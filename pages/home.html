@@ -16,18 +16,15 @@
       --bg-void:#030014;
       --neon-cyan:#00f3ff;
       --neon-purple:#bc13fe;
-      --neon-pink:#ff00aa;
 
-      --glass-surface: rgba(255,255,255,0.05);
       --glass-border: rgba(255,255,255,0.10);
-
       --text-main:#fff;
       --text-muted: rgba(255,255,255,0.65);
 
-      /* ITALKY vurgu: bordo */
       --italky-burgundy: rgba(140, 18, 45, .40);
       --italky-burgundy-2: rgba(140, 18, 45, .18);
 
+      --footerH: 86px; /* ✅ footer gerçek yüksekliği */
       --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -66,7 +63,6 @@
       0%{ transform: translate(0,0) scale(1); }
       100%{ transform: translate(10%,-10%) scale(1.1); }
     }
-
     .noise{
       position:absolute; inset:0;
       background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
@@ -95,8 +91,8 @@
       flex:0 0 92px;
       padding: 0 18px;
       display:flex; align-items:center; justify-content:space-between;
-      position:relative; z-index:20;
       gap:12px;
+      position:relative; z-index:20;
     }
 
     .mini-brand{ display:flex; flex-direction:column; width:fit-content; align-items:center; user-select:none; }
@@ -144,24 +140,26 @@
       white-space:nowrap;
     }
 
+    /* ✅ Ayar ikonu aydınlatıldı */
     .settings-btn{
-      width:44px; height:44px;
-      border-radius:14px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.22);
+      width:46px; height:46px;
+      border-radius:16px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.28);
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
       transition: .15s;
+      box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 18px rgba(0,243,255,.08);
     }
     .settings-btn:active{ transform: scale(.96); }
-    .settings-btn svg{ width:22px; height:22px; stroke:#fff; opacity: .95; }
+    .settings-btn svg{ width:22px; height:22px; stroke:#fff; opacity: 1; }
 
     /* menu scroll */
     .menu-scroll{
       flex:1;
       overflow-y:auto; overflow-x:hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 8px 18px 186px;
+      padding: 8px 18px calc(var(--footerH) + 14px); /* ✅ artık boşluk footer’a göre */
       position:relative; z-index:5;
       scrollbar-width:none;
     }
@@ -174,7 +172,6 @@
       animation: fadeInUp .6s var(--ease-elastic);
     }
 
-    /* compact cards (a bit narrower & tighter) */
     .card{
       position:relative;
       background: linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.012) 100%);
@@ -186,10 +183,9 @@
       cursor:pointer; user-select:none;
       transition: all .22s ease;
       box-shadow: 0 10px 30px -5px rgba(0,0,0,0.30);
-      aspect-ratio: 1 / 1.06; /* biraz dar */
+      aspect-ratio: 1 / 1.06;
       overflow:hidden;
     }
-
     .card::before{
       content:"";
       position:absolute; inset:0;
@@ -197,12 +193,14 @@
       opacity:0; transition:.22s;
       pointer-events:none;
     }
-    .card:active::before{ opacity: 1; }
-
-    /* hover/active bordo vibe */
+    .card:hover::before{ opacity: 1; }
+    .card:hover{
+      border-color: rgba(140,18,45,.40);
+      background: linear-gradient(160deg, rgba(140,18,45,.12) 0%, rgba(255,255,255,0.012) 100%);
+    }
     .card:active{
       transform: scale(.97);
-      border-color: rgba(140,18,45,.45);
+      border-color: rgba(140,18,45,.55);
       box-shadow: 0 18px 40px rgba(0,0,0,0.35);
     }
 
@@ -224,21 +222,38 @@
       opacity: .95;
     }
 
-    .label{
-      font-size: 13px;
-      font-weight: 950;
-      color:#fff;
-      line-height: 1.15;
-      letter-spacing: .2px;
-    }
-    .sub{
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
+    .label{ font-size: 13px; font-weight: 950; color:#fff; line-height: 1.15; letter-spacing: .2px; }
+    .sub{ font-size: 11px; font-weight: 750; color: var(--text-muted); margin-top: 2px; }
 
-    /* ===== long cards (single column full width) ===== */
+    /* ✅ Arkadaşınla Öğren: dikdörtgen (tek satır) */
+    .friendCard{
+      grid-column: span 2;
+      aspect-ratio: auto;
+      padding: 14px 14px;
+      flex-direction: row;
+      justify-content: space-between;
+      text-align: left;
+      gap: 12px;
+    }
+    .friendCard .left{
+      display:flex; align-items:center; gap:12px; min-width:0;
+    }
+    .friendCard .txt{
+      display:flex; flex-direction:column; gap:2px; min-width:0;
+    }
+    .friendCard .label{ font-size: 14px; }
+    .friendCard .chev{
+      width: 40px; height: 40px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      display:flex; align-items:center; justify-content:center;
+      opacity:.9;
+      flex: 0 0 40px;
+    }
+    .friendCard .chev svg{ width: 18px; height:18px; stroke:#fff; opacity:.85; }
+
+    /* long cards */
     .longWrap{
       margin-top: 14px;
       display:flex;
@@ -246,7 +261,6 @@
       gap: 12px;
       animation: fadeInUp .55s var(--ease-elastic);
     }
-
     .longCard{
       width:100%;
       border-radius: 22px;
@@ -268,12 +282,16 @@
       content:"";
       position:absolute; inset:0;
       background: radial-gradient(700px 220px at 10% 0%, var(--italky-burgundy-2), transparent 60%);
-      opacity:.9; pointer-events:none;
+      pointer-events:none;
+      opacity:.95;
+    }
+    .longCard:hover{
+      border-color: rgba(140,18,45,.40);
+      background: linear-gradient(160deg, rgba(140,18,45,.12) 0%, rgba(255,255,255,0.012) 100%);
     }
     .longCard:active{
       transform: scale(.98);
-      border-color: rgba(140,18,45,.48);
-      background: linear-gradient(160deg, rgba(140,18,45,.18) 0%, rgba(255,255,255,0.012) 100%);
+      border-color: rgba(140,18,45,.58);
     }
     .longLeft{
       display:flex;
@@ -293,14 +311,9 @@
       flex: 0 0 52px;
     }
     .longIcon svg{ width: 28px; height:28px; stroke:#fff; stroke-width:1.8; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
-    .longTxt{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap: 2px;
-    }
+    .longTxt{ min-width:0; display:flex; flex-direction:column; gap: 2px; }
     .longLbl{
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 1000;
       color: rgba(255,255,255,.94);
       white-space:nowrap;
@@ -309,102 +322,48 @@
     }
     .longSub{
       font-size: 11px;
-      font-weight: 750;
+      font-weight: 800;
       color: rgba(255,255,255,.60);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .chev{
+    .chev2{
       position:relative;
       z-index:2;
-      width: 36px; height: 36px;
-      border-radius: 14px;
+      width: 40px; height: 40px;
+      border-radius: 16px;
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.05);
       display:flex; align-items:center; justify-content:center;
       opacity:.9;
-      flex: 0 0 36px;
+      flex: 0 0 40px;
     }
-    .chev svg{ width: 18px; height:18px; stroke:#fff; opacity:.85; }
+    .chev2 svg{ width: 18px; height:18px; stroke:#fff; opacity:.85; }
 
-    /* teacher grid (2 columns) */
-    .teacherWrap{
-      margin-top: 12px;
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 22px;
-      background: rgba(255,255,255,0.03);
-      overflow:hidden;
-      display:none;
-    }
-    .teacherWrap.open{ display:block; animation: fadeInUp .22s ease; }
-    .teacherHead{
-      padding: 12px 14px;
-      display:flex; align-items:center; justify-content:space-between;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.18);
-      font-weight: 1000;
-      font-size: 12px;
-    }
-    .teacherGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding: 12px;
-    }
-    .tCard{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      padding: 12px 12px 10px;
-      cursor:pointer;
-      user-select:none;
-      display:flex; flex-direction:column; gap: 8px;
-    }
-    .tCard:active{ transform: scale(.98); }
-    .tTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .tFlag{
-      width: 44px;
-      height: 10px;
-      border-radius: 999px;
-      overflow:hidden;
-      display:flex;
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 10px 18px rgba(0,0,0,.25);
-      flex: 0 0 44px;
-    }
-    .tFlag span{ flex:1; }
-    .tName{
-      font-weight: 950;
-      font-size: 12px;
-      color: rgba(255,255,255,.92);
-      line-height:1.1;
-      min-width:0;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width: 140px;
-    }
-    .tSub{
-      font-weight: 800;
-      font-size: 11px;
-      color: rgba(255,255,255,.58);
-    }
-    .ghost{ opacity:.58; cursor:not-allowed; }
-
-    /* footer (fixed background to avoid blending issue) */
+    /* ✅ footer fixed + alan tamamen dolsun */
     .footerbar{
-      position:absolute; bottom:0; width:100%;
-      padding: 14px 18px 16px;
-      background: rgba(0,0,0,.92); /* ✅ artık karışmaz */
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: min(480px, 100vw);
+      max-width: 480px;
+
+      padding: 12px 18px 14px;
+      background: rgba(0,0,0,.92);
       border-top: 1px solid rgba(255,255,255,.08);
       display:flex;
       flex-direction:column;
       align-items:center;
       gap: 10px;
-      z-index:30;
+      z-index: 999;
       pointer-events:none;
     }
+    @media (min-width:520px){
+      .footerbar{ width: min(480px, calc(100vw - 0px)); }
+    }
+
     .links{
       display:flex; gap: 16px;
       pointer-events:auto;
@@ -424,78 +383,6 @@
       letter-spacing: 2px;
       text-transform: uppercase;
       font-weight: 800;
-    }
-
-    /* settings sheet */
-    .sheetOverlay{
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.65);
-      backdrop-filter: blur(10px);
-      z-index: 9999;
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 14px;
-    }
-    .sheetOverlay.show{ display:flex; }
-    .sheet{
-      width: min(480px, calc(100vw - 18px));
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(16,16,20,.92);
-      box-shadow: 0 30px 90px rgba(0,0,0,.75);
-      overflow:hidden;
-    }
-    .sheetHead{
-      padding: 12px 12px 10px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      display:flex; align-items:center; justify-content:space-between;
-      background: rgba(0,0,0,.22);
-    }
-    .sheetTitle{ font-weight: 1000; font-size: 13px; letter-spacing:.2px; color:#fff; }
-    .xBtn{
-      width:40px; height:40px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      color:#fff;
-      font-size:18px;
-      font-weight:1000;
-      cursor:pointer;
-    }
-    .xBtn:active{ transform: translateY(1px); }
-    .sheetList{ padding: 10px; display:flex; flex-direction:column; gap:10px; }
-    .sItem{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      padding: 12px 12px;
-      display:flex; align-items:center; justify-content:space-between;
-      gap: 10px;
-      cursor:pointer; user-select:none;
-    }
-    .sItem:active{ transform: translateY(1px); }
-    .sLeft{ display:flex; flex-direction:column; gap: 4px; min-width:0; }
-    .sLbl{ font-weight: 950; font-size: 13px; color: rgba(255,255,255,.92); }
-    .sDesc{
-      font-weight: 800;
-      font-size: 11px;
-      color: rgba(255,255,255,.55);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 340px;
-    }
-    .pill{
-      font-weight: 1000;
-      font-size: 11px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.75);
-      white-space:nowrap;
-    }
-    .danger{
-      border-color: rgba(255,0,120,.25);
-      background: rgba(255,0,120,.06);
     }
 
     @keyframes fadeInUp { from { transform: translateY(26px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -526,6 +413,7 @@
           <div class="plan" id="userPlan">FREE</div>
         </div>
 
+        <!-- ✅ ayarlar artık sayfaya gidecek -->
         <button class="settings-btn" id="settingsBtn" aria-label="Ayarlar">
           <svg viewBox="0 0 24 24" fill="none">
             <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" stroke-width="2" stroke="currentColor"/>
@@ -536,14 +424,12 @@
     </div>
 
     <!-- MENU -->
-    <div class="menu-scroll">
+    <div class="menu-scroll" id="menuScroll">
 
       <div class="grid">
 
-        <!-- 1) Yüz Yüze Çeviri -->
         <div class="card" data-go="/pages/face_translate.html">
           <div class="icon-box">
-            <!-- two people talking (pro) -->
             <svg viewBox="0 0 24 24">
               <path d="M7 11c1.7 0 3-1.3 3-3S8.7 5 7 5 4 6.3 4 8s1.3 3 3 3z"/>
               <path d="M17 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"/>
@@ -559,7 +445,6 @@
           </div>
         </div>
 
-        <!-- 2) Diyalog -->
         <div class="card" data-go="/pages/translate.html">
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
@@ -574,10 +459,8 @@
           </div>
         </div>
 
-        <!-- 3) Tek taraf / toplantı -->
         <div class="card" data-go="/pages/live_translate.html">
           <div class="icon-box">
-            <!-- mic to captions -->
             <svg viewBox="0 0 24 24">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -591,7 +474,6 @@
           </div>
         </div>
 
-        <!-- 4) Fotoğraftan -->
         <div class="card" data-go="/pages/photo_translate.html">
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
@@ -607,7 +489,6 @@
           </div>
         </div>
 
-        <!-- 5) Belgeden -->
         <div class="card" data-go="/pages/doc_translate.html">
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
@@ -623,7 +504,6 @@
           </div>
         </div>
 
-        <!-- 7) Online Sohbet (AI ile yer değişti) -->
         <div class="card" data-go="/pages/online_chat.html">
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
@@ -637,12 +517,31 @@
           </div>
         </div>
 
+        <!-- ✅ Arkadaşınla Öğren artık dikdörtgen -->
+        <div class="card friendCard" data-go="/pages/learn_with_friend.html">
+          <div class="left">
+            <div class="icon-box">
+              <svg viewBox="0 0 24 24">
+                <path d="M16 11c1.7 0 3-1.3 3-3S17.7 5 16 5s-3 1.3-3 3 1.3 3 3 3z"/>
+                <path d="M8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"/>
+                <path d="M2 20c0-3 3-5 6-5"/>
+                <path d="M22 20c0-3-3-5-6-5"/>
+                <path d="M8 15h8"/>
+              </svg>
+            </div>
+            <div class="txt">
+              <div class="label">Arkadaşınla Öğren</div>
+              <div class="sub">Düello • pratik</div>
+            </div>
+          </div>
+          <div class="chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Long cards (single full width) -->
       <div class="longWrap">
-
-        <!-- 6) AI Asistan (online ile yer değişti) -->
         <div class="longCard" data-go="/pages/chat.html">
           <div class="longLeft">
             <div class="longIcon">
@@ -656,13 +555,13 @@
               <div class="longSub">Soru sor • kısa çözüm al</div>
             </div>
           </div>
-          <div class="chev" aria-hidden="true">
+          <div class="chev2" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
         </div>
 
-        <!-- 8) Öğretmen (dikdörtgen) -->
-        <div class="longCard" id="teacherBtn">
+        <!-- ✅ öğretmen sayfası artık /pages/teachers.html -->
+        <div class="longCard" data-go="/pages/teachers.html">
           <div class="longLeft">
             <div class="longIcon">
               <svg viewBox="0 0 24 24">
@@ -675,163 +574,30 @@
               <div class="longSub">Ders • telaffuz • sınav</div>
             </div>
           </div>
-          <div class="chev" aria-hidden="true">
+          <div class="chev2" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
         </div>
-
-        <!-- 9) Arkadaşınla Öğren (dikdörtgen) -->
-        <div class="longCard" data-go="/pages/learn_with_friend.html">
-          <div class="longLeft">
-            <div class="longIcon">
-              <svg viewBox="0 0 24 24">
-                <path d="M16 11c1.7 0 3-1.3 3-3S17.7 5 16 5s-3 1.3-3 3 1.3 3 3 3z"/>
-                <path d="M8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"/>
-                <path d="M2 20c0-3 3-5 6-5"/>
-                <path d="M22 20c0-3-3-5-6-5"/>
-                <path d="M8 15h8"/>
-              </svg>
-            </div>
-            <div class="longTxt">
-              <div class="longLbl">Arkadaşınla Öğren</div>
-              <div class="longSub">Düello • pratik</div>
-            </div>
-          </div>
-          <div class="chev" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Teacher language chooser -->
-      <div class="teacherWrap" id="teacherWrap">
-        <div class="teacherHead">
-          <div>Öğretmen Seç</div>
-          <div style="opacity:.55;font-weight:900;font-size:11px;">(2’li)</div>
-        </div>
-        <div class="teacherGrid">
-          <div class="tCard" data-go="/pages/teacher_en.html">
-            <div class="tTop">
-              <div class="tName">İngilizce Öğretmeni</div>
-              <div class="tFlag"><span style="background:#00247d"></span><span style="background:#fff"></span><span style="background:#cf142b"></span></div>
-            </div>
-            <div class="tSub">Telaffuz • kelime • sınav</div>
-          </div>
-
-          <div class="tCard" data-go="/pages/teacher_de.html">
-            <div class="tTop">
-              <div class="tName">Almanca Öğretmeni</div>
-              <div class="tFlag"><span style="background:#000"></span><span style="background:#dd0000"></span><span style="background:#ffce00"></span></div>
-            </div>
-            <div class="tSub">Telaffuz • kelime • sınav</div>
-          </div>
-
-          <div class="tCard" data-go="/pages/teacher_fr.html">
-            <div class="tTop">
-              <div class="tName">Fransızca Öğretmeni</div>
-              <div class="tFlag"><span style="background:#0055a4"></span><span style="background:#fff"></span><span style="background:#ef4135"></span></div>
-            </div>
-            <div class="tSub">Telaffuz • kelime • sınav</div>
-          </div>
-
-          <div class="tCard" data-go="/pages/teacher_es.html">
-            <div class="tTop">
-              <div class="tName">İspanyolca Öğretmeni</div>
-              <div class="tFlag"><span style="background:#aa151b"></span><span style="background:#f1bf00"></span><span style="background:#aa151b"></span></div>
-            </div>
-            <div class="tSub">Telaffuz • kelime • sınav</div>
-          </div>
-
-          <div class="tCard" data-go="/pages/teacher_it.html">
-            <div class="tTop">
-              <div class="tName">İtalyanca Öğretmeni</div>
-              <div class="tFlag"><span style="background:#009246"></span><span style="background:#fff"></span><span style="background:#ce2b37"></span></div>
-            </div>
-            <div class="tSub">Telaffuz • kelime • sınav</div>
-          </div>
-
-          <div class="tCard ghost" id="teacherAdd">
-            <div class="tTop">
-              <div class="tName">Öğretmen Ekle</div>
-              <div class="tFlag"><span style="background:rgba(255,255,255,.12)"></span><span style="background:rgba(255,255,255,.06)"></span><span style="background:rgba(255,255,255,.12)"></span></div>
-            </div>
-            <div class="tSub">Yakında…</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- FOOTER -->
-    <div class="footerbar">
-      <div class="links">
-        <a href="/pages/about.html">Hakkında</a>
-        <a href="/pages/faq.html">SSS</a>
-        <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
-      </div>
-      <div class="footerBrand">ItalkyAI By Ozyigit's 2026</div>
     </div>
 
   </div>
 
-  <!-- SETTINGS SHEET -->
-  <div class="sheetOverlay" id="settingsSheet">
-    <div class="sheet" role="dialog" aria-modal="true">
-      <div class="sheetHead">
-        <div class="sheetTitle">Ayarlar</div>
-        <button class="xBtn" id="closeSettings" type="button">×</button>
-      </div>
-
-      <div class="sheetList">
-        <div class="sItem" id="setSiteLang">
-          <div class="sLeft">
-            <div class="sLbl">Sitenin Dili</div>
-            <div class="sDesc">Arayüz dili (şimdilik TR/EN)</div>
-          </div>
-          <div class="pill" id="siteLangPill">TR</div>
-        </div>
-
-        <div class="sItem" id="setOfflinePacks">
-          <div class="sLeft">
-            <div class="sLbl">Offline Dil Paketi</div>
-            <div class="sDesc">İndir ve internet yokken kullan</div>
-          </div>
-          <div class="pill">Yakında</div>
-        </div>
-
-        <div class="sItem" id="setUpgrade">
-          <div class="sLeft">
-            <div class="sLbl">Abonelik Yükselt</div>
-            <div class="sDesc">FREE → PLUS/PRO (sonra)</div>
-          </div>
-          <div class="pill">FREE</div>
-        </div>
-
-        <div class="sItem" id="setLogout">
-          <div class="sLeft">
-            <div class="sLbl">Güvenli Çıkış</div>
-            <div class="sDesc">Oturumu kapat</div>
-          </div>
-          <div class="pill">Çık</div>
-        </div>
-
-        <div class="sItem danger" id="setDelete">
-          <div class="sLeft">
-            <div class="sLbl">Hesabımı Sil</div>
-            <div class="sDesc">Kalıcı silme işlemi</div>
-          </div>
-          <div class="pill">Sil</div>
-        </div>
-      </div>
+  <!-- footer fixed -->
+  <div class="footerbar">
+    <div class="links">
+      <a href="/pages/about.html">Hakkında</a>
+      <a href="/pages/faq.html">SSS</a>
+      <a href="/pages/privacy.html">Gizlilik</a>
+      <a href="/pages/contact.html">İletişim</a>
     </div>
+    <div class="footerBrand">ItalkyAI By Ozyigit's 2026</div>
   </div>
 
   <script type="module">
     // FILE: italky-web/pages/home.html inline script
     import { STORAGE_KEY } from "/js/config.js";
-    import { logout } from "/js/auth.js";
 
     function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
 
@@ -841,15 +607,14 @@
       window.location.replace("/index.html");
     }
 
-    // paint user name + plan only (no picture)
+    // name + plan
     const userName = document.getElementById("userName");
     const userPlan = document.getElementById("userPlan");
-
     const full = (u.fullname || u.name || u.display_name || u.email || "—").trim();
     if(userName) userName.textContent = full;
     if(userPlan) userPlan.textContent = String(u.plan || "FREE").toUpperCase();
 
-    // nav
+    // routes
     document.querySelectorAll("[data-go]").forEach(el=>{
       el.addEventListener("click", ()=>{
         const go = el.getAttribute("data-go");
@@ -857,74 +622,24 @@
       });
     });
 
-    // teacher toggle
-    const teacherBtn = document.getElementById("teacherBtn");
-    const teacherWrap = document.getElementById("teacherWrap");
-    teacherBtn?.addEventListener("click", ()=>{
-      teacherWrap?.classList.toggle("open");
-      if(teacherWrap?.classList.contains("open")){
-        setTimeout(()=> teacherWrap.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
-      }
+    // settings -> new page
+    document.getElementById("settingsBtn")?.addEventListener("click", ()=>{
+      window.location.href = "/pages/settings.html";
     });
 
-    document.getElementById("teacherAdd")?.addEventListener("click", ()=>{
-      alert("Öğretmen ekleme yakında.");
-    });
-
-    // settings sheet
-    const settingsBtn = document.getElementById("settingsBtn");
-    const settingsSheet = document.getElementById("settingsSheet");
-    const closeSettings = document.getElementById("closeSettings");
-
-    function openSettings(){ settingsSheet?.classList.add("show"); }
-    function closeSettingsFn(){ settingsSheet?.classList.remove("show"); }
-
-    settingsBtn?.addEventListener("click", openSettings);
-    closeSettings?.addEventListener("click", closeSettingsFn);
-    settingsSheet?.addEventListener("click", (e)=>{ if(e.target === settingsSheet) closeSettingsFn(); });
-
-    // site language (toggle)
-    const siteLangPill = document.getElementById("siteLangPill");
-    const SITE_LANG_KEY = "italky_site_lang";
-    function getSiteLang(){ return (localStorage.getItem(SITE_LANG_KEY) || "TR").toUpperCase(); }
-    function setSiteLang(v){ localStorage.setItem(SITE_LANG_KEY, v); }
-    function paintLang(){ if(siteLangPill) siteLangPill.textContent = getSiteLang(); }
-    paintLang();
-
-    document.getElementById("setSiteLang")?.addEventListener("click", ()=>{
-      const cur = getSiteLang();
-      const next = (cur === "TR") ? "EN" : "TR";
-      setSiteLang(next);
-      paintLang();
-      alert("Arayüz dili (şimdilik) değişti: " + next);
-    });
-
-    document.getElementById("setUpgrade")?.addEventListener("click", ()=>{
-      alert("Abonelik yükseltme sonra bağlanacak.");
-    });
-
-    document.getElementById("setOfflinePacks")?.addEventListener("click", ()=>{
-      alert("Offline paket indirme sonra bağlanacak.");
-    });
-
-    document.getElementById("setLogout")?.addEventListener("click", ()=>{
-      try{ logout(); }catch{ window.location.replace("/index.html"); }
-    });
-
-    document.getElementById("setDelete")?.addEventListener("click", ()=>{
-      const ok = confirm("Hesabın kalıcı olarak silinecek. Emin misin?");
-      if(!ok) return;
-
-      try{
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem("google_id_token");
-        localStorage.removeItem("italky_api_token");
-        localStorage.removeItem("italky_site_lang");
-      }catch{}
-
-      window.location.replace("/index.html");
-    });
+    // ✅ son kart footer’a “tam dibinde” dursun diye: yüklenince küçük bir hesap
+    // (bazı Android WebView’larda bottom inset yüzünden boşluk oluşabiliyor)
+    const sc = document.getElementById("menuScroll");
+    if(sc){
+      const fix = ()=> {
+        // footer yüksekliğini gerçek ölç
+        const fb = document.querySelector(".footerbar");
+        const h = fb ? fb.getBoundingClientRect().height : 86;
+        sc.style.paddingBottom = (h + 14) + "px";
+      };
+      setTimeout(fix, 60);
+      window.addEventListener("resize", ()=> setTimeout(fix, 60), { passive:true });
+    }
   </script>
 </body>
 </html>
-```0
