@@ -1,1 +1,297 @@
+<!-- FILE: /pages/privacy.html -->
+<!-- NOTE: Metinler AYNI. Sadece şablon index/login öncesi standardına uyarlandı:
+     - Üst bar: index.html ile aynı + GERİ OK var
+     - Hamburger yok (login öncesi)
+     - Alt bar: about/faq/privacy/contact + imza
+-->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Gizlilik Politikası</title>
 
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+
+  <style>
+    :root{
+      --gold:#ffb300;
+      --pistachio:#bef264;
+    }
+
+    /* Üst bar sabit */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 3000;
+    }
+
+    /* Geri ok */
+    .back-wrap{
+      width:80px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+    }
+    .back-btn{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color:#fff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+    .back-btn:active{ transform: translateY(1px); filter: brightness(.95); }
+
+    /* İçerik */
+    .page-wrap{
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y:auto;
+      padding: 16px;
+      padding-bottom: 140px; /* alt footerbar */
+    }
+    .page-card{
+      background: rgba(25,25,25,.55);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.55);
+    }
+    .page-title{
+      font-size: 16px;
+      font-weight: 1000;
+      color: #fff;
+      margin: 0 0 12px;
+    }
+
+    .intro{
+      font-size: 13px;
+      color: rgba(255,255,255,.55);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      padding-bottom: 14px;
+      margin-bottom: 10px;
+      font-style: italic;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    h3{
+      color: var(--gold);
+      font-size: 13px;
+      margin: 16px 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 900;
+    }
+    p, li{
+      font-size: 13px;
+      line-height: 1.65;
+      color: rgba(255,255,255,.78);
+      margin: 0 0 10px 0;
+      font-weight: 650;
+    }
+    ul{
+      margin: 5px 0 10px 0;
+      padding-left: 18px;
+      list-style-type: disc;
+    }
+    ul ul{
+      list-style-type: circle;
+      margin-top: 6px;
+    }
+    li{ margin-bottom: 6px; }
+
+    .highlight{ color:#fff; font-weight: 900; }
+
+    .footer-sign{
+      margin-top: 18px;
+      text-align: center;
+      padding: 16px 12px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: var(--pistachio);
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: .4px;
+    }
+    .footer-sub{
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* Login öncesi alt bar (index ile aynı) */
+    .login-footerbar{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(480px, calc(100vw - 18px));
+      bottom: 0;
+      z-index: 2800;
+      background: rgba(0,0,0,.92);
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .login-links{
+      display:flex;
+      justify-content:center;
+      gap: 16px;
+      flex-wrap:wrap;
+      font-size:12px;
+      font-weight: 900;
+    }
+    .login-links a{
+      color: rgba(255,255,255,.70);
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .login-brand{
+      text-align:center;
+      font-size:11px;
+      font-weight: 900;
+      color: rgba(255,255,255,.55);
+    }
+  </style>
+</head>
+
+<body>
+<div class="mobile-frame" id="mobileFrame">
+
+  <!-- ✅ ÜST BAR (index ile aynı + geri ok) -->
+  <div class="topbar">
+    <div class="back-wrap">
+      <button class="back-btn" type="button" onclick="history.back()" aria-label="Geri">←</button>
+    </div>
+
+    <div class="brand-wrapper" id="brandWrapper">
+      <div class="logo-area">
+        <svg class="seesaw-svg" viewBox="0 0 40 20" aria-hidden="true">
+          <g class="seesaw-bar" id="seesawBar">
+            <line x1="0" y1="8" x2="40" y2="8" stroke="#ccc" stroke-width="2" stroke-linecap="round" />
+            <circle cx="3" cy="5" r="3" fill="#bef264" />
+            <circle cx="37" cy="5" r="3" fill="#ffb300" id="orangeBall" />
+          </g>
+          <polygon points="17,14 23,14 20,8" fill="none" stroke="#666" stroke-width="1.5" />
+        </svg>
+        <div class="brand-name">CaynanaAI</div>
+      </div>
+      <div class="slogan">Yapay Zekanın Geleneksel Aklı</div>
+    </div>
+
+    <div class="right-controls"></div>
+  </div>
+
+  <!-- ✅ ORTA İÇERİK (metin aynen) -->
+  <div class="page-wrap">
+    <div class="page-card">
+      <h1 class="page-title">Gizlilik Politikası</h1>
+
+      <div class="intro">
+        Caynana AI, kullanıcılarının gizliliğini ve kişisel verilerinin korunmasını ciddiyetle ele alır. Bu politika, verilerin nasıl toplandığını ve kullanıldığını açıklar.
+      </div>
+
+      <section>
+        <h3>1) Toplanan Veriler</h3>
+        <p>Caynana AI, yalnızca hizmetin çalışması için gerekli olan verileri toplar:</p>
+        <ul>
+          <li><strong>Kimlik Bilgileri:</strong> Google veya Apple hesabından gelen ad ve profil fotoğrafı.</li>
+          <li><strong>Profil Bilgileri:</strong> Caynana’nın sana verdiği isim, hitap tercihi ve isteğe bağlı bilgiler.</li>
+          <li><strong>Kullanım Verileri:</strong> Son görülme zamanı, online durumu ve teknik etkileşim bilgileri.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>2) Kamera ve Mikrofon Kullanımı</h3>
+        <ul>
+          <li>Kamera ve mikrofon yalnızca sen <span class="highlight">açıkça izin verdiğinde</span> çalışır.</li>
+          <li>Görüntü ve ses kaydedilmez, depolanmaz ve paylaşılmaz.</li>
+          <li>Veriler sadece yüz takibi, göz teması ve konuşma algılama gibi anlık analiz amaçlı kullanılır.</li>
+        </ul>
+        <p style="margin-top:5px; color:rgba(255,255,255,.55);">* İstediğin an bu izinleri kapatabilirsin.</p>
+      </section>
+
+      <section>
+        <h3>3) Mesajlar ve İçerik</h3>
+        <ul>
+          <li>Yazdığın veya söylediğin mesajlar hizmetin çalışması için işlenir.</li>
+          <li>Kalıcı olarak üçüncü taraflarla paylaşılmaz.</li>
+          <li>İçerikler, kullanıcı deneyimini geliştirmek dışında başka bir amaçla kullanılmaz.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>4) Veri Paylaşımı</h3>
+        <p>Caynana AI, kullanıcı verilerini izinsiz olarak üçüncü kişilerle paylaşmaz. Yasal zorunluluklar haricinde veri aktarımı yapmaz.</p>
+      </section>
+
+      <section>
+        <h3>5) Veri Güvenliği</h3>
+        <ul>
+          <li>Veriler güvenli sunucularda saklanır.</li>
+          <li>Yetkisiz erişimi önlemek için teknik ve idari önlemler alınır.</li>
+          <li>İhlal durumunda gerekli önlemler derhal uygulanır.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>6) Çerezler</h3>
+        <p>Oturum yönetimi için gerekli teknik çerezler kullanılabilir. Takip veya reklam amaçlı çerezler zorunlu değildir ve kullanılmaz.</p>
+      </section>
+
+      <section>
+        <h3>7) Kullanıcının Hakları</h3>
+        <p>Kullanıcı olarak şunlara hakkın vardır:</p>
+        <ul>
+          <li>Kendi verilerine erişme.</li>
+          <li>Verilerinin düzeltilmesini isteme.</li>
+          <li>Hesabının silinmesini talep etme.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>8) Çocukların Gizliliği</h3>
+        <p>Caynana AI, 18 yaş altındaki kullanıcılar için tasarlanmamıştır. Bilinçli olarak çocuklara ait veri toplanmaz.</p>
+      </section>
+
+      <section>
+        <h3>9) Değişiklikler</h3>
+        <p>Bu politika zaman zaman güncellenebilir. Güncellemeler uygulama içinde bildirildiği anda yürürlüğe girer.</p>
+      </section>
+
+      <section>
+        <h3>10) Kabul</h3>
+        <p>Caynana AI’yi kullanarak bu Gizlilik Politikası’nı okuduğunu, anladığını ve kabul ettiğini beyan etmiş olursun.</p>
+      </section>
+
+      <div class="footer-sign">
+        Caynana AI
+        <div class="footer-sub">Yapay Zekânın Geleneksel Aklı</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ✅ ALT BAR (login öncesi) -->
+  <div class="login-footerbar">
+    <div class="login-links">
+      <a href="/pages/about.html">Hakkımızda</a>
+      <a href="/pages/faq.html">SSS</a>
+      <a href="/pages/privacy.html">Gizlilik</a>
+      <a href="/pages/contact.html">İletişim</a>
+    </div>
+    <div class="login-brand">@CaynanaAI By Ozyigit’s 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
