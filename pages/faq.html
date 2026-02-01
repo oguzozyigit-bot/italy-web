@@ -1,319 +1,270 @@
-<!-- FILE: /pages/faq.html -->
-<!-- NOTE: Senin gönderdiğin metinler AYNI. Sadece şablon değişti:
-     - Üst bar: index.html ile aynı + GERİ OK var
-     - Login öncesi: hamburger YOK, alt bar index.html ile aynı
--->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Sık Sorulan Sorular</title>
+  <title>ITALKY - SSS</title>
 
   <link rel="icon" href="data:," />
-  <link rel="stylesheet" href="/css/style.css?v=2" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    /* Üst bar sabit */
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 3000;
+    :root {
+      /* ITALKY PALET */
+      --bg-void: #030014;
+      --neon-cyan: #00f3ff;
+      --neon-purple: #bc13fe;
+      --neon-pink: #ff00aa;
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.7);
+      --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Geri ok */
-    .back-wrap{
-      width:80px;
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-    }
-    .back-btn{
-      width:42px;
-      height:42px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      color:#fff;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:18px;
-    }
-    .back-btn:active{ transform: translateY(1px); filter: brightness(.95); }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
-    /* İçerik alanı */
-    :root{
-      --gold:#ffb300;
-      --pistachio:#bef264;
-      --red:#ff5252;
-    }
-    .page-wrap{
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y:auto;
-      padding: 16px;
-      padding-bottom: 140px; /* alt footerbar */
-    }
-    .page-card{
-      background: rgba(25,25,25,.55);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 22px;
-      padding: 18px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.55);
-    }
-    .page-title{
-      font-size: 16px;
-      font-weight: 1000;
-      color: #fff;
-      margin: 0 0 12px;
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100dvh;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      display: flex; align-items: center; justify-content: center;
     }
 
-    /* SSS Kartları (metin aynen) */
-    .faq-item{
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      padding-bottom: 16px;
-      margin-bottom: 16px;
+    /* --- BACKGROUND FX --- */
+    .cosmos-bg {
+      position: absolute; inset: -50%; width: 200%; height: 200%;
+      background: #030014; z-index: 0;
     }
-    .faq-q{
-      font-size: 14px;
-      color: var(--gold);
-      font-weight: 900;
-      margin-bottom: 8px;
-      line-height: 1.4;
-      letter-spacing: .2px;
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); opacity: 0.5;
+      animation: floatOrbit 25s infinite alternate ease-in-out;
     }
-    .faq-a{
-      font-size: 13px;
-      color: rgba(255,255,255,.78);
-      line-height: 1.65;
-      font-weight: 650;
+    .orb-1 {
+      top: 10%; left: 10%; width: 60vw; height: 60vw;
+      background: radial-gradient(circle, var(--neon-purple), transparent 70%);
     }
-
-    .highlight{ color:#fff; font-weight: 800; }
-    .tag{
-      display:inline-block;
-      padding: 3px 8px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 900;
-      margin-bottom: 6px;
-      border: 1px solid rgba(255,255,255,.10);
+    .orb-2 {
+      bottom: 10%; right: 10%; width: 50vw; height: 50vw;
+      background: radial-gradient(circle, var(--neon-cyan), transparent 70%);
+      animation-delay: -5s;
     }
-    .tag.yes{ background: rgba(190,242,100,0.12); color: var(--pistachio); border-color: rgba(190,242,100,0.20); }
-    .tag.no{ background: rgba(255,82,82,0.12); color: var(--red); border-color: rgba(255,82,82,0.20); }
-
-    .footer-sign{
-      margin-top: 18px;
-      text-align: center;
-      padding: 16px 12px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      color: var(--pistachio);
-      font-weight: 900;
-      font-size: 14px;
-      letter-spacing: .4px;
-    }
-    .footer-sub{
-      font-size: 11px;
-      color: rgba(255,255,255,.55);
-      font-weight: 700;
-      margin-top: 4px;
+    @keyframes floatOrbit {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(10%, -10%) scale(1.1); }
     }
 
-    /* Login öncesi alt bar (index ile aynı) */
-    .login-footerbar{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(480px, calc(100vw - 18px));
-      bottom: 0;
-      z-index: 2800;
-      background: rgba(0,0,0,.92);
-      border-top: 1px solid rgba(255,255,255,.06);
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
+    .noise {
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; mix-blend-mode: overlay; z-index: 1;
     }
-    .login-links{
-      display:flex;
-      justify-content:center;
-      gap: 16px;
-      flex-wrap:wrap;
-      font-size:12px;
-      font-weight: 900;
+
+    /* --- FRAME --- */
+    .mobile-frame {
+      width: 100%; max-width: 480px; height: 100%;
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      background: rgba(5, 5, 10, 0.4);
+      backdrop-filter: blur(30px);
     }
-    .login-links a{
-      color: rgba(255,255,255,.70);
-      text-decoration:none;
-      white-space:nowrap;
+    @media (min-width: 520px) {
+      .mobile-frame {
+        height: 92vh; border-radius: 40px;
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+      }
     }
-    .login-brand{
-      text-align:center;
-      font-size:11px;
-      font-weight: 900;
-      color: rgba(255,255,255,.55);
+
+    /* --- TOP BAR --- */
+    .topbar {
+      height: 100px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; position: relative; z-index: 20;
     }
+
+    .back-btn {
+      width: 44px; height: 44px; border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.05);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.2s;
+    }
+    .back-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+    .back-btn svg { width: 24px; height: 24px; fill: #fff; }
+
+    /* Logo Lock System */
+    .mini-brand { display: flex; flex-direction: column; width: fit-content; align-items: center; }
+    .mini-logo {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 24px;
+      letter-spacing: -1px; color: #fff; line-height: 1; white-space: nowrap;
+    }
+    .mini-flag {
+      width: 100%; height: 4px; border-radius: 4px; display: flex; overflow: hidden; margin-top: 4px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+    .mini-flag div { flex: 1; height: 100%; }
+    .f-g { background: #009246; } .f-w { background: #fff; } .f-r { background: #CE2B37; }
+
+    /* --- CONTENT AREA --- */
+    .page-content {
+      flex: 1; overflow-y: auto; padding: 10px 20px 120px;
+      display: flex; flex-direction: column; gap: 20px; scrollbar-width: none;
+    }
+    .page-content::-webkit-scrollbar { display: none; }
+
+    .faq-card {
+      background: linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+      border: 1px solid var(--glass-border); border-radius: 32px;
+      padding: 30px 24px; position: relative; overflow: hidden;
+      animation: fadeInUp 0.8s var(--ease-elastic);
+    }
+
+    h1 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 28px; margin: 0 0 24px;
+      background: linear-gradient(to right, #fff, var(--neon-purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-weight: 700; letter-spacing: -1px;
+    }
+
+    /* SSS Item */
+    .faq-item {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 16px; margin-bottom: 16px;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    
+    .faq-q {
+      font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: var(--neon-cyan);
+      margin-bottom: 8px; line-height: 1.4;
+    }
+    .faq-a {
+      font-size: 14px; color: var(--text-muted); line-height: 1.6;
+    }
+    .tag {
+      display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800;
+      margin-bottom: 6px; border: 1px solid rgba(255,255,255,0.1); letter-spacing: 0.5px;
+    }
+    .tag.yes { background: rgba(0, 255, 65, 0.1); color: #00ff41; border-color: rgba(0, 255, 65, 0.2); }
+    .tag.no { background: rgba(255, 0, 60, 0.1); color: #ff003c; border-color: rgba(255, 0, 60, 0.2); }
+    .highlight { color: #fff; font-weight: 600; }
+
+    /* --- FOOTER --- */
+    .footerbar {
+      position: absolute; bottom: 0; width: 100%; padding: 24px;
+      background: linear-gradient(to top, #000 0%, transparent 100%);
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      z-index: 30; pointer-events: none;
+    }
+    .links { display: flex; gap: 24px; pointer-events: auto; }
+    .links a {
+      color: rgba(255,255,255,0.5); text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s;
+    }
+    .links a:hover { color: var(--neon-cyan); }
+    
+    .footerBrand { 
+      font-size: 10px; color: rgba(255,255,255,0.2); letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
+    }
+
+    @keyframes fadeInUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 
 <body>
-<div class="mobile-frame" id="mobileFrame">
-
-  <!-- ✅ ÜST BAR (index ile aynı + geri ok) -->
-  <div class="topbar">
-    <div class="back-wrap">
-      <button class="back-btn" type="button" onclick="history.back()" aria-label="Geri">←</button>
-    </div>
-
-    <div class="brand-wrapper" id="brandWrapper">
-      <div class="logo-area">
-        <svg class="seesaw-svg" viewBox="0 0 40 20" aria-hidden="true">
-          <g class="seesaw-bar" id="seesawBar">
-            <line x1="0" y1="8" x2="40" y2="8" stroke="#ccc" stroke-width="2" stroke-linecap="round" />
-            <circle cx="3" cy="5" r="3" fill="#bef264" />
-            <circle cx="37" cy="5" r="3" fill="#ffb300" id="orangeBall" />
-          </g>
-          <polygon points="17,14 23,14 20,8" fill="none" stroke="#666" stroke-width="1.5" />
-        </svg>
-        <div class="brand-name">CaynanaAI</div>
-      </div>
-      <div class="slogan">Yapay Zekanın Geleneksel Aklı</div>
-    </div>
-
-    <div class="right-controls"></div>
+  <div class="cosmos-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
   </div>
+  <div class="noise"></div>
 
-  <!-- ✅ ORTA İÇERİK -->
-  <div class="page-wrap">
-    <div class="page-card">
-      <h1 class="page-title">Sık Sorulan Sorular</h1>
+  <div class="mobile-frame">
+    <div class="topbar">
+      <button class="back-btn" onclick="window.location.href='/index.html'">
+        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </button>
 
-      <div class="faq-item">
-        <div class="faq-q">1) Caynana AI nedir?</div>
-        <div class="faq-a">
-          Caynana AI, klasik bir sohbet robotu değildir. O; seninle konuşan, bakan, tepki veren ve zamanla <span class="highlight">ilişki kuran</span> bir dijital asistandır. Sorulara cevap verirken sadece kelimeleri değil, duyguyu ve bağlamı da dikkate alır.
+      <div class="mini-brand">
+        <div class="mini-logo">ITALKY</div>
+        <div class="mini-flag">
+          <div class="f-g"></div><div class="f-w"></div><div class="f-r"></div>
         </div>
       </div>
+    </div>
 
-      <div class="faq-item">
-        <div class="faq-q">2) Caynana AI ücretsiz mi?</div>
-        <div class="faq-a">
-          <span class="tag yes">EVET</span><br>
-          Caynana AI’nin temel özellikleri ücretsizdir. İlerleyen dönemlerde bazı gelişmiş özellikler veya özel modüller ücretli olabilir. Böyle bir durumda kullanıcı açıkça bilgilendirilir.
+    <div class="page-content">
+      <div class="faq-card">
+        <h1>Sıkça Sorulan Sorular</h1>
+
+        <div class="faq-item">
+          <div class="faq-q">1. ITALKY tam olarak nedir?</div>
+          <div class="faq-a">
+            ITALKY, yapay zeka destekli bir <span class="highlight">dil öğrenim ve çeviri</span> platformudur. Hem anlık çeviri yapabilir hem de sanal veya gerçek eğitmenlerle pratik yaparak dil öğrenebilirsiniz.
+          </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="faq-q">3) Nasıl giriş yapabilirim?</div>
-        <div class="faq-a">
-          Caynana AI’ye yalnızca <strong>Google veya Apple</strong> hesabınla giriş yapabilirsin. E-posta/şifre ya da misafir giriş yoktur.
+        <div class="faq-item">
+          <div class="faq-q">2. Ücretsiz mi?</div>
+          <div class="faq-a">
+            <span class="tag yes">KISMEN</span><br>
+            Temel çeviri ve sınırlı AI pratik modülleri ücretsizdir. Canlı eğitmenlerle görüşme ve ileri düzey AI özellikleri için Premium üyelik gerekebilir.
+          </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="faq-q">4) Avatarımı değiştirebilir miyim?</div>
-        <div class="faq-a">
-          <span class="tag no">HAYIR</span><br>
-          Avatarın, Google veya Apple hesabından gelen profil fotoğrafıdır ve değiştirilemez. Bu, kimlik tutarlılığı ve güven için bilinçli bir tercihtir.
+        <div class="faq-item">
+          <div class="faq-q">3. Sadece İngilizce mi var?</div>
+          <div class="faq-a">
+            <span class="tag no">HAYIR</span><br>
+            Şu an İtalyanca, İngilizce, İspanyolca, Almanca ve Fransızca başta olmak üzere birçok dili destekliyoruz. Dil seçenekleri sürekli artmaktadır.
+          </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="faq-q">5) Profil doldurmak zorunlu mu?</div>
-        <div class="faq-a">
-          <span class="tag yes">EVET</span><br>
-          Profil tamamlanmadan Caynana AI tam olarak kullanılamaz. Özellikle <strong>Caynana’nın sana vereceği isim</strong> ve <strong>hitap şekli</strong> zorunludur ve bir kez kaydedilir, sonradan değiştirilemez.
+        <div class="faq-item">
+          <div class="faq-q">4. Gerçek insanlarla konuşabilir miyim?</div>
+          <div class="faq-a">
+            <span class="tag yes">EVET</span><br>
+            "Canlı Eğitmen" modülü sayesinde, anadili o dil olan onaylı eğitmenlerle görüntülü veya sesli görüşme yaparak pratik yapabilirsiniz.
+          </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="faq-q">6) Caynana bana neden bazen sert konuşuyor?</div>
-        <div class="faq-a">
-          Çünkü Caynana bir ilişkisel asistandır. Kullandığı dil senin konuşma tarzına, samimiyet seviyene ve davranışına göre şekillenir. Sınır aşılırsa mesafe koyar, saygı varsa yumuşar. Bu bir hata değil, <span class="highlight">tasarımdır</span>.
+        <div class="faq-item">
+          <div class="faq-q">5. Ses klonlama güvenli mi?</div>
+          <div class="faq-a">
+            <span class="tag yes">EVET</span><br>
+            Sesiniz sadece sizin izninizle ve yalnızca çeviri simülasyonlarında kendi sesinizle konuşuyormuşsunuz hissi vermek için kullanılır. Ses veriniz asla üçüncü taraflarla paylaşılmaz.
+          </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="faq-q">7) Caynana söylediklerimi kaydediyor mu?</div>
-        <div class="faq-a">
-          <span class="tag no">HAYIR</span><br>
-          Kamera ve mikrofon sadece sen izin verdiğinde çalışır. Görüntü ve ses kaydedilmez, sadece anlık analiz için kullanılır. Kontrol her zaman sendedir.
+        <div class="faq-item">
+          <div class="faq-q">6. İnternet bağlantısı şart mı?</div>
+          <div class="faq-a">
+            <span class="tag yes">EVET</span><br>
+            Yapay zeka modellerimiz ve canlı bağlantılar bulut tabanlı çalıştığı için aktif bir internet bağlantısı gereklidir.
+          </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="faq-q">8) Kamera ile “takip” ne işe yarıyor?</div>
-        <div class="faq-a">
-          Takip açıkken Caynana yüzünü izler, bakışlarına ve göz kırpmana tepki verir, daha canlı ve gerçekçi davranır. İstediğin an <strong>Takibi Kapat</strong> diyerek devre dışı bırakabilirsin.
+        <div class="faq-item">
+          <div class="faq-q">7. Hesabımı silebilir miyim?</div>
+          <div class="faq-a">
+            Elbette. Ayarlar menüsünden "Hesabımı Sil" seçeneği ile tüm verilerinizi kalıcı olarak silebilirsiniz.
+          </div>
         </div>
-      </div>
 
-      <div class="faq-item">
-        <div class="faq-q">9) Mikrofonu kullanmak zorunda mıyım?</div>
-        <div class="faq-a">
-          <span class="tag no">HAYIR</span><br>
-          Caynana AI yazıyla da, sesle de kullanılabilir. Mikrofon tamamen isteğe bağlıdır.
-        </div>
       </div>
+    </div>
 
-      <div class="faq-item">
-        <div class="faq-q">10) Caynana’nın söyledikleri resmi tavsiye mi?</div>
-        <div class="faq-a">
-          <span class="tag no">HAYIR</span><br>
-          Caynana AI doktor, avukat veya finans danışmanı değildir. Verdikleri öneri niteliğindedir. Kararların sorumluluğu kullanıcıya aittir.
-        </div>
+    <div class="footerbar">
+      <div class="links">
+        <a href="/pages/about.html">Hakkında</a>
+        <a href="/pages/faq.html" style="color:#fff">SSS</a>
+        <a href="/pages/privacy.html">Gizlilik</a>
+        <a href="/pages/contact.html">İletişim</a>
       </div>
-
-      <div class="faq-item">
-        <div class="faq-q">11) Samimiyet seviyesi nedir?</div>
-        <div class="faq-a">
-          Caynana, herkesle aynı şekilde konuşmaz. Zamanla tanışır, alışır, samimiyet kurar ve buna göre davranır. Saygı varsa yakınlaşır, agresyon varsa mesafe koyar.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">12) Hesabımı silebilir miyim?</div>
-        <div class="faq-a">
-          <span class="tag yes">EVET</span><br>
-          Hesap silme ve veri talepleri için uygulama içindeki Ayarlar bölümünden veya destek kanallarından işlem yapılabilir.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <div class="faq-q">13) Caynana neden “kaynana” gibi davranıyor?</div>
-        <div class="faq-a">
-          Çünkü lafı dolandırmaz, gerektiğinde uyarır, gerektiğinde sahip çıkar. Ama her zaman kötülüğünü istemez. Tam olarak gerçek hayattaki gibi.
-        </div>
-      </div>
-
-      <div class="faq-item" style="border-bottom:none; padding-bottom:0; margin-bottom:0;">
-        <div class="faq-q">14) Bir sorun yaşarsam ne yapmalıyım?</div>
-        <div class="faq-a">
-          Uygulama içindeki Ayarlar bölümünden veya destek kanallarından bizimle iletişime geçebilirsin.
-        </div>
-      </div>
-
-      <div class="footer-sign">
-        Caynana AI
-        <div class="footer-sub">Yapay Zekânın Geleneksel Aklı</div>
-      </div>
-
+      <div class="footerBrand">ItalkyAI By Ozyigit's 2026</div>
     </div>
   </div>
-
-  <!-- ✅ ALT BAR (login öncesi) -->
-  <div class="login-footerbar">
-    <div class="login-links">
-      <a href="/pages/about.html">Hakkımızda</a>
-      <a href="/pages/faq.html">SSS</a>
-      <a href="/pages/privacy.html">Gizlilik</a>
-      <a href="/pages/contact.html">İletişim</a>
-    </div>
-    <div class="login-brand">@CaynanaAI By Ozyigit’s 2026</div>
-  </div>
-
-</div>
 </body>
 </html>
