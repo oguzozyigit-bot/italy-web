@@ -140,22 +140,41 @@
       white-space:nowrap;
     }
 
-    /* ✅ Profil ikon: zemin yok, çerçeve yok, belirgin renk */
-    .profile-btn{
-      width:44px; height:44px;
-      border:none;
+    /* ✅ Profil ikon YERİ: Google foto (zeminsiz/çerçevesiz) */
+    .avatar-btn{
+      width: 44px;
+      height: 44px;
+      border: none;
       background: transparent;
-      padding:0;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      transition: .12s;
+      padding: 0;
+      border-radius: 999px;
+      overflow: hidden;
+      cursor: pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
     }
-    .profile-btn:active{ transform: scale(.96); }
-    .profile-btn svg{
-      width:28px; height:28px;
-      stroke: var(--neon-cyan);
-      opacity: .98;
-      filter: drop-shadow(0 0 10px rgba(0,243,255,.35));
+    .avatar-btn:active{ transform: scale(.96); }
+    .avatar-btn img{
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      object-fit: cover;
+      display:block;
+    }
+    .avatar-fallback{
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.92);
+      background: radial-gradient(circle at 30% 20%, rgba(0,243,255,.18), rgba(0,0,0,0));
+      filter: drop-shadow(0 0 10px rgba(0,243,255,.22));
+      user-select:none;
     }
 
     /* menu scroll */
@@ -229,7 +248,7 @@
     .label{ font-size: 13px; font-weight: 950; color:#fff; line-height: 1.15; letter-spacing: .2px; }
     .sub{ font-size: 11px; font-weight: 750; color: var(--text-muted); margin-top: 2px; }
 
-    /* ✅ AI Asistan + Öğretmen kare yan yana */
+    /* Sohbet AI + Öğretmen kare */
     .longWrap{
       margin-top: 14px;
       display:grid;
@@ -237,7 +256,6 @@
       gap: 14px;
       animation: fadeInUp .55s var(--ease-elastic);
     }
-
     .longCard{
       width:100%;
       border-radius: 24px;
@@ -285,29 +303,11 @@
     }
     .longIcon svg{ width: 30px; height:30px; stroke:#fff; stroke-width:1.8; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
     .longTxt{ position:relative; z-index:2; width:100%; }
-    .longLbl{
-      font-size: 14px;
-      font-weight: 1000;
-      color: rgba(255,255,255,.94);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .longSub{
-      font-size: 11px;
-      font-weight: 800;
-      color: rgba(255,255,255,.60);
-      margin-top: 2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .longLbl{ font-size: 14px; font-weight: 1000; color: rgba(255,255,255,.94); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .longSub{ font-size: 11px; font-weight: 800; color: rgba(255,255,255,.60); margin-top: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    /* ✅ Arkadaşınla Öğren en altta tek satır dikdörtgen */
-    .friendRow{
-      margin-top: 14px;
-      animation: fadeInUp .55s var(--ease-elastic);
-    }
+    /* Arkadaşınla Öğren en altta */
+    .friendRow{ margin-top: 14px; animation: fadeInUp .55s var(--ease-elastic); }
     .friendCard{
       width:100%;
       border-radius: 24px;
@@ -352,7 +352,7 @@
     }
     .friendChev svg{ width: 18px; height:18px; stroke:#fff; opacity:.85; }
 
-    /* footer fixed */
+    /* footer */
     .footerbar{
       position: fixed;
       left: 50%;
@@ -360,23 +360,16 @@
       bottom: 0;
       width: min(480px, 100vw);
       max-width: 480px;
-
       padding: 12px 18px 14px;
       background: rgba(0,0,0,.92);
       border-top: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap: 10px;
       z-index: 999;
-      pointer-events:none;
     }
-
     .links{
       display:flex; gap: 16px;
-      pointer-events:auto;
-      flex-wrap:wrap;
       justify-content:center;
+      flex-wrap:wrap;
+      margin-bottom: 8px;
     }
     .links a{
       color: rgba(255,255,255,0.60);
@@ -384,9 +377,8 @@
       font-size: 12px;
       font-weight: 800;
     }
-    .links a:hover{ color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
-
     .footerBrand{
+      text-align:center;
       font-size: 10px;
       color: rgba(255,255,255,0.25);
       letter-spacing: 1px;
@@ -420,18 +412,14 @@
           <div class="plan" id="userPlan">FREE</div>
         </div>
 
-        <!-- ✅ Profil -->
-        <button class="profile-btn" id="profileBtn" aria-label="Profil">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2" stroke="currentColor"/>
-            <circle cx="12" cy="7" r="4" stroke-width="2" stroke="currentColor"/>
-          </svg>
+        <!-- ✅ Google foto burada -->
+        <button class="avatar-btn" id="avatarBtn" aria-label="Profil">
+          <span class="avatar-fallback" id="avatarFallback">•</span>
         </button>
       </div>
     </div>
 
     <div class="menu-scroll" id="menuScroll">
-
       <div class="grid">
 
         <div class="card" data-go="/pages/facetoface.html">
@@ -528,7 +516,6 @@
 
       </div>
 
-      <!-- ✅ Sohbet AI + Öğretmen kare yan yana -->
       <div class="longWrap">
         <div class="longCard" data-go="/pages/chat.html">
           <div class="longIcon">
@@ -557,7 +544,6 @@
         </div>
       </div>
 
-      <!-- ✅ Arkadaşınla Öğren en altta tek satır -->
       <div class="friendRow">
         <div class="friendCard" data-go="/pages/friend.html">
           <div class="friendLeft">
@@ -584,7 +570,6 @@
     </div>
   </div>
 
-  <!-- footer -->
   <div class="footerbar">
     <div class="links">
       <a href="/pages/about.html">Hakkında</a>
@@ -614,17 +599,30 @@
     if(userName) userName.textContent = full;
     if(userPlan) userPlan.textContent = String(u.plan || "FREE").toUpperCase();
 
+    // avatar (google photo)
+    const avatarBtn = document.getElementById("avatarBtn");
+    const fallback = document.getElementById("avatarFallback");
+    try{
+      const pic = String(u.picture || u.avatar || u.avatar_url || "").trim();
+      if(pic){
+        avatarBtn.innerHTML = `<img src="${pic}" alt="avatar">`;
+      }else{
+        const letter = (full && full[0]) ? full[0].toUpperCase() : "•";
+        if(fallback) fallback.textContent = letter;
+      }
+    }catch{}
+
+    // avatar -> profile
+    avatarBtn?.addEventListener("click", ()=>{
+      window.location.href = "/pages/profile.html";
+    });
+
     // routes
     document.querySelectorAll("[data-go]").forEach(el=>{
       el.addEventListener("click", ()=>{
         const go = el.getAttribute("data-go");
         if(go) window.location.href = go;
       });
-    });
-
-    // profile
-    document.getElementById("profileBtn")?.addEventListener("click", ()=>{
-      window.location.href = "/pages/profile.html";
     });
 
     // footer padding fix
@@ -641,3 +639,4 @@
   </script>
 </body>
 </html>
+```0
