@@ -1,335 +1,206 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ITALKY - Karşılıklı</title>
-  <link rel="icon" href="data:," />
+# FILE: app/models/translate.py
+from __future__ import annotations
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+import os
+import logging
+from typing import Optional, Dict, Any
 
-  <style>
-    :root {
-      --bg-void: #030014;
-      --neon-cyan: #00f3ff;
-      --neon-purple: #bc13fe;
-      --glass-border: rgba(255, 255, 255, 0.15);
-      --text-main: #ffffff;
-      --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+import requests
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, ConfigDict
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+logger = logging.getLogger("uvicorn.error")
+router = APIRouter()
 
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      overflow: hidden; position: fixed;
-      font-family: 'Outfit', sans-serif;
-      background-color: var(--bg-void);
-      color: var(--text-main);
-    }
+GOOGLE_API_KEY = (os.getenv("GOOGLE_API_KEY", "") or "").strip()
 
-    /* --- BACKGROUND --- */
-    .cosmos-bg { position: absolute; inset: -50%; width: 200%; height: 200%; background: #030014; z-index: 0; pointer-events: none; }
-    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.4; animation: float 20s infinite alternate; }
-    .orb-1 { top: 20%; left: 20%; width: 60vw; height: 60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
-    .orb-2 { bottom: 20%; right: 20%; width: 60vw; height: 60vw; background: radial-gradient(circle, var(--neon-cyan), transparent 70%); animation-delay: -5s; }
-    @keyframes float { 0% { transform: translate(0,0); } 100% { transform: translate(5%, 5%); } }
-    .noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; mix-blend-mode: overlay; z-index: 1; }
 
-    /* --- SPLIT SCREEN LAYOUT --- */
-    .split-container {
-      position: relative; width: 100%; height: 100%; z-index: 10;
-      display: flex; flex-direction: column;
-    }
+# -------------------------
+# MODELS
+# -------------------------
+class FlexibleModel(BaseModel):
+    model_config = ConfigDict(extra="ignore")
 
-    /* Common Side Styles */
-    .side {
-      flex: 1; display: flex; flex-direction: column;
-      justify-content: space-between; padding: 20px;
-      position: relative; overflow: hidden;
-      transition: background 0.3s;
-    }
 
-    /* --- TOP SIDE (PERSON A - Rotated) --- */
-    .side.top {
-      background: rgba(20, 5, 30, 0.4);
-      border-bottom: 1px solid var(--glass-border);
-      transform: rotate(180deg); /* KRİTİK: Ters Çevirme */
-    }
-    .side.top .accent-text { color: var(--neon-purple); }
-    .side.top .mic-btn { border-color: var(--neon-purple); color: var(--neon-purple); }
-    .side.top .mic-btn.active { background: var(--neon-purple); color: #fff; box-shadow: 0 0 40px var(--neon-purple); }
+class TranslateRequest(FlexibleModel):
+    text: str
+    from_lang: Optional[str] = None
+    to_lang: str
 
-    /* --- BOTTOM SIDE (PERSON B - Normal) --- */
-    .side.bottom {
-      background: rgba(5, 20, 30, 0.4);
-      border-top: 1px solid var(--glass-border);
-    }
-    .side.bottom .accent-text { color: var(--neon-cyan); }
-    .side.bottom .mic-btn { border-color: var(--neon-cyan); color: var(--neon-cyan); }
-    .side.bottom .mic-btn.active { background: var(--neon-cyan); color: #000; box-shadow: 0 0 40px var(--neon-cyan); }
 
-    /* --- UI ELEMENTS --- */
-    
-    /* Language Selector */
-    .lang-pill {
-      align-self: center;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 8px 16px; border-radius: 99px;
-      font-size: 14px; font-weight: 700; color: #fff;
-      display: flex; align-items: center; gap: 8px;
-      backdrop-filter: blur(5px);
-    }
+class TranslateResponse(FlexibleModel):
+    ok: bool
+    translated: str
+    detected_source: Optional[str] = None
 
-    /* Result Area */
-    .result-area {
-      flex: 1; display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
-      text-align: center; gap: 10px;
-      opacity: 0.9;
-    }
-    .text-original {
-      font-size: 16px; color: rgba(255,255,255,0.6); font-weight: 500;
-    }
-    .text-translated {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 28px; font-weight: 700; color: #fff;
-      line-height: 1.2;
-      text-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    
-    /* Action Area (Mic) */
-    .action-area {
-      display: flex; justify-content: center; padding-top: 10px;
-    }
-    .mic-btn {
-      width: 72px; height: 72px; border-radius: 50%;
-      border: 2px solid; background: rgba(0,0,0,0.3);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.2s var(--ease-elastic);
-      position: relative;
-    }
-    .mic-btn:active { transform: scale(0.9); }
-    .mic-btn svg { width: 30px; height: 30px; stroke-width: 2; }
 
-    /* Speaking Waves */
-    .mic-wave {
-      position: absolute; inset: -4px; border-radius: 50%;
-      border: 2px solid currentColor; opacity: 0;
-    }
-    .active .mic-wave { animation: ripple 1.5s infinite; }
-    @keyframes ripple { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.6); opacity: 0; } }
+class TTSRequest(FlexibleModel):
+    text: str
+    lang: str = "en"
+    gender: str = "FEMALE"
+    speaking_rate: float = 1.0
+    pitch: float = 0.0
 
-    /* --- CENTER CONTROLS (Absolute Center) --- */
-    .center-controls {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 50;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .center-btn {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: #1a1a1a; border: 1px solid rgba(255,255,255,0.2);
-      color: #fff; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 20px rgba(0,0,0,0.8); cursor: pointer;
-    }
-    .center-btn:active { transform: scale(0.9); }
 
-    /* Placeholders */
-    .placeholder-text { font-size: 14px; opacity: 0.3; font-style: italic; }
+class TTSResponse(FlexibleModel):
+    ok: bool
+    audio_base64: str
 
-  </style>
-</head>
 
-<body>
-  <div class="cosmos-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
-  <div class="noise"></div>
+# -------------------------
+# HELPERS
+# -------------------------
+def _ensure_key():
+    if not GOOGLE_API_KEY:
+        raise HTTPException(500, "GOOGLE_API_KEY missing (Render ENV)")
 
-  <div class="split-container">
-    
-    <div class="side top" id="sideTop">
-      <div class="lang-pill" id="langTopDisplay">🇬🇧 English</div>
-      
-      <div class="result-area">
-        <div class="text-original" id="textTopOriginal">...</div>
-        <div class="text-translated accent-text" id="textTopTranslated">Tap mic to speak</div>
-      </div>
 
-      <div class="action-area">
-        <button class="mic-btn" id="micTopBtn">
-          <div class="mic-wave"></div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-        </button>
-      </div>
-    </div>
+def _norm_lang(code: Optional[str]) -> Optional[str]:
+    if not code:
+        return None
+    c = str(code).strip().lower()
+    if "-" in c:
+        c = c.split("-", 1)[0]
+    if "_" in c:
+        c = c.split("_", 1)[0]
+    return c or None
 
-    <div class="center-controls">
-      <div class="center-btn" onclick="window.location.href='/pages/home.html'">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-      </div>
-      <div class="center-btn" id="swapBtn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/></svg>
-      </div>
-    </div>
 
-    <div class="side bottom" id="sideBottom">
-      <div class="lang-pill" id="langBottomDisplay">🇹🇷 Türkçe</div>
-      
-      <div class="result-area">
-        <div class="text-original" id="textBottomOriginal">...</div>
-        <div class="text-translated accent-text" id="textBottomTranslated">Mikrofona dokun</div>
-      </div>
+# -------------------------
+# ✅ QUICK PING (en hızlı teşhis)
+# GET /api/translate/_ping
+# -------------------------
+@router.get("/translate/_ping")
+def translate_ping():
+    has = bool(GOOGLE_API_KEY)
+    masked = (GOOGLE_API_KEY[:6] + "..." + GOOGLE_API_KEY[-4:]) if has else ""
+    return {"ok": True, "has_key": has, "key": masked}
 
-      <div class="action-area">
-        <button class="mic-btn" id="micBottomBtn">
-          <div class="mic-wave"></div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-        </button>
-      </div>
-    </div>
 
-  </div>
+# -------------------------
+# ✅ GOOGLE TRANSLATE v2
+# POST /api/translate
+# -------------------------
+@router.post("/translate", response_model=TranslateResponse)
+def api_translate(req: TranslateRequest):
+    _ensure_key()
 
-  <script>
-    // --- CONFIG ---
-    const API_BASE = "https://caynana-api-py310-final.onrender.com/api";
+    text = (req.text or "").strip()
+    if not text:
+        raise HTTPException(400, "empty text")
 
-    // --- STATE ---
-    let langTop = { code: 'en', name: 'English', flag: '🇬🇧' };
-    let langBottom = { code: 'tr', name: 'Türkçe', flag: '🇹🇷' };
-    let recognition = null;
-    let isRecording = false;
-    let activeSide = null; // 'top' or 'bottom'
+    src = _norm_lang(req.from_lang)
+    dst = _norm_lang(req.to_lang) or "en"
 
-    // --- ELEMENTS ---
-    const ui = {
-      top: {
-        pill: document.getElementById('langTopDisplay'),
-        orig: document.getElementById('textTopOriginal'),
-        trans: document.getElementById('textTopTranslated'),
-        mic: document.getElementById('micTopBtn'),
-      },
-      bottom: {
-        pill: document.getElementById('langBottomDisplay'),
-        orig: document.getElementById('textBottomOriginal'),
-        trans: document.getElementById('textBottomTranslated'),
-        mic: document.getElementById('micBottomBtn'),
-      }
-    };
+    url = "https://translation.googleapis.com/language/translate/v2"
+    payload: Dict[str, Any] = {
+        "q": text,
+        "target": dst,
+        "format": "text",
+        "key": GOOGLE_API_KEY,
+    }
+    if src:
+        payload["source"] = src
 
-    // --- INIT ---
-    function init() {
-      updateUI();
+    try:
+        r = requests.post(url, data=payload, timeout=18)
 
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        alert("Tarayıcınız ses tanımayı desteklemiyor (Chrome önerilir).");
-        return;
-      }
-      recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
+        # ✅ HATA DETAYINI SAKLAMA: Google ne döndüyse göster
+        if r.status_code >= 400:
+            body = (r.text or "")[:1200]
+            logger.error("GOOGLE_TRANSLATE_FAIL status=%s body=%s", r.status_code, body)
+            raise HTTPException(
+                status_code=502,
+                detail=f"google_translate_error status={r.status_code} body={body}"
+            )
 
-      recognition.onstart = () => { isRecording = true; updateMicVisuals(); };
-      recognition.onend = () => { isRecording = false; activeSide = null; updateMicVisuals(); };
-      
-      recognition.onresult = async (event) => {
-        const transcript = event.results[0][0].transcript;
-        if(transcript) await processSpeech(transcript);
-      };
-      
-      recognition.onerror = () => { isRecording = false; updateMicVisuals(); };
-    }
+        data = r.json() or {}
+        tr = (((data.get("data") or {}).get("translations")) or [])
+        if not tr:
+            return TranslateResponse(ok=True, translated=text, detected_source=src)
 
-    function updateUI() {
-      ui.top.pill.innerText = `${langTop.flag} ${langTop.name}`;
-      ui.bottom.pill.innerText = `${langBottom.flag} ${langBottom.name}`;
-    }
+        first = tr[0] or {}
+        translated = str(first.get("translatedText") or "").strip() or text
+        detected = str(first.get("detectedSourceLanguage") or "").strip() or None
 
-    function updateMicVisuals() {
-      ui.top.mic.classList.remove('active');
-      ui.bottom.mic.classList.remove('active');
-      if(isRecording && activeSide) {
-        ui[activeSide].mic.classList.add('active');
-      }
-    }
+        # Basit HTML entity temizliği
+        translated = (
+            translated
+            .replace("&amp;", "&")
+            .replace("&quot;", '"')
+            .replace("&#39;", "'")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+        )
 
-    // --- ACTIONS ---
-    function startListening(side) {
-      if(isRecording) recognition.stop();
-      activeSide = side;
-      // Kimin tarafına basıldıysa o dilde dinle
-      recognition.lang = (side === 'top') ? langTop.code : langBottom.code;
-      try { recognition.start(); } catch(e){}
-    }
+        return TranslateResponse(ok=True, translated=translated, detected_source=detected)
 
-    // --- LOGIC ---
-    async function processSpeech(text) {
-      // 1. Konuşan tarafın Orijinal metnini göster
-      ui[activeSide].orig.innerText = text;
-      
-      // Diğer taraf (Hedef)
-      const targetSide = (activeSide === 'top') ? 'bottom' : 'top';
-      const srcCode = (activeSide === 'top') ? langTop.code : langBottom.code;
-      const dstCode = (activeSide === 'top') ? langBottom.code : langTop.code;
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("TRANSLATE_EXCEPTION %s", str(e))
+        raise HTTPException(500, "translate error")
 
-      // Hedef tarafa "Çevriliyor..." yaz
-      ui[targetSide].trans.innerText = "...";
-      ui[targetSide].trans.style.opacity = "0.5";
 
-      try {
-        // 2. Çeviri İsteği
-        const res = await fetch(`${API_BASE}/translate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text, from_lang: srcCode, to_lang: dstCode })
-        });
-        const data = await res.json();
+# -------------------------
+# ✅ GOOGLE TEXT-TO-SPEECH
+# POST /api/tts
+# -------------------------
+@router.post("/tts", response_model=TTSResponse)
+def api_tts(req: TTSRequest):
+    _ensure_key()
 
-        if(data.ok) {
-          // 3. Sonucu Yaz
-          ui[targetSide].trans.innerText = data.translated;
-          ui[targetSide].trans.style.opacity = "1";
-          
-          // 4. Seslendir (Hedef dilde)
-          playTTS(data.translated, dstCode);
-        }
-      } catch(e) {
-        ui[targetSide].trans.innerText = "Hata";
-      }
-    }
+    text = (req.text or "").strip()
+    if not text:
+        raise HTTPException(400, "empty text")
 
-    async function playTTS(text, lang) {
-      try {
-        const res = await fetch(`${API_BASE}/tts`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text, lang: lang })
-        });
-        const data = await res.json();
-        if(data.ok && data.audio_base64) {
-          const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
-          audio.play();
-        }
-      } catch(e) { console.log("TTS Error"); }
-    }
+    lang = _norm_lang(req.lang) or "en"
 
-    // --- EVENTS ---
-    ui.top.mic.addEventListener('touchstart', (e) => { e.preventDefault(); startListening('top'); });
-    ui.top.mic.addEventListener('mousedown', () => startListening('top'));
+    voice_map = {
+        "tr": {"languageCode": "tr-TR", "name": "tr-TR-Standard-A"},
+        "en": {"languageCode": "en-US", "name": "en-US-Standard-C"},
+        "de": {"languageCode": "de-DE", "name": "de-DE-Standard-A"},
+        "fr": {"languageCode": "fr-FR", "name": "fr-FR-Standard-A"},
+        "es": {"languageCode": "es-ES", "name": "es-ES-Standard-A"},
+        "ar": {"languageCode": "ar-XA", "name": "ar-XA-Standard-A"},
+        "ru": {"languageCode": "ru-RU", "name": "ru-RU-Standard-A"},
+    }
+    voice = voice_map.get(lang, {"languageCode": "en-US", "name": "en-US-Standard-C"})
 
-    ui.bottom.mic.addEventListener('touchstart', (e) => { e.preventDefault(); startListening('bottom'); });
-    ui.bottom.mic.addEventListener('mousedown', () => startListening('bottom'));
+    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_API_KEY}"
+    body = {
+        "input": {"text": text[:4500]},
+        "voice": {
+            "languageCode": voice["languageCode"],
+            "name": voice["name"],
+            "ssmlGender": str(req.gender or "FEMALE").upper(),
+        },
+        "audioConfig": {
+            "audioEncoding": "MP3",
+            "speakingRate": float(req.speaking_rate or 1.0),
+            "pitch": float(req.pitch or 0.0),
+        },
+    }
 
-    document.getElementById('swapBtn').addEventListener('click', () => {
-      const t = langTop; langTop = langBottom; langBottom = t;
-      updateUI();
-    });
+    try:
+        r = requests.post(url, json=body, timeout=20)
+        if r.status_code >= 400:
+            body_txt = (r.text or "")[:1200]
+            logger.error("GOOGLE_TTS_FAIL status=%s body=%s", r.status_code, body_txt)
+            raise HTTPException(
+                status_code=502,
+                detail=f"google_tts_error status={r.status_code} body={body_txt}"
+            )
 
-    init();
-  </script>
-</body>
-</html>
+        data = r.json() or {}
+        audio = str(data.get("audioContent") or "").strip()
+        if not audio:
+            raise HTTPException(502, "tts no audioContent")
+
+        return TTSResponse(ok=True, audio_base64=audio)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("TTS_EXCEPTION %s", str(e))
+        raise HTTPException(500, "tts error")                           bu tasarımda mantık telefon ortada iki kişi mkarşılıklı mkokuşuyor. ekranın yarsı bir ki,şiye diğer yarsısı diğer kişiye bakıyordu nece tasarımda şıktı sen yüzde yüz mantığıda değiştirdin
