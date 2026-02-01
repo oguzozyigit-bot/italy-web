@@ -12,18 +12,15 @@
 
   <style>
     :root {
-      /* O EFSANE RENK PALETİ (Neon Cosmos) */
+      /* EFSANE RENKLER */
       --bg-void: #030014;
       --neon-cyan: #00f3ff;
       --neon-purple: #bc13fe;
       --neon-pink: #ff00aa;
       
-      --glass-surface: rgba(255, 255, 255, 0.03);
       --glass-border: rgba(255, 255, 255, 0.15);
-      --glass-highlight: rgba(255, 255, 255, 0.3);
-      
       --text-main: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.6);
+      --text-muted: rgba(255, 255, 255, 0.65);
       
       --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -39,50 +36,21 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* --- LIVING BACKGROUND (Geri Döndü!) --- */
-    .cosmos-bg {
-      position: absolute; inset: -50%; width: 200%; height: 200%;
-      background: #030014; z-index: 0; pointer-events: none;
-    }
-    .orb {
-      position: absolute; border-radius: 50%;
-      filter: blur(80px); opacity: 0.5;
-      animation: floatOrbit 20s infinite alternate ease-in-out;
-    }
-    .orb-1 {
-      top: 20%; left: 20%; width: 60vw; height: 60vw;
-      background: radial-gradient(circle, var(--neon-purple), transparent 70%);
-      animation-duration: 25s;
-    }
-    .orb-2 {
-      bottom: 20%; right: 20%; width: 70vw; height: 70vw;
-      background: radial-gradient(circle, var(--neon-cyan), transparent 70%);
-      animation-duration: 30s; animation-delay: -5s;
-    }
-    .orb-3 {
-      top: 50%; left: 50%; width: 40vw; height: 40vw;
-      background: radial-gradient(circle, var(--neon-pink), transparent 70%);
-      transform: translate(-50%, -50%);
-      animation: pulseOrbit 15s infinite alternate;
-    }
-    @keyframes floatOrbit { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10%, -10%) scale(1.1); } }
-    @keyframes pulseOrbit { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; } 100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.6; } }
+    /* --- BACKGROUND (Aurora) --- */
+    .cosmos-bg { position: absolute; inset: -50%; width: 200%; height: 200%; background: #030014; z-index: 0; pointer-events: none; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; animation: floatOrbit 20s infinite alternate; }
+    .orb-1 { top: 20%; left: 20%; width: 60vw; height: 60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
+    .orb-2 { bottom: 20%; right: 20%; width: 70vw; height: 70vw; background: radial-gradient(circle, var(--neon-cyan), transparent 70%); animation-delay: -5s; }
+    @keyframes floatOrbit { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(1.1) rotate(10deg); } }
+    .noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"); pointer-events: none; mix-blend-mode: overlay; z-index: 1; }
 
-    .noise {
-      position: absolute; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-      pointer-events: none; mix-blend-mode: overlay; z-index: 1;
-    }
-
-    /* --- MAIN FRAME --- */
+    /* --- FRAME --- */
     .mobile-frame {
       width: 100%; max-width: 480px; height: 100%;
       position: relative; z-index: 10;
       display: flex; flex-direction: column;
-      background: rgba(5, 5, 10, 0.2);
-      backdrop-filter: blur(35px);
-      border-right: 1px solid rgba(255,255,255,0.05);
-      border-left: 1px solid rgba(255,255,255,0.05);
+      background: rgba(5, 5, 10, 0.3);
+      backdrop-filter: blur(40px);
     }
     @media (min-width: 520px) {
       .mobile-frame {
@@ -92,62 +60,60 @@
       }
     }
 
-    /* --- HEADER --- */
-    .header {
-      flex: 0 0 110px; padding: 20px 24px 0;
-      display: flex; align-items: flex-start; justify-content: space-between;
-      position: relative; z-index: 20;
-    }
-
-    /* Profile Card (Holographic Glass) */
-    .profile-card {
-      display: flex; align-items: center; gap: 14px;
-      padding: 8px 16px 8px 8px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
-      border: 1px solid var(--glass-border);
-      border-radius: 99px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      transition: 0.3s;
-    }
-    .profile-card:active { transform: scale(0.96); }
-
-    .avatar-wrap {
-      width: 44px; height: 44px; border-radius: 50%;
-      padding: 2px; /* Border space */
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
-      position: relative;
-    }
-    .avatar-img {
-      width: 100%; height: 100%; border-radius: 50%;
-      border: 2px solid #000; object-fit: cover;
-      background: #000;
+    /* --- TOP BAR (LOGOLU) --- */
+    .topbar {
+      height: 140px; /* Büyük alan */
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 20; padding-top: 20px;
     }
     
-    .user-details { display: flex; flex-direction: column; justify-content: center; }
-    .user-name {
-      font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: #fff;
-      text-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-    .user-badge {
-      font-size: 10px; font-weight: 800; color: #000;
-      background: var(--neon-cyan); padding: 1px 6px; border-radius: 6px;
-      width: fit-content; text-transform: uppercase; letter-spacing: 0.5px;
-      box-shadow: 0 0 10px var(--neon-cyan);
-    }
-
-    /* Settings Button */
-    .settings-btn {
-      width: 48px; height: 48px; border-radius: 16px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--glass-border);
+    /* Profil Butonu (Sağ Üstte Asılı) */
+    .profile-float {
+      position: absolute; right: 20px; top: 30px;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
       display: flex; align-items: center; justify-content: center;
-      color: #fff; cursor: pointer; transition: 0.3s;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      cursor: pointer; overflow: hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      transition: 0.3s;
+      z-index: 50;
     }
-    .settings-btn:active { transform: scale(0.9); }
-    .settings-btn svg { width: 22px; height: 22px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5)); }
+    .profile-float:active { transform: scale(0.9); }
+    .profile-float img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .brand {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      animation: slideDown 1s var(--ease-elastic);
+    }
+    
+    /* HOLOGRAM LOGO */
+    .logoText {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 52px; line-height: 1;
+      letter-spacing: -2px;
+      color: transparent;
+      background: linear-gradient(135deg, #fff 30%, var(--neon-cyan) 50%, #fff 70%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      animation: holoShine 5s linear infinite;
+      filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+    }
+    @keyframes holoShine { to { background-position: 200% center; } }
 
-    /* --- GRID MENU --- */
+    /* NEON FLAG */
+    .flagbar {
+      width: 160px; height: 4px; border-radius: 99px;
+      display: flex; overflow: hidden;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+    .flagbar div { flex: 1; height: 100%; }
+    .f-g { background: #00ff41; box-shadow: 0 0 15px #00ff41; z-index: 2; }
+    .f-w { background: #ffffff; z-index: 1; opacity: 1; box-shadow: 0 0 15px #fff; }
+    .f-red { background: #ff003c; box-shadow: 0 0 15px #ff003c; z-index: 2; }
+
+    /* --- MENU GRID --- */
     .menu-scroll {
       flex: 1; overflow-y: auto; overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
@@ -158,49 +124,41 @@
 
     .grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-      animation: fadeInUp 0.8s var(--ease-elastic);
+      animation: fadeInUp 0.8s var(--ease-elastic) backwards;
     }
 
-    /* 3D GLASS CARD */
+    /* GLASS CARD */
     .nav-card {
       position: relative;
       background: linear-gradient(160deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
       border: 1px solid var(--glass-border);
       border-top: 1px solid rgba(255,255,255,0.15);
-      border-radius: 26px;
-      padding: 20px 16px;
+      border-radius: 26px; padding: 20px 16px;
       display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
       gap: 12px; cursor: pointer; user-select: none;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
-      aspect-ratio: 1 / 1.15;
-      overflow: hidden;
+      aspect-ratio: 1 / 1.1; overflow: hidden;
     }
-
-    /* Neon Glow on Hover/Active */
+    /* Hover Glow */
     .nav-card::after {
-      content: ''; position: absolute; inset: 0;
-      border-radius: 26px; padding: 1px;
+      content: ''; position: absolute; inset: 0; border-radius: 26px; padding: 1px;
       background: linear-gradient(135deg, transparent, rgba(255,255,255,0.3), transparent);
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude;
-      opacity: 0.5;
+      -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0.5;
     }
     .nav-card:active { transform: scale(0.96); background: rgba(255,255,255,0.08); }
 
     /* Icons */
     .icon-glow {
       width: 54px; height: 54px; border-radius: 18px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
       display: flex; align-items: center; justify-content: center;
-      transition: 0.3s;
-      box-shadow: inset 0 0 20px rgba(255,255,255,0.05);
+      transition: 0.3s; box-shadow: inset 0 0 20px rgba(255,255,255,0.05);
       position: relative;
     }
     .icon-glow svg { width: 26px; height: 26px; stroke-width: 1.8; color: #fff; z-index: 2; }
-    
-    /* Neon Blob under icon */
+    /* Neon Blob */
     .icon-glow::before {
       content:''; position: absolute; width: 20px; height: 20px;
       background: var(--neon-cyan); filter: blur(15px); opacity: 0; transition: 0.3s;
@@ -214,7 +172,7 @@
     .label { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2; letter-spacing: 0.3px; }
     .sub { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 2px; opacity: 0.7; }
 
-    /* Full Width Card */
+    /* Full Width */
     .nav-card.full {
       grid-column: span 2; aspect-ratio: auto; flex-direction: row; justify-content: flex-start;
       padding: 24px; background: linear-gradient(90deg, rgba(188, 19, 254, 0.1) 0%, rgba(255,255,255,0.02) 100%);
@@ -234,52 +192,34 @@
       color: rgba(255,255,255,0.5); text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s;
     }
     .links a:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.8); }
-    
-    .footerBrand { 
-      font-size: 10px; color: rgba(255,255,255,0.25); letter-spacing: 2px; text-transform: uppercase; font-weight: 700;
-    }
+    .footerBrand { font-size: 10px; color: rgba(255,255,255,0.25); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
 
-    /* --- SETTINGS MODAL (Glass Sheet) --- */
+    /* --- ANIMATIONS --- */
+    @keyframes slideDown { from { transform: translateY(-80px) scale(0.8); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    @keyframes fadeInUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* --- SETTINGS MODAL --- */
     .modal-overlay {
       position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
       backdrop-filter: blur(10px); display: none; align-items: flex-end;
       animation: fadeIn 0.3s;
     }
     .modal-overlay.active { display: flex; }
-    
     .settings-sheet {
       width: 100%; 
       background: linear-gradient(180deg, rgba(20,20,30,0.95) 0%, #000 100%);
-      border-top-left-radius: 32px; border-top-right-radius: 32px;
-      border-top: 1px solid var(--glass-border);
+      border-top-left-radius: 32px; border-top-right-radius: 32px; border-top: 1px solid var(--glass-border);
       padding: 28px 24px 40px; display: flex; flex-direction: column; gap: 12px;
-      animation: slideUp 0.4s var(--ease-elastic);
       box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
     }
-    
-    .sheet-handle {
-      width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px;
-      align-self: center; margin-bottom: 10px;
-    }
     .sheet-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px; text-align: center; }
-    
     .setting-item {
-      display: flex; align-items: center; gap: 16px;
-      padding: 16px; border-radius: 18px;
+      display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 18px;
       background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.05);
-      color: #fff; text-decoration: none; font-size: 15px; font-weight: 600;
-      transition: 0.2s; cursor: pointer;
+      color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
     }
-    .setting-item:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
-    .setting-item svg { width: 22px; height: 22px; opacity: 0.9; }
-    
     .setting-item.danger { color: #ff4d4d; background: rgba(255, 77, 77, 0.08); border-color: rgba(255, 77, 77, 0.2); }
-
-    /* Animations */
-    @keyframes fadeInUp { from { transform: translateY(60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
   </style>
 </head>
 
@@ -293,19 +233,16 @@
 
   <div class="mobile-frame">
     
-    <div class="header">
-      <div class="profile-card" onclick="window.location.href='/pages/profile.html'">
-        <div class="avatar-wrap">
-          <img id="userAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar" class="avatar-img">
-        </div>
-        <div class="user-details">
-          <div class="user-name" id="userName">Misafir</div>
-          <div class="user-badge">FREE</div>
+    <div class="topbar">
+      <div class="brand">
+        <div class="logoText">ITALKY</div>
+        <div class="flagbar">
+          <div class="f-g"></div><div class="f-w"></div><div class="f-r"></div>
         </div>
       </div>
 
-      <div class="settings-btn" id="openSettings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.09 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <div class="profile-float" id="openSettings">
+        <img id="userAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar">
       </div>
     </div>
 
@@ -395,23 +332,20 @@
 
   <div class="modal-overlay" id="settingsModal">
     <div class="settings-sheet">
-      <div class="sheet-handle"></div>
       <div class="sheet-title">Ayarlar</div>
       
       <div class="setting-item">
-        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
         Site Dili
       </div>
       <div class="setting-item">
-        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline></svg>
         Çevrimdışı Paketler (İndir)
       </div>
       <div class="setting-item" style="border-color:rgba(255,215,0,0.3);">
         <svg viewBox="0 0 24 24" stroke="#ffb300" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
         <span style="color:#ffb300;">Premium'a Yükselt</span>
       </div>
-      
-      <div style="height:10px;"></div>
       
       <div class="setting-item" onclick="logoutAction()">
         <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -432,39 +366,25 @@
     import { STORAGE_KEY } from "/js/config.js";
     import { logout } from "/js/auth.js";
 
-    // --- Profil Verisi ---
+    // Profil Yükleme
     const userAvatar = document.getElementById("userAvatar");
-    const userName = document.getElementById("userName");
-
     try {
       const u = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      if(u && u.email) {
-        if(u.picture) userAvatar.src = u.picture;
-        // Ad Soyad (Varsa)
-        if(u.given_name || u.family_name) {
-          userName.textContent = `${u.given_name || ""} ${u.family_name || ""}`.trim();
-        } else if(u.name) {
-          userName.textContent = u.name;
-        }
-      }
-    } catch(e) { console.log("Profil verisi okunamadı"); }
+      if(u && u.picture) { userAvatar.src = u.picture; }
+    } catch(e) {}
 
-    // --- Settings Modal ---
+    // Settings Modal
     const settingsBtn = document.getElementById("openSettings");
     const modal = document.getElementById("settingsModal");
     const closeBtn = document.getElementById("closeSettings");
 
     settingsBtn.addEventListener("click", () => modal.classList.add("active"));
-    
-    // Dışına tıklayınca kapat
-    modal.addEventListener("click", (e) => {
-      if(e.target === modal) modal.classList.remove("active");
-    });
+    modal.addEventListener("click", (e) => { if(e.target === modal) modal.classList.remove("active"); });
     closeBtn.addEventListener("click", () => modal.classList.remove("active"));
 
-    // --- Logout Action ---
+    // Logout
     window.logoutAction = function() {
-      if(confirm("Çıkış yapmak istediğinize emin misiniz?")) {
+      if(confirm("Çıkış yapmak istiyor musun?")) {
         try { logout(); } catch(e) { 
           localStorage.removeItem(STORAGE_KEY);
           window.location.replace("/index.html");
