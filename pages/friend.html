@@ -1,1 +1,843 @@
+<!-- FILE: italky-web/pages/duo.html -->
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>ITALKY • Duo Practice</title>
+  <link rel="icon" href="data:,"/>
 
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;height:100dvh;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial}
+    body{background:#070812;color:#fff}
+
+    .wrap{width:100%;max-width:480px;height:100%;margin:0 auto;position:relative}
+
+    .back{
+      position:absolute;top:12px;left:12px;z-index:30;
+      width:46px;height:46px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.35);color:#fff;
+      font-size:22px;font-weight:1000;
+      display:flex;align-items:center;justify-content:center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 40px rgba(0,0,0,.45);
+      user-select:none; cursor:pointer;
+    }
+    .back:active{transform:translateY(1px)}
+
+    .pill{
+      position:absolute; top:12px; right:12px; z-index:30;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.35);
+      font-weight:950;
+      font-size:12px;
+      backdrop-filter: blur(10px);
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      max-width:62vw;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      user-select:none;
+      cursor:pointer;
+    }
+
+    .grid{
+      position:absolute; inset:0;
+      display:grid;
+      grid-template-rows: 1fr 86px 1fr;
+      gap:10px;
+      padding:70px 12px 14px;
+    }
+
+    .pane{
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      box-shadow:0 28px 90px rgba(0,0,0,.6);
+      backdrop-filter: blur(10px);
+      position:relative;
+    }
+
+    .top{
+      background:
+        radial-gradient(900px 360px at 20% 0%, rgba(40,120,255,.22), transparent 62%),
+        rgba(0,0,0,.18);
+      transform: rotate(180deg);
+    }
+
+    .bottom{
+      background:
+        radial-gradient(900px 360px at 20% 0%, rgba(120,20,35,.72), transparent 64%),
+        rgba(0,0,0,.18);
+    }
+
+    .bar{
+      padding:12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex; justify-content:space-between; align-items:center;
+      background:rgba(0,0,0,.18);
+      font-weight:1000;
+      gap:10px;
+    }
+    .name{opacity:.95; font-weight:1000}
+    .score{opacity:.85; font-weight:1000}
+
+    .progressWrap{ padding: 10px 12px 0; }
+    .progress{
+      height:8px;border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(190,242,100,.95), rgba(255,179,0,.85));
+      transition: width .25s ease;
+    }
+    .pmeta{
+      margin-top:8px;
+      font-size:12px;
+      font-weight:950;
+      opacity:.78;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .body{padding:16px;display:flex;flex-direction:column;gap:10px}
+    .word{font-size:30px;font-weight:1000;letter-spacing:.2px}
+
+    .meaning{
+      font-weight:950;
+      font-size:14px;
+      opacity:.90;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .meaning .tag{
+      font-size:11px;
+      font-weight:1000;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      opacity:.9;
+    }
+
+    .hint{opacity:.82;font-weight:900;font-size:12px;line-height:1.35}
+
+    .btnrow{
+      padding:14px;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+    }
+    .btn{
+      border:none;
+      border-radius:18px;
+      padding:12px 14px;
+      font-weight:1000;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      min-width:160px;
+      user-select:none;
+      cursor:pointer;
+      box-shadow: 0 14px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.14);
+    }
+    .btn.primary{
+      background:rgba(190,242,100,.16);
+      border-color:rgba(190,242,100,.28);
+      box-shadow: 0 14px 30px rgba(190,242,100,.10), inset 0 1px 0 rgba(255,255,255,.14);
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+
+    .wave{
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.26);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      position:relative;
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+      box-shadow:0 22px 70px rgba(0,0,0,.55);
+    }
+    .wave .label{
+      font-weight:1000;
+      font-size:12px;
+      opacity:.86;
+      letter-spacing:.2px;
+      user-select:none;
+    }
+    .bars{display:flex;align-items:center;gap:6px;height:34px}
+    .barw{
+      width:6px;height:10px;border-radius:99px;
+      background: rgba(255,255,255,.22);
+      transform-origin:center;
+    }
+    .wave.teaching .barw{
+      background: rgba(190,242,100,.75);
+      box-shadow: 0 0 18px rgba(190,242,100,.18);
+      animation: w 650ms ease-in-out infinite;
+    }
+    .wave.teaching .barw:nth-child(2){animation-delay:.06s}
+    .wave.teaching .barw:nth-child(3){animation-delay:.12s}
+    .wave.teaching .barw:nth-child(4){animation-delay:.18s}
+    .wave.teaching .barw:nth-child(5){animation-delay:.24s}
+    .wave.teaching .barw:nth-child(6){animation-delay:.30s}
+    .wave.teaching .barw:nth-child(7){animation-delay:.36s}
+    .wave.listening .barw{
+      background: rgba(190,242,100,.55);
+      animation: w 560ms ease-in-out infinite;
+    }
+    @keyframes w{
+      0%{ height:10px; opacity:.55 }
+      45%{ height:34px; opacity:1 }
+      100%{ height:12px; opacity:.65 }
+    }
+
+    .panel-overlay{
+      position:absolute; inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:25;
+      font-weight:1000;
+      text-align:center;
+      user-select:none;
+      backdrop-filter: blur(4px);
+    }
+    .panel-overlay.show{ display:flex; }
+    .panel-overlay.ok{
+      background: radial-gradient(900px 520px at 50% 30%, rgba(190,242,100,.40), rgba(0,0,0,.78));
+    }
+    .panel-overlay.bad{
+      background: radial-gradient(900px 520px at 50% 30%, rgba(255,82,82,.40), rgba(0,0,0,.82));
+    }
+    .panel-overlay .big{ font-size:92px; line-height:1; text-shadow:0 20px 80px rgba(0,0,0,.65); }
+    .panel-overlay .sub{
+      margin-top:14px;
+      font-size:14px;
+      font-weight:950;
+      opacity:.92;
+      padding:10px 14px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.28);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      max-width:80%;
+    }
+
+    /* Modal */
+    .modal{
+      position:absolute; inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:60;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      padding: 14px;
+    }
+    .modal.show{display:flex}
+    .mcard{
+      width: min(420px, 92vw);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(10,10,12,.88);
+      box-shadow: 0 30px 90px rgba(0,0,0,.7);
+      padding: 14px;
+    }
+    .mcard .h{ font-weight:1000; font-size:14px; margin-bottom:10px; }
+    .mcard .line{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 12px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      font-weight:950;
+      margin-bottom:10px;
+    }
+    .mcard .btns{display:flex;gap:10px}
+    .mcard button{
+      flex:1;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+    }
+    .mcard button.primary{
+      background: rgba(190,242,100,.16);
+      border-color: rgba(190,242,100,.28);
+      color:#fff;
+    }
+    .mcard button:active{transform:translateY(1px)}
+
+    .lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .lang-btn{
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-weight:1000;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+    }
+    .lang-btn:active{transform:translateY(1px)}
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <button class="back" id="backBtn">←</button>
+  <div class="pill" id="langPill">🌍 Language</div>
+
+  <div class="grid">
+    <section class="pane top" id="paneB">
+      <div class="bar">
+        <div class="name" id="nameB">Student B</div>
+        <div class="score" id="scoreB">Set: 0</div>
+      </div>
+
+      <div class="progressWrap">
+        <div class="progress"><div id="fillB"></div></div>
+        <div class="pmeta"><span id="corrB">Correct: 0/20</span><span id="turnB">—</span></div>
+      </div>
+
+      <div class="body">
+        <div class="word" id="wordB">—</div>
+        <div class="meaning"><span class="tag" id="tagB">Turkish</span> <span id="meaningB">—</span></div>
+        <div class="hint" id="hintB">Not your turn.</div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="micB">Speak</button>
+      </div>
+
+      <div class="panel-overlay" id="overlayB">
+        <div>
+          <div class="big" id="overlayIcoB">✅</div>
+          <div class="sub" id="overlayTxtB">Great!</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wave" id="waveBox">
+      <div class="label" id="waveLabel">Teacher is reading…</div>
+      <div class="bars" aria-hidden="true">
+        <div class="barw"></div><div class="barw"></div><div class="barw"></div><div class="barw"></div>
+        <div class="barw"></div><div class="barw"></div><div class="barw"></div>
+      </div>
+    </div>
+
+    <section class="pane bottom" id="paneA">
+      <div class="bar">
+        <div class="name" id="nameA">Student A</div>
+        <div class="score" id="scoreA">Set: 0</div>
+      </div>
+
+      <div class="progressWrap">
+        <div class="progress"><div id="fillA"></div></div>
+        <div class="pmeta"><span id="corrA">Correct: 0/20</span><span id="turnA">—</span></div>
+      </div>
+
+      <div class="body">
+        <div class="word" id="wordA">—</div>
+        <div class="meaning"><span class="tag" id="tagA">Turkish</span> <span id="meaningA">—</span></div>
+        <div class="hint" id="hintA">Your turn. One try.</div>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="micA">Speak</button>
+      </div>
+
+      <div class="panel-overlay" id="overlayA">
+        <div>
+          <div class="big" id="overlayIcoA">✅</div>
+          <div class="sub" id="overlayTxtA">Great!</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Final modal -->
+  <div class="modal" id="finalModal">
+    <div class="mcard">
+      <div class="h">20 words done. Go to the next stage?</div>
+      <div class="line"><span>Student A</span><span id="finalA">Set: 0</span></div>
+      <div class="line"><span>Student B</span><span id="finalB">Set: 0</span></div>
+      <div class="btns">
+        <button class="primary" id="yesBtn">Yes</button>
+        <button id="noBtn">No</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Language modal -->
+  <div class="modal" id="langModal">
+    <div class="mcard">
+      <div class="h">Select language</div>
+      <div class="lang-grid">
+        <div class="lang-btn" data-lang="en">🇬🇧 English</div>
+        <div class="lang-btn" data-lang="de">🇩🇪 Deutsch</div>
+        <div class="lang-btn" data-lang="fr">🇫🇷 Français</div>
+        <div class="lang-btn" data-lang="it">🇮🇹 Italiano</div>
+      </div>
+      <div style="height:10px"></div>
+      <div class="btns">
+        <button class="primary" id="closeLang">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========= language ========= */
+function getLang(){
+  const u = new URL(location.href);
+  const q = (u.searchParams.get("lang") || "en").toLowerCase().trim();
+  return ["en","de","fr","it"].includes(q) ? q : "en";
+}
+let lang = getLang();
+const LOCALES = { en:"en-US", de:"de-DE", fr:"fr-FR", it:"it-IT" };
+const LANG_LABEL = { en:"🇬🇧 English", de:"🇩🇪 Deutsch", fr:"🇫🇷 Français", it:"🇮🇹 Italiano" };
+
+function setLangPill(){
+  document.getElementById("langPill").textContent = "🌍 " + (LANG_LABEL[lang] || "Language");
+}
+setLangPill();
+
+/* ========= show language modal ========= */
+const langModal = document.getElementById("langModal");
+document.getElementById("langPill").addEventListener("click", ()=> langModal.classList.add("show"));
+document.getElementById("closeLang").addEventListener("click", ()=> langModal.classList.remove("show"));
+langModal.addEventListener("click", (e)=>{ if(e.target === langModal) langModal.classList.remove("show"); });
+
+langModal.querySelectorAll("[data-lang]").forEach(el=>{
+  el.addEventListener("click", ()=>{
+    const l = el.getAttribute("data-lang");
+    const url = new URL(location.href);
+    url.searchParams.set("lang", l);
+    location.href = url.toString();
+  });
+});
+
+/* ========= WORD BANK (each has Turkish meaning) ========= */
+const WORDS = {
+  en: [
+    ["apple","elma"],["water","su"],["bread","ekmek"],["menu","menü"],["price","fiyat"],["yes","evet"],["no","hayır"],
+    ["hello","merhaba"],["goodbye","güle güle"],["thank you","teşekkürler"],["please","lütfen"],["help","yardım"],
+    ["toilet","tuvalet"],["the bill","hesap"],["hot","sıcak"],["cold","soğuk"],["today","bugün"],["excuse me","affedersiniz"],
+    ["book","kitap"],["pen","kalem"],["phone","telefon"],["table","masa"],["chair","sandalye"],["door","kapı"],["window","pencere"],
+    ["street","sokak"],["city","şehir"],["ticket","bilet"],["train","tren"],["bus","otobüs"],["airport","havaalanı"],["hotel","otel"],
+    ["room","oda"],["key","anahtar"],["breakfast","kahvaltı"],["lunch","öğle yemeği"],["dinner","akşam yemeği"],
+    ["coffee","kahve"],["tea","çay"],["milk","süt"],["cheese","peynir"],["chicken","tavuk"],["fish","balık"],["salad","salata"],
+    ["soup","çorba"],["salt","tuz"],["sugar","şeker"],["left","sol"],["right","sağ"],["straight","düz"],["near","yakın"],["far","uzak"],
+    ["open","açık"],["closed","kapalı"],["small","küçük"],["big","büyük"],["cheap","ucuz"],["expensive","pahalı"],
+    ["where","nerede"],["when","ne zaman"],["how","nasıl"],["what","ne"]
+  ],
+  de: [
+    ["Apfel","elma"],["Wasser","su"],["Brot","ekmek"],["Speisekarte","menü"],["Preis","fiyat"],["ja","evet"],["nein","hayır"],
+    ["Hallo","merhaba"],["Tschüss","güle güle"],["Danke","teşekkürler"],["Bitte","lütfen"],["Hilfe","yardım"],
+    ["Toilette","tuvalet"],["die Rechnung","hesap"],["heiß","sıcak"],["kalt","soğuk"],["heute","bugün"],
+    ["Buch","kitap"],["Stift","kalem"],["Telefon","telefon"],["Tisch","masa"],["Stuhl","sandalye"],["Tür","kapı"],["Fenster","pencere"],
+    ["Straße","sokak"],["Stadt","şehir"],["Ticket","bilet"],["Zug","tren"],["Bus","otobüs"],["Flughafen","havaalanı"],["Hotel","otel"],
+    ["Zimmer","oda"],["Schlüssel","anahtar"],["Frühstück","kahvaltı"],["Mittagessen","öğle yemeği"],["Abendessen","akşam yemeği"],
+    ["Kaffee","kahve"],["Tee","çay"],["Milch","süt"],["Käse","peynir"],["Huhn","tavuk"],["Fisch","balık"],["Salat","salata"],
+    ["Suppe","çorba"],["Salz","tuz"],["Zucker","şeker"],["links","sol"],["rechts","sağ"],["geradeaus","düz"]
+  ],
+  fr: [
+    ["pomme","elma"],["eau","su"],["pain","ekmek"],["menu","menü"],["prix","fiyat"],["oui","evet"],["non","hayır"],
+    ["bonjour","merhaba"],["au revoir","güle güle"],["merci","teşekkürler"],["s'il vous plaît","lütfen"],["aide","yardım"],
+    ["toilettes","tuvalet"],["l'addition","hesap"],["chaud","sıcak"],["froid","soğuk"],["aujourd'hui","bugün"],
+    ["livre","kitap"],["stylo","kalem"],["téléphone","telefon"],["table","masa"],["chaise","sandalye"],["porte","kapı"],["fenêtre","pencere"],
+    ["rue","sokak"],["ville","şehir"],["billet","bilet"],["train","tren"],["bus","otobüs"],["aéroport","havaalanı"],["hôtel","otel"],
+    ["chambre","oda"],["clé","anahtar"],["petit-déjeuner","kahvaltı"],["déjeuner","öğle yemeği"],["dîner","akşam yemeği"],
+    ["café","kahve"],["thé","çay"],["lait","süt"],["fromage","peynir"],["poulet","tavuk"],["poisson","balık"],["salade","salata"]
+  ],
+  it: [
+    ["mela","elma"],["acqua","su"],["pane","ekmek"],["menù","menü"],["prezzo","fiyat"],["sì","evet"],["no","hayır"],
+    ["ciao","merhaba"],["arrivederci","güle güle"],["grazie","teşekkürler"],["per favore","lütfen"],["aiuto","yardım"],
+    ["bagno","tuvalet"],["il conto","hesap"],["caldo","sıcak"],["freddo","soğuk"],["oggi","bugün"],
+    ["libro","kitap"],["penna","kalem"],["telefono","telefon"],["tavolo","masa"],["sedia","sandalye"],["porta","kapı"],["finestra","pencere"],
+    ["strada","sokak"],["città","şehir"],["biglietto","bilet"],["treno","tren"],["autobus","otobüs"],["aeroporto","havaalanı"],["hotel","otel"],
+    ["camera","oda"],["chiave","anahtar"],["colazione","kahvaltı"],["pranzo","öğle yemeği"],["cena","akşam yemeği"],
+    ["caffè","kahve"],["tè","çay"],["latte","süt"],["formaggio","peynir"],["pollo","tavuk"],["pesce","balık"]
+  ]
+};
+
+/* ========= build pool ========= */
+function buildPool(){
+  const base = (WORDS[lang] || WORDS.en).map(x=>({t:x[0], tr:x[1]}));
+  // küçük genişletme (çok saçmalamadan)
+  const out = [];
+  const suffixes = ["", "", "", " please"]; // az
+  for(const it of base){
+    out.push({t: it.t, tr: it.tr});
+    for(const s of suffixes){
+      const tt = (it.t + s).trim();
+      if(tt.length>=2 && tt.length<=26) out.push({t: tt, tr: it.tr});
+    }
+  }
+  const seen = new Set();
+  const dedup = [];
+  for(const x of out){
+    const k = x.t.toLowerCase();
+    if(seen.has(k)) continue;
+    seen.add(k);
+    dedup.push(x);
+  }
+  return dedup;
+}
+const BIG_POOL = buildPool();
+const RECENT_MAX = 60;
+const recent = [];
+function pickUniqueWord(){
+  for(let tries=0; tries<250; tries++){
+    const w = BIG_POOL[Math.floor(Math.random()*BIG_POOL.length)];
+    const key = w.t.toLowerCase();
+    if(recent.includes(key)) continue;
+    recent.push(key);
+    if(recent.length > RECENT_MAX) recent.shift();
+    return w;
+  }
+  return BIG_POOL[Math.floor(Math.random()*BIG_POOL.length)];
+}
+
+/* ========= similarity ========= */
+function norm(s){
+  return String(s||"").toLowerCase().trim().replace(/[’']/g,"'").replace(/[.,!?;:]/g,"").replace(/\s+/g," ");
+}
+function similarity(a,b){
+  a=norm(a); b=norm(b);
+  if(!a||!b) return 0;
+  if(a===b) return 1;
+  const m=a.length,n=b.length;
+  const dp=[...Array(m+1)].map(()=>Array(n+1).fill(0));
+  for(let i=0;i<=m;i++)dp[i][0]=i;
+  for(let j=0;j<=n;j++)dp[0][j]=j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      const c=a[i-1]===b[j-1]?0:1;
+      dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+c);
+    }
+  }
+  return 1-dp[m][n]/Math.max(m,n);
+}
+
+/* ========= wave + buttons ========= */
+function setWaveMode(mode){
+  const w=document.getElementById("waveBox");
+  w.classList.remove("teaching","listening");
+  if(mode) w.classList.add(mode);
+}
+function setWaveLabel(txt){ document.getElementById("waveLabel").textContent = txt; }
+function setButtonsEnabled(enabled){
+  document.getElementById("micA").disabled = !enabled;
+  document.getElementById("micB").disabled = !enabled;
+}
+
+/* ========= overlay ========= */
+function showOverlay(side, ok, msg){
+  const ov=document.getElementById(side==="A" ? "overlayA" : "overlayB");
+  const ico=document.getElementById(side==="A" ? "overlayIcoA" : "overlayIcoB");
+  const txt=document.getElementById(side==="A" ? "overlayTxtA" : "overlayTxtB");
+  ov.classList.remove("ok","bad","show");
+  ov.classList.add(ok ? "ok" : "bad");
+  ico.textContent = ok ? "✅" : "❌";
+  txt.textContent = msg;
+  ov.classList.add("show");
+  clearTimeout(ov.__t);
+  ov.__t=setTimeout(()=>ov.classList.remove("show"),2000);
+}
+function funnyWrong(){
+  const pool=[
+    "Wrong 😅",
+    "Nope! 🚫",
+    "Try again 😄",
+    "Close… but still wrong.",
+    "Teacher: not yet 👀"
+  ];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+/* ========= speech ========= */
+function makeRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r=new SR();
+  r.lang = LOCALES[lang] || "en-US";
+  r.interimResults=false;
+  r.continuous=false;
+  return r;
+}
+function teacherSpeak(text){
+  return new Promise((resolve)=>{
+    if(!("speechSynthesis" in window)){ resolve(false); return; }
+    try{
+      window.speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(String(text||""));
+      u.lang = LOCALES[lang] || "en-US";
+      u.rate = 0.95;
+      u.pitch = 1.0;
+      u.onend=()=>resolve(true);
+      u.onerror=()=>resolve(false);
+      window.speechSynthesis.speak(u);
+    }catch{ resolve(false); }
+  });
+}
+
+/* ========= game ========= */
+let stageWords = Array.from({length:20}, ()=> pickUniqueWord());
+let wordIndex=0;
+
+let turn="A";
+let busy=false;
+
+let correctA=0, correctB=0;
+let setA=0, setB=0;
+
+let attemptsOnWord=0;
+
+function updateBars(){
+  document.getElementById("fillA").style.width = `${(correctA/20)*100}%`;
+  document.getElementById("fillB").style.width = `${(correctB/20)*100}%`;
+  document.getElementById("corrA").textContent = `Correct: ${correctA}/20`;
+  document.getElementById("corrB").textContent = `Correct: ${correctB}/20`;
+  document.getElementById("scoreA").textContent = `Set: ${setA}`;
+  document.getElementById("scoreB").textContent = `Set: ${setB}`;
+  document.getElementById("turnA").textContent = (turn==="A") ? "Your turn" : "—";
+  document.getElementById("turnB").textContent = (turn==="B") ? "Your turn" : "—";
+}
+
+function setHints(){
+  document.getElementById("hintA").textContent = (turn==="A") ? `Your turn. One try. (${wordIndex+1}/20)` : "Opponent's turn.";
+  document.getElementById("hintB").textContent = (turn==="B") ? `Your turn. One try. (${wordIndex+1}/20)` : "Opponent's turn.";
+}
+
+function renderWord(){
+  const w = stageWords[wordIndex];
+  document.getElementById("wordA").textContent = w.t;
+  document.getElementById("wordB").textContent = w.t;
+  document.getElementById("meaningA").textContent = w.tr;
+  document.getElementById("meaningB").textContent = w.tr;
+}
+
+async function teacherPhase(labelAfter, isRepeat=false){
+  setButtonsEnabled(false);
+  setWaveLabel(isRepeat ? "Teacher repeats…" : "Teacher is reading…");
+  setWaveMode("teaching");
+  await teacherSpeak(stageWords[wordIndex].t);
+  setWaveMode(null);
+  setWaveLabel(labelAfter || (turn==="A" ? "Student A turn" : "Student B turn"));
+  setButtonsEnabled(true);
+}
+
+async function endGame(){
+  if(correctA > correctB){ setA=1; setB=0; turn="A"; }
+  else if(correctB > correctA){ setA=0; setB=1; turn="B"; }
+  else { setA=0; setB=0; turn="A"; }
+
+  updateBars();
+  document.getElementById("finalA").textContent = `Set: ${setA}`;
+  document.getElementById("finalB").textContent = `Set: ${setB}`;
+  document.getElementById("finalModal").classList.add("show");
+}
+
+async function nextWord(){
+  wordIndex++;
+  attemptsOnWord=0;
+
+  if(wordIndex >= 20){
+    await endGame();
+    return;
+  }
+
+  updateBars();
+  setHints();
+  renderWord();
+  await teacherPhase(turn==="A" ? "Student A turn" : "Student B turn", false);
+}
+
+async function handleAttempt(player, ok){
+  setButtonsEnabled(false);
+  busy=true;
+
+  attemptsOnWord++;
+
+  if(ok){
+    showOverlay(player,true,"Correct ✅");
+    if(player==="A") correctA++; else correctB++;
+
+    // ✅ doğru bilen devam eder
+    turn = player;
+
+    updateBars();
+    await new Promise(r=>setTimeout(r,2000));
+    busy=false;
+
+    await nextWord();
+    return;
+  }
+
+  // ❌ yanlış
+  showOverlay(player,false, funnyWrong());
+  updateBars();
+  await new Promise(r=>setTimeout(r,2000));
+
+  // ✅ ikisi de yanlışsa: öğretmen tekrar etmeden yeni kelime
+  if(attemptsOnWord >= 2){
+    // serve diğerine geçsin
+    turn = (player==="A") ? "B" : "A";
+    updateBars();
+    busy=false;
+    await nextWord();
+    return;
+  }
+
+  // ✅ ilk yanlış: sıra diğerine geçer + öğretmen bir kez tekrar eder
+  turn = (player==="A") ? "B" : "A";
+  updateBars();
+  setHints();
+  busy=false;
+
+  await teacherPhase(turn==="A" ? "Student A turn" : "Student B turn", true);
+}
+
+function listenFor(player){
+  if(busy) return;
+  if(player !== turn) return;
+
+  const rec = makeRec();
+  if(!rec){ alert("Speech recognition not available on this device."); return; }
+
+  busy=true;
+  setButtonsEnabled(false);
+  setWaveLabel("Listening…");
+  setWaveMode("listening");
+
+  const expected = stageWords[wordIndex].t;
+
+  const watchdog = setTimeout(async ()=>{
+    try{ rec.abort && rec.abort(); }catch{}
+    setWaveMode(null);
+    setWaveLabel("—");
+    setButtonsEnabled(true);
+    busy=false;
+    await handleAttempt(player,false);
+  }, 6500);
+
+  let handled=false;
+
+  rec.onresult = async (e)=>{
+    if(handled) return;
+    handled=true;
+    clearTimeout(watchdog);
+
+    const said = e.results?.[0]?.[0]?.transcript || "";
+    const ok = similarity(expected, said) >= 0.92;
+
+    setWaveMode(null);
+    setWaveLabel("—");
+    try{ rec.stop && rec.stop(); }catch{}
+
+    setButtonsEnabled(true);
+    busy=false;
+
+    await handleAttempt(player, ok);
+  };
+
+  rec.onerror = async ()=>{
+    if(handled) return;
+    handled=true;
+    clearTimeout(watchdog);
+
+    setWaveMode(null);
+    setWaveLabel("—");
+    setButtonsEnabled(true);
+    busy=false;
+
+    await handleAttempt(player,false);
+  };
+
+  rec.onend = async ()=>{
+    if(handled) return;
+    handled=true;
+    clearTimeout(watchdog);
+
+    setWaveMode(null);
+    setWaveLabel("—");
+    setButtonsEnabled(true);
+    busy=false;
+
+    await handleAttempt(player,false);
+  };
+
+  try{ rec.start(); }
+  catch{
+    clearTimeout(watchdog);
+    setWaveMode(null);
+    setWaveLabel("—");
+    setButtonsEnabled(true);
+    busy=false;
+    handleAttempt(player,false);
+  }
+}
+
+/* modal buttons */
+document.getElementById("yesBtn").addEventListener("click", async ()=>{
+  document.getElementById("finalModal").classList.remove("show");
+
+  stageWords = Array.from({length:20}, ()=> pickUniqueWord());
+  wordIndex=0;
+  correctA=0; correctB=0;
+  attemptsOnWord=0;
+
+  updateBars();
+  setHints();
+  renderWord();
+  await teacherPhase(turn==="A" ? "Student A turn" : "Student B turn", false);
+});
+
+document.getElementById("noBtn").addEventListener("click", ()=>{
+  document.getElementById("finalModal").classList.remove("show");
+});
+
+/* boot */
+document.getElementById("backBtn").addEventListener("click", ()=>{
+  location.href="/pages/friend.html";
+});
+document.getElementById("micA").addEventListener("click", ()=> listenFor("A"));
+document.getElementById("micB").addEventListener("click", ()=> listenFor("B"));
+
+updateBars();
+setHints();
+renderWord();
+teacherPhase("Student A turn", false);
+
+// first-time language popup once
+try{
+  const k="italky_duo_lang_prompted";
+  if(!localStorage.getItem(k)){
+    localStorage.setItem(k,"1");
+    document.getElementById("langModal").classList.add("show");
+  }
+}catch{}
+</script>
+
+</body>
+</html>
