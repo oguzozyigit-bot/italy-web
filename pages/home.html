@@ -12,140 +12,125 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      /* ITALKY PALET (mevcut stil korunuyor) */
-      --bg-void: #030014;
-      --neon-cyan: #00f3ff;
-      --neon-purple: #bc13fe;
-      --neon-pink: #ff00aa;
+    :root{
+      --bg-void:#030014;
+      --neon-cyan:#00f3ff;
+      --neon-purple:#bc13fe;
+      --neon-pink:#ff00aa;
 
-      --glass-surface: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-surface: rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.10);
 
-      --text-main: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.65);
+      --text-main:#fff;
+      --text-muted: rgba(255,255,255,0.65);
+
+      /* ITALKY vurgu: bordo */
+      --italky-burgundy: rgba(140, 18, 45, .40);
+      --italky-burgundy-2: rgba(140, 18, 45, .18);
 
       --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
 
-    /* Sayfa sabitle (iOS zıplama fix) */
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      overflow: hidden;
-      position: fixed;
-      font-family: 'Outfit', sans-serif;
-      background-color: var(--bg-void);
-      color: var(--text-main);
-      display: flex; align-items: center; justify-content: center;
+    html,body{
+      margin:0; padding:0; width:100%; height:100%;
+      overflow:hidden;
+      position:fixed;
+      font-family:'Outfit', sans-serif;
+      background-color:var(--bg-void);
+      color:var(--text-main);
+      display:flex; align-items:center; justify-content:center;
     }
 
-    /* Background FX */
-    .cosmos-bg {
-      position: absolute; inset: -50%; width: 200%; height: 200%;
-      background: #030014; z-index: 0; pointer-events: none;
+    /* background */
+    .cosmos-bg{
+      position:absolute; inset:-50%; width:200%; height:200%;
+      background:#030014; z-index:0; pointer-events:none;
     }
-    .orb {
-      position: absolute; border-radius: 50%;
-      filter: blur(80px); opacity: 0.5;
+    .orb{
+      position:absolute; border-radius:50%;
+      filter: blur(80px); opacity:.5;
       animation: floatOrbit 25s infinite alternate ease-in-out;
     }
-    .orb-1 {
-      top: 10%; left: 10%; width: 60vw; height: 60vw;
+    .orb-1{
+      top:10%; left:10%; width:60vw; height:60vw;
       background: radial-gradient(circle, var(--neon-purple), transparent 70%);
     }
-    .orb-2 {
-      bottom: 10%; right: 10%; width: 50vw; height: 50vw;
+    .orb-2{
+      bottom:10%; right:10%; width:50vw; height:50vw;
       background: radial-gradient(circle, var(--neon-cyan), transparent 70%);
-      animation-delay: -5s;
+      animation-delay:-5s;
     }
-    @keyframes floatOrbit {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(10%, -10%) scale(1.1); }
-    }
-
-    .noise {
-      position: absolute; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none; mix-blend-mode: overlay; z-index: 1;
+    @keyframes floatOrbit{
+      0%{ transform: translate(0,0) scale(1); }
+      100%{ transform: translate(10%,-10%) scale(1.1); }
     }
 
-    /* Frame */
-    .mobile-frame {
-      width: 100%; max-width: 480px; height: 100%;
-      position: relative; z-index: 10;
-      display: flex; flex-direction: column;
-      background: rgba(5, 5, 10, 0.4);
+    .noise{
+      position:absolute; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; mix-blend-mode:overlay; z-index:1;
+    }
+
+    /* frame */
+    .mobile-frame{
+      width:100%; max-width:480px; height:100%;
+      position:relative; z-index:10;
+      display:flex; flex-direction:column;
+      background: rgba(5,5,10,0.40);
       backdrop-filter: blur(30px);
-      overflow: hidden;
+      overflow:hidden;
     }
-    @media (min-width: 520px) {
-      .mobile-frame {
-        height: 92vh; border-radius: 40px;
-        border: 1px solid rgba(255,255,255,0.1);
+    @media (min-width:520px){
+      .mobile-frame{
+        height:92vh; border-radius:40px;
+        border:1px solid rgba(255,255,255,0.1);
         box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
       }
     }
 
-    /* Header */
-    .header {
-      flex: 0 0 92px;
+    /* header */
+    .header{
+      flex:0 0 92px;
       padding: 0 18px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: relative; z-index: 20;
-      gap: 12px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:relative; z-index:20;
+      gap:12px;
     }
 
-    .mini-brand { display: flex; flex-direction: column; width: fit-content; align-items: center; user-select:none; }
-    .mini-logo {
-      font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 26px;
-      letter-spacing: -1px; color: #fff; line-height: 1; white-space: nowrap;
-      text-shadow: 0 0 20px rgba(255,255,255,0.3);
+    .mini-brand{ display:flex; flex-direction:column; width:fit-content; align-items:center; user-select:none; }
+    .mini-logo{
+      font-family:'Space Grotesk', sans-serif;
+      font-weight:700; font-size:26px;
+      letter-spacing:-1px; line-height:1;
+      color:#fff; white-space:nowrap;
+      text-shadow:0 0 20px rgba(255,255,255,0.3);
     }
-    .mini-flag {
-      width: 100%; height: 4px; border-radius: 4px; display: flex; overflow: hidden; margin-top: 4px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.15);
+    .mini-flag{
+      width:100%; height:4px; border-radius:4px;
+      display:flex; overflow:hidden; margin-top:4px;
+      box-shadow:0 0 10px rgba(255,255,255,0.15);
     }
-    .mini-flag div { flex: 1; height: 100%; }
-    .f-g { background: #009246; box-shadow: 0 0 8px #009246; z-index:1; }
-    .f-w { background: #fff; z-index:2; }
-    .f-r { background: #CE2B37; box-shadow: 0 0 8px #CE2B37; z-index:1; }
+    .mini-flag div{ flex:1; height:100%; }
+    .f-g{ background:#009246; box-shadow:0 0 8px #009246; z-index:1; }
+    .f-w{ background:#fff; z-index:2; }
+    .f-r{ background:#CE2B37; box-shadow:0 0 8px #CE2B37; z-index:1; }
 
-    /* User chip */
     .userbox{
-      flex: 1;
-      min-width: 0;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      justify-content:flex-end;
+      flex:1; min-width:0;
+      display:flex; align-items:center; justify-content:flex-end;
+      gap:12px;
     }
-
-    .avatar{
-      width: 42px; height: 42px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.08);
-      overflow:hidden;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex: 0 0 42px;
-    }
-    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
-    .avatar .fallback{ font-size:18px; font-weight:900; opacity:.9; }
-
     .usertext{
-      min-width: 0;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap: 2px;
-      max-width: 190px;
+      min-width:0;
+      display:flex; flex-direction:column;
+      align-items:flex-end;
+      gap:2px;
+      max-width: 240px;
     }
     .uname{
-      font-weight: 900;
+      font-weight: 950;
       font-size: 13px;
       color: rgba(255,255,255,0.92);
       white-space: nowrap;
@@ -156,91 +141,194 @@
       font-weight: 900;
       font-size: 11px;
       color: rgba(255,255,255,0.60);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space:nowrap;
     }
 
     .settings-btn{
-      width: 44px; height: 44px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      width:44px; height:44px;
+      border-radius:14px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.22);
+      display:flex; align-items:center; justify-content:center;
       cursor:pointer;
-      flex: 0 0 44px;
       transition: .15s;
     }
     .settings-btn:active{ transform: scale(.96); }
-    .settings-btn svg{ width: 22px; height:22px; stroke:#fff; opacity:.9; }
+    .settings-btn svg{ width:22px; height:22px; stroke:#fff; opacity: .95; }
 
-    /* Menu scroll */
-    .menu-scroll {
-      flex: 1;
-      overflow-y: auto; overflow-x: hidden;
+    /* menu scroll */
+    .menu-scroll{
+      flex:1;
+      overflow-y:auto; overflow-x:hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 10px 18px 170px;
-      position: relative; z-index: 5;
-      scrollbar-width: none;
+      padding: 8px 18px 186px;
+      position:relative; z-index:5;
+      scrollbar-width:none;
     }
-    .menu-scroll::-webkit-scrollbar { display: none; }
+    .menu-scroll::-webkit-scrollbar{ display:none; }
 
-    .sectionTitle{
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      animation: fadeInUp .6s var(--ease-elastic);
+    }
+
+    /* compact cards (a bit narrower & tighter) */
+    .card{
+      position:relative;
+      background: linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.012) 100%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 16px 12px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+      gap: 10px;
+      cursor:pointer; user-select:none;
+      transition: all .22s ease;
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.30);
+      aspect-ratio: 1 / 1.06; /* biraz dar */
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.10), transparent 70%);
+      opacity:0; transition:.22s;
+      pointer-events:none;
+    }
+    .card:active::before{ opacity: 1; }
+
+    /* hover/active bordo vibe */
+    .card:active{
+      transform: scale(.97);
+      border-color: rgba(140,18,45,.45);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+    }
+
+    .icon-box{
+      width: 52px; height: 52px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.12);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+    }
+    .icon-box svg{
+      width: 28px; height: 28px;
+      stroke: #fff;
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: .95;
+    }
+
+    .label{
+      font-size: 13px;
+      font-weight: 950;
+      color:#fff;
+      line-height: 1.15;
+      letter-spacing: .2px;
+    }
+    .sub{
       font-size: 11px;
-      font-weight: 1000;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.55);
-      margin: 10px 6px 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ===== long cards (single column full width) ===== */
+    .longWrap{
+      margin-top: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      animation: fadeInUp .55s var(--ease-elastic);
+    }
+
+    .longCard{
+      width:100%;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.012) 100%);
+      padding: 14px 14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
+      gap: 12px;
+      cursor:pointer;
+      user-select:none;
+      transition: .22s ease;
+      box-shadow: 0 14px 34px rgba(0,0,0,0.28);
+      overflow:hidden;
+      position:relative;
     }
-
-    .grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-      animation: fadeInUp 0.8s var(--ease-elastic);
+    .longCard::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(700px 220px at 10% 0%, var(--italky-burgundy-2), transparent 60%);
+      opacity:.9; pointer-events:none;
     }
-
-    .card {
-      position: relative;
-      background: linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
-      border: 1px solid var(--glass-border);
-      border-radius: 24px;
-      padding: 18px 14px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
-      gap: 10px; cursor: pointer; user-select: none;
-      transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.3);
-      aspect-ratio: 1 / 1.1;
-      overflow: hidden;
+    .longCard:active{
+      transform: scale(.98);
+      border-color: rgba(140,18,45,.48);
+      background: linear-gradient(160deg, rgba(140,18,45,.18) 0%, rgba(255,255,255,0.012) 100%);
     }
-
-    .card::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.1), transparent 70%);
-      opacity: 0; transition: 0.25s;
-      pointer-events:none;
+    .longLeft{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width:0;
+      position:relative;
+      z-index:2;
     }
-    .card:active::before { opacity: 1; }
-    .card:active { transform: scale(0.97); border-color: rgba(255,255,255,0.28); }
-
-    .icon-box {
-      width: 56px; height: 56px; border-radius: 18px;
+    .longIcon{
+      width: 52px; height: 52px;
+      border-radius: 18px;
       background: rgba(0,0,0,0.22);
       border: 1px solid rgba(255,255,255,0.12);
-      display: flex; align-items: center; justify-content: center;
-      transition: 0.25s;
+      display:flex; align-items:center; justify-content:center;
       box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+      flex: 0 0 52px;
     }
-    .icon-box svg { width: 28px; height: 28px; stroke-width: 1.8; color: #fff; }
+    .longIcon svg{ width: 28px; height:28px; stroke:#fff; stroke-width:1.8; fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
+    .longTxt{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+    }
+    .longLbl{
+      font-size: 13px;
+      font-weight: 1000;
+      color: rgba(255,255,255,.94);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .longSub{
+      font-size: 11px;
+      font-weight: 750;
+      color: rgba(255,255,255,.60);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .chev{
+      position:relative;
+      z-index:2;
+      width: 36px; height: 36px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      display:flex; align-items:center; justify-content:center;
+      opacity:.9;
+      flex: 0 0 36px;
+    }
+    .chev svg{ width: 18px; height:18px; stroke:#fff; opacity:.85; }
 
-    .label { font-size: 14px; font-weight: 900; color: #fff; line-height: 1.15; letter-spacing: 0.2px; }
-    .sub { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
-
-    /* Teacher area (collapsible) */
+    /* teacher grid (2 columns) */
     .teacherWrap{
       margin-top: 12px;
       border: 1px solid rgba(255,255,255,0.10);
@@ -249,15 +337,13 @@
       overflow:hidden;
       display:none;
     }
-    .teacherWrap.open{ display:block; animation: fadeInUp .25s ease; }
+    .teacherWrap.open{ display:block; animation: fadeInUp .22s ease; }
     .teacherHead{
       padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      display:flex; align-items:center; justify-content:space-between;
       border-bottom: 1px solid rgba(255,255,255,.08);
       background: rgba(0,0,0,.18);
-      font-weight: 950;
+      font-weight: 1000;
       font-size: 12px;
     }
     .teacherGrid{
@@ -266,7 +352,6 @@
       gap: 12px;
       padding: 12px;
     }
-
     .tCard{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -274,18 +359,10 @@
       padding: 12px 12px 10px;
       cursor:pointer;
       user-select:none;
-      display:flex;
-      flex-direction:column;
-      gap: 8px;
+      display:flex; flex-direction:column; gap: 8px;
     }
     .tCard:active{ transform: scale(.98); }
-
-    .tTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
+    .tTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
     .tFlag{
       width: 44px;
       height: 10px;
@@ -294,6 +371,7 @@
       display:flex;
       border: 1px solid rgba(255,255,255,.10);
       box-shadow: 0 10px 18px rgba(0,0,0,.25);
+      flex: 0 0 44px;
     }
     .tFlag span{ flex:1; }
     .tName{
@@ -301,38 +379,54 @@
       font-size: 12px;
       color: rgba(255,255,255,.92);
       line-height:1.1;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 140px;
     }
     .tSub{
       font-weight: 800;
       font-size: 11px;
       color: rgba(255,255,255,.58);
     }
+    .ghost{ opacity:.58; cursor:not-allowed; }
 
-    .ghost{
-      opacity:.58;
-      cursor:not-allowed;
+    /* footer (fixed background to avoid blending issue) */
+    .footerbar{
+      position:absolute; bottom:0; width:100%;
+      padding: 14px 18px 16px;
+      background: rgba(0,0,0,.92); /* ✅ artık karışmaz */
+      border-top: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 10px;
+      z-index:30;
+      pointer-events:none;
+    }
+    .links{
+      display:flex; gap: 16px;
+      pointer-events:auto;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .links a{
+      color: rgba(255,255,255,0.60);
+      text-decoration:none;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .links a:hover{ color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
+    .footerBrand{
+      font-size: 10px;
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 800;
     }
 
-    /* Footer */
-    .footerbar {
-      position: absolute; bottom: 0; width: 100%; padding: 18px;
-      background: linear-gradient(to top, #000 10%, transparent 100%);
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      z-index: 30;
-      pointer-events: none;
-    }
-    .links { display: flex; gap: 18px; pointer-events: auto; flex-wrap:wrap; justify-content:center; }
-    .links a {
-      color: rgba(255,255,255,0.5); text-decoration: none; font-size: 12px; font-weight: 800; transition: 0.2s;
-    }
-    .links a:hover { color: var(--neon-cyan); text-shadow: 0 0 8px var(--neon-cyan); }
-
-    .footerBrand {
-      font-size: 10px; color: rgba(255,255,255,0.2);
-      letter-spacing: 2px; text-transform: uppercase; font-weight: 800;
-    }
-
-    /* Settings sheet */
+    /* settings sheet */
     .sheetOverlay{
       position: fixed; inset: 0;
       background: rgba(0,0,0,.65);
@@ -358,11 +452,7 @@
       display:flex; align-items:center; justify-content:space-between;
       background: rgba(0,0,0,.22);
     }
-    .sheetTitle{
-      font-weight: 1000;
-      font-size: 13px;
-      letter-spacing:.2px;
-    }
+    .sheetTitle{ font-weight: 1000; font-size: 13px; letter-spacing:.2px; color:#fff; }
     .xBtn{
       width:40px; height:40px;
       border-radius:14px;
@@ -374,44 +464,24 @@
       cursor:pointer;
     }
     .xBtn:active{ transform: translateY(1px); }
-    .sheetList{
-      padding: 10px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    .sheetList{ padding: 10px; display:flex; flex-direction:column; gap:10px; }
     .sItem{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
       padding: 12px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      display:flex; align-items:center; justify-content:space-between;
       gap: 10px;
-      cursor:pointer;
-      user-select:none;
+      cursor:pointer; user-select:none;
     }
     .sItem:active{ transform: translateY(1px); }
-    .sLeft{
-      display:flex;
-      flex-direction:column;
-      gap: 4px;
-      min-width:0;
-    }
-    .sLbl{
-      font-weight: 950;
-      font-size: 13px;
-      color: rgba(255,255,255,.92);
-    }
+    .sLeft{ display:flex; flex-direction:column; gap: 4px; min-width:0; }
+    .sLbl{ font-weight: 950; font-size: 13px; color: rgba(255,255,255,.92); }
     .sDesc{
       font-weight: 800;
       font-size: 11px;
       color: rgba(255,255,255,.55);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 340px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 340px;
     }
     .pill{
       font-weight: 1000;
@@ -451,9 +521,6 @@
       </div>
 
       <div class="userbox">
-        <div class="avatar" id="avatarBox">
-          <div class="fallback">👤</div>
-        </div>
         <div class="usertext">
           <div class="uname" id="userName">—</div>
           <div class="plan" id="userPlan">FREE</div>
@@ -471,14 +538,20 @@
     <!-- MENU -->
     <div class="menu-scroll">
 
-      <div class="sectionTitle">Modüller</div>
-
       <div class="grid">
 
-        <!-- 1. Yüz Yüze Çeviri -->
+        <!-- 1) Yüz Yüze Çeviri -->
         <div class="card" data-go="/pages/face_translate.html">
           <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 12h8"/><path d="M12 8v8"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+            <!-- two people talking (pro) -->
+            <svg viewBox="0 0 24 24">
+              <path d="M7 11c1.7 0 3-1.3 3-3S8.7 5 7 5 4 6.3 4 8s1.3 3 3 3z"/>
+              <path d="M17 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"/>
+              <path d="M2.5 20c0-3 2.8-5 5.8-5"/>
+              <path d="M21.5 20c0-3-2.8-5-5.8-5"/>
+              <path d="M9.8 14.7h4.4"/>
+              <path d="M9 18h6"/>
+            </svg>
           </div>
           <div>
             <div class="label">Yüz Yüze Çeviri</div>
@@ -486,21 +559,31 @@
           </div>
         </div>
 
-        <!-- 2. Diyalog -->
+        <!-- 2) Diyalog -->
         <div class="card" data-go="/pages/translate.html">
           <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <path d="M8 9h8"/>
+              <path d="M8 13h6"/>
+            </svg>
           </div>
           <div>
             <div class="label">Diyalog</div>
-            <div class="sub">Karşılıklı konuş</div>
+            <div class="sub">Karşılıklı</div>
           </div>
         </div>
 
-        <!-- 3. Anında tek taraflı -->
+        <!-- 3) Tek taraf / toplantı -->
         <div class="card" data-go="/pages/live_translate.html">
           <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            <!-- mic to captions -->
+            <svg viewBox="0 0 24 24">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <path d="M6 22h12"/>
+              <path d="M7 17h10"/>
+            </svg>
           </div>
           <div>
             <div class="label">Toplantı Modu</div>
@@ -508,43 +591,45 @@
           </div>
         </div>
 
-        <!-- 4. Fotoğraftan -->
+        <!-- 4) Fotoğraftan -->
         <div class="card" data-go="/pages/photo_translate.html">
           <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <path d="M8 14h8"/>
+              <path d="M10 11h4"/>
+              <circle cx="12" cy="13" r="4" opacity=".35" />
+            </svg>
           </div>
           <div>
-            <div class="label">Fotoğraftan Çeviri</div>
+            <div class="label">Fotoğraftan</div>
             <div class="sub">Menü / etiket</div>
           </div>
         </div>
 
-        <!-- 5. Belgeden -->
+        <!-- 5) Belgeden -->
         <div class="card" data-go="/pages/doc_translate.html">
           <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 3v5h5"/>
+              <path d="M8 13h8"/>
+              <path d="M8 17h6"/>
+            </svg>
           </div>
           <div>
-            <div class="label">Belgeden Çeviri</div>
+            <div class="label">Belgeden</div>
             <div class="sub">PDF / metin</div>
           </div>
         </div>
 
-        <!-- 6. AI Asistan -->
-        <div class="card" data-go="/pages/chat.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10h-10z" opacity="0.55"/></svg>
-          </div>
-          <div>
-            <div class="label">AI Asistan</div>
-            <div class="sub">Sohbet & soru</div>
-          </div>
-        </div>
-
-        <!-- 7. Online Sohbet -->
+        <!-- 7) Online Sohbet (AI ile yer değişti) -->
         <div class="card" data-go="/pages/online_chat.html">
           <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 8a6 6 0 1 0-11 4l-2 3 3-1a6 6 0 0 0 10-6z"/><path d="M22 12a5 5 0 0 1-5 5h-2l-3 2 1-3"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="M16 8a6 6 0 1 0-11 4l-2 3 3-1a6 6 0 0 0 10-6z"/>
+              <path d="M22 12a5 5 0 0 1-5 5h-2l-3 2 1-3"/>
+            </svg>
           </div>
           <div>
             <div class="label">Online Sohbet</div>
@@ -552,112 +637,124 @@
           </div>
         </div>
 
-        <!-- 8. Öğretmen -->
-        <div class="card" id="teacherBtn">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+
+      <!-- Long cards (single full width) -->
+      <div class="longWrap">
+
+        <!-- 6) AI Asistan (online ile yer değişti) -->
+        <div class="longCard" data-go="/pages/chat.html">
+          <div class="longLeft">
+            <div class="longIcon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+                <path d="M12 2a10 10 0 0 1 10 10h-10z" opacity=".55"/>
+              </svg>
+            </div>
+            <div class="longTxt">
+              <div class="longLbl">AI Asistan</div>
+              <div class="longSub">Soru sor • kısa çözüm al</div>
+            </div>
           </div>
-          <div>
-            <div class="label">Öğretmen</div>
-            <div class="sub">Ders & sınav</div>
+          <div class="chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
         </div>
 
-        <!-- 9. Arkadaşınla öğren -->
-        <div class="card" data-go="/pages/learn_with_friend.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 11c1.7 0 3-1.3 3-3S17.7 5 16 5s-3 1.3-3 3 1.3 3 3 3z"/><path d="M8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"/><path d="M2 20c0-3 3-5 6-5"/><path d="M22 20c0-3-3-5-6-5"/><path d="M8 15h8"/></svg>
+        <!-- 8) Öğretmen (dikdörtgen) -->
+        <div class="longCard" id="teacherBtn">
+          <div class="longLeft">
+            <div class="longIcon">
+              <svg viewBox="0 0 24 24">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+            </div>
+            <div class="longTxt">
+              <div class="longLbl">Öğretmen</div>
+              <div class="longSub">Ders • telaffuz • sınav</div>
+            </div>
           </div>
-          <div>
-            <div class="label">Arkadaşınla Öğren</div>
-            <div class="sub">Düello / pratik</div>
+          <div class="chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <!-- 9) Arkadaşınla Öğren (dikdörtgen) -->
+        <div class="longCard" data-go="/pages/learn_with_friend.html">
+          <div class="longLeft">
+            <div class="longIcon">
+              <svg viewBox="0 0 24 24">
+                <path d="M16 11c1.7 0 3-1.3 3-3S17.7 5 16 5s-3 1.3-3 3 1.3 3 3 3z"/>
+                <path d="M8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"/>
+                <path d="M2 20c0-3 3-5 6-5"/>
+                <path d="M22 20c0-3-3-5-6-5"/>
+                <path d="M8 15h8"/>
+              </svg>
+            </div>
+            <div class="longTxt">
+              <div class="longLbl">Arkadaşınla Öğren</div>
+              <div class="longSub">Düello • pratik</div>
+            </div>
+          </div>
+          <div class="chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke-width="2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
         </div>
 
       </div>
 
-      <!-- Teacher languages (open) -->
+      <!-- Teacher language chooser -->
       <div class="teacherWrap" id="teacherWrap">
         <div class="teacherHead">
           <div>Öğretmen Seç</div>
-          <div style="opacity:.6;font-weight:900;font-size:11px;">(2’li)</div>
+          <div style="opacity:.55;font-weight:900;font-size:11px;">(2’li)</div>
         </div>
-
         <div class="teacherGrid">
-          <!-- EN -->
           <div class="tCard" data-go="/pages/teacher_en.html">
             <div class="tTop">
               <div class="tName">İngilizce Öğretmeni</div>
-              <div class="tFlag" aria-hidden="true">
-                <span style="background:#00247d"></span>
-                <span style="background:#ffffff"></span>
-                <span style="background:#cf142b"></span>
-              </div>
+              <div class="tFlag"><span style="background:#00247d"></span><span style="background:#fff"></span><span style="background:#cf142b"></span></div>
             </div>
             <div class="tSub">Telaffuz • kelime • sınav</div>
           </div>
 
-          <!-- DE -->
           <div class="tCard" data-go="/pages/teacher_de.html">
             <div class="tTop">
               <div class="tName">Almanca Öğretmeni</div>
-              <div class="tFlag" aria-hidden="true">
-                <span style="background:#000"></span>
-                <span style="background:#dd0000"></span>
-                <span style="background:#ffce00"></span>
-              </div>
+              <div class="tFlag"><span style="background:#000"></span><span style="background:#dd0000"></span><span style="background:#ffce00"></span></div>
             </div>
             <div class="tSub">Telaffuz • kelime • sınav</div>
           </div>
 
-          <!-- FR -->
           <div class="tCard" data-go="/pages/teacher_fr.html">
             <div class="tTop">
               <div class="tName">Fransızca Öğretmeni</div>
-              <div class="tFlag" aria-hidden="true">
-                <span style="background:#0055a4"></span>
-                <span style="background:#fff"></span>
-                <span style="background:#ef4135"></span>
-              </div>
+              <div class="tFlag"><span style="background:#0055a4"></span><span style="background:#fff"></span><span style="background:#ef4135"></span></div>
             </div>
             <div class="tSub">Telaffuz • kelime • sınav</div>
           </div>
 
-          <!-- ES -->
           <div class="tCard" data-go="/pages/teacher_es.html">
             <div class="tTop">
               <div class="tName">İspanyolca Öğretmeni</div>
-              <div class="tFlag" aria-hidden="true">
-                <span style="background:#aa151b"></span>
-                <span style="background:#f1bf00"></span>
-                <span style="background:#aa151b"></span>
-              </div>
+              <div class="tFlag"><span style="background:#aa151b"></span><span style="background:#f1bf00"></span><span style="background:#aa151b"></span></div>
             </div>
             <div class="tSub">Telaffuz • kelime • sınav</div>
           </div>
 
-          <!-- IT -->
           <div class="tCard" data-go="/pages/teacher_it.html">
             <div class="tTop">
               <div class="tName">İtalyanca Öğretmeni</div>
-              <div class="tFlag" aria-hidden="true">
-                <span style="background:#009246"></span>
-                <span style="background:#fff"></span>
-                <span style="background:#ce2b37"></span>
-              </div>
+              <div class="tFlag"><span style="background:#009246"></span><span style="background:#fff"></span><span style="background:#ce2b37"></span></div>
             </div>
             <div class="tSub">Telaffuz • kelime • sınav</div>
           </div>
 
-          <!-- Add teacher -->
           <div class="tCard ghost" id="teacherAdd">
             <div class="tTop">
               <div class="tName">Öğretmen Ekle</div>
-              <div class="tFlag" aria-hidden="true">
-                <span style="background:rgba(255,255,255,.10)"></span>
-                <span style="background:rgba(255,255,255,.06)"></span>
-                <span style="background:rgba(255,255,255,.10)"></span>
-              </div>
+              <div class="tFlag"><span style="background:rgba(255,255,255,.12)"></span><span style="background:rgba(255,255,255,.06)"></span><span style="background:rgba(255,255,255,.12)"></span></div>
             </div>
             <div class="tSub">Yakında…</div>
           </div>
@@ -738,32 +835,21 @@
 
     function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
 
-    // ✅ login guard
+    // login guard
     const u = safeJson(localStorage.getItem(STORAGE_KEY), {});
     if(!u || !u.email || !u.isSessionActive){
       window.location.replace("/index.html");
     }
 
-    // paint user
+    // paint user name + plan only (no picture)
     const userName = document.getElementById("userName");
     const userPlan = document.getElementById("userPlan");
-    const avatarBox = document.getElementById("avatarBox");
 
     const full = (u.fullname || u.name || u.display_name || u.email || "—").trim();
     if(userName) userName.textContent = full;
-    if(userPlan) userPlan.textContent = (String(u.plan || "FREE").toUpperCase());
+    if(userPlan) userPlan.textContent = String(u.plan || "FREE").toUpperCase();
 
-    if(avatarBox){
-      const pic = (u.picture || u.avatar || u.avatar_url || "").trim();
-      if(pic){
-        avatarBox.innerHTML = `<img src="${pic}" alt="avatar" />`;
-      }else{
-        const letter = (full && full[0]) ? full[0].toUpperCase() : "👤";
-        avatarBox.innerHTML = `<div class="fallback">${letter}</div>`;
-      }
-    }
-
-    // nav for cards
+    // nav
     document.querySelectorAll("[data-go]").forEach(el=>{
       el.addEventListener("click", ()=>{
         const go = el.getAttribute("data-go");
@@ -776,7 +862,6 @@
     const teacherWrap = document.getElementById("teacherWrap");
     teacherBtn?.addEventListener("click", ()=>{
       teacherWrap?.classList.toggle("open");
-      // açınca biraz aşağı kaydır (mobil)
       if(teacherWrap?.classList.contains("open")){
         setTimeout(()=> teacherWrap.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
       }
@@ -798,12 +883,11 @@
     closeSettings?.addEventListener("click", closeSettingsFn);
     settingsSheet?.addEventListener("click", (e)=>{ if(e.target === settingsSheet) closeSettingsFn(); });
 
-    // site language (basit toggle şimdilik)
+    // site language (toggle)
     const siteLangPill = document.getElementById("siteLangPill");
     const SITE_LANG_KEY = "italky_site_lang";
     function getSiteLang(){ return (localStorage.getItem(SITE_LANG_KEY) || "TR").toUpperCase(); }
     function setSiteLang(v){ localStorage.setItem(SITE_LANG_KEY, v); }
-
     function paintLang(){ if(siteLangPill) siteLangPill.textContent = getSiteLang(); }
     paintLang();
 
@@ -815,22 +899,18 @@
       alert("Arayüz dili (şimdilik) değişti: " + next);
     });
 
-    // upgrade
     document.getElementById("setUpgrade")?.addEventListener("click", ()=>{
       alert("Abonelik yükseltme sonra bağlanacak.");
     });
 
-    // offline packs
     document.getElementById("setOfflinePacks")?.addEventListener("click", ()=>{
       alert("Offline paket indirme sonra bağlanacak.");
     });
 
-    // logout
     document.getElementById("setLogout")?.addEventListener("click", ()=>{
       try{ logout(); }catch{ window.location.replace("/index.html"); }
     });
 
-    // delete account (local wipe)
     document.getElementById("setDelete")?.addEventListener("click", ()=>{
       const ok = confirm("Hesabın kalıcı olarak silinecek. Emin misin?");
       if(!ok) return;
@@ -847,3 +927,4 @@
   </script>
 </body>
 </html>
+```0
