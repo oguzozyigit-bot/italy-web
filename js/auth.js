@@ -1,36 +1,24 @@
-// =========================================================
-// FILE: italky-web/js/auth.js
-// VERSION: italky-v1 (SP_SCORE SINGLE SOURCE + FREE DEFAULT + APPLE MSG + NO BREAK)
-// ✅ logout her zaman /index.html
-// ✅ google auto-select kapatılır
-// ✅ sp_score default 10
-// ✅ plan default FREE
-// ✅ ITALKY key-space: caynana ile karışmaz
-// =========================================================
+// italky-web/js/auth.js
+// VERSION: italky-v1 (SP single source + FREE default + italky terms key)
 
 import { GOOGLE_CLIENT_ID, STORAGE_KEY, BASE_DOMAIN } from "./config.js";
 
 const API_TOKEN_KEY = "italky_api_token";
 const STABLE_ID_KEY = "italky_stable_id_v1";
-const AUTH_STATE_KEY = "__ITALKY_AUTH__";
-
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function getAuthState(){
-  if(!window[AUTH_STATE_KEY]) window[AUTH_STATE_KEY] = { inited:false, btnRendered:false };
-  return window[AUTH_STATE_KEY];
+  if(!window.__ITALKY_AUTH__) window.__ITALKY_AUTH__ = { inited:false, btnRendered:false };
+  return window.__ITALKY_AUTH__;
 }
 
-export async function waitForGsi(timeoutMs = 8000){
-  const t0 = Date.now();
-  while (Date.now() - t0 < timeoutMs){
-    if (window.google?.accounts?.id) return true;
-    await sleep(60);
-  }
-  return false;
+function termsKey(email=""){
+  return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
 }
 
-// ✅ JWT payload UTF-8 decode
+function setApiToken(t){ if(t) localStorage.setItem(API_TOKEN_KEY, t); }
+function clearApiToken(){ localStorage.removeItem(API_TOKEN_KEY); }
+
 function base64UrlToBytes(base64Url){
   let b64 = String(base64Url || "").replace(/-/g, "+").replace(/_/g, "/");
   const pad = b64.length % 4;
@@ -55,15 +43,6 @@ function parseJwt(idToken = ""){
   }
 }
 
-// ✅ ITALKY terms key (Caynana ile çakışmasın)
-function termsKey(email=""){
-  return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
-}
-
-function setApiToken(t){ if(t) localStorage.setItem(API_TOKEN_KEY, t); }
-function clearApiToken(){ localStorage.removeItem(API_TOKEN_KEY); }
-
-// ✅ Stable ID (ITALKY)
 function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pickLetter(except){
   const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -103,8 +82,7 @@ function getOrCreateStableId(){
 }
 
 async function fetchBackendToken(googleIdToken){
-  const base = String(BASE_DOMAIN || "").replace(/\/+$/,"");
-  const r = await fetch(`${base}/api/auth/google`, {
+  const r = await fetch(`${BASE_DOMAIN}/api/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -118,7 +96,7 @@ async function fetchBackendToken(googleIdToken){
   if(!r.ok) throw new Error(`auth/google failed: ${r.status} ${txt}`);
 
   let data = {};
-  try { data = JSON.parse(txt || "{}"); } catch(e) {}
+  try { data = JSON.parse(txt || "{}"); } catch {}
 
   const token =
     (data.token ||
@@ -134,18 +112,6 @@ async function fetchBackendToken(googleIdToken){
   if(!token) throw new Error("auth/google token not found in response");
   setApiToken(token);
   return token;
-}
-
-// (opsiyonel) backend terms ping
-async function pingTermsAccept(){
-  try{
-    const base = String(BASE_DOMAIN || "").replace(/\/+$/,"");
-    await fetch(`${base}/api/terms/accept`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ ok:true })
-    });
-  }catch{}
 }
 
 async function handleGoogleResponse(res){
@@ -165,7 +131,6 @@ async function handleGoogleResponse(res){
     const savedTermsAt = localStorage.getItem(termsKey(email)) || null;
     const stableId = getOrCreateStableId();
 
-    // ✅ KURAL: herkes FREE + SP 10 ile başlar (ITALKY’de de aynı)
     const user = {
       id: stableId,
       user_id: stableId,
@@ -180,10 +145,8 @@ async function handleGoogleResponse(res){
       lastLoginAt: new Date().toISOString(),
       terms_accepted_at: savedTermsAt,
 
-      // ✅ TEK PUAN: SP
+      // tek puan alanı (istersen sonra)
       sp_score: 10,
-
-      // ✅ plan
       plan: "FREE"
     };
 
@@ -196,7 +159,7 @@ async function handleGoogleResponse(res){
       clearApiToken();
     }
 
-    // ✅ index sözleşme kontrolünü yapacak, sonra /pages/translate.html’e gidecek
+    // index sayfası sözleşme kontrol eder, kabul varsa /pages/home.html'e geçer
     window.location.href = "/index.html";
   }catch(e){
     console.error("handleGoogleResponse error:", e);
@@ -209,10 +172,7 @@ function renderGoogleOverlayButton(){
   if(st.btnRendered) return;
 
   const wrap = document.getElementById("googleBtnWrap");
-  if(!wrap){
-    console.warn("#googleBtnWrap not found in DOM");
-    return;
-  }
+  if(!wrap) return;
 
   try{
     window.google.accounts.id.renderButton(wrap, {
@@ -229,12 +189,11 @@ function renderGoogleOverlayButton(){
   }
 }
 
-export function initAuth() {
+export function initAuth(){
   const st = getAuthState();
   if(st.inited) return;
 
-  if (!window.google?.accounts?.id) return;
-
+  if(!window.google?.accounts?.id) return;
   if(!GOOGLE_CLIENT_ID){
     console.error("GOOGLE_CLIENT_ID missing in config.js");
     return;
@@ -253,21 +212,7 @@ export function initAuth() {
   renderGoogleOverlayButton();
 }
 
-export function handleLogin(provider) {
-  if(provider !== "google"){
-    alert("Apple girişi hazırlanıyor… Biraz nazlı çıktı. Şimdilik Google’la devam et 🙂");
-    return;
-  }
-
-  if(!window.google?.accounts?.id){
-    alert("Google servisi yüklenemedi (GSI).");
-    return;
-  }
-
-  initAuth();
-}
-
-export async function acceptTerms() {
+export async function acceptTerms(){
   const user = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
   const email = String(user?.email || "").toLowerCase().trim();
   if(!email) return false;
@@ -278,20 +223,15 @@ export async function acceptTerms() {
   user.terms_accepted_at = ts;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
 
-  await pingTermsAccept();
   return true;
 }
 
-export function logout() {
-  if (confirm("Çıkıyor musun?")) {
-    try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch (e) {
-      console.warn("disableAutoSelect failed", e);
-    }
-
+export function logout(){
+  if(confirm("Çıkış yapılıyor.")){
+    try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch {}
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem("google_id_token");
     localStorage.removeItem(API_TOKEN_KEY);
-
     window.location.replace("/index.html");
   }
 }
