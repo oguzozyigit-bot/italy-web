@@ -29,7 +29,6 @@
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-
     html,body{
       margin:0; padding:0; width:100%; height:100%;
       overflow:hidden;
@@ -40,36 +39,17 @@
       display:flex; align-items:center; justify-content:center;
     }
 
-    /* background */
-    .cosmos-bg{
-      position:absolute; inset:-50%; width:200%; height:200%;
-      background:#030014; z-index:0; pointer-events:none;
-    }
-    .orb{
-      position:absolute; border-radius:50%;
-      filter: blur(80px); opacity:.5;
-      animation: floatOrbit 25s infinite alternate ease-in-out;
-    }
-    .orb-1{
-      top:10%; left:10%; width:60vw; height:60vw;
-      background: radial-gradient(circle, var(--neon-purple), transparent 70%);
-    }
-    .orb-2{
-      bottom:10%; right:10%; width:50vw; height:50vw;
-      background: radial-gradient(circle, var(--neon-cyan), transparent 70%);
-      animation-delay:-5s;
-    }
-    @keyframes floatOrbit{
-      0%{ transform: translate(0,0) scale(1); }
-      100%{ transform: translate(10%,-10%) scale(1.1); }
-    }
+    .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:#030014; z-index:0; pointer-events:none; }
+    .orb{ position:absolute; border-radius:50%; filter: blur(80px); opacity:.5; animation: floatOrbit 25s infinite alternate ease-in-out; }
+    .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
+    .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, var(--neon-cyan), transparent 70%); animation-delay:-5s; }
+    @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1); } 100%{ transform: translate(10%,-10%) scale(1.1); } }
     .noise{
       position:absolute; inset:0;
       background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
       pointer-events:none; mix-blend-mode:overlay; z-index:1;
     }
 
-    /* frame */
     .mobile-frame{
       width:100%; max-width:480px; height:100%;
       position:relative; z-index:10;
@@ -86,7 +66,7 @@
       }
     }
 
-    /* header - HOME ile aynı */
+    /* header - home ile aynı */
     .header{
       flex:0 0 92px;
       padding: 0 18px;
@@ -94,11 +74,7 @@
       gap:12px;
       position:relative; z-index:20;
     }
-
-    .leftHead{
-      display:flex; align-items:center; gap:10px;
-      min-width:0;
-    }
+    .leftHead{ display:flex; align-items:center; gap:10px; min-width:0; }
 
     .backBtn{
       width: 44px; height: 44px;
@@ -115,12 +91,8 @@
     .backBtn:active{ transform: scale(.96); }
 
     .mini-brand{
-      display:flex;
-      flex-direction:column;
-      width:fit-content;
-      align-items:center;
-      user-select:none;
-      cursor:pointer; /* logo home */
+      display:flex; flex-direction:column; width:fit-content; align-items:center;
+      user-select:none; cursor:pointer;
     }
     .mini-logo{
       font-family:'Space Grotesk', sans-serif;
@@ -130,12 +102,8 @@
       text-shadow:0 0 20px rgba(255,255,255,0.3);
     }
     .mini-flag{
-      width:100%;
-      height:4px;
-      border-radius:4px;
-      display:flex;
-      overflow:hidden;
-      margin-top:4px;
+      width:100%; height:4px; border-radius:4px;
+      display:flex; overflow:hidden; margin-top:4px;
       box-shadow:0 0 10px rgba(255,255,255,0.15);
     }
     .mini-flag div{ flex:1; height:100%; }
@@ -194,7 +162,7 @@
       user-select:none;
     }
 
-    /* scroll area */
+    /* scroll */
     .contentScroll{
       flex:1;
       overflow-y:auto; overflow-x:hidden;
@@ -212,17 +180,8 @@
       flex-direction:column;
       gap:4px;
     }
-    .h1{
-      font-weight: 1000;
-      font-size: 16px;
-      letter-spacing: .2px;
-      color: rgba(255,255,255,.94);
-    }
-    .h2{
-      font-weight: 850;
-      font-size: 12px;
-      color: rgba(255,255,255,.62);
-    }
+    .h1{ font-weight: 1000; font-size: 16px; letter-spacing: .2px; color: rgba(255,255,255,.94); }
+    .h2{ font-weight: 850; font-size: 12px; color: rgba(255,255,255,.62); }
 
     .grid{
       display:grid;
@@ -231,7 +190,6 @@
       animation: fadeInUp .55s var(--ease-elastic);
     }
 
-    /* teacher cards */
     .tcard{
       position:relative;
       border-radius: 24px;
@@ -258,29 +216,10 @@
     }
     .tcard:active{ transform: scale(.97); border-color: rgba(140,18,45,.58); }
 
-    /* big flag */
-    .flagBig{
-      width: 52px; height: 52px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.14);
-      overflow:hidden;
-      display:flex;
-      box-shadow: inset 0 0 18px rgba(255,255,255,0.06), 0 10px 18px rgba(0,0,0,0.22);
-      position:relative;
-      z-index:2;
-      background: rgba(0,0,0,0.25);
+    .topRow{
+      display:flex; align-items:center; justify-content:space-between;
+      position:relative; z-index:2;
     }
-    .flagBig span{ flex:1; }
-    .bg{ background:#012169; } /* UK blue */
-    .br{ background:#CE1126; } /* red */
-    .wh{ background:#fff; }
-
-    /* country presets */
-    .flag-uk{ background: linear-gradient(90deg, #012169 0%, #012169 100%); }
-    .flag-de{ background: linear-gradient(180deg, #000 0 33%, #DD0000 33% 66%, #FFCE00 66% 100%); }
-    .flag-fr{ background: linear-gradient(90deg, #0055A4 0 33%, #fff 33% 66%, #EF4135 66% 100%); }
-    .flag-es{ background: linear-gradient(180deg, #AA151B 0 25%, #F1BF00 25% 75%, #AA151B 75% 100%); }
-    .flag-it{ background: linear-gradient(90deg, #009246 0 33%, #fff 33% 66%, #CE2B37 66% 100%); }
 
     .flagBox{
       width: 52px; height: 52px;
@@ -290,12 +229,13 @@
       box-shadow: inset 0 0 18px rgba(255,255,255,0.06), 0 10px 18px rgba(0,0,0,0.22);
       position:relative;
       z-index:2;
+      background: rgba(0,0,0,0.25);
     }
-
-    .topRow{
-      display:flex; align-items:center; justify-content:space-between;
-      position:relative; z-index:2;
-    }
+    .flag-en{ background: linear-gradient(90deg,#012169 0 100%); }
+    .flag-de{ background: linear-gradient(180deg,#000 0 33%,#DD0000 33% 66%,#FFCE00 66% 100%); }
+    .flag-fr{ background: linear-gradient(90deg,#0055A4 0 33%,#fff 33% 66%,#EF4135 66% 100%); }
+    .flag-es{ background: linear-gradient(180deg,#AA151B 0 25%,#F1BF00 25% 75%,#AA151B 75% 100%); }
+    .flag-it{ background: linear-gradient(90deg,#009246 0 33%,#fff 33% 66%,#CE2B37 66% 100%); }
 
     .teacherIcon{
       width: 44px; height: 44px;
@@ -318,20 +258,9 @@
     }
 
     .tText{ margin-top: 14px; position:relative; z-index:2; }
-    .tTitle{
-      font-weight: 1000;
-      font-size: 14px;
-      color: rgba(255,255,255,.94);
-      letter-spacing:.2px;
-      line-height:1.2;
-    }
-    .tSub{
-      margin-top: 6px;
-      font-weight: 850;
-      font-size: 12px;
-      color: rgba(255,255,255,.62);
-      line-height:1.2;
-    }
+    .tTitle{ font-weight: 1000; font-size: 14px; color: rgba(255,255,255,.94); letter-spacing:.2px; line-height:1.2; }
+    .tSub{ margin-top: 6px; font-weight: 850; font-size: 12px; color: rgba(255,255,255,.62); line-height:1.2; }
+
     .lessonChip{
       margin-top: 10px;
       display:inline-flex;
@@ -353,14 +282,8 @@
     }
 
     /* add teacher card */
-    .addCard{
-      border: 1px dashed rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.03);
-    }
-    .addCard:hover{
-      border-color: rgba(0,243,255,0.35);
-      background: rgba(0,243,255,0.05);
-    }
+    .addCard{ border: 1px dashed rgba(255,255,255,0.18); background: rgba(255,255,255,0.03); }
+    .addCard:hover{ border-color: rgba(0,243,255,0.35); background: rgba(0,243,255,0.05); }
     .addBig{
       width: 52px; height: 52px;
       border-radius: 18px;
@@ -371,10 +294,8 @@
     }
     .addBig svg{ width: 22px; height:22px; stroke:#fff; stroke-width:2; fill:none; }
 
-    /* footer (home ile aynı) */
     .footerbar{
-      position:absolute;
-      left:0; right:0; bottom:0;
+      position:absolute; left:0; right:0; bottom:0;
       height: var(--footerH);
       padding: 12px 18px 14px;
       background: rgba(0,0,0,.92);
@@ -385,11 +306,7 @@
       justify-content:center;
     }
     .links{
-      display:flex;
-      gap:16px;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin-bottom:8px;
+      display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:8px;
     }
     .links a{
       color: rgba(255,255,255,0.60);
@@ -419,7 +336,6 @@
 
   <div class="mobile-frame">
 
-    <!-- HEADER (home ile aynı + geri ok) -->
     <div class="header">
       <div class="leftHead">
         <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
@@ -444,27 +360,20 @@
       </div>
     </div>
 
-    <div class="contentScroll" id="contentScroll">
+    <div class="contentScroll">
       <div class="pageTitle">
         <div class="h1">Öğretmen</div>
-        <div class="h2">Bir ders seç</div>
+        <div class="h2">Bir dil seç</div>
       </div>
 
       <div class="grid">
 
-        <!-- İngilizce -->
-        <div class="tcard" data-go="/pages/teacher_en.html">
+        <!-- ✅ Tek sayfa parametreli -->
+        <div class="tcard" data-go="/pages/teacher.html?lang=en">
           <div class="topRow">
-            <div class="flagBox flag-uk" aria-hidden="true"></div>
+            <div class="flagBox flag-en" aria-hidden="true"></div>
             <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M4 19V7"/>
-                <path d="M20 19V7"/>
-                <path d="M4 7l8-4 8 4"/>
-                <path d="M7 10h10"/>
-                <path d="M8 13h8"/>
-                <path d="M9 16h6"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M4 19V7"/><path d="M20 19V7"/><path d="M4 7l8-4 8 4"/><path d="M7 10h10"/><path d="M8 13h8"/><path d="M9 16h6"/></svg>
             </div>
           </div>
           <div class="tText">
@@ -474,17 +383,11 @@
           </div>
         </div>
 
-        <!-- Almanca -->
-        <div class="tcard" data-go="/pages/teacher_de.html">
+        <div class="tcard" data-go="/pages/teacher.html?lang=de">
           <div class="topRow">
             <div class="flagBox flag-de" aria-hidden="true"></div>
             <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 3v18"/>
-                <path d="M6 7h12"/>
-                <path d="M7 11h10"/>
-                <path d="M8 15h8"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M6 7h12"/><path d="M7 11h10"/><path d="M8 15h8"/></svg>
             </div>
           </div>
           <div class="tText">
@@ -494,16 +397,11 @@
           </div>
         </div>
 
-        <!-- Fransızca -->
-        <div class="tcard" data-go="/pages/teacher_fr.html">
+        <div class="tcard" data-go="/pages/teacher.html?lang=fr">
           <div class="topRow">
             <div class="flagBox flag-fr" aria-hidden="true"></div>
             <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M4 18c4-8 12-8 16 0"/>
-                <path d="M7 14c2-3 8-3 10 0"/>
-                <path d="M10 10h4"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M4 18c4-8 12-8 16 0"/><path d="M7 14c2-3 8-3 10 0"/><path d="M10 10h4"/></svg>
             </div>
           </div>
           <div class="tText">
@@ -513,16 +411,11 @@
           </div>
         </div>
 
-        <!-- İspanyolca -->
-        <div class="tcard" data-go="/pages/teacher_es.html">
+        <div class="tcard" data-go="/pages/teacher.html?lang=es">
           <div class="topRow">
             <div class="flagBox flag-es" aria-hidden="true"></div>
             <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M6 18c2-6 10-6 12 0"/>
-                <path d="M8 12h8"/>
-                <path d="M10 9h4"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M6 18c2-6 10-6 12 0"/><path d="M8 12h8"/><path d="M10 9h4"/></svg>
             </div>
           </div>
           <div class="tText">
@@ -532,16 +425,11 @@
           </div>
         </div>
 
-        <!-- İtalyanca -->
-        <div class="tcard" data-go="/pages/teacher_it.html">
+        <div class="tcard" data-go="/pages/teacher.html?lang=it">
           <div class="topRow">
             <div class="flagBox flag-it" aria-hidden="true"></div>
             <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M4 20c2-10 14-10 16 0"/>
-                <path d="M8 13h8"/>
-                <path d="M10 10h4"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M4 20c2-10 14-10 16 0"/><path d="M8 13h8"/><path d="M10 10h4"/></svg>
             </div>
           </div>
           <div class="tText">
@@ -551,21 +439,13 @@
           </div>
         </div>
 
-        <!-- Yeni Öğretmen Ekle -->
         <div class="tcard addCard" data-go="/pages/teachers_add.html">
           <div class="topRow">
             <div class="addBig" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 5v14"/>
-                <path d="M5 12h14"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
             </div>
             <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M3 7h18"/>
-                <path d="M7 7v14"/>
-                <path d="M17 7v14"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M3 7h18"/><path d="M7 7v14"/><path d="M17 7v14"/></svg>
             </div>
           </div>
           <div class="tText">
@@ -578,7 +458,6 @@
       </div>
     </div>
 
-    <!-- FOOTER -->
     <div class="footerbar">
       <div class="links">
         <a href="/pages/about.html">Hakkında</a>
@@ -594,20 +473,16 @@
   <script type="module">
     // FILE: italky-web/pages/teachers.html inline script
     import { STORAGE_KEY } from "/js/config.js";
-
     function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
     const u = safeJson(localStorage.getItem(STORAGE_KEY), {});
-
     if(!u || !u.email || !u.isSessionActive){
       window.location.replace("/index.html");
     }
 
     // header user
-    const userName = document.getElementById("userName");
-    const userPlan = document.getElementById("userPlan");
     const full = (u.fullname || u.name || u.display_name || u.email || "—").trim();
-    if(userName) userName.textContent = full;
-    if(userPlan) userPlan.textContent = String(u.plan || "FREE").toUpperCase();
+    document.getElementById("userName").textContent = full;
+    document.getElementById("userPlan").textContent = String(u.plan || "FREE").toUpperCase();
 
     // avatar
     const avatarBtn = document.getElementById("avatarBtn");
@@ -617,32 +492,30 @@
       if(pic){
         avatarBtn.innerHTML = `<img src="${pic}" alt="avatar">`;
       }else{
-        const letter = (full && full[0]) ? full[0].toUpperCase() : "•";
-        if(fallback) fallback.textContent = letter;
+        fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
       }
     }catch{}
 
-    avatarBtn?.addEventListener("click", ()=>{ window.location.href = "/pages/profile.html"; });
+    avatarBtn.addEventListener("click", ()=> location.href="/pages/profile.html");
+    document.getElementById("backBtn").addEventListener("click", ()=> location.href="/pages/home.html");
+    document.getElementById("logoHome").addEventListener("click", ()=> location.href="/pages/home.html");
 
-    // nav
-    document.getElementById("backBtn")?.addEventListener("click", ()=>{ window.location.href = "/pages/home.html"; });
-    document.getElementById("logoHome")?.addEventListener("click", ()=>{ window.location.href = "/pages/home.html"; });
-
+    // click cards
     document.querySelectorAll("[data-go]").forEach(el=>{
       el.addEventListener("click", ()=>{
         const go = el.getAttribute("data-go");
-        if(go) window.location.href = go;
+        if(go) location.href = go;
       });
     });
 
-    // Ders numarası (şimdilik localStorage’dan basit okuma; yoksa Ders 1)
-    // KEY önerisi: italky_teacher_progress::<lang> = { lesson: 1 }
-    function setLesson(id, lang){
+    // lesson label from progress
+    function setLesson(id, code){
       try{
-        const k = `italky_teacher_progress::${lang}`;
-        const d = safeJson(localStorage.getItem(k), {});
-        const n = parseInt(d.lesson, 10);
-        if(n && n > 0) document.getElementById(id).textContent = `Ders ${n}`;
+        const k = `italky_teacher_progress::${code}`;
+        const p = safeJson(localStorage.getItem(k), {});
+        const n = parseInt(p.lesson || 1, 10) || 1;
+        const el = document.getElementById(id);
+        if(el) el.textContent = `Ders ${n}`;
       }catch{}
     }
     setLesson("enLessonTxt","en");
