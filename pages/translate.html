@@ -10,10 +10,8 @@
   <style>
     :root{
       --text: rgba(255,255,255,.92);
-
-      /* ITALKY kurumsal his: lacivert + bordo (meTint) */
-      --gold:#ffb300;      /* kenar vurgusu (karşı taraf) */
-      --pist:#bef264;      /* kenar vurgusu (ben tarafı) */
+      --gold:#ffb300;
+      --pist:#bef264;
 
       --border: rgba(255,255,255,.10);
       --border2: rgba(255,255,255,.06);
@@ -25,7 +23,6 @@
     html,body{ margin:0; padding:0; width:100%; height:100dvh; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
 
     body{
-      /* ITALKY background (lacivert ağırlık) */
       background:
         radial-gradient(900px 520px at 50% 16%, rgba(40,120,255,.16), transparent 62%),
         radial-gradient(900px 520px at 50% 86%, rgba(140,20,50,.12), transparent 62%),
@@ -127,7 +124,6 @@
       position:relative;
     }
 
-    /* Ben tarafı: ITALKY bordo dokunuş */
     .side.meTint{
       background:
         radial-gradient(900px 420px at 30% 12%, rgba(120, 20, 35, .85), transparent 68%),
@@ -146,6 +142,7 @@
       padding: 12px 12px;
       border-bottom: 1px solid var(--border2);
       background: rgba(0,0,0,.22);
+      z-index: 5;
     }
 
     /* Dropdown */
@@ -168,7 +165,6 @@
     }
     .dd-btn .caret{ opacity:.75; font-size: 12px; }
 
-    /* ✅ Dropdown scroll + scrollbar tamamen gizli + sağ boşluk yok */
     .dd-menu{
       position:absolute;
       top: calc(100% + 8px);
@@ -193,13 +189,11 @@
     }
     .dd.open .dd-menu{ display:block; }
 
-    /* ✅ scrollbar tamamen gizli (webkit + firefox + ms) */
     .dd-menu{ scrollbar-width: none; -ms-overflow-style: none; }
     .dd-menu::-webkit-scrollbar{ width:0; height:0; }
     .dd-menu::-webkit-scrollbar-thumb{ background: transparent; }
     .dd-menu::-webkit-scrollbar-track{ background: transparent; }
 
-    /* ✅ search sticky */
     .dd-search-wrap{
       position: sticky;
       top: 0;
@@ -311,24 +305,31 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap: 4px;
+      gap: 6px;
       pointer-events:none;
-      opacity:.90;
+      opacity:.92;
       z-index: 40;
     }
     .brandBottom{ bottom: 10px; }
     .brandTop{ top: 10px; transform: translateX(-50%) rotate(180deg); }
 
+    /* ✅ Bayrak çizgisi yazı genişliği kadar: I’den başlar Y’de biter */
+    .brandLock{
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
     .bn{
+      display:inline-block;
       font-weight: 1000;
       letter-spacing:.35px;
       font-size: 12px;
       color: rgba(255,255,255,.92);
+      line-height:1;
     }
-
-    /* italy flag under ITALKY */
     .flagbar{
-      width: 120px;
+      width: 100%;
       height: 4px;
       border-radius: 999px;
       overflow:hidden;
@@ -340,10 +341,25 @@
     .f-w{ background:#ffffff; }
     .f-r{ background:#CE2B37; }
 
+    /* ✅ Slogan yerine sabit yazı */
     .sl{
       font-weight: 900;
       font-size: 10px;
       color: rgba(255,255,255,.60);
+    }
+
+    /* ✅ Mikrofon altta ortada */
+    .micDock{
+      position:absolute;
+      left:50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      z-index: 20;
+      pointer-events:auto;
+    }
+    /* top panel rotate olduğu için dock’u düz çevir */
+    .side.top .micDock{
+      transform: translateX(-50%) rotate(180deg);
     }
 
     .toast{
@@ -377,9 +393,11 @@
 
     <!-- TOP brand -->
     <div class="brandTop">
-      <div class="bn">ITALKY</div>
-      <div class="flagbar" aria-hidden="true"><span class="f-g"></span><span class="f-w"></span><span class="f-r"></span></div>
-      <div class="sl" id="sloganTop">—</div>
+      <div class="brandLock">
+        <div class="bn">ITALKY</div>
+        <div class="flagbar" aria-hidden="true"><span class="f-g"></span><span class="f-w"></span><span class="f-r"></span></div>
+        <div class="sl" id="sloganTop">By Ozyigit's</div>
+      </div>
     </div>
 
     <div class="split">
@@ -398,7 +416,12 @@
               <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
             </svg>
           </button>
+        </div>
 
+        <div class="content" id="topBody"></div>
+
+        <!-- ✅ Mic bottom center -->
+        <div class="micDock">
           <button class="btnIcon" id="topMic" aria-label="Mikrofon">
             <svg viewBox="0 0 24 24">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
@@ -408,8 +431,6 @@
             </svg>
           </button>
         </div>
-
-        <div class="content" id="topBody"></div>
       </section>
 
       <div class="wave" aria-hidden="true">
@@ -436,7 +457,12 @@
               <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
             </svg>
           </button>
+        </div>
 
+        <div class="content" id="botBody"></div>
+
+        <!-- ✅ Mic bottom center -->
+        <div class="micDock">
           <button class="btnIcon" id="botMic" aria-label="Mikrofon">
             <svg viewBox="0 0 24 24">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
@@ -446,23 +472,21 @@
             </svg>
           </button>
         </div>
-
-        <div class="content" id="botBody"></div>
       </section>
 
     </div>
 
     <!-- BOTTOM brand -->
     <div class="brandBottom">
-      <div class="bn">ITALKY</div>
-      <div class="flagbar" aria-hidden="true"><span class="f-g"></span><span class="f-w"></span><span class="f-r"></span></div>
-      <div class="sl" id="sloganBot">—</div>
+      <div class="brandLock">
+        <div class="bn">ITALKY</div>
+        <div class="flagbar" aria-hidden="true"><span class="f-g"></span><span class="f-w"></span><span class="f-r"></span></div>
+        <div class="sl" id="sloganBot">By Ozyigit's</div>
+      </div>
     </div>
   </div>
 
   <div class="toast" id="toast">—</div>
-  <!-- ✅ ITALKY JS -->
   <script type="module" src="/js/translate_page.js?v=8"></script>
 </body>
 </html>
-```0
