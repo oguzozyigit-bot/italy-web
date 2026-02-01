@@ -1,1 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Hakkımızda</title>
 
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="/css/style.css?v=2" />
+
+  <style>
+    /* Login öncesi kurumsal sayfa: üst/alt bar index ile aynı hissiyat */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 3000;
+    }
+
+    /* Geri ok */
+    .back-wrap{
+      width:80px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+    }
+    .back-btn{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color:#fff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+    .back-btn:active{ transform: translateY(1px); filter: brightness(.95); }
+
+    /* Orta içerik */
+    .page-wrap{
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y:auto;
+      padding: 16px;
+      padding-bottom: 140px; /* alt footerbar için */
+    }
+    .page-card{
+      background: rgba(25,25,25,.55);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.55);
+    }
+    .page-title{
+      font-size: 16px;
+      font-weight: 1000;
+      color: #fff;
+      margin: 0 0 10px;
+    }
+    .page-text{
+      font-size: 13px;
+      line-height: 1.65;
+      color: rgba(255,255,255,.85);
+      font-weight: 600;
+    }
+
+    :root{
+      --gold: #ffb300;
+      --pistachio: #bef264;
+    }
+    .intro-text{
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(255,255,255,.88);
+      font-weight: 650;
+      border-left: 3px solid var(--gold);
+      padding-left: 14px;
+      margin-bottom: 18px;
+    }
+    h3{
+      color: var(--gold);
+      font-size: 13px;
+      margin: 16px 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 900;
+    }
+    p{
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(255,255,255,.78);
+      margin: 0 0 10px 0;
+      font-weight: 600;
+    }
+    ul{ margin: 0; padding-left: 0; list-style: none; }
+    li{
+      font-size: 13px;
+      color: rgba(255,255,255,.78);
+      margin-bottom: 8px;
+      padding-left: 18px;
+      position: relative;
+      line-height: 1.6;
+      font-weight: 650;
+    }
+    li::before{
+      content: "•";
+      color: var(--pistachio);
+      font-weight: 900;
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .highlight{ color:#fff; font-weight: 800; }
+
+    .footer-sign{
+      margin-top: 18px;
+      text-align: center;
+      padding: 16px 12px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: var(--pistachio);
+      font-weight: 900;
+      font-size: 14px;
+      letter-spacing: .4px;
+    }
+    .footer-sub{
+      font-size: 11px;
+      color: rgba(255,255,255,.55);
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* Login öncesi alt bar (index ile aynı) */
+    .login-footerbar{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(480px, calc(100vw - 18px));
+      bottom: 0;
+      z-index: 2800;
+      background: rgba(0,0,0,.92);
+      border-top: 1px solid rgba(255,255,255,.06);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .login-links{
+      display:flex;
+      justify-content:center;
+      gap: 16px;
+      flex-wrap:wrap;
+      font-size:12px;
+      font-weight: 900;
+    }
+    .login-links a{
+      color: rgba(255,255,255,.70);
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .login-brand{
+      text-align:center;
+      font-size:11px;
+      font-weight: 900;
+      color: rgba(255,255,255,.55);
+    }
+  </style>
+</head>
+
+<body>
+<div class="mobile-frame" id="mobileFrame">
+
+  <!-- ✅ ÜST BAR (index ile aynı, sadece GERİ OK var) -->
+  <div class="topbar">
+    <div class="back-wrap">
+      <button class="back-btn" type="button" onclick="history.back()" aria-label="Geri">←</button>
+    </div>
+
+    <div class="brand-wrapper" id="brandWrapper">
+      <div class="logo-area">
+        <svg class="seesaw-svg" viewBox="0 0 40 20" aria-hidden="true">
+          <g class="seesaw-bar" id="seesawBar">
+            <line x1="0" y1="8" x2="40" y2="8" stroke="#ccc" stroke-width="2" stroke-linecap="round" />
+            <circle cx="3" cy="5" r="3" fill="#bef264" />
+            <circle cx="37" cy="5" r="3" fill="#ffb300" id="orangeBall" />
+          </g>
+          <polygon points="17,14 23,14 20,8" fill="none" stroke="#666" stroke-width="1.5" />
+        </svg>
+        <div class="brand-name">CaynanaAI</div>
+      </div>
+      <div class="slogan">Yapay Zekanın Geleneksel Aklı</div>
+    </div>
+
+    <div class="right-controls"></div>
+  </div>
+
+  <!-- ✅ ORTA İÇERİK (Sadece metin alanı) -->
+  <div class="page-wrap">
+    <div class="page-card">
+      <h1 class="page-title">Hakkımızda</h1>
+
+      <div class="page-text">
+
+        <div class="intro-text">
+          Caynana AI, klasik bir sohbet robotu değildir.<br><br>
+          O; dinleyen, bakan, tepki veren ve seninle <span class="highlight">ilişki kuran</span> bir dijital karakterdir.<br><br>
+          Biz Caynana’yı “doğru cevabı veren bir makine” olsun diye değil,
+          <span class="highlight">doğru anda doğru tepkiyi veren bir varlık</span> olsun diye tasarladık.
+        </div>
+
+        <section>
+          <h3>Neyi Farklı Yapıyoruz?</h3>
+          <ul>
+            <li>Sadece yazdıklarını okumaz, nasıl söylediğine de bakar.</li>
+            <li>Konuştuğunda dinler, yazdığında okur.</li>
+            <li>Göz teması kurar, mimik verir, susar, kızar, güler.</li>
+            <li>Seni “kullanıcı” olarak değil, tanıdığı biri olarak görür.</li>
+          </ul>
+          <p style="margin-top:10px; font-style: italic; color:rgba(255,255,255,.55);">
+            Yani Caynana ile konuşmazsın, Caynana sana eşlik eder.
+          </p>
+        </section>
+
+        <section>
+          <h3>İlişkisel Asistan Nedir?</h3>
+          <p>Caynana bir ilişkisel asistandır. Bu şu demektir:</p>
+          <ul>
+            <li>Seninle zaman içinde bağ kurar.</li>
+            <li>Hitap şeklini öğrenir ve unutmaz.</li>
+            <li>Duyguna göre davranır.</li>
+            <li>Herkesle aynı şekilde konuşmaz.</li>
+          </ul>
+          <p>
+            Caynana’nın tepkileri; <span class="highlight">yazıya, sese, bakışa ve duraksamaya</span> göre değişir.
+            Çünkü gerçek hayatta da insanlar böyle iletişim kurar.
+          </p>
+        </section>
+
+        <section>
+          <h3>Güven ve Gizlilik</h3>
+          <ul>
+            <li>Girişler yalnızca Google ve Apple ile yapılır.</li>
+            <li>Avatarın, giriş yaptığın hesabın fotoğrafıdır.</li>
+            <li>Kamera ve mikrofon sen izin verdiğinde çalışır.</li>
+            <li>Hiçbir görüntü kaydedilmez, analiz anlıktır.</li>
+          </ul>
+          <p style="color:var(--pistachio); font-size:13px; font-weight:800; margin-top:5px;">
+            Kontrol her zaman sende.
+          </p>
+        </section>
+
+        <section>
+          <h3>Neden “Caynana”?</h3>
+          <p>Çünkü Caynana:</p>
+          <ul>
+            <li>Lafı dolandırmaz.</li>
+            <li>Gerektiğinde kızar.</li>
+            <li>Gerektiğinde sahip çıkar.</li>
+            <li>Ama her zaman senin tarafındadır.</li>
+          </ul>
+          <p>Bazen haklısın der, bazen “orada bir dur bakalım” der. Gerçek hayattaki gibi.</p>
+        </section>
+
+        <section>
+          <h3>Biz Ne Yapmak İstiyoruz?</h3>
+          <p>
+            Amacımız; soğuk arayüzler değil, ezber cevaplar değil,
+            <span class="highlight">insan gibi davranan dijital karakterler</span> üretmek.
+          </p>
+          <p>Caynana bunun ilk adımıdır.</p>
+        </section>
+
+        <div class="footer-sign">
+          Caynana AI
+          <div class="footer-sub">Yapay Zekanın Geleneksel Aklı</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ ALT BAR (login öncesi) -->
+  <div class="login-footerbar">
+    <div class="login-links">
+      <a href="/pages/about.html">Hakkımızda</a>
+      <a href="/pages/faq.html">SSS</a>
+      <a href="/pages/privacy.html">Gizlilik</a>
+      <a href="/pages/contact.html">İletişim</a>
+    </div>
+    <div class="login-brand">@CaynanaAI By Ozyigit’s 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
