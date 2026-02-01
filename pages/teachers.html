@@ -1,1 +1,414 @@
+<!-- FILE: italky-web/pages/teachers.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ITALKY • Öğretmen</title>
+  <link rel="icon" href="data:," />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-void:#030014;
+      --neon-cyan:#00f3ff;
+      --neon-purple:#bc13fe;
+
+      --glass-border: rgba(255,255,255,0.10);
+      --text-main:#fff;
+      --text-muted: rgba(255,255,255,0.65);
+
+      --italky-burgundy: rgba(140, 18, 45, .40);
+      --italky-burgundy-2: rgba(140, 18, 45, .18);
+
+      --footerH: 78px;
+      --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+
+    html,body{
+      margin:0; padding:0; width:100%; height:100%;
+      overflow:hidden;
+      position:fixed;
+      font-family:'Outfit', sans-serif;
+      background-color:var(--bg-void);
+      color:var(--text-main);
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* background */
+    .cosmos-bg{
+      position:absolute; inset:-50%; width:200%; height:200%;
+      background:#030014; z-index:0; pointer-events:none;
+    }
+    .orb{
+      position:absolute; border-radius:50%;
+      filter: blur(80px); opacity:.5;
+      animation: floatOrbit 25s infinite alternate ease-in-out;
+    }
+    .orb-1{
+      top:10%; left:10%; width:60vw; height:60vw;
+      background: radial-gradient(circle, var(--neon-purple), transparent 70%);
+    }
+    .orb-2{
+      bottom:10%; right:10%; width:50vw; height:50vw;
+      background: radial-gradient(circle, var(--neon-cyan), transparent 70%);
+      animation-delay:-5s;
+    }
+    @keyframes floatOrbit{
+      0%{ transform: translate(0,0) scale(1); }
+      100%{ transform: translate(10%,-10%) scale(1.1); }
+    }
+    .noise{
+      position:absolute; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; mix-blend-mode:overlay; z-index:1;
+    }
+
+    /* frame */
+    .mobile-frame{
+      width:100%; max-width:480px; height:100%;
+      position:relative; z-index:10;
+      display:flex; flex-direction:column;
+      background: rgba(5,5,10,0.40);
+      backdrop-filter: blur(30px);
+      overflow:hidden;
+    }
+    @media (min-width:520px){
+      .mobile-frame{
+        height:92vh; border-radius:40px;
+        border:1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+      }
+    }
+
+    /* header */
+    .header{
+      flex:0 0 92px;
+      padding: 0 18px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+      position:relative; z-index:20;
+    }
+
+    .back-btn{
+      width:46px; height:46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      flex: 0 0 46px;
+    }
+    .back-btn:active{ transform: translateY(1px); }
+    .back-btn svg{ width:22px; height:22px; stroke:#fff; stroke-width:2; fill:none; opacity:.92; }
+
+    .mini-brand{ display:flex; flex-direction:column; width:fit-content; align-items:center; user-select:none; }
+    .mini-logo{
+      font-family:'Space Grotesk', sans-serif;
+      font-weight:700; font-size:26px;
+      letter-spacing:-1px; line-height:1;
+      color:#fff; white-space:nowrap;
+      text-shadow:0 0 20px rgba(255,255,255,0.3);
+    }
+    .mini-flag{
+      width:100%; height:4px; border-radius:4px;
+      display:flex; overflow:hidden; margin-top:4px;
+      box-shadow:0 0 10px rgba(255,255,255,0.15);
+    }
+    .mini-flag div{ flex:1; height:100%; }
+    .f-g{ background:#009246; box-shadow:0 0 8px #009246; z-index:1; }
+    .f-w{ background:#fff; z-index:2; }
+    .f-r{ background:#CE2B37; box-shadow:0 0 8px #CE2B37; z-index:1; }
+
+    /* right side tiny info (optional) */
+    .right-info{
+      min-width: 84px;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      color: rgba(255,255,255,0.55);
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing:.3px;
+      user-select:none;
+    }
+
+    /* content scroll */
+    .content-scroll{
+      flex:1;
+      overflow-y:auto; overflow-x:hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 8px 18px calc(var(--footerH) + 14px);
+      position:relative; z-index:5;
+      scrollbar-width:none;
+    }
+    .content-scroll::-webkit-scrollbar{ display:none; }
+
+    .title{
+      margin: 2px 2px 10px;
+      font-size: 13px;
+      font-weight: 950;
+      color: rgba(255,255,255,0.78);
+      letter-spacing: .2px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      animation: fadeInUp .6s var(--ease-elastic);
+    }
+
+    /* teacher card */
+    .card{
+      position:relative;
+      background: linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.012) 100%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 14px 12px;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      cursor:pointer;
+      user-select:none;
+      transition: all .22s ease;
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.30);
+      aspect-ratio: 1 / 1.06;
+      overflow:hidden;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(700px 240px at 10% 0%, var(--italky-burgundy-2), transparent 60%);
+      opacity:.95;
+      pointer-events:none;
+    }
+    .card:hover{
+      border-color: rgba(140,18,45,.45);
+      background: linear-gradient(160deg, rgba(140,18,45,.12) 0%, rgba(255,255,255,0.012) 100%);
+    }
+    .card:active{ transform: scale(.97); border-color: rgba(140,18,45,.60); }
+
+    .toprow{
+      width:100%;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px;
+      position:relative; z-index:2;
+    }
+
+    .flag{
+      width: 42px; height: 30px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.14);
+      overflow:hidden;
+      background: rgba(0,0,0,0.25);
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.04);
+      flex: 0 0 42px;
+    }
+
+    /* Flags */
+    .flag.uk{
+      background:
+        linear-gradient(#012169 0 0),
+        linear-gradient(#C8102E 0 0),
+        linear-gradient(#fff 0 0);
+      background-size: 100% 100%, 100% 32%, 100% 12%;
+      background-position: 0 0, 0 50%, 0 50%;
+      background-repeat:no-repeat;
+    }
+    .flag.de{
+      background: linear-gradient(#000 0 33%, #DD0000 33% 66%, #FFCE00 66% 100%);
+    }
+    .flag.fr{
+      background: linear-gradient(90deg, #0055A4 0 33%, #fff 33% 66%, #EF4135 66% 100%);
+    }
+    .flag.es{
+      background: linear-gradient(#AA151B 0 25%, #F1BF00 25% 75%, #AA151B 75% 100%);
+    }
+    .flag.it{
+      background: linear-gradient(90deg, #009246 0 33%, #fff 33% 66%, #CE2B37 66% 100%);
+    }
+
+    .go{
+      width: 40px; height: 40px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      display:flex; align-items:center; justify-content:center;
+      opacity:.9;
+      flex: 0 0 40px;
+    }
+    .go svg{ width:18px; height:18px; stroke:#fff; opacity:.85; stroke-width:2; fill:none; }
+
+    .txt{
+      width:100%;
+      position:relative;
+      z-index:2;
+    }
+    .lang{
+      font-weight: 1000;
+      font-size: 14px;
+      color: rgba(255,255,255,0.94);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .lesson{
+      margin-top: 4px;
+      font-weight: 900;
+      font-size: 12px;
+      color: rgba(255,255,255,0.60);
+    }
+    .lesson b{ color: rgba(255,255,255,0.85); }
+
+    /* footer */
+    .footerbar{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: min(480px, 100vw);
+      max-width: 480px;
+      padding: 10px 18px 12px;
+      background: rgba(0,0,0,.92);
+      border-top: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index: 999;
+      pointer-events:none;
+    }
+    .footerBrand{
+      font-size: 10px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 1px;
+      font-weight: 800;
+    }
+
+    @keyframes fadeInUp{ from{ transform: translateY(26px); opacity:0; } to{ transform: translateY(0); opacity:1; } }
+  </style>
+</head>
+
+<body>
+  <div class="cosmos-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+  <div class="noise"></div>
+
+  <div class="mobile-frame">
+    <div class="header">
+      <button class="back-btn" id="backBtn" aria-label="Geri">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
+      <div class="mini-brand">
+        <div class="mini-logo">ITALKY</div>
+        <div class="mini-flag">
+          <div class="f-g"></div><div class="f-w"></div><div class="f-r"></div>
+        </div>
+      </div>
+
+      <div class="right-info">Öğretmen</div>
+    </div>
+
+    <div class="content-scroll" id="scrollRoot">
+      <div class="title">Bir dil seç — kaldığın dersten devam et.</div>
+
+      <div class="grid" id="teacherGrid">
+        <!-- JS ile dolacak -->
+      </div>
+    </div>
+  </div>
+
+  <div class="footerbar">
+    <div class="footerBrand">ItalkyAI By Ozyigit’s 2026</div>
+  </div>
+
+  <script type="module">
+    // FILE: italky-web/pages/teachers.html inline script
+    import { STORAGE_KEY } from "/js/config.js";
+
+    function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
+
+    // login guard
+    const u = safeJson(localStorage.getItem(STORAGE_KEY), {});
+    if(!u || !u.email || !u.isSessionActive){
+      window.location.replace("/index.html");
+    }
+
+    // back
+    document.getElementById("backBtn")?.addEventListener("click", ()=>{
+      if(history.length > 1) history.back();
+      else window.location.href = "/pages/home.html";
+    });
+
+    // lesson state
+    // ✅ her dil için ayrı ders sayısı
+    // key örn: italky_teacher_lesson::en -> 1
+    function lessonKey(code){ return `italky_teacher_lesson::${code}`; }
+    function getLesson(code){
+      const n = parseInt(localStorage.getItem(lessonKey(code)) || "1", 10);
+      return (Number.isFinite(n) && n > 0) ? n : 1;
+    }
+
+    const TEACHERS = [
+      { code:"en", title:"İngilizce Öğretmeni", flag:"uk",  href:"/pages/teacher.html?lang=en" },
+      { code:"de", title:"Almanca Öğretmeni",  flag:"de",  href:"/pages/teacher.html?lang=de" },
+      { code:"fr", title:"Fransızca Öğretmeni",flag:"fr",  href:"/pages/teacher.html?lang=fr" },
+      { code:"es", title:"İspanyolca Öğretmeni",flag:"es", href:"/pages/teacher.html?lang=es" },
+      { code:"it", title:"İtalyanca Öğretmeni", flag:"it", href:"/pages/teacher.html?lang=it" },
+    ];
+
+    const grid = document.getElementById("teacherGrid");
+
+    function cardHtml(t){
+      const lesson = getLesson(t.code);
+      return `
+        <div class="card" data-go="${t.href}">
+          <div class="toprow">
+            <div class="flag ${t.flag}" aria-hidden="true"></div>
+            <div class="go" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="txt">
+            <div class="lang">${t.title}</div>
+            <div class="lesson">Ders <b id="l_${t.code}">${lesson}</b></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function render(){
+      if(!grid) return;
+      grid.innerHTML = TEACHERS.map(cardHtml).join("");
+      grid.querySelectorAll("[data-go]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const go = el.getAttribute("data-go");
+          if(go) window.location.href = go;
+        });
+      });
+    }
+
+    render();
+
+    // dışarıdan ders ilerleyince (teacher.html) anlık güncellenebilsin
+    window.addEventListener("storage", (e)=>{
+      if(!e || !e.key) return;
+      if(String(e.key).startsWith("italky_teacher_lesson::")){
+        render();
+      }
+    });
+  </script>
+</body>
+</html>
