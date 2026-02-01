@@ -29,9 +29,11 @@
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
+    /* 1. Sayfa Çerçevesini Sabitle (Scroll Fix) */
     html, body {
-      margin: 0; padding: 0; width: 100%; height: 100dvh;
-      overflow: hidden;
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      overflow: hidden; /* Dış scroll'u kapat */
+      position: fixed; /* iOS zıplamasını önle */
       font-family: 'Outfit', sans-serif;
       background-color: var(--bg-void);
       color: var(--text-main);
@@ -41,7 +43,7 @@
     /* --- BACKGROUND FX --- */
     .cosmos-bg {
       position: absolute; inset: -50%; width: 200%; height: 200%;
-      background: #030014; z-index: 0;
+      background: #030014; z-index: 0; pointer-events: none;
     }
     .orb {
       position: absolute; border-radius: 50%;
@@ -81,12 +83,14 @@
         height: 92vh; border-radius: 40px;
         border: 1px solid rgba(255,255,255,0.1);
         box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+        overflow: hidden;
       }
     }
 
     /* --- HEADER --- */
     .header {
-      height: 90px; padding: 0 24px;
+      flex: 0 0 90px; /* Sabit yükseklik */
+      padding: 0 24px;
       display: flex; align-items: center; justify-content: space-between;
       position: relative; z-index: 20;
     }
@@ -119,11 +123,13 @@
     .profile-btn img { width: 100%; height: 100%; object-fit: cover; }
     .profile-icon { font-size: 20px; color: #fff; }
 
-    /* --- GRID MENU --- */
+    /* --- GRID MENU (SCROLL FIX) --- */
     .menu-scroll {
-      flex: 1; overflow-y: auto; overflow-x: hidden;
-      padding: 10px 20px 140px; /* Footer payı */
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+      flex: 1; /* Kalan alanı kapla */
+      overflow-y: auto; overflow-x: hidden;
+      -webkit-overflow-scrolling: touch; /* iOS momentum */
+      padding: 10px 20px 160px; /* Alt boşluk (Footer için) */
+      position: relative; z-index: 5;
     }
     .menu-scroll::-webkit-scrollbar { display: none; }
 
@@ -143,7 +149,7 @@
       gap: 12px; cursor: pointer; user-select: none;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       box-shadow: 0 10px 30px -5px rgba(0,0,0,0.3);
-      aspect-ratio: 1 / 1.1; /* Kareye yakın */
+      aspect-ratio: 1 / 1.1;
       overflow: hidden;
     }
 
@@ -307,17 +313,17 @@
   <script type="module">
     import { STORAGE_KEY } from "/js/config.js";
     
-    // Basit Profil Resmi Yükleme Mantığı (localStorage'dan)
+    // Profil Yükleme
     const profileBtn = document.getElementById("profileBtn");
     try {
       const u = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
       if(u && u.picture) {
         profileBtn.innerHTML = `<img src="${u.picture}" alt="Profil">`;
       }
-    } catch(e) { console.log("Profil resmi yüklenemedi"); }
+    } catch(e) { console.log("Profil hatası"); }
 
     profileBtn.addEventListener("click", () => {
-      window.location.href = "/pages/profile.html"; // Profil sayfasına git
+      window.location.href = "/pages/profile.html"; 
     });
   </script>
 </body>
