@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>italkyAI • Face to Face</title>
   <link rel="icon" href="data:," />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -149,7 +150,6 @@
       z-index: 5;
     }
 
-    /* Dil butonu */
     .langBtn{
       height: 44px;
       border-radius: 16px;
@@ -191,12 +191,11 @@
       opacity:.92;
     }
     .btnIcon:active{ transform: translateY(1px); }
-    .btnIcon.listening{
-      border-color: rgba(190,242,100,.35);
-      background: rgba(190,242,100,.12);
-      box-shadow: 0 0 22px rgba(190,242,100,.18);
+    .btnIcon.muted{
+      opacity: .45;
+      border-color: rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
     }
-    .btnIcon.muted{ opacity: .45; }
 
     .content{
       flex: 1 1 auto;
@@ -227,14 +226,14 @@
     .bubble.me{ align-self:flex-end; border-right: 4px solid var(--pist); text-align:right; }
     .bubble.them{ align-self:flex-start; border-left: 4px solid var(--gold); }
 
-    /* ✅ Logo (KİLİTLİ) */
+    /* ✅ LOGO (KİLİTLİ) */
     .brandBottom, .brandTop{
       position:absolute;
       left: 50%;
       transform: translateX(-50%);
       display:flex;
       flex-direction:column;
-      align-items:center;
+      align-items:flex-start;
       gap: 6px;
       pointer-events:none;
       opacity:.92;
@@ -243,12 +242,8 @@
     .brandBottom{ bottom: 10px; }
     .brandTop{ top: 10px; transform: translateX(-50%) rotate(180deg); }
 
-    .brandLock{
-      display:inline-flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap: 6px;
-    }
+    .brandLock{ display:inline-flex; flex-direction:column; align-items:flex-start; gap:6px; }
+
     .logoLine{
       font-family: 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, Arial;
       font-size: 22px;
@@ -265,15 +260,19 @@
       margin-left: 1px;
     }
 
-    /* BE FREE çizgisi i'nin altından başlar, y'nin ortasında biter */
-    .beFreeWrap{ position: relative; width: 100%; }
+    .beFreeWrap{
+      position: relative;
+      width: 100%;
+      padding-top: 10px; /* çizgi + yazı boşluğu */
+    }
     .beFreeLine{
       position:absolute;
-      left: 14px;
-      right: 38px;
       top: 6px;
       height: 1px;
       background: rgba(107,114,128,0.55);
+      border-radius: 999px;
+      left: var(--beLeft, 14px);
+      right: calc(100% - var(--beRight, 120px));
     }
     .beFreeText{
       text-align:center;
@@ -294,9 +293,10 @@
       z-index: 20;
       pointer-events:auto;
     }
-    .side.top .micDock{
-      transform: translateX(-50%) rotate(180deg);
-    }
+    /* ✅ ÖNEMLİ: üst panel zaten 180 dönük.
+       micDock'u ayrıca döndürmüyoruz. Sadece ikonun yönünü düzeltiyoruz. */
+    .side.top .micDock{ transform: translateX(-50%); }
+    .side.top #topMic svg{ transform: rotate(180deg); } /* ✅ mic yön fix */
 
     /* Language Sheet */
     .sheetOverlay{
@@ -363,7 +363,6 @@
       padding: 10px 12px;
       outline:none;
     }
-    .sheetSearch input::placeholder{ color: rgba(255,255,255,.55); font-weight: 800; }
 
     .sheetList{
       max-height: 52vh;
@@ -397,12 +396,8 @@
       letter-spacing:.5px;
       text-transform: uppercase;
     }
-    .sheetRow.selected{
-      background: rgba(190,242,100,.08);
-    }
-    .sheetRow.selected .code{
-      color: rgba(190,242,100,.95);
-    }
+    .sheetRow.selected{ background: rgba(190,242,100,.08); }
+    .sheetRow.selected .code{ color: rgba(190,242,100,.95); }
 
     .toast{
       position: fixed;
@@ -437,10 +432,10 @@
     <div class="brandTop">
       <div class="brandLock">
         <div class="logoLine">
-          <span class="logoMain">italky</span><span class="logoAI">AI</span>
+          <span class="logoMain" id="logoItalky">italk<span id="logoY">y</span></span><span class="logoAI">AI</span>
         </div>
         <div class="beFreeWrap">
-          <div class="beFreeLine"></div>
+          <div class="beFreeLine" id="beFreeLine"></div>
           <div class="beFreeText">BE FREE</div>
         </div>
       </div>
@@ -454,8 +449,8 @@
             <span id="topLangTxt">—</span><span class="caret">▾</span>
           </button>
 
-          <!-- ✅ SES: bu buton artık SON METNİ OKUYACAK -->
-          <button class="btnIcon" id="topSpeak" aria-label="Ses">
+          <!-- 🔊 (toggle mute) -->
+          <button class="btnIcon" id="topSpeak" aria-label="Ses Aç/Kapat">
             <svg viewBox="0 0 24 24">
               <path d="M11 5L6 9H3v6h3l5 4z"></path>
               <path d="M15 9a4 4 0 0 1 0 6"></path>
@@ -494,8 +489,8 @@
             <span id="botLangTxt">—</span><span class="caret">▾</span>
           </button>
 
-          <!-- ✅ SES: bu buton artık SON METNİ OKUYACAK -->
-          <button class="btnIcon" id="botSpeak" aria-label="Ses">
+          <!-- 🔊 (toggle mute) -->
+          <button class="btnIcon" id="botSpeak" aria-label="Ses Aç/Kapat">
             <svg viewBox="0 0 24 24">
               <path d="M11 5L6 9H3v6h3l5 4z"></path>
               <path d="M15 9a4 4 0 0 1 0 6"></path>
@@ -550,6 +545,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/facetoface_page.js?v=1"></script>
+  <script type="module" src="/js/facetoface_page.js?v=2"></script>
 </body>
 </html>
