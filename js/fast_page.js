@@ -1,12 +1,11 @@
 // FILE: italky-web/js/fast_page.js
-// Italky - Anında Çeviri (Toplantı Modu) v5
-// ✅ Dropdown seçim fix (mobile pointerdown + stopPropagation)
-// ✅ Çeviri debug (hata body toast)
-// ✅ TTS default OFF (sessiz). Hoparlör sadece çeviri seslendirme aç/kapat.
-// ⚠️ SpeechRecognition sistem bip'i webde kapatılamaz (OS/Chrome).
+// Anında Çeviri v5
+// ✅ Konuşurken anlık çeviri: interim -> throttle -> ekranda tek akış
+// ✅ Dropdown seçim fix (pointerdown + stopPropagation)
+// ✅ “Çeviri” label yok, ekranı şişirme yok
+// ✅ Play/Pause renk ile (sessiz). Biz ekstra ses çalmıyoruz.
 
 import { BASE_DOMAIN } from "/js/config.js";
-
 const $ = (id)=>document.getElementById(id);
 
 function toast(msg){
@@ -33,7 +32,6 @@ const LANGS = [
   { code:"no", name:"Norsk",      sr:"nb-NO", tts:"nb-NO" },
   { code:"da", name:"Dansk",      sr:"da-DK", tts:"da-DK" },
   { code:"pl", name:"Polski",     sr:"pl-PL", tts:"pl-PL" },
-  { code:"el", name:"Ελληνικά",   sr:"el-GR", tts:"el-GR" },
 ];
 
 function by(code){
@@ -42,6 +40,7 @@ function by(code){
 function baseUrl(){
   return String(BASE_DOMAIN||"").replace(/\/+$/,"");
 }
+
 function escapeHtml(s=""){
   return String(s)
     .replace(/&/g,"&amp;")
@@ -51,16 +50,38 @@ function escapeHtml(s=""){
     .replace(/'/g,"&#39;");
 }
 
-function addTranslated(text){
+function norm(s){
+  return String(s||"")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g," ")
+    .replace(/[’']/g,"'")
+    .replace(/[.,!?;:]+$/g,"");
+}
+
+/* ========= UI helpers ========= */
+function addLine(text){
   const wrap = $("stream");
   const b = document.createElement("div");
-  b.className = "bubble trg";
-  b.innerHTML = `<div class="small">Çeviri</div>${escapeHtml(text)}`;
+  b.className = "bubble";
+  b.innerHTML = escapeHtml(text || "—");
   wrap.appendChild(b);
+  // keep last ~10 items max
+  while(wrap.children.length > 10) wrap.removeChild(wrap.firstElementChild);
   wrap.scrollTop = wrap.scrollHeight;
 }
 
-/* ========= Custom Dropdown ========= */
+function setStatus(s){
+  $("panelStatus").textContent = s;
+}
+
+function setPlayUI(on){
+  $("playBtn")?.classList.toggle("running", !!on);
+  $("icoPlay").style.display = on ? "none" : "block";
+  $("icoPause").style.display = on ? "block" : "none";
+}
+
+/* ========= Custom Dropdown (mobile-safe) ========= */
 function buildDropdown(rootId, btnId, txtId, menuId, defCode){
   const root = $(rootId);
   const btn = $(btnId);
@@ -80,9 +101,7 @@ function buildDropdown(rootId, btnId, txtId, menuId, defCode){
   }
 
   menu.innerHTML = `
-    <div class="ddSearchWrap">
-      <input class="ddSearch" type="text" placeholder="Ara..." />
-    </div>
+    <div class="ddSearchWrap"><input class="ddSearch" type="text" placeholder="Ara..." /></div>
     ${LANGS.map(l=>`<div class="ddItem" data-code="${l.code}">${l.name}</div>`).join("")}
   `;
 
@@ -96,11 +115,9 @@ function buildDropdown(rootId, btnId, txtId, menuId, defCode){
       it.classList.toggle("hidden", s && !name.includes(s));
     });
   }
-
-  // ✅ input event normal
   search.addEventListener("input", ()=> filter(search.value));
 
-  // ✅ KRİTİK: item seçimleri pointerdown + stopPropagation
+  // ✅ item selection: pointerdown + stopPropagation
   items.forEach(it=>{
     it.addEventListener("pointerdown", (e)=>{
       e.preventDefault();
@@ -111,7 +128,7 @@ function buildDropdown(rootId, btnId, txtId, menuId, defCode){
     });
   });
 
-  // ✅ buton aç/kapat
+  // open/close
   btn.addEventListener("pointerdown", (e)=>{
     e.preventDefault();
     e.stopPropagation();
@@ -125,16 +142,14 @@ function buildDropdown(rootId, btnId, txtId, menuId, defCode){
     }
   });
 
-  // ✅ dışarı tıklayınca kapan
+  // click outside
   document.addEventListener("pointerdown", ()=> closeAll(), { passive:true });
 
-  // ✅ ilk değer sessiz
   setValue(defCode, true);
-
-  return { get: ()=> current, set: (c)=> setValue(c,false), root };
+  return { get:()=>current, set:(c)=>setValue(c,false), root };
 }
 
-/* ========= SR ========= */
+/* ========= SpeechRecognition ========= */
 function srSupported(){
   return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
@@ -148,49 +163,12 @@ function buildRecognizer(srLocale){
   return r;
 }
 
-function norm(s){
-  return String(s||"")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g," ")
-    .replace(/[’']/g,"'")
-    .replace(/[.,!?;:]+$/g,"");
-}
-
-/* ========= TTS (default OFF) ========= */
-let ttsOn = false;
-function setTts(on){
-  ttsOn = !!on;
-  $("spkBtn")?.classList.toggle("on", ttsOn);
-  if(!ttsOn){
-    try{ window.speechSynthesis?.cancel?.(); }catch{}
-  }
-}
-function speak(text, langCode){
-  if(!ttsOn) return;
-  if(!("speechSynthesis" in window)) return;
-  try{
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(String(text||""));
-    u.lang = by(langCode).tts || "en-US";
-    u.rate = 1.0;
-    u.pitch = 1.0;
-    window.speechSynthesis.speak(u);
-  }catch{}
-}
-
-/* ========= backend translate ========= */
+/* ========= Translate API ========= */
 async function translateViaApi(text, src, dst){
   const base = baseUrl();
   if(!base) return text;
 
-  const body = {
-    text,
-    source: src,
-    target: dst,
-    from_lang: src,
-    to_lang: dst
-  };
+  const body = { text, source: src, target: dst, from_lang: src, to_lang: dst };
 
   const r = await fetch(`${base}/api/translate`, {
     method:"POST",
@@ -199,74 +177,86 @@ async function translateViaApi(text, src, dst){
   });
 
   const raw = await r.text().catch(()=> "");
-  if(!r.ok){
-    throw new Error(raw || `HTTP ${r.status}`);
-  }
+  if(!r.ok) throw new Error(raw || `HTTP ${r.status}`);
 
   let data = {};
   try{ data = JSON.parse(raw || "{}"); }catch{ data = {}; }
 
-  const out = String(
-    data.text || data.translated || data.translation || data.translatedText || ""
-  ).trim();
-
-  return out || text;
+  return String(data.text || data.translated || data.translation || data.translatedText || "").trim() || text;
 }
 
-/* ========= play/pause ========= */
+/* ========= Engine: live translate while speaking ========= */
 let srcDD, dstDD;
 let rec = null;
 let running = false;
-let bufferText = "";
-let silenceTimer = null;
-let inFlight = false;
-let lastPushed = "";
 
-function setPlayUI(on){
-  $("playBtn")?.classList.toggle("running", !!on);
-  $("icoPlay").style.display = on ? "none" : "block";
-  $("icoPause").style.display = on ? "block" : "none";
+// speech buffers
+let interimText = "";
+let finalText = "";
+
+// translate throttling
+let tickTimer = null;
+let inFlight = false;
+let lastSent = "";
+let lastShown = "";
+let sentenceBreakTimer = null;
+
+function clearTimers(){
+  if(tickTimer){ clearInterval(tickTimer); tickTimer=null; }
+  if(sentenceBreakTimer){ clearTimeout(sentenceBreakTimer); sentenceBreakTimer=null; }
 }
 
-function clearSilence(){
-  if(silenceTimer){
-    clearTimeout(silenceTimer);
-    silenceTimer = null;
+function enforceDifferent(){
+  if(srcDD.get() === dstDD.get()){
+    dstDD.set(srcDD.get()==="tr" ? "en" : "tr");
   }
 }
-function scheduleFlush(){
-  clearSilence();
-  silenceTimer = setTimeout(()=> flushBuffer(), 900);
-}
 
-async function flushBuffer(){
-  clearSilence();
+async function translateTick(){
+  if(!running) return;
   if(inFlight) return;
-
-  const text = String(bufferText||"").trim();
-  bufferText = "";
-  if(!text) return;
-
-  const n = norm(text);
-  if(!n) return;
-  if(n === lastPushed) return;
-
-  inFlight = true;
 
   const src = srcDD.get();
   const dst = dstDD.get();
 
+  const combined = (finalText + " " + interimText).trim();
+  const n = norm(combined);
+
+  // boş / aynı / çok kısa
+  if(!n || n.length < 3) return;
+  if(n === lastSent) return;
+
+  // her tick’te Google’a spam olmasın: küçük değişimde bekle
+  const bigChange = Math.abs(n.length - lastSent.length) >= 8 || (lastSent && !n.startsWith(lastSent.slice(0, Math.min(12,lastSent.length))));
+  if(!bigChange && n.length - lastSent.length < 4) return;
+
+  inFlight = true;
+  lastSent = n;
+  setStatus("Dinliyor");
+
   try{
-    $("panelStatus").textContent = "Çeviriyorum…";
-    const out = await translateViaApi(text, src, dst);
-    addTranslated(out);
-    speak(out, dst);
-    lastPushed = n;
-    $("panelStatus").textContent = "Dinliyor";
+    const out = await translateViaApi(combined, src, dst);
+    // ekranda şişirme yok: sadece değişince satır ekle
+    const outN = norm(out);
+    if(outN && outN !== lastShown){
+      // Eğer konuşma devam ediyorsa tek satır güncelle (append yerine replace)
+      // Basit yaklaşım: son bubble'ı güncelle
+      const wrap = $("stream");
+      const last = wrap.lastElementChild;
+      if(last && last.dataset.live === "1"){
+        last.innerHTML = escapeHtml(out);
+      }else{
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.dataset.live = "1";
+        b.innerHTML = escapeHtml(out);
+        wrap.appendChild(b);
+      }
+      wrap.scrollTop = wrap.scrollHeight;
+      lastShown = outN;
+    }
   }catch(e){
-    $("panelStatus").textContent = "Hata";
-    // ✅ hata gövdesini göster (kısalt)
-    const m = String(e?.message || e || "").slice(0, 220);
+    const m = String(e?.message || e || "").slice(0, 240);
     toast(`Çeviri hatası: ${m || "bilinmiyor"}`);
     console.warn("TRANSLATE_ERR:", e);
   }finally{
@@ -274,14 +264,29 @@ async function flushBuffer(){
   }
 }
 
+function finalizeCurrentLine(){
+  const wrap = $("stream");
+  const last = wrap.lastElementChild;
+  if(last && last.dataset.live === "1"){
+    last.dataset.live = "0";
+  }
+}
+
 function stop(){
   running = false;
   setPlayUI(false);
-  $("panelStatus").textContent = "Hazır";
-  clearSilence();
-  bufferText = "";
+  setStatus("Hazır");
+
+  clearTimers();
+  interimText = "";
+  finalText = "";
+  lastSent = "";
+  inFlight = false;
+
   try{ rec?.stop?.(); }catch{}
   rec = null;
+
+  finalizeCurrentLine();
 }
 
 function start(){
@@ -290,6 +295,7 @@ function start(){
     return;
   }
 
+  enforceDifferent();
   const src = srcDD.get();
   const srLocale = by(src).sr || "en-US";
 
@@ -301,11 +307,17 @@ function start(){
 
   running = true;
   setPlayUI(true);
-  bufferText = "";
-  lastPushed = "";
+  setStatus("Dinliyor");
+
+  interimText = "";
+  finalText = "";
+  lastSent = "";
+  lastShown = "";
   inFlight = false;
-  clearSilence();
-  $("panelStatus").textContent = "Dinliyor";
+
+  // tick: 650ms (canlı)
+  clearTimers();
+  tickTimer = setInterval(translateTick, 650);
 
   rec.onresult = (e)=>{
     let finals = "";
@@ -318,13 +330,21 @@ function start(){
     }
 
     if(finals.trim()){
-      bufferText = (bufferText ? bufferText + " " : "") + finals.trim();
-      scheduleFlush();
+      finalText = (finalText ? finalText + " " : "") + finals.trim();
+      interimText = "";
+      // “cümle bitti” varsayımı: 1.2s sessizlikte satırı sabitle
+      if(sentenceBreakTimer) clearTimeout(sentenceBreakTimer);
+      sentenceBreakTimer = setTimeout(()=>{
+        finalizeCurrentLine();
+        // yeni cümle gelecekse canlı satır yeniden başlar
+        lastShown = ""; // yeni satır için
+      }, 1200);
       return;
     }
 
+    // interim akış
     if(interim.trim()){
-      scheduleFlush();
+      interimText = interim.trim();
     }
   };
 
@@ -334,8 +354,9 @@ function start(){
   };
 
   rec.onend = ()=>{
+    // running ise yeniden başlatmayı dene (bazı cihazlar kendini durduruyor)
     if(running){
-      try{ rec?.start?.(); } catch { stop(); }
+      try{ rec?.start?.(); }catch{ stop(); }
     }
   };
 
@@ -346,17 +367,11 @@ function start(){
   }
 }
 
-function enforceDifferent(){
-  if(srcDD.get() === dstDD.get()){
-    dstDD.set(srcDD.get()==="tr" ? "en" : "tr");
-  }
-}
-
 /* ========= init ========= */
 document.addEventListener("DOMContentLoaded", ()=>{
   $("backBtn").addEventListener("pointerdown", (e)=>{
     e.preventDefault();
-    if(history.length > 1) history.back();
+    if(history.length>1) history.back();
     else location.href = "/pages/home.html";
   });
 
@@ -365,33 +380,41 @@ document.addEventListener("DOMContentLoaded", ()=>{
     location.href = "/pages/home.html";
   });
 
-  // dropdowns
   srcDD = buildDropdown("ddSrc","ddSrcBtn","ddSrcTxt","ddSrcMenu","en");
   dstDD = buildDropdown("ddDst","ddDstBtn","ddDstTxt","ddDstMenu","tr");
 
   srcDD.root.addEventListener("italky:change", ()=>{
     enforceDifferent();
-    if(running){ stop(); start(); }
+    if(running){
+      stop();
+      start();
+    }
   });
+
   dstDD.root.addEventListener("italky:change", ()=>{
     enforceDifferent();
   });
 
-  // TTS toggle (default OFF)
+  // Speaker: sadece “opsiyonel” TTS için; default OFF
+  let ttsOn = false;
+  const setTts = (on)=>{
+    ttsOn = !!on;
+    $("spkBtn")?.classList.toggle("on", ttsOn);
+    toast(ttsOn ? "Ses açık" : "Sessiz");
+  };
   setTts(false);
   $("spkBtn").addEventListener("pointerdown", (e)=>{
     e.preventDefault(); e.stopPropagation();
     setTts(!ttsOn);
-    toast(ttsOn ? "Ses açık" : "Sessiz");
   });
 
-  // play/pause
+  // Play/Pause
   setPlayUI(false);
+  setStatus("Hazır");
+
   $("playBtn").addEventListener("pointerdown", (e)=>{
     e.preventDefault(); e.stopPropagation();
     if(running) stop();
     else start();
   });
-
-  $("panelStatus").textContent = "Hazır";
 });
