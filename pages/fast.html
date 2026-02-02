@@ -219,7 +219,6 @@
     }
     .stream::-webkit-scrollbar{ width:0; height:0; }
 
-    /* Clean bubble */
     .bubble{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -231,7 +230,7 @@
       box-shadow: 0 12px 28px rgba(0,0,0,.28);
     }
 
-    /* Bottom wave + play dock (FIX) */
+    /* Bottom wave + play dock */
     .bottomDock{
       position:absolute;
       left: 0; right: 0;
@@ -241,7 +240,7 @@
       z-index: 5;
     }
 
-    /* Gemini-like white wave area */
+    /* Wave */
     .liveWave{
       width: 100%;
       height: 92px;
@@ -253,21 +252,57 @@
       box-shadow: 0 24px 80px rgba(0,0,0,.45);
       backdrop-filter: blur(10px);
     }
+
+    /* ✅ Modern shimmer line under status when running */
+    .waveStatus{
+      position:absolute;
+      left: 14px;
+      top: 12px;
+      font-size: 12px;
+      font-weight: 1000;
+      color: rgba(255,255,255,.82);
+      text-shadow: 0 10px 22px rgba(0,0,0,.45);
+      pointer-events:none;
+      padding-bottom: 6px;
+      overflow:hidden;
+      width: calc(100% - 28px);
+    }
+    .liveWave.running .waveStatus::after{
+      content:"";
+      position:absolute;
+      left:0;
+      bottom:0;
+      width:100%;
+      height:2px;
+      background: linear-gradient(90deg, transparent, rgba(34,197,94,.95), #fff, rgba(34,197,94,.95), transparent);
+      background-size: 200% 100%;
+      animation: aiShimmer 1.1s linear infinite;
+      opacity: .95;
+    }
+    @keyframes aiShimmer{
+      0%{ background-position: 160% 0; }
+      100%{ background-position: -60% 0; }
+    }
+
+    /* ✅ Stronger wave glow when running */
     .liveWave::before{
       content:"";
-      position:absolute; inset:-35%;
+      position:absolute; inset:-40%;
       background:
-        radial-gradient(520px 160px at 20% 70%, rgba(255,255,255,.28), transparent 70%),
-        radial-gradient(560px 170px at 55% 80%, rgba(255,255,255,.22), transparent 70%),
-        radial-gradient(520px 160px at 85% 70%, rgba(255,255,255,.20), transparent 70%);
+        radial-gradient(540px 180px at 30% 75%, rgba(255,255,255,.20), transparent 72%),
+        radial-gradient(640px 220px at 70% 80%, rgba(255,255,255,.16), transparent 72%);
       filter: blur(18px);
-      transform: translate3d(-6%,0,0);
-      opacity: .85;
-      animation: waveMove 2.7s ease-in-out infinite alternate;
+      opacity: .55;
+      transform: translate3d(-8%, 0, 0);
+      animation: breath 3.2s ease-in-out infinite alternate;
     }
-    @keyframes waveMove{
-      0%{ transform: translate3d(-6%, 2%, 0) scale(1); opacity:.60; }
-      100%{ transform: translate3d(6%, -5%, 0) scale(1.05); opacity:.92; }
+    @keyframes breath{
+      0%{ transform: translate3d(-8%, 2%, 0) scale(1); opacity:.40; }
+      100%{ transform: translate3d(8%, -4%, 0) scale(1.06); opacity:.75; }
+    }
+    .liveWave.running::before{
+      opacity: .95;
+      animation-duration: 1.35s;
     }
 
     /* Play centered OVER wave */
@@ -293,18 +328,6 @@
     }
     .playBtn svg{ width:28px;height:28px; fill:none; stroke:#fff; stroke-width:2; opacity:.95; stroke-linecap:round; stroke-linejoin:round; }
     #icoPause{ display:none; }
-
-    /* Status text inside wave (top-left) */
-    .waveStatus{
-      position:absolute;
-      left: 14px;
-      top: 12px;
-      font-size: 12px;
-      font-weight: 1000;
-      color: rgba(255,255,255,.80);
-      text-shadow: 0 10px 22px rgba(0,0,0,.45);
-      pointer-events:none;
-    }
 
     /* Bottom brand (clickable) */
     .brand{
@@ -398,7 +421,6 @@
 
         <div class="stream" id="stream"></div>
 
-        <!-- ✅ Bottom wave area + centered play -->
         <div class="bottomDock">
           <div class="liveWave" id="liveWave">
             <div class="waveStatus" id="waveStatus">Hazır</div>
@@ -425,7 +447,7 @@
 
     <div class="toast" id="toast">—</div>
 
-    <script type="module" src="/js/fast_page.js?v=6"></script>
+    <script type="module" src="/js/fast_page.js?v=7"></script>
   </div>
 </body>
 </html>
