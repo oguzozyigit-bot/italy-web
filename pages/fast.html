@@ -101,7 +101,7 @@
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; user-select:none;
       flex:0 0 44px;
-      opacity:.55; /* default kapalı gibi dursun */
+      opacity:.55;
     }
     .spkBtn.on{ opacity:.95; }
     .spkBtn svg{ width:22px; height:22px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
@@ -112,7 +112,7 @@
       left: 12px;
       right: 12px;
       top: 70px;
-      bottom: 62px; /* logo alanı */
+      bottom: 62px;
       border-radius: 28px;
       border:1px solid var(--border);
       background:
@@ -134,9 +134,9 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
+      z-index: 10;
     }
 
-    /* Custom dropdown row */
     .ddRow{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -144,10 +144,7 @@
       align-items:center;
     }
 
-    .dd{
-      position: relative;
-      width: 100%;
-    }
+    .dd{ position: relative; width: 100%; }
     .ddBtn{
       width:100%;
       padding: 12px 12px;
@@ -188,6 +185,9 @@
     .ddMenu::-webkit-scrollbar{ width:0; height:0; }
     .dd.open .ddMenu{ display:block; }
 
+    /* ✅ hedef dil menüsü sağdan açılsın (taşma yok) */
+    #ddDst .ddMenu{ left:auto; right:0; }
+
     .ddSearchWrap{
       position: sticky;
       top: 0;
@@ -222,11 +222,10 @@
     .ddItem:hover{ background: rgba(255,255,255,.06); }
     .ddItem.hidden{ display:none; }
 
-    /* Translate stream area */
     .stream{
       flex: 1 1 auto;
       min-height:0;
-      padding: 12px 12px 92px; /* play buton için alt pay */
+      padding: 12px 12px 92px;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       display:flex;
@@ -256,7 +255,6 @@
     }
     .bubble.trg{ border-left: 4px solid rgba(190,242,100,.85); }
 
-    /* Play/Pause bottom center over panel */
     .playDock{
       position:absolute;
       left: 50%;
@@ -285,7 +283,6 @@
     }
     .playBtn svg{ width:30px; height:30px; stroke:#fff; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
 
-    /* bottom brand */
     .brandBottom{
       position:absolute;
       left: 50%;
@@ -405,6 +402,6 @@
 
   <div class="toast" id="toast">—</div>
 
-  <script type="module" src="/js/fast_page.js?v=3"></script>
+  <script type="module" src="/js/fast_page.js?v=4"></script>
 </body>
 </html>
