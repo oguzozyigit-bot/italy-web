@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ITALKY - Ana Menü</title>
+  <title>ItalkyAI - Ana Menü</title>
   <link rel="icon" href="data:," />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --bg-void:#030014;
       --text-main:#fff;
-      --text-muted: rgba(255,255,255,0.65);
+      --text-muted: rgba(255,255,255,0.60);
       --footerH: 92px; 
       --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -38,16 +38,16 @@
     }
     .orb{
       position:absolute; border-radius:50%;
-      filter: blur(90px); opacity:.35; /* Arkaplanı biraz daha sakinleştirdim */
+      filter: blur(90px); opacity:.30;
       animation: floatOrbit 30s infinite alternate ease-in-out;
     }
     .orb-1{
       top:10%; left:10%; width:60vw; height:60vw;
-      background: radial-gradient(circle, #4a00e0, transparent 70%);
+      background: radial-gradient(circle, #4338ca, transparent 70%); /* İndigo */
     }
     .orb-2{
       bottom:10%; right:10%; width:50vw; height:50vw;
-      background: radial-gradient(circle, #8e2de2, transparent 70%);
+      background: radial-gradient(circle, #5b21b6, transparent 70%); /* Mor */
       animation-delay:-5s;
     }
     @keyframes floatOrbit{
@@ -56,7 +56,7 @@
     }
     .noise{
       position:absolute; inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
       pointer-events:none; mix-blend-mode:overlay; z-index:1;
     }
 
@@ -65,44 +65,71 @@
       width:100%; max-width:480px; height:100%;
       position:relative; z-index:10;
       display:flex; flex-direction:column;
-      background: rgba(5,5,10,0.6); /* Biraz daha koyu zemin */
-      backdrop-filter: blur(30px);
+      background: rgba(8, 8, 20, 0.65); /* Daha koyu, daha net */
+      backdrop-filter: blur(25px);
       overflow:hidden;
     }
     @media (min-width:520px){
       .mobile-frame{
         height:92vh; border-radius:40px;
-        border:1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+        border:1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 40px 100px -20px rgba(0,0,0,0.9);
       }
     }
 
-    /* --- HEADER --- */
+    /* --- HEADER (LOGO & SLOGAN) --- */
     .header{
       flex:0 0 92px;
-      padding: 0 18px;
+      padding: 0 20px;
       display:flex; align-items:center; justify-content:space-between;
       gap:12px;
       position:relative; z-index:20;
     }
-    .mini-brand{ display:flex; flex-direction:column; width:fit-content; align-items:center; user-select:none; }
-    .mini-logo{
-      font-family:'Space Grotesk', sans-serif;
-      font-weight:700; font-size:26px;
-      letter-spacing:-1px; line-height:1;
-      color:#fff; white-space:nowrap;
-      text-shadow:0 0 20px rgba(255,255,255,0.3);
+    
+    .mini-brand{
+      display:flex; flex-direction:column;
+      align-items:flex-start;
+      justify-content: center;
+      user-select:none;
+      margin-top: 4px;
     }
-    .mini-flag{
-      width:100%; height:4px; border-radius:4px;
-      display:flex; overflow:hidden; margin-top:4px;
-      box-shadow:0 0 10px rgba(255,255,255,0.15);
-    }
-    .mini-flag div{ flex:1; height:100%; }
-    .f-g{ background:#009246; box-shadow:0 0 8px #009246; z-index:1; }
-    .f-w{ background:#fff; z-index:2; }
-    .f-r{ background:#CE2B37; box-shadow:0 0 8px #CE2B37; z-index:1; }
 
+    .logo-container {
+      font-family:'Space Grotesk', sans-serif;
+      font-size: 28px; /* Biraz daha büyük */
+      line-height: 0.9;
+      letter-spacing: -0.8px;
+    }
+
+    /* "Italky" Mat Beyaz */
+    .logo-main {
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    /* "AI" Mat İndigo Gradyan */
+    .logo-ai {
+      font-weight: 700;
+      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-left: 1px;
+    }
+
+    /* "BE FREE" Sloganı */
+    .mini-slogan {
+      font-family: 'Outfit', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 4px; /* Harf araları açık */
+      text-transform: uppercase;
+      margin-top: 5px;
+      margin-left: 2px;
+    }
+
+    /* Kullanıcı Alanı */
     .userbox{
       flex:1; min-width:0;
       display:flex; align-items:center; justify-content:flex-end;
@@ -111,22 +138,23 @@
     .usertext{
       min-width:0; display:flex; flex-direction:column; align-items:flex-end; gap:2px; max-width: 240px;
     }
-    .uname{ font-weight: 950; font-size: 13px; color: rgba(255,255,255,0.92); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .plan{ font-weight: 900; font-size: 11px; color: rgba(255,255,255,0.60); white-space:nowrap; }
+    .uname{ font-weight: 800; font-size: 13px; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .plan{ font-weight: 700; font-size: 11px; color: rgba(255,255,255,0.5); }
     
     .avatar-btn{
-      width: 44px; height: 44px; border: none; background: transparent;
+      width: 42px; height: 42px; border: none; background: transparent;
       padding: 0; border-radius: 999px; overflow: hidden; cursor: pointer;
       display:flex; align-items:center; justify-content:center;
+      transition: transform .2s;
     }
-    .avatar-btn:active{ transform: scale(.96); }
-    .avatar-btn img{ width: 44px; height: 44px; border-radius: 999px; object-fit: cover; display:block; }
+    .avatar-btn:active{ transform: scale(.95); }
+    .avatar-btn img{ width: 100%; height: 100%; object-fit: cover; }
     .avatar-fallback{
-      width: 44px; height: 44px; border-radius: 999px;
+      width: 100%; height: 100%; border-radius: 999px;
       display:flex; align-items:center; justify-content:center;
-      font-weight: 1000; color: rgba(255,255,255,0.92);
-      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,.2), rgba(0,0,0,0));
-      border:1px solid rgba(255,255,255,0.2);
+      font-weight: 800; color: #fff;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
     }
 
     /* --- MENU SCROLL --- */
@@ -134,7 +162,7 @@
       flex:1;
       overflow-y:auto; overflow-x:hidden;
       -webkit-overflow-scrolling: touch;
-      padding: 8px 18px calc(var(--footerH) + 14px);
+      padding: 10px 18px calc(var(--footerH) + 20px);
       position:relative; z-index:5;
       scrollbar-width:none;
     }
@@ -145,133 +173,119 @@
       animation: fadeInUp .6s var(--ease-elastic);
     }
 
-    /* --- YENİ KART TASARIMI (MAT RENKLER) --- */
+    /* --- MAT KART TASARIMI --- */
     .card, .longCard, .friendCard {
-      /* Varsayılan Renk (Gri) */
-      --card-hue: 120, 130, 140; 
+      --card-hue: 120, 130, 140; /* Varsayılan */
       
-      background: linear-gradient(160deg, rgba(var(--card-hue), 0.12) 0%, rgba(var(--card-hue), 0.03) 100%);
-      border: 1px solid rgba(var(--card-hue), 0.2);
-      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
+      background: linear-gradient(160deg, rgba(var(--card-hue), 0.08) 0%, rgba(var(--card-hue), 0.01) 100%);
+      border: 1px solid rgba(var(--card-hue), 0.12);
+      box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5);
       
       border-radius: 24px;
       cursor:pointer; user-select:none;
       transition: all .25s ease;
       position:relative; overflow:hidden;
     }
+    
+    /* İkonlar */
+    .icon-box, .longIcon {
+      width: 50px; height: 50px;
+      border-radius: 16px;
+      background: rgba(var(--card-hue), 0.15);
+      border: 1px solid rgba(var(--card-hue), 0.2);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .icon-box svg, .longIcon svg {
+      width: 26px; height: 26px;
+      stroke: #fff; stroke-width: 1.8; fill: none;
+      filter: drop-shadow(0 0 6px rgba(var(--card-hue), 0.4));
+    }
 
-    /* Hover ve Active Efektleri */
+    /* Metinler */
+    .label, .longLbl { font-size: 13px; font-weight: 800; color:#fff; line-height: 1.2; }
+    .sub, .longSub { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
+
+    /* Etkileşim */
     .card:hover, .longCard:hover, .friendCard:hover {
-      background: linear-gradient(160deg, rgba(var(--card-hue), 0.22) 0%, rgba(var(--card-hue), 0.08) 100%);
-      border-color: rgba(var(--card-hue), 0.5);
+      background: linear-gradient(160deg, rgba(var(--card-hue), 0.18) 0%, rgba(var(--card-hue), 0.05) 100%);
+      border-color: rgba(var(--card-hue), 0.4);
       transform: translateY(-2px);
     }
     .card:active, .longCard:active, .friendCard:active {
       transform: scale(0.98);
-      border-color: rgba(var(--card-hue), 0.8);
     }
 
-    /* Kare Kartlar */
+    /* Kare Kart Yapısı */
     .card{
       padding: 16px 12px;
       display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-      gap: 10px; aspect-ratio: 1 / 1.06;
+      gap: 12px; aspect-ratio: 1 / 1.05;
     }
 
-    /* İkon Kutusu */
-    .icon-box, .longIcon {
-      width: 52px; height: 52px;
-      border-radius: 18px;
-      
-      /* İkon kutusu rengi kart renginden türetilir */
-      background: rgba(var(--card-hue), 0.2);
-      border: 1px solid rgba(var(--card-hue), 0.3);
-      box-shadow: inset 0 0 15px rgba(var(--card-hue), 0.1);
-      
-      display:flex; align-items:center; justify-content:center;
-    }
+    /* --- ÖZEL MAT RENKLER --- */
     
-    .icon-box svg, .longIcon svg {
-      width: 28px; height: 28px;
-      stroke: #fff; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round;
-      filter: drop-shadow(0 0 8px rgba(var(--card-hue), 0.6));
-    }
-
-    .label{ font-size: 13px; font-weight: 950; color:#fff; line-height: 1.15; letter-spacing: .2px; }
-    .sub{ font-size: 11px; font-weight: 750; color: var(--text-muted); margin-top: 2px; }
+    /* 1. Yüz Yüze: Derin Mavi */
+    .grid .card:nth-child(1) { --card-hue: 59, 130, 246; } /* Blue-500 */
+    
+    /* 2. Yan Yana: Zümrüt */
+    .grid .card:nth-child(2) { --card-hue: 16, 185, 129; } /* Emerald-500 */
+    
+    /* 3. Anında: Kehribar/Turuncu */
+    .grid .card:nth-child(3) { --card-hue: 245, 158, 11; } /* Amber-500 */
+    
+    /* 4. Fotoğraf: Menekşe */
+    .grid .card:nth-child(4) { --card-hue: 139, 92, 246; } /* Violet-500 */
+    
+    /* 5. Belge: Cam Göbeği (Teal) */
+    .grid .card:nth-child(5) { --card-hue: 20, 184, 166; } /* Teal-500 */
+    
+    /* 6. Online: Gül (Rose) */
+    .grid .card:nth-child(6) { --card-hue: 244, 63, 94; } /* Rose-500 */
 
     /* Uzun Kartlar */
-    .longWrap{
-      margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px;
-      animation: fadeInUp .55s var(--ease-elastic);
-    }
+    .longWrap{ margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: fadeInUp .6s ease; }
     .longCard{
       width:100%; padding: 16px 14px;
       display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between;
-      gap: 12px; aspect-ratio: 1 / 1.06;
+      gap: 10px; aspect-ratio: 1 / 1.05;
     }
-    .longIcon{ width: 54px; height: 54px; flex: 0 0 54px; }
-    .longTxt{ width:100%; }
-    .longLbl{ font-size: 14px; font-weight: 1000; color: rgba(255,255,255,.94); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .longSub{ font-size: 11px; font-weight: 800; color: rgba(255,255,255,.60); margin-top: 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    
+    /* Sohbet AI: İndigo */
+    .longWrap .longCard:nth-child(1) { --card-hue: 99, 102, 241; } /* Indigo-500 */
+    /* Öğretmen: Mor */
+    .longWrap .longCard:nth-child(2) { --card-hue: 168, 85, 247; } /* Purple-500 */
 
     /* Arkadaş Kartı */
-    .friendRow{ margin-top: 14px; animation: fadeInUp .55s var(--ease-elastic); }
+    .friendRow{ margin-top: 14px; animation: fadeInUp .65s ease; }
     .friendCard{
-      width:100%; padding: 14px 14px;
+      --card-hue: 236, 72, 153; /* Pink-500 */
+      width:100%; padding: 14px 16px;
       display:flex; align-items:center; justify-content:space-between; gap: 12px;
     }
-    .friendLeft{ display:flex; align-items:center; gap:12px; min-width:0; }
+    .friendLeft{ display:flex; align-items:center; gap:14px; min-width:0; }
     .friendChev{
-      width: 40px; height: 40px; border-radius: 16px;
-      background: rgba(var(--card-hue), 0.2);
-      border: 1px solid rgba(var(--card-hue), 0.3);
+      width: 36px; height: 36px; border-radius: 12px;
+      background: rgba(var(--card-hue), 0.15); border: 1px solid rgba(var(--card-hue), 0.25);
       display:flex; align-items:center; justify-content:center;
     }
     .friendChev svg{ width: 18px; height:18px; stroke:#fff; opacity:.9; }
-
-    /* --- ÖZEL MAT RENK ATAMALARI --- */
-    
-    /* 1. Yüz Yüze: Derin Okyanus Mavisi */
-    .grid .card:nth-child(1) { --card-hue: 45, 85, 180; }
-    
-    /* 2. Yan Yana: Orman Yeşili */
-    .grid .card:nth-child(2) { --card-hue: 46, 139, 87; }
-    
-    /* 3. Anında: Kiremit / Mat Turuncu */
-    .grid .card:nth-child(3) { --card-hue: 180, 80, 40; }
-    
-    /* 4. Fotoğraf: Mürdüm / Patlıcan Moru */
-    .grid .card:nth-child(4) { --card-hue: 120, 60, 140; }
-    
-    /* 5. Belge: Petrol Yeşili / Teal */
-    .grid .card:nth-child(5) { --card-hue: 0, 128, 128; }
-    
-    /* 6. Online: Gül Kurusu / Mat Pembe */
-    .grid .card:nth-child(6) { --card-hue: 160, 70, 90; }
-    
-    /* Sohbet AI: Hardal / Altın */
-    .longWrap .longCard:nth-child(1) { --card-hue: 180, 130, 30; }
-    
-    /* Öğretmen: Gece Mavisi / İndigo */
-    .longWrap .longCard:nth-child(2) { --card-hue: 75, 0, 130; }
-    
-    /* Arkadaş: Italky Bordosu (Mat) */
-    .friendCard { --card-hue: 140, 20, 50; }
 
 
     /* --- FOOTER --- */
     .footerbar{
       position:absolute; left: 0; right: 0; bottom: 0;
-      height: var(--footerH); padding: 12px 18px 14px;
-      background: rgba(0,0,0,.92); border-top: 1px solid rgba(255,255,255,.08);
+      height: var(--footerH); padding: 12px 20px 14px;
+      background: rgba(3, 0, 20, 0.95); 
+      border-top: 1px solid rgba(255,255,255,.05);
       z-index: 999; display:flex; flex-direction:column; justify-content:center;
+      backdrop-filter: blur(10px);
     }
-    .links{ display:flex; gap: 16px; justify-content:center; flex-wrap:wrap; margin-bottom: 8px; }
-    .links a{ color: rgba(255,255,255,0.60); text-decoration:none; font-size: 12px; font-weight: 800; }
-    .footerBrand{ text-align:center; font-size: 10px; color: rgba(255,255,255,0.25); letter-spacing: 0.6px; font-weight: 800; }
+    .links{ display:flex; gap: 18px; justify-content:center; flex-wrap:wrap; margin-bottom: 8px; }
+    .links a{ color: rgba(255,255,255,0.55); text-decoration:none; font-size: 12px; font-weight: 700; transition:.2s; }
+    .links a:hover{ color: #fff; }
+    .footerBrand{ text-align:center; font-size: 10px; color: rgba(255,255,255,0.2); letter-spacing: 0.8px; font-weight: 700; }
 
-    @keyframes fadeInUp { from { transform: translateY(26px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 
@@ -286,10 +300,10 @@
 
     <div class="header">
       <div class="mini-brand">
-        <div class="mini-logo">ITALKY</div>
-        <div class="mini-flag">
-          <div class="f-g"></div><div class="f-w"></div><div class="f-r"></div>
+        <div class="logo-container">
+          <span class="logo-main">Italky</span><span class="logo-ai">AI</span>
         </div>
+        <div class="mini-slogan">BE FREE</div>
       </div>
 
       <div class="userbox">
@@ -318,8 +332,8 @@
             </svg>
           </div>
           <div>
-            <div class="label">Yüz Yüze Çeviri</div>
-            <div class="sub">İki kişi, canlı</div>
+            <div class="label">Yüz Yüze</div>
+            <div class="sub">Canlı çeviri</div>
           </div>
         </div>
 
@@ -327,7 +341,7 @@
           <div class="icon-box">
             <svg viewBox="0 0 24 24">
               <path d="M4 5h8v14H4z"/>
-              <path d="M12 7h8v12h-8z" opacity=".35"/>
+              <path d="M12 7h8v12h-8z" opacity=".4"/>
               <path d="M7 9h2"/>
               <path d="M7 12h2"/>
               <path d="M15 10h2"/>
@@ -335,7 +349,7 @@
             </svg>
           </div>
           <div>
-            <div class="label">Yan Yana Çeviri</div>
+            <div class="label">Yan Yana</div>
             <div class="sub">Karşılıklı</div>
           </div>
         </div>
@@ -350,7 +364,7 @@
             </svg>
           </div>
           <div>
-            <div class="label">Anında Çeviri</div>
+            <div class="label">Anında</div>
             <div class="sub">Toplantı modu</div>
           </div>
         </div>
@@ -361,12 +375,12 @@
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
               <path d="M8 14h8"/>
               <path d="M10 11h4"/>
-              <circle cx="12" cy="13" r="4" opacity=".35" />
+              <circle cx="12" cy="13" r="4" opacity=".4" />
             </svg>
           </div>
           <div>
-            <div class="label">Fotoğraftan</div>
-            <div class="sub">Menü / etiket</div>
+            <div class="label">Fotoğraf</div>
+            <div class="sub">Görsel çeviri</div>
           </div>
         </div>
 
@@ -380,8 +394,8 @@
             </svg>
           </div>
           <div>
-            <div class="label">Belgeden Çeviri</div>
-            <div class="sub">PDF / metin</div>
+            <div class="label">Belge</div>
+            <div class="sub">PDF / Metin</div>
           </div>
         </div>
 
@@ -393,8 +407,8 @@
             </svg>
           </div>
           <div>
-            <div class="label">Online Sohbet</div>
-            <div class="sub">Çevirili mesaj</div>
+            <div class="label">Online</div>
+            <div class="sub">Sohbet</div>
           </div>
         </div>
 
@@ -405,12 +419,12 @@
           <div class="longIcon">
             <svg viewBox="0 0 24 24">
               <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
-              <path d="M12 2a10 10 0 0 1 10 10h-10z" opacity=".55"/>
+              <path d="M12 2a10 10 0 0 1 10 10h-10z" opacity=".5"/>
             </svg>
           </div>
           <div class="longTxt">
             <div class="longLbl">Sohbet AI</div>
-            <div class="longSub">Soru sor • kısa çözüm al</div>
+            <div class="longSub">Asistanınla konuş</div>
           </div>
         </div>
 
@@ -423,7 +437,7 @@
           </div>
           <div class="longTxt">
             <div class="longLbl">Öğretmen</div>
-            <div class="longSub">Ders • telaffuz • sınav</div>
+            <div class="longSub">Telaffuz ve ders</div>
           </div>
         </div>
       </div>
@@ -442,7 +456,7 @@
             </div>
             <div class="friendTxt">
               <div class="label">Arkadaşınla Öğren</div>
-              <div class="sub">Düello • pratik</div>
+              <div class="sub">Düello ve pratik yap</div>
             </div>
           </div>
           <div class="friendChev" aria-hidden="true">
