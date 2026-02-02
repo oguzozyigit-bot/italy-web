@@ -3,25 +3,28 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
   <title>ITALKY • Anında Çeviri</title>
   <link rel="icon" href="data:," />
 
   <style>
     :root{
-      --text: rgba(255,255,255,.94);
+      --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.62);
       --border: rgba(255,255,255,.10);
       --border2: rgba(255,255,255,.06);
+
+      /* ITALKY palette */
+      --navy1:#0b1222;
+      --navy2:#05070d;
+      --bordo1: rgba(120,20,35,.78);
+      --bordo2: rgba(70,10,25,.40);
+
       --shadow: 0 28px 90px rgba(0,0,0,.65);
 
-      --bgA: #0b1222;
-      --bgB: #05070d;
-
-      --burgA: rgba(120, 20, 35, .92);
-      --burgB: rgba(60, 10, 20, .60);
-
-      --g:#009246; --w:#ffffff; --r:#CE2B37;
+      --green:#22c55e;
+      --red:#ff5252;
+      --gold:#ffb300;
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -29,11 +32,11 @@
 
     body{
       background:
-        radial-gradient(900px 520px at 50% 14%, rgba(40,120,255,.18), transparent 62%),
-        radial-gradient(900px 520px at 50% 86%, rgba(120,20,35,.16), transparent 62%),
-        radial-gradient(700px 360px at 12% 10%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 520px at 50% 18%, rgba(40,120,255,.14), transparent 62%),
+        radial-gradient(900px 520px at 50% 86%, rgba(120,20,35,.12), transparent 62%),
+        radial-gradient(700px 360px at 12% 10%, rgba(255,255,255,.05), transparent 60%),
         radial-gradient(700px 360px at 88% 90%, rgba(255,255,255,.05), transparent 60%),
-        linear-gradient(180deg, var(--bgA), var(--bgB));
+        linear-gradient(180deg, var(--navy1), var(--navy2));
       color: var(--text);
     }
 
@@ -48,153 +51,140 @@
 
     /* Top bar */
     .topbar{
-      position:absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
+      position:absolute; left:0; right:0; top:0;
+      padding: 10px 12px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
       z-index: 50;
-      display:flex;
-      align-items:center;
-      gap: 10px;
+      background: rgba(0,0,0,.18);
+      border-bottom: 1px solid var(--border2);
+      backdrop-filter: blur(10px);
     }
 
     .back{
-      width: 46px; height: 46px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: rgba(15,15,18,.50);
-      color:#fff;
-      font-size:22px;
-      font-weight:1000;
+      width:46px;height:46px;border-radius:16px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.28);
+      color:#fff; font-size:22px; font-weight:1000;
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; user-select:none;
-      box-shadow: 0 18px 40px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      flex:0 0 46px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.35);
     }
     .back:active{ transform: translateY(1px); }
 
-    .titlePill{
+    .title{
       flex:1;
-      height:46px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: rgba(15,15,18,.35);
-      box-shadow: 0 18px 40px rgba(0,0,0,.35);
-      backdrop-filter: blur(10px);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 0 12px;
-      gap: 10px;
       min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      padding-left: 2px;
     }
-    .titleLeft{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-    .ttl{ font-weight:1000; font-size:13px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .st{ font-weight:900; font-size:11px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .title b{
+      font-size:14px; font-weight:1000; letter-spacing:.2px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .title span{
+      font-size:12px; font-weight:900; color: var(--muted);
+    }
 
     .spkBtn{
-      width: 44px; height: 44px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
+      width:46px;height:46px;border-radius:16px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.22);
       display:flex; align-items:center; justify-content:center;
       cursor:pointer; user-select:none;
-      flex:0 0 44px;
-      opacity:.55;
     }
-    .spkBtn.on{ opacity:.95; }
-    .spkBtn svg{ width:22px; height:22px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .spkBtn svg{ width:22px;height:22px; stroke:#fff; fill:none; stroke-width:2; opacity:.92; stroke-linecap:round; stroke-linejoin:round; }
+    .spkBtn.on{
+      border-color: rgba(255,179,0,.35);
+      box-shadow: 0 0 20px rgba(255,179,0,.16);
+    }
+    .spkBtn:active{ transform: translateY(1px); }
 
-    /* Fullscreen burgundy panel */
-    .panel{
+    /* Main */
+    .main{
       position:absolute;
-      left: 12px;
-      right: 12px;
+      left:0; right:0;
       top: 70px;
-      bottom: 62px;
+      bottom: 78px; /* brand */
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      overflow:hidden;
+    }
+
+    /* Bordo panel FULL height (sen istedin) */
+    .panel{
+      flex:1;
       border-radius: 28px;
-      border:1px solid var(--border);
+      border: 1px solid var(--border);
       background:
-        radial-gradient(900px 420px at 30% 10%, var(--burgA), transparent 68%),
-        radial-gradient(700px 360px at 80% 18%, rgba(90, 15, 30, .70), transparent 70%),
-        radial-gradient(600px 320px at 40% 75%, var(--burgB), transparent 72%),
-        linear-gradient(180deg, rgba(10,10,12,.18), rgba(0,0,0,.15));
+        radial-gradient(900px 520px at 50% 0%, rgba(120,20,35,.82), transparent 62%),
+        radial-gradient(900px 520px at 50% 100%, rgba(40,120,255,.12), transparent 62%),
+        linear-gradient(180deg, rgba(60,10,20,.55), rgba(0,0,0,.12));
       box-shadow: var(--shadow);
       overflow:hidden;
       display:flex;
       flex-direction:column;
       min-height:0;
+      position:relative;
+      backdrop-filter: blur(10px);
     }
 
-    .panelHead{
-      padding: 12px;
-      border-bottom: 1px solid var(--border2);
+    /* Language row */
+    .langRow{
+      padding: 12px 12px 10px;
+      display:flex; align-items:center; gap:10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
       background: rgba(0,0,0,.18);
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      z-index: 10;
+      z-index: 3;
     }
 
-    .ddRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      align-items:center;
-    }
-
-    .dd{ position: relative; width: 100%; }
+    .dd{ position:relative; flex:1; min-width:0; }
     .ddBtn{
       width:100%;
-      padding: 12px 12px;
       border-radius: 18px;
-      border:1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       color:#fff;
-      font-weight: 950;
-      font-size: 13px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      cursor:pointer;
-      user-select:none;
+      padding: 12px 12px;
+      font-weight: 1000;
+      font-size: 14px;
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+      cursor:pointer; user-select:none;
+      min-height: 48px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
     }
-    .ddBtn .caret{ opacity:.75; font-size: 12px; }
+    .ddBtn .caret{ opacity:.8; font-size: 12px; }
 
     .ddMenu{
       position:absolute;
       top: calc(100% + 8px);
       left: 0;
-      width: min(92vw, 360px);
-      max-width: calc(100vw - 28px);
+      width: min(320px, calc(100vw - 24px));
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.16);
-      background: rgba(20,20,24,.98);
+      background: rgba(18,18,22,.98);
       box-shadow: 0 34px 90px rgba(0,0,0,.70);
       backdrop-filter: blur(14px);
       display:none;
-      z-index: 9999;
+      z-index: 999;
       max-height: 320px;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width:none;
-      -ms-overflow-style:none;
     }
-    .ddMenu::-webkit-scrollbar{ width:0; height:0; }
     .dd.open .ddMenu{ display:block; }
-
-    /* ✅ hedef dil menüsü sağdan açılsın (taşma yok) */
-    #ddDst .ddMenu{ left:auto; right:0; }
+    .ddMenu::-webkit-scrollbar{ width:0; height:0; }
 
     .ddSearchWrap{
       position: sticky;
       top: 0;
-      z-index: 2;
       padding: 10px;
-      background: rgba(20,20,24,.98);
+      background: rgba(18,18,22,.98);
       border-bottom: 1px solid rgba(255,255,255,.10);
+      z-index: 3;
     }
     .ddSearch{
       width:100%;
@@ -211,111 +201,153 @@
 
     .ddItem{
       padding: 13px 14px;
-      cursor:pointer;
-      color: rgba(255,255,255,.96);
       font-weight: 950;
       font-size: 14px;
       border-bottom: 1px solid rgba(255,255,255,.08);
+      cursor:pointer;
       user-select:none;
+      color: rgba(255,255,255,.95);
     }
     .ddItem:last-child{ border-bottom:none; }
-    .ddItem:hover{ background: rgba(255,255,255,.06); }
     .ddItem.hidden{ display:none; }
+    .ddItem:active{ background: rgba(255,179,0,.12); }
 
+    /* Play */
+    .playBtn{
+      width: 58px;
+      height: 58px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; user-select:none;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      flex: 0 0 58px;
+      position:relative;
+    }
+    .playBtn:active{ transform: translateY(1px); }
+    .playBtn.running{
+      border-color: rgba(34,197,94,.35);
+      background: rgba(34,197,94,.12);
+      box-shadow: 0 0 24px rgba(34,197,94,.18), 0 18px 50px rgba(0,0,0,.35);
+    }
+
+    .playBtn svg{ width:26px;height:26px; fill:none; stroke:#fff; stroke-width:2; opacity:.95; stroke-linecap:round; stroke-linejoin:round; }
+    .icoPause{ display:none; }
+
+    /* Output area */
     .stream{
-      flex: 1 1 auto;
+      flex:1;
       min-height:0;
-      padding: 12px 12px 92px;
       overflow:auto;
-      -webkit-overflow-scrolling: touch;
+      padding: 12px;
       display:flex;
       flex-direction:column;
       gap: 10px;
       scrollbar-width:none;
-      -ms-overflow-style:none;
     }
     .stream::-webkit-scrollbar{ width:0; height:0; }
 
+    /* We keep it clean: only translated lines */
     .bubble{
-      border-radius: 22px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
       padding: 12px 13px;
       font-weight: 950;
-      font-size: 13px;
+      font-size: 14px;
       line-height: 1.35;
-      word-break: break-word;
+      box-shadow: 0 12px 28px rgba(0,0,0,.28);
     }
-    .bubble .small{
-      font-size: 11px;
-      font-weight: 950;
-      color: rgba(255,255,255,.62);
-      margin-bottom: 6px;
-    }
-    .bubble.trg{ border-left: 4px solid rgba(190,242,100,.85); }
+    .small{ display:none; } /* ✅ label yok */
 
-    .playDock{
+    /* Gemini-like white living animation */
+    .liveGlow{
       position:absolute;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      z-index: 30;
-      pointer-events:auto;
-    }
-    .playBtn{
-      width: 78px; height: 78px;
-      border-radius: 30px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      box-shadow: 0 20px 55px rgba(0,0,0,.45);
-    }
-    .playBtn:active{ transform: translateY(1px); }
-    .playBtn.running{
-      border-color: rgba(190,242,100,.35);
-      background: rgba(190,242,100,.12);
-      box-shadow: 0 0 26px rgba(190,242,100,.16), 0 20px 55px rgba(0,0,0,.45);
-    }
-    .playBtn svg{ width:30px; height:30px; stroke:#fff; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
-
-    .brandBottom{
-      position:absolute;
-      left: 50%;
+      left: 14px;
+      right: 14px;
       bottom: 10px;
+      height: 88px;
+      border-radius: 26px;
+      pointer-events:none;
+      overflow:hidden;
+      opacity: .92;
+      filter: blur(.2px);
+    }
+    .liveGlow::before{
+      content:"";
+      position:absolute; inset:-40%;
+      background:
+        radial-gradient(400px 120px at 18% 60%, rgba(255,255,255,.30), transparent 70%),
+        radial-gradient(420px 140px at 52% 70%, rgba(255,255,255,.24), transparent 70%),
+        radial-gradient(360px 120px at 86% 64%, rgba(255,255,255,.22), transparent 70%);
+      filter: blur(18px);
+      transform: translate3d(-6%,0,0);
+      animation: glowMove 2.8s ease-in-out infinite alternate;
+      opacity: .80;
+    }
+    .liveGlow::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.35));
+      opacity: .8;
+    }
+    @keyframes glowMove{
+      0%{ transform: translate3d(-6%, 0, 0) scale(1); opacity:.65; }
+      100%{ transform: translate3d(6%, -6%, 0) scale(1.05); opacity:.92; }
+    }
+
+    /* Status strip */
+    .statusStrip{
+      position:absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      z-index: 4;
+      pointer-events:none;
+    }
+    .statusTxt{
+      font-size: 12px;
+      font-weight: 1000;
+      color: rgba(255,255,255,.78);
+      text-shadow: 0 10px 22px rgba(0,0,0,.45);
+    }
+
+    /* Bottom brand */
+    .brand{
+      position:absolute;
+      left:50%;
       transform: translateX(-50%);
-      z-index: 20;
+      bottom: 10px;
+      z-index: 60;
       display:flex;
       flex-direction:column;
       align-items:center;
       gap: 6px;
       cursor:pointer;
       user-select:none;
-      opacity:.92;
     }
-    .bn{
+    .brand .t{
       font-weight: 1000;
-      letter-spacing:.35px;
-      font-size: 12px;
+      letter-spacing:.4px;
+      font-size: 14px;
       color: rgba(255,255,255,.92);
-      line-height:1;
     }
-    .flagbar{
-      width: 64px;
+    .flag{
+      width: 74px;
       height: 4px;
       border-radius: 999px;
       overflow:hidden;
       display:flex;
-      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
     }
-    .flagbar span{ flex:1; }
-    .f-g{ background: var(--g); }
-    .f-w{ background: var(--w); }
-    .f-r{ background: var(--r); }
+    .flag i{ flex:1; display:block; }
+    .g{ background:#009246; }
+    .w{ background:#ffffff; }
+    .r{ background:#CE2B37; }
 
     .toast{
       position: fixed;
@@ -343,65 +375,68 @@
 </head>
 
 <body>
-  <div class="frame" id="frameRoot">
-
+  <div class="frame">
     <div class="topbar">
-      <button class="back" id="backBtn" aria-label="Geri">←</button>
-
-      <div class="titlePill">
-        <div class="titleLeft">
-          <div class="ttl">Anında Çeviri</div>
-          <div class="st" id="panelStatus">Hazır</div>
-        </div>
-
-        <button class="spkBtn" id="spkBtn" aria-label="Ses">
-          <svg viewBox="0 0 24 24">
-            <path d="M11 5L6 9H3v6h3l5 4z"></path>
-            <path d="M15 9a4 4 0 0 1 0 6"></path>
-            <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
-          </svg>
-        </button>
+      <button class="back" id="backBtn">←</button>
+      <div class="title">
+        <b>Anında Çeviri</b>
+        <span id="panelStatus">Hazır</span>
       </div>
+
+      <button class="spkBtn" id="spkBtn" title="Ses (opsiyonel)">
+        <svg viewBox="0 0 24 24">
+          <path d="M11 5L6 9H3v6h3l5 4z"></path>
+          <path d="M15 9a4 4 0 0 1 0 6"></path>
+          <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
+        </svg>
+      </button>
     </div>
 
-    <section class="panel" id="panel">
-      <div class="panelHead">
-        <div class="ddRow">
+    <div class="main">
+      <div class="panel">
+        <div class="langRow">
           <div class="dd" id="ddSrc">
-            <div class="ddBtn" id="ddSrcBtn"><span id="ddSrcTxt">English</span><span class="caret">▾</span></div>
+            <div class="ddBtn" id="ddSrcBtn"><span id="ddSrcTxt">—</span><span class="caret">▾</span></div>
             <div class="ddMenu" id="ddSrcMenu"></div>
           </div>
 
           <div class="dd" id="ddDst">
-            <div class="ddBtn" id="ddDstBtn"><span id="ddDstTxt">Türkçe</span><span class="caret">▾</span></div>
+            <div class="ddBtn" id="ddDstBtn"><span id="ddDstTxt">—</span><span class="caret">▾</span></div>
             <div class="ddMenu" id="ddDstMenu"></div>
           </div>
+
+          <button class="playBtn" id="playBtn" aria-label="Play/Pause">
+            <svg id="icoPlay" viewBox="0 0 24 24">
+              <path d="M8 5l12 7-12 7z"></path>
+            </svg>
+            <svg id="icoPause" class="icoPause" viewBox="0 0 24 24">
+              <path d="M7 6v12"></path>
+              <path d="M17 6v12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="stream" id="stream"></div>
+
+        <!-- Gemini-like living white animation -->
+        <div class="liveGlow" id="liveGlow"></div>
+
+        <div class="statusStrip">
+          <div class="statusTxt" id="statusLeft"></div>
+          <div class="statusTxt" id="statusRight"></div>
         </div>
       </div>
-
-      <div class="stream" id="stream"></div>
-
-      <div class="playDock">
-        <button class="playBtn" id="playBtn" aria-label="Başlat/Duraklat">
-          <svg id="icoPlay" viewBox="0 0 24 24">
-            <polygon points="8,5 19,12 8,19"></polygon>
-          </svg>
-          <svg id="icoPause" viewBox="0 0 24 24" style="display:none">
-            <line x1="9" y1="6" x2="9" y2="18"></line>
-            <line x1="15" y1="6" x2="15" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-    </section>
-
-    <div class="brandBottom" id="brandHome" title="Anasayfa">
-      <div class="bn">ITALKY</div>
-      <div class="flagbar" aria-hidden="true"><span class="f-g"></span><span class="f-w"></span><span class="f-r"></span></div>
     </div>
+
+    <!-- clickable brand -->
+    <div class="brand" id="brandHome">
+      <div class="t">ITALKY</div>
+      <div class="flag"><i class="g"></i><i class="w"></i><i class="r"></i></div>
+    </div>
+
+    <div class="toast" id="toast">—</div>
+
+    <script type="module" src="/js/fast_page.js?v=5"></script>
   </div>
-
-  <div class="toast" id="toast">—</div>
-
-  <script type="module" src="/js/fast_page.js?v=4"></script>
 </body>
 </html>
