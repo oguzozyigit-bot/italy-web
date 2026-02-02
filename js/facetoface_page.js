@@ -9,119 +9,84 @@ function toast(msg){
   t.textContent = msg;
   t.classList.add("show");
   clearTimeout(window.__to);
-  window.__to = setTimeout(()=>t.classList.remove("show"), 2000);
+  window.__to = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+function setWaveListening(on){
+  $("frameRoot")?.classList.toggle("listening", !!on);
 }
 
 const LANGS = [
-  { code:"tr", name:"Türkçe" },
-  { code:"en", name:"English" },
-  { code:"de", name:"Deutsch" },
-  { code:"fr", name:"Français" },
-  { code:"it", name:"Italiano" },
-  { code:"es", name:"Español" },
-  { code:"ru", name:"Русский" },
-  { code:"ar", name:"العربية" },
+  { code:"tr", name:"Türkçe",  speech:"tr-TR", tts:"tr-TR" },
+  { code:"en", name:"English", speech:"en-US", tts:"en-US" },
+  { code:"de", name:"Deutsch", speech:"de-DE", tts:"de-DE" },
+  { code:"fr", name:"Français",speech:"fr-FR", tts:"fr-FR" },
+  { code:"es", name:"Español", speech:"es-ES", tts:"es-ES" },
+  { code:"it", name:"Italiano", speech:"it-IT", tts:"it-IT" },
+  { code:"ar", name:"العربية", speech:"ar-SA", tts:"ar-SA" },
+  { code:"ru", name:"Русский", speech:"ru-RU", tts:"ru-RU" },
 ];
 
-function getLangName(code){
-  return (LANGS.find(x=>x.code===code)?.name || code);
-}
+function speechLocale(code){ return LANGS.find(x=>x.code===code)?.speech || "en-US"; }
+function ttsLocale(code){ return LANGS.find(x=>x.code===code)?.tts || "en-US"; }
 
-/* ====== STATE ====== */
-let activeTarget = "bot"; // "top" | "bot"
-let topLang = "en";
-let botLang = "tr";
-
-/* ====== SHEET OPEN/CLOSE (TOP: üstten + 180°) ====== */
-function openSheet(which){
-  activeTarget = (which === "top") ? "top" : "bot";
-  const sh = $("langSheet");
-  if(!sh) return;
-
-  sh.classList.toggle("fromTop", activeTarget === "top");
-
-  const title = $("sheetTitle");
-  if(title) title.textContent = (activeTarget === "top") ? "Üst Dil" : "Alt Dil";
-
-  renderSheetList();
-  sh.classList.add("show");
-
-  setTimeout(()=>{ try{ $("sheetQuery")?.focus?.(); }catch{} }, 30);
-}
-
-function closeSheet(){
-  $("langSheet")?.classList.remove("show");
-}
-
-function renderSheetList(){
-  const list = $("sheetList");
-  if(!list) return;
-  list.innerHTML = "";
-
-  const selected = (activeTarget === "top") ? topLang : botLang;
-
-  LANGS.forEach(l=>{
-    const row = document.createElement("div");
-    row.className = "sheetRow" + (l.code === selected ? " selected" : "");
-    row.innerHTML = `<div class="name">${l.name}</div><div class="code">${l.code}</div>`;
-    row.addEventListener("click", ()=>{
-      if(activeTarget === "top"){
-        topLang = l.code;
-        $("topLangTxt").textContent = getLangName(topLang);
-      }else{
-        botLang = l.code;
-        $("botLangTxt").textContent = getLangName(botLang);
-      }
-      closeSheet();
-    });
-    list.appendChild(row);
-  });
-
-  const q = $("sheetQuery");
-  if(q && !q.dataset.__bound){
-    q.dataset.__bound = "1";
-    q.addEventListener("input", ()=>{
-      const s = (q.value||"").toLowerCase().trim();
-      list.querySelectorAll(".sheetRow").forEach((el)=>{
-        const t = (el.textContent||"").toLowerCase();
-        el.style.display = (!s || t.includes(s)) ? "" : "none";
-      });
-    });
-  }else if(q){
-    q.value = "";
-  }
-}
-
-/* ====== TRANSLATE API ====== */
-async function translateViaApi(text, from_lang, to_lang){
+async function translateViaApi(text, source, target){
   const base = (BASE_DOMAIN || "").replace(/\/+$/,"");
   if(!base) return text;
+
   try{
+    const payload = { text, source, target, from_lang: source, to_lang: target }; // iki formatı da destekle
     const r = await fetch(`${base}/api/translate`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ text, from_lang, to_lang })
+      body: JSON.stringify(payload)
     });
     if(!r.ok) throw new Error("api");
     const data = await r.json();
-    return (data?.translated || data?.text || "").trim() || text;
+
+    const out = String(
+      data?.translated || data?.text || data?.translation || data?.translatedText || ""
+    ).trim();
+
+    return out || text;
   }catch{
     return text;
   }
 }
 
-/* ====== SpeechRecognition ====== */
-function speechLocale(code){
-  return (code==="tr")?"tr-TR":
-         (code==="en")?"en-US":
-         (code==="de")?"de-DE":
-         (code==="fr")?"fr-FR":
-         (code==="it")?"it-IT":
-         (code==="es")?"es-ES":
-         (code==="ru")?"ru-RU":
-         (code==="ar")?"ar-SA":
-         "en-US";
+/* ========= ✅ SES DÜZELTME (HOPARLÖR) =========
+   - topSpeak/botSpeak artık o paneldeki SON üretilen metni okur
+   - (Autoplay yok; kullanıcı dokunuşu ile güvenli)
+*/
+let lastSpeakTop = "";
+let lastSpeakBot = "";
+function rememberLast(side, txt){
+  const t = String(txt||"").trim();
+  if(!t) return;
+  if(side === "top") lastSpeakTop = t;
+  else lastSpeakBot = t;
 }
+
+function speakText(text, langCode){
+  const t = String(text||"").trim();
+  if(!t) { toast("Okunacak metin yok."); return; }
+  if(!("speechSynthesis" in window)) { toast("TTS desteklenmiyor."); return; }
+
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = ttsLocale(langCode);
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    window.speechSynthesis.speak(u);
+  }catch(e){
+    console.warn("TTS error", e);
+    toast("Ses çalınamadı.");
+  }
+}
+
+/* ========= Speech Recognition ========= */
 function buildRecognizer(langCode){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR) return null;
@@ -132,30 +97,85 @@ function buildRecognizer(langCode){
   return rec;
 }
 
-function setWaveListening(on){
-  $("frameRoot")?.classList.toggle("listening", !!on);
+/* Auto-follow */
+const follow = { top:true, bot:true };
+function isNearBottom(el, slack=140){
+  try{ return (el.scrollHeight - el.scrollTop - el.clientHeight) < slack; }
+  catch{ return true; }
+}
+function hookScrollFollow(sideName, el){
+  el.addEventListener("scroll", ()=>{ follow[sideName] = isNearBottom(el); }, { passive:true });
+}
+function scrollIfNeeded(sideName, el){
+  if(follow[sideName]) el.scrollTop = el.scrollHeight;
 }
 
-function addBubble(side, kind, text){
-  const wrap = $(side === "top" ? "topBody" : "botBody");
-  if(!wrap) return;
+/* Bubbles */
+function addBubble(sideName, kind, text){
+  const wrap = $(sideName === "top" ? "topBody" : "botBody");
   const b = document.createElement("div");
-  b.className = `bubble ${kind}`;
+  b.className = `bubble ${kind === "me" ? "me" : "them"}`;
   b.textContent = text || "—";
   wrap.appendChild(b);
-  wrap.scrollTop = wrap.scrollHeight;
+  scrollIfNeeded(sideName, wrap);
+
+  // son metni hatırla (✅ hoparlör için)
+  if(kind === "me") rememberLast(sideName, b.textContent);
+  if(kind === "them") rememberLast(sideName, b.textContent);
 }
 
-async function onFinal(side, src, dst, finalText){
-  const other = (side === "top") ? "bot" : "top";
-  addBubble(side, "them", finalText);
-  const out = await translateViaApi(finalText, src, dst);
-  addBubble(other, "me", out);
+/* ========= Language sheet ========= */
+let activeSheetSide = "bot"; // hangi buton açtıysa
+let topLang = "en";
+let botLang = "tr";
+
+function renderSheet(selectedCode){
+  const list = $("sheetList");
+  const q = ($("sheetQuery")?.value || "").trim().toLowerCase();
+
+  list.innerHTML = "";
+  LANGS.forEach(l=>{
+    const key = (l.name + " " + l.code).toLowerCase();
+    if(q && !key.includes(q)) return;
+
+    const row = document.createElement("div");
+    row.className = "sheetRow" + (l.code === selectedCode ? " selected" : "");
+    row.innerHTML = `<span class="name">${l.name}</span><span class="code">${l.code}</span>`;
+    row.addEventListener("click", ()=>{
+      if(activeSheetSide === "top"){
+        topLang = l.code;
+        $("topLangTxt").textContent = l.name;
+      }else{
+        botLang = l.code;
+        $("botLangTxt").textContent = l.name;
+      }
+      closeSheet();
+    });
+    list.appendChild(row);
+  });
 }
 
+function openSheet(side){
+  activeSheetSide = side;
+  $("sheetTitle").textContent = (side==="top") ? "Üst Dil" : "Alt Dil";
+  $("sheetQuery").value = "";
+  renderSheet(side==="top" ? topLang : botLang);
+  $("langSheet").classList.add("show");
+}
+function closeSheet(){
+  $("langSheet").classList.remove("show");
+}
+
+/* ========= Mic flow ========= */
 let active = null;
 let topRec = null;
 let botRec = null;
+
+function setMicUI(side, on){
+  const mic = $(side === "top" ? "topMic" : "botMic");
+  mic?.classList.toggle("listening", !!on);
+  setWaveListening(!!on);
+}
 
 function stopAll(){
   try{ topRec?.stop?.(); }catch{}
@@ -163,23 +183,41 @@ function stopAll(){
   topRec = null;
   botRec = null;
   active = null;
+  setMicUI("top", false);
+  setMicUI("bot", false);
   setWaveListening(false);
 }
 
-function startSide(side){
-  const src = (side === "top") ? topLang : botLang;
-  const dst = (side === "top") ? botLang : topLang;
+async function onFinal(side, srcCode, dstCode, finalText){
+  const otherSide = (side === "top") ? "bot" : "top";
 
+  // konuşan
+  addBubble(side, "them", finalText);
+
+  // çeviri
+  const out = await translateViaApi(finalText, srcCode, dstCode);
+  addBubble(otherSide, "me", out);
+
+  // Not: otomatik ses yok (önceden böyleyse) — hoparlör butonuyla okutuluyor
+}
+
+function startSide(side){
   if(active && active !== side) stopAll();
 
-  const rec = buildRecognizer(src);
-  if(!rec){ toast("Bu cihaz konuşmayı yazıya çevirmiyor."); return; }
+  const srcCode = (side==="top") ? topLang : botLang;
+  const dstCode = (side==="top") ? botLang : topLang;
+
+  const rec = buildRecognizer(srcCode);
+  if(!rec){
+    toast("Bu cihaz konuşmayı yazıya çevirmiyor.");
+    return;
+  }
 
   active = side;
-  setWaveListening(true);
+  setMicUI(side, true);
 
-  let finalText = "";
   let live = "";
+  let finalText = "";
 
   rec.onresult = (e)=>{
     let chunk = "";
@@ -198,35 +236,64 @@ function startSide(side){
 
   rec.onend = async ()=>{
     const txt = (finalText || live || "").trim();
-    setWaveListening(false);
+    setMicUI(side, false);
+
+    if(!txt){
+      active = null;
+      return;
+    }
+
+    await onFinal(side, srcCode, dstCode, txt);
     active = null;
-    if(txt) await onFinal(side, src, dst, txt);
   };
 
   if(side === "top") topRec = rec;
   else botRec = rec;
 
   try{ rec.start(); }
-  catch{ toast("Mikrofon açılamadı."); stopAll(); }
+  catch{
+    toast("Mikrofon açılamadı.");
+    stopAll();
+  }
 }
 
+/* ========= Boot ========= */
 document.addEventListener("DOMContentLoaded", ()=>{
-  $("backBtn")?.addEventListener("click", ()=>{
+  $("backBtn").addEventListener("click", ()=>{
     if(history.length>1) history.back();
     else location.href = "/pages/home.html";
   });
 
-  $("topLangTxt").textContent = getLangName(topLang);
-  $("botLangTxt").textContent = getLangName(botLang);
+  hookScrollFollow("top", $("topBody"));
+  hookScrollFollow("bot", $("botBody"));
 
-  $("topLangBtn")?.addEventListener("click", ()=> openSheet("top"));
-  $("botLangBtn")?.addEventListener("click", ()=> openSheet("bot"));
+  // init labels
+  $("topLangTxt").textContent = LANGS.find(x=>x.code===topLang)?.name || "English";
+  $("botLangTxt").textContent = LANGS.find(x=>x.code===botLang)?.name || "Türkçe";
 
-  $("sheetClose")?.addEventListener("click", closeSheet);
-  $("langSheet")?.addEventListener("click", (e)=>{
-    if(e.target === $("langSheet")) closeSheet();
+  // sheet open
+  $("topLangBtn").addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); openSheet("top"); });
+  $("botLangBtn").addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); openSheet("bot"); });
+
+  $("sheetClose").addEventListener("click", closeSheet);
+  $("langSheet").addEventListener("click", (e)=>{ if(e.target === $("langSheet")) closeSheet(); });
+  $("sheetQuery").addEventListener("input", ()=> renderSheet(activeSheetSide==="top" ? topLang : botLang));
+
+  // mic
+  $("topMic").addEventListener("click", ()=> startSide("top"));
+  $("botMic").addEventListener("click", ()=> startSide("bot"));
+
+  // ✅ hoparlör: son metni oku
+  $("topSpeak").addEventListener("click", ()=>{
+    speakText(lastSpeakTop, topLang);
+  });
+  $("botSpeak").addEventListener("click", ()=>{
+    speakText(lastSpeakBot, botLang);
   });
 
-  $("topMic")?.addEventListener("click", ()=> startSide("top"));
-  $("botMic")?.addEventListener("click", ()=> startSide("bot"));
+  // İlk metin boşsa uyarı olmasın diye küçük demo
+  // (İstersen kaldırırsın)
+  // addBubble("bot", "me", "Hazırım. Konuş, ben çevireyim.");
+
+  setWaveListening(false);
 });
