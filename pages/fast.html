@@ -9,35 +9,31 @@
 
   <style>
     :root{
-      --text: rgba(255,255,255,.92);
+      --text: rgba(255,255,255,.94);
       --muted: rgba(255,255,255,.62);
       --border: rgba(255,255,255,.10);
       --border2: rgba(255,255,255,.06);
       --shadow: 0 28px 90px rgba(0,0,0,.65);
 
-      --blueA: rgba(40,120,255,.16);
-      --blueB: rgba(20,40,90,.55);
+      --bgA: #0b1222;
+      --bgB: #05070d;
 
-      --burgA: rgba(120, 20, 35, .86);
-      --burgB: rgba(70, 10, 25, .50);
+      --burgA: rgba(120, 20, 35, .92);
+      --burgB: rgba(60, 10, 20, .60);
 
-      --ok: rgba(190,242,100,.85);
-      --bad: rgba(255,82,82,.85);
-
-      --g:#009246;
-      --w:#ffffff;
-      --r:#CE2B37;
+      --g:#009246; --w:#ffffff; --r:#CE2B37;
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html,body{ margin:0; padding:0; width:100%; height:100dvh; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+
     body{
       background:
         radial-gradient(900px 520px at 50% 14%, rgba(40,120,255,.18), transparent 62%),
         radial-gradient(900px 520px at 50% 86%, rgba(120,20,35,.16), transparent 62%),
         radial-gradient(700px 360px at 12% 10%, rgba(255,255,255,.06), transparent 60%),
         radial-gradient(700px 360px at 88% 90%, rgba(255,255,255,.05), transparent 60%),
-        linear-gradient(180deg, #0b1222, #05070d);
+        linear-gradient(180deg, var(--bgA), var(--bgB));
       color: var(--text);
     }
 
@@ -50,6 +46,7 @@
       overflow:hidden;
     }
 
+    /* Top bar */
     .topbar{
       position:absolute;
       top: 12px;
@@ -62,21 +59,17 @@
     }
 
     .back{
-      width: 46px;
-      height: 46px;
+      width: 46px; height: 46px;
       border-radius: 16px;
       border: 1px solid var(--border);
       background: rgba(15,15,18,.50);
       color:#fff;
       font-size:22px;
       font-weight:1000;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; user-select:none;
       box-shadow: 0 18px 40px rgba(0,0,0,.45);
       backdrop-filter: blur(10px);
-      user-select:none;
       flex:0 0 46px;
     }
     .back:active{ transform: translateY(1px); }
@@ -94,61 +87,37 @@
       justify-content:space-between;
       padding: 0 12px;
       gap: 10px;
-      min-width: 0;
+      min-width:0;
     }
-    .titleLeft{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width: 0;
-    }
-    .ttl{
-      font-weight:1000;
-      font-size:13px;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .st{
-      font-weight:900;
-      font-size:11px;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .titleLeft{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+    .ttl{ font-weight:1000; font-size:13px; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .st{ font-weight:900; font-size:11px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
     .spkBtn{
       width: 44px; height: 44px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.05);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      user-select:none;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; user-select:none;
       flex:0 0 44px;
+      opacity:.55; /* default kapalı gibi dursun */
     }
-    .spkBtn svg{ width:22px; height:22px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; opacity:.92; }
-    .spkBtn.muted{ opacity:.45; }
+    .spkBtn.on{ opacity:.95; }
+    .spkBtn svg{ width:22px; height:22px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 
-    .main{
-      position:absolute;
-      inset: 70px 12px 72px 12px;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-      min-height:0;
-    }
-
+    /* Fullscreen burgundy panel */
     .panel{
+      position:absolute;
+      left: 12px;
+      right: 12px;
+      top: 70px;
+      bottom: 62px; /* logo alanı */
       border-radius: 28px;
       border:1px solid var(--border);
       background:
-        radial-gradient(900px 420px at 30% 12%, var(--burgA), transparent 68%),
-        radial-gradient(700px 360px at 80% 18%, rgba(90, 15, 30, .65), transparent 70%),
+        radial-gradient(900px 420px at 30% 10%, var(--burgA), transparent 68%),
+        radial-gradient(700px 360px at 80% 18%, rgba(90, 15, 30, .70), transparent 70%),
         radial-gradient(600px 320px at 40% 75%, var(--burgB), transparent 72%),
         linear-gradient(180deg, rgba(10,10,12,.18), rgba(0,0,0,.15));
       box-shadow: var(--shadow);
@@ -159,74 +128,117 @@
     }
 
     .panelHead{
-      padding: 12px 12px;
+      padding: 12px;
       border-bottom: 1px solid var(--border2);
-      background: rgba(0,0,0,.20);
+      background: rgba(0,0,0,.18);
       display:flex;
-      align-items:center;
+      flex-direction:column;
       gap: 10px;
-      flex-wrap: wrap;
     }
 
-    .select{
-      appearance:none;
-      -webkit-appearance:none;
-      border-radius: 16px;
+    /* Custom dropdown row */
+    .ddRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items:center;
+    }
+
+    .dd{
+      position: relative;
+      width: 100%;
+    }
+    .ddBtn{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 18px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       color:#fff;
-      padding: 10px 12px;
       font-weight: 950;
       font-size: 13px;
-      min-width: 0;
-      flex: 1 1 160px;
-    }
-
-    .controls{
-      margin-left:auto;
       display:flex;
       align-items:center;
+      justify-content:space-between;
       gap:10px;
-      flex: 0 0 auto;
-    }
-
-    .playBtn{
-      width: 54px; height: 54px;
-      border-radius: 20px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
       cursor:pointer;
       user-select:none;
-      box-shadow: 0 16px 45px rgba(0,0,0,.35);
     }
-    .playBtn:active{ transform: translateY(1px); }
-    .playBtn.running{
-      border-color: rgba(190,242,100,.35);
-      background: rgba(190,242,100,.12);
-      box-shadow: 0 0 26px rgba(190,242,100,.16), 0 16px 45px rgba(0,0,0,.35);
-    }
-    .playBtn svg{ width:26px; height:26px; stroke:#fff; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
+    .ddBtn .caret{ opacity:.75; font-size: 12px; }
 
-    .lines{
+    .ddMenu{
+      position:absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: min(92vw, 360px);
+      max-width: calc(100vw - 28px);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(20,20,24,.98);
+      box-shadow: 0 34px 90px rgba(0,0,0,.70);
+      backdrop-filter: blur(14px);
+      display:none;
+      z-index: 9999;
+      max-height: 320px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+    }
+    .ddMenu::-webkit-scrollbar{ width:0; height:0; }
+    .dd.open .ddMenu{ display:block; }
+
+    .ddSearchWrap{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 10px;
+      background: rgba(20,20,24,.98);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .ddSearch{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      font-weight: 900;
+      font-size: 13px;
+      padding: 10px 12px;
+      outline:none;
+    }
+    .ddSearch::placeholder{ color: rgba(255,255,255,.55); font-weight: 800; }
+
+    .ddItem{
+      padding: 13px 14px;
+      cursor:pointer;
+      color: rgba(255,255,255,.96);
+      font-weight: 950;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      user-select:none;
+    }
+    .ddItem:last-child{ border-bottom:none; }
+    .ddItem:hover{ background: rgba(255,255,255,.06); }
+    .ddItem.hidden{ display:none; }
+
+    /* Translate stream area */
+    .stream{
       flex: 1 1 auto;
       min-height:0;
-      padding: 12px;
+      padding: 12px 12px 92px; /* play buton için alt pay */
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       display:flex;
       flex-direction:column;
       gap: 10px;
-
       scrollbar-width:none;
       -ms-overflow-style:none;
     }
-    .lines::-webkit-scrollbar{ width:0; height:0; }
+    .stream::-webkit-scrollbar{ width:0; height:0; }
 
     .bubble{
-      border-radius: 20px;
+      border-radius: 22px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
       box-shadow: 0 14px 30px rgba(0,0,0,.25);
@@ -234,7 +246,6 @@
       font-weight: 950;
       font-size: 13px;
       line-height: 1.35;
-      color: rgba(255,255,255,.94);
       word-break: break-word;
     }
     .bubble .small{
@@ -244,38 +255,43 @@
       margin-bottom: 6px;
     }
     .bubble.trg{ border-left: 4px solid rgba(190,242,100,.85); }
-    .bubble.src{ border-left: 4px solid rgba(255,179,0,.80); }
 
-    .toast{
-      position: fixed;
+    /* Play/Pause bottom center over panel */
+    .playDock{
+      position:absolute;
       left: 50%;
-      top: 14px;
+      bottom: 14px;
       transform: translateX(-50%);
-      z-index: 99999;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-weight: 1000;
-      font-size: 12px;
-      background: rgba(20,20,20,.92);
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 18px 40px rgba(0,0,0,.45);
-      backdrop-filter: blur(10px);
-      display:none;
-      color: rgba(255,255,255,.92);
-      max-width: min(480px, calc(100vw - 24px));
-      white-space: nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
+      z-index: 30;
+      pointer-events:auto;
     }
-    .toast.show{ display:block; }
+    .playBtn{
+      width: 78px; height: 78px;
+      border-radius: 30px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 20px 55px rgba(0,0,0,.45);
+    }
+    .playBtn:active{ transform: translateY(1px); }
+    .playBtn.running{
+      border-color: rgba(190,242,100,.35);
+      background: rgba(190,242,100,.12);
+      box-shadow: 0 0 26px rgba(190,242,100,.16), 0 20px 55px rgba(0,0,0,.45);
+    }
+    .playBtn svg{ width:30px; height:30px; stroke:#fff; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
 
-    /* Bottom brand */
+    /* bottom brand */
     .brandBottom{
       position:absolute;
       left: 50%;
       bottom: 10px;
       transform: translateX(-50%);
-      z-index: 30;
+      z-index: 20;
       display:flex;
       flex-direction:column;
       align-items:center;
@@ -304,11 +320,34 @@
     .f-w{ background: var(--w); }
     .f-r{ background: var(--r); }
 
+    .toast{
+      position: fixed;
+      left: 50%;
+      top: 14px;
+      transform: translateX(-50%);
+      z-index: 99999;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 1000;
+      font-size: 12px;
+      background: rgba(20,20,20,.92);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 18px 40px rgba(0,0,0,.45);
+      backdrop-filter: blur(10px);
+      display:none;
+      color: rgba(255,255,255,.92);
+      max-width: min(480px, calc(100vw - 24px));
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .toast.show{ display:block; }
   </style>
 </head>
 
 <body>
   <div class="frame" id="frameRoot">
+
     <div class="topbar">
       <button class="back" id="backBtn" aria-label="Geri">←</button>
 
@@ -328,30 +367,35 @@
       </div>
     </div>
 
-    <div class="main">
-      <section class="panel">
-        <div class="panelHead">
-          <select class="select" id="srcLang" aria-label="Kaynak Dil"></select>
-          <select class="select" id="dstLang" aria-label="Hedef Dil"></select>
+    <section class="panel" id="panel">
+      <div class="panelHead">
+        <div class="ddRow">
+          <div class="dd" id="ddSrc">
+            <div class="ddBtn" id="ddSrcBtn"><span id="ddSrcTxt">English</span><span class="caret">▾</span></div>
+            <div class="ddMenu" id="ddSrcMenu"></div>
+          </div>
 
-          <div class="controls">
-            <button class="playBtn" id="playBtn" aria-label="Başlat/Duraklat">
-              <!-- play icon -->
-              <svg id="icoPlay" viewBox="0 0 24 24">
-                <polygon points="8,5 19,12 8,19"></polygon>
-              </svg>
-              <!-- pause icon (hidden by JS) -->
-              <svg id="icoPause" viewBox="0 0 24 24" style="display:none">
-                <line x1="9" y1="6" x2="9" y2="18"></line>
-                <line x1="15" y1="6" x2="15" y2="18"></line>
-              </svg>
-            </button>
+          <div class="dd" id="ddDst">
+            <div class="ddBtn" id="ddDstBtn"><span id="ddDstTxt">Türkçe</span><span class="caret">▾</span></div>
+            <div class="ddMenu" id="ddDstMenu"></div>
           </div>
         </div>
+      </div>
 
-        <div class="lines" id="lines"></div>
-      </section>
-    </div>
+      <div class="stream" id="stream"></div>
+
+      <div class="playDock">
+        <button class="playBtn" id="playBtn" aria-label="Başlat/Duraklat">
+          <svg id="icoPlay" viewBox="0 0 24 24">
+            <polygon points="8,5 19,12 8,19"></polygon>
+          </svg>
+          <svg id="icoPause" viewBox="0 0 24 24" style="display:none">
+            <line x1="9" y1="6" x2="9" y2="18"></line>
+            <line x1="15" y1="6" x2="15" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </section>
 
     <div class="brandBottom" id="brandHome" title="Anasayfa">
       <div class="bn">ITALKY</div>
@@ -361,6 +405,6 @@
 
   <div class="toast" id="toast">—</div>
 
-  <script type="module" src="/js/fast_page.js?v=2"></script>
+  <script type="module" src="/js/fast_page.js?v=3"></script>
 </body>
 </html>
