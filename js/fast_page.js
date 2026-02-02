@@ -1,9 +1,10 @@
 // FILE: italky-web/js/fast_page.js
-// Anında Çeviri v5
-// ✅ Konuşurken anlık çeviri: interim -> throttle -> ekranda tek akış
-// ✅ Dropdown seçim fix (pointerdown + stopPropagation)
-// ✅ “Çeviri” label yok, ekranı şişirme yok
-// ✅ Play/Pause renk ile (sessiz). Biz ekstra ses çalmıyoruz.
+// Anında Çeviri v6
+// ✅ Play altta ortada (HTML ile)
+// ✅ Interim dedupe (aynı metni tekrar yazmaz)
+// ✅ Sürekli çalışır: Play -> stop'a kadar
+// ✅ “Ses” yok: biz hiçbir ses üretmeyiz (sadece UI rengi + animasyon)
+// ✅ Dropdown iki tarafta da çalışır (pointerdown fix)
 
 import { BASE_DOMAIN } from "/js/config.js";
 const $ = (id)=>document.getElementById(id);
@@ -14,32 +15,28 @@ function toast(msg){
   t.textContent = msg;
   t.classList.add("show");
   clearTimeout(window.__to);
-  window.__to = setTimeout(()=>t.classList.remove("show"), 2200);
+  window.__to = setTimeout(()=>t.classList.remove("show"), 2400);
 }
 
 const LANGS = [
-  { code:"tr", name:"Türkçe",     sr:"tr-TR", tts:"tr-TR" },
-  { code:"en", name:"English",    sr:"en-US", tts:"en-US" },
-  { code:"de", name:"Deutsch",    sr:"de-DE", tts:"de-DE" },
-  { code:"fr", name:"Français",   sr:"fr-FR", tts:"fr-FR" },
-  { code:"it", name:"Italiano",   sr:"it-IT", tts:"it-IT" },
-  { code:"es", name:"Español",    sr:"es-ES", tts:"es-ES" },
-  { code:"pt", name:"Português",  sr:"pt-PT", tts:"pt-PT" },
-  { code:"ru", name:"Русский",    sr:"ru-RU", tts:"ru-RU" },
-  { code:"ar", name:"العربية",    sr:"ar-SA", tts:"ar-SA" },
-  { code:"nl", name:"Nederlands", sr:"nl-NL", tts:"nl-NL" },
-  { code:"sv", name:"Svenska",    sr:"sv-SE", tts:"sv-SE" },
-  { code:"no", name:"Norsk",      sr:"nb-NO", tts:"nb-NO" },
-  { code:"da", name:"Dansk",      sr:"da-DK", tts:"da-DK" },
-  { code:"pl", name:"Polski",     sr:"pl-PL", tts:"pl-PL" },
+  { code:"tr", name:"Türkçe",     sr:"tr-TR" },
+  { code:"en", name:"English",    sr:"en-US" },
+  { code:"de", name:"Deutsch",    sr:"de-DE" },
+  { code:"fr", name:"Français",   sr:"fr-FR" },
+  { code:"it", name:"Italiano",   sr:"it-IT" },
+  { code:"es", name:"Español",    sr:"es-ES" },
+  { code:"pt", name:"Português",  sr:"pt-PT" },
+  { code:"ru", name:"Русский",    sr:"ru-RU" },
+  { code:"ar", name:"العربية",    sr:"ar-SA" },
+  { code:"nl", name:"Nederlands", sr:"nl-NL" },
+  { code:"sv", name:"Svenska",    sr:"sv-SE" },
+  { code:"no", name:"Norsk",      sr:"nb-NO" },
+  { code:"da", name:"Dansk",      sr:"da-DK" },
+  { code:"pl", name:"Polski",     sr:"pl-PL" },
 ];
 
-function by(code){
-  return LANGS.find(x=>x.code===code) || LANGS[0];
-}
-function baseUrl(){
-  return String(BASE_DOMAIN||"").replace(/\/+$/,"");
-}
+function by(code){ return LANGS.find(x=>x.code===code) || LANGS[0]; }
+function baseUrl(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
 
 function escapeHtml(s=""){
   return String(s)
@@ -59,21 +56,9 @@ function norm(s){
     .replace(/[.,!?;:]+$/g,"");
 }
 
-/* ========= UI helpers ========= */
-function addLine(text){
-  const wrap = $("stream");
-  const b = document.createElement("div");
-  b.className = "bubble";
-  b.innerHTML = escapeHtml(text || "—");
-  wrap.appendChild(b);
-  // keep last ~10 items max
-  while(wrap.children.length > 10) wrap.removeChild(wrap.firstElementChild);
-  wrap.scrollTop = wrap.scrollHeight;
-}
-
-function setStatus(s){
-  $("panelStatus").textContent = s;
-}
+/* ========= UI ========= */
+function setStatusTop(s){ $("panelStatus").textContent = s; }
+function setStatusWave(s){ $("waveStatus").textContent = s; }
 
 function setPlayUI(on){
   $("playBtn")?.classList.toggle("running", !!on);
@@ -81,7 +66,29 @@ function setPlayUI(on){
   $("icoPause").style.display = on ? "block" : "none";
 }
 
-/* ========= Custom Dropdown (mobile-safe) ========= */
+/* stream lines */
+function ensureLiveBubble(){
+  const wrap = $("stream");
+  const last = wrap.lastElementChild;
+  if(last && last.dataset.live === "1") return last;
+
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.dataset.live = "1";
+  b.innerHTML = "—";
+  wrap.appendChild(b);
+  // keep last 10
+  while(wrap.children.length > 10) wrap.removeChild(wrap.firstElementChild);
+  wrap.scrollTop = wrap.scrollHeight;
+  return b;
+}
+function finalizeLiveBubble(){
+  const wrap = $("stream");
+  const last = wrap.lastElementChild;
+  if(last && last.dataset.live === "1") last.dataset.live = "0";
+}
+
+/* ========= Dropdown ========= */
 function buildDropdown(rootId, btnId, txtId, menuId, defCode){
   const root = $(rootId);
   const btn = $(btnId);
@@ -117,7 +124,6 @@ function buildDropdown(rootId, btnId, txtId, menuId, defCode){
   }
   search.addEventListener("input", ()=> filter(search.value));
 
-  // ✅ item selection: pointerdown + stopPropagation
   items.forEach(it=>{
     it.addEventListener("pointerdown", (e)=>{
       e.preventDefault();
@@ -128,7 +134,6 @@ function buildDropdown(rootId, btnId, txtId, menuId, defCode){
     });
   });
 
-  // open/close
   btn.addEventListener("pointerdown", (e)=>{
     e.preventDefault();
     e.stopPropagation();
@@ -142,7 +147,6 @@ function buildDropdown(rootId, btnId, txtId, menuId, defCode){
     }
   });
 
-  // click outside
   document.addEventListener("pointerdown", ()=> closeAll(), { passive:true });
 
   setValue(defCode, true);
@@ -185,25 +189,24 @@ async function translateViaApi(text, src, dst){
   return String(data.text || data.translated || data.translation || data.translatedText || "").trim() || text;
 }
 
-/* ========= Engine: live translate while speaking ========= */
+/* ========= Engine ========= */
 let srcDD, dstDD;
 let rec = null;
 let running = false;
 
-// speech buffers
 let interimText = "";
 let finalText = "";
 
-// translate throttling
-let tickTimer = null;
+/* dedupe + spam control */
+let lastCombined = "";
+let lastTranslateKey = "";
 let inFlight = false;
-let lastSent = "";
-let lastShown = "";
-let sentenceBreakTimer = null;
+let tickTimer = null;
+let sentenceTimer = null;
 
 function clearTimers(){
   if(tickTimer){ clearInterval(tickTimer); tickTimer=null; }
-  if(sentenceBreakTimer){ clearTimeout(sentenceBreakTimer); sentenceBreakTimer=null; }
+  if(sentenceTimer){ clearTimeout(sentenceTimer); sentenceTimer=null; }
 }
 
 function enforceDifferent(){
@@ -212,81 +215,78 @@ function enforceDifferent(){
   }
 }
 
+/* ✅ IMPORTANT: do not keep adding repeated same content */
+function isMeaningfulChange(newText, prevText){
+  const a = norm(newText);
+  const b = norm(prevText);
+  if(!a) return false;
+  if(a === b) return false;
+
+  // very small jitter change → ignore
+  if(b && Math.abs(a.length - b.length) < 3 && a.startsWith(b.slice(0, Math.min(10,b.length)))) return false;
+
+  return true;
+}
+
+/* throttle translate: every 900ms (less spam) */
 async function translateTick(){
   if(!running) return;
   if(inFlight) return;
 
-  const src = srcDD.get();
-  const dst = dstDD.get();
-
   const combined = (finalText + " " + interimText).trim();
-  const n = norm(combined);
+  if(!combined) return;
 
-  // boş / aynı / çok kısa
-  if(!n || n.length < 3) return;
-  if(n === lastSent) return;
+  // if combined repeats → do nothing
+  if(!isMeaningfulChange(combined, lastCombined)) return;
 
-  // her tick’te Google’a spam olmasın: küçük değişimde bekle
-  const bigChange = Math.abs(n.length - lastSent.length) >= 8 || (lastSent && !n.startsWith(lastSent.slice(0, Math.min(12,lastSent.length))));
-  if(!bigChange && n.length - lastSent.length < 4) return;
+  // spam filter: if last 20 chars same loop pattern -> ignore
+  const key = norm(combined).slice(-32);
+  if(key && key === lastTranslateKey) return;
+
+  lastCombined = combined;
+  lastTranslateKey = key;
+
+  // If too short, skip
+  if(norm(combined).length < 6) return;
 
   inFlight = true;
-  lastSent = n;
-  setStatus("Dinliyor");
 
   try{
+    const src = srcDD.get();
+    const dst = dstDD.get();
     const out = await translateViaApi(combined, src, dst);
-    // ekranda şişirme yok: sadece değişince satır ekle
-    const outN = norm(out);
-    if(outN && outN !== lastShown){
-      // Eğer konuşma devam ediyorsa tek satır güncelle (append yerine replace)
-      // Basit yaklaşım: son bubble'ı güncelle
-      const wrap = $("stream");
-      const last = wrap.lastElementChild;
-      if(last && last.dataset.live === "1"){
-        last.innerHTML = escapeHtml(out);
-      }else{
-        const b = document.createElement("div");
-        b.className = "bubble";
-        b.dataset.live = "1";
-        b.innerHTML = escapeHtml(out);
-        wrap.appendChild(b);
-      }
-      wrap.scrollTop = wrap.scrollHeight;
-      lastShown = outN;
-    }
+
+    // update ONLY live bubble
+    const live = ensureLiveBubble();
+    live.innerHTML = escapeHtml(out || "—");
+    $("stream").scrollTop = $("stream").scrollHeight;
+
   }catch(e){
-    const m = String(e?.message || e || "").slice(0, 240);
+    const m = String(e?.message || e || "").slice(0, 220);
     toast(`Çeviri hatası: ${m || "bilinmiyor"}`);
-    console.warn("TRANSLATE_ERR:", e);
   }finally{
     inFlight = false;
-  }
-}
-
-function finalizeCurrentLine(){
-  const wrap = $("stream");
-  const last = wrap.lastElementChild;
-  if(last && last.dataset.live === "1"){
-    last.dataset.live = "0";
   }
 }
 
 function stop(){
   running = false;
   setPlayUI(false);
-  setStatus("Hazır");
+  setStatusTop("Hazır");
+  setStatusWave("Hazır");
 
   clearTimers();
+
   interimText = "";
   finalText = "";
-  lastSent = "";
+  lastCombined = "";
+  lastTranslateKey = "";
   inFlight = false;
 
   try{ rec?.stop?.(); }catch{}
   rec = null;
 
-  finalizeCurrentLine();
+  finalizeLiveBubble();
 }
 
 function start(){
@@ -296,9 +296,8 @@ function start(){
   }
 
   enforceDifferent();
-  const src = srcDD.get();
-  const srLocale = by(src).sr || "en-US";
 
+  const srLocale = by(srcDD.get()).sr || "en-US";
   rec = buildRecognizer(srLocale);
   if(!rec){
     toast("Mikrofon başlatılamadı.");
@@ -307,17 +306,17 @@ function start(){
 
   running = true;
   setPlayUI(true);
-  setStatus("Dinliyor");
+  setStatusTop("Dinliyor");
+  setStatusWave("Dinliyor");
 
   interimText = "";
   finalText = "";
-  lastSent = "";
-  lastShown = "";
+  lastCombined = "";
+  lastTranslateKey = "";
   inFlight = false;
 
-  // tick: 650ms (canlı)
   clearTimers();
-  tickTimer = setInterval(translateTick, 650);
+  tickTimer = setInterval(translateTick, 900);
 
   rec.onresult = (e)=>{
     let finals = "";
@@ -330,19 +329,24 @@ function start(){
     }
 
     if(finals.trim()){
-      finalText = (finalText ? finalText + " " : "") + finals.trim();
+      // append to final
+      finalText = (finalText ? (finalText + " ") : "") + finals.trim();
       interimText = "";
-      // “cümle bitti” varsayımı: 1.2s sessizlikte satırı sabitle
-      if(sentenceBreakTimer) clearTimeout(sentenceBreakTimer);
-      sentenceBreakTimer = setTimeout(()=>{
-        finalizeCurrentLine();
-        // yeni cümle gelecekse canlı satır yeniden başlar
-        lastShown = ""; // yeni satır için
+
+      // sentence break: after 1200ms without new finals -> finalize live bubble
+      if(sentenceTimer) clearTimeout(sentenceTimer);
+      sentenceTimer = setTimeout(()=>{
+        finalizeLiveBubble();
+        // reset buffers to avoid “snowball repeating”
+        finalText = "";
+        interimText = "";
+        lastCombined = "";
+        lastTranslateKey = "";
       }, 1200);
+
       return;
     }
 
-    // interim akış
     if(interim.trim()){
       interimText = interim.trim();
     }
@@ -354,7 +358,7 @@ function start(){
   };
 
   rec.onend = ()=>{
-    // running ise yeniden başlatmayı dene (bazı cihazlar kendini durduruyor)
+    // some devices stop recognition randomly; keep running if user didn't press pause
     if(running){
       try{ rec?.start?.(); }catch{ stop(); }
     }
@@ -387,7 +391,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     enforceDifferent();
     if(running){
       stop();
-      start();
+      start(); // restart with new locale
     }
   });
 
@@ -395,7 +399,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     enforceDifferent();
   });
 
-  // Speaker: sadece “opsiyonel” TTS için; default OFF
+  // speaker button: sadece UI (opsiyonel). default OFF. (TTS eklemedik)
   let ttsOn = false;
   const setTts = (on)=>{
     ttsOn = !!on;
@@ -408,9 +412,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
     setTts(!ttsOn);
   });
 
-  // Play/Pause
   setPlayUI(false);
-  setStatus("Hazır");
+  setStatusTop("Hazır");
+  setStatusWave("Hazır");
 
   $("playBtn").addEventListener("pointerdown", (e)=>{
     e.preventDefault(); e.stopPropagation();
