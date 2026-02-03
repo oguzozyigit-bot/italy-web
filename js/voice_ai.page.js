@@ -1,81 +1,89 @@
 // FILE: italky-web/js/voice_ai_page.js
 import { BASE_DOMAIN } from "/js/config.js";
 
-const $ = (id)=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-/* ✅ KULLANILAN SES İSİMLERİ (TEMİZLENMİŞ) */
 const VOICES = [
-  // Kadın
-  "Jale",
-  "Hüma",
-  "Selden",
-  "Ayşem",
-
-  // Erkek
-  "Ozan",
-  "Oğuz",
-  "Barış",
-  "Emrah",
+  "Jale","Hüma","Selden","Ayşem",
+  "Ozan","Oğuz","Barış","Emrah"
 ];
 
-let selectedName = localStorage.getItem("italky_voice_name") || null;
+let selected = localStorage.getItem("italky_voice") || "Ozan";
 
-/* ========= UI ========= */
-function renderVoiceList(){
+function demoText(name){
+  return `Italky AI'ye hoş geldiniz. Ben ${name}. 
+Benimle hem eğlenip, hem öğrenip, hem de dünyayı özgürce gezebilirsiniz.
+Hadi beni seç. Ben ${name}.`;
+}
+
+/* ===== VOICE MODAL ===== */
+window.openModal = ()=>{
+  $("modal").classList.add("show");
+  renderVoices();
+};
+
+function renderVoices(){
   const box = $("voiceList");
   box.innerHTML = "";
-
   VOICES.forEach(name=>{
-    const d = document.createElement("div");
-    d.className = "voice-row" + (name === selectedName ? " sel" : "");
-    d.textContent = name;
+    const row = document.createElement("div");
+    row.className = "voice" + (name===selected?" sel":"");
+    row.innerHTML = `
+      <div>${name}</div>
+      <button>▶</button>
+    `;
 
-    d.onclick = ()=>{
-      document.querySelectorAll(".voice-row").forEach(x=>x.classList.remove("sel"));
-      d.classList.add("sel");
-      selectedName = name;
+    row.onclick = ()=>{
+      document.querySelectorAll(".voice").forEach(x=>x.classList.remove("sel"));
+      row.classList.add("sel");
+      selected = name;
+      localStorage.setItem("italky_voice", name);
     };
 
-    box.appendChild(d);
+    row.querySelector("button").onclick = e=>{
+      e.stopPropagation();
+      speak(demoText(name));
+    };
+
+    box.appendChild(row);
   });
 }
 
-/* ========= SAVE ========= */
-$("openVoice").onclick = ()=>{
-  $("voiceModal").classList.add("show");
-  renderVoiceList();
-};
-
-$("saveVoiceBtn").onclick = ()=>{
-  if(!selectedName) return;
-  localStorage.setItem("italky_voice_name", selectedName);
-  $("voiceModal").classList.remove("show");
-};
-
-/* ========= TTS ========= */
+/* ===== SPEAK ===== */
 async function speak(text){
-  const name = selectedName || "Ozan"; // default
-  const url = `${BASE_DOMAIN.replace(/\/+$/,"")}/api/tts_openai`;
-
-  const r = await fetch(url,{
+  const r = await fetch(`${BASE_DOMAIN}/api/tts_openai`,{
     method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
       text,
-      name,      // 👈 BACKEND SPEED BURADAN OKUR
-      voice: "ash",
-      format: "mp3"
+      name:selected
     })
   });
-
-  const data = await r.json();
-  if(!data?.audio_base64) return;
-
-  const audio = new Audio(`data:audio/${data.format};base64,${data.audio_base64}`);
+  const j = await r.json();
+  const audio = new Audio(`data:audio/mp3;base64,${j.audio_base64}`);
   audio.play();
 }
 
-/* ========= DEMO ========= */
-$("micBtn").onclick = ()=>{
-  speak("Merhaba. Ben italkyAI. Sesim kişiye göre ayarlanmıştır.");
-};
+/* ===== MIC ===== */
+let listening=false;
+$("mic").addEventListener("pointerdown", async ()=>{
+  listening = !listening;
+  const stage = $("stage");
+  const mic = $("mic");
+  const status = $("status");
+
+  if(listening){
+    mic.classList.add("listening");
+    stage.className="stage listening";
+    status.textContent="Dinliyorum…";
+  }else{
+    mic.classList.remove("listening");
+    stage.className="stage speaking";
+    status.textContent="Konuşuyorum…";
+    speak(`Merhaba. Ben ${selected}.`);
+    setTimeout(()=>{
+      stage.className="stage";
+      status.textContent="Hazır";
+    },4000);
+  }
+});
