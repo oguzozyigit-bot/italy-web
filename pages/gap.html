@@ -11,7 +11,7 @@
     :root { 
       --bg-deep:#020205; 
       --text-main:#fff; 
-      --c-accent:#ffb800; /* Altın */
+      --c-accent:#ffb800; 
       --c-success:#00e676; 
       --c-error:#ff1744; 
       --c-cyan: #00f3ff;
@@ -179,14 +179,14 @@ import { BASE_DOMAIN } from "/js/config.js";
 const $ = (id) => document.getElementById(id);
 const apiBase = () => String(BASE_DOMAIN || "").replace(/\/+$/, "");
 
-// DİL AYARLARI
+// DİL AYARLARI (Hız Limitleri: DE/FR daha uzun süre ister)
 let currentLang = 'en';
 const LANG_CONFIG = {
-  en: { code: 'en-US', name: 'İngilizce', prompt: 'İngilizce' },
-  de: { code: 'de-DE', name: 'Almanca', prompt: 'Almanca' },
-  fr: { code: 'fr-FR', name: 'Fransızca', prompt: 'Fransızca' },
-  es: { code: 'es-ES', name: 'İspanyolca', prompt: 'İspanyolca' },
-  it: { code: 'it-IT', name: 'İtalyanca', prompt: 'İtalyanca' }
+  en: { code: 'en-US', name: 'İngilizce', prompt: 'İngilizce', speedLimit: 4 },
+  de: { code: 'de-DE', name: 'Almanca', prompt: 'Almanca', speedLimit: 5 },
+  fr: { code: 'fr-FR', name: 'Fransızca', prompt: 'Fransızca', speedLimit: 5 },
+  es: { code: 'es-ES', name: 'İspanyolca', prompt: 'İspanyolca', speedLimit: 4 },
+  it: { code: 'it-IT', name: 'İtalyanca', prompt: 'İtalyanca', speedLimit: 4 }
 };
 
 window.setLang = (l, el) => {
@@ -196,37 +196,21 @@ window.setLang = (l, el) => {
   ensureAudio();
 };
 
-// SES SİSTEMİ (Lazy Load & Fix)
+// SES (Lazy Load)
 let audioCtx = null;
 function ensureAudio(){
-  if(!audioCtx){
-    const AC = window.AudioContext || window.webkitAudioContext;
-    audioCtx = AC ? new AC() : null;
-  }
-  if(audioCtx && audioCtx.state === "suspended"){
-    audioCtx.resume().catch(()=>{});
-  }
+  if(!audioCtx){ const AC = window.AudioContext || window.webkitAudioContext; audioCtx = AC ? new AC() : null; }
+  if(audioCtx && audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
   return audioCtx;
 }
 
 const SFX = {
   correct: () => {
-    const ctx = ensureAudio(); if(!ctx) return;
-    const t = ctx.currentTime;
-    [523,659,783].forEach((f,i)=>{
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.frequency.value = f; o.connect(g); g.connect(ctx.destination);
-      g.gain.setValueAtTime(.05, t+i*.1); g.gain.exponentialRampToValueAtTime(.001, t+i*.1+.3);
-      o.start(t+i*.1); o.stop(t+i*.1+.3);
-    });
+    const c=ensureAudio(); if(!c)return; const t=c.currentTime;
+    [523,659,783].forEach((f,i)=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=f; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(.05,t+i*.1); g.gain.exponentialRampToValueAtTime(.001,t+i*.1+.3); o.start(t+i*.1); o.stop(t+i*.1+.3); });
   },
   wrong: () => {
-    const ctx = ensureAudio(); if(!ctx) return;
-    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'sawtooth'; o.frequency.value = 150; 
-    o.connect(g); g.connect(ctx.destination);
-    g.gain.setValueAtTime(.1, t); g.gain.linearRampToValueAtTime(.001, t+.3);
-    o.start(t); o.stop(t+.3);
+    const c=ensureAudio(); if(!c)return; const t=c.currentTime,o=c.createOscillator(),g=c.createGain(); o.type='sawtooth'; o.frequency.value=150; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(.1,t); g.gain.linearRampToValueAtTime(.001,t+.3); o.start(t); o.stop(t+.3);
   }
 };
 
@@ -240,35 +224,27 @@ let turnStartTime = 0;
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-// ROBUST PARSE
+// ROBUST PARSE (Tüm hataları yutar)
 function safeParse(raw){
   let txt = "";
   if(typeof raw === "string") txt = raw;
-  else if(raw && typeof raw === "object") txt = raw.text || raw.message || raw.output || ""; // .output eklendi
+  else if(raw && typeof raw === "object") txt = raw.text || raw.message || raw.output || "";
   
   txt = String(txt||"").trim().replace(/```json/gi,"").replace(/```/g,"").trim();
-  
-  // Köşeli parantez temizliği
-  const a = txt.indexOf("[");
-  const b = txt.lastIndexOf("]");
+  const a = txt.indexOf("["); const b = txt.lastIndexOf("]");
   if(a !== -1 && b !== -1) txt = txt.slice(a, b+1);
 
-  try {
-    return JSON.parse(txt);
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(txt); } catch { return []; }
 }
 
-// NORMALIZE (Akıllı)
+// NORMALIZE (Akıllı Karakter)
 function normalize(s){
   return String(s||"").toLowerCase().trim()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
-    .replace(/ß/g, "ss") // Almanca
+    .replace(/ß/g, "ss").replace(/œ/g, "oe")
     .replace(/[.,!?]/g,"");
 }
 
-// --- API ---
 async function fetchPuzzles() {
   ensureAudio(); 
   $("loading").style.display = "block"; $("startBtn").style.display = "none";
@@ -289,16 +265,9 @@ async function fetchPuzzles() {
 
   } catch (err) {
     if(currentLang === 'en') {
-      puzzleList = [
-        {sentence_parts:["The sky is","today."], hidden_word:"blue", translation:"Bugün gökyüzü mavi."},
-        {sentence_parts:["I drink","water."], hidden_word:"cold", translation:"Soğuk su içerim."},
-        {sentence_parts:["She likes","music."], hidden_word:"good", translation:"O iyi müzik sever."}
-      ];
+      puzzleList = [{sentence_parts:["The sky is","today."], hidden_word:"blue", translation:"Bugün gökyüzü mavi."}, {sentence_parts:["I drink","water."], hidden_word:"cold", translation:"Soğuk su içerim."}];
     } else {
-      puzzleList = [
-        {sentence_parts:["Das ist","gut."], hidden_word:"sehr", translation:"Bu çok iyi."},
-        {sentence_parts:["Ich bin","Mann."], hidden_word:"ein", translation:"Ben bir adamım."}
-      ];
+      puzzleList = [{sentence_parts:["Das ist","gut."], hidden_word:"sehr", translation:"Bu çok iyi."}, {sentence_parts:["Ich bin","Mann."], hidden_word:"ein", translation:"Ben bir adamım."}];
     }
   }
   
@@ -310,6 +279,10 @@ async function fetchPuzzles() {
 
 function loadPuzzle() {
   if (currentIndex >= puzzleList.length) { endSet(false); return; }
+
+  // Spam Koruması: Mic Disable
+  $("micBtn").disabled = true;
+  $("micBtn").classList.remove("listening");
 
   const p = puzzleList[currentIndex];
   $("translationBox").className = "translation";
@@ -353,23 +326,21 @@ async function speakPuzzle(p) {
   
   isBusy = false;
   $("micBtn").disabled = false;
-  $("micBtn").classList.remove("listening");
   setStatus("MİKROFONA BASIP SÖYLE");
 }
 
 async function speakFullSentence(p) {
   isBusy = true;
   $("statusText").textContent = "DİNLE VE ÖĞREN...";
-  try{ window.speechSynthesis.cancel(); }catch{} // Önlem
+  try{ window.speechSynthesis.cancel(); }catch{}
   await speak(`${p.sentence_parts[0]} ${p.hidden_word} ${p.sentence_parts[1]}`, 0.9);
   isBusy = false;
 }
 
-// --- STT ---
 function listen() {
   if (isBusy) return;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return alert("Tarayıcı desteklemiyor.");
+  if (!SR) return alert("Desteklenmiyor");
   
   try{ window.speechSynthesis.cancel(); }catch{}
   
@@ -380,11 +351,12 @@ function listen() {
   const rec = new SR();
   rec.lang = LANG_CONFIG[currentLang].code;
   rec.interimResults = false;
-  let handled = false; // Çift tetikleme koruması
+  let handled = false;
   
   rec.onresult = (e) => {
     if(handled) return;
     handled = true;
+    try{ rec.stop(); }catch{} // Lifecycle Fix
     checkAnswer(e.results[0][0].transcript);
   };
   
@@ -402,6 +374,10 @@ function cleanup(msg) {
 }
 
 async function checkAnswer(inputRaw) {
+  // Temizlik (UI Spam Önlemi)
+  $("micBtn").classList.remove("listening");
+  $("micBtn").disabled = true;
+
   const p = puzzleList[currentIndex];
   const target = normalize(p.hidden_word);
   const input = normalize(inputRaw);
@@ -409,9 +385,10 @@ async function checkAnswer(inputRaw) {
 
   const ok = input.includes(target) || target.includes(input);
   
-  // Hız Bonusu
+  // Hız Bonusu (Dile Göre)
+  const limit = LANG_CONFIG[currentLang].speedLimit;
   const sec = (Date.now() - turnStartTime) / 1000;
-  const speedBonus = sec <= 4 ? 5 : 0;
+  const speedBonus = sec <= limit ? 5 : 0;
 
   if (ok) {
     // DOĞRU
@@ -421,14 +398,14 @@ async function checkAnswer(inputRaw) {
     slot.classList.add("filled");
     
     combo++;
-    let bonus = combo >= 3 ? 10 : (combo >= 2 ? 5 : 0);
+    let bonus = combo >= 5 ? 20 : (combo >= 3 ? 10 : (combo >= 2 ? 5 : 0));
     score += (10 + bonus + speedBonus);
     
     let msg = "DOĞRU!";
-    if(bonus>0) msg += ` SERİ +${bonus}`;
-    if(speedBonus>0) msg += ` HIZ +${speedBonus}`;
-    setStatus(msg, "combo");
+    if(combo >= 5) msg = "MEGA SERİ!! 🔥";
+    else if(bonus>0) msg += ` SERİ +${bonus}`;
     
+    setStatus(msg, "combo");
     updateScoreUI();
     $("translationBox").classList.add("show");
     if(combo >= 3) startConfetti();
@@ -441,18 +418,19 @@ async function checkAnswer(inputRaw) {
     // YANLIŞ -> ARENA KURALI
     SFX.wrong();
     lives--;
-    score = Math.max(0, score - 5); // Ceza
+    score = Math.max(0, score - 5);
     combo = 0;
     
     slot.classList.add("error");
-    slot.textContent = p.hidden_word.toUpperCase(); // Göster
-    setStatus(`YANLIŞ! DOĞRUSU: ${p.hidden_word.toUpperCase()}`);
+    slot.textContent = p.hidden_word.toUpperCase();
+    setStatus(`YANLIŞ!`);
     updateScoreUI();
     
     await sleep(1500);
     if(lives <= 0) { endSet(true); return; }
   }
   
+  // Her durumda sonraki soru
   currentIndex++;
   isBusy = false;
   loadPuzzle();
@@ -465,6 +443,7 @@ function updateScoreUI(){
 }
 
 function endSet(isDead){
+  try{ window.speechSynthesis.cancel(); }catch{}
   $("endModal").style.display = "flex";
   if(isDead) {
     $("endResult").innerHTML = `<span style="color:var(--c-error);font-size:32px">OYUN BİTTİ</span><br>Skor: ${score}`;
@@ -474,17 +453,20 @@ function endSet(isDead){
   }
 }
 
-// CONFETTI
+// CONFETTI (Strict Cleanup)
 let fwInterval=null; const cvs=$("effectCanvas"), ctx=cvs.getContext("2d"); let particles=[];
 function startConfetti(){
   if(fwInterval) clearInterval(fwInterval);
   particles=[]; cvs.style.display="block"; cvs.width=window.innerWidth; cvs.height=window.innerHeight;
   fwInterval=setInterval(()=>{ for(let i=0;i<5;i++) particles.push({x:Math.random()*cvs.width,y:cvs.height,vx:(Math.random()-.5)*5,vy:-(Math.random()*5+5),c:`hsl(${Math.random()*360},100%,50%)`,l:100}); },100);
-  setTimeout(()=>{ if(fwInterval)clearInterval(fwInterval); cvs.style.display="none"; particles=[]; }, 4000);
+  setTimeout(()=>{ 
+    if(fwInterval)clearInterval(fwInterval); fwInterval=null; 
+    cvs.style.display="none"; particles=[]; 
+  }, 4000);
   requestAnimationFrame(loopConfetti);
 }
 function loopConfetti(){
-  if(particles.length <= 0) { cvs.style.display="none"; return; }
+  if(particles.length <= 0) return;
   ctx.clearRect(0,0,cvs.width,cvs.height);
   for(let i=0;i<particles.length;i++){ let p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.l--; ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2); ctx.fillStyle=p.c; ctx.fill(); if(p.l<=0){particles.splice(i,1);i--} }
   requestAnimationFrame(loopConfetti);
