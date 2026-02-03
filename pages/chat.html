@@ -1,4 +1,3 @@
-<!-- FILE: italky-web/pages/chat.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -13,401 +12,292 @@
 
   <style>
     :root{
-      --frameW: min(480px, calc(100vw - 12px)); /* ✅ kenarlara biraz daha yaklaşsın */
+      --frameW: min(480px, calc(100vw - 18px));
       --topH: 74px;
-      --footerH: 74px;
+      --footerH: 72px;
       --dockH: 76px;
-      --gap: 10px;
 
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.60);
       --border: rgba(255,255,255,.10);
 
-      --neon-cyan:#00f3ff;
-      --neon-purple:#bc13fe;
-
-      --green:#22c55e;     /* ✅ bot şeridi */
-      --orange:#f97316;    /* ✅ user şeridi + uçak */
+      /* 🔒 KİLİTLİ PALET */
+      --ai-color:#4F46E5;
+      --be-free:#6B7280;
     }
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html,body{
-      margin:0; padding:0; width:100%; height:100dvh;
-      overflow:hidden; position:fixed;
+      margin:0; padding:0;
+      width:100%; height:100dvh;
+      overflow:hidden;
       font-family:'Outfit', sans-serif;
       background:#030014;
       color:var(--text);
       display:flex; align-items:center; justify-content:center;
-    }
-
-    .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:#030014; z-index:0; pointer-events:none; }
-    .orb{ position:absolute; border-radius:50%; filter: blur(90px); opacity:.28; animation: floatOrbit 30s infinite alternate ease-in-out; }
-    .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
-    .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, var(--neon-cyan), transparent 70%); animation-delay:-5s; }
-    @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1);} 100%{ transform: translate(10%,-10%) scale(1.1);} }
-
-    .noise{
-      position:absolute; inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events:none; mix-blend-mode:overlay; z-index:1;
+      position:fixed;
     }
 
     .mobile-frame{
       width:100%; max-width:480px; height:100%;
-      position:relative; z-index:10;
-      background: rgba(8, 8, 20, 0.65);
+      position:relative;
+      background: rgba(8,8,20,.65);
       backdrop-filter: blur(25px);
-      overflow:hidden;
       display:flex; flex-direction:column;
     }
-    @media(min-width:520px){
-      .mobile-frame{
-        height:92vh;
-        border-radius:40px;
-        border:1px solid rgba(255,255,255,0.08);
-        box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
-      }
-    }
 
+    /* ================= TOP BAR ================= */
     .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 3000;
-      height: var(--topH);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 0 12px;
+      height:var(--topH);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 12px;
       border-bottom:1px solid rgba(255,255,255,.08);
       background: rgba(0,0,0,.35);
       backdrop-filter: blur(12px);
     }
-    .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
+
+    .leftControls{ display:flex; align-items:center; gap:10px; }
     .backBtn{
-      width:44px;height:44px;border-radius:16px;
+      width:42px;height:42px;border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.18);
-      color:#fff;
-      font-size:20px;font-weight:1000;
+      color:#fff;font-size:20px;font-weight:900;
       display:flex;align-items:center;justify-content:center;
-      cursor:pointer; user-select:none;
+      cursor:pointer;
     }
-    .backBtn:active{ transform: scale(.96); }
 
     .mini-brand{
       display:flex; flex-direction:column;
-      user-select:none; cursor:pointer; line-height:1;
-      margin-top: 2px;
+      line-height:1; cursor:pointer;
     }
     .logo-line{
-      font-family:'Space Grotesk', sans-serif;
-      font-size: 20px;
-      letter-spacing: -0.4px;
-      display:flex; align-items:flex-end; gap:2px;
+      font-family:'Space Grotesk',sans-serif;
+      font-size:20px;
+      letter-spacing:-.4px;
     }
-    .logo-main{ font-weight:700; color:#FFFFFF; }
+    .logo-main{ color:#fff; font-weight:700; }
     .logo-ai{
       font-weight:700;
-      background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 100%);
+      background: linear-gradient(135deg,#A5B4FC,#4F46E5);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
     .logo-slogan{
-      font-family:'Outfit', sans-serif;
       font-size:10px;
       font-weight:700;
-      letter-spacing: 4px;
+      letter-spacing:4px;
       color:#6B7280;
-      margin-top: 5px;
-      padding-left: 2px;
-      text-transform: uppercase;
+      margin-top:5px;
     }
 
-    .rightControls{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .usertext{
-      min-width:0;
-      display:flex; flex-direction:column; align-items:flex-end; gap:2px;
-      max-width: 200px;
+    .rightControls{
+      display:flex; align-items:center; gap:10px;
     }
-    .uname{ font-weight: 900; font-size: 12px; color: rgba(255,255,255,0.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .plan{ font-weight: 800; font-size: 11px; color: rgba(255,255,255,0.55); white-space:nowrap; }
+    .usertext{
+      display:flex; flex-direction:column; align-items:flex-end;
+    }
+    .uname{ font-size:12px; font-weight:900; }
+    .plan{ font-size:11px; color:var(--muted); font-weight:800; }
 
     .avatar-btn{
-      width: 42px; height: 42px;
-      border:none; background:transparent;
-      border-radius:999px;
+      width:40px;height:40px;border-radius:999px;
+      border:none;background:transparent;cursor:pointer;
       overflow:hidden;
-      cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
     }
-    .avatar-btn:active{ transform: scale(.96); }
-    .avatar-btn img{ width:42px; height:42px; border-radius:999px; object-fit:cover; display:block; }
+    .avatar-btn img{ width:100%;height:100%;object-fit:cover; }
     .avatar-fallback{
-      width:42px; height:42px; border-radius:999px;
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 1000;
-      color: rgba(255,255,255,0.92);
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.10);
-      user-select:none;
+      width:40px;height:40px;border-radius:999px;
+      display:flex;align-items:center;justify-content:center;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      font-weight:900;
     }
 
-    /* ✅ CHAT alanı: dock + footer üstünde kalsın */
-    #chat.chat-area{
-      position: absolute;
-      left: 0; right: 0;
-      top: var(--topH);
-      bottom: calc(var(--dockH) + var(--footerH) + var(--gap));
-      padding: 14px 12px;
+    /* ================= CLEAR CHAT ================= */
+    .clear-wrap{
+      text-align:center;
+      padding:8px 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .clear-btn{
+      background:none;
+      border:none;
+      color:var(--be-free);
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      letter-spacing:.3px;
+    }
 
+    /* ================= CHAT ================= */
+    #chat{
+      position:absolute;
+      top:calc(var(--topH) + 36px);
+      bottom:calc(var(--dockH) + var(--footerH));
+      left:0; right:0;
+      padding:14px 12px;
       overflow-y:auto;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      touch-action: pan-y;
-
-      scrollbar-width:none;
       display:flex;
       flex-direction:column;
       gap:10px;
-      min-height:0;
-      min-width:0;
     }
-    #chat.chat-area::-webkit-scrollbar{ display:none; }
-    #chat.chat-area::before{ content:""; flex:1 0 auto; }
 
     .bubble{
       max-width:85%;
       padding:10px 14px;
       border-radius:16px;
       font-size:14px;
-      line-height:1.4;
-      border:1px solid rgba(255,255,255,.10);
+      line-height:1.45;
       background: rgba(0,0,0,.18);
-      box-shadow: 0 12px 28px rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
       backdrop-filter: blur(8px);
-      word-wrap:break-word;
-      white-space: pre-wrap; /* ✅ paragraf \n\n göster */
+      white-space:pre-wrap;
     }
-
-    /* ✅ hizalar garanti */
-    .bubble.bot{ align-self:flex-start; border-left:4px solid var(--green); }
-    .bubble.user{ align-self:flex-end; border-right:4px solid var(--orange); text-align:right; }
-
+    .bubble.bot{
+      align-self:flex-start;
+      border-left:4px solid var(--ai-color);
+    }
+    .bubble.user{
+      align-self:flex-end;
+      text-align:right;
+      border-right:4px solid var(--be-free);
+    }
     .bubble.meta{
       align-self:center;
-      max-width: 92%;
-      opacity:.92;
+      font-size:12px;
+      color:var(--muted);
       background: rgba(255,255,255,.04);
-      border-color: rgba(255,255,255,.08);
-      font-size: 12px;
-      font-weight: 700;
-      color: rgba(255,255,255,.75);
-      text-align:center;
     }
 
-    /* ✅ DOCK: footer'ın üstüne oturur */
+    /* ================= INPUT ================= */
     .input-dock{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
-      bottom: var(--footerH);
-      z-index: 2600;
-      padding: 10px 12px;
+      position:fixed;
+      bottom:var(--footerH);
+      left:50%;
+      transform:translateX(-50%);
+      width:var(--frameW);
+      padding:10px 12px;
       background: rgba(0,0,0,.32);
-      border-top: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(12px);
-      pointer-events: none;
+      border-top:1px solid rgba(255,255,255,.08);
     }
     .dock-inner{
-      pointer-events:auto;
-      width:100%;
-      min-height:54px;
-      display:flex;
-      align-items:flex-end;
-      gap:8px;
+      display:flex; gap:8px; align-items:flex-end;
       background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 22px; /* ✅ biraz daha dar */
-      padding: 8px;
-    }
-
-    /* ✅ yardım (?) kaldırıldı — artık yok */
-
-    .icon-btn{
-      width:40px; height:40px;
-      border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      flex-shrink:0;
-      user-select:none;
-      position: relative;
-    }
-    .icon-btn svg{
-      width:20px; height:20px;
-      stroke: rgba(255,255,255,.85);
-      fill:none;
-      stroke-width:2;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-      opacity:.95;
+      border-radius:26px;
+      padding:8px;
     }
 
     #msgInput{
-      flex: 1 1 auto;
-      min-width:0;
-      background: transparent;
+      flex:1;
+      background:none;
       border:none;
-      outline:none;
       color:#fff;
       font-size:14px;
-      padding:10px 6px;
-      line-height:18px;
-      font-family:inherit;
       resize:none;
-      white-space:normal;
-      overflow:hidden;
-      max-height: 120px;
+      max-height:120px;
+      outline:none;
     }
 
-    /* ✅ Uçak turuncu */
-    .send-btn{
+    .icon-btn, .send-btn{
       width:40px;height:40px;
       border-radius:16px;
-      border:1px solid rgba(249,115,22,.40);
-      background: rgba(249,115,22,.22);
-      display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      display:flex;align-items:center;justify-content:center;
       cursor:pointer;
-      flex-shrink:0;
-      box-shadow: 0 10px 18px rgba(0,0,0,.30);
-      user-select:none;
-    }
-    .send-btn svg{ width:20px;height:20px; stroke: var(--orange); fill:none; stroke-width:2; }
-
-    /* ✅ Mic dinlerken HALKA/DALGA (sessiz) */
-    #micBtn.listening{
-      border-color: rgba(34,197,94,.40) !important;
-      background: rgba(34,197,94,.14) !important;
-      box-shadow: 0 0 18px rgba(34,197,94,.18);
-    }
-    #micBtn.listening::after{
-      content:"";
-      position:absolute;
-      inset:-6px;
-      border-radius:20px;
-      border:2px dashed rgba(34,197,94,.65);
-      animation: micWave 1.2s linear infinite;
-      pointer-events:none;
-    }
-    @keyframes micWave{
-      0%{ transform:scale(1); opacity:.7 }
-      100%{ transform:scale(1.2); opacity:0 }
     }
 
+    .send-btn{
+      border-color: rgba(107,114,128,.45);
+      background: rgba(107,114,128,.22);
+    }
+    .send-btn svg{ stroke:#6B7280; }
+
+    /* ================= FOOTER ================= */
     .footerbar{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
-      bottom: 0;
-      z-index: 2400;
-      height: var(--footerH);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-      background: rgba(3, 0, 20, 0.95);
-      border-top: 1px solid rgba(255,255,255,.05);
-      backdrop-filter: blur(10px);
+      position:fixed;
+      bottom:0; left:50%;
+      transform:translateX(-50%);
+      width:var(--frameW);
+      height:var(--footerH);
+      background: rgba(3,0,20,.95);
+      border-top:1px solid rgba(255,255,255,.05);
       display:flex;
       flex-direction:column;
       justify-content:center;
-      gap: 6px;
+      gap:6px;
     }
     .links{
       display:flex;
-      gap: 16px;
       justify-content:center;
-      flex-wrap:wrap;
-      line-height:1;
+      gap:16px;
     }
     .links a{
-      color: rgba(255,255,255,0.55);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
       text-decoration:none;
-      font-size: 12px;
-      font-weight: 800;
-      transition:.2s;
     }
     .footerBrand{
       text-align:center;
-      font-size: 10px;
-      color: rgba(255,255,255,0.22);
-      letter-spacing: 0.2px;
-      font-weight: 700;
+      font-size:10px;
+      color: rgba(255,255,255,.22);
+      font-weight:700;
     }
   </style>
 </head>
 
 <body>
-  <div class="cosmos-bg">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
-  <div class="noise"></div>
+<div class="mobile-frame">
 
-  <div class="mobile-frame" id="mobileFrame">
-
-    <div class="topbar">
-      <div class="leftControls">
-        <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
-
-        <div class="mini-brand" id="logoHome" title="Ana sayfa">
-          <div class="logo-line">
-            <span class="logo-main">italky</span><span class="logo-ai">AI</span>
-          </div>
-          <div class="logo-slogan">BE FREE</div>
+  <div class="topbar">
+    <div class="leftControls">
+      <button class="backBtn" id="backBtn">←</button>
+      <div class="mini-brand" id="logoHome">
+        <div class="logo-line">
+          <span class="logo-main">italky</span><span class="logo-ai">AI</span>
         </div>
-      </div>
-
-      <div class="rightControls">
-        <div class="usertext">
-          <div class="uname" id="userName">—</div>
-          <div class="plan" id="userPlan">FREE</div>
-        </div>
-
-        <button class="avatar-btn" id="avatarBtn" aria-label="Profil">
-          <span class="avatar-fallback" id="avatarFallback">•</span>
-        </button>
+        <div class="logo-slogan">BE FREE</div>
       </div>
     </div>
-
-    <div class="chat-area" id="chat"></div>
-
-    <div class="input-dock">
-      <div class="dock-inner">
-        <textarea id="msgInput" rows="1" placeholder="Sohbet AI… yaz bakalım." spellcheck="false"></textarea>
-
-        <button class="icon-btn" id="micBtn" aria-label="Mikrofon">
-          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-        </button>
-
-        <button class="send-btn" id="sendBtn" aria-label="Gönder">
-          <svg viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2Z"></path></svg>
-        </button>
+    <div class="rightControls">
+      <div class="usertext">
+        <div class="uname" id="userName">—</div>
+        <div class="plan" id="userPlan">FREE</div>
       </div>
+      <button class="avatar-btn" id="avatarBtn">
+        <span class="avatar-fallback" id="avatarFallback">•</span>
+      </button>
     </div>
-
-    <div class="footerbar">
-      <div class="links">
-        <a href="/pages/about.html">Hakkında</a>
-        <a href="/pages/faq.html">SSS</a>
-        <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
-      </div>
-      <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
-    </div>
-
   </div>
 
-  <script type="module" src="/js/italky_chat_page.js?v=4"></script>
+  <div class="clear-wrap">
+    <button class="clear-btn" id="clearChatBtn">Sohbeti Temizle</button>
+  </div>
+
+  <div id="chat"></div>
+
+  <div class="input-dock">
+    <div class="dock-inner">
+      <textarea id="msgInput" rows="1" placeholder="Sohbet AI… yaz bakalım."></textarea>
+      <button class="icon-btn" id="micBtn">🎙️</button>
+      <button class="send-btn" id="sendBtn">✈️</button>
+    </div>
+  </div>
+
+  <div class="footerbar">
+    <div class="links">
+      <a href="/pages/about.html">Hakkında</a>
+      <a href="/pages/faq.html">SSS</a>
+      <a href="/pages/privacy.html">Gizlilik</a>
+      <a href="/pages/contact.html">İletişim</a>
+    </div>
+    <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
+  </div>
+
+</div>
+
+<script type="module" src="/js/italky_chat_page.js?v=4"></script>
 </body>
 </html>
