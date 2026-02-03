@@ -1,10 +1,10 @@
 // FILE: italky-web/js/italky_chat_page.js
 // Italky Chat Page Controller (Caynana chat UX -> Italky)
-// ✅ No top/bottom global bars; this page is standalone
 // ✅ Uses italky-api: POST {BASE_DOMAIN}/api/chat
 // ✅ Simple local history per user (last 30)
-// ✅ STT mic -> fills textarea (send manually or Enter)
-// ✅ Plus sheet camera/photos/files UI only (no upload yet)
+// ✅ STT mic toggle -> fills textarea (send manually or Enter)
+// ✅ Auto-grow textarea + chat bottom padding follows dock height
+// ✅ Brand guard: "Seni kim yazdı?" -> Google DEMEZ
 
 import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
 
@@ -87,13 +87,34 @@ function typing(){
   return d;
 }
 
+/* ===== Brand guard (Google demesin) ===== */
+function isBrandQuestion(t){
+  const s = String(t||"").toLowerCase();
+  return (
+    s.includes("seni kim yazdı") ||
+    s.includes("seni kim yaptı") ||
+    s.includes("seni kim yarattı") ||
+    s.includes("kimin ürünüsün") ||
+    s.includes("kime aitsin") ||
+    s.includes("kimin yapay zekasısın") ||
+    s.includes("kimin yazılımısın")
+  );
+}
+function brandAnswer(){
+  return "Ben italkyAI’nin geliştirdiği dil yazılımıyım. Amacım konuşmayı, öğrenmeyi ve çeviriyi mümkün olduğunca pratik hale getirmek.";
+}
+
+/* ===== API ===== */
 async function apiChat(u, text, history){
   const base = String(BASE_DOMAIN||"").replace(/\/+$/,"");
   const url = `${base}/api/chat`;
+
   const body = {
     user_id: (u.user_id || u.id || u.email),
     text,
-    history: (history || []).slice(-20)
+    history: (history || []).slice(-20),
+    // backend ignore etse bile sorun yok:
+    user_meta: { app: "italkyAI", brand: "italkyAI" }
   };
 
   const r = await fetch(url,{
@@ -110,10 +131,34 @@ async function apiChat(u, text, history){
   return out || "…";
 }
 
+/* ===== Auto-grow + chat bottom offset ===== */
 function autoGrow(){
   const ta = $("msgInput");
+  if(!ta) return;
+
   ta.style.height = "auto";
   ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
+
+  // chat bottom padding: dock yüksekliği kadar
+  const dock = document.querySelector(".input-dock");
+  const chat = $("chat");
+  if(dock && chat){
+    const h = Math.ceil(dock.getBoundingClientRect().height || 74);
+    chat.style.bottom = h + "px";
+  }
+}
+
+/* ===== STT toggle ===== */
+let _rec = null;
+let _sttOn = false;
+
+function stopSTT(){
+  const micBtn = $("micBtn");
+  try{ _rec && _rec.stop && _rec.stop(); }catch{}
+  try{ _rec && _rec.abort && _rec.abort(); }catch{}
+  _rec = null;
+  _sttOn = false;
+  micBtn?.classList.remove("listening");
 }
 
 function startSTT(){
@@ -123,12 +168,22 @@ function startSTT(){
   const micBtn = $("micBtn");
   const ta = $("msgInput");
 
+  // toggle: açıksa kapat
+  if(_sttOn){
+    stopSTT();
+    return;
+  }
+
   const rec = new SR();
+  _rec = rec;
+  _sttOn = true;
+
+  // şimdilik TR; istersen site dili ayarına bağlarız
   rec.lang = "tr-TR";
   rec.interimResults = false;
   rec.continuous = false;
 
-  micBtn.classList.add("listening");
+  micBtn?.classList.add("listening");
 
   rec.onresult = (e)=>{
     const t = e.results?.[0]?.[0]?.transcript || "";
@@ -138,11 +193,13 @@ function startSTT(){
     }
   };
   rec.onerror = ()=>{};
-  rec.onend = ()=> micBtn.classList.remove("listening");
+  rec.onend = ()=> stopSTT();
 
-  try{ rec.start(); }catch{ micBtn.classList.remove("listening"); }
+  try{ rec.start(); }
+  catch{ stopSTT(); }
 }
 
+/* ===== Plus sheet ===== */
 function bindPlusSheet(){
   const camBtn = $("camBtn");
   const plusSheet = $("plusSheet");
@@ -192,6 +249,7 @@ async function main(){
   follow = true;
   scrollBottom(true);
 
+  // bind
   $("micBtn").addEventListener("click", startSTT);
 
   async function send(){
@@ -199,12 +257,24 @@ async function main(){
     const text = String(ta.value||"").trim();
     if(!text) return;
 
+    stopSTT();
+
     ta.value = "";
     autoGrow();
 
     const h = loadHist(u);
     bubble("user", text);
     h.push({ role:"user", text });
+
+    // brand guard (API'ye gitmeden)
+    if(isBrandQuestion(text)){
+      const out = brandAnswer();
+      bubble("assistant", out);
+      h.push({ role:"assistant", text: out });
+      saveHist(u, h);
+      scrollBottom(false);
+      return;
+    }
 
     const loader = typing();
 
@@ -216,8 +286,9 @@ async function main(){
       saveHist(u, h);
     }catch(e){
       try{ loader.remove(); }catch{}
-      bubble("assistant", "Şu an cevap veremedim. Bir daha dener misin?");
-      h.push({ role:"assistant", text: "Şu an cevap veremedim. Bir daha dener misin?" });
+      const fallback = "Şu an cevap veremedim. Bir daha dener misin?";
+      bubble("assistant", fallback);
+      h.push({ role:"assistant", text: fallback });
       saveHist(u, h);
     }
 
@@ -233,6 +304,7 @@ async function main(){
     }
   });
 
+  // ilk ölçüm
   autoGrow();
 }
 
