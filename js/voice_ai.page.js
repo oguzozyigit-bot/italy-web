@@ -1,380 +1,263 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI - Voice</title>
-  <link rel="icon" href="data:," />
+import { BASE_DOMAIN } from "/js/config.js";
+
+const $ = (id) => document.getElementById(id);
+
+// --- KARAKTER LİSTESİ ---
+const VOICES = [
+  // KADINLAR
+  { id: "dora",   label: "Dora",   gender: "Kadın", openaiVoice: "nova",    desc: "Enerjik ve Neşeli ⚡" },
+  { id: "ayda",   label: "Ayda",   gender: "Kadın", openaiVoice: "shimmer", desc: "Parlak ve Net ✨" },
+  { id: "umay",   label: "Umay",   gender: "Kadın", openaiVoice: "alloy",   desc: "Dengeli ve Akıcı 💧" },
+
+  // ERKEKLER
+  { id: "sencer", label: "Sencer", gender: "Erkek", openaiVoice: "echo",    desc: "Sıcak ve Yankılı 🔥" },
+  { id: "toygar", label: "Toygar", gender: "Erkek", openaiVoice: "fable",   desc: "Anlatıcı ve Vurgulu 🎭" },
+  { id: "sungur", label: "Sungur", gender: "Erkek", openaiVoice: "onyx",    desc: "Derin ve Karizmatik 🗿" }
+];
+
+const KEY = "italky_voice_pref";
+let selectedId = (localStorage.getItem(KEY) || "dora").trim();
+let stagedId = selectedId; 
+
+function apiBase() {
+  return String(BASE_DOMAIN || "").replace(/\/+$/, "");
+}
+
+function getSelectedVoice() {
+  return VOICES.find(v => v.id === selectedId) || VOICES[0];
+}
+
+/* =========================================
+   YARDIMCI: SES ÇALMA (GERÇEK API)
+   ========================================= */
+async function playRealVoice(text, openaiVoice) {
+  try {
+    const res = await fetch(`${apiBase()}/api/tts_openai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: text,
+        voice: openaiVoice,
+        speed: 1.0
+      })
+    });
+
+    if (!res.ok) throw new Error("TTS API Hatası");
+    const data = await res.json();
+    
+    if (data.audio_base64) {
+      const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
+      await audio.play();
+      return audio; // Audio nesnesini döndür (kontrol için)
+    }
+  } catch (err) {
+    console.error("Ses Çalma Hatası:", err);
+    alert("Ses sunucusuna ulaşılamadı. Backend çalışıyor mu?");
+  }
+  return null;
+}
+
+/* =========================================
+   GÖRSEL DURUMLAR
+   ========================================= */
+const stage   = $("aiStage");
+const status  = $("statusText");
+const micBtn  = $("micToggle");
+
+function setVisual(state) {
+  stage?.classList.remove("listening", "speaking");
+  micBtn?.classList.remove("active");
+  status?.classList.remove("show");
+
+  if (state === "listening") {
+    stage?.classList.add("listening");
+    micBtn?.classList.add("active");
+    if(status) { status.textContent = "Dinliyorum..."; status.classList.add("show"); }
+  } else if (state === "thinking") {
+    micBtn?.classList.add("active");
+    if(status) { status.textContent = "Düşünüyor..."; status.classList.add("show"); }
+  } else if (state === "speaking") {
+    stage?.classList.add("speaking");
+    micBtn?.classList.add("active");
+    if(status) { status.textContent = "Cevap Veriyor..."; status.classList.add("show"); }
+  } else {
+    if(status) { status.textContent = "Sohbet Başlat"; status.classList.add("show"); }
+  }
+}
+
+/* =========================================
+   SÜREKLİ SOHBET (LOOP)
+   ========================================= */
+let isConversationActive = false;
+let recognition = null;
+let currentAudio = null;
+
+function toggleConversation() {
+  if (isConversationActive) stopConversation();
+  else startConversation();
+}
+
+function startConversation() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert("Tarayıcı desteklemiyor."); return; }
+  isConversationActive = true;
+  startListening();
+}
+
+function stopConversation() {
+  isConversationActive = false;
+  if (recognition) { try { recognition.stop(); } catch(e){} recognition = null; }
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  setVisual("idle");
+}
+
+function startListening() {
+  if (!isConversationActive) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = "tr-TR";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  recognition.onstart = () => { if (isConversationActive) setVisual("listening"); };
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    if (text && isConversationActive) processUserSpeech(text);
+  };
 
-  <style>
-    /* --- TASARIM VE STİL AYARLARI (AYNEN KORUNDU) --- */
-    :root {
-      --bg-deep: #020205; --text-main: #fff; --glass-border: rgba(255, 255, 255, 0.12);
-      --c-indigo: #6366f1; --c-cyan: #06b6d4; --c-pink: #ec4899; --c-orange: #f97316;
-    }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+  recognition.onerror = (e) => {
+    if (isConversationActive && e.error !== 'aborted') setTimeout(startListening, 500);
+  };
 
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-      background: var(--bg-deep); font-family: 'Outfit', sans-serif; color: var(--text-main);
-      display: flex; align-items: center; justify-content: center;
-    }
+  try { recognition.start(); } catch(e){}
+}
 
-    /* Atmosfer */
-    .cosmos-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; }
-    .glow-spot { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15; animation: floatSpot 20s infinite alternate ease-in-out; }
-    .gs-1 { top: -10%; left: -10%; width: 80vw; height: 80vw; background: var(--c-indigo); }
-    .gs-2 { bottom: -10%; right: -10%; width: 80vw; height: 80vw; background: var(--c-cyan); animation-delay: -5s; }
-    @keyframes floatSpot { from { transform: translate(0,0); } to { transform: translate(10%, 10%); } }
-
-    .frame { width: 100%; max-width: 480px; height: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; background: transparent; }
-
-    /* Topbar */
-    .topbar {
-      height: 90px; padding: 10px 20px 0; display: flex; align-items: center; justify-content: space-between;
-      position: relative; z-index: 100; background: transparent; border: none;
-    }
-    .back-btn {
-      width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px);
-    }
-    .back-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
-    .back-btn svg { width: 22px; height: 22px; stroke-width: 2.5; }
-
-    .brand { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; margin-top: 4px; filter: drop-shadow(0 0 20px rgba(0,0,0,0.5)); }
-    .logo-container { font-family:'Space Grotesk', sans-serif; font-size: 26px; letter-spacing: -0.5px; }
-    .logo-main { font-weight: 700; color: #fff; }
-    .logo-ai { font-weight: 700; background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .mini-slogan { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.5); letter-spacing: 5px; margin-top: 6px; }
-
-    .voice-btn {
-      padding: 0 18px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-      color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px);
-    }
-    .voice-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
-
-    /* Sahne */
-    .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; pointer-events: none; }
-    .ai-blob {
-      width: 190px; height: 190px; border-radius: 50%; filter: blur(35px); opacity: 0.9;
-      background: conic-gradient(from 0deg, var(--c-indigo), var(--c-cyan), var(--c-indigo));
-      animation: spinColor 10s linear infinite, blobIdle 6s ease-in-out infinite;
-      transition: all 0.5s ease;
-    }
-    .stage.listening .ai-blob {
-      width: 150px; height: 150px; filter: blur(25px); background: radial-gradient(circle, #ffffff, var(--c-cyan));
-      border-radius: 50%; animation: pulseListen 1s infinite alternate;
-    }
-    .stage.speaking .ai-blob {
-      width: 250px; height: 250px; filter: blur(50px);
-      background: conic-gradient(from 0deg, var(--c-pink), var(--c-orange), var(--c-indigo));
-      animation: spinColor 3s linear infinite, blobMorph 4s ease-in-out infinite;
-    }
-    .status-text {
-      margin-top: 50px; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.5);
-      letter-spacing: 2px; text-transform: uppercase; opacity: 0; transform: translateY(10px); transition: 0.5s;
-    }
-    .status-text.show { opacity: 1; transform: translateY(0); }
-
-    @keyframes spinColor { 100% { transform: rotate(360deg); } }
-    @keyframes blobIdle { 0%, 100% { transform: scale(1); border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; } 50% { transform: scale(1.05); border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; } }
-    @keyframes pulseListen { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.8; } }
-    @keyframes blobMorph { 0% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; } 100% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; } }
-
-    /* Kontroller */
-    .controls { padding: 40px; display: flex; justify-content: center; position: relative; z-index: 100; pointer-events: none; }
-    .mic-btn {
-      width: 86px; height: 86px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; pointer-events: auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(5px);
-    }
-    .mic-btn svg { width: 34px; height: 34px; stroke: #fff; fill: none; stroke-width: 2; }
-    .mic-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
-    .mic-btn.active { background: #fff; border-color: #fff; box-shadow: 0 0 40px rgba(255, 255, 255, 0.4); animation: pulseMic 2s infinite; }
-    .mic-btn.active svg { stroke: #000; }
-    @keyframes pulseMic { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
-
-    /* Modal */
-    .modal-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-    .modal-overlay.show { display: flex; opacity: 1; }
-    .voice-sheet { width: 100%; max-width: 480px; background: #0b0b10; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 32px 32px 0 0; padding: 24px; padding-bottom: 40px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 80vh; display: flex; flex-direction: column; }
-    .modal-overlay.show .voice-sheet { transform: translateY(0); }
-    .vs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .vs-title { font-size: 18px; font-weight: 700; color: #fff; }
-    .vs-close { background: rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; }
+async function processUserSpeech(userText) {
+  setVisual("thinking");
+  try {
+    const chatRes = await fetch(`${apiBase()}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: userText })
+    });
     
-    .voice-list { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .voice-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 18px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.2s; }
-    .voice-item.selected { background: rgba(99, 102, 241, 0.15); border-color: var(--c-indigo); }
-    .v-left { display: flex; align-items: center; gap: 14px; flex: 1; }
-    .play-btn { width: 36px; height: 36px; border-radius: 12px; background: rgba(255,255,255,0.1); border: none; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; transition: 0.2s; }
-    .play-btn:active { background: #fff; color: #000; }
-    .play-btn svg { width: 14px; height: 14px; fill: currentColor; }
-    .v-details { display: flex; flex-direction: column; }
-    .v-name { font-weight: 700; font-size: 15px; color: #fff; }
-    .v-lang { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
-    .save-btn { margin-top: 20px; width: 100%; height: 56px; border-radius: 20px; background: linear-gradient(135deg, var(--c-indigo), var(--c-pink)); border: none; color: #fff; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3); }
-  </style>
-</head>
+    const chatData = await chatRes.json();
+    const aiReply = chatData.text || "Anlaşılamadı.";
 
-<body>
-  <div class="cosmos-bg"><div class="glow-spot gs-1"></div><div class="glow-spot gs-2"></div></div>
+    // Konuşma fonksiyonunu çağır
+    await speakResponse(aiReply);
 
-  <div class="frame">
-    <div class="topbar">
-      <div class="back-btn" id="btnBack">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  } catch (err) {
+    console.error(err);
+    if (isConversationActive) { setVisual("idle"); setTimeout(startListening, 1000); }
+  }
+}
+
+async function speakResponse(text) {
+  if (!isConversationActive) return;
+  
+  const v = getSelectedVoice();
+  setVisual("speaking");
+
+  // Mevcut playRealVoice fonksiyonunu kullanıyoruz ama loop mantığı ekliyoruz
+  try {
+    const res = await fetch(`${apiBase()}/api/tts_openai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: text, voice: v.openaiVoice })
+    });
+    const data = await res.json();
+
+    if (data.audio_base64) {
+      const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
+      currentAudio = audio;
+      
+      audio.onended = () => {
+        currentAudio = null;
+        if (isConversationActive) startListening(); // LOOP DEVAM
+        else setVisual("idle");
+      };
+      await audio.play();
+    } else {
+      if (isConversationActive) startListening();
+    }
+  } catch (e) {
+    if (isConversationActive) startListening();
+  }
+}
+
+/* =========================================
+   MODAL & DEMO (DÜZELTİLEN KISIM)
+   ========================================= */
+const modal = $("voiceModal");
+const listContainer = $("voiceListContainer");
+
+function openModal() { modal?.classList.add("show"); renderVoiceList(); }
+function closeModal() { modal?.classList.remove("show"); }
+
+function renderVoiceList() {
+  if (!listContainer) return;
+  listContainer.innerHTML = "";
+
+  VOICES.forEach(v => {
+    const isSelected = (v.id === stagedId);
+    const row = document.createElement("div");
+    row.className = `voice-item ${isSelected ? "selected" : ""}`;
+    row.innerHTML = `
+      <div class="v-left">
+        <button class="play-btn" type="button">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="v-details">
+          <div class="v-name">${v.label}</div>
+          <div class="v-lang">${v.gender} • ${v.desc}</div>
+        </div>
       </div>
-      <div class="brand">
-        <div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
-        <div class="mini-slogan">BE FREE</div>
-      </div>
-      <div class="voice-btn" id="btnSettings">Ses</div>
-    </div>
+      ${isSelected ? '<div style="color:#6366f1">✓</div>' : ''}
+    `;
 
-    <div class="stage" id="aiStage">
-      <div class="ai-blob"></div>
-      <div class="status-text" id="statusText">Sohbet Başlat</div>
-    </div>
+    row.addEventListener("click", (e) => {
+      if (e.target.closest(".play-btn")) return;
+      stagedId = v.id;
+      renderVoiceList();
+    });
 
-    <div class="controls">
-      <button class="mic-btn" id="micToggle">
-        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="voiceModal">
-    <div class="voice-sheet">
-      <div class="vs-header"><div class="vs-title">Karakter Seç</div><button class="vs-close" id="closeVoiceModal">✕</button></div>
-      <div class="voice-list" id="voiceListContainer"></div>
-      <button class="save-btn" id="saveVoiceBtn">Seçimi Kaydet</button>
-    </div>
-  </div>
-
-  <script>
-    const $ = (id) => document.getElementById(id);
-
-    // --- YENİ İSİMLER VE SES EŞLEŞTİRMELERİ ---
-    const VOICES = [
-      // KADINLAR (NOVA, SHIMMER, ALLOY)
-      { id: "dora", label: "Dora", gender: "Kadın", openaiVoice: "nova", desc: "Enerjik ve Neşeli ⚡" },
-      { id: "ayda", label: "Ayda", gender: "Kadın", openaiVoice: "shimmer", desc: "Parlak ve Net ✨" },
-      { id: "umay", label: "Umay", gender: "Kadın", openaiVoice: "alloy", desc: "Dengeli ve Akıcı 💧" },
-
-      // ERKEKLER (ECHO, FABLE, ONYX)
-      { id: "sencer", label: "Sencer", gender: "Erkek", openaiVoice: "echo", desc: "Sıcak ve Yankılı 🔥" },
-      { id: "toygar", label: "Toygar", gender: "Erkek", openaiVoice: "fable", desc: "Anlatıcı ve Vurgulu 🎭" },
-      { id: "sungur", label: "Sungur", gender: "Erkek", openaiVoice: "onyx", desc: "Derin ve Karizmatik 🗿" }
-    ];
-
-    // Varsayılan: DORA (Nova) - Eğlenceli
-    const KEY = "italky_voice_pref";
-    let selectedId = localStorage.getItem(KEY) || "dora";
-
-    // --- MODAL VE SEÇİM ---
-    $("btnBack").onclick = () => window.location.href = "/pages/home.html";
-    $("btnSettings").onclick = openModal;
-    $("closeVoiceModal").onclick = closeModal;
-    
-    $("saveVoiceBtn").onclick = () => {
-      if (selectedId) {
-        localStorage.setItem(KEY, selectedId);
-        closeModal();
-      }
-    };
-
-    function openModal() {
-      $("voiceModal").classList.add("show");
-      const list = $("voiceListContainer");
-      list.innerHTML = "";
-      VOICES.forEach(v => {
-        const isSel = (v.id === selectedId);
-        const div = document.createElement("div");
-        div.className = `voice-item ${isSel ? "selected" : ""}`;
-        div.innerHTML = `
-          <div class="v-left">
-            <button class="play-btn" title="Dinle"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-            <div class="v-details"><div class="v-name">${v.label}</div><div class="v-lang">${v.gender} • ${v.desc}</div></div>
-          </div>${isSel ? '<div style="color:#6366f1">✓</div>' : ''}`;
-        
-        // Seçim
-        div.onclick = (e) => {
-          if(e.target.closest(".play-btn")) return;
-          document.querySelectorAll(".voice-item").forEach(el => el.classList.remove("selected"));
-          div.classList.add("selected");
-          selectedId = v.id;
-        };
-
-        // Demo Dinle (Tarayıcı sesi ile simüle edilir)
-        div.querySelector(".play-btn").onclick = () => {
-          window.speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(`Merhaba, ben ${v.label}. Konuşmaya hazırım.`);
-          // Türkçe ses bulmaya çalış
-          const voices = window.speechSynthesis.getVoices();
-          const trVoice = voices.find(vo => vo.lang.includes("tr"));
-          if(trVoice) u.voice = trVoice;
-          window.speechSynthesis.speak(u);
-        };
-        list.appendChild(div);
-      });
-    }
-
-    function closeModal() { $("voiceModal").classList.remove("show"); }
-
-    // --- SÜREKLİ SOHBET (MANTIK) ---
-    const stage = $("aiStage");
-    const micBtn = $("micToggle");
-    const statusText = $("statusText");
-    let isConversationActive = false;
-    let recognition = null;
-    let currentAudio = null;
-
-    function setVisual(state) {
-      stage.classList.remove("listening", "speaking");
-      statusText.classList.remove("show");
-
-      if (state === "listening") {
-        stage.classList.add("listening");
-        statusText.innerText = "Dinliyorum...";
-        statusText.classList.add("show");
-        micBtn.classList.add("active");
-      } else if (state === "speaking") {
-        stage.classList.add("speaking");
-        statusText.innerText = "Konuşuyor...";
-        statusText.classList.add("show");
-        micBtn.classList.add("active");
-      } else {
-        // Idle
-        statusText.innerText = "Sohbet Başlat";
-        statusText.classList.add("show");
-        micBtn.classList.remove("active");
-      }
-    }
-
-    setVisual("idle");
-
-    micBtn.onclick = () => {
-      if (isConversationActive) stopConversation();
-      else startConversation();
-    };
-
-    function startConversation() {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) { alert("Tarayıcınız desteklemiyor (Chrome kullanın)."); return; }
+    // --- DEMO DİNLE (ARTIK GERÇEK SES!) ---
+    const btn = row.querySelector(".play-btn");
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
       
-      isConversationActive = true;
-      startListening();
-    }
-
-    function stopConversation() {
-      isConversationActive = false;
-      if (recognition) { try{ recognition.stop(); }catch(e){} recognition=null; }
-      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-      setVisual("idle");
-    }
-
-    function startListening() {
-      if (!isConversationActive) return;
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SR();
-      recognition.lang = "tr-TR";
-      recognition.interimResults = false;
-      recognition.continuous = false;
-
-      recognition.onstart = () => { if(isConversationActive) setVisual("listening"); };
+      // Butonu geçici olarak pasif yap (spam engelleme)
+      btn.style.opacity = "0.5";
       
-      recognition.onend = () => {
-        // Eğer konuşma modu aktif değilse ve sohbet açıksa (sessizlik olduysa)
-        // Kullanıcı konuşmayı kesti sandığında tekrar dinlemesin, akışı bekle.
-        // Ancak bu basit loopta, hata olursa tekrar başlatmak gerekebilir.
-      };
-
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        if (text && isConversationActive) processUserSpeech(text);
-      };
-
-      recognition.onerror = (e) => {
-        if(isConversationActive && e.error!=='aborted') setTimeout(startListening, 500);
-      };
-
-      try{ recognition.start(); }catch(e){}
-    }
-
-    async function processUserSpeech(userText) {
-      setVisual("thinking"); // Ara durum (düşünüyor)
-
-      // Chat API'ye sor
-      try {
-        // 1. Backend'e gönder (Chat)
-        // NOT: API URL'sini kendi canlı sunucuna göre ayarla (örn: https://italky-api.onrender.com)
-        // Localde test için: http://127.0.0.1:8000
-        const chatRes = await fetch("http://127.0.0.1:8000/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: userText })
-        });
-        const chatData = await chatRes.json();
-        const aiReply = chatData.text || "Bir hata oluştu.";
-
-        // 2. Sese çevir (TTS)
-        await speakResponse(aiReply);
-
-      } catch (err) {
-        console.error(err);
-        setVisual("idle"); // Hata olursa dur
-        // Basit fallback: Tarayıcı sesiyle hatayı oku
-        // const u = new SpeechSynthesisUtterance("Bağlantı hatası.");
-        // window.speechSynthesis.speak(u);
-      }
-    }
-
-    async function speakResponse(text) {
-      if (!isConversationActive) return;
-      setVisual("speaking");
-
-      // Seçili karakterin OpenAI sesini bul
-      const char = VOICES.find(v => v.id === selectedId) || VOICES[0];
+      // OpenAI'den gerçek sesi çek
+      const demoText = `Merhaba, ben ${v.label}. italkyAI ile konuşmaya hazırım!`;
+      await playRealVoice(demoText, v.openaiVoice);
       
-      try {
-        const ttsRes = await fetch("http://127.0.0.1:8000/api/tts_openai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            text: text,
-            voice: char.openaiVoice // "nova", "shimmer" vb.
-          })
-        });
-        const ttsData = await ttsRes.json();
-        
-        if (ttsData.audio_base64) {
-          const audio = new Audio("data:audio/mp3;base64," + ttsData.audio_base64);
-          currentAudio = audio;
-          audio.onended = () => {
-            currentAudio = null;
-            if (isConversationActive) startListening(); // Bitince tekrar dinle (LOOP)
-            else setVisual("idle");
-          };
-          audio.play();
-        } else {
-          // Ses gelmezse döngüyü sürdür
-          if (isConversationActive) startListening();
-        }
+      btn.style.opacity = "1";
+    });
 
-      } catch (e) {
-        console.error("TTS Error", e);
-        if (isConversationActive) startListening();
-      }
-    }
+    listContainer.appendChild(row);
+  });
+}
 
-    // İlk açılış
-    if(!localStorage.getItem(KEY)) setTimeout(openModal, 600);
-  </script>
-</body>
-</html>
+/* =========================================
+   INIT
+   ========================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  $("btnBack")?.addEventListener("click", () => location.href="/pages/home.html");
+  $("btnSettings")?.addEventListener("click", openModal);
+  $("closeVoiceModal")?.addEventListener("click", closeModal);
+  
+  $("saveVoiceBtn")?.addEventListener("click", () => {
+    selectedId = stagedId;
+    localStorage.setItem(KEY, selectedId);
+    closeModal();
+  });
+
+  micBtn?.addEventListener("click", toggleConversation);
+  setVisual("idle");
+
+  if (!localStorage.getItem(KEY)) setTimeout(openModal, 600);
+});
