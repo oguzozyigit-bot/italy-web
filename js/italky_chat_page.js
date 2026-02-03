@@ -1,20 +1,15 @@
 // FILE: italky-web/js/italky_chat_page.js
-// Italky Chat Page Controller (Caynana chat UX -> Italky)
-// ✅ Uses italky-api: POST {BASE_DOMAIN}/api/chat
-// ✅ Simple local history per user (last 30)
-// ✅ STT mic toggle -> fills textarea (send manually or Enter)
-// ✅ Auto-grow textarea + chat bottom padding follows dock height
+// ✅ Auto-grow textarea + chat bottom follows (dock + footer) so never overlaps
+// ✅ STT mic toggle
+// ✅ TTS: AI replies read aloud when enabled (toggle button)
 // ✅ Brand guard: "Seni kim yazdı?" -> Google DEMEZ
 
 import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
 
 const $ = (id)=>document.getElementById(id);
 function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
-function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
-function getUser(){
-  return safeJson(localStorage.getItem(STORAGE_KEY), {});
-}
+function getUser(){ return safeJson(localStorage.getItem(STORAGE_KEY), {}); }
 function ensureLogged(){
   const u = getUser();
   if(!u || !u.email || !u.isSessionActive){
@@ -43,22 +38,32 @@ function paintHeader(u){
   $("backBtn").addEventListener("click", ()=> location.href="/pages/home.html");
 }
 
+/* ===== Footer + dock -> chat bottom fix ===== */
+function refreshChatBottom(){
+  const chat = $("chat");
+  const dock = $("inputDock");
+  const footer = $("footerBar");
+  if(!chat || !dock || !footer) return;
+
+  const dh = Math.ceil(dock.getBoundingClientRect().height || 70);
+  const fh = Math.ceil(footer.getBoundingClientRect().height || 64);
+
+  chat.style.bottom = (dh + fh) + "px";
+}
+
+/* ===== History ===== */
 function chatKey(u){
   const uid = String(u.user_id || u.id || u.email || "guest").toLowerCase().trim();
   return `italky_chat_hist::${uid}`;
 }
-function loadHist(u){
-  return safeJson(localStorage.getItem(chatKey(u)), []);
-}
-function saveHist(u, h){
-  try{ localStorage.setItem(chatKey(u), JSON.stringify(h.slice(-30))); }catch{}
-}
+function loadHist(u){ return safeJson(localStorage.getItem(chatKey(u)), []); }
+function saveHist(u, h){ try{ localStorage.setItem(chatKey(u), JSON.stringify(h.slice(-30))); }catch{} }
 
+/* ===== Scroll follow ===== */
 function isNearBottom(el, slack=140){
   try{ return (el.scrollHeight - el.scrollTop - el.clientHeight) < slack; }
   catch{ return true; }
 }
-
 let follow = true;
 function scrollBottom(force=false){
   const el = $("chat");
@@ -68,6 +73,7 @@ function scrollBottom(force=false){
   });
 }
 
+/* ===== UI bubbles ===== */
 function bubble(role, text){
   const chat = $("chat");
   const d = document.createElement("div");
@@ -76,7 +82,6 @@ function bubble(role, text){
   chat.appendChild(d);
   scrollBottom(false);
 }
-
 function typing(){
   const chat = $("chat");
   const d = document.createElement("div");
@@ -101,20 +106,18 @@ function isBrandQuestion(t){
   );
 }
 function brandAnswer(){
-  return "Ben italkyAI’nin geliştirdiği dil yazılımıyım. Amacım konuşmayı, öğrenmeyi ve çeviriyi mümkün olduğunca pratik hale getirmek.";
+  return "Ben italkyAI’nin geliştirdiği dil yazılımıyım. Amacım konuşmayı, öğrenmeyi ve çeviriyi pratik hale getirmek.";
 }
 
 /* ===== API ===== */
 async function apiChat(u, text, history){
   const base = String(BASE_DOMAIN||"").replace(/\/+$/,"");
   const url = `${base}/api/chat`;
-
   const body = {
     user_id: (u.user_id || u.id || u.email),
     text,
     history: (history || []).slice(-20),
-    // backend ignore etse bile sorun yok:
-    user_meta: { app: "italkyAI", brand: "italkyAI" }
+    user_meta: { brand:"italkyAI", app:"italkyAI" }
   };
 
   const r = await fetch(url,{
@@ -131,7 +134,7 @@ async function apiChat(u, text, history){
   return out || "…";
 }
 
-/* ===== Auto-grow + chat bottom offset ===== */
+/* ===== Auto-grow textarea ===== */
 function autoGrow(){
   const ta = $("msgInput");
   if(!ta) return;
@@ -139,13 +142,7 @@ function autoGrow(){
   ta.style.height = "auto";
   ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
 
-  // chat bottom padding: dock yüksekliği kadar
-  const dock = document.querySelector(".input-dock");
-  const chat = $("chat");
-  if(dock && chat){
-    const h = Math.ceil(dock.getBoundingClientRect().height || 74);
-    chat.style.bottom = h + "px";
-  }
+  refreshChatBottom();
 }
 
 /* ===== STT toggle ===== */
@@ -160,25 +157,19 @@ function stopSTT(){
   _sttOn = false;
   micBtn?.classList.remove("listening");
 }
-
 function startSTT(){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ alert("Bu cihaz konuşmayı yazıya çevirmiyor."); return; }
 
+  // toggle
+  if(_sttOn){ stopSTT(); return; }
+
   const micBtn = $("micBtn");
   const ta = $("msgInput");
-
-  // toggle: açıksa kapat
-  if(_sttOn){
-    stopSTT();
-    return;
-  }
-
   const rec = new SR();
   _rec = rec;
   _sttOn = true;
 
-  // şimdilik TR; istersen site dili ayarına bağlarız
   rec.lang = "tr-TR";
   rec.interimResults = false;
   rec.continuous = false;
@@ -195,8 +186,50 @@ function startSTT(){
   rec.onerror = ()=>{};
   rec.onend = ()=> stopSTT();
 
-  try{ rec.start(); }
-  catch{ stopSTT(); }
+  try{ rec.start(); }catch{ stopSTT(); }
+}
+
+/* ===== TTS (sesli cevap) ===== */
+let ttsOn = true;
+
+function guessTTSLang(text){
+  const s = String(text||"");
+  const trChars = /[çğıöşüÇĞİÖŞÜ]/.test(s);
+  const trWords = /\b(ve|ama|çünkü|lütfen|teşekkür|merhaba|evet|hayır)\b/i.test(s);
+  return (trChars || trWords) ? "tr-TR" : "en-US";
+}
+
+function speak(text){
+  if(!ttsOn) return;
+  if(!("speechSynthesis" in window)) return;
+
+  const t = String(text||"").trim();
+  if(!t) return;
+
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = guessTTSLang(t);
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    window.speechSynthesis.speak(u);
+  }catch{}
+}
+
+function bindTTS(){
+  const btn = $("ttsBtn");
+  const sync = ()=>{
+    btn.classList.toggle("off", !ttsOn);
+  };
+  sync();
+  btn.addEventListener("click", ()=>{
+    ttsOn = !ttsOn;
+    sync();
+    // kapatınca sesi de kes
+    if(!ttsOn){
+      try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch{}
+    }
+  });
 }
 
 /* ===== Plus sheet ===== */
@@ -211,9 +244,7 @@ function bindPlusSheet(){
   const pickPhotos = $("pickPhotos");
   const pickFiles  = $("pickFiles");
 
-  function toggle(open){
-    plusSheet.classList.toggle("show", !!open);
-  }
+  function toggle(open){ plusSheet.classList.toggle("show", !!open); }
 
   camBtn.addEventListener("click",(e)=>{
     e.preventDefault();
@@ -238,18 +269,19 @@ async function main(){
 
   paintHeader(u);
   bindPlusSheet();
+  bindTTS();
 
   const chat = $("chat");
   chat.addEventListener("scroll", ()=>{ follow = isNearBottom(chat); }, { passive:true });
 
-  // load history
+  // history
   const hist = loadHist(u);
   chat.innerHTML = "";
   hist.forEach(m=> bubble(m.role, m.text));
   follow = true;
   scrollBottom(true);
 
-  // bind
+  // mic
   $("micBtn").addEventListener("click", startSTT);
 
   async function send(){
@@ -266,10 +298,11 @@ async function main(){
     bubble("user", text);
     h.push({ role:"user", text });
 
-    // brand guard (API'ye gitmeden)
+    // brand guard
     if(isBrandQuestion(text)){
       const out = brandAnswer();
       bubble("assistant", out);
+      speak(out);
       h.push({ role:"assistant", text: out });
       saveHist(u, h);
       scrollBottom(false);
@@ -282,13 +315,15 @@ async function main(){
       const out = await apiChat(u, text, h.map(x=>({role:x.role, content:x.text})));
       try{ loader.remove(); }catch{}
       bubble("assistant", out);
+      speak(out);
       h.push({ role:"assistant", text: out });
       saveHist(u, h);
     }catch(e){
       try{ loader.remove(); }catch{}
-      const fallback = "Şu an cevap veremedim. Bir daha dener misin?";
-      bubble("assistant", fallback);
-      h.push({ role:"assistant", text: fallback });
+      const fb = "Şu an cevap veremedim. Bir daha dener misin?";
+      bubble("assistant", fb);
+      speak(fb);
+      h.push({ role:"assistant", text: fb });
       saveHist(u, h);
     }
 
@@ -296,6 +331,7 @@ async function main(){
   }
 
   $("sendBtn").addEventListener("click", send);
+
   $("msgInput").addEventListener("input", autoGrow);
   $("msgInput").addEventListener("keydown",(e)=>{
     if(e.key==="Enter" && !e.shiftKey){
@@ -304,8 +340,14 @@ async function main(){
     }
   });
 
-  // ilk ölçüm
+  // ilk ölçümler
   autoGrow();
+  refreshChatBottom();
+
+  window.addEventListener("resize", ()=>{
+    autoGrow();
+    refreshChatBottom();
+  }, { passive:true });
 }
 
 document.addEventListener("DOMContentLoaded", main);
