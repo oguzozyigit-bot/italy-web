@@ -15,8 +15,6 @@
     :root{
       --frameW: min(480px, calc(100vw - 18px));
       --topH: 74px;
-
-      /* ✅ Alt footer + dock çakışmasın */
       --footerH: 74px;
       --dockH: 76px;
       --gap: 10px;
@@ -27,9 +25,7 @@
 
       --neon-cyan:#00f3ff;
       --neon-purple:#bc13fe;
-
       --burgundy: rgba(140, 18, 45, .48);
-      --burgundy2: rgba(140, 18, 45, .18);
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -42,7 +38,6 @@
       display:flex; align-items:center; justify-content:center;
     }
 
-    /* background (home vibe) */
     .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:#030014; z-index:0; pointer-events:none; }
     .orb{ position:absolute; border-radius:50%; filter: blur(90px); opacity:.28; animation: floatOrbit 30s infinite alternate ease-in-out; }
     .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
@@ -61,8 +56,7 @@
       background: rgba(8, 8, 20, 0.65);
       backdrop-filter: blur(25px);
       overflow:hidden;
-      display:flex;
-      flex-direction:column;
+      display:flex; flex-direction:column;
     }
     @media(min-width:520px){
       .mobile-frame{
@@ -73,7 +67,6 @@
       }
     }
 
-    /* topbar */
     .topbar{
       position: sticky;
       top: 0;
@@ -95,33 +88,22 @@
       color:#fff;
       font-size:20px;font-weight:1000;
       display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      user-select:none;
+      cursor:pointer; user-select:none;
     }
     .backBtn:active{ transform: scale(.96); }
 
-    /* ✅ Kurumsal logo: italkyAI + BE FREE */
     .mini-brand{
-      display:flex;
-      flex-direction:column;
-      user-select:none;
-      cursor:pointer;
-      line-height:1;
+      display:flex; flex-direction:column;
+      user-select:none; cursor:pointer; line-height:1;
       margin-top: 2px;
     }
     .logo-line{
       font-family:'Space Grotesk', sans-serif;
       font-size: 20px;
       letter-spacing: -0.4px;
-      display:flex;
-      align-items:flex-end;
-      gap:2px;
+      display:flex; align-items:flex-end; gap:2px;
     }
-    .logo-main{
-      font-weight:700;
-      color:#ffffff;
-      text-shadow:0 2px 10px rgba(0,0,0,0.35);
-    }
+    .logo-main{ font-weight:700; color:#FFFFFF; }
     .logo-ai{
       font-weight:700;
       background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 100%);
@@ -133,41 +115,21 @@
       font-size:10px;
       font-weight:700;
       letter-spacing: 4px;
-      color:#6B7280; /* ✅ BE FREE gri */
+      color:#6B7280;
       margin-top: 5px;
-      /* ✅ italky 'i' altından başlar, 'y' ortasında biter hissi için sola yaslı */
       padding-left: 2px;
       text-transform: uppercase;
     }
 
-    .rightControls{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
+    .rightControls{ display:flex; align-items:center; gap:10px; min-width:0; }
     .usertext{
       min-width:0;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:2px;
+      display:flex; flex-direction:column; align-items:flex-end; gap:2px;
       max-width: 200px;
     }
-    .uname{
-      font-weight: 900;
-      font-size: 12px;
-      color: rgba(255,255,255,0.92);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .plan{
-      font-weight: 800;
-      font-size: 11px;
-      color: rgba(255,255,255,0.55);
-      white-space:nowrap;
-    }
+    .uname{ font-weight: 900; font-size: 12px; color: rgba(255,255,255,0.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .plan{ font-weight: 800; font-size: 11px; color: rgba(255,255,255,0.55); white-space:nowrap; }
+
     .avatar-btn{
       width: 42px; height: 42px;
       border:none; background:transparent;
@@ -188,12 +150,10 @@
       user-select:none;
     }
 
-    /* chat area */
     #chat.chat-area{
       position: absolute;
       left: 0; right: 0;
       top: var(--topH);
-      /* ✅ Dock + Footer kadar yer bırak */
       bottom: calc(var(--dockH) + var(--footerH) + var(--gap));
       padding: 14px 12px;
 
@@ -218,43 +178,31 @@
       border-radius:16px;
       font-size:14px;
       line-height:1.4;
-      position:relative;
-      word-wrap:break-word;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
       box-shadow: 0 12px 28px rgba(0,0,0,.22);
       backdrop-filter: blur(8px);
+      word-wrap:break-word;
     }
-    .bubble.bot{
-      align-self:flex-start;
-      border-left:4px solid rgba(0,243,255,.55);
-    }
-    .bubble.user{
-      align-self:flex-end;
-      border-right:4px solid rgba(140,18,45,.65);
-      text-align:right;
-    }
+    .bubble.bot{ align-self:flex-start; border-left:4px solid rgba(0,243,255,.55); }
+    .bubble.user{ align-self:flex-end; border-right:4px solid rgba(140,18,45,.65); text-align:right; }
     .bubble.meta{
       align-self:center;
       max-width: 92%;
       opacity:.9;
-      border-left: 0;
-      border-right: 0;
-      border-color: rgba(255,255,255,.08);
       background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.08);
       font-size: 12px;
       font-weight: 700;
       color: rgba(255,255,255,.75);
       text-align:center;
     }
 
-    /* dock (chat input) */
     .input-dock{
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       width: var(--frameW);
-      /* ✅ Footer üstüne otursun */
       bottom: var(--footerH);
       z-index: 2600;
       padding: 10px 12px;
@@ -275,6 +223,7 @@
       border-radius: 26px;
       padding: 8px;
     }
+
     .icon-btn{
       width:40px; height:40px;
       border-radius:16px;
@@ -283,6 +232,7 @@
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
       flex-shrink:0;
+      user-select:none;
     }
     .icon-btn svg{
       width:20px; height:20px;
@@ -294,7 +244,6 @@
       opacity:.95;
     }
 
-    /* ✅ ChatGPT gibi: yazdıkça büyür ama genişlemez */
     #msgInput{
       flex: 1 1 auto;
       min-width:0;
@@ -321,6 +270,7 @@
       cursor:pointer;
       flex-shrink:0;
       box-shadow: 0 10px 18px rgba(0,0,0,.30);
+      user-select:none;
     }
     .send-btn svg{ width:20px;height:20px; stroke:#fff; fill:none; stroke-width:2; }
 
@@ -328,56 +278,8 @@
       border-color: rgba(190,242,100,.35) !important;
       background: rgba(190,242,100,.12) !important;
       box-shadow: 0 0 18px rgba(190,242,100,.18);
-      position: relative;
     }
 
-    /* plus sheet */
-    .plus-sheet{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
-      bottom: calc(var(--footerH) + var(--dockH) + 12px);
-      z-index: 9999;
-      display:none;
-      gap:10px;
-      padding:10px;
-      border-radius:18px;
-      background: rgba(15,15,18,.96);
-      border:1px solid rgba(255,255,255,.10);
-      box-shadow:0 18px 50px rgba(0,0,0,.60);
-      backdrop-filter: blur(10px);
-      pointer-events:auto;
-    }
-    .plus-sheet.show{ display:flex; }
-    .plus-action{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      align-items:center;
-      justify-content:center;
-      padding:10px 8px;
-      border-radius:16px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.10);
-      cursor:pointer;
-      user-select:none;
-      color: rgba(255,255,255,.86);
-      font-weight: 900;
-      font-size: 11px;
-      text-align:center;
-    }
-    .plus-action:active{ transform: translateY(-1px); }
-    .plus-ico{
-      width:40px;height:40px;border-radius:16px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.10);
-    }
-    .plus-ico svg{ width:20px;height:20px; stroke: rgba(255,255,255,.85); fill:none; stroke-width:2; }
-
-    /* footer */
     .footerbar{
       position: fixed;
       left: 50%;
@@ -409,7 +311,6 @@
       font-weight: 800;
       transition:.2s;
     }
-    .links a:active{ transform: translateY(1px); }
     .footerBrand{
       text-align:center;
       font-size: 10px;
@@ -457,13 +358,10 @@
 
     <div class="input-dock">
       <div class="dock-inner">
-        <button class="icon-btn" id="camBtn" aria-label="Dosya / Fotoğraf">
-          <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+        <!-- ✅ Foto/Belge kaldırıldı: sadece yazı + mic + gönder -->
+        <button class="icon-btn" id="helpBtn" aria-label="Bilgi">
+          <svg viewBox="0 0 24 24"><path d="M12 18h.01"></path><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4"></path><circle cx="12" cy="12" r="10"></circle></svg>
         </button>
-
-        <input type="file" id="fileCamera" accept="image/*" capture="environment" hidden>
-        <input type="file" id="filePhotos" accept="image/*" hidden>
-        <input type="file" id="fileFiles" hidden>
 
         <textarea id="msgInput" rows="1" placeholder="Sohbet AI… yaz bakalım." spellcheck="false"></textarea>
 
@@ -474,21 +372,6 @@
         <button class="send-btn" id="sendBtn" aria-label="Gönder">
           <svg viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2L15 22L11 13L2 9L22 2Z"></path></svg>
         </button>
-      </div>
-    </div>
-
-    <div class="plus-sheet" id="plusSheet">
-      <div class="plus-action" id="pickCamera">
-        <div class="plus-ico"><svg viewBox="0 0 24 24"><path d="M4 7h4l2-2h4l2 2h4v12H4z"></path><circle cx="12" cy="13" r="3"></circle></svg></div>
-        Kamera
-      </div>
-      <div class="plus-action" id="pickPhotos">
-        <div class="plus-ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M8 14l2-2 3 3 3-4 2 3"></path></svg></div>
-        Fotoğraf
-      </div>
-      <div class="plus-action" id="pickFiles">
-        <div class="plus-ico"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg></div>
-        Dosya
       </div>
     </div>
 
@@ -504,6 +387,6 @@
 
   </div>
 
-  <script type="module" src="/js/italky_chat_page.js?v=2"></script>
+  <script type="module" src="/js/italky_chat_page.js?v=3"></script>
 </body>
 </html>
