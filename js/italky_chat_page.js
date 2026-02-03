@@ -78,7 +78,30 @@ function addBubble(role, text){
 
   const d = document.createElement("div");
   d.className = `bubble ${role==="user" ? "user" : (role==="meta" ? "meta" : "bot")}`;
-  d.textContent = String(text||"");
+  function formatTextToParagraphs(text){
+  const t = String(text||"").trim();
+
+  // Zaten paragraf varsa dokunma
+  if(t.includes("\n\n")) return t;
+
+  // Cümle bazlı böl
+  const parts = t.split(/([.!?…]+)/);
+  let out = [];
+  let buf = "";
+
+  for(let i=0;i<parts.length;i+=2){
+    buf += (parts[i] || "") + (parts[i+1] || "");
+    if(buf.length > 280){
+      out.push(buf.trim());
+      buf = "";
+    }
+  }
+  if(buf.trim()) out.push(buf.trim());
+
+  return out.join("\n\n");
+}
+
+d.textContent = formatTextToParagraphs(text);
   chat.appendChild(d);
 
   scrollBottom(false);
