@@ -13,7 +13,7 @@
 
   <style>
     :root{
-      --frameW: min(480px, calc(100vw - 18px));
+      --frameW: min(480px, calc(100vw - 12px)); /* ✅ kenarlara biraz daha yaklaşsın */
       --topH: 74px;
       --footerH: 74px;
       --dockH: 76px;
@@ -25,7 +25,9 @@
 
       --neon-cyan:#00f3ff;
       --neon-purple:#bc13fe;
-      --burgundy: rgba(140, 18, 45, .48);
+
+      --green:#22c55e;     /* ✅ bot şeridi */
+      --orange:#f97316;    /* ✅ user şeridi + uçak */
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -150,6 +152,7 @@
       user-select:none;
     }
 
+    /* ✅ CHAT alanı: dock + footer üstünde kalsın */
     #chat.chat-area{
       position: absolute;
       left: 0; right: 0;
@@ -183,13 +186,17 @@
       box-shadow: 0 12px 28px rgba(0,0,0,.22);
       backdrop-filter: blur(8px);
       word-wrap:break-word;
+      white-space: pre-wrap; /* ✅ paragraf \n\n göster */
     }
-    .bubble.bot{ align-self:flex-start; border-left:4px solid rgba(0,243,255,.55); }
-    .bubble.user{ align-self:flex-end; border-right:4px solid rgba(140,18,45,.65); text-align:right; }
+
+    /* ✅ hizalar garanti */
+    .bubble.bot{ align-self:flex-start; border-left:4px solid var(--green); }
+    .bubble.user{ align-self:flex-end; border-right:4px solid var(--orange); text-align:right; }
+
     .bubble.meta{
       align-self:center;
       max-width: 92%;
-      opacity:.9;
+      opacity:.92;
       background: rgba(255,255,255,.04);
       border-color: rgba(255,255,255,.08);
       font-size: 12px;
@@ -198,6 +205,7 @@
       text-align:center;
     }
 
+    /* ✅ DOCK: footer'ın üstüne oturur */
     .input-dock{
       position: fixed;
       left: 50%;
@@ -220,9 +228,11 @@
       gap:8px;
       background: rgba(255,255,255,.04);
       border: 1px solid rgba(255,255,255,.10);
-      border-radius: 26px;
+      border-radius: 22px; /* ✅ biraz daha dar */
       padding: 8px;
     }
+
+    /* ✅ yardım (?) kaldırıldı — artık yok */
 
     .icon-btn{
       width:40px; height:40px;
@@ -233,6 +243,7 @@
       cursor:pointer;
       flex-shrink:0;
       user-select:none;
+      position: relative;
     }
     .icon-btn svg{
       width:20px; height:20px;
@@ -261,23 +272,38 @@
       max-height: 120px;
     }
 
+    /* ✅ Uçak turuncu */
     .send-btn{
       width:40px;height:40px;
       border-radius:16px;
-      border:1px solid rgba(0,243,255,.22);
-      background: rgba(0,243,255,.14);
+      border:1px solid rgba(249,115,22,.40);
+      background: rgba(249,115,22,.22);
       display:flex; align-items:center; justify-content:center;
       cursor:pointer;
       flex-shrink:0;
       box-shadow: 0 10px 18px rgba(0,0,0,.30);
       user-select:none;
     }
-    .send-btn svg{ width:20px;height:20px; stroke:#fff; fill:none; stroke-width:2; }
+    .send-btn svg{ width:20px;height:20px; stroke: var(--orange); fill:none; stroke-width:2; }
 
+    /* ✅ Mic dinlerken HALKA/DALGA (sessiz) */
     #micBtn.listening{
-      border-color: rgba(190,242,100,.35) !important;
-      background: rgba(190,242,100,.12) !important;
-      box-shadow: 0 0 18px rgba(190,242,100,.18);
+      border-color: rgba(34,197,94,.40) !important;
+      background: rgba(34,197,94,.14) !important;
+      box-shadow: 0 0 18px rgba(34,197,94,.18);
+    }
+    #micBtn.listening::after{
+      content:"";
+      position:absolute;
+      inset:-6px;
+      border-radius:20px;
+      border:2px dashed rgba(34,197,94,.65);
+      animation: micWave 1.2s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes micWave{
+      0%{ transform:scale(1); opacity:.7 }
+      100%{ transform:scale(1.2); opacity:0 }
     }
 
     .footerbar{
@@ -358,11 +384,6 @@
 
     <div class="input-dock">
       <div class="dock-inner">
-        <!-- ✅ Foto/Belge kaldırıldı: sadece yazı + mic + gönder -->
-        <button class="icon-btn" id="helpBtn" aria-label="Bilgi">
-          <svg viewBox="0 0 24 24"><path d="M12 18h.01"></path><path d="M9.1 9a3 3 0 1 1 5.8 1c0 2-3 2-3 4"></path><circle cx="12" cy="12" r="10"></circle></svg>
-        </button>
-
         <textarea id="msgInput" rows="1" placeholder="Sohbet AI… yaz bakalım." spellcheck="false"></textarea>
 
         <button class="icon-btn" id="micBtn" aria-label="Mikrofon">
@@ -387,6 +408,6 @@
 
   </div>
 
-  <script type="module" src="/js/italky_chat_page.js?v=3"></script>
+  <script type="module" src="/js/italky_chat_page.js?v=4"></script>
 </body>
 </html>
