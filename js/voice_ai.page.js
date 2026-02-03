@@ -2,7 +2,7 @@ import { BASE_DOMAIN } from "/js/config.js";
 
 const $ = (id) => document.getElementById(id);
 
-// --- KARAKTER LİSTESİ (YENİ VE FARKLI SESLER) ---
+// --- KARAKTER LİSTESİ ---
 const VOICES = [
   // KADINLAR
   { id: "dora",   label: "Dora",   gender: "Kadın", openaiVoice: "nova",    desc: "Enerjik ve Neşeli ⚡" },
@@ -16,6 +16,7 @@ const VOICES = [
 ];
 
 const KEY = "italky_voice_pref";
+// Başlangıçta kayıtlı sesi al, yoksa Dora yap
 let selectedId = (localStorage.getItem(KEY) || "dora").trim();
 let stagedId = selectedId; 
 
@@ -23,39 +24,16 @@ function apiBase() {
   return String(BASE_DOMAIN || "").replace(/\/+$/, "");
 }
 
+// SEÇİLİ SESİ GÜNCEL OLARAK GETİR (BUG FIX)
 function getSelectedVoice() {
-  return VOICES.find(v => v.id === selectedId) || VOICES[0];
+  // Localstorage'dan en güncel veriyi oku (Garanti olsun)
+  const current = localStorage.getItem(KEY) || selectedId;
+  return VOICES.find(v => v.id === current) || VOICES[0];
 }
 
-/* --- YARDIMCI: GERÇEK SES ÇALMA (API) --- */
-async function playRealVoice(text, openaiVoice) {
-  try {
-    const res = await fetch(`${apiBase()}/api/tts_openai`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: text,
-        voice: openaiVoice,
-        speed: 1.0
-      })
-    });
-
-    if (!res.ok) throw new Error("TTS API Hatası");
-    const data = await res.json();
-    
-    if (data.audio_base64) {
-      const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
-      await audio.play();
-      return audio;
-    }
-  } catch (err) {
-    console.error("Ses Çalma Hatası:", err);
-    alert("Ses sunucusuna ulaşılamadı. Backend çalışıyor mu?");
-  }
-  return null;
-}
-
-/* --- GÖRSEL DURUMLAR --- */
+/* =========================================
+   GÖRSEL DURUMLAR
+   ========================================= */
 const stage   = $("aiStage");
 const status  = $("statusText");
 const micBtn  = $("micToggle");
@@ -75,13 +53,15 @@ function setVisual(state) {
   } else if (state === "speaking") {
     stage?.classList.add("speaking");
     micBtn?.classList.add("active");
-    if(status) { status.textContent = "Cevap Veriyor..."; status.classList.add("show"); }
+    if(status) { status.textContent = "Konuşuyor..."; status.classList.add("show"); }
   } else {
     if(status) { status.textContent = "Sohbet Başlat"; status.classList.add("show"); }
   }
 }
 
-/* --- SÜREKLİ SOHBET (LOOP) --- */
+/* =========================================
+   SÜREKLİ SOHBET (LOOP)
+   ========================================= */
 let isConversationActive = false;
 let recognition = null;
 let currentAudio = null;
@@ -92,8 +72,10 @@ function toggleConversation() {
 }
 
 function startConversation() {
+  // Tarayıcı desteği kontrolü
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert("Tarayıcı desteklemiyor."); return; }
+  if (!SR) { alert("Tarayıcınız bu özelliği desteklemiyor."); return; }
+  
   isConversationActive = true;
   startListening();
 }
@@ -108,13 +90,16 @@ function stopConversation() {
 
 function startListening() {
   if (!isConversationActive) return;
+  
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = "tr-TR";
   recognition.interimResults = false;
-  recognition.continuous = false;
+  recognition.continuous = false; // Tek cümle al, işle, cevap ver
 
-  recognition.onstart = () => { if (isConversationActive) setVisual("listening"); };
+  recognition.onstart = () => { 
+    if (isConversationActive) setVisual("listening"); 
+  };
   
   recognition.onresult = (event) => {
     const text = event.results[0][0].transcript;
@@ -122,43 +107,70 @@ function startListening() {
   };
 
   recognition.onerror = (e) => {
-    if (isConversationActive && e.error !== 'aborted') setTimeout(startListening, 500);
+    // Hata olsa bile (sessizlik vb.) döngüyü kırma, tekrar dene
+    if (isConversationActive && e.error !== 'aborted') {
+      setTimeout(startListening, 300);
+    }
+  };
+
+  recognition.onend = () => {
+    // Eğer konuşma bitti ve hala işleme geçmediysek (sessizlik) tekrar dinle
+    if (isConversationActive && !stage.classList.contains("thinking") && !stage.classList.contains("speaking")) {
+       // startListening(); // Bu bazen çakışma yapar, onresult/onerror halleder.
+    }
   };
 
   try { recognition.start(); } catch(e){}
 }
 
 async function processUserSpeech(userText) {
-  setVisual("thinking");
+  setVisual("thinking"); // Düşünme modu
+  
   try {
+    // 1. Chat API'ye gönder
     const chatRes = await fetch(`${apiBase()}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: userText })
+      body: JSON.stringify({ 
+        text: userText,
+        max_tokens: 150 // Kısa cevap için token limiti
+      })
     });
     
     const chatData = await chatRes.json();
     const aiReply = chatData.text || "Anlaşılamadı.";
 
+    // 2. Seslendir
     await speakResponse(aiReply);
 
   } catch (err) {
     console.error(err);
-    if (isConversationActive) { setVisual("idle"); setTimeout(startListening, 1000); }
+    // Hata olursa loop'u kırma, tekrar dinlemeye geç
+    if (isConversationActive) { 
+      setVisual("idle"); 
+      setTimeout(startListening, 500); 
+    }
   }
 }
 
 async function speakResponse(text) {
   if (!isConversationActive) return;
   
+  // SEÇİLİ SESİ BURADA ALIYORUZ (HER SEFERİNDE GÜNCEL)
   const v = getSelectedVoice();
+  console.log("Konuşan Karakter:", v.label, v.openaiVoice); // Debug için
+
   setVisual("speaking");
 
   try {
     const res = await fetch(`${apiBase()}/api/tts_openai`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text, voice: v.openaiVoice })
+      body: JSON.stringify({ 
+        text: text, 
+        voice: v.openaiVoice,
+        speed: 1.1 // Biraz daha seri konuşsun
+      })
     });
     const data = await res.json();
 
@@ -168,19 +180,24 @@ async function speakResponse(text) {
       
       audio.onended = () => {
         currentAudio = null;
+        // Konuşma bittiği an DİNLEMEYE geç (LOOP)
         if (isConversationActive) startListening();
         else setVisual("idle");
       };
+      
       await audio.play();
     } else {
       if (isConversationActive) startListening();
     }
   } catch (e) {
+    console.error("Ses Hatası", e);
     if (isConversationActive) startListening();
   }
 }
 
-/* --- MODAL & DEMO --- */
+/* =========================================
+   MODAL & DEMO
+   ========================================= */
 const modal = $("voiceModal");
 const listContainer = $("voiceListContainer");
 
@@ -208,20 +225,35 @@ function renderVoiceList() {
       ${isSelected ? '<div style="color:#6366f1">✓</div>' : ''}
     `;
 
-    // Seçim
+    // Seçim (Sadece stagedId değişir, kaydet diyene kadar bekle)
     row.addEventListener("click", (e) => {
       if (e.target.closest(".play-btn")) return;
       stagedId = v.id;
       renderVoiceList();
     });
 
-    // Demo (Gerçek Ses)
+    // Demo Dinle (Gerçek Ses)
     const btn = row.querySelector(".play-btn");
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
-      btn.style.opacity = "0.5";
-      const demoText = `Merhaba, ben ${v.label}. italkyAI ile konuşmaya hazırım!`;
-      await playRealVoice(demoText, v.openaiVoice);
+      btn.style.opacity = "0.5"; // Yükleniyor efekti
+      
+      // Demo cümlesi
+      const demoText = `Merhaba, ben ${v.label}. Seninle konuşmak çok keyifli olacak!`;
+      
+      try {
+        const res = await fetch(`${apiBase()}/api/tts_openai`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: demoText, voice: v.openaiVoice })
+        });
+        const d = await res.json();
+        if(d.audio_base64) {
+           const a = new Audio("data:audio/mp3;base64," + d.audio_base64);
+           await a.play();
+        }
+      } catch(err) { alert("Demo sesi alınamadı."); }
+      
       btn.style.opacity = "1";
     });
 
@@ -229,16 +261,20 @@ function renderVoiceList() {
   });
 }
 
-/* --- INIT --- */
+/* =========================================
+   BAŞLATMA
+   ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
   $("btnBack")?.addEventListener("click", () => location.href="/pages/home.html");
   $("btnSettings")?.addEventListener("click", openModal);
   $("closeVoiceModal")?.addEventListener("click", closeModal);
   
+  // KAYDET BUTONU (Kritik Nokta)
   $("saveVoiceBtn")?.addEventListener("click", () => {
-    selectedId = stagedId;
-    localStorage.setItem(KEY, selectedId);
+    selectedId = stagedId; 
+    localStorage.setItem(KEY, selectedId); // Tarayıcıya kaydet
     closeModal();
+    // Eğer o an konuşma aktifse, bir sonraki cümlede yeni ses devreye girer
   });
 
   micBtn?.addEventListener("click", toggleConversation);
