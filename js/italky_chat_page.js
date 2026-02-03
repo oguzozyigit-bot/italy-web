@@ -2,9 +2,7 @@
 // Italky Chat Page Controller (Gemini backend - text only)
 // ✅ STT -> auto-send (no enter needed)
 // ✅ No TTS here (no sound)
-// ✅ Footer links fixed; dock sits above footer
-// ✅ Local history per user (last 30)
-// ✅ Plus sheet: camera/photos/files (OCR hook is optional)
+// ✅ No photo/document here (chat = text only)
 
 import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
 
@@ -90,16 +88,14 @@ async function apiChat(u, text, history){
   const base = String(BASE_DOMAIN||"").replace(/\/+$/,"");
   const url = `${base}/api/chat`;
 
-  // ✅ sadece yazı: Italky AI ürünü
   const body = {
     user_id: (u.user_id || u.id || u.email),
     text,
     history: (history || []).slice(-20),
     user_meta: {
-      // bu alanlar backend prompt'a yardımcı olur
       fullname: u.fullname || u.name || u.display_name || "",
       plan: u.plan || "FREE",
-      product: "italkyAI"
+      product: "italkyAI",
     }
   };
 
@@ -116,29 +112,6 @@ async function apiChat(u, text, history){
   try{ data = JSON.parse(raw || "{}"); }catch{}
   const out = String(data.text || data.reply || data.answer || "").trim();
   return out || "…";
-}
-
-/* OPTIONAL OCR hook (eğer backend’de /api/ocr varsa) */
-async function tryOCRImage(base64DataUrl){
-  const base = String(BASE_DOMAIN||"").replace(/\/+$/,"");
-  if(!base) return "";
-
-  // beklenen örnek payload: { image_base64: "data:image/jpeg;base64,..." } veya { image: "..." }
-  const url = `${base}/api/ocr`;
-  try{
-    const r = await fetch(url,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ image_base64: base64DataUrl })
-    });
-    const raw = await r.text().catch(()=> "");
-    if(!r.ok) return "";
-    let d={}; try{ d=JSON.parse(raw||"{}"); }catch{}
-    const text = String(d.text || d.ocr_text || d.result || "").trim();
-    return text;
-  }catch{
-    return "";
-  }
 }
 
 function autoGrow(){
@@ -168,10 +141,11 @@ function startSTT(onFinal){
 
   rec.onresult = (e)=>{
     const t = e.results?.[0]?.[0]?.transcript || "";
-    if(t){
-      ta.value = t.trim();
+    const finalText = String(t||"").trim();
+    if(finalText){
+      ta.value = finalText;
       autoGrow();
-      onFinal?.(t.trim());
+      onFinal?.(finalText);
     }
   };
   rec.onerror = ()=>{};
@@ -187,80 +161,6 @@ function startSTT(onFinal){
   }
 }
 
-function bindPlusSheet(u, sendFn){
-  const camBtn = $("camBtn");
-  const plusSheet = $("plusSheet");
-  const fileCamera = $("fileCamera");
-  const filePhotos = $("filePhotos");
-  const fileFiles  = $("fileFiles");
-
-  const pickCamera = $("pickCamera");
-  const pickPhotos = $("pickPhotos");
-  const pickFiles  = $("pickFiles");
-
-  function toggle(open){
-    plusSheet.classList.toggle("show", !!open);
-  }
-
-  camBtn.addEventListener("click",(e)=>{
-    e.preventDefault();
-    toggle(!plusSheet.classList.contains("show"));
-  });
-
-  document.addEventListener("click",(e)=>{
-    if(!plusSheet.classList.contains("show")) return;
-    if(plusSheet.contains(e.target)) return;
-    if(camBtn.contains(e.target)) return;
-    toggle(false);
-  }, true);
-
-  pickCamera.onclick = ()=>{ toggle(false); fileCamera.click(); };
-  pickPhotos.onclick = ()=>{ toggle(false); filePhotos.click(); };
-  pickFiles.onclick  = ()=>{ toggle(false); fileFiles.click(); };
-
-  async function handleImage(file){
-    if(!file) return;
-    addBubble("meta", `📷 Fotoğraf alındı: ${file.name || "image"}`);
-
-    // base64
-    const dataUrl = await new Promise((res)=>{
-      const fr = new FileReader();
-      fr.onload = ()=> res(String(fr.result||""));
-      fr.readAsDataURL(file);
-    });
-
-    const ocrText = await tryOCRImage(dataUrl);
-    if(ocrText){
-      addBubble("meta", `📝 Metin (OCR): ${ocrText.slice(0, 900)}${ocrText.length>900 ? "…" : ""}`);
-      // istersen otomatik sohbete soralım:
-      // $("msgInput").value = ocrText; autoGrow(); sendFn();
-    }else{
-      addBubble("meta", "📝 OCR şu an bağlı değil (backend /api/ocr yok ya da hata).");
-    }
-  }
-
-  fileCamera.addEventListener("change", async ()=>{
-    const f = fileCamera.files?.[0];
-    fileCamera.value = "";
-    await handleImage(f);
-  });
-
-  filePhotos.addEventListener("change", async ()=>{
-    const f = filePhotos.files?.[0];
-    filePhotos.value = "";
-    await handleImage(f);
-  });
-
-  fileFiles.addEventListener("change", async ()=>{
-    const f = fileFiles.files?.[0];
-    fileFiles.value = "";
-    if(!f) return;
-
-    addBubble("meta", `📎 Dosya alındı: ${f.name} (${Math.round((f.size||0)/1024)} KB)`);
-    // burada ileride: PDF/text çıkarma + web arama bağlarız
-  });
-}
-
 async function main(){
   const u = ensureLogged();
   if(!u) return;
@@ -270,12 +170,12 @@ async function main(){
   const chat = $("chat");
   chat.addEventListener("scroll", ()=>{ follow = isNearBottom(chat); }, { passive:true });
 
-  // load history
+  // history
   const hist = loadHist(u);
   chat.innerHTML = "";
 
   if(!hist.length){
-    addBubble("meta", "italkyAI: Yazılı sohbet modundasın. Mikrofon konuşmanı yazıya çevirir ve otomatik gönderir.");
+    addBubble("meta", "italkyAI: Bu sayfa yazılı bilgi alma içindir. Mikrofon konuşmanı yazıya çevirir ve otomatik gönderir.");
   }else{
     hist.forEach(m=> addBubble(m.role, m.text));
   }
@@ -314,8 +214,6 @@ async function main(){
     scrollBottom(false);
   }
 
-  bindPlusSheet(u, send);
-
   $("sendBtn").addEventListener("click", send);
 
   $("msgInput").addEventListener("input", autoGrow);
@@ -326,12 +224,16 @@ async function main(){
     }
   });
 
-  // ✅ Mikrofon: konuşma biter bitmez otomatik gönder
+  // ✅ Mic => STT => auto-send
   $("micBtn").addEventListener("click", ()=>{
     startSTT(async ()=>{
-      // STT yazdıktan sonra otomatik gönder
       await send();
     });
+  });
+
+  // küçük bilgi butonu
+  $("helpBtn")?.addEventListener("click", ()=>{
+    addBubble("meta", "İpucu: Mikrofon konuşmanı yazıya çevirip otomatik gönderir. Sesli cevap bu sayfada yok.");
   });
 
   autoGrow();
