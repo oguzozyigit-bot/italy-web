@@ -28,6 +28,43 @@
 
     .wrap { width:100%; max-width:480px; height:100%; margin:0 auto; position:relative; z-index:10; display:flex; flex-direction:column; }
 
+    /* --- YENİ LOGO ALANI --- */
+    .game-logo-header {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding-top: 20px; margin-bottom: -15px; position: relative; z-index: 20;
+    }
+    
+    /* Üst Marka */
+    .gl-brand {
+      font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700;
+      color: rgba(255, 255, 255, 0.6); letter-spacing: 2px; margin-bottom: 5px;
+    }
+    
+    /* İkon */
+    .gl-icon {
+      font-size: 32px; margin-bottom: 2px;
+      filter: drop-shadow(0 0 5px var(--c-neon));
+      animation: pulseNeon 2s infinite alternate;
+    }
+    
+    /* Oyun Başlığı */
+    .gl-title {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 1px;
+      background: linear-gradient(to right, var(--c-neon), var(--c-safe));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-transform: uppercase; line-height: 1;
+    }
+    
+    /* Alt Slogan */
+    .gl-sub {
+      font-size: 9px; letter-spacing: 4px; color: var(--c-safe); opacity: 0.8; margin-top: 4px; font-weight: 700;
+    }
+    
+    @keyframes pulseNeon {
+      from { filter: drop-shadow(0 0 5px var(--c-neon)); transform: scale(1); }
+      to { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.05); }
+    }
+
     /* NAV & SCORE */
     .nav-layer { height:70px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; }
     .nav-btn { width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid var(--border); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; transition:0.2s; }
@@ -52,26 +89,10 @@
     .stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:5px; position:relative; }
 
     /* HANGMAN */
-    .hangman-draw { width: 120px; height: 120px; margin-bottom: 5px; filter: drop-shadow(0 0 8px var(--c-neon)); transition: 0.3s; }
+    .hangman-draw { width: 120px; height: 120px; margin-bottom: 10px; filter: drop-shadow(0 0 8px var(--c-neon)); transition: 0.3s; }
     .hangman-draw path, .hangman-draw line, .hangman-draw circle { fill: none; stroke: var(--c-neon); stroke-width: 4; stroke-linecap: round; opacity: 0; transition: opacity 0.3s; }
     .hangman-draw .base { stroke: #555; opacity: 1; }
     .stage.boss-mode .hangman-draw { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.1); }
-
-    /* LOGO (DAR AĞACI ALTI) */
-    .stage-logo {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 15px; opacity: 0.9;
-    }
-    .sl-icon { font-size: 24px; filter: drop-shadow(0 0 5px var(--c-neon)); animation: pulseNeon 2s infinite alternate; }
-    .sl-text {
-      font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 2px;
-      background: linear-gradient(to right, var(--c-neon), var(--c-safe));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    @keyframes pulseNeon {
-      from { filter: drop-shadow(0 0 5px var(--c-neon)); transform: scale(1); }
-      to { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.1); }
-    }
 
     /* WORD */
     .word-container { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; max-width: 95%; }
@@ -135,6 +156,13 @@
 
   <div class="wrap">
     
+    <div class="game-logo-header">
+      <div class="gl-brand">ITALKY<span style="color:var(--c-safe)">AI</span></div>
+      <div class="gl-icon">☠️</div>
+      <div class="gl-title">NEON HANGMAN</div>
+      <div class="gl-sub">CYBER ARENA</div>
+    </div>
+
     <div class="nav-layer">
       <button class="nav-btn" onclick="location.href='/pages/game.html'">←</button>
       <div class="score-panel">
@@ -153,11 +181,6 @@
         <line x1="10" y1="95" x2="90" y2="95" class="base" />
         <line x1="50" y1="95" x2="50" y2="5" class="part p1" /> <line x1="50" y1="5" x2="80" y2="5" class="part p2" /> <line x1="80" y1="5" x2="80" y2="20" class="part p3" /> <circle cx="80" cy="30" r="10" class="part p4" /> <line x1="80" y1="40" x2="80" y2="70" class="part p5" /> <line x1="80" y1="50" x2="65" y2="60" class="part p6" /> <line x1="80" y1="50" x2="95" y2="60" class="part p7" /> <line x1="80" y1="70" x2="65" y2="85" class="part p8" /> <line x1="80" y1="70" x2="95" y2="85" class="part p9" /> 
       </svg>
-
-      <div class="stage-logo">
-        <div class="sl-icon">☠️</div>
-        <div class="sl-text">NEON HANGMAN</div>
-      </div>
 
       <div class="hint-box" id="hintBox">...</div>
 
@@ -308,6 +331,7 @@ async function fetchWords() {
       Bana ${langName} dilinde, ${difficulty} seviyesinde 15 kelime ver.
       Kurallar:
       - Sadece isim/fiil
+      - Sadece a-z harfleri
       - Uzunluk: ${SETTINGS[difficulty].range} harf
       - Yanına Türkçe karşılığı ve o kelimeyle basit bir cümle (${langName} dilinde) yaz.
       SADECE JSON dön:
@@ -435,12 +459,14 @@ function handleGuess(char, btn) {
   btn.classList.add("used");
 
   if(currentWord.includes(char)) {
+    // DOĞRU
     btn.classList.add("correct");
     for(let i=0; i<currentWord.length; i++) {
       if(currentWord[i] === char) discovered[i] = true;
     }
     renderWord();
     
+    // Kazanma Kontrolü
     const allFound = discovered.every(Boolean);
     if(allFound) {
       SFX.win();
@@ -448,6 +474,7 @@ function handleGuess(char, btn) {
       const basePoints = (currentMaxErrors - mistakes) * 10;
       const streakBonus = (streak + 1) * 5; 
       const roundScore = Math.floor((basePoints + streakBonus) * scoreMultiplier);
+      
       score += roundScore;
       streak++;
       if(streak % 3 === 0) powerups++;
@@ -455,16 +482,22 @@ function handleGuess(char, btn) {
       updateScoreUI();
       if(streak > 1) startConfetti();
 
-      setTimeout(() => { currentIndex++; startLevel(); }, 1500);
+      setTimeout(() => {
+        currentIndex++;
+        startLevel();
+      }, 1500);
     }
   } else {
+    // YANLIŞ
     btn.classList.add("wrong");
     
+    // A2'de can az gitsin
     if(difficulty === 'A2') mistakes += 0.5; 
     else mistakes += 1;
 
     renderHangman();
     
+    // Streak Kırıldı
     if(streak > 0) {
       streak = 0;
       updateScoreUI();
@@ -484,6 +517,7 @@ function handleGuess(char, btn) {
   }
 }
 
+// JOKER KULLANIMI
 window.usePowerUp = () => {
   if(isBossRound) return; 
   if(powerups <= 0) return;
@@ -515,6 +549,7 @@ window.usePowerUp = () => {
   renderWord();
   updateScoreUI();
   
+  // Jokerle kazanılırsa (İndirimli Puan)
   const allFound = discovered.every(Boolean);
   if(allFound) {
     setTimeout(() => {
