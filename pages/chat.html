@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ITALKY • Sohbet AI</title>
+  <title>italkyAI • Sohbet AI</title>
   <link rel="icon" href="data:,">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,13 +14,11 @@
   <style>
     :root{
       --frameW: min(480px, calc(100vw - 18px));
-      --topH: 74px;
+      --topH: 76px;
+      --dockPad: 10px;
 
-      /* ✅ footer ve dock ölçüleri */
-      --footerH: 86px;     /* linkler + copyright */
-      --dockMinH: 64px;    /* dock min (textarea 1 satır) */
-      --dockMaxH: 150px;   /* textarea büyüme sınırı */
-      --gap: 10px;         /* footer ile dock arası */
+      /* ✅ daha dar footer */
+      --footerH: 64px;
 
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.62);
@@ -29,8 +27,8 @@
       --neon-cyan:#00f3ff;
       --neon-purple:#bc13fe;
 
-      --italky-burgundy: rgba(140, 18, 45, .42);
-      --italky-burgundy-2: rgba(140, 18, 45, .18);
+      --burgundy: rgba(140, 18, 45, .55);
+      --burgundy2: rgba(140, 18, 45, .22);
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -49,7 +47,7 @@
 
     /* background (home vibe) */
     .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:#030014; z-index:0; pointer-events:none; }
-    .orb{ position:absolute; border-radius:50%; filter: blur(80px); opacity:.5; animation: floatOrbit 25s infinite alternate ease-in-out; }
+    .orb{ position:absolute; border-radius:50%; filter: blur(80px); opacity:.45; animation: floatOrbit 25s infinite alternate ease-in-out; }
     .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
     .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, var(--neon-cyan), transparent 70%); animation-delay:-5s; }
     @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1);} 100%{ transform: translate(10%,-10%) scale(1.1);} }
@@ -94,6 +92,7 @@
       background: rgba(0,0,0,.35);
       backdrop-filter: blur(12px);
     }
+
     .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
     .backBtn{
       width:44px;height:44px;border-radius:16px;
@@ -106,27 +105,43 @@
     }
     .backBtn:active{ transform: scale(.96); }
 
-    .mini-brand{
-      display:flex; flex-direction:column; width:fit-content; align-items:center;
-      user-select:none; cursor:pointer;
+    /* ✅ Logo (KİLİTLİ) */
+    .brand-lock{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      user-select:none;
+      cursor:pointer;
+      gap:4px;
+      padding-top: 2px;
     }
-    .mini-logo{
+    .logo-line{
       font-family:'Space Grotesk', sans-serif;
-      font-weight:700; font-size:20px;
-      letter-spacing:-1px; line-height:1;
-      color:#fff;
-      text-shadow:0 0 18px rgba(255,255,255,0.25);
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing: -0.3px;
       white-space:nowrap;
     }
-    .mini-flag{
-      width:100%; height:4px; border-radius:4px;
-      display:flex; overflow:hidden; margin-top:4px;
-      box-shadow:0 0 10px rgba(255,255,255,0.12);
+    .logo-main{ color:#FFFFFF; font-weight:700; }
+    .logo-ai{
+      font-weight:700;
+      background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-left: 1px;
     }
-    .mini-flag span{ flex:1; height:100%; }
-    .f-g{ background:#009246; }
-    .f-w{ background:#fff; }
-    .f-r{ background:#CE2B37; }
+    .be-free{
+      font-size: 10px;
+      font-weight: 800;
+      color: #6B7280; /* ✅ kilit */
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      /* ✅ i altından başla, y’nin ortasında bitsin hissi: soldan başla + X daralt */
+      transform: scaleX(0.78);
+      transform-origin: left;
+      margin-left: 1px;
+      line-height: 1;
+    }
 
     .rightControls{
       display:flex;
@@ -155,7 +170,6 @@
       font-size: 11px;
       color: rgba(255,255,255,0.60);
       white-space:nowrap;
-      text-transform: uppercase;
     }
     .avatar-btn{
       width: 42px; height: 42px;
@@ -177,15 +191,26 @@
       user-select:none;
     }
 
-    /* ✅ chat area: bottom dinamik ayarlanacak (JS) */
+    /* ✅ TTS (sesli okuma) butonu */
+    .ttsBtn{
+      width: 42px; height: 42px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+    }
+    .ttsBtn:active{ transform: scale(.96); }
+    .ttsBtn svg{ width:20px; height:20px; stroke:#fff; fill:none; stroke-width:2; opacity:.9; }
+    .ttsBtn.off{ opacity:.45; }
+
+    /* chat area (JS dinamik bottom veriyor) */
     #chat.chat-area{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
+      position: absolute;
+      left: 0; right: 0;
       top: var(--topH);
-      bottom: calc(var(--footerH) + var(--dockMinH) + (var(--gap) * 2));
-      padding: 14px 12px;
+      bottom: calc(var(--footerH) + 86px); /* fallback */
+      padding: 14px 14px;
 
       overflow-y:auto;
       -webkit-overflow-scrolling: touch;
@@ -200,10 +225,11 @@
       min-width:0;
     }
     #chat.chat-area::-webkit-scrollbar{ display:none; }
-    #chat.chat-area::before{ content:""; flex:1 0 auto; }
+    /* ✅ İlk mesaj “hemen input üstünden” başlasın */
+    #chat.chat-area::before{ content:""; flex: 1 0 auto; }
 
     .bubble{
-      max-width:85%;
+      max-width:78%; /* ✅ daralt */
       padding:10px 14px;
       border-radius:16px;
       font-size:14px;
@@ -225,32 +251,69 @@
       text-align:right;
     }
 
-    /* ✅ dock footer'ın ÜSTÜNDE */
+    /* ✅ footer bar (alt linkler) */
+    .footerbar{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--frameW);
+      bottom: 0;
+      height: var(--footerH);
+      z-index: 2400;
+      background: rgba(3, 0, 20, 0.92);
+      border-top: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      padding: 8px 14px calc(8px + env(safe-area-inset-bottom));
+    }
+    .footer-links{
+      display:flex;
+      justify-content:center;
+      gap: 16px;
+      flex-wrap:wrap;
+      font-size:12px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .footer-links a{
+      color: rgba(255,255,255,0.55);
+      text-decoration:none;
+    }
+    .footer-brand{
+      text-align:center;
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.22);
+      letter-spacing: .4px;
+    }
+
+    /* ✅ dock: footer üstüne oturur */
     .input-dock{
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       width: var(--frameW);
-      bottom: calc(var(--footerH) + var(--gap));
+      bottom: var(--footerH);
       z-index: 2600;
-      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      padding: var(--dockPad) 12px;
       background: rgba(0,0,0,.35);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 22px;
+      border-top: 1px solid rgba(255,255,255,.08);
       backdrop-filter: blur(12px);
       pointer-events: none;
-      box-shadow: 0 18px 55px rgba(0,0,0,.35);
     }
     .dock-inner{
       pointer-events:auto;
       width:100%;
-      min-height:54px;
+      min-height:52px;
       display:flex;
       align-items:flex-end;
       gap:8px;
       background: rgba(255,255,255,.04);
       border: 1px solid rgba(255,255,255,.10);
-      border-radius: 26px;
+      border-radius: 24px;
       padding: 8px;
     }
     .icon-btn{
@@ -271,6 +334,7 @@
       stroke-linejoin:round;
       opacity:.95;
     }
+
     #msgInput{
       flex: 1 1 auto;
       min-width:0;
@@ -283,12 +347,10 @@
       line-height:18px;
       font-family:inherit;
       resize:none;
-
-      overflow-y:auto;
-      max-height: var(--dockMaxH);
-      scrollbar-width:none;
+      white-space:normal;
+      overflow:hidden;
+      max-height:120px;
     }
-    #msgInput::-webkit-scrollbar{ width:0; height:0; }
 
     .send-btn{
       width:40px;height:40px;
@@ -308,7 +370,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: var(--frameW);
-      bottom: calc(var(--footerH) + var(--dockMinH) + 22px);
+      bottom: calc(var(--footerH) + 70px); /* dock üstü */
       z-index: 9999;
       display:none;
       gap:10px;
@@ -352,46 +414,6 @@
       border-color: rgba(190,242,100,.35) !important;
       background: rgba(190,242,100,.12) !important;
       box-shadow: 0 0 18px rgba(190,242,100,.18);
-      position: relative;
-    }
-
-    /* ✅ footer */
-    .footerbar{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
-      bottom: 0;
-      z-index: 2400;
-      height: var(--footerH);
-      background: rgba(3, 0, 20, 0.95);
-      border-top: 1px solid rgba(255,255,255,.06);
-      backdrop-filter: blur(10px);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      padding: 10px 16px 12px;
-      gap: 8px;
-    }
-    .links{
-      display:flex;
-      justify-content:center;
-      gap: 16px;
-      flex-wrap:wrap;
-    }
-    .links a{
-      color: rgba(255,255,255,0.62);
-      text-decoration:none;
-      font-size: 12px;
-      font-weight: 800;
-    }
-    .links a:active{ opacity:.85; }
-    .footerBrand{
-      text-align:center;
-      font-size: 11px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.35);
-      letter-spacing: .2px;
     }
   </style>
 </head>
@@ -409,15 +431,25 @@
       <div class="leftControls">
         <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
 
-        <div class="mini-brand" id="logoHome" title="Ana sayfa">
-          <div class="mini-logo">ITALKY</div>
-          <div class="mini-flag" aria-hidden="true">
-            <span class="f-g"></span><span class="f-w"></span><span class="f-r"></span>
+        <!-- ✅ Yeni logo -->
+        <div class="brand-lock" id="logoHome" title="Ana sayfa">
+          <div class="logo-line">
+            <span class="logo-main">italky</span><span class="logo-ai">AI</span>
           </div>
+          <div class="be-free">BE FREE</div>
         </div>
       </div>
 
       <div class="rightControls">
+        <!-- ✅ ses toggle -->
+        <button class="ttsBtn" id="ttsBtn" aria-label="Sesli cevap">
+          <svg viewBox="0 0 24 24">
+            <path d="M11 5L6 9H3v6h3l5 4z"></path>
+            <path d="M15 9a4 4 0 0 1 0 6"></path>
+            <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
+          </svg>
+        </button>
+
         <div class="usertext">
           <div class="uname" id="userName">—</div>
           <div class="plan" id="userPlan">FREE</div>
@@ -431,8 +463,9 @@
 
     <div class="chat-area" id="chat"></div>
 
-    <div class="input-dock" id="dockWrap">
-      <div class="dock-inner" id="dockInner">
+    <!-- ✅ Dock -->
+    <div class="input-dock" id="inputDock">
+      <div class="dock-inner">
         <button class="icon-btn" id="camBtn" aria-label="Dosya / Fotoğraf">
           <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
         </button>
@@ -468,16 +501,17 @@
       </div>
     </div>
 
-    <div class="footerbar">
-      <div class="links">
-        <a href="/pages/about.html">Hakkında</a>
-        <a href="/pages/faq.html">SSS</a>
-        <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
-      </div>
-      <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
-    </div>
+  </div>
 
+  <!-- ✅ Footer bar -->
+  <div class="footerbar" id="footerBar">
+    <div class="footer-links">
+      <a href="/pages/about.html">Hakkında</a>
+      <a href="/pages/faq.html">SSS</a>
+      <a href="/pages/privacy.html">Gizlilik</a>
+      <a href="/pages/contact.html">İletişim</a>
+    </div>
+    <div class="footer-brand">italkyAI By Ozyigit’s 2026</div>
   </div>
 
   <script type="module" src="/js/italky_chat_page.js?v=2"></script>
