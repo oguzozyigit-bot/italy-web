@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Live</title>
+  <title>italkyAI • Sesli AI</title>
   <link rel="icon" href="data:," />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,7 @@
     :root {
       --bg-deep: #020205;
       --text-main: #fff;
-      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.12);
       
       /* Canlı Renkler */
       --c-indigo: #6366f1;
@@ -40,122 +40,119 @@
     }
     .gs-1 { top: -10%; left: -10%; width: 80vw; height: 80vw; background: var(--c-indigo); }
     .gs-2 { bottom: -10%; right: -10%; width: 80vw; height: 80vw; background: var(--c-cyan); animation-delay: -5s; }
-    
     @keyframes floatSpot { from { transform: translate(0,0); } to { transform: translate(10%, 10%); } }
 
     .frame {
       width: 100%; max-width: 480px; height: 100%;
       position: relative; z-index: 10;
       display: flex; flex-direction: column;
-      background: rgba(0,0,0,0.01); /* Tıklamayı engellemez */
+      background: rgba(0,0,0,0.01);
     }
 
-    /* --- NAV (Üst Bar) --- */
-    .nav-bar {
-      height: 80px; padding: 0 24px; 
+    /* --- TOPBAR (Logo ve Butonlar Geri Geldi) --- */
+    .topbar {
+      height: 80px; padding: 0 16px;
       display: flex; align-items: center; justify-content: space-between;
-      position: absolute; top: 0; left: 0; width: 100%; z-index: 100;
-      pointer-events: none; /* Boşluklara tıklamayı engelleme */
+      position: relative; z-index: 100; /* En üstte */
+      background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--glass-border);
     }
-    
-    /* Butonların tıklanabilir olduğundan emin ol */
-    .nav-btn {
-      width: 44px; height: 44px; border-radius: 50%;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; cursor: pointer; transition: 0.2s; backdrop-filter: blur(10px);
-      pointer-events: auto; /* KESİN ÇÖZÜM */
-    }
-    .nav-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
-    .nav-btn svg { width: 22px; height: 22px; stroke-width: 2.5; }
 
-    /* --- THE LIVE CORE (Ana Sahne) --- */
+    .back-btn {
+      width: 44px; height: 44px; border-radius: 14px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; cursor: pointer; transition: 0.2s;
+    }
+    .back-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+    .back-btn svg { width: 20px; height: 20px; stroke-width: 2.5; }
+
+    /* LOGO ORTADA */
+    .brand {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      line-height: 1; margin-top: 4px;
+    }
+    .logo-container { font-family:'Space Grotesk', sans-serif; font-size: 24px; letter-spacing: -0.5px; }
+    .logo-main { font-weight: 700; color: #fff; }
+    .logo-ai { 
+      font-weight: 700; 
+      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .mini-slogan { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 4px; margin-top: 4px; }
+
+    /* SES BUTONU */
+    .voice-btn {
+      padding: 0 16px; height: 40px; border-radius: 12px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.2s;
+    }
+    .voice-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+
+    /* --- SAHNE (Liquid Blob) --- */
     .stage {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       position: relative;
-      pointer-events: none; /* Sahne tıklamayı yemesin */
+      pointer-events: none; /* Tıklamayı engelleme */
     }
 
-    .ai-container {
-      position: relative;
-      width: 320px; height: 320px;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    /* AKIŞKAN BULUT (BLOB) */
     .ai-blob {
-      position: absolute;
-      width: 200px; height: 200px;
-      border-radius: 50%;
+      width: 180px; height: 180px; border-radius: 50%;
       filter: blur(30px); opacity: 0.9;
-      transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-      
-      /* Varsayılan: IDLE */
       background: conic-gradient(from 0deg, var(--c-indigo), var(--c-cyan), var(--c-indigo));
       animation: spinColor 10s linear infinite, blobIdle 6s ease-in-out infinite;
+      transition: all 0.5s ease;
     }
 
-    /* STATES */
+    /* STATE: LISTENING */
     .stage.listening .ai-blob {
-      width: 150px; height: 150px; filter: blur(20px);
+      width: 140px; height: 140px; filter: blur(20px);
       background: radial-gradient(circle, #ffffff, var(--c-cyan));
       border-radius: 50%;
-      animation: pulseListen 1.5s infinite ease-in-out;
-      box-shadow: 0 0 50px rgba(6, 182, 212, 0.4);
+      animation: pulseListen 1s infinite alternate;
     }
 
+    /* STATE: SPEAKING */
     .stage.speaking .ai-blob {
-      width: 260px; height: 260px; filter: blur(45px);
-      background: conic-gradient(from 0deg, var(--c-pink), var(--c-orange), var(--c-indigo), var(--c-pink));
+      width: 240px; height: 240px; filter: blur(45px);
+      background: conic-gradient(from 0deg, var(--c-pink), var(--c-orange), var(--c-indigo));
       animation: spinColor 3s linear infinite, blobMorph 4s ease-in-out infinite;
     }
 
     .status-text {
       margin-top: 40px;
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 16px; font-weight: 700;
-      color: rgba(255,255,255,0.6);
+      font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.6);
       letter-spacing: 2px; text-transform: uppercase;
       opacity: 0; transform: translateY(10px); transition: 0.5s;
     }
     .status-text.show { opacity: 1; transform: translateY(0); }
 
     @keyframes spinColor { 100% { transform: rotate(360deg); } }
-    @keyframes blobIdle {
-      0%, 100% { transform: scale(1); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-      50% { transform: scale(1.05); border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-    }
-    @keyframes pulseListen {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(0.92); opacity: 0.8; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes blobMorph {
-      0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-      50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-      100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-    }
+    @keyframes blobIdle { 0%, 100% { transform: scale(1); border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; } 50% { transform: scale(1.05); border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; } }
+    @keyframes pulseListen { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.8; } }
+    @keyframes blobMorph { 0% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; } 100% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; } }
 
-    /* --- MİKROFON (Kontroller) --- */
+    /* --- KONTROLLER (MİKROFON) --- */
     .controls {
-      padding: 40px; display: flex; justify-content: center;
-      position: relative; z-index: 100;
-      pointer-events: none; /* Boşluklar tıklamayı yemesin */
+      padding: 30px; display: flex; justify-content: center;
+      position: relative; z-index: 100; /* Blob'un üstünde */
+      pointer-events: none; /* Boşluğa tıklamayı engelleme */
     }
     .mic-btn {
-      width: 84px; height: 84px; border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-      pointer-events: auto; /* BUTON TIKLANABİLİR OLSUN */
+      cursor: pointer; transition: 0.2s; pointer-events: auto; /* BUTON TIKLANABİLİR */
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
     }
-    .mic-btn svg { width: 32px; height: 32px; stroke: #fff; fill: none; stroke-width: 2; transition: 0.3s; }
+    .mic-btn svg { width: 32px; height: 32px; stroke: #fff; fill: none; stroke-width: 2; }
     
-    .mic-btn:active { transform: scale(0.9); }
-    .mic-btn.active { background: #fff; box-shadow: 0 0 30px rgba(255, 255, 255, 0.3); border-color: #fff; }
+    .mic-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+    .mic-btn.active { background: #fff; border-color: #fff; box-shadow: 0 0 30px rgba(255,255,255,0.3); }
     .mic-btn.active svg { stroke: #000; }
 
     /* --- MODAL --- */
@@ -168,10 +165,8 @@
     .modal-overlay.show { display: flex; opacity: 1; }
 
     .voice-sheet {
-      width: 100%; max-width: 480px;
-      background: #0b0b10;
-      border-top: 1px solid var(--glass-border);
-      border-radius: 32px 32px 0 0;
+      width: 100%; max-width: 480px; background: #0b0b10;
+      border-top: 1px solid var(--glass-border); border-radius: 32px 32px 0 0;
       padding: 24px; padding-bottom: 40px;
       transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
       max-height: 80vh; display: flex; flex-direction: column;
@@ -180,19 +175,15 @@
 
     .vs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .vs-title { font-size: 18px; font-weight: 700; color: #fff; }
-    .vs-close { 
-      background: rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
-    }
+    .vs-close { background: rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; }
 
     .voice-list { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    
     .voice-item {
       display: flex; align-items: center; justify-content: space-between;
       padding: 14px 16px; border-radius: 18px;
       background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
       cursor: pointer; transition: 0.2s;
     }
-    .voice-item:active { transform: scale(0.98); }
     .voice-item.selected { background: rgba(99, 102, 241, 0.15); border-color: var(--c-indigo); }
     
     .v-left { display: flex; align-items: center; gap: 14px; flex: 1; }
@@ -207,7 +198,7 @@
 
     .v-details { display: flex; flex-direction: column; }
     .v-name { font-weight: 700; font-size: 15px; color: #fff; }
-    .v-lang { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
+    .v-lang { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
 
     .save-btn {
       margin-top: 20px; width: 100%; height: 56px; border-radius: 20px;
@@ -225,19 +216,23 @@
   </div>
 
   <div class="frame">
-    <div class="nav-bar">
-      <div class="nav-btn" id="btnBack">
+    <div class="topbar">
+      <div class="back-btn" id="btnBack">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </div>
-      <div class="nav-btn" id="btnSettings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      
+      <div class="brand">
+        <div class="logo-container">
+          <span class="logo-main">italky</span><span class="logo-ai">AI</span>
+        </div>
+        <div class="mini-slogan">BE FREE</div>
       </div>
+
+      <div class="voice-btn" id="btnSettings">Ses</div>
     </div>
 
     <div class="stage" id="aiStage">
-      <div class="ai-container">
-        <div class="ai-blob"></div>
-      </div>
+      <div class="ai-blob"></div>
       <div class="status-text" id="statusText">Dinliyor...</div>
     </div>
 
@@ -260,30 +255,27 @@
   </div>
 
   <script>
-    // --- GÖMÜLÜ JAVASCRIPT (Hata Şansı Yok) ---
-    
-    // Basit DOM Seçici
+    // --- GÖMÜLÜ JS (Hatasız) ---
     const $ = (id) => document.getElementById(id);
 
-    // Ses Listesi
     const VOICES = [
       { id: "jale", label: "Jale", gender: "Kadın", openaiVoice: "shimmer", desc: "Net ve İddialı" },
-      { id: "huma", label: "Hüma", gender: "Kadın", openaiVoice: "nova", desc: "Enerjik ve Sıcak" },
+      { id: "huma", label: "Hüma", gender: "Kadın", openaiVoice: "nova", desc: "Enerjik" },
       { id: "selden", label: "Selden", gender: "Kadın", openaiVoice: "alloy", desc: "Çok Yönlü" },
       { id: "oguz", label: "Oğuz", gender: "Erkek", openaiVoice: "echo", desc: "Tok ve Yankılı" },
-      { id: "baris", label: "Barış", gender: "Erkek", openaiVoice: "fable", desc: "Anlatıcı Tonu" },
-      { id: "emrah", label: "Emrah", gender: "Erkek", openaiVoice: "onyx", desc: "Derin ve Ciddi" }
+      { id: "baris", label: "Barış", gender: "Erkek", openaiVoice: "fable", desc: "Anlatıcı" },
+      { id: "emrah", label: "Emrah", gender: "Erkek", openaiVoice: "onyx", desc: "Derin" }
     ];
 
     const KEY = "italky_voice_pref";
     let selectedId = localStorage.getItem(KEY) || "";
 
-    // --- NAVIGASYON ---
+    // --- NAV ---
     $("btnBack").onclick = () => window.location.href = "/pages/home.html";
     $("btnSettings").onclick = openModal;
     $("closeVoiceModal").onclick = closeModal;
 
-    // --- MODAL İŞLEMLERİ ---
+    // --- MODAL ---
     function openModal() {
       const modal = $("voiceModal");
       const list = $("voiceListContainer");
@@ -315,13 +307,9 @@
           selectedId = v.id;
         };
 
-        // Demo Oynat (Şimdilik tarayıcı sesi ile simüle ediyoruz, API'ye gerek yok)
+        // Demo
         div.querySelector(".play-btn").onclick = () => {
-          const u = new SpeechSynthesisUtterance(`Merhaba, ben ${v.label}. italkyAI ile konuşmaya hazırım.`);
-          // Tarayıcıdaki en uygun sesi bulmaya çalış
-          const sysVoices = window.speechSynthesis.getVoices();
-          const target = sysVoices.find(sv => sv.name.includes("Google") || sv.lang.includes("tr"));
-          if(target) u.voice = target;
+          const u = new SpeechSynthesisUtterance(`Merhaba, ben ${v.label}.`);
           window.speechSynthesis.cancel();
           window.speechSynthesis.speak(u);
         };
@@ -330,9 +318,7 @@
       });
     }
 
-    function closeModal() {
-      $("voiceModal").classList.remove("show");
-    }
+    function closeModal() { $("voiceModal").classList.remove("show"); }
 
     $("saveVoiceBtn").onclick = () => {
       if (selectedId) {
@@ -341,7 +327,7 @@
       }
     };
 
-    // --- MİKROFON VE ANİMASYON ---
+    // --- MIC & ANIMATION ---
     const stage = $("aiStage");
     const micBtn = $("micToggle");
     const statusText = $("statusText");
@@ -365,27 +351,22 @@
       } else {
         // Idle
         statusText.innerText = "Dokun ve Konuş";
-        statusText.classList.add("show");
       }
     }
 
-    // Başlangıç Durumu
     setVisual("idle");
 
-    // Mikrofon Tıklama
     micBtn.onclick = () => {
       if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
-        alert("Tarayıcınız sesli komutu desteklemiyor. Chrome kullanın.");
+        alert("Tarayıcınız sesli komutu desteklemiyor.");
         return;
       }
 
       if (isListening) {
-        // Durdur
         if (recognition) recognition.stop();
         isListening = false;
         setVisual("idle");
       } else {
-        // Başlat
         startListening();
       }
     };
@@ -403,13 +384,11 @@
 
       recognition.onend = () => {
         isListening = false;
-        // Eğer speaking modunda değilse idle'a dön
         if (!stage.classList.contains("speaking")) setVisual("idle");
       };
 
       recognition.onresult = (event) => {
         const text = event.results[0][0].transcript;
-        // Cevap Simülasyonu
         speakResponse(text);
       };
 
@@ -418,16 +397,15 @@
 
     function speakResponse(userText) {
       setVisual("speaking");
-      const u = new SpeechSynthesisUtterance(`Bunu söylediniz: ${userText}. Harika bir cümle!`);
+      const u = new SpeechSynthesisUtterance(`Bunu söylediniz: ${userText}`);
       u.onend = () => setVisual("idle");
       window.speechSynthesis.speak(u);
     }
 
-    // İlk açılışta ses yoksa modalı aç
+    // İlk açılışta ses yoksa modal
     if (!localStorage.getItem(KEY)) {
       setTimeout(openModal, 600);
     }
-
   </script>
 </body>
 </html>
