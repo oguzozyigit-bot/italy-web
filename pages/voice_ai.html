@@ -1,3 +1,4 @@
+<!-- FILE: italky-web/pages/voice_ai.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -50,6 +51,9 @@
       border-bottom:1px solid rgba(255,255,255,.06);
       background:rgba(0,0,0,.35);
       backdrop-filter: blur(10px);
+      position:relative;
+      z-index: 50;
+      pointer-events:auto;
     }
 
     .back-btn{
@@ -60,7 +64,9 @@
       font-size:20px;
       display:flex;align-items:center;justify-content:center;
       cursor:pointer;
+      user-select:none;
     }
+    .back-btn:active{ transform: scale(.96); }
 
     .brand{
       display:flex;
@@ -87,6 +93,7 @@
       letter-spacing:4px;
       color:var(--muted);
       margin-top:6px;
+      text-transform: uppercase;
     }
 
     .voice-btn{
@@ -98,7 +105,9 @@
       font-weight:700;
       cursor:pointer;
       font-size:12px;
+      user-select:none;
     }
+    .voice-btn:active{ transform: scale(.98); }
 
     /* ===== STAGE ===== */
     .stage{
@@ -108,11 +117,16 @@
       align-items:center;
       justify-content:center;
       gap:22px;
+      position: relative;
+      z-index: 10;
+      /* ✅ tıklamayı yemesin */
+      pointer-events:none;
     }
 
     .aiWrap{
       width:260px;height:260px;
       display:flex;align-items:center;justify-content:center;
+      pointer-events:none; /* ✅ */
     }
 
     .aiCore{
@@ -121,6 +135,7 @@
       background:conic-gradient(from 0deg,var(--indigo),var(--cyan),var(--indigo));
       animation:spin 9s linear infinite, breathe 6s ease-in-out infinite;
       transition:.25s;
+      pointer-events:none; /* ✅ */
     }
 
     .stage.listening .aiCore{
@@ -143,6 +158,7 @@
       font-size:13px;
       color:rgba(255,255,255,.7);
       text-transform:uppercase;
+      pointer-events:none;
     }
 
     /* ===== MIC ===== */
@@ -150,6 +166,9 @@
       padding:24px;
       display:flex;
       justify-content:center;
+      position: relative;
+      z-index: 60;
+      pointer-events:auto;
     }
 
     .mic-btn{
@@ -159,7 +178,11 @@
       display:flex;align-items:center;justify-content:center;
       cursor:pointer;
       position:relative;
+      user-select:none;
+      z-index: 9999;          /* ✅ */
+      pointer-events:auto;    /* ✅ */
     }
+    .mic-btn:active{ transform: scale(.96); }
     .mic-btn svg{ width:34px;height:34px; stroke:#fff; fill:none; stroke-width:2; }
 
     .mic-btn.listening::after{
@@ -178,9 +201,7 @@
     @keyframes spin{100%{transform:rotate(360deg)}}
     @keyframes breathe{50%{transform:scale(1.12)}}
     @keyframes pulse{100%{transform:scale(.9)}}
-    @keyframes morph{
-      50%{border-radius:30% 60% 70% 40% / 50% 60% 30% 60%}
-    }
+    @keyframes morph{50%{border-radius:30% 60% 70% 40% / 50% 60% 30% 60%}}
 
     /* ===== VOICE MODAL ===== */
     .modal{
@@ -191,7 +212,8 @@
       align-items:flex-end;
       justify-content:center;
       padding:14px;
-      z-index:999;
+      z-index: 99999;
+      pointer-events:auto;
     }
     .modal.show{display:flex}
 
@@ -201,20 +223,61 @@
       background:#0b0b14;
       border-radius:24px;
       overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 20px 80px rgba(0,0,0,.65);
     }
-    .sheet h3{
-      margin:0;padding:14px;
-      font-size:14px;
-      text-align:center;
+    .sheetHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
       border-bottom:1px solid rgba(255,255,255,.08);
     }
+    .sheetHead h3{
+      margin:0;
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .closeBtn{
+      width:40px;height:40px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.06);
+      color:#fff;
+      font-size:18px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .closeBtn:active{ transform: scale(.98); }
+
+    .voiceList{
+      max-height: 52vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width:none;
+    }
+    .voiceList::-webkit-scrollbar{ width:0; height:0; }
+
     .voice-row{
       padding:14px;
       border-bottom:1px solid rgba(255,255,255,.06);
       cursor:pointer;
-      font-weight:700;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
     }
-    .voice-row.sel{ background:rgba(99,102,241,.18) }
+    .voice-row small{
+      font-weight:700;
+      color: rgba(255,255,255,.55);
+    }
+    .voice-row:active{ background: rgba(255,255,255,.06); }
+    .voice-row.sel{
+      background:rgba(99,102,241,.18);
+      border-bottom-color: rgba(99,102,241,.25);
+    }
   </style>
 </head>
 
@@ -224,7 +287,7 @@
     <div class="topbar">
       <button class="back-btn" id="backBtn">←</button>
 
-      <div class="brand" id="homeBtn">
+      <div class="brand" id="homeBtn" title="Ana sayfa">
         <div class="logo-line">
           <span class="logo-main">italky</span><span class="logo-ai">AI</span>
         </div>
@@ -240,7 +303,7 @@
     </div>
 
     <div class="controls">
-      <button class="mic-btn" id="micBtn">
+      <button class="mic-btn" id="micBtn" aria-label="Mikrofon">
         <svg viewBox="0 0 24 24">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4"/>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -251,13 +314,17 @@
     </div>
   </div>
 
-  <div class="modal" id="voiceModal">
-    <div class="sheet">
-      <h3>Sesini Seç</h3>
-      <div id="voiceList"></div>
+  <div class="modal" id="voiceModal" aria-hidden="true">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="sheetHead">
+        <h3>Sesini Seç</h3>
+        <button class="closeBtn" id="closeVoice" type="button">×</button>
+      </div>
+      <div class="voiceList" id="voiceList"></div>
     </div>
   </div>
 
-  <script type="module" src="/js/voice_ai_page.js"></script>
+  <!-- ✅ DİKKAT: sistemindeki dosya adı bu -->
+  <script type="module" src="/js/voice_ai.page.js"></script>
 </body>
 </html>
