@@ -2,18 +2,14 @@
 // Italky Chat Page Controller (Gemini backend - text only)
 // ✅ STT -> auto-send (no enter needed)
 // ✅ No TTS here (no sound)
-// ✅ No photo/document here (chat = text only)
-// ✅ Fix: STT final text is sent directly (no timing/empty bug)
+// ✅ Text only (no photo/doc)
 
 import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
 
 const $ = (id)=>document.getElementById(id);
-
 function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
 
-function getUser(){
-  return safeJson(localStorage.getItem(STORAGE_KEY), {});
-}
+function getUser(){ return safeJson(localStorage.getItem(STORAGE_KEY), {}); }
 
 function ensureLogged(){
   const u = getUser();
@@ -32,27 +28,22 @@ function paintHeader(u){
   const avatarBtn = $("avatarBtn");
   const fallback = $("avatarFallback");
   const pic = String(u.picture || u.avatar || u.avatar_url || "").trim();
-
   if(pic){
     avatarBtn.innerHTML = `<img src="${pic}" alt="avatar">`;
   }else{
-    if(fallback) fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
+    fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
   }
 
-  avatarBtn?.addEventListener("click", ()=> location.href="/pages/profile.html");
-  $("logoHome")?.addEventListener("click", ()=> location.href="/pages/home.html");
-  $("backBtn")?.addEventListener("click", ()=> location.href="/pages/home.html");
+  avatarBtn.addEventListener("click", ()=> location.href="/pages/profile.html");
+  $("logoHome").addEventListener("click", ()=> location.href="/pages/home.html");
+  $("backBtn").addEventListener("click", ()=> location.href="/pages/home.html");
 }
 
 function chatKey(u){
   const uid = String(u.user_id || u.id || u.email || "guest").toLowerCase().trim();
   return `italky_chat_hist::${uid}`;
 }
-
-function loadHist(u){
-  return safeJson(localStorage.getItem(chatKey(u)), []);
-}
-
+function loadHist(u){ return safeJson(localStorage.getItem(chatKey(u)), []); }
 function saveHist(u, h){
   try{ localStorage.setItem(chatKey(u), JSON.stringify((h||[]).slice(-30))); }catch{}
 }
@@ -63,7 +54,6 @@ function isNearBottom(el, slack=140){
 }
 
 let follow = true;
-
 function scrollBottom(force=false){
   const el = $("chat");
   if(!el) return;
@@ -72,50 +62,54 @@ function scrollBottom(force=false){
   });
 }
 
-function addBubble(role, text){
-  const chat = $("chat");
-  if(!chat) return;
-
-  const d = document.createElement("div");
-  d.className = `bubble ${role==="user" ? "user" : (role==="meta" ? "meta" : "bot")}`;
-  function formatTextToParagraphs(text){
+/* ✅ Paragraf format */
+function formatTextToParagraphs(text){
   const t = String(text||"").trim();
-
-  // Zaten paragraf varsa dokunma
+  if(!t) return "";
   if(t.includes("\n\n")) return t;
 
-  // Cümle bazlı böl
+  // Çok uzun blokları cümle bazlı böl
   const parts = t.split(/([.!?…]+)/);
   let out = [];
   let buf = "";
 
   for(let i=0;i<parts.length;i+=2){
     buf += (parts[i] || "") + (parts[i+1] || "");
-    if(buf.length > 280){
+    if(buf.trim().length >= 260){
       out.push(buf.trim());
       buf = "";
     }
   }
   if(buf.trim()) out.push(buf.trim());
 
+  // Yine de tek parça kaldıysa, güvenli kır
+  if(out.length <= 1 && t.length > 320){
+    return t.replace(/(.{240,320})(\s+)/g, "$1\n\n");
+  }
+
   return out.join("\n\n");
 }
 
-d.textContent = formatTextToParagraphs(text);
-  chat.appendChild(d);
+function addBubble(role, text){
+  const chat = $("chat");
+  const d = document.createElement("div");
 
+  const cls =
+    (role === "user") ? "user" :
+    (role === "meta") ? "meta" : "bot";
+
+  d.className = `bubble ${cls}`;
+  d.textContent = formatTextToParagraphs(text);
+  chat.appendChild(d);
   scrollBottom(false);
 }
 
 function typingBubble(){
   const chat = $("chat");
-  if(!chat) return null;
-
   const d = document.createElement("div");
   d.className = "bubble bot";
   d.textContent = "…";
   chat.appendChild(d);
-
   scrollBottom(false);
   return d;
 }
@@ -131,7 +125,7 @@ async function apiChat(u, text, history){
     user_meta: {
       fullname: u.fullname || u.name || u.display_name || "",
       plan: u.plan || "FREE",
-      product: "italkyAI",
+      product: "italkyAI"
     }
   };
 
@@ -159,12 +153,7 @@ function autoGrow(){
 
 let sttBusy = false;
 
-/**
- * STT:
- * - Konuşma bittiğinde tek sefer finalText üretir.
- * - FinalText direkt sendText(finalText) ile gönderilir.
- */
-function startSTT(onFinalText){
+function startSTT(onFinal){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ alert("Bu cihaz konuşmayı yazıya çevirmiyor."); return; }
   if(sttBusy) return;
@@ -178,36 +167,26 @@ function startSTT(onFinalText){
   rec.continuous = false;
 
   sttBusy = true;
-  micBtn?.classList.add("listening");
-
-  let finalText = "";
+  micBtn.classList.add("listening");
 
   rec.onresult = (e)=>{
-    finalText = String(e.results?.[0]?.[0]?.transcript || "").trim();
+    const t = e.results?.[0]?.[0]?.transcript || "";
+    const finalText = String(t||"").trim();
     if(finalText){
-      // kullanıcı görsün diye textarea'ya da basıyoruz
-      if(ta){
-        ta.value = finalText;
-        autoGrow();
-      }
+      ta.value = finalText;
+      autoGrow();
+      onFinal?.(finalText);
     }
   };
-
   rec.onerror = ()=>{};
-
   rec.onend = ()=>{
-    micBtn?.classList.remove("listening");
+    micBtn.classList.remove("listening");
     sttBusy = false;
-
-    const t = String(finalText || "").trim();
-    if(t && typeof onFinalText === "function"){
-      onFinalText(t);
-    }
   };
 
   try{ rec.start(); }
   catch{
-    micBtn?.classList.remove("listening");
+    micBtn.classList.remove("listening");
     sttBusy = false;
   }
 }
@@ -219,14 +198,14 @@ async function main(){
   paintHeader(u);
 
   const chat = $("chat");
-  chat?.addEventListener("scroll", ()=>{ follow = isNearBottom(chat); }, { passive:true });
+  chat.addEventListener("scroll", ()=>{ follow = isNearBottom(chat); }, { passive:true });
 
-  // history load
+  // history
   const hist = loadHist(u);
-  if(chat) chat.innerHTML = "";
+  chat.innerHTML = "";
 
   if(!hist.length){
-    addBubble("meta", "italkyAI • Bu alan yazılı bilgi içindir. Mikrofon konuşmanı yazıya çevirir ve otomatik gönderir.");
+    addBubble("meta","italkyAI: Bu sayfa yazılı bilgi alma içindir. Mikrofon konuşmanı yazıya çevirir ve otomatik gönderir.");
   }else{
     hist.forEach(m=> addBubble(m.role, m.text));
   }
@@ -234,35 +213,28 @@ async function main(){
   follow = true;
   scrollBottom(true);
 
-  /**
-   * Tek kaynak gönderim: her yer burayı çağırır
-   */
-  async function sendText(text){
-    const t = String(text||"").trim();
-    if(!t) return;
-
-    // textarea temizle (STT’den geldiyse de temizle)
+  async function send(textOverride){
     const ta = $("msgInput");
-    if(ta){
-      ta.value = "";
-      autoGrow();
-    }
+    const text = (typeof textOverride === "string") ? textOverride.trim() : String(ta.value||"").trim();
+    if(!text) return;
+
+    ta.value = "";
+    autoGrow();
 
     const h = loadHist(u);
-
-    addBubble("user", t);
-    h.push({ role:"user", text: t });
+    addBubble("user", text);
+    h.push({ role:"user", text });
 
     const loader = typingBubble();
 
     try{
-      const out = await apiChat(u, t, h.map(x=>({ role:x.role, content:x.text })));
-      try{ loader?.remove(); }catch{}
+      const out = await apiChat(u, text, h.map(x=>({role:x.role, content:x.text})));
+      try{ loader.remove(); }catch{}
       addBubble("assistant", out);
       h.push({ role:"assistant", text: out });
       saveHist(u, h);
     }catch{
-      try{ loader?.remove(); }catch{}
+      try{ loader.remove(); }catch{}
       const msg = "Şu an cevap veremedim. Bir daha dener misin?";
       addBubble("assistant", msg);
       h.push({ role:"assistant", text: msg });
@@ -272,30 +244,21 @@ async function main(){
     scrollBottom(false);
   }
 
-  // Send btn: manual
-  $("sendBtn")?.addEventListener("click", ()=>{
-    const ta = $("msgInput");
-    sendText(String(ta?.value || ""));
-  });
+  $("sendBtn").addEventListener("click", ()=> send());
+  $("msgInput").addEventListener("input", autoGrow);
 
-  // Keyboard send
-  $("msgInput")?.addEventListener("input", autoGrow);
-  $("msgInput")?.addEventListener("keydown",(e)=>{
+  $("msgInput").addEventListener("keydown",(e)=>{
     if(e.key==="Enter" && !e.shiftKey){
       e.preventDefault();
-      const ta = $("msgInput");
-      sendText(String(ta?.value || ""));
+      send();
     }
   });
 
-  // ✅ Mic => STT => auto-send (finalText direkt)
-  $("micBtn")?.addEventListener("click", ()=>{
-    startSTT((finalText)=> sendText(finalText));
-  });
-
-  // küçük bilgi butonu (varsa)
-  $("helpBtn")?.addEventListener("click", ()=>{
-    addBubble("meta", "İpucu: Mikrofon konuşmanı yazıya çevirir ve otomatik gönderir. Bu sayfada sesli cevap yok.");
+  // ✅ Mic => STT => auto-send (enter gerekmez)
+  $("micBtn").addEventListener("click", ()=>{
+    startSTT(async (finalText)=>{
+      await send(finalText);
+    });
   });
 
   autoGrow();
