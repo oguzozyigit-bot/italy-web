@@ -14,7 +14,7 @@
     :root {
       --bg-deep: #020205;
       --text-main: #fff;
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.15);
       
       /* Canlı Renkler */
       --c-indigo: #6366f1;
@@ -33,7 +33,7 @@
     }
 
     /* --- ATMOSFER --- */
-    .cosmos-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+    .cosmos-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; }
     .glow-spot {
       position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15;
       animation: floatSpot 20s infinite alternate ease-in-out;
@@ -47,24 +47,26 @@
       width: 100%; max-width: 480px; height: 100%;
       position: relative; z-index: 10;
       display: flex; flex-direction: column;
-      /* Hafif karartma */
-      background: rgba(0,0,0,0.3); 
+      background: rgba(0,0,0,0.01); /* Tıklamayı engellemez */
     }
 
-    /* --- NAV (SADECE OK VE AYAR) --- */
+    /* --- NAV (Üst Bar) --- */
     .nav-bar {
       height: 80px; padding: 0 24px; 
       display: flex; align-items: center; justify-content: space-between;
-      position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+      position: absolute; top: 0; left: 0; width: 100%; z-index: 100;
+      pointer-events: none; /* Boşluklara tıklamayı engelleme */
     }
     
+    /* Butonların tıklanabilir olduğundan emin ol */
     .nav-btn {
       width: 44px; height: 44px; border-radius: 50%;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
       display: flex; align-items: center; justify-content: center;
       color: #fff; cursor: pointer; transition: 0.2s; backdrop-filter: blur(10px);
+      pointer-events: auto; /* KESİN ÇÖZÜM */
     }
-    .nav-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+    .nav-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
     .nav-btn svg { width: 22px; height: 22px; stroke-width: 2.5; }
 
     /* --- THE LIVE CORE (Ana Sahne) --- */
@@ -72,6 +74,7 @@
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       position: relative;
+      pointer-events: none; /* Sahne tıklamayı yemesin */
     }
 
     .ai-container {
@@ -88,30 +91,26 @@
       filter: blur(30px); opacity: 0.9;
       transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
       
-      /* Varsayılan: IDLE (Nefes Alma) */
+      /* Varsayılan: IDLE */
       background: conic-gradient(from 0deg, var(--c-indigo), var(--c-cyan), var(--c-indigo));
       animation: spinColor 10s linear infinite, blobIdle 6s ease-in-out infinite;
     }
 
-    /* STATE: LISTENING (Kullanıcı Konuşuyor -> İçine Çekil) */
+    /* STATES */
     .stage.listening .ai-blob {
-      width: 150px; height: 150px; /* Küçül */
-      filter: blur(20px); /* Netleş */
+      width: 150px; height: 150px; filter: blur(20px);
       background: radial-gradient(circle, #ffffff, var(--c-cyan));
-      border-radius: 50%; /* Tam yuvarlak ol */
+      border-radius: 50%;
       animation: pulseListen 1.5s infinite ease-in-out;
       box-shadow: 0 0 50px rgba(6, 182, 212, 0.4);
     }
 
-    /* STATE: SPEAKING (AI Konuşuyor -> Patlama & Renk Cümbüşü) */
     .stage.speaking .ai-blob {
-      width: 260px; height: 260px; /* Büyü */
-      filter: blur(45px); /* Yumuşa */
+      width: 260px; height: 260px; filter: blur(45px);
       background: conic-gradient(from 0deg, var(--c-pink), var(--c-orange), var(--c-indigo), var(--c-pink));
       animation: spinColor 3s linear infinite, blobMorph 4s ease-in-out infinite;
     }
 
-    /* Durum Metni */
     .status-text {
       margin-top: 40px;
       font-family: 'Space Grotesk', sans-serif;
@@ -122,31 +121,27 @@
     }
     .status-text.show { opacity: 1; transform: translateY(0); }
 
-    /* Animasyon Keyframe'leri */
     @keyframes spinColor { 100% { transform: rotate(360deg); } }
-    
     @keyframes blobIdle {
       0%, 100% { transform: scale(1); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
       50% { transform: scale(1.05); border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
     }
-
     @keyframes pulseListen {
       0% { transform: scale(1); opacity: 1; }
       50% { transform: scale(0.92); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
     }
-
     @keyframes blobMorph {
       0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-      33% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-      66% { border-radius: 70% 30% 50% 50% / 30% 30% 60% 70%; }
+      50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
       100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
     }
 
-    /* --- KONTROLLER (MİKROFON) --- */
+    /* --- MİKROFON (Kontroller) --- */
     .controls {
       padding: 40px; display: flex; justify-content: center;
-      position: relative; z-index: 20;
+      position: relative; z-index: 100;
+      pointer-events: none; /* Boşluklar tıklamayı yemesin */
     }
     .mic-btn {
       width: 84px; height: 84px; border-radius: 50%;
@@ -155,20 +150,15 @@
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
       box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      pointer-events: auto; /* BUTON TIKLANABİLİR OLSUN */
     }
     .mic-btn svg { width: 32px; height: 32px; stroke: #fff; fill: none; stroke-width: 2; transition: 0.3s; }
     
     .mic-btn:active { transform: scale(0.9); }
-    
-    /* Aktif (Dinleme) Modu butonu */
-    .mic-btn.active {
-      background: #fff; box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-      border-color: #fff;
-    }
+    .mic-btn.active { background: #fff; box-shadow: 0 0 30px rgba(255, 255, 255, 0.3); border-color: #fff; }
     .mic-btn.active svg { stroke: #000; }
 
-
-    /* --- SES SEÇİM MODALI (PRO) --- */
+    /* --- MODAL --- */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 9999;
       background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
@@ -188,9 +178,7 @@
     }
     .modal-overlay.show .voice-sheet { transform: translateY(0); }
 
-    .vs-header {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-    }
+    .vs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .vs-title { font-size: 18px; font-weight: 700; color: #fff; }
     .vs-close { 
       background: rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
@@ -205,9 +193,7 @@
       cursor: pointer; transition: 0.2s;
     }
     .voice-item:active { transform: scale(0.98); }
-    .voice-item.selected { 
-      background: rgba(99, 102, 241, 0.15); border-color: var(--c-indigo); 
-    }
+    .voice-item.selected { background: rgba(99, 102, 241, 0.15); border-color: var(--c-indigo); }
     
     .v-left { display: flex; align-items: center; gap: 14px; flex: 1; }
     .play-btn {
@@ -240,10 +226,10 @@
 
   <div class="frame">
     <div class="nav-bar">
-      <div class="nav-btn" onclick="window.location.href='/pages/home.html'">
+      <div class="nav-btn" id="btnBack">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </div>
-      <div class="nav-btn" id="settingsBtn">
+      <div class="nav-btn" id="btnSettings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
       </div>
     </div>
@@ -268,12 +254,180 @@
         <div class="vs-title">Asistan Sesi Seç</div>
         <button class="vs-close" id="closeVoiceModal">✕</button>
       </div>
-      <div class="voice-list" id="voiceListContainer">
-        </div>
+      <div class="voice-list" id="voiceListContainer"></div>
       <button class="save-btn" id="saveVoiceBtn">Seçimi Kaydet</button>
     </div>
   </div>
 
-  <script type="module" src="/js/voice_ai_page.js?v=3"></script>
+  <script>
+    // --- GÖMÜLÜ JAVASCRIPT (Hata Şansı Yok) ---
+    
+    // Basit DOM Seçici
+    const $ = (id) => document.getElementById(id);
+
+    // Ses Listesi
+    const VOICES = [
+      { id: "jale", label: "Jale", gender: "Kadın", openaiVoice: "shimmer", desc: "Net ve İddialı" },
+      { id: "huma", label: "Hüma", gender: "Kadın", openaiVoice: "nova", desc: "Enerjik ve Sıcak" },
+      { id: "selden", label: "Selden", gender: "Kadın", openaiVoice: "alloy", desc: "Çok Yönlü" },
+      { id: "oguz", label: "Oğuz", gender: "Erkek", openaiVoice: "echo", desc: "Tok ve Yankılı" },
+      { id: "baris", label: "Barış", gender: "Erkek", openaiVoice: "fable", desc: "Anlatıcı Tonu" },
+      { id: "emrah", label: "Emrah", gender: "Erkek", openaiVoice: "onyx", desc: "Derin ve Ciddi" }
+    ];
+
+    const KEY = "italky_voice_pref";
+    let selectedId = localStorage.getItem(KEY) || "";
+
+    // --- NAVIGASYON ---
+    $("btnBack").onclick = () => window.location.href = "/pages/home.html";
+    $("btnSettings").onclick = openModal;
+    $("closeVoiceModal").onclick = closeModal;
+
+    // --- MODAL İŞLEMLERİ ---
+    function openModal() {
+      const modal = $("voiceModal");
+      const list = $("voiceListContainer");
+      modal.classList.add("show");
+      
+      list.innerHTML = "";
+      VOICES.forEach(v => {
+        const isSel = (v.id === selectedId);
+        const div = document.createElement("div");
+        div.className = `voice-item ${isSel ? "selected" : ""}`;
+        div.innerHTML = `
+          <div class="v-left">
+            <button class="play-btn" title="Oynat">
+              <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="v-details">
+              <div class="v-name">${v.label}</div>
+              <div class="v-lang">${v.gender} • ${v.desc}</div>
+            </div>
+          </div>
+          ${isSel ? '<div style="color:#6366f1">✓</div>' : ''}
+        `;
+        
+        // Seçim
+        div.onclick = (e) => {
+          if(e.target.closest(".play-btn")) return;
+          document.querySelectorAll(".voice-item").forEach(el => el.classList.remove("selected"));
+          div.classList.add("selected");
+          selectedId = v.id;
+        };
+
+        // Demo Oynat (Şimdilik tarayıcı sesi ile simüle ediyoruz, API'ye gerek yok)
+        div.querySelector(".play-btn").onclick = () => {
+          const u = new SpeechSynthesisUtterance(`Merhaba, ben ${v.label}. italkyAI ile konuşmaya hazırım.`);
+          // Tarayıcıdaki en uygun sesi bulmaya çalış
+          const sysVoices = window.speechSynthesis.getVoices();
+          const target = sysVoices.find(sv => sv.name.includes("Google") || sv.lang.includes("tr"));
+          if(target) u.voice = target;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(u);
+        };
+
+        list.appendChild(div);
+      });
+    }
+
+    function closeModal() {
+      $("voiceModal").classList.remove("show");
+    }
+
+    $("saveVoiceBtn").onclick = () => {
+      if (selectedId) {
+        localStorage.setItem(KEY, selectedId);
+        closeModal();
+      }
+    };
+
+    // --- MİKROFON VE ANİMASYON ---
+    const stage = $("aiStage");
+    const micBtn = $("micToggle");
+    const statusText = $("statusText");
+    let isListening = false;
+    let recognition = null;
+
+    function setVisual(state) {
+      stage.classList.remove("listening", "speaking");
+      micBtn.classList.remove("active");
+      statusText.classList.remove("show");
+
+      if (state === "listening") {
+        stage.classList.add("listening");
+        micBtn.classList.add("active");
+        statusText.innerText = "Dinliyorum...";
+        statusText.classList.add("show");
+      } else if (state === "speaking") {
+        stage.classList.add("speaking");
+        statusText.innerText = "Cevap Veriyor...";
+        statusText.classList.add("show");
+      } else {
+        // Idle
+        statusText.innerText = "Dokun ve Konuş";
+        statusText.classList.add("show");
+      }
+    }
+
+    // Başlangıç Durumu
+    setVisual("idle");
+
+    // Mikrofon Tıklama
+    micBtn.onclick = () => {
+      if (!window.webkitSpeechRecognition && !window.SpeechRecognition) {
+        alert("Tarayıcınız sesli komutu desteklemiyor. Chrome kullanın.");
+        return;
+      }
+
+      if (isListening) {
+        // Durdur
+        if (recognition) recognition.stop();
+        isListening = false;
+        setVisual("idle");
+      } else {
+        // Başlat
+        startListening();
+      }
+    };
+
+    function startListening() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SR();
+      recognition.lang = "tr-TR";
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        setVisual("listening");
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        // Eğer speaking modunda değilse idle'a dön
+        if (!stage.classList.contains("speaking")) setVisual("idle");
+      };
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        // Cevap Simülasyonu
+        speakResponse(text);
+      };
+
+      recognition.start();
+    }
+
+    function speakResponse(userText) {
+      setVisual("speaking");
+      const u = new SpeechSynthesisUtterance(`Bunu söylediniz: ${userText}. Harika bir cümle!`);
+      u.onend = () => setVisual("idle");
+      window.speechSynthesis.speak(u);
+    }
+
+    // İlk açılışta ses yoksa modalı aç
+    if (!localStorage.getItem(KEY)) {
+      setTimeout(openModal, 600);
+    }
+
+  </script>
 </body>
 </html>
