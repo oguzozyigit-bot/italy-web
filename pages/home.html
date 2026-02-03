@@ -171,7 +171,7 @@
       animation: fadeInUp .6s var(--ease-elastic);
     }
 
-    /* --- KART TASARIMLARI --- */
+    /* --- KART TASARIMLARI (HEPSİ ORTALI) --- */
     .card, .longCard {
       --card-hue: 120, 130, 140; 
       
@@ -183,6 +183,13 @@
       cursor:pointer; user-select:none;
       transition: all .25s ease;
       position:relative; overflow:hidden;
+      
+      /* --- MERKEZLEME BÜYÜSÜ --- */
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; /* Yatay Ortala */
+      justify-content: center; /* Dikey Ortala */
+      text-align: center; /* Metni Ortala */
     }
     
     .icon-box, .longIcon {
@@ -191,6 +198,7 @@
       background: rgba(var(--card-hue), 0.15);
       border: 1px solid rgba(var(--card-hue), 0.2);
       display:flex; align-items:center; justify-content:center;
+      margin-bottom: 10px; /* İkon ile yazı arasına boşluk */
     }
     .icon-box svg, .longIcon svg {
       width: 26px; height: 26px;
@@ -210,21 +218,14 @@
       transform: scale(0.98);
     }
 
+    /* Kare Kartlar (Üst) */
     .card{
       padding: 16px 12px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-      gap: 12px; aspect-ratio: 1 / 1.05;
+      gap: 0; /* Boşluğu margin ile hallettik */
+      aspect-ratio: 1 / 1.05;
     }
 
-    /* --- RENKLER (Üst Grid) --- */
-    .grid .card:nth-child(1) { --card-hue: 59, 130, 246; } 
-    .grid .card:nth-child(2) { --card-hue: 16, 185, 129; } 
-    .grid .card:nth-child(3) { --card-hue: 245, 158, 11; } 
-    .grid .card:nth-child(4) { --card-hue: 139, 92, 246; } 
-    .grid .card:nth-child(5) { --card-hue: 20, 184, 166; } 
-    .grid .card:nth-child(6) { --card-hue: 244, 63, 94; } 
-
-    /* Alt Kısım (4'lü Yapı) */
+    /* Uzun Kartlar (Alt) - Artık ortalı */
     .longWrap{ 
       margin-top: 14px; 
       display:grid; grid-template-columns: 1fr 1fr; gap: 14px; 
@@ -232,21 +233,24 @@
     }
     .longCard{
       width:100%; padding: 16px 14px;
-      display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between;
-      gap: 10px; aspect-ratio: 1 / 1.05;
+      gap: 0; /* Boşluğu margin ile hallettik */
+      aspect-ratio: 1 / 1.05; /* Karelerle aynı oran */
     }
-    
-    /* 1. Sohbet AI: İndigo */
-    .longWrap .longCard:nth-child(1) { --card-hue: 99, 102, 241; } 
-    
-    /* 2. Konuşkan AI: Turkuaz (Cyan) - YENİ */
-    .longWrap .longCard:nth-child(2) { --card-hue: 6, 182, 212; } 
 
-    /* 3. Öğretmen: Mor */
-    .longWrap .longCard:nth-child(3) { --card-hue: 168, 85, 247; } 
+    /* --- RENKLER --- */
+    /* Üst Grid */
+    .grid .card:nth-child(1) { --card-hue: 59, 130, 246; } 
+    .grid .card:nth-child(2) { --card-hue: 16, 185, 129; } 
+    .grid .card:nth-child(3) { --card-hue: 245, 158, 11; } 
+    .grid .card:nth-child(4) { --card-hue: 139, 92, 246; } 
+    .grid .card:nth-child(5) { --card-hue: 20, 184, 166; } 
+    .grid .card:nth-child(6) { --card-hue: 244, 63, 94; } 
 
-    /* 4. Arkadaş: Pembe */
-    .longWrap .longCard:nth-child(4) { --card-hue: 236, 72, 153; } 
+    /* Alt Grid (Özel Renkler) */
+    .longWrap .longCard:nth-child(1) { --card-hue: 99, 102, 241; } /* Sohbet AI: İndigo */
+    .longWrap .longCard:nth-child(2) { --card-hue: 6, 182, 212; }  /* Konuşkan AI: Turkuaz */
+    .longWrap .longCard:nth-child(3) { --card-hue: 168, 85, 247; } /* Öğretmen: Mor */
+    .longWrap .longCard:nth-child(4) { --card-hue: 236, 72, 153; } /* Arkadaş: Pembe */
 
 
     /* --- FOOTER --- */
@@ -296,76 +300,38 @@
     </div>
 
     <div class="menu-scroll" id="menuScroll">
+      
       <div class="grid">
-
         <div class="card" data-go="/pages/facetoface.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24"><path d="M7 11c1.7 0 3-1.3 3-3S8.7 5 7 5 4 6.3 4 8s1.3 3 3 3z"/><path d="M17 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"/><path d="M2.5 20c0-3 2.8-5 5.8-5"/><path d="M21.5 20c0-3-2.8-5-5.8-5"/><path d="M9.8 14.7h4.4"/><path d="M9 18h6"/></svg>
-          </div>
-          <div>
-            <div class="label">Yüz Yüze</div>
-            <div class="sub">Canlı çeviri</div>
-          </div>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M7 11c1.7 0 3-1.3 3-3S8.7 5 7 5 4 6.3 4 8s1.3 3 3 3z"/><path d="M17 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"/><path d="M2.5 20c0-3 2.8-5 5.8-5"/><path d="M21.5 20c0-3-2.8-5-5.8-5"/><path d="M9.8 14.7h4.4"/><path d="M9 18h6"/></svg></div>
+          <div><div class="label">Yüz Yüze</div><div class="sub">Canlı çeviri</div></div>
         </div>
-
         <div class="card" data-go="/pages/sidebyside.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24"><path d="M4 5h8v14H4z"/><path d="M12 7h8v12h-8z" opacity=".4"/><path d="M7 9h2"/><path d="M7 12h2"/><path d="M15 10h2"/><path d="M15 13h2"/></svg>
-          </div>
-          <div>
-            <div class="label">Yan Yana</div>
-            <div class="sub">Karşılıklı</div>
-          </div>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M4 5h8v14H4z"/><path d="M12 7h8v12h-8z" opacity=".4"/><path d="M7 9h2"/><path d="M7 12h2"/><path d="M15 10h2"/><path d="M15 13h2"/></svg></div>
+          <div><div class="label">Yan Yana</div><div class="sub">Karşılıklı</div></div>
         </div>
-
         <div class="card" data-go="/pages/fast.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M6 22h12"/><path d="M7 17h10"/></svg>
-          </div>
-          <div>
-            <div class="label">Anında</div>
-            <div class="sub">Toplantı modu</div>
-          </div>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M6 22h12"/><path d="M7 17h10"/></svg></div>
+          <div><div class="label">Anında</div><div class="sub">Toplantı modu</div></div>
         </div>
-
         <div class="card" data-go="/pages/photo.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><path d="M8 14h8"/><path d="M10 11h4"/><circle cx="12" cy="13" r="4" opacity=".4" /></svg>
-          </div>
-          <div>
-            <div class="label">Fotoğraf</div>
-            <div class="sub">Görsel çeviri</div>
-          </div>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><path d="M8 14h8"/><path d="M10 11h4"/><circle cx="12" cy="13" r="4" opacity=".4" /></svg></div>
+          <div><div class="label">Fotoğraf</div><div class="sub">Görsel çeviri</div></div>
         </div>
-
         <div class="card" data-go="/pages/document.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg>
-          </div>
-          <div>
-            <div class="label">Belge</div>
-            <div class="sub">PDF / Metin</div>
-          </div>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></div>
+          <div><div class="label">Belge</div><div class="sub">PDF / Metin</div></div>
         </div>
-
         <div class="card" data-go="/pages/online.html">
-          <div class="icon-box">
-            <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 1 0-11 4l-2 3 3-1a6 6 0 0 0 10-6z"/><path d="M22 12a5 5 0 0 1-5 5h-2l-3 2 1-3"/></svg>
-          </div>
-          <div>
-            <div class="label">Online</div>
-            <div class="sub">Sohbet</div>
-          </div>
+          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 1 0-11 4l-2 3 3-1a6 6 0 0 0 10-6z"/><path d="M22 12a5 5 0 0 1-5 5h-2l-3 2 1-3"/></svg></div>
+          <div><div class="label">Online</div><div class="sub">Sohbet</div></div>
         </div>
-
       </div>
 
       <div class="longWrap">
         
         <div class="longCard" data-go="/pages/chat.html">
-          <div class="longIcon">
-            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10h-10z" opacity=".5"/></svg>
-          </div>
+          <div class="longIcon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 2a10 10 0 0 1 10 10h-10z" opacity=".5"/></svg></div>
           <div class="longTxt">
             <div class="longLbl">Sohbet AI</div>
             <div class="longSub">Asistanınla konuş</div>
@@ -383,9 +349,7 @@
         </div>
 
         <div class="longCard" data-go="/pages/teachers.html">
-          <div class="longIcon">
-            <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          </div>
+          <div class="longIcon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
           <div class="longTxt">
             <div class="longLbl">Öğretmen</div>
             <div class="longSub">Telaffuz ve ders</div>
@@ -393,9 +357,7 @@
         </div>
 
         <div class="longCard" data-go="/pages/friend.html">
-          <div class="longIcon">
-            <svg viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3S17.7 5 16 5s-3 1.3-3 3 1.3 3 3 3z"/><path d="M8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"/><path d="M2 20c0-3 3-5 6-5"/><path d="M22 20c0-3-3-5-6-5"/><path d="M8 15h8"/></svg>
-          </div>
+          <div class="longIcon"><svg viewBox="0 0 24 24"><path d="M16 11c1.7 0 3-1.3 3-3S17.7 5 16 5s-3 1.3-3 3 1.3 3 3 3z"/><path d="M8 11c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3z"/><path d="M2 20c0-3 3-5 6-5"/><path d="M22 20c0-3-3-5-6-5"/><path d="M8 15h8"/></svg></div>
           <div class="longTxt">
             <div class="longLbl">Arkadaşınla Öğren</div>
             <div class="longSub">Düello ve pratik</div>
