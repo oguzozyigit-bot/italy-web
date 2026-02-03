@@ -3,339 +3,277 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Sesli AI</title>
-  <link rel="icon" href="data:,">
+  <title>italkyAI • Live</title>
+  <link rel="icon" href="data:," />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg:#030014;
-      --text:#fff;
-      --muted:#6B7280;
-      --ai1:#A5B4FC;
-      --ai2:#4F46E5;
-
-      --indigo:#6366f1;
-      --cyan:#06b6d4;
-      --pink:#ec4899;
-      --orange:#f97316;
-
-      --border: rgba(255,255,255,.10);
-      --glass: rgba(0,0,0,.35);
+    :root {
+      --bg-deep: #020205;
+      --text-main: #fff;
+      --glass-border: rgba(255, 255, 255, 0.1);
+      
+      /* Canlı Renkler */
+      --c-indigo: #6366f1;
+      --c-cyan: #06b6d4;
+      --c-pink: #ec4899;
+      --c-orange: #f97316;
     }
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html,body{
-      margin:0; padding:0; width:100%; height:100%;
-      background:var(--bg); color:var(--text);
-      font-family:'Outfit',sans-serif;
-      overflow:hidden;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      overflow: hidden; background: var(--bg-deep);
+      font-family: 'Outfit', sans-serif; color: var(--text-main);
+      display: flex; align-items: center; justify-content: center;
     }
 
-    .frame{
-      max-width:480px; height:100%;
-      margin:0 auto;
-      display:flex; flex-direction:column;
-      position:relative;
+    /* --- ATMOSFER --- */
+    .cosmos-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+    .glow-spot {
+      position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15;
+      animation: floatSpot 20s infinite alternate ease-in-out;
+    }
+    .gs-1 { top: -10%; left: -10%; width: 80vw; height: 80vw; background: var(--c-indigo); }
+    .gs-2 { bottom: -10%; right: -10%; width: 80vw; height: 80vw; background: var(--c-cyan); animation-delay: -5s; }
+    
+    @keyframes floatSpot { from { transform: translate(0,0); } to { transform: translate(10%, 10%); } }
+
+    .frame {
+      width: 100%; max-width: 480px; height: 100%;
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      /* Hafif karartma */
+      background: rgba(0,0,0,0.3); 
     }
 
-    /* ===== TOPBAR ===== */
-    .topbar{
-      height:80px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:0 16px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      background: var(--glass);
-      backdrop-filter: blur(10px);
+    /* --- NAV (SADECE OK VE AYAR) --- */
+    .nav-bar {
+      height: 80px; padding: 0 24px; 
+      display: flex; align-items: center; justify-content: space-between;
+      position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+    }
+    
+    .nav-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; cursor: pointer; transition: 0.2s; backdrop-filter: blur(10px);
+    }
+    .nav-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
+    .nav-btn svg { width: 22px; height: 22px; stroke-width: 2.5; }
+
+    /* --- THE LIVE CORE (Ana Sahne) --- */
+    .stage {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       position: relative;
-      z-index: 50;              /* ✅ üstte */
-      pointer-events: auto;     /* ✅ tıklanır */
     }
 
-    .back-btn{
-      width:44px;height:44px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      font-size:20px;
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      user-select:none;
-    }
-    .back-btn:active{ transform: scale(.96); }
-
-    .brand{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      line-height:1;
-      cursor:pointer;
-      user-select:none;
-      gap: 0;
-    }
-    .logo-line{
-      font-family:'Space Grotesk',sans-serif;
-      font-size:22px;
-      display:flex; gap:2px;
-      align-items:flex-end;
-    }
-    .logo-main{ color:#fff; font-weight:700; }
-    .logo-ai{
-      background:linear-gradient(135deg,var(--ai1),var(--ai2));
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      font-weight:700;
-    }
-    .logo-slogan{
-      font-size:10px;
-      letter-spacing:4px;
-      color:var(--muted);
-      margin-top:6px;
-      text-transform: uppercase;
-    }
-
-    .voice-btn{
-      padding:10px 14px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-      font-size:12px;
-      user-select:none;
-    }
-    .voice-btn:active{ transform: scale(.98); }
-
-    /* ===== STAGE ===== */
-    .stage{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:22px;
+    .ai-container {
       position: relative;
-      z-index: 10;
+      width: 320px; height: 320px;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    /* ✅ Blob tıklama yemez */
-    .aiWrap{
-      width:260px;height:260px;
-      display:flex;align-items:center;justify-content:center;
-      pointer-events: none;      /* ✅ EN KRİTİK: tıklamayı yeme */
+    /* AKIŞKAN BULUT (BLOB) */
+    .ai-blob {
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      filter: blur(30px); opacity: 0.9;
+      transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+      
+      /* Varsayılan: IDLE (Nefes Alma) */
+      background: conic-gradient(from 0deg, var(--c-indigo), var(--c-cyan), var(--c-indigo));
+      animation: spinColor 10s linear infinite, blobIdle 6s ease-in-out infinite;
     }
 
-    .aiCore{
-      width:170px;height:170px;border-radius:50%;
-      filter:blur(40px);
-      background:conic-gradient(from 0deg,var(--indigo),var(--cyan),var(--indigo));
-      animation:spin 9s linear infinite, breathe 6s ease-in-out infinite;
-      transition:.25s;
-      pointer-events: none;      /* ✅ */
+    /* STATE: LISTENING (Kullanıcı Konuşuyor -> İçine Çekil) */
+    .stage.listening .ai-blob {
+      width: 150px; height: 150px; /* Küçül */
+      filter: blur(20px); /* Netleş */
+      background: radial-gradient(circle, #ffffff, var(--c-cyan));
+      border-radius: 50%; /* Tam yuvarlak ol */
+      animation: pulseListen 1.5s infinite ease-in-out;
+      box-shadow: 0 0 50px rgba(6, 182, 212, 0.4);
     }
 
-    .stage.listening .aiCore{
-      width:130px;height:130px;
-      filter:blur(25px);
-      background:radial-gradient(circle,#fff,var(--cyan));
-      animation:pulse .9s infinite alternate;
+    /* STATE: SPEAKING (AI Konuşuyor -> Patlama & Renk Cümbüşü) */
+    .stage.speaking .ai-blob {
+      width: 260px; height: 260px; /* Büyü */
+      filter: blur(45px); /* Yumuşa */
+      background: conic-gradient(from 0deg, var(--c-pink), var(--c-orange), var(--c-indigo), var(--c-pink));
+      animation: spinColor 3s linear infinite, blobMorph 4s ease-in-out infinite;
     }
 
-    .stage.speaking .aiCore{
-      width:210px;height:210px;
-      filter:blur(55px);
-      background:conic-gradient(from 0deg,var(--pink),var(--orange),var(--indigo));
-      animation:spin 3s linear infinite, morph 3.5s ease-in-out infinite;
+    /* Durum Metni */
+    .status-text {
+      margin-top: 40px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 2px; text-transform: uppercase;
+      opacity: 0; transform: translateY(10px); transition: 0.5s;
+    }
+    .status-text.show { opacity: 1; transform: translateY(0); }
+
+    /* Animasyon Keyframe'leri */
+    @keyframes spinColor { 100% { transform: rotate(360deg); } }
+    
+    @keyframes blobIdle {
+      0%, 100% { transform: scale(1); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+      50% { transform: scale(1.05); border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
     }
 
-    .status{
-      font-family:'Space Grotesk',sans-serif;
-      letter-spacing:2px;
-      font-size:13px;
-      color:rgba(255,255,255,.7);
-      text-transform:uppercase;
-      user-select:none;
-      z-index: 15;
+    @keyframes pulseListen {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.92); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
-    /* ===== MIC ===== */
-    .controls{
-      padding:24px;
-      display:flex;
-      justify-content:center;
-      position: relative;
-      z-index: 60;              /* ✅ blob üstünde */
-      pointer-events: auto;     /* ✅ tıklanır */
+    @keyframes blobMorph {
+      0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+      33% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+      66% { border-radius: 70% 30% 50% 50% / 30% 30% 60% 70%; }
+      100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
     }
 
-    .mic-btn{
-      width:86px;height:86px;border-radius:50%;
-      border:1px solid rgba(255,255,255,.22);
-      background:rgba(255,255,255,.10);
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      position:relative;
-      user-select:none;
+    /* --- KONTROLLER (MİKROFON) --- */
+    .controls {
+      padding: 40px; display: flex; justify-content: center;
+      position: relative; z-index: 20;
     }
-    .mic-btn:active{ transform: scale(.96); }
-    .mic-btn svg{ width:36px;height:36px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .mic-btn {
+      width: 84px; height: 84px; border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .mic-btn svg { width: 32px; height: 32px; stroke: #fff; fill: none; stroke-width: 2; transition: 0.3s; }
+    
+    .mic-btn:active { transform: scale(0.9); }
+    
+    /* Aktif (Dinleme) Modu butonu */
+    .mic-btn.active {
+      background: #fff; box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+      border-color: #fff;
+    }
+    .mic-btn.active svg { stroke: #000; }
 
-    .mic-btn.listening{
-      border-color: rgba(6,182,212,.55);
-      box-shadow: 0 0 0 1px rgba(6,182,212,.25), 0 0 22px rgba(6,182,212,.18);
-    }
-    .mic-btn.listening::after{
-      content:"";
-      position:absolute; inset:-12px;
-      border-radius:50%;
-      border:1px solid rgba(6,182,212,.45);
-      animation:ring 1s infinite;
-    }
 
-    @keyframes ring{
-      0%{transform:scale(1);opacity:.6}
-      70%{transform:scale(1.18);opacity:.18}
-      100%{transform:scale(1);opacity:.6}
+    /* --- SES SEÇİM MODALI (PRO) --- */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);
+      display: none; align-items: flex-end; justify-content: center;
+      opacity: 0; transition: opacity 0.3s;
     }
-    @keyframes spin{100%{transform:rotate(360deg)}}
-    @keyframes breathe{50%{transform:scale(1.12)}}
-    @keyframes pulse{100%{transform:scale(.9)}}
-    @keyframes morph{ 50%{border-radius:30% 60% 70% 40% / 50% 60% 30% 60%} }
+    .modal-overlay.show { display: flex; opacity: 1; }
 
-    /* ===== VOICE MODAL (BOTTOM SHEET) ===== */
-    .modal{
-      position:fixed; inset:0;
-      background:rgba(0,0,0,.62);
-      backdrop-filter:blur(10px);
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding:14px;
-      z-index: 9999;
-      pointer-events: auto;
+    .voice-sheet {
+      width: 100%; max-width: 480px;
+      background: #0b0b10;
+      border-top: 1px solid var(--glass-border);
+      border-radius: 32px 32px 0 0;
+      padding: 24px; padding-bottom: 40px;
+      transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      max-height: 80vh; display: flex; flex-direction: column;
     }
-    .modal.show{display:flex}
+    .modal-overlay.show .voice-sheet { transform: translateY(0); }
 
-    .sheet{
-      width:100%;
-      max-width:480px;
-      background:#0b0b14;
-      border-radius:24px;
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 30px 90px rgba(0,0,0,.7);
+    .vs-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+    }
+    .vs-title { font-size: 18px; font-weight: 700; color: #fff; }
+    .vs-close { 
+      background: rgba(255,255,255,0.1); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;
     }
 
-    .sheetHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:12px 12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
+    .voice-list { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    
+    .voice-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-radius: 18px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer; transition: 0.2s;
     }
-    .sheetHead h3{
-      margin:0;
-      font-size:13px;
-      letter-spacing:.5px;
-      font-weight:900;
-      opacity:.9;
+    .voice-item:active { transform: scale(0.98); }
+    .voice-item.selected { 
+      background: rgba(99, 102, 241, 0.15); border-color: var(--c-indigo); 
     }
-    .xBtn{
-      width:40px; height:40px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      font-size:18px;
-      font-weight:900;
-      cursor:pointer;
+    
+    .v-left { display: flex; align-items: center; gap: 14px; flex: 1; }
+    .play-btn {
+      width: 36px; height: 36px; border-radius: 12px;
+      background: rgba(255,255,255,0.1); border: none;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; cursor: pointer; transition: 0.2s;
     }
+    .play-btn:active { background: #fff; color: #000; }
+    .play-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
-    .voiceList{
-      max-height: 55vh;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width:none;
-    }
-    .voiceList::-webkit-scrollbar{ display:none; }
+    .v-details { display: flex; flex-direction: column; }
+    .v-name { font-weight: 700; font-size: 15px; color: #fff; }
+    .v-lang { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .voice-row{
-      padding:12px 12px;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      cursor:pointer;
-      user-select:none;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .voice-row.sel{ background:rgba(99,102,241,.16) }
-
-    .vLeft{ display:flex; flex-direction:column; gap:2px; }
-    .vName{ font-weight:900; }
-    .vMeta{ font-size:11px; opacity:.6; }
-
-    .vPlay{
-      width:42px; height:34px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:#fff;
-      font-weight:900;
-      cursor:pointer;
+    .save-btn {
+      margin-top: 20px; width: 100%; height: 56px; border-radius: 20px;
+      background: linear-gradient(135deg, var(--c-indigo), var(--c-pink));
+      border: none; color: #fff; font-weight: 700; font-size: 16px;
+      cursor: pointer; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
     }
   </style>
 </head>
 
 <body>
+  <div class="cosmos-bg">
+    <div class="glow-spot gs-1"></div>
+    <div class="glow-spot gs-2"></div>
+  </div>
+
   <div class="frame">
-
-    <div class="topbar">
-      <button class="back-btn" id="backBtn">←</button>
-
-      <div class="brand" id="homeBtn" title="Ana sayfa">
-        <div class="logo-line">
-          <span class="logo-main">italky</span><span class="logo-ai">AI</span>
-        </div>
-        <div class="logo-slogan">BE FREE</div>
+    <div class="nav-bar">
+      <div class="nav-btn" onclick="window.location.href='/pages/home.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </div>
-
-      <button class="voice-btn" id="openVoice">Ses</button>
+      <div class="nav-btn" id="settingsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </div>
     </div>
 
-    <div class="stage" id="stage">
-      <div class="aiWrap"><div class="aiCore"></div></div>
-      <div class="status" id="status">Hazır</div>
+    <div class="stage" id="aiStage">
+      <div class="ai-container">
+        <div class="ai-blob"></div>
+      </div>
+      <div class="status-text" id="statusText">Dinliyor...</div>
     </div>
 
     <div class="controls">
-      <button class="mic-btn" id="micBtn" aria-label="Mikrofon">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-          <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
-          <path d="M12 19v3"/>
-          <path d="M8 22h8"/>
-        </svg>
+      <button class="mic-btn" id="micToggle">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       </button>
     </div>
   </div>
 
-  <div class="modal" id="voiceModal" role="dialog" aria-modal="true">
-    <div class="sheet">
-      <div class="sheetHead">
-        <h3>Sesini Seç</h3>
-        <button class="xBtn" id="closeVoice" type="button">×</button>
+  <div class="modal-overlay" id="voiceModal">
+    <div class="voice-sheet">
+      <div class="vs-header">
+        <div class="vs-title">Asistan Sesi Seç</div>
+        <button class="vs-close" id="closeVoiceModal">✕</button>
       </div>
-      <div class="voiceList" id="voiceList"></div>
+      <div class="voice-list" id="voiceListContainer">
+        </div>
+      <button class="save-btn" id="saveVoiceBtn">Seçimi Kaydet</button>
     </div>
   </div>
 
-  <script type="module" src="/js/voice_ai_page.js?v=2"></script>
+  <script type="module" src="/js/voice_ai_page.js?v=3"></script>
 </body>
 </html>
