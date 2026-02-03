@@ -9,17 +9,16 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --frameW: min(480px, calc(100vw - 18px));
-      --topH: 76px;
-      --dockPad: 10px;
+      --topH: 64px;
+      --dockH: 74px;
+      --footerH: 74px;
 
-      /* ✅ daha dar footer */
-      --footerH: 64px;
-
+      --bg-void:#030014;
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.62);
       --border: rgba(255,255,255,.10);
@@ -27,8 +26,12 @@
       --neon-cyan:#00f3ff;
       --neon-purple:#bc13fe;
 
-      --burgundy: rgba(140, 18, 45, .55);
-      --burgundy2: rgba(140, 18, 45, .22);
+      --ai1:#A5B4FC;
+      --ai2:#4F46E5;
+      --be:#6B7280;
+
+      --burgundy: rgba(140, 18, 45, .42);
+      --burgundy2: rgba(140, 18, 45, .18);
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -37,7 +40,7 @@
       width:100%; height:100dvh;
       overflow:hidden;
       font-family:'Outfit', sans-serif;
-      background:#030014;
+      background: var(--bg-void);
       color:var(--text);
       display:flex;
       align-items:center;
@@ -46,14 +49,14 @@
     }
 
     /* background (home vibe) */
-    .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:#030014; z-index:0; pointer-events:none; }
-    .orb{ position:absolute; border-radius:50%; filter: blur(80px); opacity:.45; animation: floatOrbit 25s infinite alternate ease-in-out; }
-    .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
-    .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, var(--neon-cyan), transparent 70%); animation-delay:-5s; }
+    .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:var(--bg-void); z-index:0; pointer-events:none; }
+    .orb{ position:absolute; border-radius:50%; filter: blur(90px); opacity:.30; animation: floatOrbit 30s infinite alternate ease-in-out; }
+    .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, #4338ca, transparent 70%); }
+    .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, #5b21b6, transparent 70%); animation-delay:-5s; }
     @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1);} 100%{ transform: translate(10%,-10%) scale(1.1);} }
     .noise{
       position:absolute; inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
       pointer-events:none; mix-blend-mode:overlay; z-index:1;
     }
 
@@ -63,8 +66,8 @@
       height:100%;
       position:relative;
       z-index:10;
-      background: rgba(5,5,10,0.40);
-      backdrop-filter: blur(30px);
+      background: rgba(8, 8, 20, 0.65);
+      backdrop-filter: blur(25px);
       overflow:hidden;
       display:flex;
       flex-direction:column;
@@ -73,12 +76,12 @@
       .mobile-frame{
         height:92vh;
         border-radius:40px;
-        border:1px solid rgba(255,255,255,0.1);
-        box-shadow:0 40px 100px -20px rgba(0,0,0,0.8);
+        border:1px solid rgba(255,255,255,0.08);
+        box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
       }
     }
 
-    /* topbar */
+    /* topbar: sadece geri ok + kullanıcı adı/plan + avatar */
     .topbar{
       position: sticky;
       top: 0;
@@ -89,11 +92,10 @@
       justify-content:space-between;
       padding: 0 12px;
       border-bottom:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.35);
+      background: rgba(0,0,0,.28);
       backdrop-filter: blur(12px);
     }
 
-    .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
     .backBtn{
       width:44px;height:44px;border-radius:16px;
       border:1px solid rgba(255,255,255,.12);
@@ -104,44 +106,6 @@
       cursor:pointer;
     }
     .backBtn:active{ transform: scale(.96); }
-
-    /* ✅ Logo (KİLİTLİ) */
-    .brand-lock{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      user-select:none;
-      cursor:pointer;
-      gap:4px;
-      padding-top: 2px;
-    }
-    .logo-line{
-      font-family:'Space Grotesk', sans-serif;
-      font-size: 22px;
-      line-height: 1;
-      letter-spacing: -0.3px;
-      white-space:nowrap;
-    }
-    .logo-main{ color:#FFFFFF; font-weight:700; }
-    .logo-ai{
-      font-weight:700;
-      background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-left: 1px;
-    }
-    .be-free{
-      font-size: 10px;
-      font-weight: 800;
-      color: #6B7280; /* ✅ kilit */
-      letter-spacing: 8px;
-      text-transform: uppercase;
-      /* ✅ i altından başla, y’nin ortasında bitsin hissi: soldan başla + X daralt */
-      transform: scaleX(0.78);
-      transform-origin: left;
-      margin-left: 1px;
-      line-height: 1;
-    }
 
     .rightControls{
       display:flex;
@@ -155,10 +119,10 @@
       flex-direction:column;
       align-items:flex-end;
       gap:2px;
-      max-width: 200px;
+      max-width: 220px;
     }
     .uname{
-      font-weight: 950;
+      font-weight: 850;
       font-size: 12px;
       color: rgba(255,255,255,0.92);
       white-space:nowrap;
@@ -166,11 +130,12 @@
       text-overflow:ellipsis;
     }
     .plan{
-      font-weight: 900;
+      font-weight: 800;
       font-size: 11px;
-      color: rgba(255,255,255,0.60);
+      color: rgba(255,255,255,0.55);
       white-space:nowrap;
     }
+
     .avatar-btn{
       width: 42px; height: 42px;
       border:none; background:transparent;
@@ -184,33 +149,21 @@
     .avatar-fallback{
       width:42px; height:42px; border-radius:999px;
       display:flex; align-items:center; justify-content:center;
-      font-weight: 1000;
+      font-weight: 900;
       color: rgba(255,255,255,0.92);
       background: radial-gradient(circle at 30% 20%, rgba(0,243,255,.18), rgba(0,0,0,0));
-      filter: drop-shadow(0 0 10px rgba(0,243,255,.22));
+      border: 1px solid rgba(255,255,255,0.12);
+      filter: drop-shadow(0 0 10px rgba(0,243,255,.18));
       user-select:none;
     }
 
-    /* ✅ TTS (sesli okuma) butonu */
-    .ttsBtn{
-      width: 42px; height: 42px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-    }
-    .ttsBtn:active{ transform: scale(.96); }
-    .ttsBtn svg{ width:20px; height:20px; stroke:#fff; fill:none; stroke-width:2; opacity:.9; }
-    .ttsBtn.off{ opacity:.45; }
-
-    /* chat area (JS dinamik bottom veriyor) */
+    /* chat area: footer + dock çakışmasın */
     #chat.chat-area{
       position: absolute;
       left: 0; right: 0;
       top: var(--topH);
-      bottom: calc(var(--footerH) + 86px); /* fallback */
-      padding: 14px 14px;
+      bottom: calc(var(--dockH) + var(--footerH));
+      padding: 14px 12px;
 
       overflow-y:auto;
       -webkit-overflow-scrolling: touch;
@@ -225,11 +178,10 @@
       min-width:0;
     }
     #chat.chat-area::-webkit-scrollbar{ display:none; }
-    /* ✅ İlk mesaj “hemen input üstünden” başlasın */
-    #chat.chat-area::before{ content:""; flex: 1 0 auto; }
+    #chat.chat-area::before{ content:""; flex:1 0 auto; }
 
     .bubble{
-      max-width:78%; /* ✅ daralt */
+      max-width:85%;
       padding:10px 14px;
       border-radius:16px;
       font-size:14px;
@@ -241,56 +193,10 @@
       box-shadow: 0 12px 28px rgba(0,0,0,.22);
       backdrop-filter: blur(8px);
     }
-    .bubble.bot{
-      align-self:flex-start;
-      border-left:4px solid rgba(0,243,255,.55);
-    }
-    .bubble.user{
-      align-self:flex-end;
-      border-right:4px solid rgba(140,18,45,.65);
-      text-align:right;
-    }
+    .bubble.bot{ align-self:flex-start; border-left:4px solid rgba(0,243,255,.55); }
+    .bubble.user{ align-self:flex-end; border-right:4px solid rgba(140,18,45,.65); text-align:right; }
 
-    /* ✅ footer bar (alt linkler) */
-    .footerbar{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
-      bottom: 0;
-      height: var(--footerH);
-      z-index: 2400;
-      background: rgba(3, 0, 20, 0.92);
-      border-top: 1px solid rgba(255,255,255,.06);
-      backdrop-filter: blur(10px);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      padding: 8px 14px calc(8px + env(safe-area-inset-bottom));
-    }
-    .footer-links{
-      display:flex;
-      justify-content:center;
-      gap: 16px;
-      flex-wrap:wrap;
-      font-size:12px;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-    .footer-links a{
-      color: rgba(255,255,255,0.55);
-      text-decoration:none;
-    }
-    .footer-brand{
-      text-align:center;
-      font-size: 10px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.22);
-      letter-spacing: .4px;
-    }
-
-    /* ✅ dock: footer üstüne oturur */
+    /* dock (auto-grow) */
     .input-dock{
       position: fixed;
       left: 50%;
@@ -298,8 +204,8 @@
       width: var(--frameW);
       bottom: var(--footerH);
       z-index: 2600;
-      padding: var(--dockPad) 12px;
-      background: rgba(0,0,0,.35);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.40);
       border-top: 1px solid rgba(255,255,255,.08);
       backdrop-filter: blur(12px);
       pointer-events: none;
@@ -307,13 +213,13 @@
     .dock-inner{
       pointer-events:auto;
       width:100%;
-      min-height:52px;
+      min-height:54px;
       display:flex;
       align-items:flex-end;
       gap:8px;
       background: rgba(255,255,255,.04);
       border: 1px solid rgba(255,255,255,.10);
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 8px;
     }
     .icon-btn{
@@ -325,15 +231,7 @@
       cursor:pointer;
       flex-shrink:0;
     }
-    .icon-btn svg{
-      width:20px; height:20px;
-      stroke: rgba(255,255,255,.85);
-      fill:none;
-      stroke-width:2;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-      opacity:.95;
-    }
+    .icon-btn svg{ width:20px; height:20px; stroke: rgba(255,255,255,.85); fill:none; stroke-width:2; }
 
     #msgInput{
       flex: 1 1 auto;
@@ -364,13 +262,19 @@
     }
     .send-btn svg{ width:20px;height:20px; stroke:#fff; fill:none; stroke-width:2; }
 
+    #micBtn.listening{
+      border-color: rgba(190,242,100,.35) !important;
+      background: rgba(190,242,100,.12) !important;
+      box-shadow: 0 0 18px rgba(190,242,100,.18);
+    }
+
     /* plus sheet */
     .plus-sheet{
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       width: var(--frameW);
-      bottom: calc(var(--footerH) + 70px); /* dock üstü */
+      bottom: calc(var(--footerH) + var(--dockH) + 14px);
       z-index: 9999;
       display:none;
       gap:10px;
@@ -401,7 +305,6 @@
       font-size: 11px;
       text-align:center;
     }
-    .plus-action:active{ transform: translateY(-1px); }
     .plus-ico{
       width:40px;height:40px;border-radius:16px;
       display:flex; align-items:center; justify-content:center;
@@ -410,11 +313,29 @@
     }
     .plus-ico svg{ width:20px;height:20px; stroke: rgba(255,255,255,.85); fill:none; stroke-width:2; }
 
-    #micBtn.listening{
-      border-color: rgba(190,242,100,.35) !important;
-      background: rgba(190,242,100,.12) !important;
-      box-shadow: 0 0 18px rgba(190,242,100,.18);
+    /* footer (sabit, dar) */
+    .footerbar{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--frameW);
+      bottom: 0;
+      height: var(--footerH);
+      z-index: 2500;
+      background: rgba(3, 0, 20, 0.95);
+      border-top: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     }
+    .links{ display:flex; gap: 16px; justify-content:center; flex-wrap:wrap; }
+    .links a{ color: rgba(255,255,255,0.55); text-decoration:none; font-size: 12px; font-weight: 700; }
+    .footerBrand{ text-align:center; font-size: 10px; color: rgba(255,255,255,0.22); letter-spacing: .6px; font-weight: 700; }
+
   </style>
 </head>
 
@@ -428,28 +349,9 @@
   <div class="mobile-frame" id="mobileFrame">
 
     <div class="topbar">
-      <div class="leftControls">
-        <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
-
-        <!-- ✅ Yeni logo -->
-        <div class="brand-lock" id="logoHome" title="Ana sayfa">
-          <div class="logo-line">
-            <span class="logo-main">italky</span><span class="logo-ai">AI</span>
-          </div>
-          <div class="be-free">BE FREE</div>
-        </div>
-      </div>
+      <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
 
       <div class="rightControls">
-        <!-- ✅ ses toggle -->
-        <button class="ttsBtn" id="ttsBtn" aria-label="Sesli cevap">
-          <svg viewBox="0 0 24 24">
-            <path d="M11 5L6 9H3v6h3l5 4z"></path>
-            <path d="M15 9a4 4 0 0 1 0 6"></path>
-            <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
-          </svg>
-        </button>
-
         <div class="usertext">
           <div class="uname" id="userName">—</div>
           <div class="plan" id="userPlan">FREE</div>
@@ -463,8 +365,7 @@
 
     <div class="chat-area" id="chat"></div>
 
-    <!-- ✅ Dock -->
-    <div class="input-dock" id="inputDock">
+    <div class="input-dock">
       <div class="dock-inner">
         <button class="icon-btn" id="camBtn" aria-label="Dosya / Fotoğraf">
           <svg viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
@@ -477,7 +378,7 @@
         <textarea id="msgInput" rows="1" placeholder="Sohbet AI… yaz bakalım." spellcheck="false"></textarea>
 
         <button class="icon-btn" id="micBtn" aria-label="Mikrofon">
-          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+          <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
         </button>
 
         <button class="send-btn" id="sendBtn" aria-label="Gönder">
@@ -487,31 +388,21 @@
     </div>
 
     <div class="plus-sheet" id="plusSheet">
-      <div class="plus-action" id="pickCamera">
-        <div class="plus-ico"><svg viewBox="0 0 24 24"><path d="M4 7h4l2-2h4l2 2h4v12H4z"></path><circle cx="12" cy="13" r="3"></circle></svg></div>
-        Kamera
-      </div>
-      <div class="plus-action" id="pickPhotos">
-        <div class="plus-ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M8 14l2-2 3 3 3-4 2 3"></path></svg></div>
-        Fotoğraf
-      </div>
-      <div class="plus-action" id="pickFiles">
-        <div class="plus-ico"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg></div>
-        Dosya
-      </div>
+      <div class="plus-action" id="pickCamera"><div class="plus-ico"><svg viewBox="0 0 24 24"><path d="M4 7h4l2-2h4l2 2h4v12H4z"></path><circle cx="12" cy="13" r="3"></circle></svg></div>Kamera</div>
+      <div class="plus-action" id="pickPhotos"><div class="plus-ico"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M8 14l2-2 3 3 3-4 2 3"></path></svg></div>Fotoğraf</div>
+      <div class="plus-action" id="pickFiles"><div class="plus-ico"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg></div>Dosya</div>
     </div>
 
-  </div>
-
-  <!-- ✅ Footer bar -->
-  <div class="footerbar" id="footerBar">
-    <div class="footer-links">
-      <a href="/pages/about.html">Hakkında</a>
-      <a href="/pages/faq.html">SSS</a>
-      <a href="/pages/privacy.html">Gizlilik</a>
-      <a href="/pages/contact.html">İletişim</a>
+    <div class="footerbar">
+      <div class="links">
+        <a href="/pages/about.html">Hakkında</a>
+        <a href="/pages/faq.html">SSS</a>
+        <a href="/pages/privacy.html">Gizlilik</a>
+        <a href="/pages/contact.html">İletişim</a>
+      </div>
+      <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
     </div>
-    <div class="footer-brand">italkyAI By Ozyigit’s 2026</div>
+
   </div>
 
   <script type="module" src="/js/italky_chat_page.js?v=2"></script>
