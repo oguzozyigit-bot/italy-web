@@ -28,30 +28,6 @@
 
     .wrap { width:100%; max-width:480px; height:100%; margin:0 auto; position:relative; z-index:10; display:flex; flex-direction:column; }
 
-    /* LOGO HEADER */
-    .game-logo-header {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding-top: 20px; margin-bottom: -10px; position: relative; z-index: 20;
-    }
-    .gl-icon {
-      font-size: 36px; margin-bottom: 2px;
-      filter: drop-shadow(0 0 5px var(--c-neon));
-      animation: pulseNeon 2s infinite alternate;
-    }
-    .gl-title {
-      font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 24px; letter-spacing: 1px;
-      background: linear-gradient(to right, var(--c-neon), var(--c-safe));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      text-transform: uppercase; line-height: 1;
-    }
-    .gl-sub {
-      font-size: 9px; letter-spacing: 4px; color: var(--c-safe); opacity: 0.8; margin-top: 4px; font-weight: 700;
-    }
-    @keyframes pulseNeon {
-      from { filter: drop-shadow(0 0 5px var(--c-neon)); transform: scale(1); }
-      to { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.05); }
-    }
-
     /* NAV & SCORE */
     .nav-layer { height:70px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; }
     .nav-btn { width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid var(--border); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; transition:0.2s; }
@@ -76,10 +52,26 @@
     .stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:5px; position:relative; }
 
     /* HANGMAN */
-    .hangman-draw { width: 120px; height: 120px; margin-bottom: 10px; filter: drop-shadow(0 0 8px var(--c-neon)); transition: 0.3s; }
+    .hangman-draw { width: 120px; height: 120px; margin-bottom: 5px; filter: drop-shadow(0 0 8px var(--c-neon)); transition: 0.3s; }
     .hangman-draw path, .hangman-draw line, .hangman-draw circle { fill: none; stroke: var(--c-neon); stroke-width: 4; stroke-linecap: round; opacity: 0; transition: opacity 0.3s; }
     .hangman-draw .base { stroke: #555; opacity: 1; }
     .stage.boss-mode .hangman-draw { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.1); }
+
+    /* LOGO (DAR AĞACI ALTI) */
+    .stage-logo {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 15px; opacity: 0.9;
+    }
+    .sl-icon { font-size: 24px; filter: drop-shadow(0 0 5px var(--c-neon)); animation: pulseNeon 2s infinite alternate; }
+    .sl-text {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 2px;
+      background: linear-gradient(to right, var(--c-neon), var(--c-safe));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    @keyframes pulseNeon {
+      from { filter: drop-shadow(0 0 5px var(--c-neon)); transform: scale(1); }
+      to { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.1); }
+    }
 
     /* WORD */
     .word-container { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; max-width: 95%; }
@@ -142,12 +134,7 @@
   <canvas id="effectCanvas"></canvas>
 
   <div class="wrap">
-    <div class="game-logo-header">
-      <div class="gl-icon">☠️</div>
-      <div class="gl-title">NEON HANGMAN</div>
-      <div class="gl-sub">CYBER ARENA</div>
-    </div>
-
+    
     <div class="nav-layer">
       <button class="nav-btn" onclick="location.href='/pages/game.html'">←</button>
       <div class="score-panel">
@@ -166,6 +153,11 @@
         <line x1="10" y1="95" x2="90" y2="95" class="base" />
         <line x1="50" y1="95" x2="50" y2="5" class="part p1" /> <line x1="50" y1="5" x2="80" y2="5" class="part p2" /> <line x1="80" y1="5" x2="80" y2="20" class="part p3" /> <circle cx="80" cy="30" r="10" class="part p4" /> <line x1="80" y1="40" x2="80" y2="70" class="part p5" /> <line x1="80" y1="50" x2="65" y2="60" class="part p6" /> <line x1="80" y1="50" x2="95" y2="60" class="part p7" /> <line x1="80" y1="70" x2="65" y2="85" class="part p8" /> <line x1="80" y1="70" x2="95" y2="85" class="part p9" /> 
       </svg>
+
+      <div class="stage-logo">
+        <div class="sl-icon">☠️</div>
+        <div class="sl-text">NEON HANGMAN</div>
+      </div>
 
       <div class="hint-box" id="hintBox">...</div>
 
@@ -306,7 +298,6 @@ function safeJsonArray(text){
 
 // KARAKTER DÖNÜŞÜMÜ (Multilang için)
 function normalizeChar(char) {
-  // Aksanlı karakterleri normale çevir (Örn: é -> E, Ü -> U)
   return char.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 }
 
@@ -341,7 +332,6 @@ async function fetchWords() {
     startLevel();
 
   } catch (err) {
-    // Yedek Veri (Dile göre)
     if(currentLang === 'en') wordList = [["Galaxy", "Galaksi", "Space is big."], ["Planet", "Gezegen", "Earth is blue."]];
     else wordList = [["Hallo", "Merhaba", "Hallo welt."], ["Auto", "Araba", "Das auto ist schnell."]];
     
@@ -370,7 +360,7 @@ function startLevel() {
     $("hintBox").textContent = trMean;
   }
 
-  // Kelimeyi Normalize Et (Özel karakterleri temizle)
+  // Kelimeyi Normalize Et
   currentWord = normalizeChar(wordList[currentIndex][0]); 
   
   mistakes = 0;
@@ -417,7 +407,6 @@ function generateKeyboard() {
   const onlyLetters = currentWord.replace(/[^A-Z]/g, "");
   const poolSet = new Set(onlyLetters.split(""));
   
-  // Distractor harfler (Dile özgü olabilir ama şimdilik standart)
   const common = "ETAOINSHRDLUCMPFGYWBVKXJQZ"; 
   let totalKeys = (difficulty === 'B2') ? 18 : 14;
 
@@ -455,6 +444,7 @@ function handleGuess(char, btn) {
     const allFound = discovered.every(Boolean);
     if(allFound) {
       SFX.win();
+      
       const basePoints = (currentMaxErrors - mistakes) * 10;
       const streakBonus = (streak + 1) * 5; 
       const roundScore = Math.floor((basePoints + streakBonus) * scoreMultiplier);
@@ -469,7 +459,10 @@ function handleGuess(char, btn) {
     }
   } else {
     btn.classList.add("wrong");
-    mistakes++;
+    
+    if(difficulty === 'A2') mistakes += 0.5; 
+    else mistakes += 1;
+
     renderHangman();
     
     if(streak > 0) {
@@ -492,7 +485,7 @@ function handleGuess(char, btn) {
 }
 
 window.usePowerUp = () => {
-  if(isBossRound) return;
+  if(isBossRound) return; 
   if(powerups <= 0) return;
   
   let hiddenIndices = [];
@@ -504,6 +497,7 @@ window.usePowerUp = () => {
   
   SFX.click();
   powerups--;
+  if(streak > 0) streak = Math.max(0, streak - 1);
   
   const rndIdx = hiddenIndices[Math.floor(Math.random() * hiddenIndices.length)];
   const charToReveal = currentWord[rndIdx];
@@ -514,7 +508,7 @@ window.usePowerUp = () => {
   
   const btn = $(`key-${charToReveal}`);
   if(btn) {
-    btn.classList.remove("wrong");
+    btn.classList.remove("wrong"); 
     btn.classList.add("used", "correct");
   }
   
@@ -523,7 +517,16 @@ window.usePowerUp = () => {
   
   const allFound = discovered.every(Boolean);
   if(allFound) {
-    setTimeout(() => { SFX.win(); score += 10; currentIndex++; startLevel(); }, 1000);
+    setTimeout(() => {
+        SFX.win();
+        const basePoints = (currentMaxErrors - Math.floor(mistakes)) * 10;
+        const roundScore = Math.floor(basePoints * 0.6); 
+        score += roundScore;
+        updateScoreUI();
+        
+        currentIndex++;
+        startLevel();
+    }, 1000);
   }
 }
 
@@ -547,6 +550,10 @@ function updateScoreUI() {
 function teacherSolve() {
   try{ window.speechSynthesis.cancel(); }catch{} 
 
+  // Ceza Puanı
+  score = Math.max(0, score - 5);
+  updateScoreUI();
+
   const slots = document.querySelectorAll(".letter-slot");
   for(let i=0; i<currentWord.length; i++) {
     if(!discovered[i]) {
@@ -557,10 +564,10 @@ function teacherSolve() {
   
   const w = wordList[currentIndex]; 
   const spelled = currentWord.split("").join("-");
-  const lessonText = `${w[0]}. ${w[2]}`; // Sadece kelime ve cümle oku
+  const lessonText = `${w[0]}. ${w[2]}`; 
   
   const u = new SpeechSynthesisUtterance(lessonText);
-  u.lang = LANG_CONFIG[currentLang].code; // Seçilen dilin aksanı
+  u.lang = LANG_CONFIG[currentLang].code; 
   u.rate = 0.85; 
   
   const goNext = () => { setTimeout(() => { currentIndex++; startLevel(); }, 1000); };
