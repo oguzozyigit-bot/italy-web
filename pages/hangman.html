@@ -28,8 +28,32 @@
 
     .wrap { width:100%; max-width:480px; height:100%; margin:0 auto; position:relative; z-index:10; display:flex; flex-direction:column; }
 
+    /* --- YENİ LOGO ALANI --- */
+    .game-logo-header {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding-top: 25px; margin-bottom: -10px; position: relative; z-index: 20;
+    }
+    .gl-icon {
+      font-size: 42px; margin-bottom: 5px;
+      filter: drop-shadow(0 0 5px var(--c-neon));
+      animation: pulseNeon 2s infinite alternate;
+    }
+    .gl-title {
+      font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 1px;
+      background: linear-gradient(to right, var(--c-neon), var(--c-safe));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-transform: uppercase; line-height: 1;
+    }
+    .gl-sub {
+      font-size: 10px; letter-spacing: 4px; color: var(--c-safe); opacity: 0.8; margin-top: 5px; font-weight: 700;
+    }
+    @keyframes pulseNeon {
+      from { filter: drop-shadow(0 0 5px var(--c-neon)); transform: scale(1); }
+      to { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.05); }
+    }
+
     /* NAV & SCORE */
-    .nav-layer { height:80px; padding:12px; display:flex; justify-content:space-between; align-items:center; }
+    .nav-layer { height:70px; padding:12px; display:flex; justify-content:space-between; align-items:center; }
     .nav-btn { width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid var(--border); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; transition:0.2s; }
     .nav-btn:active { transform:scale(0.95); }
     
@@ -49,39 +73,39 @@
     .power-btn.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(1); border-color: #555; }
 
     /* STAGE */
-    .stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:10px; position:relative; }
+    .stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:5px; position:relative; }
 
     /* HANGMAN */
-    .hangman-draw { width: 130px; height: 130px; margin-bottom: 15px; filter: drop-shadow(0 0 8px var(--c-neon)); transition: 0.3s; }
+    .hangman-draw { width: 120px; height: 120px; margin-bottom: 10px; filter: drop-shadow(0 0 8px var(--c-neon)); transition: 0.3s; }
     .hangman-draw path, .hangman-draw line, .hangman-draw circle { fill: none; stroke: var(--c-neon); stroke-width: 4; stroke-linecap: round; opacity: 0; transition: opacity 0.3s; }
     .hangman-draw .base { stroke: #555; opacity: 1; }
     .stage.boss-mode .hangman-draw { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.1); }
 
     /* WORD */
-    .word-container { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; max-width: 90%; }
+    .word-container { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; max-width: 95%; }
     .letter-slot { 
-      width: 34px; height: 44px; border-bottom: 3px solid rgba(255,255,255,0.3); 
-      font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 800; 
-      text-align: center; line-height: 44px; text-transform: uppercase; color: #fff; transition: 0.2s;
+      width: 32px; height: 42px; border-bottom: 3px solid rgba(255,255,255,0.3); 
+      font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 800; 
+      text-align: center; line-height: 42px; text-transform: uppercase; color: #fff; transition: 0.2s;
     }
     .letter-slot.filled { border-bottom-color: var(--c-safe); color: var(--c-safe); animation: popIn 0.3s; text-shadow: 0 0 10px var(--c-safe); }
     .letter-slot.missed { border-bottom-color: var(--c-neon); color: var(--c-neon); animation: shake 0.4s; }
 
-    .hint-box { font-size: 16px; color: rgba(255,255,255,0.8); font-weight: 600; background: rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--border); text-align: center; max-width: 90%; transition: color 0.3s; }
+    .hint-box { font-size: 15px; color: rgba(255,255,255,0.8); font-weight: 600; background: rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 20px; margin-bottom: 15px; border: 1px solid var(--border); text-align: center; max-width: 95%; transition: color 0.3s; }
     .hint-box.alert { color: var(--c-neon) !important; animation: shake 0.4s; }
 
     /* KEYBOARD */
-    .keyboard-area { padding: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; max-width: 420px; margin: 0 auto 20px; }
+    .keyboard-area { padding: 5px 10px 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 420px; margin: 0 auto; }
     .key-btn { 
-      width: 40px; height: 48px; border-radius: 10px; background: rgba(255,255,255,0.1); 
+      width: 38px; height: 46px; border-radius: 10px; background: rgba(255,255,255,0.1); 
       border: 1px solid var(--border); color: #fff; font-size: 18px; font-weight: 700; 
       cursor: pointer; display: flex; align-items: center; justify-content: center; 
-      transition: 0.1s; box-shadow: 0 4px 0 rgba(0,0,0,0.3); 
+      transition: 0.1s; box-shadow: 0 3px 0 rgba(0,0,0,0.3); 
     }
-    .key-btn:active { transform: translateY(4px); box-shadow: none; }
-    .key-btn.used { opacity: 0.2; pointer-events: none; background: #000; border-color: transparent; box-shadow: none; transform: translateY(4px); }
-    .key-btn.wrong { background: var(--c-neon); border-color: var(--c-neon); box-shadow: 0 0 15px var(--c-neon); opacity: 0.8; }
-    .key-btn.correct { background: var(--c-safe); border-color: var(--c-safe); color: #000; box-shadow: 0 0 15px var(--c-safe); }
+    .key-btn:active { transform: translateY(3px); box-shadow: none; }
+    .key-btn.used { opacity: 0.2; pointer-events: none; background: #000; border-color: transparent; box-shadow: none; transform: translateY(3px); }
+    .key-btn.wrong { background: var(--c-neon); border-color: var(--c-neon); box-shadow: 0 0 10px var(--c-neon); opacity: 0.8; }
+    .key-btn.correct { background: var(--c-safe); border-color: var(--c-safe); color: #000; box-shadow: 0 0 10px var(--c-safe); }
 
     /* MODAL */
     .modal-wrap { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(20px); }
@@ -110,6 +134,12 @@
   <canvas id="effectCanvas"></canvas>
 
   <div class="wrap">
+    <div class="game-logo-header">
+      <div class="gl-icon">☠️</div>
+      <div class="gl-title">NEON HANGMAN</div>
+      <div class="gl-sub">CYBER ARENA</div>
+    </div>
+
     <div class="nav-layer">
       <button class="nav-btn" onclick="location.href='/pages/game.html'">←</button>
       <div class="score-panel">
@@ -371,29 +401,7 @@ function handleGuess(char, btn) {
       if(currentWord[i] === char) discovered[i] = true;
     }
     renderWord();
-    
-    // Kazanma Kontrolü
-    const allFound = discovered.every(Boolean);
-    if(allFound) {
-      SFX.win();
-      
-      const basePoints = (currentMaxErrors - mistakes) * 10;
-      const streakBonus = (streak + 1) * 5; // Fix: Mevcut streak'i ödüllendir
-      const roundScore = Math.floor((basePoints + streakBonus) * scoreMultiplier);
-      
-      score += roundScore;
-      streak++;
-      
-      if(streak % 3 === 0) powerups++; // Her 3 streakte joker
-      
-      updateScoreUI();
-      if(streak > 1) startConfetti();
-
-      setTimeout(() => {
-        currentIndex++;
-        startLevel();
-      }, 1500);
-    }
+    checkWin();
   } else {
     // Yanlış
     btn.classList.add("wrong");
@@ -452,18 +460,31 @@ window.usePowerUp = () => {
   
   renderWord();
   updateScoreUI();
-  
-  // Jokerle kazanılırsa
+  checkWin();
+}
+
+function checkWin() {
   const allFound = discovered.every(Boolean);
   if(allFound) {
+    SFX.win();
+    
+    const basePoints = (currentMaxErrors - mistakes) * 10;
+    const streakBonus = (streak + 1) * 5; // Mevcut streak ödülü
+    const roundScore = Math.floor((basePoints + streakBonus) * scoreMultiplier);
+    
+    score += roundScore;
+    streak++;
+    
+    // Her 3 Streak'te +1 Joker
+    if(streak % 3 === 0) powerups++;
+    
+    updateScoreUI();
+    if(streak > 1) startConfetti();
+
     setTimeout(() => {
-        // handleGuess içindeki kazanma mantığını manuel tetiklemiyoruz,
-        // sadece bir sonraki tura geçişi sağlıyoruz
-        SFX.win();
-        score += 10; // Jokerle kazanmak daha az puan
-        currentIndex++;
-        startLevel();
-    }, 1000);
+      currentIndex++;
+      startLevel();
+    }, 1500);
   }
 }
 
@@ -519,7 +540,7 @@ $("btnPowerUp").addEventListener("click", () => window.usePowerUp());
 // KONFETİ
 let fwInterval=null; const cvs=$("effectCanvas"), ctx=cvs.getContext("2d"); let particles=[];
 function startConfetti(){
-  particles = [];
+  particles = []; // Temizle
   cvs.style.display="block"; cvs.width=window.innerWidth; cvs.height=window.innerHeight;
   for(let i=0;i<30;i++){
     particles.push({x:cvs.width/2, y:cvs.height/2, vx:(Math.random()-.5)*15, vy:(Math.random()-.5)*15, color:`hsl(${Math.random()*360},100%,50%)`, life:50});
