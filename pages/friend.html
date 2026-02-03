@@ -1,843 +1,536 @@
-<!-- FILE: italky-web/pages/duo.html -->
 <!doctype html>
 <html lang="tr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-  <title>ITALKY • Duo Practice</title>
+  <title>ITALKY • Duo Battle</title>
   <link rel="icon" href="data:,"/>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
   <style>
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;height:100dvh;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial}
-    body{background:#070812;color:#fff}
-
-    .wrap{width:100%;max-width:480px;height:100%;margin:0 auto;position:relative}
-
-    .back{
-      position:absolute;top:12px;left:12px;z-index:30;
-      width:46px;height:46px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.35);color:#fff;
-      font-size:22px;font-weight:1000;
-      display:flex;align-items:center;justify-content:center;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 40px rgba(0,0,0,.45);
-      user-select:none; cursor:pointer;
-    }
-    .back:active{transform:translateY(1px)}
-
-    .pill{
-      position:absolute; top:12px; right:12px; z-index:30;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.35);
-      font-weight:950;
-      font-size:12px;
-      backdrop-filter: blur(10px);
-      box-shadow:0 18px 40px rgba(0,0,0,.35);
-      max-width:62vw;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:ellipsis;
-      user-select:none;
-      cursor:pointer;
+    /* --- TEMEL AYARLAR --- */
+    :root {
+      --bg-deep: #020205; 
+      --text-main: #ffffff;
+      --c-cyan: #00f3ff;
+      --c-pink: #ff00aa;
+      --c-green: #beF264;
+      --c-red: #ff5252;
+      --glass: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1);
     }
 
-    .grid{
-      position:absolute; inset:0;
-      display:grid;
-      grid-template-rows: 1fr 86px 1fr;
-      gap:10px;
-      padding:70px 12px 14px;
-    }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; user-select:none; }
+    html, body { margin:0; height:100dvh; overflow:hidden; font-family:'Outfit', sans-serif; background:var(--bg-deep); color:var(--text-main); }
 
-    .pane{
-      border-radius:26px;
-      border:1px solid rgba(255,255,255,.12);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      box-shadow:0 28px 90px rgba(0,0,0,.6);
-      backdrop-filter: blur(10px);
-      position:relative;
-    }
+    /* --- ATMOSFER --- */
+    .cosmos-bg { position:absolute; inset:0; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); z-index:0; }
+    .star-dust { position: absolute; inset: 0; opacity: 0.4; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 50px 50px; animation: dustMove 100s linear infinite; }
+    @keyframes dustMove { from { transform: translateY(0); } to { transform: translateY(-500px); } }
 
-    .top{
-      background:
-        radial-gradient(900px 360px at 20% 0%, rgba(40,120,255,.22), transparent 62%),
-        rgba(0,0,0,.18);
-      transform: rotate(180deg);
-    }
+    .wrap { width:100%; max-width:480px; height:100%; margin:0 auto; position:relative; z-index:10; display:flex; flex-direction:column; }
 
-    .bottom{
-      background:
-        radial-gradient(900px 360px at 20% 0%, rgba(120,20,35,.72), transparent 64%),
-        rgba(0,0,0,.18);
-    }
+    /* --- NAVIGATION --- */
+    .nav-layer { position:absolute; top:0; left:0; width:100%; height:70px; z-index:50; display:flex; justify-content:space-between; padding:12px; pointer-events:none; }
+    .nav-btn { pointer-events:auto; height:44px; padding:0 16px; border-radius:14px; background:rgba(0,0,0,0.4); border:1px solid var(--border); color:#fff; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px); cursor:pointer; font-weight:700; font-size:14px; gap:6px; box-shadow:0 10px 30px rgba(0,0,0,0.3); transition:0.2s; }
+    .nav-btn:active { transform:scale(0.95); }
+    .back-btn { width:44px; padding:0; font-size:20px; }
 
-    .bar{
-      padding:12px;
-      border-bottom:1px solid rgba(255,255,255,.10);
-      display:flex; justify-content:space-between; align-items:center;
-      background:rgba(0,0,0,.18);
-      font-weight:1000;
-      gap:10px;
-    }
-    .name{opacity:.95; font-weight:1000}
-    .score{opacity:.85; font-weight:1000}
+    /* --- GRID LAYOUT --- */
+    .grid { flex:1; display:grid; grid-template-rows: 1fr 80px 1fr; gap:12px; padding:70px 12px 20px; }
 
-    .progressWrap{ padding: 10px 12px 0; }
-    .progress{
-      height:8px;border-radius:999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.10);
-      overflow:hidden;
+    /* --- OYUNCU KARTLARI --- */
+    .pane {
+      position:relative; border-radius:24px; border:1px solid var(--border);
+      background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(0,0,0,0.4));
+      backdrop-filter:blur(10px);
+      display:flex; flex-direction:column; overflow:hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    .progress > div{
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(190,242,100,.95), rgba(255,179,0,.85));
-      transition: width .25s ease;
-    }
-    .pmeta{
-      margin-top:8px;
-      font-size:12px;
-      font-weight:950;
-      opacity:.78;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-    }
+    
+    /* Aktif Oyuncu Vurgusu */
+    .pane.active { border-color:var(--c-cyan); box-shadow: 0 0 30px rgba(0,243,255,0.15); }
+    
+    /* Üst Oyuncu (Ters Dönmüş - Yüz Yüze Oyun İçin) */
+    .pane.top { transform: rotate(180deg); }
 
-    .body{padding:16px;display:flex;flex-direction:column;gap:10px}
-    .word{font-size:30px;font-weight:1000;letter-spacing:.2px}
+    /* Header Bar */
+    .bar {
+      padding:12px 16px; background:rgba(0,0,0,0.3); border-bottom:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center; font-family:'Space Grotesk', sans-serif;
+    }
+    .p-name { font-weight:700; font-size:15px; letter-spacing:0.5px; opacity:0.9; }
+    .p-score { font-weight:700; color:var(--c-green); }
 
-    .meaning{
-      font-weight:950;
-      font-size:14px;
-      opacity:.90;
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    .meaning .tag{
-      font-size:11px;
-      font-weight:1000;
-      padding:4px 8px;
-      border-radius:999px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      opacity:.9;
-    }
+    /* Progress */
+    .prog-wrap { padding:12px 16px 0; }
+    .prog-track { height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; }
+    .prog-fill { height:100%; width:0%; background:var(--c-green); transition: width 0.3s ease; box-shadow:0 0 10px var(--c-green); }
+    .prog-meta { display:flex; justify-content:space-between; margin-top:6px; font-size:11px; opacity:0.6; font-weight:600; text-transform:uppercase; }
 
-    .hint{opacity:.82;font-weight:900;font-size:12px;line-height:1.35}
+    /* Kelime Alanı */
+    .body { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:6px; padding:10px; }
+    .word { font-size:32px; font-weight:800; color:#fff; font-family:'Space Grotesk', sans-serif; text-align:center; }
+    .meaning { font-size:16px; color:rgba(255,255,255,0.6); font-weight:500; }
+    .hint { font-size:12px; color:var(--c-cyan); font-weight:700; margin-top:8px; opacity:0; transition:0.3s; text-transform:uppercase; letter-spacing:1px; }
+    .pane.active .hint { opacity:1; }
 
-    .btnrow{
-      padding:14px;
-      display:flex;
-      justify-content:center;
-      gap:10px;
+    /* Buton Alanı */
+    .actions { padding:16px; display:flex; justify-content:center; }
+    .mic-btn {
+      width:100%; padding:14px; border-radius:16px; border:1px solid var(--border);
+      background:rgba(255,255,255,0.05); color:#fff; font-weight:700; font-size:16px;
+      cursor:pointer; transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px;
     }
-    .btn{
-      border:none;
-      border-radius:18px;
-      padding:12px 14px;
-      font-weight:1000;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
-      color:#fff;
-      min-width:160px;
-      user-select:none;
-      cursor:pointer;
-      box-shadow: 0 14px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.14);
+    .pane.active .mic-btn {
+      background: linear-gradient(135deg, var(--c-cyan), #0066ff); border:none;
+      box-shadow: 0 10px 30px rgba(0,243,255,0.3);
     }
-    .btn.primary{
-      background:rgba(190,242,100,.16);
-      border-color:rgba(190,242,100,.28);
-      box-shadow: 0 14px 30px rgba(190,242,100,.10), inset 0 1px 0 rgba(255,255,255,.14);
-    }
-    .btn:active{transform:translateY(1px)}
-    .btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+    .mic-btn:disabled { opacity:0.3; cursor:not-allowed; transform:none !important; background:rgba(255,255,255,0.05) !important; box-shadow:none !important; }
+    .mic-btn:active { transform:scale(0.96); }
 
-    .wave{
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      position:relative;
-      overflow:hidden;
-      backdrop-filter: blur(10px);
-      box-shadow:0 22px 70px rgba(0,0,0,.55);
+    /* --- ORTA WAVE ALANI --- */
+    .wave-box {
+      border-radius:20px; background:rgba(0,0,0,0.6); border:1px solid var(--border);
+      backdrop-filter:blur(10px); display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:8px; position:relative; overflow:hidden;
     }
-    .wave .label{
-      font-weight:1000;
-      font-size:12px;
-      opacity:.86;
-      letter-spacing:.2px;
-      user-select:none;
-    }
-    .bars{display:flex;align-items:center;gap:6px;height:34px}
-    .barw{
-      width:6px;height:10px;border-radius:99px;
-      background: rgba(255,255,255,.22);
-      transform-origin:center;
-    }
-    .wave.teaching .barw{
-      background: rgba(190,242,100,.75);
-      box-shadow: 0 0 18px rgba(190,242,100,.18);
-      animation: w 650ms ease-in-out infinite;
-    }
-    .wave.teaching .barw:nth-child(2){animation-delay:.06s}
-    .wave.teaching .barw:nth-child(3){animation-delay:.12s}
-    .wave.teaching .barw:nth-child(4){animation-delay:.18s}
-    .wave.teaching .barw:nth-child(5){animation-delay:.24s}
-    .wave.teaching .barw:nth-child(6){animation-delay:.30s}
-    .wave.teaching .barw:nth-child(7){animation-delay:.36s}
-    .wave.listening .barw{
-      background: rgba(190,242,100,.55);
-      animation: w 560ms ease-in-out infinite;
-    }
-    @keyframes w{
-      0%{ height:10px; opacity:.55 }
-      45%{ height:34px; opacity:1 }
-      100%{ height:12px; opacity:.65 }
-    }
+    .wave-status { font-size:12px; font-weight:700; opacity:0.8; letter-spacing:1px; text-transform:uppercase; color:var(--c-cyan); }
+    
+    .bars { display:flex; gap:4px; height:24px; align-items:center; }
+    .b { width:4px; height:8px; background:rgba(255,255,255,0.3); border-radius:4px; transition:0.2s; }
+    
+    /* Animasyonlar */
+    .wave-box.speaking .b { background:var(--c-green); animation: bounce 0.6s infinite ease-in-out; }
+    .wave-box.listening .b { background:var(--c-cyan); animation: bounce 0.5s infinite ease-in-out; }
+    .wave-box.speaking .wave-status { color:var(--c-green); }
+    .wave-box.listening .wave-status { color:var(--c-cyan); }
 
-    .panel-overlay{
-      position:absolute; inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:25;
-      font-weight:1000;
-      text-align:center;
-      user-select:none;
-      backdrop-filter: blur(4px);
-    }
-    .panel-overlay.show{ display:flex; }
-    .panel-overlay.ok{
-      background: radial-gradient(900px 520px at 50% 30%, rgba(190,242,100,.40), rgba(0,0,0,.78));
-    }
-    .panel-overlay.bad{
-      background: radial-gradient(900px 520px at 50% 30%, rgba(255,82,82,.40), rgba(0,0,0,.82));
-    }
-    .panel-overlay .big{ font-size:92px; line-height:1; text-shadow:0 20px 80px rgba(0,0,0,.65); }
-    .panel-overlay .sub{
-      margin-top:14px;
-      font-size:14px;
-      font-weight:950;
-      opacity:.92;
-      padding:10px 14px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.28);
-      box-shadow: 0 18px 50px rgba(0,0,0,.45);
-      max-width:80%;
-    }
+    @keyframes bounce { 0%,100%{height:8px} 50%{height:24px} }
+    .b:nth-child(1){animation-delay:0s} .b:nth-child(2){animation-delay:0.1s} .b:nth-child(3){animation-delay:0.2s}
+    .b:nth-child(4){animation-delay:0.3s} .b:nth-child(5){animation-delay:0.4s}
 
-    /* Modal */
-    .modal{
-      position:absolute; inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:60;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(6px);
-      padding: 14px;
+    /* --- SONUÇ OVERLAY --- */
+    .result-overlay {
+      position:absolute; inset:0; z-index:20; background:rgba(0,0,0,0.8);
+      display:none; flex-direction:column; align-items:center; justify-content:center;
+      backdrop-filter:blur(5px); animation:fadeIn 0.3s;
     }
-    .modal.show{display:flex}
-    .mcard{
-      width: min(420px, 92vw);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(10,10,12,.88);
-      box-shadow: 0 30px 90px rgba(0,0,0,.7);
-      padding: 14px;
-    }
-    .mcard .h{ font-weight:1000; font-size:14px; margin-bottom:10px; }
-    .mcard .line{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:10px 12px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      font-weight:950;
-      margin-bottom:10px;
-    }
-    .mcard .btns{display:flex;gap:10px}
-    .mcard button{
-      flex:1;
-      padding:12px 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color:#fff;
-      font-weight:1000;
-      cursor:pointer;
-    }
-    .mcard button.primary{
-      background: rgba(190,242,100,.16);
-      border-color: rgba(190,242,100,.28);
-      color:#fff;
-    }
-    .mcard button:active{transform:translateY(1px)}
+    .result-overlay.show { display:flex; }
+    .res-icon { font-size:64px; margin-bottom:10px; animation:popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .res-text { font-size:18px; font-weight:800; font-family:'Space Grotesk', sans-serif; text-transform:uppercase; letter-spacing:2px; }
+    .ok .res-text { color:var(--c-green); }
+    .bad .res-text { color:var(--c-red); }
 
-    .lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .lang-btn{
-      padding:12px 12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      font-weight:1000;
-      text-align:center;
-      cursor:pointer;
-      user-select:none;
+    @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    /* --- BAŞLANGIÇ & MODALLER --- */
+    .modal-wrap {
+      position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:999;
+      display:flex; align-items:center; justify-content:center; backdrop-filter:blur(15px);
     }
-    .lang-btn:active{transform:translateY(1px)}
+    .modal-card {
+      width:85%; background:#101014; border:1px solid var(--border); border-radius:24px; padding:24px;
+      text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.8); animation: popIn 0.5s;
+    }
+    .modal-title { font-size:20px; font-weight:800; margin-bottom:16px; font-family:'Space Grotesk', sans-serif; }
+    .modal-p { font-size:14px; opacity:0.7; margin-bottom:24px; line-height:1.5; }
+    
+    .btn-primary {
+      width:100%; padding:16px; border-radius:16px; border:none;
+      background:linear-gradient(135deg, var(--c-cyan), #0066ff); color:#fff;
+      font-weight:800; font-size:16px; cursor:pointer; box-shadow:0 10px 30px rgba(0,100,255,0.3);
+    }
+    .btn-sec { background:rgba(255,255,255,0.1); margin-top:10px; color:#fff; }
+
+    /* Dil Seçimi Grid */
+    .lang-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .lang-opt { padding:14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:14px; font-weight:700; cursor:pointer; transition:0.2s; }
+    .lang-opt:hover { background:rgba(255,255,255,0.1); border-color:var(--c-cyan); }
+
   </style>
 </head>
-
 <body>
-<div class="wrap">
-  <button class="back" id="backBtn">←</button>
-  <div class="pill" id="langPill">🌍 Language</div>
 
-  <div class="grid">
-    <section class="pane top" id="paneB">
-      <div class="bar">
-        <div class="name" id="nameB">Student B</div>
-        <div class="score" id="scoreB">Set: 0</div>
-      </div>
+  <div class="cosmos-bg"><div class="star-dust"></div></div>
 
-      <div class="progressWrap">
-        <div class="progress"><div id="fillB"></div></div>
-        <div class="pmeta"><span id="corrB">Correct: 0/20</span><span id="turnB">—</span></div>
-      </div>
-
-      <div class="body">
-        <div class="word" id="wordB">—</div>
-        <div class="meaning"><span class="tag" id="tagB">Turkish</span> <span id="meaningB">—</span></div>
-        <div class="hint" id="hintB">Not your turn.</div>
-      </div>
-      <div class="btnrow">
-        <button class="btn primary" id="micB">Speak</button>
-      </div>
-
-      <div class="panel-overlay" id="overlayB">
-        <div>
-          <div class="big" id="overlayIcoB">✅</div>
-          <div class="sub" id="overlayTxtB">Great!</div>
-        </div>
-      </div>
-    </section>
-
-    <div class="wave" id="waveBox">
-      <div class="label" id="waveLabel">Teacher is reading…</div>
-      <div class="bars" aria-hidden="true">
-        <div class="barw"></div><div class="barw"></div><div class="barw"></div><div class="barw"></div>
-        <div class="barw"></div><div class="barw"></div><div class="barw"></div>
-      </div>
+  <div class="wrap">
+    <div class="nav-layer">
+      <button class="nav-btn back-btn" id="backBtn">←</button>
+      <button class="nav-btn" id="langBtn">🌍 Dil Seç</button>
     </div>
 
-    <section class="pane bottom" id="paneA">
-      <div class="bar">
-        <div class="name" id="nameA">Student A</div>
-        <div class="score" id="scoreA">Set: 0</div>
-      </div>
+    <div class="grid">
+      
+      <section class="pane top" id="paneB">
+        <div class="bar">
+          <div class="p-name">OYUNCU B</div>
+          <div class="p-score" id="scoreB">Set: 0</div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-track"><div class="prog-fill" id="fillB"></div></div>
+          <div class="prog-meta"><span id="corrB">0/20 Doğru</span><span id="turnB">Bekliyor</span></div>
+        </div>
+        <div class="body">
+          <div class="word" id="wordB">---</div>
+          <div class="meaning" id="meanB">---</div>
+          <div class="hint">SENİN SIRAN</div>
+        </div>
+        <div class="actions">
+          <button class="mic-btn" id="micB" disabled>🎙️ Konuş</button>
+        </div>
+        <div class="result-overlay" id="ovB">
+          <div class="res-icon" id="iconB">✅</div>
+          <div class="res-text" id="textB">MÜKEMMEL</div>
+        </div>
+      </section>
 
-      <div class="progressWrap">
-        <div class="progress"><div id="fillA"></div></div>
-        <div class="pmeta"><span id="corrA">Correct: 0/20</span><span id="turnA">—</span></div>
-      </div>
-
-      <div class="body">
-        <div class="word" id="wordA">—</div>
-        <div class="meaning"><span class="tag" id="tagA">Turkish</span> <span id="meaningA">—</span></div>
-        <div class="hint" id="hintA">Your turn. One try.</div>
-      </div>
-      <div class="btnrow">
-        <button class="btn primary" id="micA">Speak</button>
-      </div>
-
-      <div class="panel-overlay" id="overlayA">
-        <div>
-          <div class="big" id="overlayIcoA">✅</div>
-          <div class="sub" id="overlayTxtA">Great!</div>
+      <div class="wave-box" id="waveBox">
+        <div class="wave-status" id="waveStatus">HAZIR</div>
+        <div class="bars">
+          <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
         </div>
       </div>
-    </section>
-  </div>
 
-  <!-- Final modal -->
-  <div class="modal" id="finalModal">
-    <div class="mcard">
-      <div class="h">20 words done. Go to the next stage?</div>
-      <div class="line"><span>Student A</span><span id="finalA">Set: 0</span></div>
-      <div class="line"><span>Student B</span><span id="finalB">Set: 0</span></div>
-      <div class="btns">
-        <button class="primary" id="yesBtn">Yes</button>
-        <button id="noBtn">No</button>
-      </div>
+      <section class="pane" id="paneA">
+        <div class="bar">
+          <div class="p-name">OYUNCU A</div>
+          <div class="p-score" id="scoreA">Set: 0</div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-track"><div class="prog-fill" id="fillA"></div></div>
+          <div class="prog-meta"><span id="corrA">0/20 Doğru</span><span id="turnA">Bekliyor</span></div>
+        </div>
+        <div class="body">
+          <div class="word" id="wordA">---</div>
+          <div class="meaning" id="meanA">---</div>
+          <div class="hint">SENİN SIRAN</div>
+        </div>
+        <div class="actions">
+          <button class="mic-btn" id="micA" disabled>🎙️ Konuş</button>
+        </div>
+        <div class="result-overlay" id="ovA">
+          <div class="res-icon" id="iconA">✅</div>
+          <div class="res-text" id="textA">MÜKEMMEL</div>
+        </div>
+      </section>
+
     </div>
   </div>
 
-  <!-- Language modal -->
-  <div class="modal" id="langModal">
-    <div class="mcard">
-      <div class="h">Select language</div>
+  <div class="modal-wrap" id="startModal">
+    <div class="modal-card">
+      <div class="modal-title">DUO BATTLE 🥊</div>
+      <div class="modal-p">
+        Telefonu iki kişinin arasına koyun.<br>
+        Sırayla kelimeleri okuyun.<br>
+        En iyi telaffuz eden kazanır!
+      </div>
+      <button class="btn-primary" id="startBtn">BAŞLA</button>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="langModal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-title">Dil Seçimi</div>
       <div class="lang-grid">
-        <div class="lang-btn" data-lang="en">🇬🇧 English</div>
-        <div class="lang-btn" data-lang="de">🇩🇪 Deutsch</div>
-        <div class="lang-btn" data-lang="fr">🇫🇷 Français</div>
-        <div class="lang-btn" data-lang="it">🇮🇹 Italiano</div>
+        <div class="lang-opt" data-lang="en">🇬🇧 İngilizce</div>
+        <div class="lang-opt" data-lang="de">🇩🇪 Almanca</div>
+        <div class="lang-opt" data-lang="fr">🇫🇷 Fransızca</div>
+        <div class="lang-opt" data-lang="it">🇮🇹 İtalyanca</div>
       </div>
-      <div style="height:10px"></div>
-      <div class="btns">
-        <button class="primary" id="closeLang">Close</button>
-      </div>
+      <button class="btn-primary btn-sec" id="closeLang">Kapat</button>
     </div>
   </div>
-</div>
+
+  <div class="modal-wrap" id="endModal" style="display:none">
+    <div class="modal-card">
+      <div class="modal-title">OYUN BİTTİ! 🎉</div>
+      <div class="modal-p" id="endResult">Sonuçlar yükleniyor...</div>
+      <button class="btn-primary" id="restartBtn">YENİ MAÇ</button>
+      <button class="btn-primary btn-sec" onclick="location.href='/pages/home.html'">ÇIKIŞ</button>
+    </div>
+  </div>
 
 <script>
-/* ========= language ========= */
-function getLang(){
-  const u = new URL(location.href);
-  const q = (u.searchParams.get("lang") || "en").toLowerCase().trim();
-  return ["en","de","fr","it"].includes(q) ? q : "en";
-}
-let lang = getLang();
-const LOCALES = { en:"en-US", de:"de-DE", fr:"fr-FR", it:"it-IT" };
-const LANG_LABEL = { en:"🇬🇧 English", de:"🇩🇪 Deutsch", fr:"🇫🇷 Français", it:"🇮🇹 Italiano" };
-
-function setLangPill(){
-  document.getElementById("langPill").textContent = "🌍 " + (LANG_LABEL[lang] || "Language");
-}
-setLangPill();
-
-/* ========= show language modal ========= */
-const langModal = document.getElementById("langModal");
-document.getElementById("langPill").addEventListener("click", ()=> langModal.classList.add("show"));
-document.getElementById("closeLang").addEventListener("click", ()=> langModal.classList.remove("show"));
-langModal.addEventListener("click", (e)=>{ if(e.target === langModal) langModal.classList.remove("show"); });
-
-langModal.querySelectorAll("[data-lang]").forEach(el=>{
-  el.addEventListener("click", ()=>{
-    const l = el.getAttribute("data-lang");
-    const url = new URL(location.href);
-    url.searchParams.set("lang", l);
-    location.href = url.toString();
-  });
-});
-
-/* ========= WORD BANK (each has Turkish meaning) ========= */
+/* =========================================
+   KELİME HAVUZU (TURKISH MEANINGS)
+   ========================================= */
 const WORDS = {
   en: [
-    ["apple","elma"],["water","su"],["bread","ekmek"],["menu","menü"],["price","fiyat"],["yes","evet"],["no","hayır"],
-    ["hello","merhaba"],["goodbye","güle güle"],["thank you","teşekkürler"],["please","lütfen"],["help","yardım"],
-    ["toilet","tuvalet"],["the bill","hesap"],["hot","sıcak"],["cold","soğuk"],["today","bugün"],["excuse me","affedersiniz"],
-    ["book","kitap"],["pen","kalem"],["phone","telefon"],["table","masa"],["chair","sandalye"],["door","kapı"],["window","pencere"],
-    ["street","sokak"],["city","şehir"],["ticket","bilet"],["train","tren"],["bus","otobüs"],["airport","havaalanı"],["hotel","otel"],
-    ["room","oda"],["key","anahtar"],["breakfast","kahvaltı"],["lunch","öğle yemeği"],["dinner","akşam yemeği"],
-    ["coffee","kahve"],["tea","çay"],["milk","süt"],["cheese","peynir"],["chicken","tavuk"],["fish","balık"],["salad","salata"],
-    ["soup","çorba"],["salt","tuz"],["sugar","şeker"],["left","sol"],["right","sağ"],["straight","düz"],["near","yakın"],["far","uzak"],
-    ["open","açık"],["closed","kapalı"],["small","küçük"],["big","büyük"],["cheap","ucuz"],["expensive","pahalı"],
-    ["where","nerede"],["when","ne zaman"],["how","nasıl"],["what","ne"]
+    ["apple","elma"],["water","su"],["bread","ekmek"],["friend","arkadaş"],["price","fiyat"],
+    ["hello","merhaba"],["goodbye","güle güle"],["thank you","teşekkürler"],["please","lütfen"],
+    ["school","okul"],["house","ev"],["car","araba"],["money","para"],["time","zaman"],
+    ["book","kitap"],["pen","kalem"],["phone","telefon"],["computer","bilgisayar"],["table","masa"],
+    ["coffee","kahve"],["tea","çay"],["milk","süt"],["music","müzik"],["love","aşk"]
   ],
   de: [
-    ["Apfel","elma"],["Wasser","su"],["Brot","ekmek"],["Speisekarte","menü"],["Preis","fiyat"],["ja","evet"],["nein","hayır"],
-    ["Hallo","merhaba"],["Tschüss","güle güle"],["Danke","teşekkürler"],["Bitte","lütfen"],["Hilfe","yardım"],
-    ["Toilette","tuvalet"],["die Rechnung","hesap"],["heiß","sıcak"],["kalt","soğuk"],["heute","bugün"],
-    ["Buch","kitap"],["Stift","kalem"],["Telefon","telefon"],["Tisch","masa"],["Stuhl","sandalye"],["Tür","kapı"],["Fenster","pencere"],
-    ["Straße","sokak"],["Stadt","şehir"],["Ticket","bilet"],["Zug","tren"],["Bus","otobüs"],["Flughafen","havaalanı"],["Hotel","otel"],
-    ["Zimmer","oda"],["Schlüssel","anahtar"],["Frühstück","kahvaltı"],["Mittagessen","öğle yemeği"],["Abendessen","akşam yemeği"],
-    ["Kaffee","kahve"],["Tee","çay"],["Milch","süt"],["Käse","peynir"],["Huhn","tavuk"],["Fisch","balık"],["Salat","salata"],
-    ["Suppe","çorba"],["Salz","tuz"],["Zucker","şeker"],["links","sol"],["rechts","sağ"],["geradeaus","düz"]
+    ["Apfel","elma"],["Wasser","su"],["Brot","ekmek"],["Freund","arkadaş"],["Preis","fiyat"],
+    ["Hallo","merhaba"],["Tschüss","güle güle"],["Danke","teşekkürler"],["Bitte","lütfen"],
+    ["Schule","okul"],["Haus","ev"],["Auto","araba"],["Geld","para"],["Zeit","zaman"],
+    ["Buch","kitap"],["Stift","kalem"],["Handy","telefon"],["Tisch","masa"],["Kaffee","kahve"]
   ],
   fr: [
-    ["pomme","elma"],["eau","su"],["pain","ekmek"],["menu","menü"],["prix","fiyat"],["oui","evet"],["non","hayır"],
-    ["bonjour","merhaba"],["au revoir","güle güle"],["merci","teşekkürler"],["s'il vous plaît","lütfen"],["aide","yardım"],
-    ["toilettes","tuvalet"],["l'addition","hesap"],["chaud","sıcak"],["froid","soğuk"],["aujourd'hui","bugün"],
-    ["livre","kitap"],["stylo","kalem"],["téléphone","telefon"],["table","masa"],["chaise","sandalye"],["porte","kapı"],["fenêtre","pencere"],
-    ["rue","sokak"],["ville","şehir"],["billet","bilet"],["train","tren"],["bus","otobüs"],["aéroport","havaalanı"],["hôtel","otel"],
-    ["chambre","oda"],["clé","anahtar"],["petit-déjeuner","kahvaltı"],["déjeuner","öğle yemeği"],["dîner","akşam yemeği"],
-    ["café","kahve"],["thé","çay"],["lait","süt"],["fromage","peynir"],["poulet","tavuk"],["poisson","balık"],["salade","salata"]
+    ["pomme","elma"],["eau","su"],["pain","ekmek"],["ami","arkadaş"],["prix","fiyat"],
+    ["bonjour","merhaba"],["au revoir","güle güle"],["merci","teşekkürler"],["s'il vous plaît","lütfen"],
+    ["école","okul"],["maison","ev"],["voiture","araba"],["argent","para"],["temps","zaman"]
   ],
   it: [
-    ["mela","elma"],["acqua","su"],["pane","ekmek"],["menù","menü"],["prezzo","fiyat"],["sì","evet"],["no","hayır"],
-    ["ciao","merhaba"],["arrivederci","güle güle"],["grazie","teşekkürler"],["per favore","lütfen"],["aiuto","yardım"],
-    ["bagno","tuvalet"],["il conto","hesap"],["caldo","sıcak"],["freddo","soğuk"],["oggi","bugün"],
-    ["libro","kitap"],["penna","kalem"],["telefono","telefon"],["tavolo","masa"],["sedia","sandalye"],["porta","kapı"],["finestra","pencere"],
-    ["strada","sokak"],["città","şehir"],["biglietto","bilet"],["treno","tren"],["autobus","otobüs"],["aeroporto","havaalanı"],["hotel","otel"],
-    ["camera","oda"],["chiave","anahtar"],["colazione","kahvaltı"],["pranzo","öğle yemeği"],["cena","akşam yemeği"],
-    ["caffè","kahve"],["tè","çay"],["latte","süt"],["formaggio","peynir"],["pollo","tavuk"],["pesce","balık"]
+    ["mela","elma"],["acqua","su"],["pane","ekmek"],["amico","arkadaş"],["prezzo","fiyat"],
+    ["ciao","merhaba"],["arrivederci","güle güle"],["grazie","teşekkürler"],["per favore","lütfen"],
+    ["scuola","okul"],["casa","ev"],["macchina","araba"],["soldi","para"],["tempo","zaman"]
   ]
 };
 
-/* ========= build pool ========= */
-function buildPool(){
-  const base = (WORDS[lang] || WORDS.en).map(x=>({t:x[0], tr:x[1]}));
-  // küçük genişletme (çok saçmalamadan)
-  const out = [];
-  const suffixes = ["", "", "", " please"]; // az
-  for(const it of base){
-    out.push({t: it.t, tr: it.tr});
-    for(const s of suffixes){
-      const tt = (it.t + s).trim();
-      if(tt.length>=2 && tt.length<=26) out.push({t: tt, tr: it.tr});
-    }
-  }
-  const seen = new Set();
-  const dedup = [];
-  for(const x of out){
-    const k = x.t.toLowerCase();
-    if(seen.has(k)) continue;
-    seen.add(k);
-    dedup.push(x);
-  }
-  return dedup;
-}
-const BIG_POOL = buildPool();
-const RECENT_MAX = 60;
-const recent = [];
-function pickUniqueWord(){
-  for(let tries=0; tries<250; tries++){
-    const w = BIG_POOL[Math.floor(Math.random()*BIG_POOL.length)];
-    const key = w.t.toLowerCase();
-    if(recent.includes(key)) continue;
-    recent.push(key);
-    if(recent.length > RECENT_MAX) recent.shift();
-    return w;
-  }
-  return BIG_POOL[Math.floor(Math.random()*BIG_POOL.length)];
+const LANG_CONFIG = {
+  en: { code: "en-US", name: "İngilizce" },
+  de: { code: "de-DE", name: "Almanca" },
+  fr: { code: "fr-FR", name: "Fransızca" },
+  it: { code: "it-IT", name: "İtalyanca" }
+};
+
+/* =========================================
+   OYUN MOTORU
+   ========================================= */
+let currentLang = "en";
+let wordList = [];
+let currentIndex = 0;
+let turn = "A"; // A veya B
+let isBusy = false;
+
+// Skorlar
+let stats = {
+  A: { correct: 0, sets: 0 },
+  B: { correct: 0, sets: 0 }
+};
+
+// DOM
+const $ = (id) => document.getElementById(id);
+
+// --- INIT ---
+function initGame() {
+  const urlParams = new URLSearchParams(window.location.search);
+  currentLang = urlParams.get('lang') || 'en';
+  if(!WORDS[currentLang]) currentLang = 'en';
+
+  $("langBtn").textContent = "🌍 " + LANG_CONFIG[currentLang].name;
+  
+  // Kelime Listesini Karıştır ve Hazırla
+  let pool = [...WORDS[currentLang]];
+  pool.sort(() => Math.random() - 0.5);
+  wordList = pool.slice(0, 20); // 20 kelimelik set
+  
+  currentIndex = 0;
+  stats.A.correct = 0;
+  stats.B.correct = 0;
+  
+  updateUI();
+  
+  // ÖĞRETMEN OKUMASIYLA BAŞLA
+  setTimeout(() => teacherPhase(), 1000);
 }
 
-/* ========= similarity ========= */
-function norm(s){
-  return String(s||"").toLowerCase().trim().replace(/[’']/g,"'").replace(/[.,!?;:]/g,"").replace(/\s+/g," ");
-}
-function similarity(a,b){
-  a=norm(a); b=norm(b);
-  if(!a||!b) return 0;
-  if(a===b) return 1;
-  const m=a.length,n=b.length;
-  const dp=[...Array(m+1)].map(()=>Array(n+1).fill(0));
-  for(let i=0;i<=m;i++)dp[i][0]=i;
-  for(let j=0;j<=n;j++)dp[0][j]=j;
-  for(let i=1;i<=m;i++){
-    for(let j=1;j<=n;j++){
-      const c=a[i-1]===b[j-1]?0:1;
-      dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+c);
-    }
+// --- UI GÜNCELLEME ---
+function updateUI() {
+  const w = wordList[currentIndex];
+  
+  // Text
+  $("wordA").textContent = w[0]; $("meanA").textContent = w[1];
+  $("wordB").textContent = w[0]; $("meanB").textContent = w[1];
+  
+  // Progress
+  $("fillA").style.width = (stats.A.correct / 20 * 100) + "%";
+  $("corrA").textContent = stats.A.correct + "/20 Doğru";
+  $("scoreA").textContent = "Set: " + stats.A.sets;
+  
+  $("fillB").style.width = (stats.B.correct / 20 * 100) + "%";
+  $("corrB").textContent = stats.B.correct + "/20 Doğru";
+  $("scoreB").textContent = "Set: " + stats.B.sets;
+
+  // Aktif Oyuncu Görseli
+  $("paneA").classList.remove("active");
+  $("paneB").classList.remove("active");
+  $("micA").disabled = true;
+  $("micB").disabled = true;
+
+  if (turn === "A") {
+    $("paneA").classList.add("active");
+    $("micA").disabled = false;
+    $("turnA").textContent = "Sıra Sende";
+    $("turnB").textContent = "Rakibi Bekle";
+  } else {
+    $("paneB").classList.add("active");
+    $("micB").disabled = false;
+    $("turnB").textContent = "Sıra Sende";
+    $("turnA").textContent = "Rakibi Bekle";
   }
-  return 1-dp[m][n]/Math.max(m,n);
 }
 
-/* ========= wave + buttons ========= */
-function setWaveMode(mode){
-  const w=document.getElementById("waveBox");
-  w.classList.remove("teaching","listening");
-  if(mode) w.classList.add(mode);
-}
-function setWaveLabel(txt){ document.getElementById("waveLabel").textContent = txt; }
-function setButtonsEnabled(enabled){
-  document.getElementById("micA").disabled = !enabled;
-  document.getElementById("micB").disabled = !enabled;
-}
-
-/* ========= overlay ========= */
-function showOverlay(side, ok, msg){
-  const ov=document.getElementById(side==="A" ? "overlayA" : "overlayB");
-  const ico=document.getElementById(side==="A" ? "overlayIcoA" : "overlayIcoB");
-  const txt=document.getElementById(side==="A" ? "overlayTxtA" : "overlayTxtB");
-  ov.classList.remove("ok","bad","show");
-  ov.classList.add(ok ? "ok" : "bad");
-  ico.textContent = ok ? "✅" : "❌";
-  txt.textContent = msg;
-  ov.classList.add("show");
-  clearTimeout(ov.__t);
-  ov.__t=setTimeout(()=>ov.classList.remove("show"),2000);
-}
-function funnyWrong(){
-  const pool=[
-    "Wrong 😅",
-    "Nope! 🚫",
-    "Try again 😄",
-    "Close… but still wrong.",
-    "Teacher: not yet 👀"
-  ];
-  return pool[Math.floor(Math.random()*pool.length)];
+// --- ÖĞRETMEN MODU (OKUMA) ---
+async function teacherPhase() {
+  isBusy = true;
+  $("micA").disabled = true;
+  $("micB").disabled = true;
+  
+  const w = wordList[currentIndex][0];
+  
+  setWave("speaking", "Öğretmen Okuyor...");
+  await speak(w);
+  setWave("idle", "Sıra: Oyuncu " + turn);
+  
+  isBusy = false;
+  // Butonları aktif et
+  if (turn === "A") $("micA").disabled = false;
+  else $("micB").disabled = false;
 }
 
-/* ========= speech ========= */
-function makeRec(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR) return null;
-  const r=new SR();
-  r.lang = LOCALES[lang] || "en-US";
-  r.interimResults=false;
-  r.continuous=false;
-  return r;
-}
-function teacherSpeak(text){
-  return new Promise((resolve)=>{
-    if(!("speechSynthesis" in window)){ resolve(false); return; }
-    try{
-      window.speechSynthesis.cancel();
-      const u=new SpeechSynthesisUtterance(String(text||""));
-      u.lang = LOCALES[lang] || "en-US";
-      u.rate = 0.95;
-      u.pitch = 1.0;
-      u.onend=()=>resolve(true);
-      u.onerror=()=>resolve(false);
-      window.speechSynthesis.speak(u);
-    }catch{ resolve(false); }
+// --- KONUŞMA SENTEZİ (TTS) ---
+function speak(text) {
+  return new Promise(resolve => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = LANG_CONFIG[currentLang].code;
+    u.rate = 0.9;
+    u.onend = resolve;
+    u.onerror = resolve;
+    window.speechSynthesis.speak(u);
   });
 }
 
-/* ========= game ========= */
-let stageWords = Array.from({length:20}, ()=> pickUniqueWord());
-let wordIndex=0;
-
-let turn="A";
-let busy=false;
-
-let correctA=0, correctB=0;
-let setA=0, setB=0;
-
-let attemptsOnWord=0;
-
-function updateBars(){
-  document.getElementById("fillA").style.width = `${(correctA/20)*100}%`;
-  document.getElementById("fillB").style.width = `${(correctB/20)*100}%`;
-  document.getElementById("corrA").textContent = `Correct: ${correctA}/20`;
-  document.getElementById("corrB").textContent = `Correct: ${correctB}/20`;
-  document.getElementById("scoreA").textContent = `Set: ${setA}`;
-  document.getElementById("scoreB").textContent = `Set: ${setB}`;
-  document.getElementById("turnA").textContent = (turn==="A") ? "Your turn" : "—";
-  document.getElementById("turnB").textContent = (turn==="B") ? "Your turn" : "—";
-}
-
-function setHints(){
-  document.getElementById("hintA").textContent = (turn==="A") ? `Your turn. One try. (${wordIndex+1}/20)` : "Opponent's turn.";
-  document.getElementById("hintB").textContent = (turn==="B") ? `Your turn. One try. (${wordIndex+1}/20)` : "Opponent's turn.";
-}
-
-function renderWord(){
-  const w = stageWords[wordIndex];
-  document.getElementById("wordA").textContent = w.t;
-  document.getElementById("wordB").textContent = w.t;
-  document.getElementById("meaningA").textContent = w.tr;
-  document.getElementById("meaningB").textContent = w.tr;
-}
-
-async function teacherPhase(labelAfter, isRepeat=false){
-  setButtonsEnabled(false);
-  setWaveLabel(isRepeat ? "Teacher repeats…" : "Teacher is reading…");
-  setWaveMode("teaching");
-  await teacherSpeak(stageWords[wordIndex].t);
-  setWaveMode(null);
-  setWaveLabel(labelAfter || (turn==="A" ? "Student A turn" : "Student B turn"));
-  setButtonsEnabled(true);
-}
-
-async function endGame(){
-  if(correctA > correctB){ setA=1; setB=0; turn="A"; }
-  else if(correctB > correctA){ setA=0; setB=1; turn="B"; }
-  else { setA=0; setB=0; turn="A"; }
-
-  updateBars();
-  document.getElementById("finalA").textContent = `Set: ${setA}`;
-  document.getElementById("finalB").textContent = `Set: ${setB}`;
-  document.getElementById("finalModal").classList.add("show");
-}
-
-async function nextWord(){
-  wordIndex++;
-  attemptsOnWord=0;
-
-  if(wordIndex >= 20){
-    await endGame();
-    return;
-  }
-
-  updateBars();
-  setHints();
-  renderWord();
-  await teacherPhase(turn==="A" ? "Student A turn" : "Student B turn", false);
-}
-
-async function handleAttempt(player, ok){
-  setButtonsEnabled(false);
-  busy=true;
-
-  attemptsOnWord++;
-
-  if(ok){
-    showOverlay(player,true,"Correct ✅");
-    if(player==="A") correctA++; else correctB++;
-
-    // ✅ doğru bilen devam eder
-    turn = player;
-
-    updateBars();
-    await new Promise(r=>setTimeout(r,2000));
-    busy=false;
-
-    await nextWord();
-    return;
-  }
-
-  // ❌ yanlış
-  showOverlay(player,false, funnyWrong());
-  updateBars();
-  await new Promise(r=>setTimeout(r,2000));
-
-  // ✅ ikisi de yanlışsa: öğretmen tekrar etmeden yeni kelime
-  if(attemptsOnWord >= 2){
-    // serve diğerine geçsin
-    turn = (player==="A") ? "B" : "A";
-    updateBars();
-    busy=false;
-    await nextWord();
-    return;
-  }
-
-  // ✅ ilk yanlış: sıra diğerine geçer + öğretmen bir kez tekrar eder
-  turn = (player==="A") ? "B" : "A";
-  updateBars();
-  setHints();
-  busy=false;
-
-  await teacherPhase(turn==="A" ? "Student A turn" : "Student B turn", true);
-}
-
-function listenFor(player){
-  if(busy) return;
-  if(player !== turn) return;
-
-  const rec = makeRec();
-  if(!rec){ alert("Speech recognition not available on this device."); return; }
-
-  busy=true;
-  setButtonsEnabled(false);
-  setWaveLabel("Listening…");
-  setWaveMode("listening");
-
-  const expected = stageWords[wordIndex].t;
-
-  const watchdog = setTimeout(async ()=>{
-    try{ rec.abort && rec.abort(); }catch{}
-    setWaveMode(null);
-    setWaveLabel("—");
-    setButtonsEnabled(true);
-    busy=false;
-    await handleAttempt(player,false);
-  }, 6500);
-
-  let handled=false;
-
-  rec.onresult = async (e)=>{
-    if(handled) return;
-    handled=true;
-    clearTimeout(watchdog);
-
-    const said = e.results?.[0]?.[0]?.transcript || "";
-    const ok = similarity(expected, said) >= 0.92;
-
-    setWaveMode(null);
-    setWaveLabel("—");
-    try{ rec.stop && rec.stop(); }catch{}
-
-    setButtonsEnabled(true);
-    busy=false;
-
-    await handleAttempt(player, ok);
+// --- DİNLEME (STT) ---
+function listen(player) {
+  if (isBusy || player !== turn) return;
+  
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert("Tarayıcı desteklemiyor."); return; }
+  
+  isBusy = true;
+  $("micA").disabled = true;
+  $("micB").disabled = true;
+  setWave("listening", "Dinleniyor...");
+  
+  const recognition = new SR();
+  recognition.lang = LANG_CONFIG[currentLang].code;
+  recognition.interimResults = false;
+  
+  let heard = "";
+  
+  recognition.onresult = (e) => {
+    heard = e.results[0][0].transcript;
   };
-
-  rec.onerror = async ()=>{
-    if(handled) return;
-    handled=true;
-    clearTimeout(watchdog);
-
-    setWaveMode(null);
-    setWaveLabel("—");
-    setButtonsEnabled(true);
-    busy=false;
-
-    await handleAttempt(player,false);
+  
+  recognition.onend = async () => {
+    setWave("idle", "Kontrol Ediliyor...");
+    await checkResult(player, heard);
   };
-
-  rec.onend = async ()=>{
-    if(handled) return;
-    handled=true;
-    clearTimeout(watchdog);
-
-    setWaveMode(null);
-    setWaveLabel("—");
-    setButtonsEnabled(true);
-    busy=false;
-
-    await handleAttempt(player,false);
+  
+  recognition.onerror = () => {
+    recognition.stop(); // Hata olsa da bitir
   };
+  
+  recognition.start();
+}
 
-  try{ rec.start(); }
-  catch{
-    clearTimeout(watchdog);
-    setWaveMode(null);
-    setWaveLabel("—");
-    setButtonsEnabled(true);
-    busy=false;
-    handleAttempt(player,false);
+// --- SONUÇ KONTROL ---
+async function checkResult(player, text) {
+  const target = wordList[currentIndex][0].toLowerCase().replace(/[.,!?]/g,"");
+  const input = text.toLowerCase().replace(/[.,!?]/g,"");
+  
+  // Basit benzerlik kontrolü (Jaro-Winkler yerine basit includes/levenshtein basitleştirilmiş)
+  const isCorrect = input === target || input.includes(target) || target.includes(input);
+  
+  showResultOverlay(player, isCorrect);
+  
+  if (isCorrect) {
+    stats[player].correct++;
+    // Doğru bilen devam eder (Winner stays)
+    // Kelimeyi değiştir
+    if (currentIndex < 19) {
+      currentIndex++;
+      updateUI();
+      setTimeout(teacherPhase, 1500); // Biraz bekle sonra yeni kelime
+    } else {
+      endSet();
+    }
+  } else {
+    // Yanlış! Sıra diğerine geçer.
+    await new Promise(r => setTimeout(r, 2000)); // Hata mesajını görsün
+    turn = (turn === "A" ? "B" : "A");
+    updateUI();
+    // Öğretmen kelimeyi tekrar hatırlatır
+    setTimeout(teacherPhase, 500);
   }
 }
 
-/* modal buttons */
-document.getElementById("yesBtn").addEventListener("click", async ()=>{
-  document.getElementById("finalModal").classList.remove("show");
+function showResultOverlay(player, isOk) {
+  const ov = $(player === "A" ? "ovA" : "ovB");
+  const icon = $(player === "A" ? "iconA" : "iconB");
+  const txt = $(player === "A" ? "textA" : "textB");
+  
+  ov.className = "result-overlay show " + (isOk ? "ok" : "bad");
+  icon.textContent = isOk ? "✅" : "❌";
+  txt.textContent = isOk ? "HARİKA!" : "TEKRAR DENE";
+  
+  setTimeout(() => {
+    ov.classList.remove("show");
+  }, 1500);
+}
 
-  stageWords = Array.from({length:20}, ()=> pickUniqueWord());
-  wordIndex=0;
-  correctA=0; correctB=0;
-  attemptsOnWord=0;
+function setWave(state, text) {
+  const wb = $("waveBox");
+  const st = $("waveStatus");
+  wb.className = "wave-box " + state;
+  st.textContent = text;
+}
 
-  updateBars();
-  setHints();
-  renderWord();
-  await teacherPhase(turn==="A" ? "Student A turn" : "Student B turn", false);
+function endSet() {
+  const winner = stats.A.correct > stats.B.correct ? "A" : (stats.B.correct > stats.A.correct ? "B" : "Berabere");
+  if (winner === "A") stats.A.sets++;
+  if (winner === "B") stats.B.sets++;
+  
+  $("endModal").style.display = "flex";
+  $("endResult").innerHTML = `
+    OYUNCU A: ${stats.A.correct} Doğru<br>
+    OYUNCU B: ${stats.B.correct} Doğru<br><br>
+    ${winner === "Berabere" ? "DOSTLUK KAZANDI!" : "KAZANAN: OYUNCU " + winner}
+  `;
+}
+
+/* =========================================
+   EVENT LISTENERS
+   ========================================= */
+$("startBtn").addEventListener("click", () => {
+  $("startModal").style.display = "none";
+  initGame(); // Ses motorunu başlatmak için kullanıcı etkileşimi şart
 });
 
-document.getElementById("noBtn").addEventListener("click", ()=>{
-  document.getElementById("finalModal").classList.remove("show");
+$("backBtn").addEventListener("click", () => location.href="/pages/home.html");
+
+$("micA").addEventListener("click", () => listen("A"));
+$("micB").addEventListener("click", () => listen("B"));
+
+$("restartBtn").addEventListener("click", () => {
+  $("endModal").style.display = "none";
+  initGame();
 });
 
-/* boot */
-document.getElementById("backBtn").addEventListener("click", ()=>{
-  location.href="/pages/friend.html";
+// Dil Seçimi
+$("langBtn").addEventListener("click", () => $("langModal").style.display = "flex");
+$("closeLang").addEventListener("click", () => $("langModal").style.display = "none");
+
+document.querySelectorAll(".lang-opt").forEach(el => {
+  el.addEventListener("click", () => {
+    const l = el.getAttribute("data-lang");
+    const u = new URL(location.href);
+    u.searchParams.set("lang", l);
+    location.href = u.toString();
+  });
 });
-document.getElementById("micA").addEventListener("click", ()=> listenFor("A"));
-document.getElementById("micB").addEventListener("click", ()=> listenFor("B"));
 
-updateBars();
-setHints();
-renderWord();
-teacherPhase("Student A turn", false);
-
-// first-time language popup once
-try{
-  const k="italky_duo_lang_prompted";
-  if(!localStorage.getItem(k)){
-    localStorage.setItem(k,"1");
-    document.getElementById("langModal").classList.add("show");
-  }
-}catch{}
 </script>
-
 </body>
 </html>
