@@ -33,33 +33,24 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding-top: 20px; margin-bottom: -15px; position: relative; z-index: 20;
     }
-    
-    /* Üst Marka */
     .gl-brand {
       font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700;
       color: rgba(255, 255, 255, 0.6); letter-spacing: 2px; margin-bottom: 5px;
     }
-    
-    /* İkon */
     .gl-icon {
       font-size: 32px; margin-bottom: 2px;
       filter: drop-shadow(0 0 5px var(--c-neon));
       animation: pulseNeon 2s infinite alternate;
     }
-    
-    /* Oyun Başlığı */
     .gl-title {
       font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 1px;
       background: linear-gradient(to right, var(--c-neon), var(--c-safe));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       text-transform: uppercase; line-height: 1;
     }
-    
-    /* Alt Slogan */
     .gl-sub {
       font-size: 9px; letter-spacing: 4px; color: var(--c-safe); opacity: 0.8; margin-top: 4px; font-weight: 700;
     }
-    
     @keyframes pulseNeon {
       from { filter: drop-shadow(0 0 5px var(--c-neon)); transform: scale(1); }
       to { filter: drop-shadow(0 0 15px var(--c-neon)); transform: scale(1.05); }
@@ -196,11 +187,11 @@
       
       <div class="modal-p" style="margin-bottom:10px; font-weight:700">Hedef Dili Seç:</div>
       <div class="lang-grid">
-        <div class="lang-btn active" onclick="setLang('en')">🇬🇧</div>
-        <div class="lang-btn" onclick="setLang('de')">🇩🇪</div>
-        <div class="lang-btn" onclick="setLang('fr')">🇫🇷</div>
-        <div class="lang-btn" onclick="setLang('es')">🇪🇸</div>
-        <div class="lang-btn" onclick="setLang('it')">🇮🇹</div>
+        <div class="lang-btn active" onclick="setLang('en', this)">🇬🇧</div>
+        <div class="lang-btn" onclick="setLang('de', this)">🇩🇪</div>
+        <div class="lang-btn" onclick="setLang('fr', this)">🇫🇷</div>
+        <div class="lang-btn" onclick="setLang('es', this)">🇪🇸</div>
+        <div class="lang-btn" onclick="setLang('it', this)">🇮🇹</div>
       </div>
 
       <div class="modal-p">
@@ -232,6 +223,51 @@ import { BASE_DOMAIN } from "/js/config.js";
 const $ = (id) => document.getElementById(id);
 const apiBase = () => String(BASE_DOMAIN || "").replace(/\/+$/, "");
 
+// DEVASA YEDEK KELİME HAVUZU (İnternet Yoksa Buradan Çeker)
+const OFFLINE_DB = {
+  en: [
+    ["GALAXY","Galaksi","The galaxy is huge."],["PLANET","Gezegen","Mars is a planet."],
+    ["ENERGY","Enerji","Solar energy is clean."],["FUTURE","Gelecek","The future is bright."],
+    ["DREAM","Rüya","I had a weird dream."],["MUSIC","Müzik","Music heals the soul."],
+    ["TRAVEL","Seyahat","I love to travel."],["FRIEND","Arkadaş","She is my best friend."],
+    ["SUMMER","Yaz","Summer days are long."],["SCHOOL","Okul","School starts at 8."],
+    ["MARKET","Pazar","The market is busy."],["GARDEN","Bahçe","Flowers grow in the garden."],
+    ["DOCTOR","Doktor","The doctor helped me."],["WINDOW","Pencere","Open the window."],
+    ["COFFEE","Kahve","I need strong coffee."],["BRIDGE","Köprü","Cross the bridge."],
+    ["ISLAND","Ada","They live on an island."],["FOREST","Orman","The forest is dark."],
+    ["YELLOW","Sarı","Bananas are yellow."],["PURPLE","Mor","Grapes can be purple."]
+  ],
+  de: [
+    ["SONNE","Güneş","Die Sonne scheint."],["MOND","Ay","Der Mond ist hell."],
+    ["WASSER","Su","Wasser ist Leben."],["FREUND","Arkadaş","Er ist mein Freund."],
+    ["SCHULE","Okul","Die Schule ist aus."],["ARBEIT","İş","Die Arbeit macht Spaß."],
+    ["HIMMEL","Gökyüzü","Der Himmel ist blau."],["GARTEN","Bahçe","Im Garten sind Blumen."],
+    ["FAMILIE","Aile","Meine Familie ist groß."],["REISE","Seyahat","Die Reise war schön."],
+    ["BUCH","Kitap","Ich lese ein Buch."],["STADT","Şehir","Die Stadt ist laut."]
+  ],
+  fr: [
+    ["SOLEIL","Güneş","Le soleil brille."],["LUNE","Ay","La lune est belle."],
+    ["AMOUR","Aşk","L'amour est fort."],["MONDE","Dünya","Le monde est grand."],
+    ["FLEUR","Çiçek","Cette fleur est rouge."],["TEMPS","Zaman","Le temps passe vite."],
+    ["PLAGE","Plaj","La plage est calme."],["LIVRE","Kitap","J'aime ce livre."],
+    ["CHIEN","Köpek","Le chien aboie."],["MAISON","Ev","Ma maison est ici."]
+  ],
+  es: [
+    ["SOL","Güneş","El sol es caliente."],["LUNA","Ay","La luna está llena."],
+    ["AMIGO","Arkadaş","Es mi mejor amigo."],["CIUDAD","Şehir","La ciudad es grande."],
+    ["PLAYA","Plaj","Vamos a la playa."],["LIBRO","Kitap","Leo un libro."],
+    ["TIEMPO","Zaman","No tengo tiempo."],["GATO","Kedi","El gato duerme."],
+    ["CASA","Ev","Mi casa es tu casa."],["FIESTA","Parti","La fiesta es hoy."]
+  ],
+  it: [
+    ["SOLE","Güneş","Il sole splende."],["LUNA","Ay","La luna è alta."],
+    ["AMORE","Aşk","L'amore vince sempre."],["MARE","Deniz","Il mare è blu."],
+    ["PIZZA","Pizza","La pizza è buona."],["TEMPO","Zaman","Il tempo vola."],
+    ["CITTA","Şehir","Roma è una città."],["CASA","Ev","Vado a casa."],
+    ["LIBRO","Kitap","Leggo un libro."],["GATTO","Kedi","Il gatto miagola."]
+  ]
+};
+
 // DİL AYARLARI
 let currentLang = 'en';
 const LANG_CONFIG = {
@@ -242,10 +278,10 @@ const LANG_CONFIG = {
   it: { code: 'it-IT', name: 'İtalyanca', prompt: 'İtalyanca' }
 };
 
-window.setLang = (lang) => {
+window.setLang = (lang, el) => {
   currentLang = lang;
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  if(el) el.classList.add('active');
   ensureAudio();
 };
 
@@ -328,10 +364,9 @@ async function fetchWords() {
   try {
     const langName = LANG_CONFIG[currentLang].prompt;
     const prompt = `
-      Bana ${langName} dilinde, ${difficulty} seviyesinde 15 kelime ver.
+      Bana ${langName} dilinde, ${difficulty} seviyesinde 15 FARKLI ve RASTGELE kelime ver.
       Kurallar:
       - Sadece isim/fiil
-      - Sadece a-z harfleri
       - Uzunluk: ${SETTINGS[difficulty].range} harf
       - Yanına Türkçe karşılığı ve o kelimeyle basit bir cümle (${langName} dilinde) yaz.
       SADECE JSON dön:
@@ -356,8 +391,10 @@ async function fetchWords() {
     startLevel();
 
   } catch (err) {
-    if(currentLang === 'en') wordList = [["Galaxy", "Galaksi", "Space is big."], ["Planet", "Gezegen", "Earth is blue."]];
-    else wordList = [["Hallo", "Merhaba", "Hallo welt."], ["Auto", "Araba", "Das auto ist schnell."]];
+    // FALLBACK (Yedek Depo - Rastgele Seçim)
+    const db = OFFLINE_DB[currentLang] || OFFLINE_DB['en'];
+    // Karıştır ve 15 tane al
+    wordList = db.sort(() => 0.5 - Math.random()).slice(0, 15);
     
     $("startModal").style.display = "none";
     startLevel();
@@ -384,7 +421,7 @@ function startLevel() {
     $("hintBox").textContent = trMean;
   }
 
-  // Kelimeyi Normalize Et
+  // Kelimeyi Normalize Et (Özel karakterleri temizle)
   currentWord = normalizeChar(wordList[currentIndex][0]); 
   
   mistakes = 0;
@@ -459,22 +496,18 @@ function handleGuess(char, btn) {
   btn.classList.add("used");
 
   if(currentWord.includes(char)) {
-    // DOĞRU
     btn.classList.add("correct");
     for(let i=0; i<currentWord.length; i++) {
       if(currentWord[i] === char) discovered[i] = true;
     }
     renderWord();
     
-    // Kazanma Kontrolü
     const allFound = discovered.every(Boolean);
     if(allFound) {
       SFX.win();
-      
       const basePoints = (currentMaxErrors - mistakes) * 10;
       const streakBonus = (streak + 1) * 5; 
       const roundScore = Math.floor((basePoints + streakBonus) * scoreMultiplier);
-      
       score += roundScore;
       streak++;
       if(streak % 3 === 0) powerups++;
@@ -482,22 +515,13 @@ function handleGuess(char, btn) {
       updateScoreUI();
       if(streak > 1) startConfetti();
 
-      setTimeout(() => {
-        currentIndex++;
-        startLevel();
-      }, 1500);
+      setTimeout(() => { currentIndex++; startLevel(); }, 1500);
     }
   } else {
-    // YANLIŞ
     btn.classList.add("wrong");
-    
-    // A2'de can az gitsin
-    if(difficulty === 'A2') mistakes += 0.5; 
-    else mistakes += 1;
-
+    mistakes++;
     renderHangman();
     
-    // Streak Kırıldı
     if(streak > 0) {
       streak = 0;
       updateScoreUI();
@@ -517,9 +541,8 @@ function handleGuess(char, btn) {
   }
 }
 
-// JOKER KULLANIMI
 window.usePowerUp = () => {
-  if(isBossRound) return; 
+  if(isBossRound) return;
   if(powerups <= 0) return;
   
   let hiddenIndices = [];
@@ -531,7 +554,6 @@ window.usePowerUp = () => {
   
   SFX.click();
   powerups--;
-  if(streak > 0) streak = Math.max(0, streak - 1);
   
   const rndIdx = hiddenIndices[Math.floor(Math.random() * hiddenIndices.length)];
   const charToReveal = currentWord[rndIdx];
@@ -542,26 +564,16 @@ window.usePowerUp = () => {
   
   const btn = $(`key-${charToReveal}`);
   if(btn) {
-    btn.classList.remove("wrong"); 
+    btn.classList.remove("wrong");
     btn.classList.add("used", "correct");
   }
   
   renderWord();
   updateScoreUI();
   
-  // Jokerle kazanılırsa (İndirimli Puan)
   const allFound = discovered.every(Boolean);
   if(allFound) {
-    setTimeout(() => {
-        SFX.win();
-        const basePoints = (currentMaxErrors - Math.floor(mistakes)) * 10;
-        const roundScore = Math.floor(basePoints * 0.6); 
-        score += roundScore;
-        updateScoreUI();
-        
-        currentIndex++;
-        startLevel();
-    }, 1000);
+    setTimeout(() => { SFX.win(); score += 10; currentIndex++; startLevel(); }, 1000);
   }
 }
 
@@ -584,10 +596,6 @@ function updateScoreUI() {
 
 function teacherSolve() {
   try{ window.speechSynthesis.cancel(); }catch{} 
-
-  // Ceza Puanı
-  score = Math.max(0, score - 5);
-  updateScoreUI();
 
   const slots = document.querySelectorAll(".letter-slot");
   for(let i=0; i<currentWord.length; i++) {
