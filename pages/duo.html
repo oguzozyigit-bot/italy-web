@@ -1,241 +1,10 @@
-<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>ITALKY • Boxing Arena</title>
-  <link rel="icon" href="data:,"/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-  
-  <style>
-    /* --- TEMA: BOXING NIGHT --- */
-    :root { 
-      --bg-deep: #050005; 
-      --text-main: #ffffff; 
-      --c-cyan: #00f3ff; 
-      --c-green: #00e676;
-      --c-red: #ff1744;
-      --c-gold: #ffb800;
-      --border: rgba(255, 255, 255, 0.15); 
-      --safe-top: env(safe-area-inset-top, 20px);
-      --safe-bottom: env(safe-area-inset-bottom, 20px);
-    }
-    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; user-select:none; }
-    html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:'Outfit', sans-serif; background:var(--bg-deep); color:var(--text-main); position:fixed; }
-    
-    /* ARKA PLAN: STADYUM IŞIKLARI */
-    .cosmos-bg { position:absolute; inset:0; background: radial-gradient(circle at center, #1a001a 0%, #000 100%); z-index:0; }
-    .spotlights { position:absolute; inset:0; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, transparent 2px, transparent 10px); animation: lightMove 20s linear infinite; }
-    #effectCanvas { position: absolute; inset: 0; pointer-events: none; z-index: 9999; display: none; }
-
-    @keyframes lightMove { from { background-position: 0 0; } to { background-position: 100px 100px; } }
-    
-    .wrap { 
-      width:100%; max-width:480px; height:100%; margin:0 auto; position:relative; z-index:10; display:flex; flex-direction:column; 
-      padding-top: var(--safe-top); padding-bottom: var(--safe-bottom);
-    }
-    
-    /* LOGO HEADER */
-    .game-logo-header {
-      flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding-top: 10px; margin-bottom: -10px; position: relative; z-index: 20;
-    }
-    .gl-brand { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.6); letter-spacing: 2px; margin-bottom: 2px; }
-    .gl-icon { font-size: 32px; margin-bottom: 0px; filter: drop-shadow(0 0 10px var(--c-red)); animation: pulseBattle 1s infinite alternate; }
-    .gl-title { font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 24px; letter-spacing: 1px; background: linear-gradient(to right, var(--c-red), var(--c-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; line-height: 1; font-style: italic; }
-    .gl-sub { font-size: 9px; letter-spacing: 4px; color: var(--text-main); opacity: 0.8; margin-top: 2px; font-weight: 700; }
-    @keyframes pulseBattle { from { transform: scale(1); } to { transform: scale(1.1); } }
-
-    /* NAV */
-    .nav-layer { flex: 0 0 50px; display:flex; justify-content:space-between; padding:0 12px; align-items:center; position:relative; z-index:30; }
-    .nav-btn { width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid var(--border); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700; font-size:14px; transition:0.2s; }
-    .nav-btn:active { transform:scale(0.95); }
-    
-    /* GRID */
-    .grid { flex:1; display:grid; grid-template-rows: 1fr 60px 1fr; gap:8px; padding:0 10px 10px; overflow:hidden; }
-    
-    .pane { position:relative; border-radius:20px; border:2px solid rgba(255,255,255,0.05); background: linear-gradient(160deg, rgba(20,0,0,0.6), rgba(0,0,0,0.8)); backdrop-filter:blur(10px); display:flex; flex-direction:column; overflow:hidden; transition: 0.2s; min-height:0; }
-    
-    /* RAKİP KIRMIZI KÖŞE */
-    .pane.top { transform: rotate(180deg); border-color: rgba(255, 23, 68, 0.3); }
-    .pane.top > * { transform: rotate(180deg); } 
-    .pane.top.active { border-color: var(--c-red); box-shadow: 0 0 30px rgba(255, 23, 68, 0.2); }
-    
-    /* SEN MAVİ KÖŞE */
-    .pane.bottom { border-color: rgba(0, 243, 255, 0.3); }
-    .pane.bottom.active { border-color: var(--c-cyan); box-shadow: 0 0 30px rgba(0, 243, 255, 0.2); }
-
-    /* VURULMA EFEKTLERİ */
-    .shake-hit { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--c-red) !important; background: rgba(255,0,0,0.2) !important; }
-    .flash-hit { animation: flash 0.2s ease-in-out; background: rgba(255,255,255,0.2) !important; }
-
-    @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
-    @keyframes flash { 0% { background: rgba(255,255,255,0); } 50% { background: rgba(255,255,255,0.3); } 100% { background: rgba(255,255,255,0); } }
-    
-    .bar { flex: 0 0 40px; padding:0 12px; background:rgba(0,0,0,0.3); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-family:'Space Grotesk', sans-serif; font-size:13px; }
-    .score-stats { display: flex; gap: 10px; align-items: center; font-weight: 800; font-size: 13px; }
-    .stat-main { color: #fff; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 6px; font-size: 13px; white-space:nowrap; }
-
-    .prog-wrap { flex: 0 0 24px; padding:8px 12px 0; }
-    .prog-track { height:6px; background:rgba(255,255,255,0.1); border-radius:10px; overflow:hidden; }
-    .prog-fill { height:100%; width:0%; background:linear-gradient(90deg, var(--c-gold), var(--c-red)); transition: width 0.3s ease; }
-    .prog-meta { display:flex; justify-content:space-between; margin-top:4px; font-size:10px; opacity:0.6; font-weight:600; text-transform:uppercase; }
-    
-    .body { flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:2px; padding:4px 10px; min-height:0; overflow:hidden; }
-    .word { font-size:clamp(22px, 6vw, 32px); font-weight:900; color:#fff; font-family:'Space Grotesk', sans-serif; text-align:center; line-height:1.1; text-transform: uppercase; letter-spacing: 1px; }
-    .meaning { font-size:clamp(14px, 4vw, 16px); color:rgba(255,255,255,0.6); font-weight:500; text-align:center; }
-    .hint { font-size:10px; color:var(--c-gold); font-weight:800; margin-top:6px; opacity:0; transition:0.3s; text-transform:uppercase; letter-spacing:2px; }
-    .pane.active .hint { opacity:1; }
-    
-    .actions { flex: 0 0 70px; padding:10px; display:flex; justify-content:center; align-items:center; }
-    .mic-btn { width:100%; height:48px; border-radius:16px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:#fff; font-weight:800; font-size:16px; cursor:pointer; transition:0.2s; display:flex; align-items:center; justify-content:center; gap:8px; text-transform: uppercase; letter-spacing: 1px; }
-    .pane.active .mic-btn { background: linear-gradient(135deg, var(--c-red), #ff5500); border:none; box-shadow: 0 5px 25px rgba(255, 85, 0, 0.4); }
-    .mic-btn:disabled { opacity:0.3; cursor:not-allowed; background:rgba(255,255,255,0.05) !important; box-shadow:none !important; }
-    .mic-btn:active { transform:scale(0.96); }
-    
-    .wave-box { border-radius:16px; background:rgba(0,0,0,0.6); border:1px solid var(--border); backdrop-filter:blur(10px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; position:relative; overflow:hidden; }
-    .wave-status { font-size:10px; font-weight:700; opacity:0.8; letter-spacing:1px; text-transform:uppercase; color:var(--c-gold); }
-    .bars { display:flex; gap:3px; height:16px; align-items:center; }
-    .b { width:4px; height:6px; background:rgba(255,255,255,0.3); border-radius:4px; transition:0.1s; }
-    .wave-box.speaking .b { background:var(--c-red); animation: bounce 0.4s infinite ease-in-out; }
-    .wave-box.listening .b { background:var(--c-cyan); animation: bounce 0.3s infinite ease-in-out; }
-    @keyframes bounce { 0%,100%{height:6px} 50%{height:20px} }
-    .b:nth-child(1){animation-delay:0s} .b:nth-child(2){animation-delay:0.1s} .b:nth-child(3){animation-delay:0.2s} .b:nth-child(4){animation-delay:0.3s} .b:nth-child(5){animation-delay:0.4s}
-    
-    .result-overlay { position:absolute; inset:0; z-index:20; background:rgba(0,0,0,0.85); display:none; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(8px); animation:fadeIn 0.2s; }
-    .result-overlay.show { display:flex; }
-    .res-icon { font-size:64px; margin-bottom:8px; animation:popIn 0.3s; }
-    .res-text { font-size:24px; font-weight:900; font-family:'Space Grotesk', sans-serif; text-transform:uppercase; letter-spacing:2px; font-style: italic; }
-    .ok .res-text { color:var(--c-green); text-shadow: 0 0 20px var(--c-green); } 
-    .bad .res-text { color:var(--c-red); text-shadow: 0 0 20px var(--c-red); }
-    @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} } @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    
-    .modal-wrap { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(20px); padding:20px; }
-    .modal-card { width:100%; max-width:340px; background:#101014; border:1px solid var(--border); border-radius:24px; padding:24px; text-align:center; box-shadow:0 30px 80px rgba(0,0,0,1); animation: popIn 0.5s; max-height: 80vh; overflow-y:auto; }
-    .modal-title { font-size:24px; font-weight:800; margin-bottom:16px; font-family:'Space Grotesk', sans-serif; color: var(--c-gold); }
-    .modal-p { font-size:14px; opacity:0.8; margin-bottom:24px; line-height:1.6; }
-    .btn-primary { width:100%; padding:16px; border-radius:16px; border:none; background:linear-gradient(135deg, var(--c-red), #ff5500); color:#fff; font-weight:800; font-size:16px; cursor:pointer; box-shadow:0 10px 30px rgba(255,50,0,0.4); transition:0.2s; text-transform: uppercase; letter-spacing: 1px; }
-    .btn-primary:active { transform:scale(0.98); }
-    .btn-sec { background:rgba(255,255,255,0.1); margin-top:10px; color:#fff; }
-    
-    /* DİL SEÇİMİ */
-    .lang-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
-    .lang-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 0; cursor: pointer; font-size: 22px; transition: 0.2s; display: flex; justify-content: center; }
-    .lang-btn:active, .lang-btn.active { background: var(--c-red); border-color: var(--c-red); transform: scale(1.05); }
-    
-    .rules-box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 12px; text-align: left; line-height: 1.6; color: rgba(255,255,255,0.8); }
-    .rules-box strong { color: var(--c-gold); }
-
-    .loader { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--c-red); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  </style>
-</head>
-<body>
-
-  <div class="cosmos-bg"><div class="spotlights"></div></div>
-  <canvas id="effectCanvas"></canvas>
-
-  <div class="wrap">
-    <div class="game-logo-header">
-      <div class="gl-brand">ITALKY<span style="color:var(--c-red)">ARENA</span></div>
-      <div class="gl-icon">🥊</div>
-      <div class="gl-title">BOXING DUEL</div>
-      <div class="gl-sub">CHAMPIONSHIP</div>
-    </div>
-
-    <div class="nav-layer">
-      <button class="nav-btn" onclick="window.location.href='/pages/game.html'">←</button>
-      <button class="nav-btn" style="opacity:0">.</button>
-    </div>
-
-    <div class="grid">
-      <section class="pane top" id="paneB">
-        <div class="bar">
-          <div class="p-name" style="color:var(--c-red)">RAKİP (CPU)</div>
-          <div class="score-stats">
-            <span class="stat-main" id="valScoreB">0 P</span>
-          </div>
-        </div>
-        <div class="prog-wrap">
-          <div class="prog-track"><div class="prog-fill" id="fillB" style="background:var(--c-red)"></div></div>
-          <div class="prog-meta"><span id="turnB">Bekliyor</span></div>
-        </div>
-        <div class="body">
-          <div class="word" id="wordB">---</div>
-          <div class="meaning" id="meanB">---</div>
-          <div class="hint">HAMLE YAPIYOR...</div>
-        </div>
-        <div class="actions"><button class="mic-btn" id="micB" disabled>🥊</button></div>
-      </section>
-
-      <div class="wave-box" id="waveBox">
-        <div class="wave-status" id="waveStatus">HAZIR</div>
-        <div class="bars"><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div></div>
-      </div>
-
-      <section class="pane bottom" id="paneA">
-        <div class="bar">
-          <div class="p-name" style="color:var(--c-cyan)">ŞAMPİYON (SEN)</div>
-          <div class="score-stats">
-            <span class="stat-main" id="valScore">0 P • ❤️❤️❤️</span>
-          </div>
-        </div>
-        <div class="prog-wrap">
-          <div class="prog-track"><div class="prog-fill" id="fillA"></div></div>
-          <div class="prog-meta"><span id="corrA">0/20</span><span id="turnA">Bekliyor</span></div>
-        </div>
-        <div class="body">
-          <div class="word" id="wordA">---</div>
-          <div class="meaning" id="meanA">---</div>
-          <div class="hint">SENİN SIRAN</div>
-        </div>
-        <div class="actions"><button class="mic-btn" id="micA" disabled>🎙️ YUMRUK AT</button></div>
-        <div class="result-overlay" id="ovA"></div>
-      </section>
-    </div>
-  </div>
-
-  <div class="modal-wrap" id="startModal">
-    <div class="modal-card">
-      <div class="modal-title">RİNGE ÇIK! 🥊</div>
-      <div class="modal-p" style="font-weight:700">Rakibinin Dilini Seç:</div>
-      <div class="lang-grid">
-        <div class="lang-btn active" onclick="setLang('en', this)">🇬🇧</div>
-        <div class="lang-btn" onclick="setLang('de', this)">🇩🇪</div>
-        <div class="lang-btn" onclick="setLang('fr', this)">🇫🇷</div>
-        <div class="lang-btn" onclick="setLang('es', this)">🇪🇸</div>
-        <div class="lang-btn" onclick="setLang('it', this)">🇮🇹</div>
-      </div>
-      
-      <div class="rules-box">
-        <strong>Kurallar:</strong><br>
-        • <strong>Doğru Cevap:</strong> Rakibe sert bir yumruk atarsın. (+Puan)<br>
-        • <strong>Yanlış Cevap:</strong> Rakip sana vurur. (Ekran sallanır)<br>
-        • <strong>3 Darbe (Yanlış):</strong> NAKAVT olursun! (Oyun Biter)<br>
-        • <strong>Havuz Sistemi:</strong> Zorlu rakipler, tekrar yok!
-      </div>
-
-      <div id="loading" style="display:none"><div class="loader"></div><div style="font-size:12px;opacity:0.6">Rakip Isınıyor...</div></div>
-      <button class="btn-primary" id="startBtn">MAÇA BAŞLA</button>
-    </div>
-  </div>
-
-  <div class="modal-wrap" id="endModal" style="display:none">
-    <div class="modal-card">
-      <div class="modal-title">MAÇ SONUCU 🔔</div>
-      <div class="modal-p" id="endResult"></div>
-      <button class="btn-primary" id="retryBtn">RÖVANŞ</button>
-      <button class="btn-primary btn-sec" onclick="location.href='/pages/game.html'">SOYUNMA ODASI</button>
-    </div>
-  </div>
-
 <script type="module">
 import { BASE_DOMAIN } from "/js/config.js";
 const $ = (id) => document.getElementById(id);
 const apiBase = () => String(BASE_DOMAIN || "").replace(/\/+$/, "");
 
 // ----------------------------------------------------------------
-// 1. ZORLU & GENİŞ KELİME HAVUZU (70+ Kelime/Dil)
+// 1. DEVASA OFFLINE HAVUZ (HER DİL İÇİN 70+ KELİME)
 // ----------------------------------------------------------------
 const OFFLINE_DB = {
   en: [
@@ -426,17 +195,19 @@ function pickN(n=20){
 }
 
 // ----------------------------------------------------------------
-// 4. VERİ ÇEKME
+// 4. VERİ ÇEKME (ZAMAN AYARLI)
 // ----------------------------------------------------------------
 async function fetchWordsFromAI() {
   $("loading").style.display="block";
   $("startBtn").style.display="none";
-  setWave("idle","Rakip Hazırlanıyor...");
+  setWave("idle","Rakip Aranıyor...");
 
+  // 1. Önce Lokal Hafızaya Bak
   loadPool();
   used = new Set(); 
   savePool();
 
+  // Eğer havuz doluysa, API ile hiç vakit kaybetme
   if(pool.length >= 120){
     wordList = pickN(20);
     $("startModal").style.display="none";
@@ -445,46 +216,59 @@ async function fetchWordsFromAI() {
     return;
   }
 
+  // 2. API Bağlantısını Dene (Timeout Korumalı)
   try {
     const lg = LANGS[currentLang];
     const seed = Math.floor(Math.random()*1e9);
+    
+    // Timeout Kontrolcüsü (4 Saniye süre veriyoruz)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
     const res = await fetch(`${apiBase()}/api/chat`, {
       method:"POST",
       headers:{"Content-Type":"application/json"},
+      signal: controller.signal, // Bağlantı yavaşsa iptal et
       body: JSON.stringify({
         text:`Bana ${lg.name} dilinde B1-B2 seviyesinde ${POOL_TARGET} FARKLI kelime (Soyut, Fiil, Sıfat karışık) ve Türkçe karşılığını SADECE JSON array formatında ver: [["Freedom","Özgürlük"], ...] Seed:${seed}`,
         max_tokens: 2600
       })
     });
+    
+    clearTimeout(timeoutId); // Bağlantı başarılıysa sayacı durdur
 
     const data = await res.json();
     const incoming = uniqWords(safeParseWordList(data));
     pool = uniqWords([...pool, ...incoming]);
 
+    // Eksikse Offline ile tamamla
     if(pool.length < 100){
-      const fb = OFFLINE_DB[currentLang] || OFFLINE_DB.en;
-      let filled = [...fb];
-      while(filled.length < POOL_TARGET) filled = filled.concat(fb);
-      pool = uniqWords([...pool, ...filled]);
+      fallbackToOffline();
+    } else {
+      pool = shuffle(pool).slice(0, POOL_TARGET * 1.5);
+      savePool();
+      wordList = pickN(20);
     }
 
-    pool = shuffle(pool).slice(0, POOL_TARGET * 1.5);
-    savePool();
-    wordList = pickN(20);
-
   } catch (e) {
-    const fb = OFFLINE_DB[currentLang] || OFFLINE_DB.en;
-    let filled = [...fb];
-    while(filled.length < POOL_TARGET) filled = filled.concat(fb);
-    pool = uniqWords(shuffle(filled)).slice(0, POOL_TARGET);
-    savePool();
-    wordList = pickN(20);
+    // 3. HATA ALIRSA (Timeout veya Server Hatası) HEMEN OFFLINE'A GEÇ
+    console.log("Offline moduna geçildi:", e);
+    fallbackToOffline();
   }
 
   $("startModal").style.display="none";
   await sleep(100);
   startGameLoop(true);
+}
+
+function fallbackToOffline(){
+  const fb = OFFLINE_DB[currentLang] || OFFLINE_DB.en;
+  let filled = [...fb];
+  // Havuzu şişir ki rastgelelik artsın
+  while(filled.length < POOL_TARGET) filled = filled.concat(fb);
+  pool = uniqWords(shuffle(filled)).slice(0, POOL_TARGET);
+  savePool();
+  wordList = pickN(20);
 }
 
 // ----------------------------------------------------------------
@@ -546,6 +330,7 @@ function updateUI(){
 
 function speakBrowser(t, rate=0.9){
   return new Promise(r=>{
+    // Ses takılırsa 2.5 saniyede zorla devam et
     const tm = setTimeout(()=>{ r(); }, 2500); 
     try{ window.speechSynthesis.cancel(); }catch{}
     const u=new SpeechSynthesisUtterance(String(t||""));
@@ -629,7 +414,7 @@ async function checkResult(txt){
   const timeBonus = sec <= 2 ? 2 : sec <= 4 ? 1 : 0;
 
   if(ok){
-    // HİT EFEKTİ (RAKİBE VUR)
+    // HİT EFEKTİ
     $("paneB").classList.add("flash-hit");
     setTimeout(()=>$("paneB").classList.remove("flash-hit"), 300);
 
@@ -640,7 +425,7 @@ async function checkResult(txt){
     showResultOverlay(true, gained);
     if(combo === 3){ score += 5; setWave("idle","🔥 KOMBİNASYON!"); }
   } else {
-    // SHAKE EFEKTİ (DARBE AL)
+    // SHAKE EFEKTİ
     $("paneA").classList.add("shake-hit");
     setTimeout(()=>$("paneA").classList.remove("shake-hit"), 500);
 
@@ -706,5 +491,3 @@ function loopConfetti(){
 
 $("startBtn").onclick=fetchWordsFromAI; $("micA").onclick=()=>{ ensureAudio(); listen(); };
 </script>
-</body>
-</html>
