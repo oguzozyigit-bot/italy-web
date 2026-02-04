@@ -10,7 +10,7 @@
     /* --- TEMA: DEEP SPACE NEON --- */
     :root {
       --bg-deep: #050005;
-      --panel-bg: rgba(15, 15, 25, 0.85);
+      --panel-bg: rgba(15, 15, 25, 0.95);
       --primary: #9900ff; /* Mor */
       --accent: #00f3ff;  /* Cyan */
       --success: #00e676;
@@ -22,11 +22,9 @@
     * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
     html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; position: fixed; font-family: 'Outfit', sans-serif; background: var(--bg-deep); color: var(--text); display: flex; align-items: center; justify-content: center; }
 
-    /* ARKA PLAN */
     .cosmos-bg { position: absolute; inset: 0; background: radial-gradient(circle at center, #1a001a 0%, #000 100%); z-index: 0; }
     .star-dust { position: absolute; inset: 0; opacity: 0.3; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 40px 40px; }
 
-    /* ÇERÇEVE */
     .mobile-frame {
       width: 100%; max-width: 480px; height: 100%; position: relative; z-index: 10;
       display: flex; flex-direction: column; background: var(--panel-bg);
@@ -34,24 +32,20 @@
     }
     @media(min-width: 520px) { .mobile-frame { height: 92vh; border-radius: 32px; box-shadow: 0 40px 100px -20px #000; } }
 
-    /* HEADER */
     .header { flex: 0 0 70px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
     .nav-btn { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .nav-btn:active { transform: scale(0.95); }
     .page-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; color: var(--accent); text-transform: uppercase; }
     .lang-badge { font-size: 10px; padding: 4px 8px; background: var(--primary); border-radius: 6px; color: #fff; margin-left: 8px; vertical-align: middle; }
 
-    /* OYUN ALANI */
     .game-area { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
 
-    /* İSTATİSTİKLER */
     .stats-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 15px; border-radius: 16px; border: 1px solid var(--border); }
     .stat-item { display: flex; flex-direction: column; align-items: center; }
     .stat-label { font-size: 10px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
     .stat-val { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; }
     .lives { color: var(--error); letter-spacing: 2px; }
 
-    /* İPUCU (Türkçe) */
     .hint-card {
       background: linear-gradient(135deg, rgba(153,0,255,0.1), rgba(0,243,255,0.05));
       border: 1px solid rgba(153,0,255,0.3);
@@ -60,7 +54,6 @@
     }
     .hint-text { font-size: 16px; font-weight: 600; color: #fff; font-style: italic; }
 
-    /* 1. HEDEF ALANI (Drop Zone) */
     .target-zone {
       min-height: 100px;
       background: rgba(0,0,0,0.3);
@@ -73,14 +66,12 @@
     .target-zone.wrong { border-color: var(--error); animation: shake 0.4s; }
     .target-zone.correct { border-color: var(--success); background: rgba(0, 230, 118, 0.1); }
 
-    /* 2. KAYNAK ALANI (Word Pool) */
     .pool-zone {
       flex: 1;
       display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 8px;
       padding-top: 10px;
     }
 
-    /* TOKEN (Kelime Kutusu) */
     .token {
       background: rgba(255,255,255,0.08);
       border: 1px solid var(--border);
@@ -91,25 +82,21 @@
     }
     .token:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
     
-    /* Seçilmiş Token (Target Zone) */
     .token.placed {
       background: linear-gradient(135deg, var(--primary), var(--accent));
       border: none; box-shadow: 0 4px 0 rgba(0,0,0,0.4); text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
-    /* Butonlar */
     .action-row { display: flex; gap: 10px; margin-top: auto; }
     .game-btn { flex: 1; padding: 14px; border-radius: 16px; border: none; font-weight: 800; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
     .btn-check { background: var(--success); color: #000; box-shadow: 0 5px 15px rgba(0,230,118,0.3); }
     .btn-check:active { transform: scale(0.98); }
     .btn-sec { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--border); }
 
-    /* MODAL */
     .modal-wrap { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 99; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
     .modal-card { width: 85%; max-width: 320px; background: #151520; border: 1px solid var(--border); border-radius: 24px; padding: 24px; text-align: center; animation: popIn 0.4s; }
     .modal-title { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 10px; color: var(--accent); }
     
-    /* DİL SEÇİMİ */
     .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
     .lang-opt { background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition:0.2s; }
     .lang-opt.active { background: var(--primary); border-color: var(--primary); }
@@ -185,8 +172,8 @@
 
   <div class="modal-wrap" id="resultModal">
     <div class="modal-card">
-      <div class="modal-title" id="resTitle">TEBRİKLER!</div>
-      <div id="resDesc" style="margin-bottom:20px; font-size:14px; opacity:0.8;"></div>
+      <div class="modal-title" id="resTitle">OYUN BİTTİ</div>
+      <div id="resDesc" style="margin-bottom:20px; font-size:14px; opacity:0.9;"></div>
       <button class="game-btn btn-check" onclick="restartGame()">TEKRAR OYNA</button>
       <div style="height:10px"></div>
       <button class="game-btn btn-sec" onclick="location.href='/pages/game.html'">ÇIKIŞ</button>
@@ -194,7 +181,7 @@
   </div>
 
 <script>
-// --- OFFLINE DATABASE (Genişletilmiş) ---
+// --- OFFLINE DATABASE (Offline İçerik) ---
 const SENTENCE_DB = {
   en: [
     { t: "Her gün okula giderim", s: "I go to school every day." },
@@ -207,16 +194,12 @@ const SENTENCE_DB = {
     { t: "Seni bekliyordum", s: "I have been waiting for you." },
     { t: "Yeni bir araba aldım", s: "I bought a new car." },
     { t: "Yarın görüşürüz", s: "See you tomorrow." },
-    { t: "Bu kitap çok ilginç", s: "This book is very interesting." },
     { t: "Nerede yaşıyorsun?", s: "Where do you live?" },
     { t: "Sana yardım edebilir miyim?", s: "Can I help you?" },
     { t: "O çok güzel şarkı söyler", s: "She sings very beautifully." },
     { t: "Dün gece uyuyamadım", s: "I could not sleep last night." },
     { t: "Başarı çalışmaya bağlıdır", s: "Success depends on hard work." },
-    { t: "Zaman paradır", s: "Time is money." },
-    { t: "Bunu yapabilirsin!", s: "You can do it!" },
-    { t: "Hiçbir şey imkansız değildir", s: "Nothing is impossible." },
-    { t: "Hayat sürprizlerle dolu", s: "Life is full of surprises." }
+    { t: "Zaman paradır", s: "Time is money." }
   ],
   de: [
     { t: "Benim adım Ali", s: "Mein Name ist Ali." },
@@ -227,8 +210,7 @@ const SENTENCE_DB = {
     { t: "Hafta sonu ne yapıyorsun?", s: "Was machst du am Wochenende?" },
     { t: "Bir kahve istiyorum", s: "Ich möchte einen Kaffee." },
     { t: "Hava bugün güzel", s: "Das Wetter ist heute schön." },
-    { t: "Yorgunum", s: "Ich bin müde." },
-    { t: "Yardıma ihtiyacım var", s: "Ich brauche Hilfe." }
+    { t: "Yorgunum", s: "Ich bin müde." }
   ],
   fr: [
     { t: "Benim adım Ali", s: "Je m'appelle Ali." },
@@ -237,34 +219,23 @@ const SENTENCE_DB = {
     { t: "Bu çok güzel", s: "C'est très beau." },
     { t: "Fransızca öğreniyorum", s: "J'apprends le français." },
     { t: "Saat kaç?", s: "Quelle heure est-il ?" },
-    { t: "Bir kahve lütfen", s: "Un café s'il vous plaît." },
-    { t: "Bugün hava sıcak", s: "Il fait chaud aujourd'hui." },
-    { t: "Anlamıyorum", s: "Je ne comprends pas." },
-    { t: "Yardım edebilir misiniz?", s: "Pouvez-vous m'aider ?" }
+    { t: "Bir kahve lütfen", s: "Un café s'il vous plaît." }
   ],
   es: [
     { t: "Benim adım Ali", s: "Me llamo Ali." },
     { t: "Nasılsın?", s: "Cómo estás?" },
     { t: "Seni seviyorum", s: "Te quiero." },
-    { t: "Bu çok iyi", s: "Esto es muy bueno." },
     { t: "İspanyolca öğreniyorum", s: "Estoy aprendiendo español." },
     { t: "Neredesin?", s: "Dónde estás?" },
-    { t: "Bir kahve istiyorum", s: "Quiero un café." },
-    { t: "Hava güzel", s: "El tiempo es bueno." },
-    { t: "Benim bir kedim var", s: "Tengo un gato." },
-    { t: "Sonra görüşürüz", s: "Hasta luego." }
+    { t: "Bir kahve istiyorum", s: "Quiero un café." }
   ],
   it: [
     { t: "Benim adım Ali", s: "Mi chiamo Ali." },
     { t: "Nasılsın?", s: "Come stai?" },
     { t: "Seni seviyorum", s: "Ti amo." },
-    { t: "Bu çok lezzetli", s: "È molto delizioso." },
     { t: "İtalyanca öğreniyorum", s: "Sto imparando l'italiano." },
     { t: "Nereden geliyorsun?", s: "Di dove sei?" },
-    { t: "Bir kahve lütfen", s: "Un caffè per favore." },
-    { t: "Hava yağmurlu", s: "Il tempo è piovoso." },
-    { t: "Benim bir köpeğim var", s: "Ho un cane." },
-    { t: "Teşekkür ederim", s: "Grazie mille." }
+    { t: "Bir kahve lütfen", s: "Un caffè per favore." }
   ]
 };
 
@@ -274,9 +245,9 @@ let currentLevel = 0;
 let score = 0;
 let lives = 3;
 let currentSentence = {};
-let targetTokens = []; // Dizilenler
-let poolTokens = []; // Havuzdakiler
-let correctTokens = []; // Doğru sıra
+let targetTokens = [];
+let poolTokens = [];
+let correctTokens = [];
 let isMuted = false;
 
 // --- DİL SEÇİMİ ---
@@ -288,8 +259,9 @@ window.selectLang = (lang) => {
   restartGame();
 };
 
-// --- OYUN BAŞLATMA ---
+// --- OYUN BAŞLATMA (DÜZELTİLDİ: Tekrar Oyna için) ---
 function restartGame() {
+  document.getElementById('resultModal').style.display = 'none'; // Modalı kapat
   score = 0;
   lives = 3;
   currentLevel = 0;
@@ -303,9 +275,9 @@ function restartGame() {
   loadLevel();
 }
 
-// --- TOKEN PARSE (Akıllı Ayırıcı) ---
+// --- TOKEN PARSE ---
 function parseSentence(sentence) {
-  // Kelimeleri ve noktalama işaretlerini ayırır: "Hello, world!" -> ["Hello", ",", "world", "!"]
+  // Kelimeleri ve noktalamaları ayırır
   return sentence.match(/[\wÀ-ž]+|[.,!?;]/g) || [];
 }
 
@@ -327,7 +299,7 @@ function loadLevel() {
   // Havuzu karıştır
   poolTokens = [...correctTokens].sort(() => Math.random() - 0.5);
   
-  // Her token için benzersiz ID oluştur (Aynı kelimeler karışmasın)
+  // Benzersiz ID
   poolTokens = poolTokens.map((txt, idx) => ({ id: idx, text: txt }));
   
   targetTokens = [];
@@ -342,7 +314,6 @@ function renderUI() {
   targetZone.innerHTML = '';
   poolZone.innerHTML = '';
   
-  // HEDEF ALANI
   if (targetTokens.length === 0) {
     targetZone.innerHTML = `<div style="width:100%; text-align:center; opacity:0.3; pointer-events:none;">Kelimelere dokun...</div>`;
   } else {
@@ -355,7 +326,6 @@ function renderUI() {
     });
   }
   
-  // HAVUZ ALANI
   poolTokens.forEach((tok, index) => {
     let btn = document.createElement('div');
     btn.className = 'token';
@@ -365,18 +335,18 @@ function renderUI() {
   });
 }
 
-// --- ETKİLEŞİM ---
+// --- ETKİLEŞİM (SES EKLENDİ) ---
 function placeToken(poolIndex) {
-  // Havuzdan al, hedefe koy
   const token = poolTokens[poolIndex];
   poolTokens.splice(poolIndex, 1);
   targetTokens.push(token);
+  
+  speak(token.text); // ✅ KELİMEYİ OKU
   playSFX('click');
   renderUI();
 }
 
 function unplaceToken(targetIndex) {
-  // Hedeften al, havuza geri koy
   const token = targetTokens[targetIndex];
   targetTokens.splice(targetIndex, 1);
   poolTokens.push(token);
@@ -385,7 +355,6 @@ function unplaceToken(targetIndex) {
 }
 
 function resetLevel() {
-  // Hepsini geri al
   poolTokens = [...poolTokens, ...targetTokens];
   targetTokens = [];
   renderUI();
@@ -405,7 +374,7 @@ function checkSentence() {
     targetZone.classList.add('correct');
     playSFX('win');
     score += 10;
-    speak(currentSentence.s);
+    speak(currentSentence.s); // ✅ DOĞRU CÜMLEYİ OKU
     
     setTimeout(() => {
       targetZone.classList.remove('correct');
@@ -428,7 +397,6 @@ function checkSentence() {
   }
 }
 
-// --- OYUN SONU ---
 function updateStats() {
   document.getElementById('scoreVal').innerText = score;
   document.getElementById('levelVal').innerText = currentLevel + 1;
@@ -436,16 +404,26 @@ function updateStats() {
   document.getElementById('livesVal').innerText = hearts;
 }
 
+// --- OYUN SONU (DÜZELTİLDİ: Doğruyu Göster) ---
 function endGame() {
   document.getElementById('resultModal').style.display = 'flex';
   const title = lives > 0 ? "ŞAMPİYON! 🏆" : "OYUN BİTTİ 💀";
-  const desc = `Toplam Puan: ${score}<br>Tamamlanan Seviye: ${currentLevel}`;
+  
+  let desc = `Toplam Puan: <strong style="color:#fff">${score}</strong>`;
+  
+  // Eğer kaybettiyse doğrusunu göster
+  if (lives <= 0) {
+    desc += `<br><br><span style="color:#ff1744; font-weight:bold; font-size:12px;">DOĞRUSU:</span><br>
+             <span style="color:#fff; font-size:16px; font-style:italic;">"${currentSentence.s}"</span>`;
+             
+    speak(currentSentence.s); // ✅ DOĞRUSUNU OKU
+  }
   
   document.getElementById('resTitle').innerText = title;
   document.getElementById('resDesc').innerHTML = desc;
 }
 
-// --- SES SİSTEMİ (GÜVENLİ) ---
+// --- SES SİSTEMİ (GÜVENLİ TIMEOUT) ---
 const synth = window.speechSynthesis;
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -474,8 +452,8 @@ function playSFX(type) {
   } else if (type === 'win') {
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(440, t);
-    osc.frequency.setValueAtTime(554, t + 0.1); // C#
-    osc.frequency.setValueAtTime(659, t + 0.2); // E
+    osc.frequency.setValueAtTime(554, t + 0.1); 
+    osc.frequency.setValueAtTime(659, t + 0.2); 
     gain.gain.setValueAtTime(0.2, t);
     gain.gain.linearRampToValueAtTime(0, t + 0.4);
     osc.start(t); osc.stop(t + 0.4);
@@ -491,13 +469,12 @@ function playSFX(type) {
 
 function speak(text) {
   if (isMuted) return;
-  // Güvenli Timeout (Takılmayı önler)
+  // Takılmayı önleyen sigorta
   const tm = setTimeout(() => {}, 2000);
   
   try {
     synth.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    // Dil kodunu eşle
     const langMap = { 'en': 'en-US', 'de': 'de-DE', 'fr': 'fr-FR', 'es': 'es-ES', 'it': 'it-IT' };
     u.lang = langMap[currentLang] || 'en-US';
     u.rate = 0.9;
