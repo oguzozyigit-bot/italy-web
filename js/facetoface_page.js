@@ -59,6 +59,26 @@ function langFlag(code){
   return LANGS.find(x=>x.code===code)?.flag || "🌐";
 }
 
+function base(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
+
+/* ========= UI small fixes (requested) ========= */
+function applyVisualFixes(){
+  // 1) 180° tarafındaki mikrofon ikonunu çevir
+  // HTML'de id'ler farklıysa da kırılmasın diye birkaç olasılığı deniyoruz:
+  const cand = ["botMic","bottomMic","micBottom","micB"];
+  for(const id of cand){
+    const el = $(id);
+    if(el){
+      el.classList.add("rot180");
+      break;
+    }
+  }
+  // 2) italkyAI / BE FREE aşağı insin (bordo üstüne kaymasın)
+  // Bu başlık alanına class basıyoruz; CSS'te .brandLower ile aşağı kaydıracağız.
+  const brand = $("brandBlock") || $("miniBrand") || $("logoHome");
+  if(brand) brand.classList.add("brandLower");
+}
+
 /* ========= Language sheet ========= */
 let sheetFor = "bot"; // "top" | "bot"
 
@@ -85,9 +105,12 @@ function renderSheetList(){
       if(sheetFor === "top"){
         topLang = code;
         $("topLangTxt").textContent = `${langFlag(topLang)} ${langName(topLang)}`;
+        // recognizer dili değişsin diye: aktif varsa durdur
+        stopAll();
       }else{
         botLang = code;
         $("botLangTxt").textContent = `${langFlag(botLang)} ${langName(botLang)}`;
+        stopAll();
       }
 
       closeSheet();
@@ -136,6 +159,229 @@ function bindNav(){
   });
 }
 
+/* ========= Speech + Translate Engine ========= */
+function srAvailable(){
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
+function normalizeLangForSpeech(code){
+  // browser SR çoğunlukla BCP-47 ister
+  const map = {
+    "tr":"tr-TR",
+    "en":"en-US",
+    "de":"de-DE",
+    "fr":"fr-FR",
+    "it":"it-IT",
+    "es":"es-ES",
+    "pt":"pt-PT",
+    "pt-br":"pt-BR",
+    "nl":"nl-NL",
+    "sv":"sv-SE",
+    "no":"nb-NO",
+    "da":"da-DK",
+    "fi":"fi-FI",
+    "pl":"pl-PL",
+    "cs":"cs-CZ",
+    "sk":"sk-SK",
+    "hu":"hu-HU",
+    "ro":"ro-RO",
+    "bg":"bg-BG",
+    "el":"el-GR",
+    "ru":"ru-RU",
+    "uk":"uk-UA",
+    "sr":"sr-RS",
+    "hr":"hr-HR",
+    "bs":"bs-BA",
+    "sq":"sq-AL",
+    "ar":"ar-SA",
+    "fa":"fa-IR",
+    "ur":"ur-PK",
+    "hi":"hi-IN",
+    "bn":"bn-BD",
+    "ta":"ta-IN",
+    "te":"te-IN",
+    "th":"th-TH",
+    "vi":"vi-VN",
+    "id":"id-ID",
+    "ms":"ms-MY",
+    "zh":"zh-CN",
+    "zh-tw":"zh-TW",
+    "ja":"ja-JP",
+    "ko":"ko-KR",
+    "he":"he-IL",
+  };
+  return map[code] || "en-US";
+}
+
+async function translateViaApi(text, source, target){
+  const b = base();
+  if(!b) return text;
+
+  const body = {
+    text,
+    source,
+    target,
+    from_lang: source,
+    to_lang: target,
+  };
+
+  const r = await fetch(`${b}/api/translate`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
+
+  const data = await r.json().catch(()=> ({}));
+  const out = String(
+    data?.translated || data?.translation || data?.text || data?.translated_text || ""
+  ).trim();
+
+  return out || text;
+}
+
+function speak(text, langCode){
+  const t = String(text||"").trim();
+  if(!t) return;
+  if(!("speechSynthesis" in window)) return;
+
+  try{
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = normalizeLangForSpeech(langCode);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }catch{}
+}
+
+function setMicUI(which, on){
+  // HTML'deki id’ler farklı olabilir diye birkaç aday deniyoruz
+  const ids = (which === "top")
+    ? ["topMic","micTop","micA","mic1"]
+    : ["botMic","bottomMic","micBottom","micB","mic2"];
+
+  for(const id of ids){
+    const el = $(id);
+    if(el){
+      el.classList.toggle("listening", !!on);
+      break;
+    }
+  }
+
+  $("frameRoot")?.classList.toggle("listening", !!on);
+}
+
+function appendLine(side, text){
+  // Facetoface HTML’inde hangi alanlar varsa ona yazacağız:
+  // topBox/botBox yoksa console’a düşmeden sessiz geçsin.
+  const topOut = $("topOut") || $("topText") || $("topTranscript");
+  const botOut = $("botOut") || $("botText") || $("botTranscript");
+
+  if(side === "top"){
+    if(topOut) topOut.textContent = text;
+  }else{
+    if(botOut) botOut.textContent = text;
+  }
+}
+
+let active = null;
+let recTop = null;
+let recBot = null;
+
+function stopAll(){
+  try{ recTop?.stop?.(); }catch{}
+  try{ recBot?.stop?.(); }catch{}
+  recTop = null; recBot = null;
+  active = null;
+  setMicUI("top", false);
+  setMicUI("bot", false);
+}
+
+function buildRecognizer(langCode){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const rec = new SR();
+  rec.lang = normalizeLangForSpeech(langCode);
+  rec.interimResults = true;
+  rec.continuous = false;
+  return rec;
+}
+
+async function start(which){
+  if(!srAvailable()){
+    alert("Bu cihaz konuşmayı yazıya çevirmiyor (SpeechRecognition yok).");
+    return;
+  }
+
+  if(active && active !== which) stopAll();
+
+  const src = (which === "top") ? topLang : botLang;
+  const dst = (which === "top") ? botLang : topLang;
+
+  const rec = buildRecognizer(src);
+  if(!rec){
+    alert("Mikrofon açılamadı.");
+    return;
+  }
+
+  active = which;
+  setMicUI(which, true);
+
+  let live = "";
+  let finalText = "";
+
+  rec.onresult = (e)=>{
+    let chunk = "";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t = e.results[i]?.[0]?.transcript || "";
+      if(e.results[i].isFinal) finalText += t + " ";
+      else chunk += t + " ";
+    }
+    live = (finalText + chunk).trim();
+    // canlı yazdır
+    appendLine(which, live);
+  };
+
+  rec.onerror = ()=>{
+    stopAll();
+    alert("Mikrofon izin/HTTPS/cihaz sorunu olabilir.");
+  };
+
+  rec.onend = async ()=>{
+    setMicUI(which, false);
+    const txt = (finalText || live || "").trim();
+    active = null;
+
+    if(!txt) return;
+
+    // çevir
+    try{
+      const translated = await translateViaApi(txt, src, dst);
+
+      // diğer tarafa yaz
+      const other = (which === "top") ? "bot" : "top";
+      appendLine(other, translated);
+
+      // otomatik ses (varsa)
+      const speakBtn = (other === "top")
+        ? ($("topSpeak") || $("speakTop"))
+        : ($("botSpeak") || $("speakBot"));
+
+      const muted = speakBtn?.classList?.contains("muted");
+      if(!muted) speak(translated, dst);
+    }catch{
+      // sessiz fail
+    }
+  };
+
+  if(which === "top") recTop = rec; else recBot = rec;
+
+  try{ rec.start(); }
+  catch{
+    stopAll();
+    alert("Mikrofon başlatılamadı.");
+  }
+}
+
+/* ========= Buttons ========= */
 function bindLangButtons(){
   $("topLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); openSheet("top"); });
   $("botLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); openSheet("bot"); });
@@ -146,10 +392,58 @@ function bindLangButtons(){
   });
 }
 
+function bindMicButtons(){
+  // Üst mikrofon
+  const topMic = $("topMic") || $("micTop") || $("micA") || $("mic1");
+  topMic?.addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(active === "top") stopAll();
+    else start("top");
+  });
+
+  // Alt mikrofon (180°)
+  const botMic = $("botMic") || $("bottomMic") || $("micBottom") || $("micB") || $("mic2");
+  botMic?.addEventListener("click", (e)=>{
+    e.preventDefault();
+    if(active === "bot") stopAll();
+    else start("bot");
+  });
+
+  // Speak butonları (mute)
+  const t = $("topSpeak") || $("speakTop");
+  const b = $("botSpeak") || $("speakBot");
+  t?.addEventListener("click", ()=> t.classList.toggle("muted"));
+  b?.addEventListener("click", ()=> b.classList.toggle("muted"));
+}
+
+function injectCssFixes(){
+  // İstenen iki tasarım fixini sayfaya CSS olarak enjekte ediyoruz
+  const css = `
+    .rot180 { transform: rotate(180deg) !important; }
+    .brandLower { transform: translateY(6px) !important; }
+  `;
+  const st = document.createElement("style");
+  st.textContent = css;
+  document.head.appendChild(st);
+}
+
 document.addEventListener("DOMContentLoaded", ()=>{
+  injectCssFixes();
+  applyVisualFixes();
+
   $("topLangTxt").textContent = `${langFlag(topLang)} ${langName(topLang)}`;
   $("botLangTxt").textContent = `${langFlag(botLang)} ${langName(botLang)}`;
 
   bindNav();
   bindLangButtons();
+  bindMicButtons();
+
+  // ilk açılışta SR yoksa kullanıcıyı boş bırakma
+  if(!srAvailable()){
+    // alert yok, sessiz: sadece mikrofonlara "disabled" efekti verelim
+    const m1 = $("topMic") || $("micTop") || $("micA") || $("mic1");
+    const m2 = $("botMic") || $("bottomMic") || $("micBottom") || $("micB") || $("mic2");
+    m1?.classList?.add("muted");
+    m2?.classList?.add("muted");
+  }
 });
