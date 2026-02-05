@@ -1,4 +1,5 @@
 import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
+import { apiPOST } from "/js/api.js";
 
 const $ = (id)=>document.getElementById(id);
 function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
@@ -6,12 +7,38 @@ function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; }
 function getUser(){
   return safeJson(localStorage.getItem(STORAGE_KEY), {});
 }
+
+function termsKey(email=""){
+  return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
+}
+
 function ensureLogged(){
   const u = getUser();
-  if(!u || !u.email || !u.isSessionActive){
+  if(!u || !u.email){
     location.replace("/index.html");
     return null;
   }
+
+  // ✅ sözleşme zorunlu
+  const tk = termsKey(u.email);
+  if(!localStorage.getItem(tk)){
+    location.replace("/index.html");
+    return null;
+  }
+
+  // ✅ aktif session işareti yoksa da çıkar (mevcut kuralını koruduk)
+  if(!u.isSessionActive){
+    location.replace("/index.html");
+    return null;
+  }
+
+  // ✅ google token yoksa da çıkar (backend bazı modüllerde ister)
+  const gid = (localStorage.getItem("google_id_token") || "").trim();
+  if(!gid){
+    location.replace("/index.html");
+    return null;
+  }
+
   return u;
 }
 
@@ -122,24 +149,14 @@ function autoGrow(){
 
 /* ========= API ========= */
 async function apiChat(u, text, history){
-  const base = String(BASE_DOMAIN||"").replace(/\/+$/,"");
-  const url = `${base}/api/chat`;
-
-  const r = await fetch(url,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      user_id: (u.user_id || u.id || u.email),
-      text,
-      history: (history || []).slice(-20)
-    })
+  // ✅ api.js üzerinden (token header otomatik)
+  const data = await apiPOST("/api/chat", {
+    user_id: (u.user_id || u.id || u.email),
+    text,
+    history: (history || []).slice(-20)
   });
 
-  const raw = await r.text().catch(()=> "");
-  if(!r.ok) throw new Error(raw || `HTTP ${r.status}`);
-  let data = {};
-  try{ data = JSON.parse(raw || "{}"); }catch{}
-  const out = String(data.text || "").trim();
+  const out = String(data?.text || data?.message || data?.reply || "").trim();
   return out || "…";
 }
 
