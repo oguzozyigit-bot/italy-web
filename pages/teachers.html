@@ -1,528 +1,578 @@
-<!-- FILE: italky-web/pages/teachers.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ITALKY - Öğretmen</title>
+  <title>italkyAI • Dil Öğretmeni</title>
   <link rel="icon" href="data:," />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg-void:#030014;
-      --neon-cyan:#00f3ff;
-      --neon-purple:#bc13fe;
+      --frameW: min(480px, calc(100vw - 18px));
+      --topH: 74px;
+      --footerH: 74px;
+      --dockH: 88px;
 
-      --glass-border: rgba(255,255,255,0.10);
-      --text-main:#fff;
-      --text-muted: rgba(255,255,255,0.65);
+      --bg:#030014;
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.60);
+      --border: rgba(255,255,255,.10);
 
-      --italky-burgundy: rgba(140, 18, 45, .42);
-      --italky-burgundy-2: rgba(140, 18, 45, .18);
+      --ai1:#A5B4FC;
+      --ai2:#4F46E5;
+      --befree:#6B7280;
 
-      --footerH: 92px;
-      --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --glass: rgba(255,255,255,.06);
+      --card: rgba(0,0,0,.18);
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
     html,body{
-      margin:0; padding:0; width:100%; height:100%;
-      overflow:hidden;
-      position:fixed;
+      margin:0; padding:0; width:100%; height:100dvh;
+      overflow:hidden; position:fixed;
       font-family:'Outfit', sans-serif;
-      background-color:var(--bg-void);
-      color:var(--text-main);
+      background:var(--bg);
+      color:var(--text);
       display:flex; align-items:center; justify-content:center;
     }
 
-    .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:#030014; z-index:0; pointer-events:none; }
-    .orb{ position:absolute; border-radius:50%; filter: blur(80px); opacity:.5; animation: floatOrbit 25s infinite alternate ease-in-out; }
-    .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, var(--neon-purple), transparent 70%); }
-    .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, var(--neon-cyan), transparent 70%); animation-delay:-5s; }
-    @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1); } 100%{ transform: translate(10%,-10%) scale(1.1); } }
+    /* background */
+    .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:var(--bg); z-index:0; pointer-events:none; }
+    .orb{ position:absolute; border-radius:50%; filter: blur(90px); opacity:.28; animation: floatOrbit 30s infinite alternate ease-in-out; }
+    .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, rgba(79,70,229,.55), transparent 70%); }
+    .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, rgba(165,180,252,.45), transparent 70%); animation-delay:-5s; }
+    @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1);} 100%{ transform: translate(10%,-10%) scale(1.1);} }
     .noise{
       position:absolute; inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
       pointer-events:none; mix-blend-mode:overlay; z-index:1;
     }
 
     .mobile-frame{
       width:100%; max-width:480px; height:100%;
       position:relative; z-index:10;
-      display:flex; flex-direction:column;
-      background: rgba(5,5,10,0.40);
-      backdrop-filter: blur(30px);
+      background: rgba(8, 8, 20, 0.65);
+      backdrop-filter: blur(25px);
       overflow:hidden;
+      display:flex; flex-direction:column;
     }
-    @media (min-width:520px){
+    @media(min-width:520px){
       .mobile-frame{
-        height:92vh; border-radius:40px;
-        border:1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+        height:92vh;
+        border-radius:40px;
+        border:1px solid rgba(255,255,255,0.08);
+        box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
       }
     }
 
-    /* header - home ile aynı */
-    .header{
-      flex:0 0 92px;
-      padding: 0 18px;
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px;
-      position:relative; z-index:20;
+    /* topbar */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 3000;
+      height: var(--topH);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 0 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(12px);
     }
-    .leftHead{ display:flex; align-items:center; gap:10px; min-width:0; }
-
+    .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
     .backBtn{
-      width: 44px; height: 44px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
+      width:44px;height:44px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
       color:#fff;
-      font-weight: 1000;
-      font-size: 20px;
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      box-shadow: 0 14px 30px rgba(0,0,0,0.35);
+      font-size:20px;font-weight:1000;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer; user-select:none;
     }
     .backBtn:active{ transform: scale(.96); }
 
     .mini-brand{
-      display:flex; flex-direction:column; width:fit-content; align-items:center;
-      user-select:none; cursor:pointer;
+      display:flex; flex-direction:column;
+      user-select:none; cursor:pointer; line-height:1;
+      margin-top: 2px;
     }
-    .mini-logo{
+    .logo-line{
       font-family:'Space Grotesk', sans-serif;
-      font-weight:700; font-size:26px;
-      letter-spacing:-1px; line-height:1;
-      color:#fff; white-space:nowrap;
-      text-shadow:0 0 20px rgba(255,255,255,0.3);
+      font-size: 20px;
+      letter-spacing: -0.4px;
+      display:flex; align-items:flex-end; gap:2px;
     }
-    .mini-flag{
-      width:100%; height:4px; border-radius:4px;
-      display:flex; overflow:hidden; margin-top:4px;
-      box-shadow:0 0 10px rgba(255,255,255,0.15);
+    .logo-main{ font-weight:700; color:#FFFFFF; }
+    .logo-ai{
+      font-weight:700;
+      background: linear-gradient(135deg, var(--ai1) 0%, var(--ai2) 100%);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
-    .mini-flag div{ flex:1; height:100%; }
-    .f-g{ background:#009246; box-shadow:0 0 8px #009246; z-index:1; }
-    .f-w{ background:#fff; z-index:2; }
-    .f-r{ background:#CE2B37; box-shadow:0 0 8px #CE2B37; z-index:1; }
+    .logo-slogan{
+      font-family:'Outfit', sans-serif;
+      font-size:10px;
+      font-weight:700;
+      letter-spacing: 4px;
+      color: var(--befree);
+      margin-top: 5px;
+      padding-left: 2px;
+      text-transform: uppercase;
+    }
 
-    .userbox{
-      flex:1; min-width:0;
-      display:flex; align-items:center; justify-content:flex-end;
-      gap:12px;
-    }
+    .rightControls{ display:flex; align-items:center; gap:10px; min-width:0; }
     .usertext{
       min-width:0;
-      display:flex; flex-direction:column;
-      align-items:flex-end;
-      gap:2px;
-      max-width: 240px;
+      display:flex; flex-direction:column; align-items:flex-end; gap:2px;
+      max-width: 200px;
     }
-    .uname{
-      font-weight: 950;
-      font-size: 13px;
-      color: rgba(255,255,255,0.92);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .plan{
-      font-weight: 900;
-      font-size: 11px;
-      color: rgba(255,255,255,0.60);
-      white-space:nowrap;
-    }
-
+    .uname{ font-weight: 900; font-size: 12px; color: rgba(255,255,255,0.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .plan{ font-weight: 800; font-size: 11px; color: rgba(255,255,255,0.55); white-space:nowrap; }
     .avatar-btn{
-      width: 44px; height: 44px;
-      border: none;
-      background: transparent;
-      padding: 0;
-      border-radius: 999px;
-      overflow: hidden;
-      cursor: pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      width: 42px; height: 42px;
+      border:none; background:transparent;
+      border-radius:999px;
+      overflow:hidden;
+      cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
     }
     .avatar-btn:active{ transform: scale(.96); }
-    .avatar-btn img{ width:44px; height:44px; border-radius:999px; object-fit:cover; display:block; }
+    .avatar-btn img{ width:42px; height:42px; border-radius:999px; object-fit:cover; display:block; }
     .avatar-fallback{
-      width:44px; height:44px; border-radius:999px;
+      width:42px; height:42px; border-radius:999px;
       display:flex; align-items:center; justify-content:center;
       font-weight: 1000;
       color: rgba(255,255,255,0.92);
-      background: radial-gradient(circle at 30% 20%, rgba(0,243,255,.18), rgba(0,0,0,0));
-      filter: drop-shadow(0 0 10px rgba(0,243,255,.22));
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
       user-select:none;
     }
 
-    /* scroll */
-    .contentScroll{
+    /* main */
+    .main{
       flex:1;
-      overflow-y:auto; overflow-x:hidden;
-      -webkit-overflow-scrolling: touch;
-      padding: 10px 18px calc(var(--footerH) + 14px);
-      position:relative;
-      z-index: 5;
-      scrollbar-width:none;
-    }
-    .contentScroll::-webkit-scrollbar{ display:none; }
-
-    .pageTitle{
-      margin: 6px 2px 12px;
+      padding: 12px;
+      overflow:hidden;
       display:flex;
       flex-direction:column;
-      gap:4px;
-    }
-    .h1{ font-weight: 1000; font-size: 16px; letter-spacing: .2px; color: rgba(255,255,255,.94); }
-    .h2{ font-weight: 850; font-size: 12px; color: rgba(255,255,255,.62); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      animation: fadeInUp .55s var(--ease-elastic);
+      gap: 10px;
+      padding-bottom: calc(var(--footerH) + var(--dockH) + 12px);
     }
 
-    .tcard{
-      position:relative;
-      border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.012) 100%);
-      box-shadow: 0 14px 34px rgba(0,0,0,0.28);
-      overflow:hidden;
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .pill{
+      flex:1;
+      height: 46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:#fff;
+      font-weight: 1000;
+      font-size: 12px;
+      padding: 0 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       cursor:pointer;
       user-select:none;
-      transition: .22s ease;
-      aspect-ratio: 1 / 1.06;
-      padding: 14px 14px 16px;
+      min-width:0;
+      gap: 10px;
     }
-    .tcard::before{
-      content:"";
-      position:absolute; inset:0;
-      background: radial-gradient(900px 260px at 10% 0%, var(--italky-burgundy-2), transparent 62%);
-      pointer-events:none;
-      opacity:.95;
-    }
-    .tcard:hover{
-      border-color: rgba(140,18,45,.40);
-      background: linear-gradient(160deg, rgba(140,18,45,.12) 0%, rgba(255,255,255,0.012) 100%);
-    }
-    .tcard:active{ transform: scale(.97); border-color: rgba(140,18,45,.58); }
+    .pillLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .flag{ width:24px; display:flex; align-items:center; justify-content:center; font-size:16px; flex:0 0 24px; opacity:.95; }
+    .label{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .caret{ opacity:.8; }
 
-    .topRow{
-      display:flex; align-items:center; justify-content:space-between;
-      position:relative; z-index:2;
+    .tinyBtn{
+      width: 54px; height: 46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      font-weight: 1000;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tinyBtn.muted{ opacity:.55; filter: grayscale(1); }
+
+    /* quick actions */
+    .chips{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 2px;
+    }
+    .chip{
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.92);
+      font-weight: 900;
+      font-size: 12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .chip:active{ transform: scale(.98); }
+
+    /* chat */
+    #chat{
+      flex:1;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width:none;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      padding: 6px 2px 2px;
+      min-height:0;
+    }
+    #chat::-webkit-scrollbar{ display:none; }
+
+    .bubble{
+      max-width: 88%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.45;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      box-shadow: 0 12px 28px rgba(0,0,0,.22);
+      backdrop-filter: blur(8px);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .bubble.bot{
+      align-self:flex-start;
+      border-left:4px solid var(--ai2);
+      background: rgba(79,70,229,.12);
+    }
+    .bubble.user{
+      align-self:flex-end;
+      border-right:4px solid var(--befree);
+      background: rgba(107,114,128,.14);
+      text-align:right;
+    }
+    .bubble.meta{
+      align-self:center;
+      max-width: 92%;
+      opacity:.92;
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.08);
+      font-size: 12px;
+      font-weight: 800;
+      color: rgba(255,255,255,.70);
+      text-align:center;
     }
 
-    .flagBox{
-      width: 52px; height: 52px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.14);
+    /* input dock */
+    .dock{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--frameW);
+      bottom: var(--footerH);
+      z-index: 2600;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.32);
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(12px);
+    }
+    .dock-inner{
+      width:100%;
+      min-height:54px;
+      display:flex;
+      align-items:flex-end;
+      gap:8px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 26px;
+      padding: 8px;
+    }
+
+    #msgInput{
+      flex: 1 1 auto;
+      min-width:0;
+      background: transparent;
+      border:none;
+      outline:none;
+      color:#fff;
+      font-size:14px;
+      padding:10px 6px;
+      line-height:18px;
+      font-family:inherit;
+      resize:none;
       overflow:hidden;
-      box-shadow: inset 0 0 18px rgba(255,255,255,0.06), 0 10px 18px rgba(0,0,0,0.22);
-      position:relative;
-      z-index:2;
-      background: rgba(0,0,0,0.25);
+      max-height: 120px;
     }
-    .flag-en{ background: linear-gradient(90deg,#012169 0 100%); }
-    .flag-de{ background: linear-gradient(180deg,#000 0 33%,#DD0000 33% 66%,#FFCE00 66% 100%); }
-    .flag-fr{ background: linear-gradient(90deg,#0055A4 0 33%,#fff 33% 66%,#EF4135 66% 100%); }
-    .flag-es{ background: linear-gradient(180deg,#AA151B 0 25%,#F1BF00 25% 75%,#AA151B 75% 100%); }
-    .flag-it{ background: linear-gradient(90deg,#009246 0 33%,#fff 33% 66%,#CE2B37 66% 100%); }
 
-    .teacherIcon{
-      width: 44px; height: 44px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.22);
+    .iconBtn{
+      width:42px; height:42px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
       display:flex; align-items:center; justify-content:center;
-      box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
-      position:relative;
-      z-index:2;
+      cursor:pointer; user-select:none;
+      flex-shrink:0;
     }
-    .teacherIcon svg{
-      width: 22px; height:22px;
-      stroke:#fff;
-      stroke-width:1.8;
+    .iconBtn svg{
+      width:21px; height:21px;
+      stroke: rgba(255,255,255,.88);
       fill:none;
+      stroke-width:2;
       stroke-linecap:round;
       stroke-linejoin:round;
       opacity:.95;
     }
-
-    .tText{ margin-top: 14px; position:relative; z-index:2; }
-    .tTitle{ font-weight: 1000; font-size: 14px; color: rgba(255,255,255,.94); letter-spacing:.2px; line-height:1.2; }
-    .tSub{ margin-top: 6px; font-weight: 850; font-size: 12px; color: rgba(255,255,255,.62); line-height:1.2; }
-
-    .lessonChip{
-      margin-top: 10px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.84);
-      font-weight: 950;
-      font-size: 11px;
+    .iconBtn.listening{
+      border-color: rgba(79,70,229,.45);
+      background: rgba(79,70,229,.16);
+      box-shadow: 0 0 18px rgba(79,70,229,.20);
+      position: relative;
     }
-    .lessonChip .dot{
-      width: 8px; height:8px;
-      border-radius: 99px;
-      background: rgba(0,243,255,.55);
-      box-shadow: 0 0 14px rgba(0,243,255,.18);
-    }
-
-    /* add teacher card */
-    .addCard{ border: 1px dashed rgba(255,255,255,0.18); background: rgba(255,255,255,0.03); }
-    .addCard:hover{ border-color: rgba(0,243,255,0.35); background: rgba(0,243,255,0.05); }
-    .addBig{
-      width: 52px; height: 52px;
+    .iconBtn.listening::after{
+      content:"";
+      position:absolute;
+      inset:-7px;
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      display:flex; align-items:center; justify-content:center;
-      box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+      border: 2px solid rgba(165,180,252,.55);
+      animation: micPulse 1.15s ease-in-out infinite;
     }
-    .addBig svg{ width: 22px; height:22px; stroke:#fff; stroke-width:2; fill:none; }
+    @keyframes micPulse{
+      0%{ transform: scale(0.92); opacity:.75; }
+      50%{ transform: scale(1.08); opacity:.28; }
+      100%{ transform: scale(0.92); opacity:.75; }
+    }
 
+    .sendBtn{
+      border-color: rgba(107,114,128,.28);
+      background: rgba(107,114,128,.16);
+    }
+    .sendBtn svg{ stroke: rgba(107,114,128,.95); }
+
+    /* footer */
     .footerbar{
-      position:absolute; left:0; right:0; bottom:0;
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: var(--frameW);
+      bottom: 0;
+      z-index: 2400;
       height: var(--footerH);
-      padding: 12px 18px 14px;
-      background: rgba(0,0,0,.92);
-      border-top: 1px solid rgba(255,255,255,.08);
-      z-index: 999;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(3, 0, 20, 0.95);
+      border-top: 1px solid rgba(255,255,255,.05);
+      backdrop-filter: blur(10px);
       display:flex;
       flex-direction:column;
       justify-content:center;
-    }
-    .links{
-      display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:8px;
-    }
-    .links a{
-      color: rgba(255,255,255,0.60);
-      text-decoration:none;
-      font-size: 12px;
-      font-weight: 800;
+      gap: 6px;
     }
     .footerBrand{
       text-align:center;
       font-size: 10px;
-      color: rgba(255,255,255,0.25);
-      letter-spacing: 0.6px;
-      font-weight: 800;
-      text-transform:none;
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 0.2px;
+      font-weight: 700;
     }
 
-    @keyframes fadeInUp { from { transform: translateY(26px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    /* sheet */
+    .sheetBackdrop{
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,.72);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 16px;
+    }
+    .sheetBackdrop.show{ display:flex; }
+    .sheet{
+      width: 100%;
+      max-width: 480px;
+      background: rgba(10,10,18,.96);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 26px;
+      overflow:hidden;
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    }
+    .sheetTop{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sheetTitle{
+      font-weight: 1000;
+      font-size: 13px;
+      color: rgba(255,255,255,.92);
+    }
+    .sheetClose{
+      width: 42px; height: 42px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.88);
+      font-weight: 1000;
+      cursor:pointer;
+    }
+    .sheetSearch{
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sheetSearch input{
+      width:100%;
+      height: 46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: #fff;
+      padding: 0 12px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .sheetList{
+      max-height: 55vh;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width:none;
+    }
+    .sheetList::-webkit-scrollbar{ display:none; }
+    .sheetRow{
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      cursor:pointer;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .sheetRow.selected{ background: rgba(79,70,229,.14); }
+    .sheetRow .left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .sheetRow .name{ font-weight: 1000; font-size: 13px; color: rgba(255,255,255,.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sheetRow .code{ font-weight: 800; font-size: 12px; color: rgba(255,255,255,.55); white-space:nowrap; }
+
+    /* toast */
+    .toast{
+      position: fixed; left:50%; top:18px;
+      transform: translateX(-50%) translateY(-120px);
+      background: rgba(10,10,18,.92);
+      border:1px solid rgba(165,180,252,.35);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color:#fff;
+      z-index:10000;
+      font-weight:900;
+      font-size:12px;
+      transition:.28s;
+      backdrop-filter: blur(12px);
+    }
+    .toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 
 <body>
-  <div class="cosmos-bg">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-  </div>
+  <div class="cosmos-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
   <div class="noise"></div>
 
   <div class="mobile-frame">
-
-    <div class="header">
-      <div class="leftHead">
+    <div class="topbar">
+      <div class="leftControls">
         <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
-
         <div class="mini-brand" id="logoHome" title="Ana sayfa">
-          <div class="mini-logo">ITALKY</div>
-          <div class="mini-flag">
-            <div class="f-g"></div><div class="f-w"></div><div class="f-r"></div>
-          </div>
+          <div class="logo-line"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
+          <div class="logo-slogan">BE FREE</div>
         </div>
       </div>
 
-      <div class="userbox">
+      <div class="rightControls">
         <div class="usertext">
           <div class="uname" id="userName">—</div>
           <div class="plan" id="userPlan">FREE</div>
         </div>
-
-        <button class="avatar-btn" id="avatarBtn" aria-label="Profil">
+        <button class="avatar-btn" id="avatarBtn" aria-label="Çıkış">
           <span class="avatar-fallback" id="avatarFallback">•</span>
         </button>
       </div>
     </div>
 
-    <div class="contentScroll">
-      <div class="pageTitle">
-        <div class="h1">Öğretmen</div>
-        <div class="h2">Bir dil seç</div>
+    <div class="main">
+      <div class="row">
+        <button class="pill" id="langBtn" type="button">
+          <span class="pillLeft">
+            <span class="flag" id="langFlag">🇬🇧</span>
+            <span class="label" id="langTxt">İngilizce</span>
+          </span>
+          <span class="caret">▾</span>
+        </button>
+        <button class="tinyBtn" id="muteBtn" type="button" title="Ses (aç/kapat)">🔊</button>
       </div>
 
-      <div class="grid">
+      <div class="chips">
+        <div class="chip" data-q="Kısa bir seviye testi yap (5 soru).">Seviye Testi</div>
+        <div class="chip" data-q="Bugün için 10 kelimelik bir mini kelime listesi ve örnek cümleler ver.">10 Kelime</div>
+        <div class="chip" data-q="Benimle günlük konuşma pratiği yap. Çok kısa cümlelerle başla.">Konuşma Pratiği</div>
+        <div class="chip" data-q="Bir roleplay başlat: kafede sipariş verme.">Roleplay</div>
+      </div>
 
-        <!-- ✅ Tek sayfa parametreli -->
-        <div class="tcard" data-go="/pages/teacher.html?lang=en">
-          <div class="topRow">
-            <div class="flagBox flag-en" aria-hidden="true"></div>
-            <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 19V7"/><path d="M20 19V7"/><path d="M4 7l8-4 8 4"/><path d="M7 10h10"/><path d="M8 13h8"/><path d="M9 16h6"/></svg>
-            </div>
-          </div>
-          <div class="tText">
-            <div class="tTitle">İngilizce Öğretmeni</div>
-            <div class="tSub">Telaffuz • kelime • cümle</div>
-            <div class="lessonChip"><span class="dot"></span><span id="enLessonTxt">Ders 1</span></div>
-          </div>
-        </div>
+      <div id="chat"></div>
+    </div>
 
-        <div class="tcard" data-go="/pages/teacher.html?lang=de">
-          <div class="topRow">
-            <div class="flagBox flag-de" aria-hidden="true"></div>
-            <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M6 7h12"/><path d="M7 11h10"/><path d="M8 15h8"/></svg>
-            </div>
-          </div>
-          <div class="tText">
-            <div class="tTitle">Almanca Öğretmeni</div>
-            <div class="tSub">Telaffuz • kelime • pratik</div>
-            <div class="lessonChip"><span class="dot"></span><span id="deLessonTxt">Ders 1</span></div>
-          </div>
-        </div>
+    <div class="dock">
+      <div class="dock-inner">
+        <textarea id="msgInput" rows="1" placeholder="Yaz ya da konuş…" spellcheck="false"></textarea>
 
-        <div class="tcard" data-go="/pages/teacher.html?lang=fr">
-          <div class="topRow">
-            <div class="flagBox flag-fr" aria-hidden="true"></div>
-            <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 18c4-8 12-8 16 0"/><path d="M7 14c2-3 8-3 10 0"/><path d="M10 10h4"/></svg>
-            </div>
-          </div>
-          <div class="tText">
-            <div class="tTitle">Fransızca Öğretmeni</div>
-            <div class="tSub">Telaffuz • kelime • cümle</div>
-            <div class="lessonChip"><span class="dot"></span><span id="frLessonTxt">Ders 1</span></div>
-          </div>
-        </div>
+        <button class="iconBtn" id="micBtn" aria-label="Mikrofon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
 
-        <div class="tcard" data-go="/pages/teacher.html?lang=es">
-          <div class="topRow">
-            <div class="flagBox flag-es" aria-hidden="true"></div>
-            <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M6 18c2-6 10-6 12 0"/><path d="M8 12h8"/><path d="M10 9h4"/></svg>
-            </div>
-          </div>
-          <div class="tText">
-            <div class="tTitle">İspanyolca Öğretmeni</div>
-            <div class="tSub">Telaffuz • kelime • pratik</div>
-            <div class="lessonChip"><span class="dot"></span><span id="esLessonTxt">Ders 1</span></div>
-          </div>
-        </div>
-
-        <div class="tcard" data-go="/pages/teacher.html?lang=it">
-          <div class="topRow">
-            <div class="flagBox flag-it" aria-hidden="true"></div>
-            <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 20c2-10 14-10 16 0"/><path d="M8 13h8"/><path d="M10 10h4"/></svg>
-            </div>
-          </div>
-          <div class="tText">
-            <div class="tTitle">İtalyanca Öğretmeni</div>
-            <div class="tSub">Telaffuz • kelime • cümle</div>
-            <div class="lessonChip"><span class="dot"></span><span id="itLessonTxt">Ders 1</span></div>
-          </div>
-        </div>
-
-        <div class="tcard addCard" data-go="/pages/teachers_add.html">
-          <div class="topRow">
-            <div class="addBig" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-            </div>
-            <div class="teacherIcon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M3 7h18"/><path d="M7 7v14"/><path d="M17 7v14"/></svg>
-            </div>
-          </div>
-          <div class="tText">
-            <div class="tTitle">Yeni Öğretmen Ekle</div>
-            <div class="tSub">Yakında…</div>
-            <div class="lessonChip"><span class="dot"></span><span>Listeye ekle</span></div>
-          </div>
-        </div>
-
+        <button class="iconBtn sendBtn" id="sendBtn" aria-label="Gönder">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 2L11 13"></path>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+          </svg>
+        </button>
       </div>
     </div>
 
     <div class="footerbar">
-      <div class="links">
-        <a href="/pages/about.html">Hakkında</a>
-        <a href="/pages/faq.html">SSS</a>
-        <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
-      </div>
-      <div class="footerBrand">ItalkyAI By Ozyigit’s 2026</div>
+      <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
     </div>
-
   </div>
 
-  <script type="module">
-    // FILE: italky-web/pages/teachers.html inline script
-    import { STORAGE_KEY } from "/js/config.js";
-    function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
-    const u = safeJson(localStorage.getItem(STORAGE_KEY), {});
-    if(!u || !u.email || !u.isSessionActive){
-      window.location.replace("/index.html");
-    }
+  <!-- Language Sheet -->
+  <div class="sheetBackdrop" id="langSheet">
+    <div class="sheet">
+      <div class="sheetTop">
+        <div class="sheetTitle" id="sheetTitle">Öğrenilecek Dil</div>
+        <button class="sheetClose" id="sheetClose" aria-label="Kapat">✕</button>
+      </div>
+      <div class="sheetSearch">
+        <input id="sheetQuery" placeholder="Dil ara (İngilizce, Almanca, Fransızca…)" />
+      </div>
+      <div class="sheetList" id="sheetList"></div>
+    </div>
+  </div>
 
-    // header user
-    const full = (u.fullname || u.name || u.display_name || u.email || "—").trim();
-    document.getElementById("userName").textContent = full;
-    document.getElementById("userPlan").textContent = String(u.plan || "FREE").toUpperCase();
+  <div id="toast" class="toast"></div>
 
-    // avatar
-    const avatarBtn = document.getElementById("avatarBtn");
-    const fallback = document.getElementById("avatarFallback");
-    try{
-      const pic = String(u.picture || u.avatar || u.avatar_url || "").trim();
-      if(pic){
-        avatarBtn.innerHTML = `<img src="${pic}" alt="avatar">`;
-      }else{
-        fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
-      }
-    }catch{}
-
-    avatarBtn.addEventListener("click", ()=> location.href="/pages/profile.html");
-    document.getElementById("backBtn").addEventListener("click", ()=> location.href="/pages/home.html");
-    document.getElementById("logoHome").addEventListener("click", ()=> location.href="/pages/home.html");
-
-    // click cards
-    document.querySelectorAll("[data-go]").forEach(el=>{
-      el.addEventListener("click", ()=>{
-        const go = el.getAttribute("data-go");
-        if(go) location.href = go;
-      });
-    });
-
-    // lesson label from progress
-    function setLesson(id, code){
-      try{
-        const k = `italky_teacher_progress::${code}`;
-        const p = safeJson(localStorage.getItem(k), {});
-        const n = parseInt(p.lesson || 1, 10) || 1;
-        const el = document.getElementById(id);
-        if(el) el.textContent = `Ders ${n}`;
-      }catch{}
-    }
-    setLesson("enLessonTxt","en");
-    setLesson("deLessonTxt","de");
-    setLesson("frLessonTxt","fr");
-    setLesson("esLessonTxt","es");
-    setLesson("itLessonTxt","it");
-  </script>
+  <script type="module" src="/js/teacher_page.js?v=1"></script>
 </body>
 </html>
