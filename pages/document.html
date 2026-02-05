@@ -1,4 +1,4 @@
-​​<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
@@ -8,368 +8,330 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --frameW: min(480px, calc(100vw - 18px));
-      --topH: 74px;
-      --footerH: 74px;
+    :root {
+      /* --- Layout --- */
+      --frameW: min(480px, 100vw);
+      --topH: 70px;
+      --footerH: 80px;
 
-      --bg:#030014;
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.60);
+      /* --- Colors (Premium Palette) --- */
+      --bg-deep: #050507;
+      --bg-surface: #0f0f13;
+      
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --text-dim: rgba(255, 255, 255, 0.3);
 
-      --ai1:#A5B4FC;
-      --ai2:#4F46E5;
-      --befree:#6B7280;
+      --accent-primary: #6366f1; /* Indigo */
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
 
-      --glass: rgba(255,255,255,.06);
-      --border: rgba(255,255,255,.12);
+      /* --- Glassmorphism --- */
+      --glass-bg: rgba(20, 20, 25, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-highlight: rgba(255, 255, 255, 0.03);
+      --blur-amt: 20px;
 
-      --navyA: rgba(40,120,255,.12);
-      --navyB: rgba(255,255,255,.05);
-
-      --burgA: rgba(120, 20, 35, .85);
-      --burgB: rgba(90, 15, 30, .65);
-      --burgC: rgba(70, 10, 25, .45);
+      /* --- Logo Colors --- */
+      --logo-w: #fff;
+      --ai-grad: linear-gradient(to right, #818cf8, #c084fc);
     }
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    html,body{
-      margin:0; padding:0; width:100%; height:100dvh;
-      overflow:hidden; position:fixed;
-      font-family:'Outfit', sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      display:flex; align-items:center; justify-content:center;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    
+    body {
+      margin: 0; padding: 0; width: 100%; height: 100dvh;
+      overflow: hidden; position: fixed;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-main);
+      display: flex; align-items: center; justify-content: center;
     }
 
-    .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:var(--bg); z-index:0; pointer-events:none; }
-    .orb{ position:absolute; border-radius:50%; filter: blur(90px); opacity:.28; animation: floatOrbit 30s infinite alternate ease-in-out; }
-    .orb-1{ top:10%; left:10%; width:60vw; height:60vw; background: radial-gradient(circle, rgba(79,70,229,.55), transparent 70%); }
-    .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, rgba(165,180,252,.45), transparent 70%); animation-delay:-5s; }
-    @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1);} 100%{ transform: translate(10%,-10%) scale(1.1);} }
-    .noise{
-      position:absolute; inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events:none; mix-blend-mode:overlay; z-index:1;
+    /* --- Background Atmosphere --- */
+    .premium-bg {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #000000 60%);
+    }
+    .premium-glow {
+      position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+      top: -200px; left: 50%; transform: translateX(-50%);
+      filter: blur(80px); opacity: 0.6;
     }
 
-    .mobile-frame{
-      width:100%; max-width:480px; height:100%;
-      position:relative; z-index:10;
-      background: rgba(8, 8, 20, 0.65);
-      backdrop-filter: blur(25px);
-      overflow:hidden;
-      display:flex; flex-direction:column;
+    /* --- Mobile Frame --- */
+    .mobile-frame {
+      width: 100%; max-width: var(--frameW); height: 100%;
+      position: relative; z-index: 10;
+      background: rgba(10, 10, 12, 0.4);
+      display: flex; flex-direction: column;
+      overflow: hidden;
     }
-    @media(min-width:520px){
-      .mobile-frame{
-        height:92vh;
-        border-radius:40px;
-        border:1px solid rgba(255,255,255,0.08);
-        box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
+    
+    @media(min-width: 520px) {
+      .mobile-frame {
+        height: 92vh; border-radius: 32px;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 40px 120px -20px rgba(0,0,0,0.8);
+        background: rgba(10, 10, 12, 0.85); /* Slightly darker on desktop */
       }
     }
 
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 3000;
+    /* --- Top Bar --- */
+    .topbar {
       height: var(--topH);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 0 12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(12px);
-    }
-    .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .backBtn{
-      width:44px;height:44px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color:#fff;
-      font-size:20px;font-weight:1000;
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer; user-select:none;
-    }
-    .backBtn:active{ transform: scale(.96); }
-
-    .mini-brand{ display:flex; flex-direction:column; user-select:none; cursor:pointer; line-height:1; margin-top:2px; }
-    .logo-line{ font-family:'Space Grotesk', sans-serif; font-size: 20px; letter-spacing:-0.4px; display:flex; align-items:flex-end; gap:2px; }
-    .logo-main{ font-weight:700; color:#FFFFFF; }
-    .logo-ai{ font-weight:700; background: linear-gradient(135deg, var(--ai1) 0%, var(--ai2) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .logo-slogan{ font-size:10px; font-weight:700; letter-spacing:4px; color: var(--befree); margin-top:5px; padding-left:2px; text-transform: uppercase; }
-
-    .rightControls{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .usertext{ min-width:0; display:flex; flex-direction:column; align-items:flex-end; gap:2px; max-width: 200px; }
-    .uname{ font-weight: 900; font-size: 12px; color: rgba(255,255,255,0.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .plan{ font-weight: 800; font-size: 11px; color: rgba(255,255,255,0.55); white-space:nowrap; }
-
-    .avatar-btn{ width:42px; height:42px; border:none; background:transparent; border-radius:999px; overflow:hidden; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-    .avatar-btn img{ width:42px; height:42px; border-radius:999px; object-fit:cover; display:block; }
-    .avatar-fallback{ width:42px; height:42px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-weight:1000; color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.10); user-select:none; }
-
-    .main{
-      flex:1;
-      padding: 12px;
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      overflow:hidden;
-      padding-bottom: calc(var(--footerH) + 12px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px;
+      background: rgba(5, 5, 7, 0.7);
+      backdrop-filter: blur(var(--blur-amt));
+      border-bottom: 1px solid var(--glass-border);
+      z-index: 50;
     }
 
-    .toolbar{
-      display:flex;
-      gap:10px;
-      align-items:center;
+    .backBtn {
+      width: 40px; height: 40px; border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-highlight);
+      color: var(--text-main); font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.2s;
     }
-    .pill{
-      flex:1;
-      height: 46px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: var(--glass);
-      color:#fff;
-      font-weight: 1000;
-      font-size: 12px;
-      padding: 0 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      cursor:pointer;
-      user-select:none;
-      min-width:0;
-      gap: 10px;
-    }
-    .pillLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .flag{ width:24px; display:flex; align-items:center; justify-content:center; font-size:16px; flex:0 0 24px; opacity:.95; }
-    .label{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .caret{ opacity:.8; }
+    .backBtn:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
 
-    .btnSmall{
-      width: 74px; height: 46px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: var(--glass);
-      color: rgba(255,255,255,.92);
-      font-weight: 1000;
-      cursor:pointer;
-    }
-    .btnSmall:active{ transform: scale(.98); }
+    .mini-brand { display: flex; flex-direction: column; cursor: pointer; margin-left: 6px; }
+    .logo-line { font-family: 'Space Grotesk', sans-serif; font-size: 20px; letter-spacing: -0.5px; line-height: 1; }
+    .logo-main { font-weight: 700; color: var(--logo-w); }
+    .logo-ai { font-weight: 700; background: var(--ai-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .logo-slogan { font-size: 9px; font-weight: 700; letter-spacing: 3px; color: var(--text-muted); margin-top: 4px; opacity: 0.7; }
 
-    .pane{
-      flex:1;
-      display:grid;
-      grid-template-rows: 1fr 1fr;
-      gap: 10px;
-      min-height:0;
+    .rightControls { display: flex; align-items: center; gap: 12px; }
+    .usertext { text-align: right; line-height: 1.2; }
+    .uname { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .plan { font-size: 10px; font-weight: 600; color: #a855f7; letter-spacing: 0.5px; text-transform: uppercase; }
+    
+    .avatar-btn {
+      width: 38px; height: 38px; border-radius: 50%; padding: 0;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent; overflow: hidden; cursor: pointer;
+    }
+    .avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-fallback { width: 100%; height: 100%; background: #1f1f25; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+
+    /* --- Main Content --- */
+    .main {
+      flex: 1; padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
+      overflow-y: auto; overflow-x: hidden;
+      padding-bottom: calc(var(--footerH) + 20px);
+    }
+    /* Hide Scrollbar */
+    .main::-webkit-scrollbar { display: none; }
+
+    /* --- Toolbar (Controls) --- */
+    .toolbar {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 10px;
+      margin-bottom: 4px;
     }
 
-    .box{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.10);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 28px 90px rgba(0,0,0,.55);
+    /* Language Pill - Premium Style */
+    .pill {
+      height: 50px; border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+      border: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; cursor: pointer; transition: 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .pill:active { transform: scale(0.98); border-color: rgba(255,255,255,0.2); }
+    .pillLeft { display: flex; align-items: center; gap: 10px; }
+    .flag { font-size: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    .label { font-size: 14px; font-weight: 600; letter-spacing: 0.3px; }
+    .caret { font-size: 10px; opacity: 0.6; }
+
+    /* Action Buttons Group */
+    .actions-group {
+      display: flex; gap: 8px;
     }
 
-    .box.top{
-      background:
-        radial-gradient(800px 240px at 0% 0%, var(--navyA), transparent 62%),
-        radial-gradient(800px 240px at 100% 0%, var(--navyB), transparent 62%),
-        rgba(0,0,0,.12);
+    .btnSmall {
+      height: 50px; padding: 0 16px; border-radius: 14px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
     }
-    .box.bottom{
-      background:
-        radial-gradient(900px 420px at 30% 12%, var(--burgA), transparent 68%),
-        radial-gradient(700px 360px at 80% 18%, var(--burgB), transparent 70%),
-        radial-gradient(600px 320px at 40% 75%, var(--burgC), transparent 72%),
-        linear-gradient(180deg, rgba(60, 10, 20, .55), rgba(0,0,0,.15));
-    }
-
-    .boxHead{
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.22);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .headTitle{
-      font-weight: 1000;
-      font-size: 12px;
-      color: rgba(255,255,255,.88);
-      white-space: nowrap;
-    }
-    .small{
-      font-weight: 900;
-      font-size: 11px;
-      color: rgba(255,255,255,.55);
-      white-space:nowrap;
-    }
-
-    .previewWrap{
-      flex:1;
-      position:relative;
-      overflow:hidden;
-      min-height:0;
-    }
-    .preview{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit: contain;
-      background: rgba(0,0,0,.25);
-    }
-
-    textarea{
-      flex:1;
-      border:none;
-      outline:none;
+    
+    /* Secondary Buttons (File/Cam) */
+    .btn-secondary {
       background: transparent;
-      color:#fff;
-      font-size: 13px;
-      line-height: 1.5;
-      padding: 12px;
-      resize:none;
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+    .btn-secondary:active { background: rgba(255,255,255,0.05); color: var(--text-main); }
+    .btn-secondary svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* Hero Button (Translate) */
+    #runBtn {
+      background: var(--accent-gradient);
+      border: none; color: #fff;
+      box-shadow: 0 4px 20px var(--accent-glow);
+      min-width: 80px;
+    }
+    #runBtn:active { transform: scale(0.96); box-shadow: 0 2px 10px var(--accent-glow); }
+
+    /* --- The Split Pane (Cards) --- */
+    .pane {
+      flex: 1; display: grid; grid-template-rows: 1fr 1fr; gap: 16px; min-height: 0;
     }
 
-    .footerbar{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
-      bottom: 0;
-      z-index: 2400;
+    .box {
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--blur-amt));
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: border-color 0.3s;
+    }
+    .box:focus-within { border-color: rgba(255,255,255,0.2); }
+
+    /* Box Header */
+    .boxHead {
+      height: 40px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      background: rgba(0,0,0,0.1);
+    }
+    .headTitle { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .small { font-size: 11px; font-weight: 500; color: var(--accent-primary); }
+    #statusBot { color: var(--text-dim); }
+
+    /* Input Preview Area */
+    .previewWrap {
+      flex: 1; position: relative; overflow: hidden;
+      background: rgba(0,0,0,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* Empty State Icon */
+    .previewWrap::after {
+      content: 'Dosya veya Kamera Seçin';
+      position: absolute; font-size: 12px; color: var(--text-dim);
+      font-weight: 500; pointer-events: none; z-index: 0;
+    }
+    
+    .preview {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: contain; z-index: 1; opacity: 0; transition: opacity 0.3s;
+    }
+    .preview.show { opacity: 1; background: #000; } /* Show when file selected */
+
+    /* Output Text Area */
+    textarea {
+      flex: 1; width: 100%; border: none; background: transparent; resize: none;
+      padding: 16px; color: var(--text-main); font-family: 'Outfit', sans-serif;
+      font-size: 15px; line-height: 1.6; font-weight: 400;
+    }
+    textarea::placeholder { color: var(--text-dim); font-weight: 300; }
+    textarea::-webkit-scrollbar { width: 4px; }
+    textarea::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    /* --- Footer --- */
+    .footerbar {
+      position: absolute; bottom: 0; left: 0; right: 0;
       height: var(--footerH);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-      background: rgba(3, 0, 20, 0.95);
-      border-top: 1px solid rgba(255,255,255,.05);
-      backdrop-filter: blur(10px);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap: 6px;
+      background: rgba(5, 5, 7, 0.8);
+      backdrop-filter: blur(var(--blur-amt));
+      border-top: 1px solid var(--glass-border);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      gap: 10px; z-index: 50;
     }
-    .links{ display:flex; gap: 16px; justify-content:center; flex-wrap:wrap; line-height:1; }
-    .links a{ color: rgba(255,255,255,0.55); text-decoration:none; font-size: 12px; font-weight: 800; transition:.2s; }
-    .links a:active{ opacity:.85; }
-    .footerBrand{ text-align:center; font-size: 10px; color: rgba(255,255,255,0.22); letter-spacing: 0.2px; font-weight: 700; }
+    
+    .links { display: flex; gap: 20px; }
+    .links a {
+      color: var(--text-muted); font-size: 11px; font-weight: 600; text-decoration: none;
+      text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s;
+    }
+    .links a:hover { color: var(--text-main); }
+    
+    .footerBrand {
+      font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px;
+    }
 
-    /* language sheet */
-    .sheetBackdrop{
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: rgba(0,0,0,.72);
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 16px;
+    /* --- Language Sheet (Modern Modal) --- */
+    .sheetBackdrop {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      display: none; align-items: flex-end; justify-content: center;
+      opacity: 0; transition: opacity 0.3s;
     }
-    .sheetBackdrop.show{ display:flex; }
-    .sheet{
-      width: 100%;
-      max-width: 480px;
-      background: rgba(10,10,18,.96);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 26px;
-      overflow:hidden;
-      box-shadow: 0 30px 80px rgba(0,0,0,.55);
-    }
-    .sheetTop{
-      padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .sheetTitle{
-      font-weight: 1000;
-      font-size: 13px;
-      color: rgba(255,255,255,.92);
-    }
-    .sheetClose{
-      width: 42px; height: 42px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.88);
-      font-weight: 1000;
-      cursor:pointer;
-    }
-    .sheetSearch{
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .sheetSearch input{
-      width:100%;
-      height: 46px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.06);
-      color: #fff;
-      padding: 0 12px;
-      font-weight: 800;
-      font-size: 13px;
-    }
-    .sheetList{
-      max-height: 55vh;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width:none;
-    }
-    .sheetList::-webkit-scrollbar{ display:none; }
-    .sheetRow{
-      padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      cursor:pointer;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .sheetRow.selected{ background: rgba(79,70,229,.14); }
-    .sheetRow .left{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .sheetRow .name{ font-weight: 1000; font-size: 13px; color: rgba(255,255,255,.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .sheetRow .code{ font-weight: 800; font-size: 12px; color: rgba(255,255,255,.55); white-space:nowrap; }
+    .sheetBackdrop.show { display: flex; opacity: 1; }
 
-    /* toast */
-    .toast{
-      position: fixed; left:50%; top:18px;
-      transform: translateX(-50%) translateY(-120px);
-      background: rgba(10,10,18,.92);
-      border:1px solid rgba(165,180,252,.35);
-      padding: 10px 14px;
-      border-radius: 999px;
-      color:#fff;
-      z-index:10000;
-      font-weight:900;
-      font-size:12px;
-      transition:.28s;
-      backdrop-filter: blur(12px);
+    .sheet {
+      width: 100%; max-width: 480px;
+      background: #121216;
+      border: 1px solid var(--glass-border);
+      border-radius: 28px 28px 0 0;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+      overflow: hidden; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      margin-bottom: 0; /* Bottom sheet */
     }
-    .toast.show{ transform: translateX(-50%) translateY(0); }
+    @media(min-width: 520px) {
+      .sheet { border-radius: 24px; margin-bottom: 20px; width: 90%; }
+    }
+    .sheetBackdrop.show .sheet { transform: translateY(0); }
 
-    /* hidden inputs */
-    #filePick, #camPick{ display:none; }
+    .sheetTop {
+      padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .sheetTitle { font-size: 16px; font-weight: 700; color: #fff; }
+    .sheetClose {
+      background: rgba(255,255,255,0.08); border: none; color: #fff;
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+
+    .sheetSearch { padding: 12px 20px; border-bottom: 1px solid var(--glass-border); }
+    .sheetSearch input {
+      width: 100%; height: 44px; border-radius: 12px;
+      background: rgba(255,255,255,0.05); border: 1px solid transparent;
+      color: #fff; padding: 0 14px; font-size: 14px;
+    }
+    .sheetSearch input:focus { border-color: var(--accent-primary); background: rgba(0,0,0,0.2); }
+
+    .sheetList { max-height: 50vh; overflow-y: auto; padding-bottom: 20px; }
+    .sheetRow {
+      padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background 0.2s;
+    }
+    .sheetRow:active { background: rgba(255,255,255,0.05); }
+    .sheetRow.selected { background: rgba(99, 102, 241, 0.1); }
+    .sheetRow.selected .name { color: var(--accent-primary); }
+    
+    .sheetRow .name { font-size: 14px; font-weight: 600; color: var(--text-main); }
+    .sheetRow .code { font-size: 12px; font-weight: 500; color: var(--text-dim); text-transform: uppercase; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+      background: rgba(255, 255, 255, 0.95); color: #000;
+      padding: 12px 24px; border-radius: 30px;
+      font-size: 13px; font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 10000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Hidden Inputs */
+    #filePick, #camPick { display: none; }
   </style>
 </head>
 
 <body>
-  <div class="cosmos-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
-  <div class="noise"></div>
+  <div class="premium-bg"></div>
+  <div class="premium-glow"></div>
 
   <div class="mobile-frame">
     <div class="topbar">
@@ -386,13 +348,14 @@
           <div class="uname" id="userName">—</div>
           <div class="plan" id="userPlan">FREE</div>
         </div>
-        <button class="avatar-btn" id="avatarBtn" aria-label="Çıkış">
-          <span class="avatar-fallback" id="avatarFallback">•</span>
+        <button class="avatar-btn" id="avatarBtn" aria-label="Profil">
+          <div class="avatar-fallback" id="avatarFallback">U</div>
         </button>
       </div>
     </div>
 
     <div class="main">
+      
       <div class="toolbar">
         <button class="pill" id="toLangBtn" type="button">
           <span class="pillLeft">
@@ -402,30 +365,35 @@
           <span class="caret">▾</span>
         </button>
 
-        <button class="btnSmall" id="pickFileBtn" type="button">DOSYA</button>
-        <button class="btnSmall" id="pickCamBtn" type="button">KAMERA</button>
-        <button class="btnSmall" id="runBtn" type="button">ÇEVİR</button>
+        <div class="actions-group">
+          <button class="btnSmall btn-secondary" id="pickFileBtn" type="button" aria-label="Dosya Seç">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+          </button>
+          <button class="btnSmall btn-secondary" id="pickCamBtn" type="button" aria-label="Kamera Aç">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </button>
+          <button class="btnSmall" id="runBtn" type="button">ÇEVİR</button>
+        </div>
       </div>
 
       <div class="pane">
-        <div class="box top">
+        <div class="box">
           <div class="boxHead">
-            <div class="headTitle">Belge / Görsel</div>
+            <div class="headTitle">Belge Kaynağı</div>
             <div class="small" id="statusTop">Hazır</div>
           </div>
-
           <div class="previewWrap">
             <img id="imgPreview" class="preview" alt="preview" />
             <canvas id="pdfCanvas" class="preview"></canvas>
           </div>
         </div>
 
-        <div class="box bottom">
+        <div class="box">
           <div class="boxHead">
-            <div class="headTitle">Çıktı</div>
+            <div class="headTitle">AI Çevirisi</div>
             <div class="small" id="statusBot">—</div>
           </div>
-          <textarea id="outText" placeholder="OCR + çeviri sonucu burada..." spellcheck="false"></textarea>
+          <textarea id="outText" placeholder="Çeviri sonucu buraya gelecek..." spellcheck="false"></textarea>
         </div>
       </div>
 
@@ -436,23 +404,21 @@
     <div class="footerbar">
       <div class="links">
         <a href="/pages/about.html">Hakkında</a>
-        <a href="/pages/faq.html">SSS</a>
+        <a href="/pages/faq.html">Destek</a>
         <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
       </div>
-      <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
+      <div class="footerBrand">italkyAI © 2026</div>
     </div>
   </div>
 
-  <!-- Language Sheet -->
   <div class="sheetBackdrop" id="langSheet">
     <div class="sheet">
       <div class="sheetTop">
-        <div class="sheetTitle" id="sheetTitle">Hedef Dil</div>
+        <div class="sheetTitle" id="sheetTitle">Hedef Dil Seçimi</div>
         <button class="sheetClose" id="sheetClose" aria-label="Kapat">✕</button>
       </div>
       <div class="sheetSearch">
-        <input id="sheetQuery" placeholder="Dil ara (Türkçe, İngilizce, Almanca…)" />
+        <input id="sheetQuery" placeholder="Dil ara... (Örn: İngilizce, EN)" />
       </div>
       <div class="sheetList" id="sheetList"></div>
     </div>
@@ -460,10 +426,7 @@
 
   <div id="toast" class="toast"></div>
 
-  <!-- OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
-  <!-- PDF renderer -->
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.js"></script>
 
   <script type="module" src="/js/document_page.js?v=1"></script>
