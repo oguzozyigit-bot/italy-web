@@ -206,6 +206,28 @@
     .btnIcon:active{ transform: translateY(1px); }
     .btnIcon.muted{ opacity: .45; }
 
+    /* ✅ listening state (motor class ekliyor) */
+    .btnIcon.listening{
+      border-color: rgba(79,70,229,.45);
+      background: rgba(79,70,229,.14);
+      box-shadow: 0 0 18px rgba(79,70,229,.20);
+      position: relative;
+    }
+    .btnIcon.listening::after{
+      content:"";
+      position:absolute;
+      inset:-7px;
+      border-radius: 22px;
+      border: 2px solid rgba(165,180,252,.55);
+      animation: micPulse 1.15s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes micPulse{
+      0%{ transform: scale(0.92); opacity:.75; }
+      50%{ transform: scale(1.08); opacity:.28; }
+      100%{ transform: scale(0.92); opacity:.75; }
+    }
+
     .content{
       flex: 1 1 auto;
       min-height:0;
@@ -231,6 +253,7 @@
       line-height: 1.35;
       word-break: break-word;
       box-shadow: 0 12px 28px rgba(0,0,0,.28);
+      white-space: pre-wrap;
     }
     .bubble.me{ align-self:flex-end; border-right: 4px solid var(--pist); text-align:right; }
     .bubble.them{ align-self:flex-start; border-left: 4px solid var(--gold); }
@@ -249,6 +272,11 @@
       transform: translateX(-50%) rotate(180deg);
     }
 
+    /* ✅ HATA-1 FIX: 180° taraftaki mikrofon ikonunu 180° döndür */
+    .side.top #botMic svg{
+      transform: rotate(180deg);
+    }
+
     /* ===== LOGO (KİLİTLİ) ===== */
     .brandBottom, .brandTop{
       position:absolute;
@@ -263,7 +291,12 @@
       z-index: 40;
     }
     .brandBottom{ bottom: 10px; }
-    .brandTop{ top: 10px; transform: translateX(-50%) rotate(180deg); }
+
+    /* ✅ HATA-2 FIX: italkyAI / BE FREE biraz aşağı insin */
+    .brandTop{
+      top: 18px; /* 10px -> 18px */
+      transform: translateX(-50%) rotate(180deg);
+    }
 
     .brandLock{
       display:inline-flex;
@@ -557,6 +590,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/facetoface_page.js?v=2"></script>
+  <script type="module" src="/js/facetoface_page.js?v=3"></script>
 </body>
 </html>
