@@ -350,6 +350,13 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
   $("topMic")?.addEventListener("click", ()=> startSide("top", ()=>langTop, ()=>langBot));
   $("botMic")?.addEventListener("click", ()=> startSide("bot", ()=>langBot, ()=>langTop));
+  // ✅ swap diller
+document.getElementById("swapBtn")?.addEventListener("click", ()=>{
+  const a = langTop; langTop = langBot; langBot = a;
+  $("topLangTxt").textContent = labelOf(langTop);
+  $("botLangTxt").textContent = labelOf(langBot);
+  toast("Diller değişti");
+});
 
   setWaveListening(false);
 
