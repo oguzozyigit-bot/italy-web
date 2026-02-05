@@ -1,4 +1,7 @@
-// /js/langpool.js
+// FILE: italky-web/js/langpool.js
+import { LANGPOOL_BASE } from "/js/config.js";
+
+// Pool cache key (opsiyonel) – CDN zaten hızlı ama yine de dursun
 const CACHE_KEY = (l) => `italky_lang_${l}_v1`;
 
 // normalize: "used" anahtarı için
@@ -15,28 +18,41 @@ function safeJsonParse(raw, fallback = null) {
   try { return JSON.parse(raw); } catch { return fallback; }
 }
 
+function emptyPool(lang) {
+  return { lang: String(lang || ""), version: 1, items: [] };
+}
+
 export async function loadLangPool(lang) {
-  // localStorage cache
+  const L = String(lang || "").trim().toLowerCase();
+  if (!L) return emptyPool("");
+
+  // 1) localStorage cache (isteğe bağlı hızlandırma)
+  // Not: Supabase dosyaları zamanla büyüyor; bu yüzden cache’i "kırılabilir" tutuyoruz.
+  // Eğer her zaman en güncel istersen bu bloğu tamamen kaldırabilirsin.
   try {
-    const raw = localStorage.getItem(CACHE_KEY(lang));
+    const raw = localStorage.getItem(CACHE_KEY(L));
     if (raw) {
       const parsed = safeJsonParse(raw, null);
       if (parsed) return sanitize(parsed);
     }
   } catch {}
 
-  // file fetch (offline cache varsa çalışır)
+  // 2) Supabase public URL
+  const url = `${LANGPOOL_BASE}/${encodeURIComponent(L)}.json`;
+
   let data = null;
   try {
-    const r = await fetch(`/assets/lang/${lang}.json`, { cache: "force-cache" });
+    // ✅ no-store: güncellemeler hemen gelsin
+    const r = await fetch(url, { cache: "no-store" });
+    if (!r.ok) return emptyPool(L);
     data = await r.json();
   } catch {
-    // fetch/json patlarsa en azından boş havuz döndür
-    return { lang: lang || "", version: 1, items: [] };
+    return emptyPool(L);
   }
 
+  // 3) cache yaz (opsiyonel)
   try {
-    localStorage.setItem(CACHE_KEY(lang), JSON.stringify(data));
+    localStorage.setItem(CACHE_KEY(L), JSON.stringify(data));
   } catch {}
 
   return sanitize(data);
@@ -56,14 +72,14 @@ function sanitize(data) {
     if (seen.has(k)) continue;
     seen.add(k);
 
-    // ✅ PATCH: sentence/ex gibi alanları koru (opsiyonel)
+    // opsiyonel: örnek cümle alanı
     const sentence = String(it?.sentence || it?.ex || "").trim();
 
     out.push({
       w,
       tr,
-      pos: String(it?.pos || "").trim(),  // noun/verb/adj/adv vs
-      lvl: String(it?.lvl || "").trim(),  // A2/B1/B2/C1...
+      pos: String(it?.pos || "").trim(),  // noun/verb/adj/adv
+      lvl: String(it?.lvl || "").trim(),  // A1/A2/B1/B2/C1
       sentence
     });
   }
@@ -72,7 +88,6 @@ function sanitize(data) {
 }
 
 export function createUsedSet(storageKey) {
-  // oyun başına ayrı used anahtarı: örn "used_hangman_en_A2"
   let used = new Set();
   try {
     const raw = localStorage.getItem(storageKey);
@@ -87,20 +102,24 @@ export function createUsedSet(storageKey) {
   return { used, save, norm };
 }
 
+/**
+ * pick:
+ * - pool.items içinden count kadar seçer
+ * - usedSet ile tekrarları engeller
+ * - aday azsa usedSet clear (yeni tur)
+ */
 export function pick(pool, count, usedSet, saveUsed, filterFn) {
   const items = Array.isArray(pool?.items) ? pool.items : [];
+  if (!items.length) return [];
 
-  // filtreli adaylar (used hariç)
   const candidates = items.filter(
-    (x) => !usedSet.has(norm(x.w)) && (!filterFn || filterFn(x))
+    (x) => x?.w && !usedSet.has(norm(x.w)) && (!filterFn || filterFn(x))
   );
 
-  // ✅ PATCH: aday sayısı azsa used reset (yeni tur)
-  // (mevcut mantık korunuyor)
   if (candidates.length < count) usedSet.clear();
 
   const fresh = items.filter(
-    (x) => !usedSet.has(norm(x.w)) && (!filterFn || filterFn(x))
+    (x) => x?.w && !usedSet.has(norm(x.w)) && (!filterFn || filterFn(x))
   );
 
   const chosen = shuffle(fresh).slice(0, count);
