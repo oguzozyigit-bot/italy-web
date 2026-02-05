@@ -1,8 +1,10 @@
 // /js/text_translate_page.js
-import { BASE_DOMAIN } from "/js/config.js";
+import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
+import { logout } from "/js/auth.js";
 
 const $ = (id) => document.getElementById(id);
 function base(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
+function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
 
 function toast(msg){
   const t = $("toast");
@@ -13,7 +15,7 @@ function toast(msg){
   window.__to = setTimeout(()=> t.classList.remove("show"), 1800);
 }
 
-/* ✅ Bayraklı dil listesi (yüz yüzedeki gibi) */
+/* ✅ Bayraklı dil listesi */
 const LANGS = [
   { code:"auto", tr:"Dili Algıla", native:"Auto", flag:"🌐", tts:"" },
   { code:"tr", tr:"Türkçe", native:"Türkçe", flag:"🇹🇷", tts:"tr-TR" },
@@ -33,25 +35,52 @@ const LANGS = [
 function getLang(code){
   return LANGS.find(l=>l.code===code) || { code, tr: code, native: code, flag:"🌐", tts:"en-US" };
 }
-function setLangUI(){
-  $("fromLangTxt").textContent = getLang(fromLang).tr + (detectedFrom && fromLang==="auto" ? ` (${detectedFrom.toUpperCase()})` : "");
-  $("fromFlag").textContent = fromLang==="auto" ? (detectedFrom ? getLang(detectedFrom).flag : "🌐") : getLang(fromLang).flag;
 
-  $("toLangTxt").textContent = getLang(toLang).tr;
-  $("toFlag").textContent = getLang(toLang).flag;
+/* ===== Session + Terms guard (home/chat ile aynı mantık) ===== */
+function termsKey(email=""){
+  return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
+}
+function getUser(){
+  return safeJson(localStorage.getItem(STORAGE_KEY), {});
+}
+function ensureLogged(){
+  const u = getUser();
+  if(!u || !u.email){ location.replace("/index.html"); return null; }
+  if(!localStorage.getItem(termsKey(u.email))){ location.replace("/index.html"); return null; }
+  const gid = (localStorage.getItem("google_id_token") || "").trim();
+  if(!gid){ location.replace("/index.html"); return null; }
+  if(!u.isSessionActive){ location.replace("/index.html"); return null; }
+  return u;
 }
 
-/* ✅ Sayfadan çıkana kadar kalsın: sessionStorage */
-const SS_FROM = "italky_text_translate_from_v1";
-const SS_TO   = "italky_text_translate_to_v1";
-const SS_MANUAL_TO = "italky_text_translate_to_manual_v1";
+function paintHeader(u){
+  const full = (u.fullname || u.name || u.display_name || u.email || "—").trim();
+  $("userName").textContent = full;
+  $("userPlan").textContent = String(u.plan || "FREE").toUpperCase();
+
+  const avatarBtn = $("avatarBtn");
+  const fallback = $("avatarFallback");
+  const pic = String(u.picture || u.avatar || u.avatar_url || "").trim();
+  if(pic){
+    avatarBtn.innerHTML = `<img src="${pic}" alt="avatar">`;
+  }else{
+    fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
+  }
+
+  // şimdilik: avatara basınca çıkış (home ile aynı)
+  avatarBtn.addEventListener("click", logout);
+}
+
+/* ===== Persist: sayfadan çıkana kadar kalsın (sessionStorage) ===== */
+const SS_FROM = "italky_text_translate_from_v2";
+const SS_TO   = "italky_text_translate_to_v2";
+const SS_MANUAL_TO = "italky_text_translate_to_manual_v2";
 
 let fromLang = sessionStorage.getItem(SS_FROM) || "auto";
 let toLang   = sessionStorage.getItem(SS_TO) || "tr";
 let manualTo = (sessionStorage.getItem(SS_MANUAL_TO) || "0") === "1";
 
-// auto algılama sonrası göstereceğimiz “detected”
-let detectedFrom = null;
+let detectedFrom = null; // auto algılandığında
 
 function persist(){
   sessionStorage.setItem(SS_FROM, fromLang);
@@ -59,7 +88,21 @@ function persist(){
   sessionStorage.setItem(SS_MANUAL_TO, manualTo ? "1" : "0");
 }
 
-/* ===== language sheet ===== */
+function setLangUI(){
+  const fromShown = (fromLang==="auto")
+    ? `Dili Algıla${detectedFrom ? ` (${String(detectedFrom).toUpperCase()})` : ""}`
+    : getLang(fromLang).tr;
+
+  $("fromLangTxt").textContent = fromShown;
+  $("fromFlag").textContent = fromLang==="auto"
+    ? (detectedFrom ? getLang(detectedFrom).flag : "🌐")
+    : getLang(fromLang).flag;
+
+  $("toLangTxt").textContent = getLang(toLang).tr;
+  $("toFlag").textContent = getLang(toLang).flag;
+}
+
+/* ===== Language sheet ===== */
 let sheetFor = "from"; // from|to
 
 function openSheet(which){
@@ -104,11 +147,10 @@ function renderSheet(filter){
       const code = row.getAttribute("data-code") || "en";
       if(sheetFor === "from"){
         fromLang = code;
-        detectedFrom = null; // manual değişince algılananı sıfırla
-        // kaynak dili seçilince (auto hariç) hedefi zorlamıyoruz
+        detectedFrom = null;
       }else{
         toLang = code;
-        manualTo = true; // ✅ kullanıcı hedefi değiştirdiyse sayfa boyunca kilit
+        manualTo = true; // kullanıcı hedefi seçerse sayfada kilitle
       }
       persist();
       setLangUI();
@@ -118,7 +160,7 @@ function renderSheet(filter){
   });
 }
 
-/* ===== API translate ===== */
+/* ===== Translate API ===== */
 async function translateViaApi(text, source, target){
   const b = base();
   if(!b) return { out:"", detected:null };
@@ -143,7 +185,6 @@ async function translateViaApi(text, source, target){
     data?.translated || data?.translation || data?.text || data?.translated_text || ""
   ).trim();
 
-  // detected language (backend farklı isimlerle dönebilir)
   const det = String(
     data?.detected || data?.detected_lang || data?.detected_language || data?.source_lang || data?.source || ""
   ).trim().toLowerCase();
@@ -151,9 +192,9 @@ async function translateViaApi(text, source, target){
   return { out: out || "", detected: det || null };
 }
 
-/* ===== Auto target rule =====
+/* ===== Auto target rule (senin kuralın) =====
    - Algıladığı dil Türkçe ise hedef otomatik İngilizce
-   - Algıladığı dil Türkçe değilse hedef otomatik Türkçe
+   - Türkçe harici ne algılarsa algılasın hedef otomatik Türkçe
    - Kullanıcı hedefi değiştirirse sayfa boyunca sabit (manualTo=true)
 */
 function applyAutoTargetRule(detected){
@@ -164,11 +205,9 @@ function applyAutoTargetRule(detected){
 
   detectedFrom = d;
 
-  if(d === "tr"){
-    toLang = "en";
-  }else{
-    toLang = "tr";
-  }
+  if(d === "tr") toLang = "en";
+  else toLang = "tr";
+
   persist();
   setLangUI();
 }
@@ -182,7 +221,7 @@ function updateCounts(){
   $("countOut").textContent = String(outV === "—" ? 0 : outV.length);
 }
 
-/* ===== TTS (hoparlör) ===== */
+/* ===== TTS ===== */
 function speak(text, langCode){
   const t = String(text||"").trim();
   if(!t) return;
@@ -199,48 +238,94 @@ function speak(text, langCode){
   }
 }
 
-async function doTranslate(){
+/* ===== STT (mikrofon) ===== */
+let sttBusy = false;
+function detectLightTR(text){
+  const t = String(text||"").toLowerCase();
+  if(/[çğıöşü]/.test(t)) return "tr";
+  const trHints = [" ve ", " bir ", " için ", " değil ", " merhaba", " selam", " nasılsın", " teşekkür"];
+  for(const h of trHints) if(t.includes(h)) return "tr";
+  return "en";
+}
+
+function startSTT(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast("Bu cihaz konuşmayı yazıya çevirmiyor."); return; }
+  if(sttBusy) return;
+
+  const micBtn = $("micIn");
+  const rec = new SR();
+  // kaynak auto ise TR dinleyelim (Türkiye default), değilse seçilen dili dinle
+  const listenCode = (fromLang === "auto") ? "tr" : fromLang;
+  rec.lang = getLang(listenCode).tts || "tr-TR";
+  rec.interimResults = false;
+  rec.continuous = false;
+
+  sttBusy = true;
+  micBtn.classList.add("listening");
+
+  rec.onresult = async (e)=>{
+    const t = e.results?.[0]?.[0]?.transcript || "";
+    const finalText = String(t||"").trim();
+    if(!finalText) return;
+
+    $("inText").value = finalText;
+    updateCounts();
+
+    // auto kaynak ise: yazıdan hızlı TR tahmini (backend detected yoksa diye)
+    if(fromLang === "auto"){
+      const guess = detectLightTR(finalText);
+      applyAutoTargetRule(guess); // TR -> EN, diğer -> TR
+    }
+
+    await doTranslate(true);
+  };
+
+  rec.onerror = ()=>{
+    // sessiz geç
+  };
+  rec.onend = ()=>{
+    micBtn.classList.remove("listening");
+    sttBusy = false;
+  };
+
+  try{ rec.start(); }
+  catch{
+    micBtn.classList.remove("listening");
+    sttBusy = false;
+    toast("Mikrofon açılamadı.");
+  }
+}
+
+/* ===== translate ===== */
+async function doTranslate(silent=false){
   const text = String($("inText").value || "").trim();
   if(!text){
-    toast("Metin yaz");
+    if(!silent) toast("Metin yaz");
     return;
   }
 
   $("outText").textContent = "Çevriliyor…";
   updateCounts();
 
-  // source empty -> backend auto algılama
   const src = (fromLang === "auto") ? "" : fromLang;
 
   try{
     const { out, detected } = await translateViaApi(text, src, toLang);
 
-    // ✅ auto ise, algılananı al ve hedef kuralını uygula
+    // auto ise backend detected geldiyse asıl kuralı onunla uygula
     if(fromLang === "auto"){
-      applyAutoTargetRule(detected || detectLight(text));
+      applyAutoTargetRule(detected || detectLightTR(text));
     }
 
     $("outText").textContent = out || "—";
   }catch{
     $("outText").textContent = "—";
-    toast("Çeviri alınamadı");
+    if(!silent) toast("Çeviri alınamadı");
   }
 
   setLangUI();
   updateCounts();
-}
-
-/* Hafif algılama (backend detected dönmezse yedek) */
-function detectLight(text){
-  const t = String(text||"").toLowerCase();
-  // Türkçe karakterler varsa büyük ihtimal tr
-  if(/[çğıöşü]/.test(t)) return "tr";
-  // basit kelime ipuçları
-  const trHints = [" ve ", " bir ", " için ", " değil ", " merhaba", " selam", " nasılsın", " teşekkür"];
-  let score = 0;
-  for(const h of trHints) if(t.includes(h)) score++;
-  if(score >= 1) return "tr";
-  return "en"; // default
 }
 
 function swapLang(){
@@ -249,7 +334,6 @@ function swapLang(){
     return;
   }
   const a = fromLang; fromLang = toLang; toLang = a;
-  // swap -> artık manuel kabul edelim (kullanıcı bilinçli değiştiriyor)
   manualTo = true;
   detectedFrom = null;
   persist();
@@ -258,13 +342,17 @@ function swapLang(){
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
+  const u = ensureLogged();
+  if(!u) return;
+
+  paintHeader(u);
+
   $("backBtn")?.addEventListener("click", ()=>{
     if(history.length>1) history.back();
     else location.href = "/pages/home.html";
   });
   $("logoHome")?.addEventListener("click", ()=> location.href="/pages/home.html");
 
-  // ilk UI
   setLangUI();
   updateCounts();
 
@@ -279,20 +367,22 @@ document.addEventListener("DOMContentLoaded", ()=>{
   $("clearBtn")?.addEventListener("click", ()=>{
     $("inText").value = "";
     $("outText").textContent = "—";
-    // temizleyince: auto hedef kilidi bozulmasın, ama detected görünümü sıfırlansın
     detectedFrom = null;
+    // hedef dili kullanıcı manuel seçmediyse burada resetlemiyoruz; sayfada kalsın
+    persist();
     setLangUI();
     updateCounts();
   });
 
-  $("translateBtn")?.addEventListener("click", doTranslate);
+  $("translateBtn")?.addEventListener("click", ()=> doTranslate(false));
   $("inText")?.addEventListener("input", updateCounts);
 
-  // hoparlörler
+  $("micIn")?.addEventListener("click", startSTT);
+
   $("speakIn")?.addEventListener("click", ()=>{
     const txt = String($("inText").value||"").trim();
     if(!txt) return toast("Metin yok");
-    const lang = (fromLang === "auto") ? (detectedFrom || detectLight(txt)) : fromLang;
+    const lang = (fromLang === "auto") ? (detectedFrom || detectLightTR(txt)) : fromLang;
     speak(txt, lang);
   });
 
