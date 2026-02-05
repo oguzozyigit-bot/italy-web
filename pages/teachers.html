@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Dil Öğretmeni</title>
+  <title>italkyAI • Öğretmen Seçimi</title>
   <link rel="icon" href="data:," />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,29 +12,24 @@
 
   <style>
     :root {
-      /* --- Layout --- */
       --frameW: min(480px, 100vw);
       --topH: 70px;
-      --footerH: 90px; /* Mikrofon için biraz daha yüksek */
+      --footerH: 90px;
 
-      /* --- Colors --- */
       --bg-deep: #050507;
       --text-main: #ffffff;
       --text-muted: rgba(255, 255, 255, 0.6);
-      --text-dim: rgba(255, 255, 255, 0.3);
 
-      /* Öğretmen Modu için daha sıcak/arkadaş canlısı bir accent */
-      --accent-primary: #8b5cf6; /* Violet */
-      --accent-secondary: #ec4899; /* Pink */
+      /* Varsayılan Accent (Dora) */
+      --accent-primary: #8b5cf6; 
       --accent-glow: rgba(139, 92, 246, 0.5);
       --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
 
       --glass-bg: rgba(20, 20, 25, 0.75);
       --glass-border: rgba(255, 255, 255, 0.08);
 
-      --user-bubble: #2e1065; /* Dark Violet */
-      --ai-bubble: #1f2937; /* Dark Gray */
-      --correction: #ef4444; /* Red hint */
+      --user-bubble: #2e1065;
+      --ai-bubble: #1f2937;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -48,11 +43,11 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* --- Background --- */
+    /* Background Atmosphere */
     .premium-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 0%, #1a103c 0%, #000000 70%); }
-    .premium-glow { position: absolute; width: 100%; height: 60%; background: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.15), transparent 70%); top: 0; left: 0; pointer-events: none; }
+    .premium-glow { position: absolute; width: 100%; height: 60%; background: radial-gradient(ellipse at top, var(--accent-glow), transparent 70%); top: 0; left: 0; pointer-events: none; transition: 0.5s; }
 
-    /* --- Frame --- */
+    /* Frame */
     .mobile-frame {
       width: 100%; max-width: var(--frameW); height: 100%;
       position: relative; z-index: 10;
@@ -64,7 +59,7 @@
       .mobile-frame { height: 92vh; border-radius: 32px; border: 1px solid var(--glass-border); box-shadow: 0 40px 120px -20px rgba(0,0,0,0.8); background: rgba(10, 10, 12, 0.9); }
     }
 
-    /* --- Top Bar --- */
+    /* Top Bar */
     .topbar {
       height: var(--topH); display: flex; align-items: center; justify-content: space-between;
       padding: 0 20px; background: rgba(5, 5, 7, 0.8); backdrop-filter: blur(20px);
@@ -89,17 +84,62 @@
     .lang-flag { font-size: 18px; line-height: 1; }
     .lang-code { font-size: 12px; font-weight: 700; color: #fff; text-transform: uppercase; }
 
-    /* --- Main Chat Area --- */
+    /* --- TEACHER SELECTION OVERLAY (NEW) --- */
+    .selection-overlay {
+        position: absolute; inset: 0; z-index: 100;
+        background: rgba(5, 5, 7, 0.98);
+        display: flex; flex-direction: column; padding: 80px 20px 40px;
+        gap: 20px; overflow-y: auto;
+        transition: transform 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+    }
+    .selection-overlay.hidden { transform: translateY(100%); pointer-events: none; }
+
+    .sel-title { font-size: 26px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 4px; }
+    .sel-subtitle { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 24px; }
+
+    .teacher-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+        padding-bottom: 40px;
+    }
+
+    .t-card {
+        background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+        border-radius: 24px; padding: 16px; cursor: pointer;
+        display: flex; flex-direction: column; align-items: center; gap: 12px;
+        transition: 0.2s; position: relative; overflow: hidden;
+    }
+    .t-card:active { transform: scale(0.96); background: rgba(255,255,255,0.06); }
+    
+    /* Seçili efekti */
+    .t-card.selected { border-color: var(--accent-primary); background: rgba(139, 92, 246, 0.1); }
+
+    .t-avatar {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: linear-gradient(135deg, #333, #111);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        border: 2px solid rgba(255,255,255,0.1);
+    }
+    .t-info { text-align: center; }
+    .t-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+    .t-style { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Female Colors */
+    .t-card[data-gender="female"] .t-avatar { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
+    /* Male Colors */
+    .t-card[data-gender="male"] .t-avatar { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+
+
+    /* --- Chat Area --- */
     .chat-area {
       flex: 1; padding: 20px; overflow-y: auto;
       display: flex; flex-direction: column; gap: 16px;
-      padding-bottom: 120px; /* Space for bottom controls */
+      padding-bottom: 120px;
     }
     .chat-area::-webkit-scrollbar { display: none; }
 
     /* Messages */
-    .msg { max-width: 85%; width: fit-content; display: flex; flex-direction: column; gap: 4px; position: relative; }
-    
+    .msg { max-width: 85%; width: fit-content; display: flex; flex-direction: column; gap: 4px; }
     .msg.ai { align-self: flex-start; }
     .msg.user { align-self: flex-end; align-items: flex-end; }
 
@@ -107,180 +147,62 @@
       padding: 12px 16px; border-radius: 18px;
       font-size: 15px; line-height: 1.5; color: #fff;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      position: relative;
     }
-    .msg.ai .bubble {
-      background: var(--ai-bubble);
-      border-bottom-left-radius: 4px;
-      border: 1px solid var(--glass-border);
-    }
-    .msg.user .bubble {
-      background: var(--user-bubble);
-      border-bottom-right-radius: 4px;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      background: linear-gradient(135deg, rgba(46, 16, 101, 0.8), rgba(76, 29, 149, 0.8));
-    }
+    .msg.ai .bubble { background: var(--ai-bubble); border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); }
+    .msg.user .bubble { background: var(--user-bubble); border-bottom-right-radius: 4px; border: 1px solid rgba(255,255,255,0.15); }
 
-    /* Correction / Hint Style inside bubble */
-    .correction {
-        display: block; margin-top: 6px; padding-top: 6px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        font-size: 12px; color: #f87171; font-weight: 500; font-style: italic;
-    }
-    .correction span { color: #fff; opacity: 0.7; font-style: normal; margin-right: 4px; }
-
-    /* AI Avatar (Teacher) */
-    .teacher-status {
-        display: flex; flex-direction: column; align-items: center; gap: 10px;
-        margin-bottom: 20px; margin-top: 10px;
-        transition: all 0.5s ease;
-    }
-    .teacher-status.minimized {
-        flex-direction: row; margin: 0; padding: 10px 20px;
-        background: rgba(0,0,0,0.3); position: absolute; top: var(--topH); left: 0; right: 0;
-        z-index: 40; backdrop-filter: blur(10px); border-bottom: 1px solid var(--glass-border);
-        justify-content: center; height: 50px; opacity: 0; pointer-events: none;
-    }
-    
+    /* Main Avatar in Chat */
+    .teacher-status { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; margin-top: 10px; transition: 0.3s; }
     .avatar-orb {
         width: 80px; height: 80px; border-radius: 50%;
         background: var(--accent-gradient);
         box-shadow: 0 0 30px var(--accent-glow);
-        position: relative;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .avatar-orb::after {
-        content: ''; position: absolute; inset: -5px; border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.1);
-        animation: spin 10s linear infinite;
+        position: relative; display: flex; align-items: center; justify-content: center;
+        font-size: 32px; color: #fff;
     }
     .avatar-orb.speaking { animation: pulse-speak 1.5s infinite; }
-
-    .teacher-text { text-align: center; }
-    .teacher-name { font-size: 18px; font-weight: 700; color: #fff; }
-    .teacher-mode { font-size: 12px; color: var(--accent-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .teacher-name-display { font-size: 18px; font-weight: 700; color: #fff; }
+    .teacher-mode-display { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
 
     @keyframes pulse-speak {
         0% { transform: scale(1); box-shadow: 0 0 20px var(--accent-glow); }
         50% { transform: scale(1.05); box-shadow: 0 0 40px var(--accent-glow); }
         100% { transform: scale(1); box-shadow: 0 0 20px var(--accent-glow); }
     }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
 
-
-    /* --- Bottom Controls --- */
+    /* Bottom Controls */
     .bottom-controls {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      height: var(--footerH);
+      position: absolute; bottom: 0; left: 0; right: 0; height: var(--footerH);
       background: rgba(5, 5, 7, 0.9); backdrop-filter: blur(25px);
       border-top: 1px solid var(--glass-border);
-      display: flex; align-items: center; justify-content: center;
-      gap: 20px; z-index: 60; padding: 0 20px;
+      display: flex; align-items: center; justify-content: center; gap: 20px; z-index: 60;
     }
-
-    /* Side Buttons */
-    .ctrl-btn {
-        width: 44px; height: 44px; border-radius: 14px;
-        background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-        color: var(--text-muted); display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: 0.2s;
-    }
-    .ctrl-btn:active { background: rgba(255,255,255,0.1); color: #fff; transform: scale(0.95); }
-    .ctrl-btn svg { width: 22px; height: 22px; fill: currentColor; }
-
-    /* The Main Mic Button */
     .mic-btn {
         width: 72px; height: 72px; border-radius: 50%;
         background: var(--accent-gradient);
         border: 4px solid rgba(5, 5, 7, 0.5);
         box-shadow: 0 8px 30px var(--accent-glow);
         display: flex; align-items: center; justify-content: center;
-        color: #fff; cursor: pointer; margin-top: -30px; /* Pop out effect */
-        transition: 0.2s; position: relative;
+        color: #fff; cursor: pointer; margin-top: -30px; transition: 0.2s;
     }
-    .mic-btn svg { width: 32px; height: 32px; fill: currentColor; }
     .mic-btn:active { transform: scale(0.95); }
-    
-    .mic-btn::before {
-        content: ''; position: absolute; inset: -10px; border-radius: 50%;
-        border: 1px solid rgba(255,255,255,0.1); opacity: 0.5;
-        animation: ripple 2s infinite; pointer-events: none;
-    }
-    @keyframes ripple {
-        0% { transform: scale(0.8); opacity: 0; }
-        50% { opacity: 0.5; }
-        100% { transform: scale(1.5); opacity: 0; }
-    }
+    .mic-btn svg { width: 32px; height: 32px; fill: currentColor; }
 
-
-    /* --- Mode Selection Cards (Initial State) --- */
-    .mode-overlay {
-        position: absolute; inset: 0; z-index: 80;
-        background: rgba(5, 5, 7, 0.95); backdrop-filter: blur(10px);
-        display: flex; flex-direction: column; padding: 100px 20px 40px;
-        gap: 20px; overflow-y: auto;
-        transition: opacity 0.4s, transform 0.4s;
-    }
-    .mode-overlay.hidden { opacity: 0; pointer-events: none; transform: scale(1.05); }
-
-    .mode-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 10px; text-align: center; }
-    .mode-subtitle { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 20px; line-height: 1.5; }
-
-    .mode-card {
-        background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
-        border-radius: 20px; padding: 20px; cursor: pointer;
-        display: flex; align-items: center; gap: 16px;
-        transition: 0.2s;
-    }
-    .mode-card:active { transform: scale(0.98); background: rgba(255,255,255,0.06); }
-    
-    .mode-icon {
-        width: 50px; height: 50px; border-radius: 14px;
-        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
-        display: flex; align-items: center; justify-content: center;
-        font-size: 24px; color: var(--accent-secondary);
-        border: 1px solid rgba(255,255,255,0.05);
-    }
-    .mode-info { flex: 1; }
-    .mode-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-    .mode-desc { font-size: 12px; color: var(--text-muted); font-weight: 400; }
-
-    /* --- Sheets --- */
-    .sheetBackdrop {
-      position: fixed; inset: 0; z-index: 9999;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-      display: none; align-items: flex-end; justify-content: center;
-      opacity: 0; transition: opacity 0.3s;
-    }
-    .sheetBackdrop.show { display: flex; opacity: 1; }
-    .sheet {
-      width: 100%; max-width: 480px; background: #121216;
-      border: 1px solid var(--glass-border); border-radius: 28px 28px 0 0;
-      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-      padding-bottom: 30px;
-    }
-    .sheetBackdrop.show .sheet { transform: translateY(0); }
+    /* Sheets */
+    .sheetBackdrop { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; justify-content: center; }
+    .sheetBackdrop.show { display: flex; }
+    .sheet { width: 100%; max-width: 480px; background: #121216; border-radius: 28px 28px 0 0; border: 1px solid var(--glass-border); padding-bottom: 30px; }
     .sheetTop { padding: 20px 24px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
     .sheetTitle { font-size: 16px; font-weight: 700; color: #fff; }
-    .sheetClose { background: rgba(255,255,255,0.08); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; }
-    
     .lang-grid { padding: 24px; display: grid; gap: 12px; }
-    .lang-option {
-        display: flex; align-items: center; gap: 16px; padding: 16px 20px;
-        background: rgba(255,255,255,0.03); border-radius: 16px;
-        border: 1px solid var(--glass-border); cursor: pointer; transition: 0.2s;
-    }
-    .lang-option:active { background: rgba(255,255,255,0.08); }
-    .lang-option .flag { font-size: 24px; }
-    .lang-option .name { font-size: 15px; font-weight: 600; color: #fff; }
-    .lang-option.active { border-color: var(--accent-primary); background: rgba(139, 92, 246, 0.1); }
+    .lang-option { display: flex; align-items: center; gap: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid var(--glass-border); color: #fff; font-weight: 600; cursor: pointer; }
 
   </style>
 </head>
 
 <body>
   <div class="premium-bg"></div>
-  <div class="premium-glow"></div>
+  <div class="premium-glow" id="ambientGlow"></div>
 
   <div class="mobile-frame">
     
@@ -290,72 +212,65 @@
         <div class="logo-line"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
         <div class="logo-slogan">BE FREE</div>
       </div>
-      <div class="lang-indicator" id="langTrigger">
+      <div class="lang-indicator" onclick="document.getElementById('langSheet').classList.add('show')">
         <span class="lang-flag" id="currentFlag">🇬🇧</span>
         <span class="lang-code" id="currentCode">EN</span>
       </div>
     </div>
 
-    <div class="mode-overlay" id="modeOverlay">
-      <h2 class="mode-title">Nasıl Konuşalım?</h2>
-      <p class="mode-subtitle">Bugün hangi konuda kendini geliştirmek istersin?</p>
+    <div class="selection-overlay" id="teacherSelectScreen">
+      <h2 class="sel-title">Öğretmenini Seç</h2>
+      <p class="sel-subtitle">Seninle kim konuşsun istersin?</p>
       
-      <div class="mode-card" onclick="selectMode('Serbest Muhabbet')">
-        <div class="mode-icon">☕</div>
-        <div class="mode-info">
-          <div class="mode-name">Serbest Muhabbet</div>
-          <div class="mode-desc">Konu sınırlaması yok, havadan sudan konuşalım.</div>
+      <div class="teacher-grid">
+        <div class="t-card" data-gender="female" onclick="chooseTeacher('Dora', 'female', 'Sabırlı & Sakin')">
+          <div class="t-avatar">👩‍🏫</div>
+          <div class="t-info"><div class="t-name">Dora</div><div class="t-style">Sabırlı</div></div>
         </div>
-      </div>
-
-      <div class="mode-card" onclick="selectMode('Hayatta Kalma')">
-        <div class="mode-icon">🆘</div>
-        <div class="mode-info">
-          <div class="mode-name">Hayatta Kalma</div>
-          <div class="mode-desc">Havalimanı, otel, hastane senaryoları.</div>
+        <div class="t-card" data-gender="female" onclick="chooseTeacher('Ayda', 'female', 'Enerjik & Hızlı')">
+          <div class="t-avatar">⚡</div>
+          <div class="t-info"><div class="t-name">Ayda</div><div class="t-style">Enerjik</div></div>
         </div>
-      </div>
+        <div class="t-card" data-gender="female" onclick="chooseTeacher('Umay', 'female', 'Disiplinli')">
+          <div class="t-avatar">⚖️</div>
+          <div class="t-info"><div class="t-name">Umay</div><div class="t-style">Disiplinli</div></div>
+        </div>
 
-      <div class="mode-card" onclick="selectMode('Gramer Polisi')">
-        <div class="mode-icon">👮</div>
-        <div class="mode-info">
-          <div class="mode-name">Gramer Polisi</div>
-          <div class="mode-desc">Her hatanı düzeltirim, acımak yok!</div>
+        <div class="t-card" data-gender="male" onclick="chooseTeacher('Sencer', 'male', 'Resmi & Tok Ses')">
+          <div class="t-avatar">🎙️</div>
+          <div class="t-info"><div class="t-name">Sencer</div><div class="t-style">Resmi</div></div>
+        </div>
+        <div class="t-card" data-gender="male" onclick="chooseTeacher('Toygar', 'male', 'Samimi & Kanka')">
+          <div class="t-avatar">🎮</div>
+          <div class="t-info"><div class="t-name">Toygar</div><div class="t-style">Samimi</div></div>
+        </div>
+        <div class="t-card" data-gender="male" onclick="chooseTeacher('Sungur', 'male', 'Akademik')">
+          <div class="t-avatar">📚</div>
+          <div class="t-info"><div class="t-name">Sungur</div><div class="t-style">Akademik</div></div>
         </div>
       </div>
     </div>
 
     <div class="chat-area" id="chatArea">
-      
-      <div class="teacher-status" id="teacherStatus">
-        <div class="avatar-orb" id="avatarOrb">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-        </div>
-        <div class="teacher-text">
-          <div class="teacher-name">italky Teacher</div>
-          <div class="teacher-mode" id="activeModeDisplay">Mod Seçimi Bekleniyor...</div>
+      <div class="teacher-status">
+        <div class="avatar-orb" id="mainAvatar">👩‍🏫</div>
+        <div class="teacher-text" style="text-align:center;">
+          <div class="teacher-name-display" id="mainName">Dora</div>
+          <div class="teacher-mode-display" id="mainStyle">Öğretmenin</div>
         </div>
       </div>
 
-      <div class="msg ai" style="display:none;" id="welcomeMsg">
-        <div class="bubble">
-          Merhaba! Ben İngilizce öğretmenin. Bugün nasılsın, neler yaptın?
+      <div class="msg ai">
+        <div class="bubble" id="welcomeText">
+          Merhaba! Ben Dora. Bugün İngilizce pratiği yapmaya ne dersin? Hata yapmaktan çekinme!
         </div>
       </div>
     </div>
 
     <div class="bottom-controls">
-      <button class="ctrl-btn" aria-label="Klavye">
-        <svg viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z"/></svg>
-      </button>
-
       <div class="mic-btn" id="micBtn">
         <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
       </div>
-
-      <button class="ctrl-btn" aria-label="İpucu" style="color: #fbbf24;">
-        <svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/></svg>
-      </button>
     </div>
 
   </div>
@@ -363,119 +278,81 @@
   <div class="sheetBackdrop" id="langSheet">
     <div class="sheet">
       <div class="sheetTop">
-        <div class="sheetTitle">Hangi Dili Öğreniyoruz?</div>
-        <button class="sheetClose" id="closeLangBtn">✕</button>
+        <span class="sheetTitle">Dil Seçimi</span>
+        <span onclick="document.getElementById('langSheet').classList.remove('show')" style="color:#fff; cursor:pointer;">✕</span>
       </div>
       <div class="lang-grid">
-        <div class="lang-option active" onclick="setLang('🇬🇧', 'EN')">
-          <span class="flag">🇬🇧</span>
-          <span class="name">İngilizce</span>
-        </div>
-        <div class="lang-option" onclick="setLang('🇩🇪', 'DE')">
-          <span class="flag">🇩🇪</span>
-          <span class="name">Almanca</span>
-        </div>
-        <div class="lang-option" onclick="setLang('🇫🇷', 'FR')">
-          <span class="flag">🇫🇷</span>
-          <span class="name">Fransızca</span>
-        </div>
-        <div class="lang-option" onclick="setLang('🇪🇸', 'ES')">
-          <span class="flag">🇪🇸</span>
-          <span class="name">İspanyolca</span>
-        </div>
-        <div class="lang-option" onclick="setLang('🇮🇹', 'IT')">
-          <span class="flag">🇮🇹</span>
-          <span class="name">İtalyanca</span>
-        </div>
+        <div class="lang-option" onclick="setLang('🇬🇧','EN')"><span class="flag">🇬🇧</span> İngilizce</div>
+        <div class="lang-option" onclick="setLang('🇩🇪','DE')"><span class="flag">🇩🇪</span> Almanca</div>
+        <div class="lang-option" onclick="setLang('🇫🇷','FR')"><span class="flag">🇫🇷</span> Fransızca</div>
+        <div class="lang-option" onclick="setLang('🇪🇸','ES')"><span class="flag">🇪🇸</span> İspanyolca</div>
+        <div class="lang-option" onclick="setLang('🇮🇹','IT')"><span class="flag">🇮🇹</span> İtalyanca</div>
       </div>
     </div>
   </div>
 
   <script>
-    // --- Logic for UI interactions ---
+    // Logic for Selection
+    function chooseTeacher(name, gender, style) {
+        // 1. Hide Selection Screen
+        document.getElementById('teacherSelectScreen').classList.add('hidden');
 
-    // 1. Language Sheet
-    const langTrigger = document.getElementById('langTrigger');
-    const langSheet = document.getElementById('langSheet');
-    const closeLangBtn = document.getElementById('closeLangBtn');
-    const currentFlag = document.getElementById('currentFlag');
-    const currentCode = document.getElementById('currentCode');
-
-    langTrigger.addEventListener('click', () => langSheet.classList.add('show'));
-    closeLangBtn.addEventListener('click', () => langSheet.classList.remove('show'));
-
-    function setLang(flag, code) {
-        currentFlag.textContent = flag;
-        currentCode.textContent = code;
-        langSheet.classList.remove('show');
-        // Reset active class
-        document.querySelectorAll('.lang-option').forEach(el => el.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    }
-
-    // 2. Mode Selection
-    const modeOverlay = document.getElementById('modeOverlay');
-    const activeModeDisplay = document.getElementById('activeModeDisplay');
-    const welcomeMsg = document.getElementById('welcomeMsg');
-    const avatarOrb = document.getElementById('avatarOrb');
-
-    function selectMode(modeName) {
-        modeOverlay.classList.add('hidden');
-        activeModeDisplay.textContent = modeName;
+        // 2. Update UI Colors & Content
+        const root = document.documentElement;
+        const glow = document.getElementById('ambientGlow');
+        const avatar = document.getElementById('mainAvatar');
         
-        // Show welcome message after small delay
-        setTimeout(() => {
-            welcomeMsg.style.display = 'flex';
-            avatarOrb.classList.add('speaking'); // Start speaking animation
+        // Update Texts
+        document.getElementById('mainName').innerText = name;
+        document.getElementById('mainStyle').innerText = style;
+        document.getElementById('welcomeText').innerText = `Selam! Ben ${name}. ${style} tarzımla seni dinliyorum. Hadi başlayalım!`;
+
+        // Update Icons & Colors
+        if (gender === 'female') {
+            // Pembe/Mor Tema
+            root.style.setProperty('--accent-gradient', 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)');
+            root.style.setProperty('--accent-glow', 'rgba(139, 92, 246, 0.5)');
             
-            // Stop speaking after a few seconds (simulate TTS)
-            setTimeout(() => avatarOrb.classList.remove('speaking'), 3000);
-        }, 500);
+            if(name === 'Dora') avatar.innerText = '👩‍🏫';
+            if(name === 'Ayda') avatar.innerText = '⚡';
+            if(name === 'Umay') avatar.innerText = '⚖️';
+
+        } else {
+            // Mavi/Turkuaz Tema
+            root.style.setProperty('--accent-gradient', 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)');
+            root.style.setProperty('--accent-glow', 'rgba(59, 130, 246, 0.5)');
+            
+            if(name === 'Sencer') avatar.innerText = '🎙️';
+            if(name === 'Toygar') avatar.innerText = '🎮';
+            if(name === 'Sungur') avatar.innerText = '📚';
+        }
     }
 
-    // 3. Microphone Interaction
+    // Lang Set
+    function setLang(flag, code) {
+        document.getElementById('currentFlag').innerText = flag;
+        document.getElementById('currentCode').innerText = code;
+        document.getElementById('langSheet').classList.remove('show');
+    }
+
+    // Mic Animation Simulation
     const micBtn = document.getElementById('micBtn');
-    let isListening = false;
+    const avatar = document.getElementById('mainAvatar');
+    let isTalking = false;
 
     micBtn.addEventListener('click', () => {
-        isListening = !isListening;
-        if(isListening) {
+        isTalking = !isTalking;
+        if(isTalking) {
             micBtn.style.transform = 'scale(1.1)';
-            micBtn.style.boxShadow = '0 0 40px var(--accent-glow)';
-            // Simulating user speaking
-            avatarOrb.classList.remove('speaking');
+            avatar.classList.remove('speaking'); // User speaks
         } else {
             micBtn.style.transform = 'scale(1)';
-            micBtn.style.boxShadow = '0 8px 30px var(--accent-glow)';
-            // Simulate AI processing & reply
             setTimeout(() => {
-                 addMsg("User", "I go to cinema yesterday.");
-                 setTimeout(() => {
-                     addMsg("AI", "Oh, you **went to the cinema**? That's great! What did you watch?", true);
-                 }, 1000);
+                avatar.classList.add('speaking'); // AI replies
+                setTimeout(() => avatar.classList.remove('speaking'), 3000);
             }, 500);
         }
     });
-
-    function addMsg(role, text, correction = false) {
-        const chatArea = document.getElementById('chatArea');
-        const div = document.createElement('div');
-        div.className = `msg ${role.toLowerCase()}`;
-        
-        let htmlContent = text;
-        if(correction) {
-            // Demo for correction formatting
-            htmlContent = `Oh, you <b>went to the cinema</b>? That's great! What did you watch?
-            <span class="correction"><span>Düzeltme:</span> I went to the cinema</span>`;
-            avatarOrb.classList.add('speaking');
-            setTimeout(() => avatarOrb.classList.remove('speaking'), 3000);
-        }
-
-        div.innerHTML = `<div class="bubble">${htmlContent}</div>`;
-        chatArea.appendChild(div);
-        chatArea.scrollTop = chatArea.scrollHeight;
-    }
-
   </script>
 </body>
 </html>
