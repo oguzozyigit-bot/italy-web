@@ -22,7 +22,6 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100dvh; overflow: hidden; font-family: 'Outfit', sans-serif; background-color: var(--bg-deep); color: var(--text-white); display: flex; align-items: center; justify-content: center; }
 
-    /* COSMOS TASARIM (Nebula Efektleri) */
     .cosmos-layer { position: absolute; inset: -50%; width: 200%; height: 200%; background: var(--bg-deep); z-index: 0; overflow: hidden; }
     .nebula { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35; animation: breathe 10s infinite alternate ease-in-out; }
     .nebula-1 { top: 5%; left: 10%; width: 80vw; height: 80vw; background: radial-gradient(circle, #6366f1, transparent 65%); }
@@ -50,8 +49,7 @@
       display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: 0.3s;
     }
     .icon-badge { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-    
-    /* Google Wrapper Fix */
+
     .google-wrapper { position: relative; width: 100%; height: 60px; display: flex; justify-content: center; }
     #googleBtnWrapper { width: 100% !important; min-height: 50px; display: flex; justify-content: center; }
 
@@ -60,12 +58,11 @@
     .footer-nav a { color: rgba(255,255,255,0.4); text-decoration: none; font-size: 11px; font-weight: 700; text-transform: uppercase; }
     .copyright { font-size: 10px; color: rgba(255,255,255,0.15); font-weight: 700; letter-spacing: 1px; }
 
-    /* Modal */
     .overlay-backdrop { position: fixed; inset: 0; z-index: 9999; background: rgba(2, 2, 5, 0.95); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; padding: 20px; }
     .overlay-backdrop.active { display: flex; }
     .modal-card { width: 100%; max-width: 440px; background: #0a0a0f; border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; text-align: center; }
     iframe { width: 100%; height: 350px; border: none; background: #fff; border-radius: 12px; margin-bottom: 15px; }
-    
+
     .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #1a1a2e; border: 1px solid #6366f1; padding: 12px 24px; border-radius: 30px; color: #fff; z-index: 10000; transition: 0.4s; text-align: center; }
     .toast.show { transform: translateX(-50%) translateY(0); }
   </style>
@@ -91,9 +88,7 @@
       </div>
 
       <div class="glass-btn" onclick="showToast('Apple girişi henüz hazır değil. Lütfen Google kullanın.')">
-        <span class="icon-badge" style="background: #000; border: 1px solid rgba(255,255,255,0.2); color: #fff;">
-          
-        </span>
+        <span class="icon-badge" style="background: #000; border: 1px solid rgba(255,255,255,0.2); color: #fff;"></span>
         Apple ile Devam Et
       </div>
     </div>
@@ -125,77 +120,65 @@
   <div id="toast" class="toast"></div>
 
 <script>
-  // Kilit Madde: config.js ile uyumlu anahtar
-  const STORAGE_KEY = "italky_user_v1";
-
-  window.onload = function () {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const u = JSON.parse(saved);
-        const termsKey = `italky_terms_accepted_at::${u.email}`;
-        if (u.email && localStorage.getItem(termsKey)) {
-          window.location.replace("/pages/home.html");
-          return;
-        }
-      } catch(e) { localStorage.removeItem(STORAGE_KEY); }
-    }
-    initGoogleLibrary();
-  };
-
-  function initGoogleLibrary() {
-    let attempts = 0;
-    const poll = setInterval(() => {
-      if (typeof google !== 'undefined' && google.accounts.id) {
-        clearInterval(poll);
-        google.accounts.id.initialize({
-          client_id: "1030744341756-225hv01qs2ltugoe70c67r4m4fd83f0d.apps.googleusercontent.com",
-          callback: handleGoogleLogin,
-          auto_prompt: false
-        });
-        google.accounts.id.renderButton(document.getElementById("googleBtnWrapper"), { 
-          theme: "outline", size: "large", width: 380, shape: "rectangular", text: "continue_with"
-        });
-      } else if (++attempts > 20) clearInterval(poll);
-    }, 100);
-  }
-
-  function handleGoogleLogin(response) {
-    try {
-      const payload = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-      const user = { 
-        email: payload.email, 
-        fullname: payload.name, 
-        picture: payload.picture, 
-        id_token: response.credential, 
-        plan: "FREE" 
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      const termsKey = `italky_terms_accepted_at::${user.email}`;
-      if (localStorage.getItem(termsKey)) window.location.replace("/pages/home.html");
-      else document.getElementById("termsModal").classList.add("active");
-    } catch (e) { showToast("Giriş işlemi tamamlanamadı."); }
-  }
-
-  const checkTerm = document.getElementById("checkTerm");
-  const acceptBtn = document.getElementById("acceptBtn");
-  checkTerm.onchange = () => { 
-    acceptBtn.disabled = !checkTerm.checked; 
-    acceptBtn.style.opacity = checkTerm.checked ? "1" : "0.5"; 
-  };
-  acceptBtn.onclick = () => {
-    const u = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (u) {
-      localStorage.setItem(`italky_terms_accepted_at::${u.email}`, new Date().toISOString());
-      window.location.replace("/pages/home.html");
-    }
-  };
-
   function showToast(msg) {
     const t = document.getElementById("toast");
     t.textContent = msg; t.classList.add("show");
     setTimeout(() => t.classList.remove("show"), 3500);
   }
 </script>
+
+<script type="module">
+  import { STORAGE_KEY } from "/js/config.js";
+  import { initAuth, acceptTerms } from "/js/auth.js";
+
+  // auth.js butonu buraya basacak
+  window.__ITALKY_SHOW_TERMS__ = () => {
+    document.getElementById("termsModal")?.classList.add("active");
+  };
+
+  function hasAcceptedTerms(u){
+    try{
+      const email = String(u?.email || "").toLowerCase().trim();
+      if(!email) return false;
+      return !!localStorage.getItem(`italky_terms_accepted_at::${email}`);
+    }catch{ return false; }
+  }
+
+  // giriş yapılmış + sözleşme onaylıysa direkt home
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const u = JSON.parse(raw);
+      if(hasAcceptedTerms(u)){
+        window.location.replace("/pages/home.html");
+      }
+    }
+  }catch{}
+
+  // Google lib hazır olunca initAuth
+  let tries = 0;
+  const timer = setInterval(() => {
+    tries++;
+    if (window.google?.accounts?.id) {
+      clearInterval(timer);
+      initAuth();
+    }
+    if(tries > 80) clearInterval(timer);
+  }, 100);
+
+  const checkTerm = document.getElementById("checkTerm");
+  const acceptBtn = document.getElementById("acceptBtn");
+  checkTerm.onchange = () => {
+    acceptBtn.disabled = !checkTerm.checked;
+    acceptBtn.style.opacity = checkTerm.checked ? "1" : "0.5";
+  };
+  acceptBtn.onclick = async () => {
+    if(!checkTerm.checked) return;
+    const ok = await acceptTerms();
+    if(ok) window.location.replace("/pages/home.html");
+    else showToast("Sözleşme kaydedilemedi.");
+  };
+</script>
+
 </body>
 </html>
