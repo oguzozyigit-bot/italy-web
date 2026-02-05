@@ -1,4 +1,3 @@
-<script type="module">
 /**
  * NEON HANGMAN (OFFLINE LANG POOL)
  * - /assets/lang/{lang}.json -> ortak havuz
@@ -100,12 +99,19 @@ window.selectLevel = async (diff) => {
   scoreMultiplier = SETTINGS[diff].multi;
   ensureAudio();
 
-  const modal = $("startModal").querySelector(".modal-card");
-  Array.from(modal.children).forEach((c) => {
-    if (c.tagName === "BUTTON" || c.className === "modal-p" || c.className === "lang-grid") c.style.display = "none";
-  });
-  $("loading").style.display = "block";
+  const modalCard = $("startModal")?.querySelector(".modal-card");
+  if (modalCard) {
+    Array.from(modalCard.children).forEach((c) => {
+      // PATCH: className eşitliği yerine matches
+      const isHide =
+        c.matches?.("button") ||
+        c.matches?.(".modal-p") ||
+        c.matches?.(".lang-grid");
+      if (isHide) c.style.display = "none";
+    });
+  }
 
+  $("loading").style.display = "block";
   await fetchWordsFromPool();
 };
 
@@ -123,35 +129,89 @@ function normalizeCharString(s){
 }
 
 /* =========================
+   CÜMLE ŞABLONU (DİLE GÖRE)  ✅ PATCH
+   ========================= */
+function buildSentenceByLang(word, pos){
+  const w = String(word || "").trim();
+  if(!w) return "";
+
+  const L = currentLang;
+
+  // minimal, basit, offline şablonlar
+  const templates = {
+    en: {
+      verb: `I ${w} every day.`,
+      adj:  `It is ${w}.`,
+      adv:  `I do it ${w}.`,
+      noun: `This is ${w}.`
+    },
+    de: {
+      verb: `Ich ${w} jeden Tag.`,
+      adj:  `Es ist ${w}.`,
+      adv:  `Ich mache es ${w}.`,
+      noun: `Das ist ${w}.`
+    },
+    fr: {
+      verb: `Je ${w} chaque jour.`,
+      adj:  `C'est ${w}.`,
+      adv:  `Je le fais ${w}.`,
+      noun: `C'est ${w}.`
+    },
+    es: {
+      verb: `Yo ${w} todos los días.`,
+      adj:  `Es ${w}.`,
+      adv:  `Lo hago ${w}.`,
+      noun: `Esto es ${w}.`
+    },
+    it: {
+      verb: `Io ${w} ogni giorno.`,
+      adj:  `È ${w}.`,
+      adv:  `Lo faccio ${w}.`,
+      noun: `Questo è ${w}.`
+    }
+  };
+
+  const pack = templates[L] || templates.en;
+  if(pos === "verb") return pack.verb;
+  if(pos === "adj") return pack.adj;
+  if(pos === "adv") return pack.adv;
+  return pack.noun;
+}
+
+/* =========================
    ORTAK HAVUZDAN KELİME ÇEK
    - /assets/lang/{lang}.json
-   - pos: noun|verb
-   - lvl: zorluk
-   - uzunluk: SETTINGS range
    ========================= */
 async function fetchWordsFromPool(){
-  // Havuzu yükle
   const pool = await loadLangPool(currentLang);
 
-  // used: bu oyun + bu dil + bu zorluk için ayrı iz
+  // PATCH: havuz boşsa güvenli çık
+  if (!Array.isArray(pool) || pool.length === 0) {
+    $("loading").style.display = "none";
+    alert("Dil havuzu boş görünüyor. /assets/lang dosyalarını kontrol et.");
+    location.reload();
+    return;
+  }
+
   const usedKey = `used_hangman_${currentLang}_${difficulty}`;
-  const { used, save, norm } = createUsedSet(usedKey);
+  const { used, save } = createUsedSet(usedKey);
 
   const [minLen, maxLen] = SETTINGS[difficulty].range;
 
-  // filtre: noun/verb + lvl + uzunluk
   const filterFn = (it) => {
     const posOk = (it.pos === "noun" || it.pos === "verb" || !it.pos);
-    const lvlOk = (it.lvl === difficulty || (difficulty==="B1" && it.lvl==="A2") || (difficulty==="B2" && (it.lvl==="B1" || it.lvl==="B2" || it.lvl==="C1")));
+    const lvlOk =
+      (it.lvl === difficulty) ||
+      (difficulty==="B1" && it.lvl==="A2") ||
+      (difficulty==="B2" && (it.lvl==="B1" || it.lvl==="B2" || it.lvl==="C1"));
+
     const w = normalizeCharString(it.w).replace(/[^A-Z]/g,"");
     const lenOk = (w.length >= minLen && w.length <= maxLen);
     return posOk && lvlOk && lenOk;
   };
 
-  // 15 kelime seç (tekrarsız)
   let picked = pick(pool, 15, used, save, filterFn);
 
-  // yetersizse filtreyi gevşet (uzunluk/level)
   if(picked.length < 10){
     picked = pick(pool, 15, used, save, (it)=>{
       const posOk = (it.pos === "noun" || it.pos === "verb" || !it.pos);
@@ -160,26 +220,25 @@ async function fetchWordsFromPool(){
     });
   }
 
-  // sentence üret (basit, offline)
+  // PATCH: yine azsa, hiç değilse 10-15 arası ne varsa oynat
+  if (picked.length < 5) {
+    $("loading").style.display = "none";
+    alert("Bu dil/zorluk kombinasyonunda yeterli kelime yok. Havuzu genişlet.");
+    location.reload();
+    return;
+  }
+
+  // sentence üret (offline, dile göre) ✅ PATCH
   wordList = picked.map(it => {
     const w = String(it.w || "").trim();
     const tr = String(it.tr || "").trim();
-    const sent = buildSentence(w, it.pos);
+    // pool içinde örnek cümle varsa onu tercih edelim
+    const sent = String(it.sentence || it.ex || "").trim() || buildSentenceByLang(w, it.pos);
     return [w, tr, sent];
   });
 
   $("startModal").style.display = "none";
   startRun();
-}
-
-function buildSentence(w, pos){
-  const word = String(w||"").trim();
-  // çok basit sentence template; amaç: seslendirmede bağlam vermek
-  if(!word) return "";
-  if(pos === "verb") return `I ${word} every day.`;
-  if(pos === "adj") return `It is ${word}.`;
-  if(pos === "adv") return `I do it ${word}.`;
-  return `This is ${word}.`;
 }
 
 /* =========================
@@ -191,7 +250,6 @@ function startRun(){
   streak = 0;
   powerups = 1;
   $("loading").style.display = "none";
-
   startLevel();
 }
 
@@ -215,7 +273,6 @@ function startLevel() {
     $("hintBox").textContent = trMean;
   }
 
-  // Kelimeyi normalize et (diakritik sök + upper)
   currentWord = normalizeCharString(wordList[currentIndex][0]);
 
   mistakes = 0;
@@ -265,7 +322,6 @@ function generateKeyboard() {
   const onlyLetters = currentWord.replace(/[^A-Z]/g, "");
   const poolSet = new Set(onlyLetters.split(""));
 
-  // A-Z ortak klavye
   const common = "ETAOINSHRDLUCMPFGYWBVKXJQZ";
   let totalKeys = (difficulty === "B2") ? 18 : 14;
 
@@ -348,6 +404,7 @@ function handleGuess(char, btn) {
    POWER UP
    ========================= */
 window.usePowerUp = () => {
+  // PATCH: Boss round’da tıklama ile de kilitle
   if (isBossRound) return;
   if (powerups <= 0) return;
 
@@ -409,12 +466,30 @@ function updateScoreUI() {
 /* =========================
    FAIL -> TEACHER SOLVE
    ========================= */
+function pickVoiceFor(langCode){
+  try {
+    const voices = window.speechSynthesis?.getVoices?.() || [];
+    if (!voices.length) return null;
+
+    // tam eşleşme
+    let v = voices.find(x => (x.lang || "").toLowerCase() === langCode.toLowerCase());
+    if (v) return v;
+
+    // dil kısmı eşleşme (de / fr / es / it / en)
+    const short = langCode.split("-")[0].toLowerCase();
+    v = voices.find(x => (x.lang || "").toLowerCase().startsWith(short));
+    return v || null;
+  } catch {
+    return null;
+  }
+}
+
 function teacherSolve() {
   try { window.speechSynthesis.cancel(); } catch {}
 
   const slots = document.querySelectorAll(".letter-slot");
   for (let i = 0; i < currentWord.length; i++) {
-    if (!discovered[i]) {
+    if (!discovered[i] && slots[i]) {
       slots[i].textContent = currentWord[i];
       slots[i].classList.add("missed");
     }
@@ -423,23 +498,40 @@ function teacherSolve() {
   const w = wordList[currentIndex];
   const lessonText = `${w[0]}. ${w[1]}. ${w[2] || ""}`.trim();
 
+  const goNext = () => { setTimeout(() => { currentIndex++; startLevel(); }, 1000); };
+
+  // PATCH: SpeechSynthesis yoksa patlama, direkt geç
+  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+    goNext();
+    return;
+  }
+
   const u = new SpeechSynthesisUtterance(lessonText);
   u.lang = LANG_CONFIG[currentLang].code;
   u.rate = 0.85;
 
-  const goNext = () => { setTimeout(() => { currentIndex++; startLevel(); }, 1000); };
+  // PATCH: uygun voice seç (varsa)
+  const v = pickVoiceFor(u.lang);
+  if (v) u.voice = v;
+
   u.onend = goNext;
   u.onerror = goNext;
 
-  window.speechSynthesis.speak(u);
+  // Bazı tarayıcılarda voices async gelir; yine de konuşmayı başlat
+  try { window.speechSynthesis.speak(u); }
+  catch { goNext(); }
 }
 
-$("btnPowerUp").addEventListener("click", () => window.usePowerUp());
+// PATCH: voices listesi geç gelirse dolduralım
+try {
+  window.speechSynthesis.onvoiceschanged = () => {};
+} catch {}
+
+$("btnPowerUp")?.addEventListener("click", () => window.usePowerUp());
 
 /* =========================
    CONFETTI
    ========================= */
-let fwInterval = null;
 const cvs = $("effectCanvas"), ctx = cvs.getContext("2d");
 let particles = [];
 
@@ -482,4 +574,3 @@ window.addEventListener("resize", () => {
     cvs.height = window.innerHeight;
   }
 });
-</script>
