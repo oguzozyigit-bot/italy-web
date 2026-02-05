@@ -1,4 +1,3 @@
-<!-- FILE: italky-web/pages/facetoface.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -283,11 +282,11 @@
       transform: translateX(-50%) rotate(180deg);
     }
 
-    /* ✅ İSTEDİĞİN: ALT (bordo) taraftaki mikrofon 180° */
+    /* ✅ DÜZELTME 1: Alt (bordo) mikrofon 180 derece */
     #botMic svg{ transform: rotate(180deg); }
 
-    /* (üst mikrofon normal kalsın) */
-    #topMic svg{ transform: none; }
+    /* ✅ DÜZELTME 2: Üst mikrofonu da 180 derece çevirdik (kullanıcı isteği) */
+    #topMic svg{ transform: rotate(180deg); }
 
     /* ===== LOGO (KİLİTLİ) ===== */
     .brandBottom, .brandTop{
@@ -303,14 +302,14 @@
       z-index: 40;
     }
 
-    /* ✅ üst yazı lacivert zemine binmesin: bir tık yukarı/ayır */
+    /* üst yazı lacivert zemine binmesin: bir tık yukarı/ayır */
     .brandTop{
       top: 18px; /* daha yukarıda */
       transform: translateX(-50%) rotate(180deg);
       padding-top: 6px; /* minik ayırma */
     }
 
-    /* ✅ alt logo aşağı + slogan garanti */
+    /* alt logo aşağı + slogan garanti */
     .brandBottom{
       bottom: 2px;
       transform: translateX(-50%) translateY(16px);
@@ -487,7 +486,6 @@
   <div class="frame" id="frameRoot">
     <button class="back" id="backBtn" aria-label="Geri">←</button>
 
-    <!-- TOP brand -->
     <div class="brandTop">
       <div class="brandLock">
         <div class="logoLine">
@@ -500,7 +498,6 @@
     </div>
 
     <div class="split">
-      <!-- TOP PANEL -->
       <section class="side top" id="sideTop">
         <div class="bar">
           <button class="langBtn" id="topLangBtn" type="button">
@@ -529,7 +526,6 @@
         </div>
       </section>
 
-      <!-- WAVE -->
       <div class="wave" aria-hidden="true">
         <div class="glow"></div>
         <svg viewBox="0 0 1000 90" preserveAspectRatio="none">
@@ -556,7 +552,6 @@
         </svg>
       </div>
 
-      <!-- BOTTOM PANEL -->
       <section class="side meTint" id="sideBottom">
         <div class="bar">
           <button class="langBtn" id="botLangBtn" type="button">
@@ -586,7 +581,6 @@
       </section>
     </div>
 
-    <!-- BOTTOM brand (italkyAI + BE FREE) -->
     <div class="brandBottom">
       <div class="brandLock">
         <div class="logoLine">
@@ -599,7 +593,6 @@
     </div>
   </div>
 
-  <!-- Language Sheet -->
   <div class="sheetOverlay" id="langSheet">
     <div class="sheet" role="dialog" aria-modal="true">
       <div class="sheetHead">
