@@ -3,40 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ITALKY • Neural Match — Final</title>
-<link rel="icon" href="data:,">
+<title>ITALKY • Neural Match — Elite Survival</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#05000a;
-  --panel:rgba(20,0,30,.92);
-  --pink:#ff00ff;
-  --cyan:#00f3ff;
-  --purple:#bd00ff;
-  --green:#00e676;
-  --red:#ff1744;
-  --border:rgba(189,0,255,.3);
-  --text:#fff;
+  --bg:#05000a; --panel:rgba(20,0,30,.92); --pink:#ff00ff; --cyan:#00f3ff;
+  --purple:#bd00ff; --green:#00e676; --red:#ff1744; --border:rgba(189,0,255,.3); --text:#fff;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfit,sans-serif;overflow:hidden;color:var(--text)}
-
 .bg{position:absolute;inset:0;background:radial-gradient(circle at center,#1a002b 0%,#000 100%)}
-.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(189,0,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(189,0,255,.1) 1px,transparent 1px);background-size:40px 40px;opacity:.4}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(189,0,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(189,0,255,.1) 1px,transparent 1px);background-size:40px 40px;opacity:.4}
 
 .app{position:relative;max-width:480px;height:100%;margin:0 auto;border:1px solid var(--border);background:var(--panel);display:flex;flex-direction:column;z-index:5}
-@media(min-width:520px){.app{height:92vh;border-radius:32px}}
+@media(min-width:520px){.app{height:92vh;border-radius:32px;margin-top:4vh}}
 
 .header{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--border)}
 .title{font-family:Space Grotesk;font-weight:900;color:var(--pink);letter-spacing:1px;text-shadow:0 0 12px var(--pink)}
-.badge{font-size:10px;padding:4px 8px;border-radius:6px;background:var(--purple);margin-left:8px}
+.pb-badge{font-size:10px;padding:4px 8px;border-radius:6px;background:var(--purple);color:#fff;font-weight:800}
 
 .stats{display:flex;justify-content:space-between;padding:10px 16px;font-family:Space Grotesk;color:var(--cyan);border-bottom:1px dashed var(--border)}
 .stats span b{color:#fff}
 
 .game{flex:1;padding:12px;display:none;flex-direction:column}
-.grid-cards{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:10px;flex:1;max-height:460px}
+.grid-cards{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:10px;flex:1}
 
 .card{perspective:1000px;cursor:pointer}
 .inner{width:100%;height:100%;transition:transform .4s;transform-style:preserve-3d;border-radius:14px}
@@ -46,35 +37,45 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
 .face{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);backface-visibility:hidden}
 .front{background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.01));color:var(--purple);font-size:22px}
 .front::after{content:"🧠";opacity:.5}
-.back{background:rgba(30,0,50,.95);color:#fff;transform:rotateY(180deg);font-weight:800;font-size:14px;text-align:center;padding:6px}
+.back{background:rgba(30,0,50,.95);transform:rotateY(180deg);font-weight:800;font-size:11px;text-align:center;padding:6px;word-break:break-word}
+
+/* ✅ Renkli Kart Arkaları */
+.back.tr { color: var(--green); }
+.back.fx { color: #fff; }
 
 .modal{position:absolute;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:20}
 .card-modal{background:#10051a;border:1px solid var(--pink);border-radius:24px;padding:26px;text-align:center;width:85%;box-shadow:0 0 50px rgba(255,0,255,.25)}
-.langs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:16px}
-.lang{padding:10px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-weight:900}
+.langs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0}
+.lang{padding:10px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-weight:900;font-size:12px}
 .lang.active{background:var(--pink);color:#000}
 
-.btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:900;margin-top:16px;background:var(--pink);color:#000}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-weight:900;margin-top:12px;background:var(--pink);color:#000;cursor:pointer;transition: 0.2s;}
+.btn:disabled{opacity:0.3;cursor:default}
 .btn.sec{background:transparent;border:1px solid #fff;color:#fff}
-
 .hidden{display:none!important}
+
+#resInfo { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 10; padding: 8px 16px; background: var(--purple); color: #fff; border-radius: 20px; font-size: 12px; font-weight: 700; opacity: 0; transition: 0.3s; pointer-events: none; white-space: nowrap; box-shadow: 0 0 15px var(--purple); }
 </style>
 </head>
 
 <body>
 <div class="bg"></div>
-<div class="grid"></div>
+<div class="grid-bg"></div>
 
 <div class="app">
   <div class="header">
-    <div class="title">NEURAL MATCH <span id="langBadge" class="badge">EN</span></div>
+    <div class="title">NEURAL MATCH</div>
+    <div id="pbBadge" class="pb-badge">PB: 0</div>
     <div id="soundBtn" style="cursor:pointer">🔊</div>
   </div>
 
   <div class="stats">
     <span>HAMLE: <b id="moveVal">0</b></span>
-    <span>EŞLEŞME: <b id="matchVal">0</b> / 8</span>
+    <span>SKOR: <b id="scoreVal">0</b></span>
+    <span>EŞLEŞME: <b id="matchVal">0</b>/8</span>
   </div>
+
+  <div id="resInfo">TOAST</div>
 
   <div class="game" id="game">
     <div class="grid-cards" id="grid"></div>
@@ -84,7 +85,7 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
 <div class="modal" id="start">
   <div class="card-modal">
     <h2 style="color:var(--cyan);margin:0;font-family:Space Grotesk">NEURAL LINK</h2>
-    <p style="opacity:.7;font-size:13px">Kelime ile anlamı eşleştir.</p>
+    <p style="opacity:.7;font-size:13px;margin:10px 0">Kelime ile anlamı eşleştirerek ilerle.</p>
     <div class="langs">
       <div class="lang active" data-lang="en">EN</div>
       <div class="lang" data-lang="de">DE</div>
@@ -98,158 +99,253 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
 
 <div class="modal hidden" id="end">
   <div class="card-modal">
-    <h2 style="color:var(--green);margin:0">BAĞLANTI KURULDU</h2>
+    <h2 id="endTitle" style="color:var(--green);margin:0">SET TAMAMLANDI</h2>
     <p style="margin:12px 0">
-      Hamle: <b id="finalMoves"></b><br>
-      Skor: <b id="finalScore"></b>
+      Toplam Skor: <b id="finalScore"></b><br>
+      Yanlış Hamle: <b id="finalWrong"></b>
     </p>
-    <button class="btn" onclick="restart()">YENİDEN</button>
-    <button class="btn sec" onclick="location.href='/pages/game.html'">ÇIKIŞ</button>
+    <button class="btn" id="btnContinue">DEVAM ET (x1.10 MOMENTUM 🚀)</button>
+    <button class="btn" id="btnBank" style="background:var(--cyan)">BANKALA (%5 BONUS 💰)</button>
+    <button class="btn sec" id="btnFinish">BİTİR VE KAYDET</button>
   </div>
 </div>
 
 <script type="module">
 import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
-const $=id=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-let lang="en";
-let cards=[],flipped=[],matched=0,moves=0,locked=false;
-let muted=false;
+let lang = "en";
+let cards = [], flipped = [], matched = 0, moves = 0, wrongMoves = 0, locked = false;
+let totalScore = 0, setScore = 0, momentum = 1.0;
+let muted = false;
 
-const LANGMAP={en:"en-US",de:"de-DE",fr:"fr-FR",es:"es-ES",it:"it-IT"};
+const LANGMAP = {en:"en-US", de:"de-DE", fr:"fr-FR", es:"es-ES", it:"it-IT"};
 
-document.querySelectorAll(".lang").forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll(".lang").forEach(x=>x.classList.remove("active"));
+function shuffle(a) {
+  const arr = [...a];
+  for(let i=arr.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ✅ Toast Mesaj Sistemi başkanım
+function toastRes(msg){
+  $("resInfo").textContent = msg;
+  $("resInfo").style.opacity = "1";
+  clearTimeout(window.__resTo);
+  window.__resTo = setTimeout(() => $("resInfo").style.opacity = "0", 1800);
+}
+
+function updatePBDisplay() {
+  const pb = localStorage.getItem(`neural_pb_${lang}`) || 0;
+  $("pbBadge").textContent = `PB (${lang.toUpperCase()}): ${pb}`;
+}
+
+document.querySelectorAll(".lang").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll(".lang").forEach(x => x.classList.remove("active"));
     b.classList.add("active");
-    lang=b.dataset.lang;
-    $("langBadge").textContent=lang.toUpperCase();
+    lang = b.dataset.lang;
+    updatePBDisplay();
   };
 });
 
-$("soundBtn").onclick=()=>{
-  muted=!muted;
-  $("soundBtn").textContent=muted?"🔇":"🔊";
+$("soundBtn").onclick = () => {
+  muted = !muted;
+  $("soundBtn").textContent = muted ? "🔇" : "🔊";
 };
 
-$("startBtn").onclick=async()=>{
+// ✅ Start Mantığı Düzenlendi başkanım
+$("startBtn").onclick = async () => {
   $("start").classList.add("hidden");
-  $("game").style.display="flex";
-  await initGame();
+  $("game").style.display = "flex";
+  totalScore = 0;
+  momentum = 1.0;
+  await initGame(true);
 };
 
-async function initGame(){
-  moves=0;matched=0;flipped=[];locked=false;
+// ✅ initGame İmzası ve Mantığı Yenilendi başkanım
+async function initGame(isNewRun = false) {
+  $("btnContinue").disabled = false;
+  $("btnBank").disabled = false;
+
+  matched = 0; moves = 0; wrongMoves = 0; flipped = []; locked = false; setScore = 0;
+  
+  if (isNewRun) {
+    totalScore = 0;
+    momentum = 1.0;
+  }
+
   updateStats();
+  
+  const pool = await loadLangPool(lang);
+  const randomizedItems = shuffle([...pool.items]);
+  
+  const USED_KEY = `used_neural_v2_${lang}`;
+  const {used, save} = createUsedSet(USED_KEY);
+  
+  const picked = pick({items: randomizedItems}, 8, used, save);
 
-  const pool=await loadLangPool(lang);
-  const {used,save}=createUsedSet("neural_match_"+lang);
-  const picked=pick(pool,8,used,save);
+  // ✅ Hafıza Mührü
+  try { 
+    save(picked.map(x => x.w)); 
+    await Promise.resolve(); // Microtask flush
+  } catch(e){}
 
-  cards=[];
-  picked.forEach((it,i)=>{
-    cards.push({pair:i,text:it.w,lang:lang});
-    cards.push({pair:i,text:it.tr,lang:"tr"});
+  if (picked.length < 8) {
+      alert("Havuz tükendi başkanım! Liste temizleniyor.");
+      localStorage.removeItem(USED_KEY);
+      location.reload(); return;
+  }
+
+  cards = [];
+  picked.forEach((it, i) => {
+    cards.push({pair: i, text: it.w, lang: lang});
+    cards.push({pair: i, text: it.tr, lang: "tr"});
   });
-  cards.sort(()=>Math.random()-.5);
+  cards = shuffle(cards);
   render();
 }
 
-function render(){
-  const g=$("grid"); g.innerHTML="";
-  cards.forEach((c,i)=>{
-    const el=document.createElement("div");
-    el.className="card";
-    el.dataset.i=i;
-    el.innerHTML=`
+function render() {
+  const g = $("grid"); g.innerHTML = "";
+  cards.forEach((c, i) => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
       <div class="inner">
         <div class="face front"></div>
-        <div class="face back">${c.text}</div>
+        <div class="face back ${c.lang === "tr" ? "tr" : "fx"}">${c.text}</div>
       </div>`;
-    el.onclick=()=>clickCard(i);
+    el.onclick = () => clickCard(i, el);
     g.appendChild(el);
   });
 }
 
-function clickCard(i){
-  if(locked) return;
-  const el=document.querySelectorAll(".card")[i];
-  if(el.classList.contains("flipped")||el.classList.contains("matched")) return;
+function clickCard(i, el) {
+  if (locked || el.classList.contains("flipped") || el.classList.contains("matched")) return;
 
   el.classList.add("flipped");
-  flipped.push({i,data:cards[i],el});
+  flipped.push({i, data: cards[i], el});
 
-  if(flipped.length===2){
-    moves++; updateStats();
+  if (flipped.length === 2) {
+    moves++;
+    updateStats();
     check();
   }
 }
 
-function check(){
-  locked=true;
-  const [a,b]=flipped;
-  if(a.data.pair===b.data.pair){
+function check() {
+  locked = true;
+  const [a, b] = flipped;
+  if (a.data.pair === b.data.pair) {
     play("match");
-    const speakCard=a.data.lang!=="tr"?a.data:b.data;
-    speak(speakCard.text,speakCard.lang);
-    setTimeout(()=>{
+    const speakCard = a.data.lang !== "tr" ? a.data : b.data;
+    speak(speakCard.text, speakCard.FX_LANG || lang);
+    
+    setTimeout(() => {
       a.el.classList.add("matched");
       b.el.classList.add("matched");
       matched++;
-      flipped=[];
-      locked=false;
+      
+      // ✅ Adil Skor Formülü başkanım
+      const roundPoints = Math.round(Math.max(10, 60 - (wrongMoves * 6)) * momentum);
+      setScore += roundPoints;
+      totalScore += roundPoints;
+      
+      flipped = [];
+      locked = false;
       updateStats();
-      if(matched===8) finish();
-    },500);
-  }else{
+      if (matched === 8) finish();
+    }, 500);
+  } else {
     play("error");
-    setTimeout(()=>{
+    wrongMoves++; // Yanlış hamle sayacı başkanım
+    setTimeout(() => {
       a.el.classList.remove("flipped");
       b.el.classList.remove("flipped");
-      flipped=[];
-      locked=false;
-    },900);
+      flipped = [];
+      locked = false;
+    }, 800);
   }
 }
 
-function updateStats(){
-  $("moveVal").textContent=moves;
-  $("matchVal").textContent=matched;
+function updateStats() {
+  $("moveVal").textContent = moves;
+  $("matchVal").textContent = matched;
+  $("scoreVal").textContent = totalScore;
 }
 
-function finish(){
+function saveRecord() {
+  const currentPB = parseInt(localStorage.getItem(`neural_pb_${lang}`) || 0);
+  if (totalScore > currentPB) {
+    localStorage.setItem(`neural_pb_${lang}`, totalScore);
+    return true;
+  }
+  return false;
+}
+
+function finish() {
   play("win");
-  $("finalMoves").textContent=moves;
-  const score=Math.max(0,100-(moves-8)*10);
-  $("finalScore").textContent="%"+score;
+  const isPB = saveRecord();
+  $("endTitle").textContent = isPB ? "YENİ REKOR! 👑" : "SET TAMAMLANDI";
+  $("finalMoves").textContent = wrongMoves;
+  $("finalScore").textContent = totalScore;
   $("end").classList.remove("hidden");
+  updatePBDisplay();
 }
 
-function restart(){
+// ✅ Continue/Bank Butonları Patch edildi başkanım
+$("btnContinue").onclick = () => {
+  $("btnContinue").disabled = true;
+  $("btnBank").disabled = true;
+  momentum += 0.10; // Momentum artışı
+  toastRes(`MOMENTUM YÜKSELDİ: x${momentum.toFixed(2)} 🚀`);
   $("end").classList.add("hidden");
-  initGame();
-}
+  initGame(false);
+};
 
-let audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-function play(t){
-  if(muted) return;
-  if(audioCtx.state==="suspended") audioCtx.resume();
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+$("btnBank").onclick = () => {
+  $("btnContinue").disabled = true;
+  $("btnBank").disabled = true;
+  const bonus = Math.round(setScore * 0.05);
+  totalScore += bonus;
+  momentum = 1.0; // Momentum sıfırlanır
+  toastRes(`BANKA BONUSU +${bonus} PUAN! 💰`);
+  $("end").classList.add("hidden");
+  initGame(false);
+};
+
+$("btnFinish").onclick = () => {
+  saveRecord();
+  location.reload();
+};
+
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function play(t) {
+  if (muted) return;
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
   o.connect(g); g.connect(audioCtx.destination);
-  const now=audioCtx.currentTime;
-  if(t==="match"){o.frequency.value=600;g.gain.value=.08;o.start(now);o.stop(now+.25);}
-  if(t==="error"){o.frequency.value=140;g.gain.value=.1;o.start(now);o.stop(now+.2);}
-  if(t==="win"){o.frequency.value=800;g.gain.value=.1;o.start(now);o.stop(now+.6);}
+  const now = audioCtx.currentTime;
+  if (t === "match") { o.frequency.value = 600; g.gain.value = .08; o.start(now); o.stop(now + .25); }
+  if (t === "error") { o.frequency.value = 140; g.gain.value = .1; o.start(now); o.stop(now + .2); }
+  if (t === "win") { o.frequency.value = 800; g.gain.value = .1; o.start(now); o.stop(now + .6); }
 }
 
-function speak(txt,l){
-  if(muted) return;
-  const u=new SpeechSynthesisUtterance(txt);
-  u.lang=l==="tr"?"tr-TR":LANGMAP[l]||"en-US";
+function speak(txt, l) {
+  if (muted) return;
+  const u = new SpeechSynthesisUtterance(txt);
+  u.lang = l === "tr" ? "tr-TR" : LANGMAP[l] || "en-US";
+  u.rate = 0.85;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
+
+window.addEventListener('load', updatePBDisplay);
 </script>
 </body>
 </html>
