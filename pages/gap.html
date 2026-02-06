@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • Gap Master Evolution V2</title>
+  <title>italkyAI • Gap Master Master Edition</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
     :root { 
@@ -16,7 +16,6 @@
     .cosmos-bg { position:absolute; inset:0; background: radial-gradient(circle at 50% 35%, #0b0b2a 0%, #020205 60%, #010104 100%); z-index:0; }
     .wrap { width:100%; max-width:480px; height:100%; margin:0 auto; position:relative; z-index:10; display:flex; flex-direction:column; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
 
-    /* UI ELEMENTS */
     .nav-top { display:flex; align-items:center; justify-content:space-between; padding: 15px 20px; }
     .status-chip { background: var(--glass); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid var(--border); letter-spacing: 1px; }
     
@@ -27,32 +26,26 @@
     .score-pill { color: var(--c-neon-green); font-weight: 900; font-size: 20px; }
     @keyframes scorePop{ from{ transform:scale(1.25); } to{ transform:scale(1); } }.score-pop{ animation: scorePop .18s ease; }
 
-    /* STAGE */
     .stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 10px 20px; gap: 15px; }
     .sentence-card { width:100%; background: var(--glass); border: 1px solid var(--border); border-radius: 32px; padding: 35px 20px; text-align: center; backdrop-filter: blur(25px); }
+    .sentence-text { text-transform: uppercase; letter-spacing: .3px; font-size: 22px; font-weight: 700; line-height: 1.5; }
     .gap-box { color: var(--c-neon-blue); border-bottom: 3px solid var(--c-neon-blue); padding: 0 8px; font-weight: 800; }
     .translation-text { font-size: 16px; color: var(--c-neon-green); font-style: italic; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px; }
 
-    /* KEYBOARD & OPTIONS */
     .options-grid { width: 100%; display: grid; grid-template-columns: 1fr; gap: 12px; }
-    .opt-btn { 
-      position:relative; overflow:hidden; width: 100%; padding: 18px; background: var(--glass); 
-      border: 1px solid var(--border); border-radius: 20px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s;
-    }
+    .opt-btn { position:relative; overflow:hidden; width: 100%; padding: 18px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
     .opt-btn:active { transform: translateY(3px); }
     .opt-btn:disabled { opacity:.85; cursor:default; }
-    .opt-btn.correct { background: linear-gradient(180deg, #00e676, #00c853) !important; color: #000; box-shadow: 0 0 25px rgba(0, 230, 118, 0.4); }
+    .opt-btn.correct { background: linear-gradient(180deg, #00e676, #00c853) !important; color: #000; }
     .opt-btn.correct::after { content:""; position:absolute; inset:-30%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 35%); opacity:.55; transform: rotate(12deg); pointer-events:none; }
     .opt-btn.wrong { background: linear-gradient(180deg, #ff1744, #d50000) !important; animation: shake 0.4s; }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-    /* MODAL DİLLER ✅ */
-    .lang-btn{ font-size:24px; padding:10px; border-radius:16px; background: var(--glass); border: 1px solid transparent; cursor:pointer; margin:4px; transition:.2s; }
-    .lang-btn.active{ border-color: var(--c-neon-blue); background: rgba(0,243,255,0.15); transform: scale(1.08); }
-
     .modal-wrap { position: absolute; inset: 0; background: rgba(0,0,0,0.98); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .modal-card { width: 100%; max-width: 360px; background: #08080c; border: 1px solid var(--border); border-radius: 36px; padding: 40px 30px; text-align: center; }
     .btn-main { width: 100%; padding: 18px; background: var(--c-neon-green); color: #000; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; margin-top: 12px; }
+    .lang-btn{ font-size:24px; padding:10px; border-radius:16px; background: var(--glass); border: 1px solid transparent; cursor:pointer; margin:4px; transition:.2s; }
+    .lang-btn.active{ border-color: var(--c-neon-blue); background: rgba(0,243,255,0.15); transform: scale(1.08); }
   </style>
 </head>
 <body>
@@ -80,7 +73,7 @@
 
   <div class="modal-wrap" id="startModal">
     <div class="modal-card">
-      <h2 style="margin:0 0 20px;">GAP MASTER V2</h2>
+      <h2 style="margin:0 0 20px;">GAP MASTER MASTER</h2>
       <div style="margin-bottom:25px;">
         <button onclick="setLang('en',this)" class="lang-btn active">🇬🇧</button>
         <button onclick="setLang('de',this)" class="lang-btn">🇩🇪</button>
@@ -96,7 +89,7 @@
 
   <div class="modal-wrap" id="endModal" style="display:none">
     <div class="modal-card">
-      <h2 id="endTitle">SET TAMAMLANDI</h2>
+      <h2 id="endTitle">Oturum Bitti</h2>
       <div id="endStats" style="text-align:left; margin:20px 0; font-size:15px; line-height:2;"></div>
       <button class="btn-main" onclick="location.reload()">TEKRAR DENE</button>
     </div>
@@ -107,19 +100,11 @@ import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
 const $ = id => document.getElementById(id);
 let currentLang = 'en', puzzles = [], currentIdx = 0;
-let score = 0, lives = 3, maxLives = 3, streak = 0, isBusy = false, startTime = 0;
+let score = 0, lives = 3, maxLives = 3, streak = 0, totalCorrect = 0, totalAnswered = 0, isBusy = false, startTime = 0;
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSfx(freq, type, duration) {
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-  osc.connect(gain); gain.connect(audioCtx.destination);
-  osc.start(); osc.stop(audioCtx.currentTime + duration);
-}
+const FALLBACK = ["TIME","WORLD","HOUSE","WATER","FRIEND","GO","LIFE","DAY"];
 
-function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function escapeRegExp(s){ return String(s ?? "").replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
 window.setLang = (l, btn) => {
   currentLang = l;
@@ -130,7 +115,7 @@ window.setLang = (l, btn) => {
 window.initGame = async (diff) => {
   try {
     const rawPool = await loadLangPool(currentLang);
-    const { used, save } = createUsedSet(`gap_v2_${currentLang}_${diff}`);
+    const { used, save } = createUsedSet(`gap_master_final_${currentLang}_${diff}`);
     maxLives = (diff === "A2") ? 4 : 3;
     lives = maxLives;
     puzzles = pick(rawPool, 15, used, save, it => {
@@ -141,7 +126,7 @@ window.initGame = async (diff) => {
     $('statusChip').textContent = `${currentLang.toUpperCase()} • ${diff}`;
     $('startModal').style.display = 'none';
     loadPuzzle();
-  } catch (e) { alert("Hata!"); }
+  } catch (e) { alert("Havuz yüklenemedi!"); }
 };
 
 function loadPuzzle() {
@@ -150,18 +135,20 @@ function loadPuzzle() {
   const escapedWord = escapeRegExp(p.w);
   $('progFill').style.width = `${((currentIdx + 1) / puzzles.length) * 100}%`;
   
-  // Unicode Regex ✅
-  const upperSentence = String(p.sentence || "").toUpperCase();
-  const regex = new RegExp(`(^|[^\\p{L}])(${escapedWord})(?=[^\\p{L}]|$)`, 'giu');
-  $('sentenceDisplay').innerHTML = upperSentence.replace(regex, `$1<span class="gap-box">____</span>`);
+  // ✅ Unicode Regex Fix (Giu Flag + \p{L})
+  const sentence = String(p.sentence || "");
+  const regex = new RegExp(`(^|[^\\p{L}])(${escapedWord})(?=[^\\p{L}]|$)`, "giu");
+  $('sentenceDisplay').innerHTML = sentence.replace(regex, `$1<span class="gap-box">____</span>`);
   
   $('translationDisplay').textContent = p.tr;
   $('lifeBar').textContent = "❤️".repeat(lives) + "🖤".repeat(maxLives - lives);
   $('resInfo').style.opacity = "0";
   
   const norm = s => String(s||"").trim().toUpperCase();
-  let options = shuffle([p.w, ...shuffle(puzzles.filter(x => norm(x.w) !== norm(p.w)).map(x => x.w)).slice(0, 4)]);
-  renderOptions(options);
+  let wrongs = shuffle(puzzles.filter(x => norm(x.w) !== norm(p.w)).map(x => x.w));
+  while (wrongs.length < 4) wrongs.push(FALLBACK[wrongs.length % FALLBACK.length]); // ✅ Şık Tamamlama
+  
+  renderOptions(shuffle([p.w, ...wrongs.slice(0,4)]));
   startTime = Date.now();
 }
 
@@ -180,39 +167,37 @@ function handleChoice(val, btn) {
   const p = puzzles[currentIdx];
   const correctVal = p.w.toUpperCase();
   const timeTaken = (Date.now() - startTime) / 1000;
-  isBusy = true;
+  isBusy = true; totalAnswered++;
   document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
 
   if (val === correctVal) {
-    streak++;
+    streak++; totalCorrect++;
     let speedBonus = timeTaken < 4 ? 8 : (timeTaken < 7 ? 5 : (timeTaken < 10 ? 2 : 0));
     let comboMult = streak <= 3 ? streak : (3 + (streak - 3) * 0.25);
     score += Math.round(10 * comboMult + speedBonus);
-    
-    playSfx(600, 'sine', 0.2);
     btn.classList.add('correct');
     $('scoreTxt').classList.remove('score-pop'); void $('scoreTxt').offsetWidth;
     $('scoreTxt').classList.add('score-pop');
+    speak(p.sentence); // ✅ Başarı TTS
   } else {
     streak = 0; lives--;
-    playSfx(200, 'square', 0.2);
     btn.classList.add('wrong');
     $('resInfo').textContent = `Doğru: ${correctVal}`;
     $('resInfo').style.opacity = "1";
     document.querySelectorAll('.opt-btn').forEach(b => { if(b.textContent === correctVal) b.classList.add('correct'); });
+    // ✅ Yanlışta Vurgulu TTS
+    const prefix = currentLang === 'en' ? `Correct word: ${correctVal}. ` : `${correctVal}. `;
+    speak(prefix + p.sentence);
   }
 
   $('scoreTxt').textContent = score;
-  speak(p.sentence); // Her durumda oku ✅
-
-  setTimeout(() => {
-    currentIdx++; isBusy = false; loadPuzzle();
-  }, 2200);
+  setTimeout(() => { currentIdx++; isBusy = false; loadPuzzle(); }, 2200);
 }
 
 function showFinal() {
   $('endModal').style.display = 'flex';
-  $('endStats').innerHTML = `• Skor: <b>${score}</b><br>• Doğruluk: <b>%${Math.round((score/200)*100)}</b>`;
+  const acc = totalAnswered ? Math.round((totalCorrect/totalAnswered)*100) : 0; // ✅ Net Doğruluk
+  $('endStats').innerHTML = `• Toplam Skor: <b>${score}</b><br>• Doğruluk: <b>%${acc}</b>`;
 }
 
 function speak(t) {
