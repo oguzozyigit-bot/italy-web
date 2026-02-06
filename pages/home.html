@@ -21,35 +21,47 @@
     .orb-2{ bottom:10%; right:10%; width:50vw; height:50vw; background: radial-gradient(circle, #5b21b6, transparent 70%); animation-delay:-5s; }
     @keyframes floatOrbit{ 0%{ transform: translate(0,0) scale(1); } 100%{ transform: translate(10%,-10%) scale(1.1); } }
     .noise{ position:absolute; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; mix-blend-mode:overlay; z-index:1; }
+
     .mobile-frame{ width:100%; max-width:480px; height:100%; position:relative; z-index:10; display:flex; flex-direction:column; background: rgba(8, 8, 20, 0.65); backdrop-filter: blur(25px); overflow:hidden; }
     @media (min-width:520px){ .mobile-frame{ height:92vh; border-radius:40px; border:1px solid rgba(255,255,255,0.08); box-shadow: 0 40px 100px -20px rgba(0,0,0,0.9); } }
-    .header{ flex:0 0 92px; padding: 0 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; position:relative; z-index:20; }
+
+    .header{
+      flex:0 0 92px; padding: 0 20px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      position:relative; z-index:999998; /* ✅ en üste */
+    }
+
     .mini-brand{ display:flex; flex-direction:column; align-items:flex-start; justify-content: center; user-select:none; margin-top: 4px; }
     .logo-container { font-family:'Space Grotesk', sans-serif; font-size: 28px; line-height: 0.9; letter-spacing: -0.5px; }
     .logo-main { font-weight: 700; color: rgba(255,255,255,0.95); text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
     .logo-ai { font-weight: 700; background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-left: 1px; }
     .mini-slogan { font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.45); letter-spacing: 4px; text-transform: uppercase; margin-top: 5px; margin-left: 2px; }
+
     .userbox{ flex:1; min-width:0; display:flex; align-items:center; justify-content:flex-end; gap:12px; }
     .usertext{ min-width:0; display:flex; flex-direction:column; align-items:flex-end; gap:2px; max-width: 240px; }
     .uname{ font-weight: 800; font-size: 13px; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .plan{ font-weight: 700; font-size: 11px; color: rgba(255,255,255,0.5); }
 
-    /* ✅ profile click kesin çalışsın */
+    /* ✅ AVATAR artık LINK ve kesin tıklanır */
     .avatar-btn{
       width: 42px; height: 42px;
-      border: none; background: transparent; padding: 0; border-radius: 999px;
-      overflow: hidden; cursor: pointer;
+      border: none; background: transparent; padding: 0;
+      border-radius: 999px; overflow: hidden;
+      cursor: pointer;
       display:flex; align-items:center; justify-content:center;
       transition: transform .2s;
-      pointer-events: auto;  /* ✅ */
-      z-index: 9999;         /* ✅ */
+      pointer-events: auto;
+      position: relative;
+      z-index: 999999;
+      text-decoration: none;
     }
     .avatar-btn:active{ transform: scale(.95); }
-    .avatar-btn img{ width: 100%; height: 100%; object-fit: cover; }
+    .avatar-btn img{ width: 100%; height: 100%; object-fit: cover; display:block; }
     .avatar-fallback{ width: 100%; height: 100%; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-weight: 800; color: #fff; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
 
     .menu-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling: touch; padding: 10px 18px calc(var(--footerH) + 20px); position:relative; z-index:5; scrollbar-width:none; }
     .menu-scroll::-webkit-scrollbar{ display:none; }
+
     .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: fadeInUp .6s var(--ease-elastic); }
     .card, .longCard { --card-hue: 120, 130, 140; background: linear-gradient(160deg, rgba(var(--card-hue), 0.08) 0%, rgba(var(--card-hue), 0.01) 100%); border: 1px solid rgba(var(--card-hue), 0.12); box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5); border-radius: 24px; cursor:pointer; user-select:none; transition: all .25s ease; position:relative; overflow:hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     .icon-box, .longIcon { width: 50px; height: 50px; border-radius: 16px; background: rgba(var(--card-hue), 0.15); border: 1px solid rgba(var(--card-hue), 0.2); display:flex; align-items:center; justify-content:center; margin-bottom: 10px; }
@@ -59,21 +71,26 @@
     .card:hover, .longCard:hover { background: linear-gradient(160deg, rgba(var(--card-hue), 0.18) 0%, rgba(var(--card-hue), 0.05) 100%); border-color: rgba(var(--card-hue), 0.4); transform: translateY(-2px); }
     .card:active, .longCard:active { transform: scale(0.98); }
     .card{ padding: 16px 12px; gap: 0; aspect-ratio: 1 / 1.05; }
+
     .longWrap{ margin-top: 14px; display:grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: fadeInUp .6s ease; }
     .longCard{ width:100%; padding: 16px 14px; gap: 0; aspect-ratio: 1 / 1.05; }
+
     .grid .card:nth-child(1) { --card-hue: 59, 130, 246; }
     .grid .card:nth-child(2) { --card-hue: 16, 185, 129; }
     .grid .card:nth-child(3) { --card-hue: 245, 158, 11; }
     .grid .card:nth-child(4) { --card-hue: 139, 92, 246; }
     .grid .card:nth-child(5) { --card-hue: 20, 184, 166; }
     .grid .card:nth-child(6) { --card-hue: 244, 63, 94; }
+
     .longWrap .longCard:nth-child(1) { --card-hue: 168, 85, 247; }
     .longWrap .longCard:nth-child(2) { --card-hue: 236, 72, 153; }
+
     .footerbar{ position:absolute; left: 0; right: 0; bottom: 0; height: var(--footerH); padding: 12px 20px 14px; background: rgba(3, 0, 20, 0.95); border-top: 1px solid rgba(255,255,255,.05); z-index: 999; display:flex; flex-direction:column; justify-content:center; backdrop-filter: blur(10px); }
     .links{ display:flex; gap: 18px; justify-content:center; flex-wrap:wrap; margin-bottom: 8px; }
     .links a{ color: rgba(255,255,255,0.55); text-decoration:none; font-size: 12px; font-weight: 700; transition:.2s; }
     .links a:hover{ color: #fff; }
     .footerBrand{ text-align:center; font-size: 10px; color: rgba(255,255,255,0.2); letter-spacing: 0.8px; font-weight: 700; }
+
     @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
@@ -88,47 +105,33 @@
         <div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
         <div class="mini-slogan">BE FREE</div>
       </div>
-      <div class="userbox">
-        <div class="usertext"><div class="uname" id="userName">—</div><div class="plan" id="userPlan">FREE</div></div>
 
-        <!-- ✅ ONCLICK ile kesin profile -->
-        <button class="avatar-btn" id="avatarBtn" title="Profil" onclick="window.location.href='/pages/profile.html'">
+      <div class="userbox">
+        <div class="usertext">
+          <div class="uname" id="userName">—</div>
+          <div class="plan" id="userPlan">FREE</div>
+        </div>
+
+        <!-- ✅ LINK: JS’ye ihtiyaç yok -->
+        <a class="avatar-btn" id="avatarBtn" title="Profil" href="/pages/profile.html">
           <span class="avatar-fallback" id="avatarFallback">•</span>
-        </button>
+        </a>
       </div>
     </div>
 
     <div class="menu-scroll" id="menuScroll">
       <div class="grid">
-        <div class="card" data-go="/pages/facetoface.html">
-          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M7 11c1.7 0 3-1.3 3-3S8.7 5 7 5 4 6.3 4 8s1.3 3 3 3z"/><path d="M17 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"/><path d="M2.5 20c0-3 2.8-5 5.8-5"/><path d="M21.5 20c0-3-2.8-5-5.8-5"/><path d="M9.8 14.7h4.4"/><path d="M9 18h6"/></svg></div>
-          <div><div class="label" data-i18n="home_face_to_face">Yüz Yüze</div><div class="sub" data-i18n="home_live_translate">Canlı çeviri</div></div>
-        </div>
+        <div class="card" data-go="/pages/facetoface.html"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M7 11c1.7 0 3-1.3 3-3S8.7 5 7 5 4 6.3 4 8s1.3 3 3 3z"/><path d="M17 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3z"/><path d="M2.5 20c0-3 2.8-5 5.8-5"/><path d="M21.5 20c0-3-2.8-5-5.8-5"/><path d="M9.8 14.7h4.4"/><path d="M9 18h6"/></svg></div><div><div class="label" data-i18n="home_face_to_face">Yüz Yüze</div><div class="sub" data-i18n="home_live_translate">Canlı çeviri</div></div></div>
 
-        <div class="card" data-go="/pages/text_translate.html">
-          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M4 6h10"/><path d="M4 10h7"/><path d="M4 14h10"/><path d="M4 18h7"/><path d="M16 7l4 4"/><path d="M20 7l-4 4"/><path d="M16 17h4"/></svg></div>
-          <div><div class="label" data-i18n="home_text_translate">Metinden</div><div class="sub" data-i18n="home_text_translate_sub">Yazıdan çeviri</div></div>
-        </div>
+        <div class="card" data-go="/pages/text_translate.html"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M4 6h10"/><path d="M4 10h7"/><path d="M4 14h10"/><path d="M4 18h7"/><path d="M16 7l4 4"/><path d="M20 7l-4 4"/><path d="M16 17h4"/></svg></div><div><div class="label" data-i18n="home_text_translate">Metinden</div><div class="sub" data-i18n="home_text_translate_sub">Yazıdan çeviri</div></div></div>
 
-        <div class="card" data-go="/pages/photo.html">
-          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><path d="M8 14h8"/><path d="M10 11h4"/><circle cx="12" cy="13" r="4" opacity=".4" /></svg></div>
-          <div><div class="label" data-i18n="home_photo_translate">Fotoğraf</div><div class="sub" data-i18n="home_overlay_translate">Üstüne çevir</div></div>
-        </div>
+        <div class="card" data-go="/pages/photo.html"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><path d="M8 14h8"/><path d="M10 11h4"/><circle cx="12" cy="13" r="4" opacity=".4" /></svg></div><div><div class="label" data-i18n="home_photo_translate">Fotoğraf</div><div class="sub" data-i18n="home_overlay_translate">Üstüne çevir</div></div></div>
 
-        <div class="card" data-go="/pages/document.html">
-          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></div>
-          <div><div class="label" data-i18n="home_document_translate">Belge</div><div class="sub" data-i18n="home_pdf_camera">PDF / Kamera</div></div>
-        </div>
+        <div class="card" data-go="/pages/document.html"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></div><div><div class="label" data-i18n="home_document_translate">Belge</div><div class="sub" data-i18n="home_pdf_camera">PDF / Kamera</div></div></div>
 
-        <div class="card" data-go="/pages/chat.html">
-          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg></div>
-          <div><div class="label" data-i18n="home_chat_ai">Sohbet AI</div><div class="sub" data-i18n="home_assistant">Asistanın</div></div>
-        </div>
+        <div class="card" data-go="/pages/chat.html"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M7 8h10"/><path d="M7 12h6"/></svg></div><div><div class="label" data-i18n="home_chat_ai">Sohbet AI</div><div class="sub" data-i18n="home_assistant">Asistanın</div></div></div>
 
-        <div class="card" data-go="/pages/voice_ai.html">
-          <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/></svg></div>
-          <div><div class="label" data-i18n="home_talk_ai">Konuşkan</div><div class="sub" data-i18n="home_voice_ai">Sesli AI</div></div>
-        </div>
+        <div class="card" data-go="/pages/voice_ai.html"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/><path d="M8 22h8"/></svg></div><div><div class="label" data-i18n="home_talk_ai">Konuşkan</div><div class="sub" data-i18n="home_voice_ai">Sesli AI</div></div></div>
       </div>
 
       <div class="longWrap">
@@ -175,6 +178,8 @@
         document.getElementById("userName").textContent = (u.fullname || u.name || u.email || "—").trim();
         document.getElementById("userPlan").textContent = String(u.plan || "FREE").toUpperCase();
         const pic = String(u.picture || u.avatar || "").trim();
+
+        // ✅ link içindeki içeriği de değiştirir
         if (pic) document.getElementById("avatarBtn").innerHTML = `<img src="${pic}" alt="avatar">`;
 
       } catch(e) {
