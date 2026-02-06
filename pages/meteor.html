@@ -1,58 +1,137 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ITALKY • Meteor Defense — Final</title>
-<link rel="icon" href="data:,">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>ITALKY • Meteor Defense — Elite Survival (FINAL)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --bg:#020005;--panel:rgba(18,18,26,.92);
   --blue:#00f3ff;--red:#ff0055;--green:#00ff66;--gold:#ffb800;
-  --border:rgba(255,255,255,.14);--text:#fff
+  --border:rgba(255,255,255,.14);--text:#fff;
+  --glass: rgba(255,255,255,0.05);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfit,sans-serif;overflow:hidden;color:var(--text)}
 .space{position:absolute;inset:0;background:radial-gradient(circle at bottom,#1a0033,#000)}
-.stars{position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:50px 50px;opacity:.3}
+.stars{position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:50px 50px;opacity:.25}
 
-.game{position:relative;max-width:480px;height:100%;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border);display:flex;flex-direction:column}
-.header{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
-.score{font-family:Space Grotesk;font-weight:900;color:var(--blue);text-shadow:0 0 10px var(--blue)}
-.combo{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid rgba(0,243,255,.3)}
-.lives{letter-spacing:2px}
-.powerbar{display:flex;gap:6px}
-.pbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:#fff;font-weight:900;cursor:pointer}
-.pbtn:disabled{opacity:.4}
+.game{position:relative;max-width:480px;height:100%;margin:0 auto;border-left:1px solid var(--border);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:5}
+.header{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.35);backdrop-filter: blur(10px)}
+.score-box{text-align:left}
+.score{font-family:"Space Grotesk";font-weight:900;color:var(--blue);font-size:20px;letter-spacing:.5px}
+.pb-chip{font-size:10px;color:var(--gold);font-weight:900;opacity:.95}
 
-.stage{flex:1;position:relative;overflow:hidden}
-.turret{position:absolute;bottom:230px;left:50%;transform:translateX(-50%);width:40px;height:40px;background:var(--blue);border-radius:50% 50% 0 0;box-shadow:0 0 15px var(--blue)}
+.stats-mid{text-align:center;min-width:120px}
+.combo-tag{font-size:10px;background:var(--blue);color:#000;padding:2px 8px;border-radius:6px;font-weight:900;display:inline-block}
+.momentum{font-size:12px;color:var(--green);font-weight:900;margin-top:4px}
 
-.meteor{position:absolute;top:-140px;width:110px;height:120px;display:flex;align-items:center;justify-content:center}
-.meteor.boss .meteor-body{box-shadow:0 0 28px var(--gold);border-color:var(--gold)}
-.meteor-body{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,#ffcc00,#ff4400);box-shadow:0 0 20px #ff4400;border:2px solid #fff;display:flex;align-items:center;justify-content:center}
-.meteor-text{font-family:Space Grotesk;font-weight:900;font-size:13px;color:#000;text-align:center;padding:0 6px}
+.lives{font-size:16px;letter-spacing:2px}
 
-.laser{position:absolute;height:4px;background:var(--green);box-shadow:0 0 10px var(--green);transform-origin:0 50%}
-.explosion{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#fff,#ffaa00,transparent);animation:boom .45s forwards;pointer-events:none}
-@keyframes boom{0%{transform:scale(.2);opacity:1}100%{transform:scale(2);opacity:0}}
+.stage{flex:1;position:relative;overflow:hidden;background:rgba(255,255,255,0.02)}
+.turret{
+  position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  width:54px;height:28px;border-radius:14px 14px 8px 8px;
+  background:linear-gradient(180deg, rgba(0,243,255,.95), rgba(0,243,255,.35));
+  box-shadow:0 0 22px rgba(0,243,255,.55);
+}
+.laser{
+  position:absolute;left:50%;bottom:32px;transform:translateX(-50%);
+  width:3px;height:0;background:var(--blue);
+  box-shadow:0 0 18px var(--blue);
+  opacity:0; transition: height .12s ease, opacity .12s ease;
+}
 
-.panel{height:240px;background:var(--panel);border-top:2px solid var(--blue);padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.opt{border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.06);color:#fff;font-weight:900;font-size:16px;cursor:pointer}
-.opt.correct{background:var(--green);color:#000}
-.opt.wrong{background:var(--red)}
+.meteor{position:absolute;top:-160px;width:118px;height:132px;display:flex;align-items:center;justify-content:center;will-change: transform, top}
+.meteor .meteor-body{
+  width:82px;height:82px;border-radius:50%;
+  background:radial-gradient(circle,#666,#222);
+  border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  box-shadow: 0 0 18px rgba(0,0,0,.6);
+}
+.meteor .meteor-body::after{
+  content:'';
+  position:absolute;top:-12px;
+  width:44px;height:68px;
+  background:linear-gradient(to top, rgba(255,68,0,0.4), transparent);
+  z-index:-1;
+  filter: blur(.2px);
+}
+.meteor .meteor-text{
+  font-family:"Space Grotesk";
+  font-weight:900;font-size:13px;color:#fff;text-align:center;padding:0 6px;
+  text-transform:uppercase;
+}
+.meteor.boss .meteor-body{
+  border:3px solid var(--gold);
+  box-shadow:0 0 34px rgba(255,184,0,.55);
+}
+.meteor.boss.armor1 .meteor-body{
+  box-shadow:0 0 34px rgba(255,184,0,.55), inset 0 0 0 6px rgba(255,184,0,.10);
+}
+.meteor.boss.armor0 .meteor-body{
+  box-shadow:0 0 34px rgba(255,184,0,.55), inset 0 0 0 6px rgba(255,0,85,.14);
+}
+.boss-tag{
+  position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  font-size:10px;font-weight:900;
+  background:rgba(255,184,0,.2);border:1px solid rgba(255,184,0,.5);
+  color:var(--gold);padding:3px 8px;border-radius:999px;
+}
 
-.toast{position:absolute;left:12px;right:12px;bottom:252px;background:rgba(10,10,18,.85);border:1px solid var(--border);border-radius:14px;padding:10px;display:none;align-items:center;justify-content:space-between;gap:10px}
-.toast.show{display:flex}
-.toast b{font-family:Space Grotesk}
+.explosion{
+  position:absolute;width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,#fff,rgba(255,170,0,.9),transparent 65%);
+  animation:boom .42s forwards; pointer-events:none;
+}
+ Trusted? @keyframes boom{0%{transform:scale(0.2);opacity:1}100%{transform:scale(2.0);opacity:0}}
 
-.modal{position:absolute;inset:0;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;z-index:99}
-.card{background:#101015;border:1px solid var(--blue);border-radius:20px;padding:24px;text-align:center;width:85%}
-.langs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
-.lang{padding:10px;border:1px solid var(--border);border-radius:8px;font-weight:900;cursor:pointer}
-.lang.active{background:var(--blue);color:#000}
-.btn{width:100%;padding:14px;margin-top:10px;border:none;border-radius:12px;font-weight:900;background:var(--blue);color:#000}
+.panel{
+  height:228px;
+  background:var(--panel);
+  border-top:2px solid var(--blue);
+  padding:12px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.opt{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--glass);
+  color:#fff;font-weight:900;font-size:15px;
+  cursor:pointer; transition: transform .12s ease, background .12s ease, border .12s ease;
+  display:flex;align-items:center;justify-content:center;
+  padding:10px;text-align:center;
+}
+.opt:active{transform:scale(0.97)}
+.opt.correct{background:rgba(0,255,102,.95);color:#000;border:none}
+.opt.wrong{background:rgba(255,0,85,.92);border:none}
+
+.toast{
+  position:absolute;top:82px;left:50%;transform:translateX(-50%);
+  background:rgba(10,10,16,.9);
+  border:1px solid var(--blue);
+  padding:8px 16px;border-radius:20px;font-weight:900;font-size:12px;
+  opacity:0;transition:0.25s;z-index:100;
+  box-shadow: 0 0 22px rgba(0,243,255,.12);
+  pointer-events:none;
+}
+
+.modal{position:absolute;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:1000}
+.card{background:#0a0a0f;border:1px solid var(--blue);border-radius:28px;padding:30px;text-align:center;width:86%;max-width:380px}
+.langs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:18px 0}
+.lang{padding:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;font-weight:900;cursor:pointer;font-size:12px;color:#fff}
+.lang.active{border-color:var(--blue);background:rgba(0,243,255,0.12)}
+.mainbtn{width:100%;padding:16px;margin-top:12px;border:none;border-radius:16px;font-weight:900;background:var(--blue);color:#000;cursor:pointer}
+.mainbtn:active{transform:scale(.99)}
+.hidden{display:none!important}
+
+.small{font-size:12px;opacity:.7;line-height:1.4}
 </style>
 </head>
 
@@ -62,206 +141,512 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
 
 <div class="game">
   <div class="header">
-    <div class="score"><span id="score">0</span> P</div>
-    <div class="combo" id="combo">COMBO x0</div>
-    <div class="powerbar">
-      <button class="pbtn" id="slowBtn" title="Yavaşlat">⏳</button>
-      <button class="pbtn" id="nukeBtn" title="Nuke">💣</button>
+    <div class="score-box">
+      <div class="score" id="score">0</div>
+      <div class="pb-chip" id="pb">PB: 0</div>
     </div>
+
+    <div class="stats-mid">
+      <div class="combo-tag" id="combo">COMBO x0</div>
+      <div class="momentum" id="momVal">x1.00</div>
+    </div>
+
     <div class="lives" id="lives">❤️❤️❤️</div>
   </div>
 
   <div class="stage" id="stage">
     <div class="turret"></div>
+    <div class="laser" id="laser"></div>
   </div>
 
-  <div class="toast" id="toast">
-    <div><b id="tTitle">—</b><br><small id="tMsg">—</small></div>
-    <button class="pbtn" id="tSpeak">Oku</button>
-  </div>
+  <div id="resToast" class="toast">TOAST</div>
 
   <div class="panel" id="panel"></div>
 </div>
 
-<div class="modal" id="start">
+<div class="modal" id="startModal">
   <div class="card">
-    <h2 style="color:var(--blue)">METEOR DEFENSE</h2>
-    <div class="langs" id="langs">
-      <div class="lang active" data-lang="en">EN</div>
-      <div class="lang" data-lang="de">DE</div>
-      <div class="lang" data-lang="fr">FR</div>
-      <div class="lang" data-lang="es">ES</div>
-      <div class="lang" data-lang="it">IT</div>
+    <h2 style="color:var(--blue);margin:0">METEOR DEFENSE</h2>
+    <p class="small">Gezegeni koru, kelimeleri eşleştir başkanım. Yanlışta doğruyu da öğretiyorum 😈</p>
+
+    <div class="langs">
+      <button class="lang active" data-lang="en">EN</button>
+      <button class="lang" data-lang="de">DE</button>
+      <button class="lang" data-lang="fr">FR</button>
+      <button class="lang" data-lang="es">ES</button>
+      <button class="lang" data-lang="it">IT</button>
     </div>
-    <button class="btn" id="startBtn">BAŞLA</button>
+
+    <button class="mainbtn" id="startBtn">SİSTEMİ BAŞLAT</button>
   </div>
 </div>
 
-<div class="modal" id="end" style="display:none">
+<div class="modal hidden" id="endModal">
   <div class="card">
-    <h2 style="color:var(--red)">OYUN BİTTİ</h2>
-    <div style="font-size:28px;font-weight:900" id="final">0</div>
-    <button class="btn" onclick="location.reload()">TEKRAR</button>
+    <h2 id="endTitle" style="color:var(--green);margin:0">SEKTÖR TEMİZ</h2>
+    <p id="endStats" style="font-size:14px;margin:18px 0;line-height:1.5"></p>
+
+    <button class="mainbtn" id="btnContinue">DEVAM ET (MOMENTUM 🚀)</button>
+    <button class="mainbtn" id="btnBank" style="background:var(--gold)">BANKALA (%5 BONUS + TAMİR 🛡️)</button>
+    <button class="mainbtn" style="background:#222;color:#fff" id="btnExit">KAYDET VE ÇIK</button>
   </div>
 </div>
 
 <script type="module">
 import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
-const $=id=>document.getElementById(id);
 
-let lang="en";
-let pool=[],queue=[];
-let meteor=null;
-let y=0,baseSpeed=.9,speed=.9;
-let score=0,lives=3,combo=0;
-let running=false,slowTicks=0,nukes=1;
-let bossEvery=7,killCount=0;
-let lastSpeak="";
+const $ = (id) => document.getElementById(id);
 
-const LANGMAP={en:"en-US",de:"de-DE",fr:"fr-FR",es:"es-ES",it:"it-IT"};
+let lang = "en";
+let pool = [];       // picked items (unique-ish)
+let deck = [];       // current set order (no repeats inside a set)
+let currentMeteor = null;
 
-document.querySelectorAll(".lang").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll(".lang").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active"); lang=b.dataset.lang;
+let totalScore = 0;
+let setScore = 0;
+let combo = 0;
+let momentum = 1.0;
+let lives = 3;
+
+let y = -160;
+let running = false;
+let rafId = 0;
+
+let killCount = 0;     // total kills across run
+let setCounter = 0;    // meteors progressed in set (spawn count)
+const SET_SIZE = 8;
+
+let baseSpeed = 1.05;      // baseline
+let speedCap = 3.2;        // hard cap
+let speedBossMult = 0.72;  // boss heavier
+let stageW = 0;
+
+const LANGMAP = { en:"en-US", de:"de-DE", fr:"fr-FR", es:"es-ES", it:"it-IT" };
+
+function shuffle(a){
+  const arr = [...a];
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+function updatePB(){
+  const pb = Number(localStorage.getItem(`meteor_pb_${lang}`) || 0);
+  $("pb").textContent = `PB: ${pb}`;
+}
+
+document.querySelectorAll(".lang").forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll(".lang").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    lang = b.dataset.lang;
+    updatePB();
+  };
 });
 
-$("#startBtn").onclick=async()=>{
-  $("#start").style.display="none";
-  const data=await loadLangPool(lang);
-  const {used,save}=createUsedSet("meteor_final_"+lang);
-  pool=pick(data,80,used,save);
-  queue=[...pool];
-  score=0;lives=3;combo=0;killCount=0;baseSpeed=.9;speed=.9;slowTicks=0;nukes=1;
-  updateUI();
-  spawn(true);
-  running=true;
-  requestAnimationFrame(loop);
-};
-
-function spawn(immediate=false){
-  if(!queue.length) queue=[...pool];
-  const w=queue.shift();
-  const el=document.createElement("div");
-  el.className="meteor";
-  const isBoss = (++killCount % bossEvery === 0);
-  if(isBoss) el.classList.add("boss");
-  el.innerHTML=`<div class="meteor-body"><div class="meteor-text">${w.w}</div></div>`;
-  el.style.left=Math.random()*(360-110)+20+"px";
-  $("#stage").appendChild(el);
-  meteor={el,data:w,boss:isBoss};
-  y=-140;
-  baseSpeed=Math.min(baseSpeed+(immediate?0:.05),2.2);
-  speed=baseSpeed*(slowTicks>0?.4:1);
-  buildOptions(w);
+function toast(msg, color="var(--blue)"){
+  const t = $("resToast");
+  t.textContent = msg;
+  t.style.borderColor = color;
+  t.style.color = color;
+  t.style.opacity = "1";
+  clearTimeout(window.__toastTO);
+  window.__toastTO = setTimeout(()=> t.style.opacity="0", 1500);
 }
 
-function buildOptions(w){
-  const panel=$("#panel"); panel.innerHTML="";
-  const opts=[w.tr];
-  while(opts.length<4){
-    const r=pool[Math.floor(Math.random()*pool.length)].tr;
-    if(!opts.includes(r)) opts.push(r);
-  }
-  opts.sort(()=>Math.random()-.5);
-  opts.forEach(o=>{
-    const b=document.createElement("button");
-    b.className="opt"; b.textContent=o;
-    b.onclick=()=>answer(b,o,w.tr);
-    panel.appendChild(b);
-  });
-}
-
-function answer(btn,sel,correct){
-  if(!meteor) return;
-  if(sel===correct){
-    btn.classList.add("correct");
-    fire();
-    const gain=10+Math.min(combo,5)*5+(meteor.boss?20:0);
-    score+=gain; combo++;
-    speak(meteor.data.w);
-    toast("DOĞRU",`+${gain} • ${meteor.data.w} → ${correct}`,meteor.data.w);
-    destroy();
-  }else{
-    btn.classList.add("wrong");
-    combo=0; lives--; updateUI();
-    toast("YANLIŞ",`Kalan can: ${lives}`,"");
-    if(lives<=0) gameOver();
-  }
-}
-
-function destroy(){
-  const m=meteor; if(!m) return;
-  const exp=document.createElement("div");
-  exp.className="explosion";
-  exp.style.left=(m.el.offsetLeft-10)+"px";
-  exp.style.top=(y-10)+"px";
-  $("#stage").appendChild(exp);
-  setTimeout(()=>exp.remove(),500);
-  m.el.remove(); meteor=null;
-  updateUI();
-  setTimeout(()=>spawn(false),400);
-}
-
-function fire(){
-  const s=$("#stage");
-  const laser=document.createElement("div");
-  laser.className="laser";
-  laser.style.left="50%"; laser.style.top="100%";
-  laser.style.width="300px"; laser.style.transform="rotate(-90deg)";
-  s.appendChild(laser);
-  setTimeout(()=>laser.remove(),150);
-}
-
-function loop(){
-  if(!running) return;
-  if(meteor){
-    if(slowTicks>0){ slowTicks--; speed=baseSpeed*.4; }
-    else speed=baseSpeed;
-    y+=speed; meteor.el.style.top=y+"px";
-    if(y>($("#stage").offsetHeight-140)){
-      lives--; combo=0; updateUI();
-      meteor.el.remove(); meteor=null;
-      if(lives<=0){gameOver();return;}
-      spawn(false);
-    }
-  }
-  requestAnimationFrame(loop);
+function laserPulse(){
+  const l = $("laser");
+  l.style.opacity = "1";
+  l.style.height = "220px";
+  clearTimeout(window.__laserTO);
+  window.__laserTO = setTimeout(()=>{
+    l.style.opacity = "0";
+    l.style.height = "0px";
+  }, 120);
 }
 
 function updateUI(){
-  $("#score").textContent=score;
-  $("#combo").textContent="COMBO x"+combo;
-  $("#lives").textContent="❤️".repeat(lives)+"💀".repeat(3-lives);
-  $("#slowBtn").disabled=slowTicks>0;
-  $("#nukeBtn").disabled=nukes<=0;
+  $("score").textContent = totalScore;
+  $("combo").textContent = "COMBO x" + combo;
+  $("momVal").textContent = "x" + momentum.toFixed(2);
+  $("lives").textContent = "❤️".repeat(Math.max(0,lives)) + "🖤".repeat(3 - Math.max(0,lives));
 }
 
-function toast(t,m,s){
-  lastSpeak=s||""; $("#tTitle").textContent=t; $("#tMsg").textContent=m;
-  $("#toast").classList.add("show");
-  setTimeout(()=>$("#toast").classList.remove("show"),700);
+function safeSpeak(text){
+  try{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = LANGMAP[lang] || "en-US";
+    u.rate = 0.9;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch{}
 }
 
-function speak(t){
-  if(!t) return;
-  const u=new SpeechSynthesisUtterance(t);
-  u.lang=LANGMAP[lang]||"en-US";
-  speechSynthesis.cancel(); speechSynthesis.speak(u);
+function stopLoop(){
+  running = false;
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = 0;
 }
 
-$("#tSpeak").onclick=()=>{ if(lastSpeak) speak(lastSpeak); };
+async function initGame(isBank=false){
+  stopLoop();
+  // bank = full repair + reset difficulty feel
+  if (isBank){
+    lives = 3;
+    momentum = 1.0;
+    baseSpeed = 1.05;
+    combo = 0;
+  }
 
-$("#slowBtn").onclick=()=>{ slowTicks=240; };
-$("#nukeBtn").onclick=()=>{
-  if(nukes<=0) return;
-  nukes--; if(meteor){ destroy(); }
+  setScore = 0;
+  setCounter = 0;
+
+  // stage width cache
+  stageW = $("stage").offsetWidth;
+
+  let data = null;
+  try{
+    data = await loadLangPool(lang);
+  }catch(e){
+    data = null;
+  }
+
+  if (!data || !Array.isArray(data.items) || data.items.length < 20){
+    toast("Dil paketi yüklenemedi. Tekrar dene. ⚠️", "var(--red)");
+    // modalı geri aç
+    $("startModal").classList.remove("hidden");
+    return;
+  }
+
+  const randomized = shuffle(data.items);
+
+  // used logic: DO NOT double-save (avoid overwrite risk)
+  const USED_KEY = `used_meteor_v3_${lang}`;
+  const { used, save } = createUsedSet(USED_KEY);
+
+  // pick smaller pool for less repetition pressure + faster rotation
+  pool = pick({ items: randomized }, 40, used, save);
+
+  if (!Array.isArray(pool) || pool.length < 16){
+    // used exhausted or pick failed -> reset used and retry once
+    try { localStorage.removeItem(USED_KEY); } catch {}
+    pool = pick({ items: randomized }, 40, new Set(), (list)=>{ try{ save(list); }catch{} });
+  }
+
+  // create a no-repeat deck for this set
+  deck = shuffle(pool).slice(0, SET_SIZE);
+
+  if (deck.length < SET_SIZE){
+    toast("Havuz yetersiz. Dil paketini büyütelim. 🧪", "var(--red)");
+    $("startModal").classList.remove("hidden");
+    return;
+  }
+
+  // spawn first
+  spawnNext();
+  running = true;
+  rafId = requestAnimationFrame(loop);
+}
+
+function spawnNext(){
+  // finish set after SET_SIZE meteors (regardless of correct/missed)
+  if (setCounter >= SET_SIZE){
+    finishSet(false);
+    return;
+  }
+
+  const w = deck[setCounter];
+  const isBoss = (killCount > 0 && killCount % 5 === 0);
+
+  const el = document.createElement("div");
+  el.className = `meteor ${isBoss ? "boss armor1" : ""}`;
+  el.innerHTML = `
+    ${isBoss ? `<div class="boss-tag">BOSS • 2x</div>` : ""}
+    <div class="meteor-body"><div class="meteor-text">${String(w.w || "").toUpperCase()}</div></div>
+  `;
+
+  const stage = $("stage");
+  stageW = stage.offsetWidth;
+
+  const left = clamp(Math.random() * (stageW - 118), 6, Math.max(6, stageW - 124));
+  el.style.left = left + "px";
+  stage.appendChild(el);
+
+  currentMeteor = {
+    el,
+    data: w,
+    boss: isBoss,
+    armor: isBoss ? 2 : 1
+  };
+
+  y = -160;
+
+  // Speed curve: based on set progress + small momentum effect, capped
+  const prog = setCounter / Math.max(1, SET_SIZE-1); // 0..1
+  const base = baseSpeed + (prog * 1.0);             // +1.0 over set
+  const momBoost = (momentum - 1.0) * 0.35;          // small effect
+  let speed = clamp(base + momBoost, 0.95, speedCap);
+  if (isBoss) speed *= speedBossMult;
+  currentMeteor.speed = speed;
+
+  buildOptions(w);
+  updateUI();
+}
+
+function buildOptions(w){
+  const p = $("panel");
+  p.innerHTML = "";
+
+  const correct = String(w.tr || "").trim();
+  const opts = [correct];
+
+  // create unique options
+  let safety = 0;
+  while(opts.length < 4 && safety < 200){
+    safety++;
+    const r = pool[Math.floor(Math.random() * pool.length)];
+    const cand = String(r.tr || "").trim();
+    if (cand && !opts.includes(cand)) opts.push(cand);
+  }
+
+  const finalOpts = shuffle(opts);
+  finalOpts.forEach(o=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = o;
+    b.onclick = ()=> checkAnswer(b, o, correct);
+    p.appendChild(b);
+  });
+}
+
+function showCorrectHint(correct){
+  toast(`Doğru: ${correct}`, "var(--gold)");
+}
+
+function scoreGain(isBoss, momentumVal){
+  const base = isBoss ? 140 : 95;
+  return Math.round(base * momentumVal);
+}
+
+function onCorrect(){
+  combo++;
+  momentum = clamp(momentum + 0.05, 1.0, 1.6);
+}
+
+function onWrong(){
+  combo = 0;
+  momentum = clamp(momentum - 0.2, 1.0, 1.6);
+  lives--;
+}
+
+function destroyMeteor(centerX, centerY){
+  const exp = document.createElement("div");
+  exp.className = "explosion";
+  exp.style.left = (centerX - 70) + "px";
+  exp.style.top  = (centerY - 70) + "px";
+  $("stage").appendChild(exp);
+  setTimeout(()=> exp.remove(), 420);
+
+  if (currentMeteor?.el) currentMeteor.el.remove();
+  currentMeteor = null;
+}
+
+function checkAnswer(btn, sel, correct){
+  if (!running || !currentMeteor) return;
+
+  // lock buttons instantly
+  document.querySelectorAll(".opt").forEach(x=> x.disabled = true);
+
+  if (sel === correct){
+    btn.classList.add("correct");
+    laserPulse();
+    safeSpeak(currentMeteor.data.w);
+
+    // boss armor mechanic
+    if (currentMeteor.boss && currentMeteor.armor > 1){
+      currentMeteor.armor--;
+      currentMeteor.el.classList.remove("armor1");
+      currentMeteor.el.classList.add("armor0");
+
+      const gain = Math.round(scoreGain(true, momentum) * 0.55);
+      totalScore += gain;
+      setScore += gain;
+
+      onCorrect();
+      toast(`ZIRH KIRILDI +${gain}`, "var(--gold)");
+
+      // keep same meteor, rebuild options with same correct to simulate 2-step
+      setTimeout(()=>{
+        document.querySelectorAll(".opt").forEach(x=> x.disabled = false);
+      }, 180);
+
+      updateUI();
+      return;
+    }
+
+    // normal kill
+    const gain = scoreGain(currentMeteor.boss, momentum);
+    totalScore += gain;
+    setScore += gain;
+
+    onCorrect();
+    killCount++;
+
+    // explosion centered at meteor
+    const rect = currentMeteor.el.getBoundingClientRect();
+    const stageRect = $("stage").getBoundingClientRect();
+    const cx = (rect.left - stageRect.left) + rect.width/2;
+    const cy = y + rect.height/2;
+
+    destroyMeteor(cx, cy);
+
+    // progress set by spawn count (not only correct)
+    setCounter++;
+
+    setTimeout(()=>{
+      spawnNext();
+      if (running && !rafId) rafId = requestAnimationFrame(loop);
+    }, 520);
+
+    updateUI();
+  } else {
+    btn.classList.add("wrong");
+    showCorrectHint(correct);
+
+    onWrong();
+
+    if (lives <= 0){
+      finishSet(true);
+      return;
+    }
+
+    // allow retry on same meteor (learning): rebuild options after short delay
+    setTimeout(()=>{
+      buildOptions(currentMeteor.data);
+      document.querySelectorAll(".opt").forEach(x=> x.disabled = false);
+      updateUI();
+    }, 520);
+
+    updateUI();
+  }
+}
+
+function loop(){
+  if (!running || !currentMeteor) { rafId = 0; return; }
+
+  y += currentMeteor.speed;
+  currentMeteor.el.style.top = y + "px";
+
+  const stageH = $("stage").offsetHeight;
+
+  // meteor hits ground
+  if (y > (stageH - 110)){
+    // miss penalty: boss hurts more
+    lives -= currentMeteor.boss ? 2 : 1;
+    combo = 0;
+    momentum = 1.0;
+
+    // remove meteor
+    currentMeteor.el.remove();
+    currentMeteor = null;
+
+    // progress set
+    setCounter++;
+
+    if (lives <= 0){
+      finishSet(true);
+      return;
+    }
+
+    spawnNext();
+    updateUI();
+  }
+
+  rafId = requestAnimationFrame(loop);
+}
+
+function finishSet(died){
+  stopLoop();
+
+  if (currentMeteor?.el){ currentMeteor.el.remove(); }
+  currentMeteor = null;
+
+  const pb = Number(localStorage.getItem(`meteor_pb_${lang}`) || 0);
+  if (totalScore > pb) localStorage.setItem(`meteor_pb_${lang}`, String(totalScore));
+
+  $("endModal").classList.remove("hidden");
+  $("endTitle").textContent = died ? "SAVUNMA ÇÖKTÜ" : "SEKTÖR TEMİZ";
+  $("endTitle").style.color = died ? "var(--red)" : "var(--green)";
+  $("endStats").innerHTML =
+    `SKOR: <b>${totalScore}</b><br>` +
+    `SET PUANI: ${setScore}<br>` +
+    `MOMENTUM: x${momentum.toFixed(2)}<br>` +
+    `KILL: ${killCount}`;
+
+  if (died){
+    $("btnContinue").classList.add("hidden");
+    $("btnBank").classList.add("hidden");
+  } else {
+    $("btnContinue").classList.remove("hidden");
+    $("btnBank").classList.remove("hidden");
+  }
+
+  updatePB();
+}
+
+$("startBtn").onclick = async ()=>{
+  // prevent double start
+  $("startBtn").disabled = true;
+  $("startModal").classList.add("hidden");
+
+  totalScore = 0;
+  lives = 3;
+  momentum = 1.0;
+  baseSpeed = 1.05;
+  combo = 0;
+  killCount = 0;
+
+  updateUI();
+
+  await initGame(false);
+
+  setTimeout(()=> $("startBtn").disabled = false, 600);
 };
 
-function gameOver(){
-  running=false;
-  $("#end").style.display="flex";
-  $("#final").textContent=score;
-}
+$("btnContinue").onclick = ()=>{
+  $("endModal").classList.add("hidden");
+  // slight difficulty nudge per set (but capped by speedCap anyway)
+  baseSpeed = clamp(baseSpeed + 0.08, 0.95, 2.0);
+  deck = shuffle(pool).slice(0, SET_SIZE);
+  initGame(false);
+};
+
+$("btnBank").onclick = ()=>{
+  const bonus = Math.round(setScore * 0.05);
+  totalScore += bonus;
+  toast(`BANKA: +${bonus} BONUS 💰`, "var(--gold)");
+  $("endModal").classList.add("hidden");
+
+  // bank resets difficulty feel
+  deck = shuffle(pool).slice(0, SET_SIZE);
+  initGame(true);
+};
+
+$("btnExit").onclick = ()=> location.reload();
+
+window.addEventListener("resize", ()=>{
+  // keep spawns safe after resize
+  stageW = $("stage").offsetWidth;
+});
+
+window.onload = ()=>{
+  updatePB();
+  updateUI();
+};
 </script>
 </body>
 </html>
