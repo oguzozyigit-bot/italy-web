@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>ITALKY • Meteor Defense — Elite Survival (FINAL)</title>
+<title>ITALKY • Meteor Defense — Elite Eternal</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
 <style>
@@ -27,7 +27,6 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
 .stats-mid{text-align:center;min-width:120px}
 .combo-tag{font-size:10px;background:var(--blue);color:#000;padding:2px 8px;border-radius:6px;font-weight:900;display:inline-block}
 .momentum{font-size:12px;color:var(--green);font-weight:900;margin-top:4px}
-
 .lives{font-size:16px;letter-spacing:2px}
 
 .stage{flex:1;position:relative;overflow:hidden;background:rgba(255,255,255,0.02)}
@@ -44,82 +43,65 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
   opacity:0; transition: height .12s ease, opacity .12s ease;
 }
 
+/* ✅ GERÇEK METEOR TAŞ GÖRÜNTÜSÜ */
 .meteor{position:absolute;top:-160px;width:118px;height:132px;display:flex;align-items:center;justify-content:center;will-change: transform, top}
 .meteor .meteor-body{
-  width:82px;height:82px;border-radius:50%;
-  background:radial-gradient(circle,#666,#222);
-  border:2px solid var(--border);
+  width:82px;height:82px;border-radius:38% 62% 63% 37% / 41% 44% 56% 59%; /* Organik asimetrik şekil */
+  background: radial-gradient(circle at 30% 30%, #888, #444 40%, #222);
+  border: 1px solid rgba(255,255,255,0.1);
   display:flex;align-items:center;justify-content:center;
   position:relative;
-  box-shadow: 0 0 18px rgba(0,0,0,.6);
+  box-shadow: 
+    inset -10px -10px 20px rgba(0,0,0,0.8),
+    0 0 15px rgba(0,0,0,0.5);
+  overflow: hidden;
 }
-.meteor .meteor-body::after{
-  content:'';
-  position:absolute;top:-12px;
-  width:44px;height:68px;
-  background:linear-gradient(to top, rgba(255,68,0,0.4), transparent);
-  z-index:-1;
-  filter: blur(.2px);
+/* Kraterler */
+.meteor-body::before {
+  content: ''; position: absolute; width: 15px; height: 10px; background: rgba(0,0,0,0.4); border-radius: 50%; top: 20%; left: 20%; box-shadow: 30px 40px 0 rgba(0,0,0,0.3), 10px 50px 0 rgba(0,0,0,0.4);
 }
+/* Kuyruk / Kor Ateşi */
+.meteor::after{
+  content:''; position:absolute; top:-40px; width:50px; height:100px;
+  background:linear-gradient(to top, rgba(255,100,0,0.5), rgba(255,50,0,0.2), transparent);
+  z-index:-1; filter: blur(8px); border-radius: 50% 50% 0 0;
+}
+
 .meteor .meteor-text{
-  font-family:"Space Grotesk";
-  font-weight:900;font-size:13px;color:#fff;text-align:center;padding:0 6px;
-  text-transform:uppercase;
+  font-family:"Space Grotesk"; font-weight:900;font-size:12px;color:#fff;text-align:center;padding:0 8px;
+  text-transform:uppercase; z-index: 2; text-shadow: 0 2px 4px #000;
 }
 .meteor.boss .meteor-body{
-  border:3px solid var(--gold);
-  box-shadow:0 0 34px rgba(255,184,0,.55);
+  width: 100px; height: 100px; border: 2px solid var(--gold); box-shadow: 0 0 40px rgba(255,184,0,0.4);
 }
-.meteor.boss.armor1 .meteor-body{
-  box-shadow:0 0 34px rgba(255,184,0,.55), inset 0 0 0 6px rgba(255,184,0,.10);
-}
-.meteor.boss.armor0 .meteor-body{
-  box-shadow:0 0 34px rgba(255,184,0,.55), inset 0 0 0 6px rgba(255,0,85,.14);
-}
-.boss-tag{
-  position:absolute;top:6px;left:50%;transform:translateX(-50%);
-  font-size:10px;font-weight:900;
-  background:rgba(255,184,0,.2);border:1px solid rgba(255,184,0,.5);
-  color:var(--gold);padding:3px 8px;border-radius:999px;
-}
+.meteor.boss::after { background:linear-gradient(to top, rgba(255,200,0,0.6), transparent); }
 
 .explosion{
-  position:absolute;width:140px;height:140px;border-radius:50%;
-  background:radial-gradient(circle,#fff,rgba(255,170,0,.9),transparent 65%);
-  animation:boom .42s forwards; pointer-events:none;
+  position:absolute;width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,#fff,rgba(255,170,0,.9),transparent 70%);
+  animation:boom .45s forwards; pointer-events:none;
 }
- Trusted? @keyframes boom{0%{transform:scale(0.2);opacity:1}100%{transform:scale(2.0);opacity:0}}
+@keyframes boom{0%{transform:scale(0.2);opacity:1}100%{transform:scale(2.5);opacity:0}}
 
 .panel{
-  height:228px;
-  background:var(--panel);
-  border-top:2px solid var(--blue);
-  padding:12px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
+  height:228px; background:var(--panel); border-top:2px solid var(--blue); padding:12px;
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
 }
 .opt{
-  border:1px solid var(--border);
-  border-radius:16px;
-  background:var(--glass);
-  color:#fff;font-weight:900;font-size:15px;
-  cursor:pointer; transition: transform .12s ease, background .12s ease, border .12s ease;
-  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border); border-radius:16px; background:var(--glass);
+  color:#fff;font-weight:900;font-size:15px; cursor:pointer; 
+  transition: transform .1s, background .1s; display:flex;align-items:center;justify-content:center;
   padding:10px;text-align:center;
 }
-.opt:active{transform:scale(0.97)}
-.opt.correct{background:rgba(0,255,102,.95);color:#000;border:none}
-.opt.wrong{background:rgba(255,0,85,.92);border:none}
+.opt:active{transform:scale(0.96)}
+.opt.correct{background:rgba(0,255,102,.9);color:#000;border:none}
+.opt.wrong{background:rgba(255,0,85,.9);border:none}
 
 .toast{
   position:absolute;top:82px;left:50%;transform:translateX(-50%);
-  background:rgba(10,10,16,.9);
-  border:1px solid var(--blue);
-  padding:8px 16px;border-radius:20px;font-weight:900;font-size:12px;
-  opacity:0;transition:0.25s;z-index:100;
-  box-shadow: 0 0 22px rgba(0,243,255,.12);
-  pointer-events:none;
+  background:rgba(10,10,16,.95); border:1px solid var(--blue);
+  padding:8px 20px;border-radius:20px;font-weight:900;font-size:12px;
+  opacity:0;transition:0.25s;z-index:100; pointer-events:none;
 }
 
 .modal{position:absolute;inset:0;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;z-index:1000}
@@ -128,10 +110,8 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
 .lang{padding:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;font-weight:900;cursor:pointer;font-size:12px;color:#fff}
 .lang.active{border-color:var(--blue);background:rgba(0,243,255,0.12)}
 .mainbtn{width:100%;padding:16px;margin-top:12px;border:none;border-radius:16px;font-weight:900;background:var(--blue);color:#000;cursor:pointer}
-.mainbtn:active{transform:scale(.99)}
-.hidden{display:none!important}
 
-.small{font-size:12px;opacity:.7;line-height:1.4}
+.hidden{display:none!important}
 </style>
 </head>
 
@@ -145,12 +125,10 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
       <div class="score" id="score">0</div>
       <div class="pb-chip" id="pb">PB: 0</div>
     </div>
-
     <div class="stats-mid">
       <div class="combo-tag" id="combo">COMBO x0</div>
       <div class="momentum" id="momVal">x1.00</div>
     </div>
-
     <div class="lives" id="lives">❤️❤️❤️</div>
   </div>
 
@@ -160,15 +138,13 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
   </div>
 
   <div id="resToast" class="toast">TOAST</div>
-
   <div class="panel" id="panel"></div>
 </div>
 
 <div class="modal" id="startModal">
   <div class="card">
     <h2 style="color:var(--blue);margin:0">METEOR DEFENSE</h2>
-    <p class="small">Gezegeni koru, kelimeleri eşleştir başkanım. Yanlışta doğruyu da öğretiyorum 😈</p>
-
+    <p style="font-size:12px;opacity:.7;margin:10px 0">Gezegeni koru başkanım. Yanlış cevap momentumu kırar!</p>
     <div class="langs">
       <button class="lang active" data-lang="en">EN</button>
       <button class="lang" data-lang="de">DE</button>
@@ -176,17 +152,15 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
       <button class="lang" data-lang="es">ES</button>
       <button class="lang" data-lang="it">IT</button>
     </div>
-
-    <button class="mainbtn" id="startBtn">SİSTEMİ BAŞLAT</button>
+    <button class="mainbtn" id="startBtn">SAVUNMAYI BAŞLAT</button>
   </div>
 </div>
 
 <div class="modal hidden" id="endModal">
   <div class="card">
     <h2 id="endTitle" style="color:var(--green);margin:0">SEKTÖR TEMİZ</h2>
-    <p id="endStats" style="font-size:14px;margin:18px 0;line-height:1.5"></p>
-
-    <button class="mainbtn" id="btnContinue">DEVAM ET (MOMENTUM 🚀)</button>
+    <p id="endStats" style="font-size:14px;margin:18px 0;line-height:1.6"></p>
+    <button class="mainbtn" id="btnContinue">DEVAM ET (MOMENTUM KORU 🚀)</button>
     <button class="mainbtn" id="btnBank" style="background:var(--gold)">BANKALA (%5 BONUS + TAMİR 🛡️)</button>
     <button class="mainbtn" style="background:#222;color:#fff" id="btnExit">KAYDET VE ÇIK</button>
   </div>
@@ -198,28 +172,14 @@ import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 const $ = (id) => document.getElementById(id);
 
 let lang = "en";
-let pool = [];       // picked items (unique-ish)
-let deck = [];       // current set order (no repeats inside a set)
+let pool = [];
+let deck = [];
 let currentMeteor = null;
-
-let totalScore = 0;
-let setScore = 0;
-let combo = 0;
-let momentum = 1.0;
-let lives = 3;
-
-let y = -160;
-let running = false;
-let rafId = 0;
-
-let killCount = 0;     // total kills across run
-let setCounter = 0;    // meteors progressed in set (spawn count)
-const SET_SIZE = 8;
-
-let baseSpeed = 1.05;      // baseline
-let speedCap = 3.2;        // hard cap
-let speedBossMult = 0.72;  // boss heavier
-let stageW = 0;
+let totalScore = 0, setScore = 0, combo = 0, momentum = 1.0, lives = 3;
+let y = -160, running = false, rafId = 0, killCount = 0, setCounter = 0;
+const SET_SIZE = 10; 
+let baseSpeed = 1.1;
+const speedCap = 3.5;
 
 const LANGMAP = { en:"en-US", de:"de-DE", fr:"fr-FR", es:"es-ES", it:"it-IT" };
 
@@ -232,8 +192,6 @@ function shuffle(a){
   return arr;
 }
 
-function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-
 function updatePB(){
   const pb = Number(localStorage.getItem(`meteor_pb_${lang}`) || 0);
   $("pb").textContent = `PB: ${pb}`;
@@ -242,31 +200,19 @@ function updatePB(){
 document.querySelectorAll(".lang").forEach(b=>{
   b.onclick = ()=>{
     document.querySelectorAll(".lang").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    lang = b.dataset.lang;
-    updatePB();
+    b.classList.add("active"); lang = b.dataset.lang; updatePB();
   };
 });
 
 function toast(msg, color="var(--blue)"){
   const t = $("resToast");
-  t.textContent = msg;
-  t.style.borderColor = color;
-  t.style.color = color;
-  t.style.opacity = "1";
-  clearTimeout(window.__toastTO);
-  window.__toastTO = setTimeout(()=> t.style.opacity="0", 1500);
+  t.textContent = msg; t.style.borderColor = color; t.style.color = color; t.style.opacity = "1";
+  clearTimeout(window.__tto); window.__tto = setTimeout(()=> t.style.opacity="0", 1500);
 }
 
 function laserPulse(){
-  const l = $("laser");
-  l.style.opacity = "1";
-  l.style.height = "220px";
-  clearTimeout(window.__laserTO);
-  window.__laserTO = setTimeout(()=>{
-    l.style.opacity = "0";
-    l.style.height = "0px";
-  }, 120);
+  const l = $("laser"); l.style.opacity = "1"; l.style.height = "300px";
+  setTimeout(()=>{ l.style.opacity = "0"; l.style.height = "0px"; }, 150);
 }
 
 function updateUI(){
@@ -279,349 +225,173 @@ function updateUI(){
 function safeSpeak(text){
   try{
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = LANGMAP[lang] || "en-US";
-    u.rate = 0.9;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
+    u.lang = LANGMAP[lang] || "en-US"; u.rate = 0.9;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
   }catch{}
 }
 
-function stopLoop(){
-  running = false;
-  if (rafId) cancelAnimationFrame(rafId);
-  rafId = 0;
-}
-
 async function initGame(isBank=false){
-  stopLoop();
-  // bank = full repair + reset difficulty feel
-  if (isBank){
-    lives = 3;
-    momentum = 1.0;
-    baseSpeed = 1.05;
-    combo = 0;
-  }
-
-  setScore = 0;
-  setCounter = 0;
-
-  // stage width cache
-  stageW = $("stage").offsetWidth;
-
-  let data = null;
-  try{
-    data = await loadLangPool(lang);
-  }catch(e){
-    data = null;
-  }
-
-  if (!data || !Array.isArray(data.items) || data.items.length < 20){
-    toast("Dil paketi yüklenemedi. Tekrar dene. ⚠️", "var(--red)");
-    // modalı geri aç
-    $("startModal").classList.remove("hidden");
-    return;
-  }
-
+  if(isBank){ lives = 3; momentum = 1.0; baseSpeed = 1.1; combo = 0; }
+  setScore = 0; setCounter = 0;
+  
+  const data = await loadLangPool(lang);
   const randomized = shuffle(data.items);
-
-  // used logic: DO NOT double-save (avoid overwrite risk)
-  const USED_KEY = `used_meteor_v3_${lang}`;
+  const USED_KEY = `used_meteor_v4_${lang}`;
   const { used, save } = createUsedSet(USED_KEY);
 
-  // pick smaller pool for less repetition pressure + faster rotation
-  pool = pick({ items: randomized }, 40, used, save);
+  pool = pick({ items: randomized }, 50, used, save);
 
-  if (!Array.isArray(pool) || pool.length < 16){
-    // used exhausted or pick failed -> reset used and retry once
-    try { localStorage.removeItem(USED_KEY); } catch {}
-    pool = pick({ items: randomized }, 40, new Set(), (list)=>{ try{ save(list); }catch{} });
+  // ✅ ETERNAL DÖNGÜ: Havuz bittiyse sıfırla ve devam et başkanım
+  if (!pool || pool.length < 15){
+    localStorage.removeItem(USED_KEY);
+    return initGame(isBank);
   }
 
-  // create a no-repeat deck for this set
+  // Used mühürleme
+  try { save(pool.map(x => x.w)); } catch(e){}
+
   deck = shuffle(pool).slice(0, SET_SIZE);
-
-  if (deck.length < SET_SIZE){
-    toast("Havuz yetersiz. Dil paketini büyütelim. 🧪", "var(--red)");
-    $("startModal").classList.remove("hidden");
-    return;
-  }
-
-  // spawn first
   spawnNext();
   running = true;
-  rafId = requestAnimationFrame(loop);
+  if(!rafId) rafId = requestAnimationFrame(loop);
 }
 
 function spawnNext(){
-  // finish set after SET_SIZE meteors (regardless of correct/missed)
-  if (setCounter >= SET_SIZE){
-    finishSet(false);
-    return;
-  }
+  if (setCounter >= SET_SIZE){ finishSet(false); return; }
 
   const w = deck[setCounter];
   const isBoss = (killCount > 0 && killCount % 5 === 0);
 
   const el = document.createElement("div");
-  el.className = `meteor ${isBoss ? "boss armor1" : ""}`;
-  el.innerHTML = `
-    ${isBoss ? `<div class="boss-tag">BOSS • 2x</div>` : ""}
-    <div class="meteor-body"><div class="meteor-text">${String(w.w || "").toUpperCase()}</div></div>
-  `;
-
+  el.className = `meteor ${isBoss ? "boss" : ""}`;
+  el.innerHTML = `<div class="meteor-body"><div class="meteor-text">${String(w.w || "").toUpperCase()}</div></div>`;
+  
   const stage = $("stage");
-  stageW = stage.offsetWidth;
-
-  const left = clamp(Math.random() * (stageW - 118), 6, Math.max(6, stageW - 124));
-  el.style.left = left + "px";
+  const left = Math.random() * (stage.offsetWidth - 118);
+  el.style.left = Math.max(10, left) + "px";
   stage.appendChild(el);
 
-  currentMeteor = {
-    el,
-    data: w,
-    boss: isBoss,
-    armor: isBoss ? 2 : 1
-  };
-
+  currentMeteor = { el, data: w, boss: isBoss, armor: isBoss ? 2 : 1 };
   y = -160;
-
-  // Speed curve: based on set progress + small momentum effect, capped
-  const prog = setCounter / Math.max(1, SET_SIZE-1); // 0..1
-  const base = baseSpeed + (prog * 1.0);             // +1.0 over set
-  const momBoost = (momentum - 1.0) * 0.35;          // small effect
-  let speed = clamp(base + momBoost, 0.95, speedCap);
-  if (isBoss) speed *= speedBossMult;
-  currentMeteor.speed = speed;
+  currentMeteor.speed = Math.min(baseSpeed + (setCounter * 0.1) + (momentum * 0.1), speedCap) * (isBoss ? 0.7 : 1);
 
   buildOptions(w);
   updateUI();
 }
 
 function buildOptions(w){
-  const p = $("panel");
-  p.innerHTML = "";
-
+  const p = $("panel"); p.innerHTML = "";
   const correct = String(w.tr || "").trim();
   const opts = [correct];
 
-  // create unique options
-  let safety = 0;
-  while(opts.length < 4 && safety < 200){
-    safety++;
+  while(opts.length < 4){
     const r = pool[Math.floor(Math.random() * pool.length)];
     const cand = String(r.tr || "").trim();
     if (cand && !opts.includes(cand)) opts.push(cand);
   }
 
-  const finalOpts = shuffle(opts);
-  finalOpts.forEach(o=>{
+  shuffle(opts).forEach(o=>{
     const b = document.createElement("button");
-    b.className = "opt";
-    b.textContent = o;
+    b.className = "opt"; b.textContent = o;
     b.onclick = ()=> checkAnswer(b, o, correct);
     p.appendChild(b);
   });
 }
 
-function showCorrectHint(correct){
-  toast(`Doğru: ${correct}`, "var(--gold)");
-}
-
-function scoreGain(isBoss, momentumVal){
-  const base = isBoss ? 140 : 95;
-  return Math.round(base * momentumVal);
-}
-
-function onCorrect(){
-  combo++;
-  momentum = clamp(momentum + 0.05, 1.0, 1.6);
-}
-
-function onWrong(){
-  combo = 0;
-  momentum = clamp(momentum - 0.2, 1.0, 1.6);
-  lives--;
-}
-
-function destroyMeteor(centerX, centerY){
-  const exp = document.createElement("div");
-  exp.className = "explosion";
-  exp.style.left = (centerX - 70) + "px";
-  exp.style.top  = (centerY - 70) + "px";
-  $("stage").appendChild(exp);
-  setTimeout(()=> exp.remove(), 420);
-
-  if (currentMeteor?.el) currentMeteor.el.remove();
-  currentMeteor = null;
-}
-
 function checkAnswer(btn, sel, correct){
   if (!running || !currentMeteor) return;
-
-  // lock buttons instantly
-  document.querySelectorAll(".opt").forEach(x=> x.disabled = true);
 
   if (sel === correct){
     btn.classList.add("correct");
     laserPulse();
     safeSpeak(currentMeteor.data.w);
 
-    // boss armor mechanic
     if (currentMeteor.boss && currentMeteor.armor > 1){
       currentMeteor.armor--;
-      currentMeteor.el.classList.remove("armor1");
-      currentMeteor.el.classList.add("armor0");
-
-      const gain = Math.round(scoreGain(true, momentum) * 0.55);
-      totalScore += gain;
-      setScore += gain;
-
-      onCorrect();
-      toast(`ZIRH KIRILDI +${gain}`, "var(--gold)");
-
-      // keep same meteor, rebuild options with same correct to simulate 2-step
-      setTimeout(()=>{
-        document.querySelectorAll(".opt").forEach(x=> x.disabled = false);
-      }, 180);
-
-      updateUI();
+      toast("ZIRH HASAR ALDI! 🛡️", "var(--gold)");
+      setTimeout(()=> btn.classList.remove("correct"), 200);
       return;
     }
 
-    // normal kill
-    const gain = scoreGain(currentMeteor.boss, momentum);
-    totalScore += gain;
-    setScore += gain;
+    const gain = Math.round((currentMeteor.boss ? 150 : 100) * momentum);
+    totalScore += gain; setScore += gain;
+    combo++; momentum = Math.min(momentum + 0.05, 1.6);
+    killCount++; setCounter++;
 
-    onCorrect();
-    killCount++;
-
-    // explosion centered at meteor
     const rect = currentMeteor.el.getBoundingClientRect();
     const stageRect = $("stage").getBoundingClientRect();
-    const cx = (rect.left - stageRect.left) + rect.width/2;
-    const cy = y + rect.height/2;
+    destroyMeteor(rect.left - stageRect.left + 40, y + 40);
 
-    destroyMeteor(cx, cy);
-
-    // progress set by spawn count (not only correct)
-    setCounter++;
-
-    setTimeout(()=>{
-      spawnNext();
-      if (running && !rafId) rafId = requestAnimationFrame(loop);
-    }, 520);
-
-    updateUI();
+    setTimeout(spawnNext, 400);
   } else {
     btn.classList.add("wrong");
-    showCorrectHint(correct);
-
-    onWrong();
-
-    if (lives <= 0){
-      finishSet(true);
-      return;
-    }
-
-    // allow retry on same meteor (learning): rebuild options after short delay
-    setTimeout(()=>{
-      buildOptions(currentMeteor.data);
-      document.querySelectorAll(".opt").forEach(x=> x.disabled = false);
-      updateUI();
-    }, 520);
-
+    combo = 0; momentum = Math.max(1.0, momentum - 0.2);
+    lives--;
+    if (lives <= 0) finishSet(true);
     updateUI();
+    toast(`DOĞRUSU: ${correct}`, "var(--red)");
   }
 }
 
+function destroyMeteor(cx, cy){
+  const exp = document.createElement("div");
+  exp.className = "explosion";
+  exp.style.left = (cx - 80) + "px"; exp.style.top = (cy - 80) + "px";
+  $("stage").appendChild(exp);
+  setTimeout(()=> exp.remove(), 450);
+  if (currentMeteor?.el) currentMeteor.el.remove();
+  currentMeteor = null;
+}
+
 function loop(){
-  if (!running || !currentMeteor) { rafId = 0; return; }
+  if (!running) return;
+  if (currentMeteor){
+    y += currentMeteor.speed;
+    currentMeteor.el.style.top = y + "px";
 
-  y += currentMeteor.speed;
-  currentMeteor.el.style.top = y + "px";
-
-  const stageH = $("stage").offsetHeight;
-
-  // meteor hits ground
-  if (y > (stageH - 110)){
-    // miss penalty: boss hurts more
-    lives -= currentMeteor.boss ? 2 : 1;
-    combo = 0;
-    momentum = 1.0;
-
-    // remove meteor
-    currentMeteor.el.remove();
-    currentMeteor = null;
-
-    // progress set
-    setCounter++;
-
-    if (lives <= 0){
-      finishSet(true);
-      return;
+    if (y > ($("stage").offsetHeight - 100)){
+      lives -= currentMeteor.boss ? 2 : 1;
+      combo = 0; momentum = 1.0;
+      currentMeteor.el.remove(); currentMeteor = null;
+      setCounter++;
+      if (lives <= 0) finishSet(true);
+      else spawnNext();
+      updateUI();
     }
-
-    spawnNext();
-    updateUI();
   }
-
   rafId = requestAnimationFrame(loop);
 }
 
 function finishSet(died){
-  stopLoop();
-
-  if (currentMeteor?.el){ currentMeteor.el.remove(); }
+  running = false;
+  if (currentMeteor?.el) currentMeteor.el.remove();
   currentMeteor = null;
 
   const pb = Number(localStorage.getItem(`meteor_pb_${lang}`) || 0);
   if (totalScore > pb) localStorage.setItem(`meteor_pb_${lang}`, String(totalScore));
 
   $("endModal").classList.remove("hidden");
-  $("endTitle").textContent = died ? "SAVUNMA ÇÖKTÜ" : "SEKTÖR TEMİZ";
+  $("endTitle").textContent = died ? "SAVUNMA ÇÖKTÜ 💀" : "SEKTÖR TEMİZ 🛰️";
   $("endTitle").style.color = died ? "var(--red)" : "var(--green)";
-  $("endStats").innerHTML =
-    `SKOR: <b>${totalScore}</b><br>` +
-    `SET PUANI: ${setScore}<br>` +
-    `MOMENTUM: x${momentum.toFixed(2)}<br>` +
-    `KILL: ${killCount}`;
+  $("endStats").innerHTML = `TOPLAM SKOR: <b>${totalScore}</b><br>MOMENTUM: x${momentum.toFixed(2)}<br>METEOR İMHA: ${killCount}`;
 
   if (died){
-    $("btnContinue").classList.add("hidden");
-    $("btnBank").classList.add("hidden");
+    $("btnContinue").classList.add("hidden"); $("btnBank").classList.add("hidden");
   } else {
-    $("btnContinue").classList.remove("hidden");
-    $("btnBank").classList.remove("hidden");
+    $("btnContinue").classList.remove("hidden"); $("btnBank").classList.remove("hidden");
   }
-
   updatePB();
 }
 
 $("startBtn").onclick = async ()=>{
-  // prevent double start
-  $("startBtn").disabled = true;
   $("startModal").classList.add("hidden");
-
-  totalScore = 0;
-  lives = 3;
-  momentum = 1.0;
-  baseSpeed = 1.05;
-  combo = 0;
-  killCount = 0;
-
-  updateUI();
-
-  await initGame(false);
-
-  setTimeout(()=> $("startBtn").disabled = false, 600);
+  totalScore = 0; lives = 3; momentum = 1.0; baseSpeed = 1.1; combo = 0; killCount = 0;
+  updateUI(); await initGame(false);
 };
 
 $("btnContinue").onclick = ()=>{
   $("endModal").classList.add("hidden");
-  // slight difficulty nudge per set (but capped by speedCap anyway)
-  baseSpeed = clamp(baseSpeed + 0.08, 0.95, 2.0);
-  deck = shuffle(pool).slice(0, SET_SIZE);
+  baseSpeed = Math.min(baseSpeed + 0.1, 2.0);
   initGame(false);
 };
 
@@ -630,23 +400,12 @@ $("btnBank").onclick = ()=>{
   totalScore += bonus;
   toast(`BANKA: +${bonus} BONUS 💰`, "var(--gold)");
   $("endModal").classList.add("hidden");
-
-  // bank resets difficulty feel
-  deck = shuffle(pool).slice(0, SET_SIZE);
   initGame(true);
 };
 
 $("btnExit").onclick = ()=> location.reload();
 
-window.addEventListener("resize", ()=>{
-  // keep spawns safe after resize
-  stageW = $("stage").offsetWidth;
-});
-
-window.onload = ()=>{
-  updatePB();
-  updateUI();
-};
+window.onload = ()=>{ updatePB(); updateUI(); };
 </script>
 </body>
 </html>
