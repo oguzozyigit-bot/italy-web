@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>italkyAI - Translate</title>
 <style>
-/* CSS BAŞLANGICI */
+/* --- CSS AYARLARI --- */
 :root{
     --frameW: min(480px, calc(100vw - 18px));
-    --topH: 64px; /* Biraz kısalttım */
-    --footerH: 50px; /* Footer küçüldü */
+    --topH: 64px;
+    --footerH: 50px;
     --bg:#030014;
     --text: rgba(255,255,255,.92);
     --muted: rgba(255,255,255,.60);
@@ -66,11 +66,9 @@ html,body{ margin:0; padding:0; width:100%; height:100dvh; overflow:hidden; posi
 .swapBtn{ width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--btnBd); background: var(--btnBg); color: rgba(255,255,255,.92); font-weight: 1000; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .swapBtn:active{ transform: scale(.98); }
 
-/* Boxes Container - Pane kaldırıldı, flex yapısına geçildi */
+/* Boxes */
 .box{ border-radius: 20px; border: 1px solid rgba(255,255,255,.10); overflow:hidden; display:flex; flex-direction:column; flex:1; min-height:0; backdrop-filter: blur(10px); }
-/* Üst Kutu */
 .box.top{ background: radial-gradient(800px 240px at 0% 0%, var(--navyA), transparent 62%), radial-gradient(800px 240px at 100% 0%, var(--navyB), transparent 62%), rgba(0,0,0,.12); }
-/* Alt Kutu */
 .box.bottom{ background: radial-gradient(900px 420px at 30% 12%, var(--burgA), transparent 68%), radial-gradient(700px 360px at 80% 18%, var(--burgB), transparent 70%), radial-gradient(600px 320px at 40% 75%, var(--burgC), transparent 72%), linear-gradient(180deg, rgba(60, 10, 20, .55), rgba(0,0,0,.15)); }
 
 .boxHead{ padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.22); display:flex; align-items:center; justify-content:space-between; gap:10px; height: 42px; }
@@ -82,12 +80,17 @@ html,body{ margin:0; padding:0; width:100%; height:100dvh; overflow:hidden; posi
 .iconBtn:active{ transform: scale(.98); }
 .iconBtn svg{ width: 14px; height: 14px; stroke: rgba(255,255,255,.90); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; opacity:.95; }
 
-textarea{ flex:1; border:none; outline:none; background: transparent; color:#fff; font-size: 15px; line-height: 1.5; padding: 12px; resize:none; }
+/* Mic listening animation */
+.iconBtn.listening{ border-color: rgba(79,70,229,.45); background: rgba(79,70,229,.14); position: relative; }
+.iconBtn.listening::after{ content:""; position:absolute; inset:-4px; border-radius: 12px; border: 2px solid rgba(165,180,252,.55); animation: micPulse 1.15s ease-in-out infinite; pointer-events:none; }
+@keyframes micPulse{ 0%{ transform: scale(0.92); opacity:.75; } 50%{ transform: scale(1.08); opacity:.28; } 100%{ transform: scale(0.92); opacity:.75; } }
+
+textarea{ flex:1; border:none; outline:none; background: transparent; color:#fff; font-size: 15px; line-height: 1.5; padding: 12px; resize:none; font-family: inherit; }
 .out{ flex:1; padding: 12px; overflow:auto; -webkit-overflow-scrolling: touch; scrollbar-width:none; white-space: pre-wrap; word-break: break-word; font-size: 15px; line-height: 1.5; color: rgba(255,255,255,.92); }
 
-/* ACTIONS - ORTAYA ALINDI */
+/* ACTIONS */
 .actions{ display:flex; gap: 10px; padding: 2px 0; flex: 0 0 auto; }
-.btn{ flex:1; height: 44px; border-radius: 14px; border: 1px solid var(--btnBd); background: var(--btnBg); color:#fff; font-weight: 1000; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; letter-spacing:0.3px; }
+.btn{ flex:1; height: 44px; border-radius: 14px; border: 1px solid var(--btnBd); background: var(--btnBg); color:#fff; font-weight: 1000; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; letter-spacing:0.3px; transition:0.2s; }
 .btn.primary{ background: linear-gradient(135deg, var(--ai1), var(--ai2)); border: none; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
 .btn:active{ transform: scale(.98); }
 
@@ -95,7 +98,6 @@ textarea{ flex:1; border:none; outline:none; background: transparent; color:#fff
 .footerbar{ position: fixed; left: 50%; transform: translateX(-50%); width: var(--frameW); bottom: 0; z-index: 2400; height: var(--footerH); padding: 0 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(3, 0, 20, 0.95); border-top: 1px solid rgba(255,255,255,.05); backdrop-filter: blur(10px); display:flex; flex-direction:column; justify-content:center; align-items:center; }
 .footerBrand{ text-align:center; font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.5px; font-weight: 700; text-transform:uppercase; }
 
-/* Font import */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap');
 </style>
 </head>
@@ -110,7 +112,7 @@ textarea{ flex:1; border:none; outline:none; background: transparent; color:#fff
 <div class="mobile-frame">
     <div class="topbar">
         <div class="leftControls">
-            <div class="backBtn">←</div>
+            <div class="backBtn" onclick="history.back()">←</div>
             <div class="mini-brand">
                 <div class="logo-line">
                     <span class="logo-main">italky</span>
@@ -118,17 +120,17 @@ textarea{ flex:1; border:none; outline:none; background: transparent; color:#fff
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 
     <div class="main">
         <div class="toolbar">
             <button class="langBtn" id="fromLangBtn">
-                <span class="langLeft"><span class="flag">🌐</span><span class="langLabel">Dili Algıla</span></span>
+                <span class="langLeft"><span class="flag" id="fromFlag">🌐</span><span class="langLabel" id="fromLabel">Dili Algıla</span></span>
                 <span class="caret">▼</span>
             </button>
             <button class="swapBtn" id="swapBtn">⇄</button>
             <button class="langBtn" id="toLangBtn">
-                <span class="langLeft"><span class="flag">🇹🇷</span><span class="langLabel">Türkçe</span></span>
+                <span class="langLeft"><span class="flag" id="toFlag">🇹🇷</span><span class="langLabel" id="toLabel">Türkçe</span></span>
                 <span class="caret">▼</span>
             </button>
         </div>
@@ -158,7 +160,7 @@ textarea{ flex:1; border:none; outline:none; background: transparent; color:#fff
                 </div>
                 <div class="btnsRight">
                     <button class="iconBtn" id="speakOut"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"></path><path d="M15 9a4 4 0 0 1 0 6"></path><path d="M17.5 6.5a7 7 0 0 1 0 11"></path></svg></button>
-                    <button class="iconBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
+                    <button class="iconBtn" id="copyOut"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
                 </div>
             </div>
             <div class="out" id="outText">...</div>
@@ -170,6 +172,104 @@ textarea{ flex:1; border:none; outline:none; background: transparent; color:#fff
         <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
     </div>
 </div>
+
+<script>
+    // Elementleri seçelim
+    const inText = document.getElementById('inText');
+    const outText = document.getElementById('outText');
+    const clearBtn = document.getElementById('clearBtn');
+    const translateBtn = document.getElementById('translateBtn');
+    const swapBtn = document.getElementById('swapBtn');
+    const micIn = document.getElementById('micIn');
+    const countIn = document.getElementById('countIn');
+    
+    // Dil elementleri
+    const fromLabel = document.getElementById('fromLabel');
+    const fromFlag = document.getElementById('fromFlag');
+    const toLabel = document.getElementById('toLabel');
+    const toFlag = document.getElementById('toFlag');
+
+    // 1. Karakter Sayacı
+    inText.addEventListener('input', () => {
+        countIn.innerText = inText.value.length;
+    });
+
+    // 2. Temizle Butonu
+    clearBtn.addEventListener('click', () => {
+        inText.value = '';
+        outText.innerText = '...';
+        countIn.innerText = '0';
+        inText.focus();
+    });
+
+    // 3. Dil Değiştir (Swap) Butonu
+    swapBtn.addEventListener('click', () => {
+        // Yedekle
+        const tempTxt = fromLabel.innerText;
+        const tempFlag = fromFlag.innerText;
+        
+        // Değiştir
+        fromLabel.innerText = toLabel.innerText;
+        fromFlag.innerText = toFlag.innerText;
+        toLabel.innerText = tempTxt;
+        toFlag.innerText = tempFlag;
+        
+        // Animasyon efekti
+        swapBtn.style.transform = "rotate(180deg)";
+        setTimeout(() => swapBtn.style.transform = "rotate(0deg)", 300);
+    });
+
+    // 4. Çevir Butonu (Simülasyon)
+    translateBtn.addEventListener('click', () => {
+        const text = inText.value.trim();
+        if(!text) return;
+
+        // Yükleniyor efekti
+        const originalText = translateBtn.innerText;
+        translateBtn.innerText = "Çevriliyor...";
+        translateBtn.style.opacity = "0.7";
+        outText.style.opacity = "0.5";
+
+        // Demo gecikmesi (Sanki API'ye gidip geliyormuş gibi)
+        setTimeout(() => {
+            // Basit bir demo mantığı: Metni ters çevirelim veya büyük harf yapalım
+            // Gerçek projede buraya API isteği gelecek.
+            outText.innerText = " [AI Çevirisi]: " + text;
+            
+            translateBtn.innerText = originalText;
+            translateBtn.style.opacity = "1";
+            outText.style.opacity = "1";
+        }, 800);
+    });
+
+    // 5. Mikrofon Butonu (Görsel efekt)
+    let isListening = false;
+    micIn.addEventListener('click', () => {
+        isListening = !isListening;
+        if(isListening){
+            micIn.classList.add('listening');
+            inText.placeholder = "Dinliyorum...";
+        } else {
+            micIn.classList.remove('listening');
+            inText.placeholder = "Yazmaya başla...";
+        }
+    });
+    
+    // 6. Kopyala Butonu (Ekstra ekledim)
+    const copyOut = document.getElementById('copyOut');
+    if(copyOut) {
+        copyOut.addEventListener('click', () => {
+            if(outText.innerText !== '...') {
+                navigator.clipboard.writeText(outText.innerText);
+                // Basit bir geri bildirim
+                const oldColor = copyOut.style.background;
+                copyOut.style.background = "rgba(79,70,229,.4)";
+                setTimeout(() => copyOut.style.background = oldColor, 200);
+            }
+        });
+    }
+
+</script>
 
 </body>
 </html>
