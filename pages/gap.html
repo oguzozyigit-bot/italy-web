@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • Gap Master Elite Survival</title>
+  <title>italkyAI • Gap Master Grand Master</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
     :root { 
@@ -14,33 +14,36 @@
     html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:'Outfit', sans-serif; background:var(--bg-deep); color:#fff; position:fixed; }
     .cosmos-bg { position:absolute; inset:0; background: radial-gradient(circle at 50% 35%, #0b0b2a 0%, #020205 60%, #010104 100%); z-index:0; }
     .wrap { width:100%; max-width:480px; height:100%; margin:0 auto; position:relative; z-index:10; display:flex; flex-direction:column; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+    
     .nav-top { display:flex; align-items:center; justify-content:space-between; padding: 15px 20px; }
+    .pb-chip { font-size: 10px; color: var(--c-neon-pink); font-weight: 800; text-align: right; margin-top: 4px; }
     .status-chip { background: var(--glass); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid var(--border); letter-spacing: 1px; }
+
     .progress-bar { width: calc(100% - 40px); height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; margin: 0 20px 10px; overflow: hidden; }
     .progress-fill { height: 100%; background: var(--c-neon-blue); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 12px var(--c-neon-blue); }
     .stats-row { padding: 5px 20px; display: flex; justify-content: space-between; align-items: center; }
-    #lifeBar { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .score-pill { color: var(--c-neon-green); font-weight: 900; font-size: 20px; }
-    @keyframes scorePop{ from{ transform:scale(1.25); } to{ transform:scale(1); } }.score-pop{ animation: scorePop .18s ease; }
+    
     .stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 10px 20px; gap: 15px; }
     .sentence-card { width:100%; background: var(--glass); border: 1px solid var(--border); border-radius: 32px; padding: 35px 20px; text-align: center; backdrop-filter: blur(25px); position: relative; }
-    .sentence-text { text-transform: uppercase; letter-spacing: .3px; font-size: 22px; font-weight: 700; line-height: 1.5; }
     .gap-box { color: var(--c-neon-blue); border-bottom: 3px solid var(--c-neon-blue); padding: 0 8px; font-weight: 800; }
-    .translation-text { font-size: 16px; color: var(--c-neon-green); font-style: italic; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 15px; }
-    #resInfo { font-size: 12px; color: var(--c-neon-blue); margin-top: 10px; font-weight: 700; opacity: 0; transition: opacity 0.3s; text-align: center; width: 100%; }
-    .options-grid { width: 100%; display: grid; grid-template-columns: 1fr; gap: 12px; }
+    #resInfo { font-size: 12px; color: var(--c-neon-blue); margin-top: 10px; font-weight: 700; opacity: 0; transition: opacity 0.3s; text-align: center; min-height: 18px; }
+
     .opt-btn { position:relative; overflow:hidden; width: 100%; padding: 18px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 26px rgba(0,0,0,.42); }
-    .opt-btn:active { transform: translateY(3px); }
-    .opt-btn:disabled { opacity:.85; cursor:default; }
-    .opt-btn.correct { background: linear-gradient(180deg, #00e676, #00c853) !important; color: #000; box-shadow: 0 0 22px rgba(0, 230, 118, 0.35) !important; }
-    .opt-btn.wrong { background: linear-gradient(180deg, #ff1744, #d50000) !important; animation: shake 0.4s; box-shadow: 0 0 18px rgba(255, 23, 68, 0.25) !important; }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    .opt-btn.correct { background: linear-gradient(180deg, #00e676, #00c853) !important; color: #000; }
+    .opt-btn.wrong { background: linear-gradient(180deg, #ff1744, #d50000) !important; }
+
     .modal-wrap { position: absolute; inset: 0; background: rgba(0,0,0,0.98); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal-card { width: 100%; max-width: 360px; background: #08080c; border: 1px solid var(--border); border-radius: 36px; padding: 40px 30px; text-align: center; }
+    .modal-card { width: 100%; max-width: 360px; background: #08080c; border: 1px solid var(--border); border-radius: 36px; padding: 30px; text-align: center; overflow-y: auto; max-height: 90vh; }
+    
+    /* RECORD ITEMS - PODYUM DOKUNUŞU başkanım */
+    .record-item { display: flex; justify-content: space-between; align-items:center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 8px; font-size: 11px; border-left: 3px solid #444; }
+    .record-item.rank-0 { border-left-color: var(--c-neon-pink); background: rgba(255,0,255,0.05); }
+    .record-item.rank-1 { border-left-color: var(--c-neon-blue); }
+    .record-item.rank-2 { border-left-color: var(--c-neon-green); }
+
     .btn-main { width: 100%; padding: 18px; background: var(--c-neon-green); color: #000; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; margin-top: 12px; }
-    .btn-secondary { width: 100%; padding: 18px; background: var(--glass); color: #fff; border: 1px solid var(--border); border-radius: 20px; font-weight: 700; cursor: pointer; margin-top: 12px; }
-    .lang-btn{ font-size:24px; padding:10px; border-radius:16px; background: var(--glass); border: 1px solid transparent; cursor:pointer; margin:4px; transition:.2s; }
-    .lang-btn.active{ border-color: var(--c-neon-blue); background: rgba(0,243,255,0.15); transform: scale(1.08); }
+    .lvl-btn { width:100%; display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-radius: 18px; border: 1px solid var(--border); background: var(--glass); color: #fff; font-weight: 700; cursor: pointer; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -48,7 +51,10 @@
   <div class="wrap">
     <div class="nav-top">
       <a href="/pages/game.html" style="text-decoration:none; color:#fff; font-size:22px;">←</a>
-      <div id="statusChip" class="status-chip">EN • LEVEL</div>
+      <div style="text-align: center;">
+        <div id="statusChip" class="status-chip">EN • LEVEL</div>
+        <div id="pbDisplay" class="pb-chip">PB: 0</div>
+      </div>
       <div style="font-size:20px; font-weight:900;">italky<span style="color:var(--c-neon-blue)">AI</span></div>
     </div>
     <div class="progress-bar"><div id="progFill" class="progress-fill"></div></div>
@@ -58,27 +64,31 @@
     </div>
     <div class="stage">
       <div class="sentence-card">
-        <div id="sentenceDisplay" class="sentence-text"></div>
+        <div id="sentenceDisplay" class="sentence-text" style="text-transform: uppercase; font-size: 22px; font-weight: 700;"></div>
         <div id="resInfo"></div>
-        <div id="translationDisplay" class="translation-text"></div>
+        <div id="translationDisplay" class="translation-text" style="font-size: 16px; color: var(--c-neon-green); font-style: italic; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;"></div>
       </div>
-      <div class="options-grid" id="optionsGrid"></div>
+      <div class="options-grid" id="optionsGrid" style="width: 100%; display: grid; gap: 12px;"></div>
     </div>
   </div>
 
   <div class="modal-wrap" id="startModal">
     <div class="modal-card">
       <h2 style="margin:0 0 20px;">GAP MASTER ELITE</h2>
-      <div style="margin-bottom:25px;">
+      <div style="margin-bottom:20px;">
         <button onclick="setLang('en',this)" class="lang-btn active">🇬🇧</button>
         <button onclick="setLang('de',this)" class="lang-btn">🇩🇪</button>
         <button onclick="setLang('fr',this)" class="lang-btn">🇫🇷</button>
         <button onclick="setLang('es',this)" class="lang-btn">🇪🇸</button>
         <button onclick="setLang('it',this)" class="lang-btn">🇮🇹</button>
       </div>
-      <button class="btn-main" onclick="initGame('A2')">KOLAY SEVİYE</button>
-      <button class="btn-main" style="background:#4338ca; color:#fff;" onclick="initGame('B1')">ORTA SEVİYE</button>
-      <button class="btn-main" style="background:#701a75; color:#fff;" onclick="initGame('B2')">ZOR SEVİYE</button>
+      
+      <button class="lvl-btn" onclick="initGame('A2')"><span>KOLAY SEVİYE</span> <span id="pb-A2" style="font-size:11px; color:var(--c-neon-blue)">PB: 0</span></button>
+      <button class="lvl-btn" style="border-color: #4338ca" onclick="initGame('B1')"><span>ORTA SEVİYE</span> <span id="pb-B1" style="font-size:11px; color:var(--c-neon-blue)">PB: 0</span></button>
+      <button class="lvl-btn" style="border-color: #701a75" onclick="initGame('B2')"><span>ZOR SEVİYE</span> <span id="pb-B2" style="font-size:11px; color:var(--c-neon-blue)">PB: 0</span></button>
+
+      <h3 style="margin:25px 0 10px; font-size:14px; color:var(--c-neon-pink);">🏆 KAYIT DEFTERİ</h3>
+      <div id="leaderboardBox"></div>
     </div>
   </div>
 
@@ -88,7 +98,7 @@
       <div id="endStats" style="text-align:left; margin:20px 0; font-size:15px; line-height:2;"></div>
       <button class="btn-main" id="btnContinue">DEVAM ET (RİSK)</button>
       <button class="btn-main" id="btnBank" style="background:var(--c-neon-blue)">BANKALA (%5 BONUS)</button>
-      <button class="btn-secondary" onclick="location.reload()">SIFIRLA VE BAŞLA</button>
+      <button class="btn-main" id="btnFinish" style="background:var(--glass); color:#fff; border: 1px solid var(--border)">BİTİR VE KAYDET</button>
     </div>
   </div>
 
@@ -97,7 +107,7 @@ import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
 const $ = id => document.getElementById(id);
 let currentLang = 'en', currentDiff = 'A2', puzzles = [], currentIdx = 0;
-let score = 0, setScore = 0, lives = 3, maxLives = 3, streak = 0, totalCorrect = 0, totalAnswered = 0, isBusy = false, startTime = 0, lastSpoken = 0;
+let score = 0, setScore = 0, lives = 3, maxLives = 3, streak = 0, maxStreak = 0, totalCorrect = 0, totalAnswered = 0, isBusy = false, startTime = 0, lastSpoken = 0;
 
 const FALLBACKS = {
   en:["TIME","WORLD","HOUSE","WATER","FRIEND","GO","LIFE","DAY"],
@@ -119,20 +129,38 @@ function shuffle(a) {
   return arr;
 }
 
+function updateLeaderboardUI() {
+  const records = JSON.parse(localStorage.getItem('italky_hof_v63') || '[]');
+  const badges = ["👑", "🥈", "🥉"];
+  
+  $('leaderboardBox').innerHTML = records.map((r, i) => `
+    <div class="record-item rank-${i < 3 ? i : 'rest'}">
+      <span>${i < 3 ? badges[i] : i+1 + '.'} <b>${r.score}</b> <small>${r.lang}-${r.lvl}</small></span>
+      <span style="color:var(--c-neon-pink)">🔥${r.streak} <small>${r.time}</small></span>
+    </div>
+  `).join('') || '<div style="font-size:12px; opacity:0.5">Henüz rekor yok başkanım.</div>';
+  
+  ['A2', 'B1', 'B2'].forEach(lvl => {
+    const local = records.filter(r => r.lang === currentLang.toUpperCase() && r.lvl === lvl);
+    const top = local.length > 0 ? Math.max(...local.map(r => r.score)) : 0;
+    $(`pb-${lvl}`).textContent = `PB: ${top}`;
+    if (lvl === currentDiff) $('pbDisplay').textContent = `PB (${currentLang.toUpperCase()}-${lvl}): ${top}`;
+  });
+}
+
 window.setLang = (l, btn) => {
   currentLang = l;
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  updateLeaderboardUI(); 
 };
 
 window.initGame = async (diff) => {
   try {
     currentDiff = diff;
     const rawPool = await loadLangPool(currentLang);
-    if (!rawPool || !rawPool.items) throw new Error("Havuz boş");
-
-    const randomizedItems = shuffle(rawPool.items);
-    const { used, save } = createUsedSet(`gap_master_v57_${currentLang}_${diff}`);
+    const randomizedItems = shuffle([...rawPool.items]);
+    const { used, save } = createUsedSet(`gap_elite_v63_${currentLang}_${diff}`);
     
     if (totalAnswered === 0) {
       maxLives = (diff === "A2") ? 4 : 3;
@@ -145,22 +173,25 @@ window.initGame = async (diff) => {
       return it.sentence && (targetLvl === "A2" ? ["A1","A2"].includes(itLvl) : itLvl === targetLvl);
     });
 
-    // ✅ used set'i persist et başkanım
-    try { save(puzzles); } catch {}
+    try { 
+      save(puzzles.map(x => x.w)); 
+      await Promise.resolve();
+    } catch {}
 
     if (puzzles.length === 0) {
-        alert("Havuz tazelemek için liste temizleniyor başkanım!");
-        localStorage.removeItem(`gap_master_v57_${currentLang}_${diff}`);
+        alert("Havuz tükendi başkanım! Liste temizleniyor.");
+        localStorage.removeItem(`gap_elite_v63_${currentLang}_${diff}`);
         location.reload(); return;
     }
 
-    $('statusChip').textContent = `${currentLang.toUpperCase()} • ${diff}`;
     $('startModal').style.display = 'none';
     $('endModal').style.display = 'none';
-    currentIdx = 0; 
-    setScore = 0; // Her set başında setSkoru sıfırlanır
-    loadPuzzle();
-  } catch (e) { alert("Sistem hatası!"); }
+    $('btnContinue').disabled = false;
+    $('btnBank').disabled = false;
+    $('statusChip').textContent = `${currentLang.toUpperCase()} • ${diff}`;
+    
+    currentIdx = 0; setScore = 0; loadPuzzle();
+  } catch (e) { alert("Sistem hatası başkanım!"); }
 };
 
 function loadPuzzle() {
@@ -182,28 +213,19 @@ function loadPuzzle() {
   
   const n = s => norm(s).trim().toUpperCase();
   const correctN = n(p.w);
-  let wrongs = shuffle(puzzles.filter(x => n(x.w) !== correctN).map(x => x.w));
+  let setWrongs = shuffle(puzzles.filter(x => n(x.w) !== correctN).map(x => x.w));
   const fallbackList = FALLBACKS[currentLang] || FALLBACKS.en;
+  let rawWrongs = shuffle([...setWrongs.slice(0, 2), ...shuffle(fallbackList).slice(0, 3)]);
   
   const uniqueWrongs = [];
   const addWrong = (cand) => {
-    if (n(cand) !== correctN && !uniqueWrongs.some(x => n(x) === n(cand))) {
-      uniqueWrongs.push(cand);
-    }
+    if (n(cand) !== correctN && !uniqueWrongs.some(x => n(x) === n(cand))) uniqueWrongs.push(cand);
   };
-
-  wrongs.forEach(w => { if(uniqueWrongs.length < 4) addWrong(w); });
-  while (uniqueWrongs.length < 4) {
-    addWrong(fallbackList[uniqueWrongs.length % fallbackList.length]);
-  }
+  rawWrongs.forEach(w => { if(uniqueWrongs.length < 4) addWrong(w); });
+  while (uniqueWrongs.length < 4) addWrong(fallbackList[uniqueWrongs.length % fallbackList.length]);
   
-  renderOptions(shuffle([p.w, ...uniqueWrongs]));
-  startTime = Date.now();
-}
-
-function renderOptions(opts) {
   const grid = $('optionsGrid'); grid.innerHTML = '';
-  opts.forEach(opt => {
+  shuffle([p.w, ...uniqueWrongs]).forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'opt-btn'; 
     const normalizedOpt = norm(opt).trim().toUpperCase();
@@ -211,6 +233,7 @@ function renderOptions(opts) {
     btn.onclick = () => handleChoice(normalizedOpt, btn);
     grid.appendChild(btn);
   });
+  startTime = Date.now();
 }
 
 function handleChoice(val, btn) {
@@ -223,7 +246,7 @@ function handleChoice(val, btn) {
 
   if (val === correctVal) {
     streak++; totalCorrect++;
-    
+    maxStreak = Math.max(maxStreak, streak);
     let comboMsg = "";
     if (streak > 0 && streak % 10 === 0 && timeTaken < 7 && lives < maxLives) {
       lives = Math.min(lives + 1, maxLives);
@@ -231,69 +254,91 @@ function handleChoice(val, btn) {
       $('lifeBar').style.transform = "scale(1.2)";
       setTimeout(()=> $('lifeBar').style.transform="scale(1)", 200);
     }
-
     let comboMult = Math.min(streak <= 3 ? streak : (3 + (streak - 3) * 0.25), 6); 
     let speedBonus = timeTaken < 4 ? 8 : (timeTaken < 7 ? 5 : (timeTaken < 10 ? 2 : 0));
     if (currentDiff === "B2") speedBonus = Math.floor(speedBonus * 0.7);
-
     const roundScore = Math.round(10 * comboMult + speedBonus);
-    score += roundScore;
-    setScore += roundScore; // ✅ Set skoru takibi
-    
+    score += roundScore; setScore += roundScore;
     btn.classList.add('correct');
-    $('scoreTxt').classList.remove('score-pop'); void $('scoreTxt').offsetWidth;
-    $('scoreTxt').classList.add('score-pop');
-    
     $('resInfo').textContent = `+${roundScore} PUAN • STREAK ${streak} • MULT x${comboMult.toFixed(1)}${comboMsg}`;
     $('resInfo').style.opacity = "1";
     speak(p.sentence);
   } else {
     streak = 0; lives--;
-    // ✅ Puan Cezası ve Streak Reset Görseli başkanım
-    score = Math.max(0, score - 5); 
-    $('scoreTxt').textContent = score;
+    const penalty = currentDiff === "B2" ? 7 : 5;
+    score = Math.max(0, score - penalty);
     btn.classList.add('wrong');
-    $('resInfo').textContent = `DOĞRU: ${correctVal} • STREAK SIFIRLANDI`;
+    $('resInfo').textContent = `DOĞRU: ${correctVal} • STREAK SIFIRLANDI (-${penalty})`;
     $('resInfo').style.opacity = "1";
     document.querySelectorAll('.opt-btn').forEach(b => { if(norm(b.textContent) === correctVal) b.classList.add('correct'); });
     speak(correctVal); 
   }
-
   $('scoreTxt').textContent = score;
   $('lifeBar').textContent = "❤️".repeat(Math.max(0, lives)) + "🖤".repeat(maxLives - Math.max(0, lives));
-
   setTimeout(() => { currentIdx++; isBusy = false; loadPuzzle(); }, 2200);
+}
+
+function saveRecord() {
+  if (score <= 0) return false;
+  const records = JSON.parse(localStorage.getItem('italky_hof_v63') || '[]');
+  const now = new Date();
+  const newRecord = {
+    id: now.getTime() + "-" + Math.random().toString(16).slice(2), // ✅ EŞSİZ ID başkanım
+    score: score,
+    lang: currentLang.toUpperCase(),
+    lvl: currentDiff,
+    streak: maxStreak,
+    time: now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) + ' ' + now.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })
+  };
+  records.push(newRecord);
+  records.sort((a,b) => b.score - a.score);
+  const finalRecords = records.slice(0, 10);
+  localStorage.setItem('italky_hof_v63', JSON.stringify(finalRecords));
+  updateLeaderboardUI();
+  return finalRecords.some(r => r.id === newRecord.id); // ✅ Kesin Top 10 kontrolü
 }
 
 function showFinal(gameEnded) {
   $('endModal').style.display = 'flex';
   const acc = totalAnswered ? Math.round((totalCorrect/totalAnswered)*100) : 0;
-  
   if (gameEnded) {
-    $('endTitle').textContent = "OYUN BİTTİ 💀";
-    $('btnContinue').style.display = 'none';
-    $('btnBank').style.display = 'none';
+    const isNewRecord = saveRecord();
+    $('endTitle').textContent = isNewRecord ? "YENİ REKOR! 👑" : "OYUN BİTTİ 💀";
+    $('btnContinue').style.display = 'none'; $('btnBank').style.display = 'none';
   } else {
     $('endTitle').textContent = "SET TAMAMLANDI 🏆";
-    $('btnContinue').style.display = 'block';
-    // ✅ Continue: Önce kapat, sonra yükle başkanım
-    $('btnContinue').onclick = () => { 
-      $('endModal').style.display = 'none';
-      initGame(currentDiff);
-    };
-    
-    $('btnBank').style.display = 'block';
-    // ✅ Bankala: Set skoruna göre bonus başkanım
-    $('btnBank').onclick = () => {
-      $('endModal').style.display = 'none';
-      score += Math.round(setScore * 0.05); 
-      lives = maxLives;
-      streak = 0; 
-      initGame(currentDiff);
-    };
+    $('btnContinue').style.display = 'block'; $('btnBank').style.display = 'block';
   }
-  $('endStats').innerHTML = `Toplam Skor: <b>${score}</b><br>Doğruluk: <b>%${acc}</b><br>Can: <b>${lives} ❤️</b>`;
+  $('endStats').innerHTML = `Skor: <b>${score}</b><br>En İyi Seri: <b>🔥 ${maxStreak}</b><br>Doğruluk: <b>%${acc}</b>`;
 }
+
+// Menüye Temiz Dönüş başkanım
+function returnToMenu() {
+  saveRecord();
+  score = 0; setScore = 0; lives = 3; streak = 0; maxStreak = 0; totalAnswered = 0; totalCorrect = 0;
+  $('scoreTxt').textContent = "0";
+  $('endModal').style.display = 'none';
+  $('startModal').style.display = 'flex';
+  updateLeaderboardUI();
+}
+
+$('btnContinue').onclick = () => { 
+  $('btnContinue').disabled = true; $('btnBank').disabled = true;
+  $('endModal').style.display = 'none';
+  setScore = 0; initGame(currentDiff);
+};
+
+$('btnBank').onclick = () => {
+  $('btnContinue').disabled = true; $('btnBank').disabled = true;
+  $('endModal').style.display = 'none';
+  const bonus = Math.round(setScore * 0.05);
+  score += bonus;
+  $('resInfo').textContent = `BANKA BONUSU +${bonus} PUAN`;
+  $('resInfo').style.opacity = "1";
+  setScore = 0; lives = maxLives; streak = 0; initGame(currentDiff);
+};
+
+$('btnFinish').onclick = () => returnToMenu();
 
 function speak(t) {
   const now = Date.now();
@@ -306,6 +351,8 @@ function speak(t) {
   u.rate = 0.85;
   window.speechSynthesis.speak(u);
 }
+
+window.addEventListener('load', updateLeaderboardUI);
 </script>
 </body>
 </html>
