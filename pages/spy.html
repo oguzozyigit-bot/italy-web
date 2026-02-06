@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ITALKY • Audio Spy — Elite Eternal</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
@@ -10,6 +10,8 @@
 :root{
   --bg:#000900; --radar:#00ffcc; --radar-dim:rgba(0,255,204,.15);
   --alert:#ff3300; --ok:#00e676; --text:#e0fffb; --border:rgba(0,255,204,.3); --gold:#ffb800;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text)}
@@ -22,12 +24,26 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
   background:rgba(0,15,10,.9);display:flex;flex-direction:column;z-index:5}
 @media(min-width:520px){.app{height:92vh;border-radius:24px;margin-top:4vh}}
 
-.header{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--border)}
+.header{
+  height:70px; padding-top: var(--safe-top);
+  display:flex;align-items:center;justify-content:space-between;padding-left:16px;padding-right:16px;
+  border-bottom:1px solid var(--border);
+}
 .score-box{text-align:left}
 .score{font-family:'Share Tech Mono';font-size:20px;color:var(--radar);text-shadow:0 0 10px var(--radar)}
 .pb-chip{font-size:10px;color:var(--gold);font-weight:800}
+.title{font-family:'Share Tech Mono';letter-spacing:1px;color:var(--radar);opacity:.9}
+.btn{
+  width:38px;height:38px;border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(0,40,30,.45);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer; transition:.2s;
+  box-shadow:0 0 18px rgba(0,255,204,.08);
+}
+.btn:active{transform:scale(.96); background:rgba(0,255,204,.12)}
 
-.main{flex:1;padding:16px;display:none;flex-direction:column;justify-content:space-between}
+.main{flex:1;padding:16px;display:none;flex-direction:column;justify-content:space-between;padding-bottom:calc(16px + var(--safe-bottom))}
 
 .visual{width:180px;height:180px;border:2px solid var(--border);border-radius:50%;margin:10px auto;
   position:relative;background:radial-gradient(circle,rgba(0,255,204,0.1) 0%,transparent 70%);
@@ -45,10 +61,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 .listen-btn{margin:10px auto;padding:12px 30px;border-radius:30px;border:2px solid var(--radar);
   background:transparent;color:var(--radar);font-family:'Share Tech Mono';font-size:15px;cursor:pointer;transition:0.2s}
 .listen-btn:active{transform:scale(0.95);background:var(--radar-dim)}
+.listen-btn[disabled]{opacity:.45;cursor:not-allowed}
 
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{padding:16px;border-radius:14px;border:1px solid var(--border);
   background:rgba(0,40,30,.6);cursor:pointer;font-weight:700;transition:0.2s;text-align:center}
+.opt:active{transform:scale(.99)}
 .opt.correct{border-color:var(--ok);background:rgba(0,230,118,.2);color:var(--ok)}
 .opt.wrong{border-color:var(--alert);background:rgba(255,51,0,.2);color:var(--alert)}
 
@@ -79,13 +97,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
       <div class="pb-chip" id="pbDisp">PB: 0</div>
     </div>
     <div class="title">AUDIO_SPY</div>
-    <div class="btn" id="soundBtn">🔊</div>
+    <div class="btn" id="soundBtn" title="Ses">🔊</div>
   </div>
 
   <div class="main" id="gameArea">
     <div class="visual">
       <div class="scan"></div>
-      <div class="wave" id="wave">
+      <div class="wave" id="wave" aria-hidden="true">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
       </div>
     </div>
@@ -133,194 +151,274 @@ const $ = id => document.getElementById(id);
 
 let lang = "en";
 let muted = false, totalScore = 0, setScore = 0, momentum = 1.0, lives = 3;
-let currentItem = null, playing = false, cooldown = false;
+let currentItem = null;
+let cooldown = false;
 let setCounter = 0, runActive = false;
 let poolItems = [];
+
+// speech state
+let speaking = false;
+let lastUtter = null;
 
 const LANGMAP = {en:"en-US", de:"de-DE", fr:"fr-FR", es:"es-ES", it:"it-IT"};
 
 function updatePB() {
-    const pb = localStorage.getItem(`audio_spy_pb_${lang}`) || 0;
-    $("pbDisp").textContent = `PB: ${pb}`;
+  const pb = parseInt(localStorage.getItem(`audio_spy_pb_${lang}`) || "0", 10);
+  $("pbDisp").textContent = `PB: ${pb}`;
+}
+
+function setListenLabel(state){
+  // state: idle | playing | wait
+  const btn = $("listenBtn");
+  if(state === "playing"){
+    btn.textContent = "⏳ SİNYAL ÇALIYOR";
+    btn.disabled = true;
+  } else if(state === "wait"){
+    btn.textContent = "… BEKLE";
+    btn.disabled = true;
+  } else {
+    btn.textContent = "▶ SİNYALİ DİNLE";
+    btn.disabled = false;
+  }
 }
 
 document.querySelectorAll(".lang-btn").forEach(b => {
-    b.onclick = () => {
-        document.querySelectorAll(".lang-btn").forEach(x => x.classList.remove("active"));
-        b.classList.add("active");
-        lang = b.dataset.lang;
-        updatePB();
-    };
+  b.onclick = () => {
+    document.querySelectorAll(".lang-btn").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    lang = b.dataset.lang;
+    updatePB();
+  };
 });
 
 $("soundBtn").onclick = () => {
-    muted = !muted;
-    $("soundBtn").textContent = muted ? "🔇" : "🔊";
+  muted = !muted;
+  $("soundBtn").textContent = muted ? "🔇" : "🔊";
+  // stop ongoing
+  if(muted) stopSpeak();
 };
 
 $("startBtn").onclick = async () => {
-    $("startModal").classList.add("hidden");
-    $("gameArea").style.display = "flex";
-    if(!runActive) {
-        totalScore = 0; lives = 3; momentum = 1.0; runActive = true;
-    }
-    await initSet();
+  $("startModal").classList.add("hidden");
+  $("gameArea").style.display = "flex";
+  if(!runActive) {
+    totalScore = 0; lives = 3; momentum = 1.0; runActive = true;
+  }
+  await initSet();
 };
 
 async function initSet(isBank = false) {
-    if(isBank) { lives = 3; momentum = 1.0; }
-    setCounter = 0; setScore = 0;
-    
-    const data = await loadLangPool(lang);
-    const USED_KEY = `used_audio_spy_v2_${lang}`;
-    const { used, save } = createUsedSet(USED_KEY);
+  if(isBank) { lives = 3; momentum = 1.0; }
+  setCounter = 0; setScore = 0;
+  cooldown = false;
+  stopSpeak();
+  setListenLabel("idle");
 
-    // ✅ ETERNAL DÖNGÜ: Havuz bittiyse temizle başkanım
-    let picked = pick(data, 10, used, save);
-    if (!picked || picked.length < 8) {
-        localStorage.removeItem(USED_KEY);
-        const cleanUsed = new Set();
-        picked = pick(data, 10, cleanUsed, save);
-    }
-    
-    poolItems = picked;
-    // ✅ Used set mühürleme (sentence bazlı)
-    try { save(poolItems.map(x => x.sentence || x.w)); } catch(e){}
+  const data = await loadLangPool(lang);
+  const USED_KEY = `used_audio_spy_v2_${lang}`;
+  const { used, save } = createUsedSet(USED_KEY);
 
-    updateUI();
-    nextSignal();
+  // ✅ ETERNAL: az kaldıysa reset
+  let picked = pick(data, 10, used, save);
+  if (!picked || picked.length < 8) {
+    localStorage.removeItem(USED_KEY);
+    const cleanUsed = new Set();
+    picked = pick(data, 10, cleanUsed, save);
+  }
+
+  poolItems = picked || [];
+  try { save(poolItems.map(x => x.sentence || x.w)); } catch(e){}
+
+  updateUI();
+  nextSignal();
 }
 
 function nextSignal() {
-    if(setCounter >= 8 || lives <= 0) {
-        finishSet(lives <= 0);
-        return;
-    }
-    
-    const w = poolItems[setCounter];
-    currentItem = { 
-        say: (w.sentence || `Listen: ${w.w}.`), 
-        ans: w.tr, 
-        w: w.w 
-    };
-    
-    buildOptions(currentItem.ans);
-    setTimeout(playSignal, 600);
+  if(setCounter >= 8 || lives <= 0) {
+    finishSet(lives <= 0);
+    return;
+  }
+
+  const w = poolItems[setCounter];
+  currentItem = {
+    say: (w?.sentence || `Listen: ${w?.w || "signal"}.`),
+    ans: w?.tr || "",
+    w: w?.w || ""
+  };
+
+  buildOptions(currentItem.ans);
+  // küçük gecikme: UI otursun
+  setTimeout(() => playSignal(), 450);
 }
 
 function buildOptions(correct) {
-    const opts = [correct];
-    while(opts.length < 4) {
-        const r = poolItems[Math.floor(Math.random() * poolItems.length)].tr;
-        if(r && !opts.includes(r)) opts.push(r);
-    }
-    opts.sort(() => Math.random() - 0.5);
-    
-    const area = $("optionsArea");
-    area.innerHTML = "";
-    opts.forEach(v => {
-        const d = document.createElement("div");
-        d.className = "opt";
-        d.textContent = v;
-        d.onclick = () => handleChoice(d, v);
-        area.appendChild(d);
-    });
+  const opts = [];
+  if(correct) opts.push(correct);
+
+  // havuzdan şık distractor
+  while(opts.length < 4) {
+    const r = poolItems[Math.floor(Math.random() * poolItems.length)]?.tr;
+    if(r && !opts.includes(r)) opts.push(r);
+  }
+  // fallback: çok kısa havuzda
+  while(opts.length < 4) opts.push("—");
+
+  opts.sort(() => Math.random() - 0.5);
+
+  const area = $("optionsArea");
+  area.innerHTML = "";
+  opts.forEach(v => {
+    const d = document.createElement("div");
+    d.className = "opt";
+    d.textContent = v;
+    d.onclick = () => handleChoice(d, v);
+    area.appendChild(d);
+  });
+}
+
+function lockOptions(lock=true){
+  document.querySelectorAll(".opt").forEach(x => x.style.pointerEvents = lock ? "none" : "auto");
 }
 
 function playSignal() {
-    if(playing || cooldown || !currentItem) return;
-    speak(currentItem.say);
-    playing = true;
-    $("wave").classList.add("playing");
-    setTimeout(() => {
-        playing = false;
-        $("wave").classList.remove("playing");
-    }, 2200);
+  if(speaking || cooldown || !currentItem) return;
+  setListenLabel("playing");
+  $("wave").classList.add("playing");
+  speak(currentItem.say, () => {
+    $("wave").classList.remove("playing");
+    setListenLabel("idle");
+  });
 }
 
 $("listenBtn").onclick = playSignal;
 
 function handleChoice(el, val) {
-    if(cooldown) return;
-    cooldown = true;
-    document.querySelectorAll(".opt").forEach(x => x.style.pointerEvents = "none");
-    
-    if(val === currentItem.ans) {
-        el.classList.add("correct");
-        const gain = Math.round(100 * momentum);
-        totalScore += gain; setScore += gain;
-        momentum = Math.min(1.6, momentum + 0.05);
-        speak(currentItem.say); // Tekrar doğrula
-        setTimeout(() => { resetSignal(); nextSignal(); }, 1200);
-    } else {
-        el.classList.add("wrong");
-        lives--;
-        momentum = Math.max(1.0, momentum - 0.2);
-        document.querySelectorAll(".opt").forEach(x => {
-            if(x.textContent === currentItem.ans) x.classList.add("correct");
-        });
-        speak(currentItem.say); // Doğrusunu duysun başkanım
-        setTimeout(() => { resetSignal(); lives > 0 ? nextSignal() : finishSet(true); }, 2200);
-    }
-    updateUI();
+  if(cooldown || !currentItem) return;
+  cooldown = true;
+  lockOptions(true);
+  setListenLabel("wait");
+
+  if(val === currentItem.ans) {
+    el.classList.add("correct");
+    const gain = Math.round(100 * momentum);
+    totalScore += gain; setScore += gain;
+    momentum = Math.min(1.6, momentum + 0.05);
+
+    // doğru sesi bir daha duyur
+    $("wave").classList.add("playing");
+    speak(currentItem.say, () => {
+      $("wave").classList.remove("playing");
+      resetSignal();
+      nextSignal();
+    });
+  } else {
+    el.classList.add("wrong");
+    lives--;
+    momentum = Math.max(1.0, momentum - 0.2);
+    document.querySelectorAll(".opt").forEach(x => {
+      if(x.textContent === currentItem.ans) x.classList.add("correct");
+    });
+
+    $("wave").classList.add("playing");
+    speak(currentItem.say, () => {
+      $("wave").classList.remove("playing");
+      resetSignal();
+      (lives > 0) ? nextSignal() : finishSet(true);
+    });
+  }
+
+  updateUI();
 }
 
 function resetSignal() {
-    cooldown = false;
-    setCounter++;
-    document.querySelectorAll(".opt").forEach(x => x.style.pointerEvents = "auto");
+  cooldown = false;
+  setCounter++;
+  lockOptions(false);
+  setListenLabel("idle");
 }
 
 function updateUI() {
-    $("scoreDisp").textContent = totalScore;
-    $("momDisp").textContent = `x${momentum.toFixed(2)} MOMENTUM`;
-    $("livesDisp").textContent = "❤️".repeat(Math.max(0, lives)) + "💀".repeat(3 - Math.max(0, lives));
+  $("scoreDisp").textContent = totalScore;
+  $("momDisp").textContent = `x${momentum.toFixed(2)} MOMENTUM`;
+  $("livesDisp").textContent = "❤️".repeat(Math.max(0, lives)) + "💀".repeat(3 - Math.max(0, lives));
 }
 
 function finishSet(died) {
-    const pb = parseInt(localStorage.getItem(`audio_spy_pb_${lang}`) || 0);
-    if(totalScore > pb) localStorage.setItem(`audio_spy_pb_${lang}`, totalScore);
-    
-    $("endModal").classList.remove("hidden");
-    $("endTitle").textContent = died ? "SIGNAL LOST" : "SECTOR DECODED";
-    $("endTitle").style.color = died ? "var(--alert)" : "var(--radar)";
-    $("endStats").innerHTML = `TOPLAM SKOR: <b>${totalScore}</b><br>MOMENTUM: <b>x${momentum.toFixed(2)}</b>`;
-    
-    if(died) {
-        $("continueBtn").classList.add("hidden");
-        $("bankBtn").classList.add("hidden");
-        runActive = false;
-    } else {
-        $("continueBtn").classList.remove("hidden");
-        $("bankBtn").classList.remove("hidden");
-    }
-    updatePB();
+  stopSpeak();
+  setListenLabel("idle");
+
+  const pb = parseInt(localStorage.getItem(`audio_spy_pb_${lang}`) || "0", 10);
+  if(totalScore > pb) localStorage.setItem(`audio_spy_pb_${lang}`, String(totalScore));
+
+  $("endModal").classList.remove("hidden");
+  $("endTitle").textContent = died ? "SIGNAL LOST" : "SECTOR DECODED";
+  $("endTitle").style.color = died ? "var(--alert)" : "var(--radar)";
+  $("endStats").innerHTML = `TOPLAM SKOR: <b>${totalScore}</b><br>MOMENTUM: <b>x${momentum.toFixed(2)}</b>`;
+
+  if(died) {
+    $("continueBtn").classList.add("hidden");
+    $("bankBtn").classList.add("hidden");
+    runActive = false;
+  } else {
+    $("continueBtn").classList.remove("hidden");
+    $("bankBtn").classList.remove("hidden");
+  }
+  updatePB();
 }
 
 $("continueBtn").onclick = () => {
-    $("endModal").classList.add("hidden");
-    initSet(false);
+  $("endModal").classList.add("hidden");
+  initSet(false);
 };
 
 $("bankBtn").onclick = () => {
-    const bonus = Math.round(setScore * 0.05);
-    totalScore += bonus;
-    $("endModal").classList.add("hidden");
-    initSet(true);
+  const bonus = Math.round(setScore * 0.05);
+  totalScore += bonus;
+  $("endModal").classList.add("hidden");
+  initSet(true);
 };
 
 $("exitBtn").onclick = () => location.reload();
 
-function speak(txt) {
-    if(muted || !txt) return;
-    const u = new SpeechSynthesisUtterance(txt);
-    u.lang = LANGMAP[lang] || "en-US";
-    u.rate = 0.85;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
+function stopSpeak(){
+  speaking = false;
+  try { speechSynthesis.cancel(); } catch {}
+  lastUtter = null;
 }
 
-window.addEventListener('load', updatePB);
+function speak(txt, onDone) {
+  if(muted || !txt) { onDone && onDone(); return; }
+
+  // bazı tarayıcılarda ses motoru hazır değilse “fail” olabilir; yine de kilitlemeyelim
+  stopSpeak();
+
+  const u = new SpeechSynthesisUtterance(txt);
+  lastUtter = u;
+  u.lang = LANGMAP[lang] || "en-US";
+  u.rate = 0.85;
+
+  speaking = true;
+
+  const finish = () => {
+    if(lastUtter !== u) return; // yeni konuşma başladıysa
+    speaking = false;
+    onDone && onDone();
+  };
+
+  u.onend = finish;
+  u.onerror = finish;
+
+  try {
+    speechSynthesis.speak(u);
+  } catch {
+    finish();
+  }
+}
+
+window.addEventListener('load', () => {
+  updatePB();
+  setListenLabel("idle");
+});
 </script>
 </body>
 </html>
