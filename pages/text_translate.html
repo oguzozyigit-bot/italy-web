@@ -121,7 +121,6 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-    /* Gizlenenler */
     .logo-slogan{ display: none; }
     .rightControls{ display: none; }
 
@@ -198,10 +197,9 @@
       flex:1;
       display:flex;
       flex-direction: column;
-      gap: 8px; /* Butonlar ile kutular arası boşluk */
+      gap: 8px; 
       min-height:0;
       position: relative;
-      z-index: 10;
     }
 
     .box{
@@ -212,9 +210,9 @@
       flex-direction:column;
       min-height:0;
       backdrop-filter: blur(10px);
-      flex: 1; /* Alanı eşit paylaş */
+      flex: 1; 
       position: relative;
-      z-index: 11;
+      z-index: 1; /* Kutular altta kalsın */
     }
 
     .box.top{
@@ -335,16 +333,16 @@
     }
     .out::-webkit-scrollbar{ display:none; }
 
-    /* ORTA BUTTONLAR */
-    /* JS bağlantısını korumak için class ismini "actions" olarak bıraktım */
+    /* AKSİYON BUTONLARI */
+    /* .actions sınıfı JS için korunuyor. */
+    /* position: relative ve z-index: 50 ile en öne alıyorum. */
     .actions{
       display:flex;
       gap: 10px;
       padding: 4px 0;
-      flex: 0 0 auto; /* Yükseklik içeriğe göre */
+      flex: 0 0 auto; 
       position: relative;
-      z-index: 100; /* Kesinlikle en üstte */
-      pointer-events: auto;
+      z-index: 50; 
     }
     .btn{
       flex:1;
@@ -379,7 +377,7 @@
       flex-direction:column;
       justify-content:center;
       align-items: center;
-      pointer-events: none; /* Link olmadığı için tıklamayı engellemesin */
+      pointer-events: none;
     }
     .footerBrand{
       text-align:center;
