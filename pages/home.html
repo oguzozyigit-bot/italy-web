@@ -33,10 +33,21 @@
     .usertext{ min-width:0; display:flex; flex-direction:column; align-items:flex-end; gap:2px; max-width: 240px; }
     .uname{ font-weight: 800; font-size: 13px; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .plan{ font-weight: 700; font-size: 11px; color: rgba(255,255,255,0.5); }
-    .avatar-btn{ width: 42px; height: 42px; border: none; background: transparent; padding: 0; border-radius: 999px; overflow: hidden; cursor: pointer; display:flex; align-items:center; justify-content:center; transition: transform .2s; }
+
+    /* ✅ profile click kesin çalışsın */
+    .avatar-btn{
+      width: 42px; height: 42px;
+      border: none; background: transparent; padding: 0; border-radius: 999px;
+      overflow: hidden; cursor: pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition: transform .2s;
+      pointer-events: auto;  /* ✅ */
+      z-index: 9999;         /* ✅ */
+    }
     .avatar-btn:active{ transform: scale(.95); }
     .avatar-btn img{ width: 100%; height: 100%; object-fit: cover; }
     .avatar-fallback{ width: 100%; height: 100%; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-weight: 800; color: #fff; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
+
     .menu-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling: touch; padding: 10px 18px calc(var(--footerH) + 20px); position:relative; z-index:5; scrollbar-width:none; }
     .menu-scroll::-webkit-scrollbar{ display:none; }
     .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: fadeInUp .6s var(--ease-elastic); }
@@ -79,7 +90,9 @@
       </div>
       <div class="userbox">
         <div class="usertext"><div class="uname" id="userName">—</div><div class="plan" id="userPlan">FREE</div></div>
-        <button class="avatar-btn" id="avatarBtn" title="Profil">
+
+        <!-- ✅ ONCLICK ile kesin profile -->
+        <button class="avatar-btn" id="avatarBtn" title="Profil" onclick="window.location.href='/pages/profile.html'">
           <span class="avatar-fallback" id="avatarFallback">•</span>
         </button>
       </div>
@@ -172,7 +185,7 @@
 
     checkSession();
 
-    // ✅ i18n apply
+    // i18n apply
     applyI18n(document);
     document.title = t("home_title");
 
@@ -185,12 +198,7 @@
     }
     setFooter();
 
-    // ✅ avatar => profile
-    document.getElementById("avatarBtn")?.addEventListener("click", ()=>{
-      window.location.href = "/pages/profile.html";
-    });
-
-    // ✅ modül navigasyon
+    // modül navigasyon
     document.querySelectorAll("[data-go]").forEach(el => {
       el.addEventListener("click", () => {
         const go = el.getAttribute("data-go");
@@ -198,7 +206,7 @@
       });
     });
 
-    // ✅ dil değişince anında güncelle
+    // dil değişince anında güncelle
     window.addEventListener("storage",(e)=>{
       if(e.key==="italky_site_lang_v1" || e.key==="italky_lang_ping"){
         applyI18n(document);
