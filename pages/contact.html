@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI - İletişim</title>
+  <title>italkyAI</title>
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,7 +54,6 @@
     .logo-ai { font-weight: 700; background: var(--ai-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .mini-slogan { font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 4px; text-transform: uppercase; margin-top: 4px; margin-left: 2px; }
 
-    /* --- SCROLL FIX --- */
     .page-content {
       flex: 1; height: 100%; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
       padding: 10px 20px 160px; display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 5;
@@ -71,7 +70,6 @@
     h1 span { background: var(--ai-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     p { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; }
 
-    /* FORM */
     .input-group { margin-bottom: 16px; }
     .input-field {
       width: 100%; height: 54px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
@@ -106,31 +104,196 @@
 <body>
   <div class="cosmos-bg"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
   <div class="noise"></div>
+
   <div class="mobile-frame">
     <div class="topbar">
-      <button class="back-btn" onclick="window.history.length > 1 ? window.history.back() : window.location.href='/pages/home.html'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
-      <div class="mini-brand"><div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div><div class="mini-slogan">BE FREE</div></div>
-    </div>
-    <div class="page-content">
-      <div class="contact-card">
-        <h1>Bize <span>Ulaşın</span></h1>
-        <p>Sorularınız, önerileriniz veya iş birliği için bizimle iletişime geçebilirsiniz.</p>
-        
-        <div class="input-group"><input type="text" class="input-field" placeholder="Adınız Soyadınız"></div>
-        <div class="input-group"><input type="email" class="input-field" placeholder="E-posta Adresiniz"></div>
-        <div class="input-group"><textarea class="input-field" placeholder="Mesajınız..."></textarea></div>
-        <button class="send-btn">Mesajı Gönder</button>
-
-        <div class="info-row">
-          <div class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-          <div class="info-text"><div>E-Posta</div><span>support@italkyai.com</span></div>
-        </div>
+      <button class="back-btn" onclick="window.history.length > 1 ? window.history.back() : window.location.href='/pages/home.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <div class="mini-brand">
+        <div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
+        <div class="mini-slogan">BE FREE</div>
       </div>
     </div>
+
+    <!-- ✅ host -->
+    <div class="page-content" id="contentHost"></div>
+
     <div class="footerbar">
-      <div class="links"><a href="/pages/about.html">Hakkında</a><a href="/pages/faq.html">SSS</a><a href="/pages/privacy.html">Gizlilik</a><a href="/pages/contact.html" style="color:#fff">İletişim</a></div>
+      <div class="links">
+        <a href="/pages/about.html" id="lnkAbout">About</a>
+        <a href="/pages/faq.html" id="lnkFaq">FAQ</a>
+        <a href="/pages/privacy.html" id="lnkPrivacy">Privacy</a>
+        <a href="/pages/contact.html" id="lnkContact" style="color:#fff">Contact</a>
+      </div>
       <div class="footerBrand">italkyAI By Ozyigit's 2026</div>
     </div>
   </div>
+
+  <!-- ===== TR ===== -->
+  <template id="contact_tr">
+    <div class="contact-card">
+      <h1>Bize <span>Ulaşın</span></h1>
+      <p>Sorularınız, önerileriniz veya iş birliği için bizimle iletişime geçebilirsiniz.</p>
+
+      <div class="input-group"><input type="text" class="input-field" placeholder="Adınız Soyadınız"></div>
+      <div class="input-group"><input type="email" class="input-field" placeholder="E-posta Adresiniz"></div>
+      <div class="input-group"><textarea class="input-field" placeholder="Mesajınız..."></textarea></div>
+      <button class="send-btn">Mesajı Gönder</button>
+
+      <div class="info-row">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="info-text"><div>E-Posta</div><span>support@italkyai.com</span></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ===== EN ===== -->
+  <template id="contact_en">
+    <div class="contact-card">
+      <h1>Contact <span>Us</span></h1>
+      <p>You can reach out to us for questions, suggestions, or collaboration.</p>
+
+      <div class="input-group"><input type="text" class="input-field" placeholder="Full Name"></div>
+      <div class="input-group"><input type="email" class="input-field" placeholder="Email Address"></div>
+      <div class="input-group"><textarea class="input-field" placeholder="Your message..."></textarea></div>
+      <button class="send-btn">Send Message</button>
+
+      <div class="info-row">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="info-text"><div>Email</div><span>support@italkyai.com</span></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ===== DE ===== -->
+  <template id="contact_de">
+    <div class="contact-card">
+      <h1>Kontakt <span>aufnehmen</span></h1>
+      <p>Für Fragen, Vorschläge oder Kooperationen können Sie uns kontaktieren.</p>
+
+      <div class="input-group"><input type="text" class="input-field" placeholder="Vor- und Nachname"></div>
+      <div class="input-group"><input type="email" class="input-field" placeholder="E-Mail-Adresse"></div>
+      <div class="input-group"><textarea class="input-field" placeholder="Ihre Nachricht..."></textarea></div>
+      <button class="send-btn">Nachricht senden</button>
+
+      <div class="info-row">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="info-text"><div>E-Mail</div><span>support@italkyai.com</span></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ===== IT ===== -->
+  <template id="contact_it">
+    <div class="contact-card">
+      <h1>Contattaci <span>ora</span></h1>
+      <p>Puoi contattarci per domande, suggerimenti o collaborazioni.</p>
+
+      <div class="input-group"><input type="text" class="input-field" placeholder="Nome e Cognome"></div>
+      <div class="input-group"><input type="email" class="input-field" placeholder="Indirizzo email"></div>
+      <div class="input-group"><textarea class="input-field" placeholder="Il tuo messaggio..."></textarea></div>
+      <button class="send-btn">Invia messaggio</button>
+
+      <div class="info-row">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="info-text"><div>Email</div><span>support@italkyai.com</span></div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ===== FR ===== -->
+  <template id="contact_fr">
+    <div class="contact-card">
+      <h1>Contactez <span>nous</span></h1>
+      <p>Vous pouvez nous contacter pour vos questions, suggestions ou collaborations.</p>
+
+      <div class="input-group"><input type="text" class="input-field" placeholder="Nom complet"></div>
+      <div class="input-group"><input type="email" class="input-field" placeholder="Adresse e-mail"></div>
+      <div class="input-group"><textarea class="input-field" placeholder="Votre message..."></textarea></div>
+      <button class="send-btn">Envoyer le message</button>
+
+      <div class="info-row">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="info-text"><div>E-mail</div><span>support@italkyai.com</span></div>
+      </div>
+    </div>
+  </template>
+
+  <script type="module">
+    import { getSiteLang, t } from "/js/i18n.js";
+
+    function pickId(){
+      const lang = getSiteLang();
+      const map = { tr:"contact_tr", en:"contact_en", de:"contact_de", it:"contact_it", fr:"contact_fr" };
+      return map[lang] || "contact_en";
+    }
+
+    function setFooterLang(){
+      const a = document.getElementById("lnkAbout");
+      const f = document.getElementById("lnkFaq");
+      const p = document.getElementById("lnkPrivacy");
+      const c = document.getElementById("lnkContact");
+      if(a) a.textContent = t("nav_about");
+      if(f) f.textContent = t("nav_faq");
+      if(p) p.textContent = t("nav_privacy");
+      if(c) c.textContent = t("nav_contact");
+      document.documentElement.lang = getSiteLang();
+    }
+
+    function render(){
+      const host = document.getElementById("contentHost");
+      host.innerHTML = "";
+      const tpl = document.getElementById(pickId());
+      if(tpl) host.appendChild(tpl.content.cloneNode(true));
+
+      const lang = getSiteLang();
+      const titles = {
+        tr: "italkyAI • İletişim",
+        en: "italkyAI • Contact",
+        de: "italkyAI • Kontakt",
+        it: "italkyAI • Contatti",
+        fr: "italkyAI • Contact"
+      };
+      document.title = titles[lang] || "italkyAI";
+
+      setFooterLang();
+    }
+
+    render();
+
+    window.addEventListener("storage",(e)=>{
+      if(e.key==="italky_site_lang_v1" || e.key==="italky_lang_ping"){
+        render();
+      }
+    });
+  </script>
 </body>
 </html>
