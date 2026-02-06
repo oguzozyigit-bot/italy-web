@@ -27,7 +27,6 @@
 
       --glass: rgba(255,255,255,.04);
 
-      /* ✅ Face-to-face hissi */
       --navyA: rgba(40,120,255,.12);
       --navyB: rgba(255,255,255,.05);
 
@@ -90,7 +89,7 @@
       border-bottom:1px solid rgba(255,255,255,.08);
       background: rgba(0,0,0,.35);
       backdrop-filter: blur(12px);
-      flex: 0 0 auto; /* Yükseklik bozulmasın */
+      flex: 0 0 auto;
     }
     .leftControls{ display:flex; align-items:center; gap:12px; min-width:0; }
     .backBtn{
@@ -101,7 +100,6 @@
       font-size:18px;font-weight:1000;
       display:flex;align-items:center;justify-content:center;
       cursor:pointer; user-select:none;
-      z-index: 3001; /* Tıklanabilir olsun */
     }
     .backBtn:active{ transform: scale(.96); }
 
@@ -123,6 +121,7 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
+    /* Gizlenenler */
     .logo-slogan{ display: none; }
     .rightControls{ display: none; }
 
@@ -133,7 +132,6 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
-      /* Footer payı */
       padding-bottom: calc(var(--footerH) + 12px);
     }
 
@@ -141,7 +139,7 @@
       display:flex;
       gap:10px;
       align-items:center;
-      flex: 0 0 auto; /* Sabit yükseklik */
+      flex: 0 0 auto;
       z-index: 20;
     }
     .langBtn{
@@ -161,7 +159,6 @@
       user-select:none;
       min-width:0;
       gap: 10px;
-      position: relative; z-index: 21; /* Tıklanabilir */
     }
     .langLeft{
       display:flex;
@@ -194,7 +191,6 @@
       color: rgba(255,255,255,.92);
       font-weight: 1000;
       cursor:pointer;
-      position: relative; z-index: 21; /* Tıklanabilir */
     }
     .swapBtn:active{ transform: scale(.98); }
 
@@ -202,7 +198,7 @@
       flex:1;
       display:flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px; /* Butonlar ile kutular arası boşluk */
       min-height:0;
       position: relative;
       z-index: 10;
@@ -216,7 +212,7 @@
       flex-direction:column;
       min-height:0;
       backdrop-filter: blur(10px);
-      flex: 1; /* Alanı paylaş */
+      flex: 1; /* Alanı eşit paylaş */
       position: relative;
       z-index: 11;
     }
@@ -280,7 +276,6 @@
       align-items:center;
       justify-content:center;
       user-select:none;
-      position: relative; z-index: 22; /* Tıklanabilir */
     }
     .iconBtn:active{ transform: scale(.98); }
     .iconBtn svg{
@@ -297,6 +292,21 @@
       border-color: rgba(79,70,229,.45);
       background: rgba(79,70,229,.14);
       box-shadow: 0 0 18px rgba(79,70,229,.20);
+      position: relative;
+    }
+    .iconBtn.listening::after{
+      content:"";
+      position:absolute;
+      inset:-7px;
+      border-radius: 18px;
+      border: 2px solid rgba(165,180,252,.55);
+      animation: micPulse 1.15s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes micPulse{
+      0%{ transform: scale(0.92); opacity:.75; }
+      50%{ transform: scale(1.08); opacity:.28; }
+      100%{ transform: scale(0.92); opacity:.75; }
     }
 
     textarea{
@@ -309,7 +319,6 @@
       line-height: 1.5;
       padding: 12px;
       resize:none;
-      z-index: 12;
     }
 
     .out{
@@ -323,19 +332,19 @@
       font-size: 15px;
       line-height: 1.5;
       color: rgba(255,255,255,.92);
-      z-index: 12;
     }
     .out::-webkit-scrollbar{ display:none; }
 
-    /* ORTA AKSİYON BUTONLARI (DÜZELTİLDİ) */
-    .actions-mid{
+    /* ORTA BUTTONLAR */
+    /* JS bağlantısını korumak için class ismini "actions" olarak bıraktım */
+    .actions{
       display:flex;
       gap: 10px;
       padding: 4px 0;
       flex: 0 0 auto; /* Yükseklik içeriğe göre */
-      position: relative; 
-      z-index: 50; /* Diğer her şeyin üstünde */
-      pointer-events: auto; /* Tıklanabilir */
+      position: relative;
+      z-index: 100; /* Kesinlikle en üstte */
+      pointer-events: auto;
     }
     .btn{
       flex:1;
@@ -347,14 +356,10 @@
       font-weight: 1000;
       cursor:pointer;
       font-size: 13px;
-      position: relative;
-      z-index: 51; /* Butonun kendisi de üstte */
-      pointer-events: auto;
     }
     .btn.primary{
       background: linear-gradient(135deg, var(--ai1), var(--ai2));
       border: none;
-      box-shadow: 0 4px 12px rgba(79,70,229,0.3);
     }
     .btn:active{ transform: scale(.98); }
 
@@ -404,7 +409,6 @@
       border-radius: 26px;
       overflow:hidden;
       box-shadow: 0 30px 80px rgba(0,0,0,.55);
-      z-index: 10000;
     }
     .sheetTop{
       padding: 12px 14px;
@@ -568,7 +572,7 @@
           <textarea id="inText" placeholder="Yaz ya da mikrofonla konuş…" spellcheck="false"></textarea>
         </div>
 
-        <div class="actions-mid">
+        <div class="actions">
           <button class="btn" id="clearBtn" type="button">Temizle</button>
           <button class="btn primary" id="translateBtn" type="button">Çevir</button>
         </div>
