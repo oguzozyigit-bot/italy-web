@@ -13,8 +13,8 @@
   <style>
     :root{
       --frameW: min(480px, calc(100vw - 18px));
-      --topH: 64px; /* Sadeleştiği için biraz kısalttım */
-      --footerH: 40px; /* Linkler gidince kısalttım */
+      --topH: 64px;
+      --footerH: 40px;
 
       --bg:#030014;
       --text: rgba(255,255,255,.92);
@@ -77,7 +77,7 @@
       }
     }
 
-    /* TOP BAR (SADELEŞTİRİLDİ) */
+    /* TOP BAR */
     .topbar{
       position: sticky;
       top: 0;
@@ -90,6 +90,7 @@
       border-bottom:1px solid rgba(255,255,255,.08);
       background: rgba(0,0,0,.35);
       backdrop-filter: blur(12px);
+      flex: 0 0 auto; /* Yükseklik bozulmasın */
     }
     .leftControls{ display:flex; align-items:center; gap:12px; min-width:0; }
     .backBtn{
@@ -100,17 +101,18 @@
       font-size:18px;font-weight:1000;
       display:flex;align-items:center;justify-content:center;
       cursor:pointer; user-select:none;
+      z-index: 3001; /* Tıklanabilir olsun */
     }
     .backBtn:active{ transform: scale(.96); }
 
     .mini-brand{
       display:flex; flex-direction:column;
       user-select:none; cursor:pointer; line-height:1;
-      justify-content:center; /* Dikey ortala */
+      justify-content:center;
     }
     .logo-line{
       font-family:'Space Grotesk', sans-serif;
-      font-size: 22px; /* Logo biraz büyüdü */
+      font-size: 22px;
       letter-spacing: -0.5px;
       display:flex; align-items:center; gap:2px;
     }
@@ -121,9 +123,7 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-    /* Slogan gizlendi */
-    .logo-slogan{ display: none; } 
-    /* Sağ taraf (profil vb) gizlendi */
+    .logo-slogan{ display: none; }
     .rightControls{ display: none; }
 
     .main{
@@ -133,6 +133,7 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
+      /* Footer payı */
       padding-bottom: calc(var(--footerH) + 12px);
     }
 
@@ -140,7 +141,8 @@
       display:flex;
       gap:10px;
       align-items:center;
-      flex: 0 0 auto;
+      flex: 0 0 auto; /* Sabit yükseklik */
+      z-index: 20;
     }
     .langBtn{
       flex:1;
@@ -159,6 +161,7 @@
       user-select:none;
       min-width:0;
       gap: 10px;
+      position: relative; z-index: 21; /* Tıklanabilir */
     }
     .langLeft{
       display:flex;
@@ -191,16 +194,18 @@
       color: rgba(255,255,255,.92);
       font-weight: 1000;
       cursor:pointer;
+      position: relative; z-index: 21; /* Tıklanabilir */
     }
     .swapBtn:active{ transform: scale(.98); }
 
-    /* PANE Düzeni Değişti: Flex Column */
     .pane{
       flex:1;
-      display:flex; 
+      display:flex;
       flex-direction: column;
-      gap: 8px; /* Kutular arası boşluk */
+      gap: 10px;
       min-height:0;
+      position: relative;
+      z-index: 10;
     }
 
     .box{
@@ -211,17 +216,17 @@
       flex-direction:column;
       min-height:0;
       backdrop-filter: blur(10px);
-      flex: 1; /* Alanı eşit paylaş */
+      flex: 1; /* Alanı paylaş */
+      position: relative;
+      z-index: 11;
     }
 
-    /* ✅ üst lacivert */
     .box.top{
       background:
         radial-gradient(800px 240px at 0% 0%, var(--navyA), transparent 62%),
         radial-gradient(800px 240px at 100% 0%, var(--navyB), transparent 62%),
         rgba(0,0,0,.12);
     }
-    /* ✅ alt bordo */
     .box.bottom{
       background:
         radial-gradient(900px 420px at 30% 12%, var(--burgA), transparent 68%),
@@ -238,7 +243,7 @@
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      flex: 0 0 auto; /* Başlık sabit */
+      flex: 0 0 auto;
     }
     .headLeft{
       display:flex;
@@ -275,6 +280,7 @@
       align-items:center;
       justify-content:center;
       user-select:none;
+      position: relative; z-index: 22; /* Tıklanabilir */
     }
     .iconBtn:active{ transform: scale(.98); }
     .iconBtn svg{
@@ -287,26 +293,10 @@
       opacity:.95;
     }
 
-    /* mic listening */
     .iconBtn.listening{
       border-color: rgba(79,70,229,.45);
       background: rgba(79,70,229,.14);
       box-shadow: 0 0 18px rgba(79,70,229,.20);
-      position: relative;
-    }
-    .iconBtn.listening::after{
-      content:"";
-      position:absolute;
-      inset:-7px;
-      border-radius: 18px;
-      border: 2px solid rgba(165,180,252,.55);
-      animation: micPulse 1.15s ease-in-out infinite;
-      pointer-events:none;
-    }
-    @keyframes micPulse{
-      0%{ transform: scale(0.92); opacity:.75; }
-      50%{ transform: scale(1.08); opacity:.28; }
-      100%{ transform: scale(0.92); opacity:.75; }
     }
 
     textarea{
@@ -319,6 +309,7 @@
       line-height: 1.5;
       padding: 12px;
       resize:none;
+      z-index: 12;
     }
 
     .out{
@@ -332,15 +323,19 @@
       font-size: 15px;
       line-height: 1.5;
       color: rgba(255,255,255,.92);
+      z-index: 12;
     }
     .out::-webkit-scrollbar{ display:none; }
 
-    /* ORTA AKSİYON BUTONLARI */
+    /* ORTA AKSİYON BUTONLARI (DÜZELTİLDİ) */
     .actions-mid{
       display:flex;
       gap: 10px;
-      padding: 2px 0;
+      padding: 4px 0;
       flex: 0 0 auto; /* Yükseklik içeriğe göre */
+      position: relative; 
+      z-index: 50; /* Diğer her şeyin üstünde */
+      pointer-events: auto; /* Tıklanabilir */
     }
     .btn{
       flex:1;
@@ -352,6 +347,9 @@
       font-weight: 1000;
       cursor:pointer;
       font-size: 13px;
+      position: relative;
+      z-index: 51; /* Butonun kendisi de üstte */
+      pointer-events: auto;
     }
     .btn.primary{
       background: linear-gradient(135deg, var(--ai1), var(--ai2));
@@ -360,7 +358,6 @@
     }
     .btn:active{ transform: scale(.98); }
 
-    /* Footer Sadeleşti */
     .footerbar{
       position: fixed;
       left: 50%;
@@ -377,6 +374,7 @@
       flex-direction:column;
       justify-content:center;
       align-items: center;
+      pointer-events: none; /* Link olmadığı için tıklamayı engellemesin */
     }
     .footerBrand{
       text-align:center;
@@ -406,6 +404,7 @@
       border-radius: 26px;
       overflow:hidden;
       box-shadow: 0 30px 80px rgba(0,0,0,.55);
+      z-index: 10000;
     }
     .sheetTop{
       padding: 12px 14px;
@@ -482,7 +481,6 @@
       white-space:nowrap;
     }
 
-    /* toast */
     .toast{
       position: fixed; left:50%; top:18px;
       transform: translateX(-50%) translateY(-120px);
@@ -516,7 +514,7 @@
           <div class="logo-line">
             <span class="logo-main">italky</span><span class="logo-ai">AI</span>
           </div>
-          </div>
+        </div>
       </div>
       <div class="rightControls"></div>
     </div>
