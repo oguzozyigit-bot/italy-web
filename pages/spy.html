@@ -3,74 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ITALKY • Audio Spy — Final</title>
-<link rel="icon" href="data:,">
+<title>ITALKY • Audio Spy — Elite Eternal</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --bg:#000900; --radar:#00ffcc; --radar-dim:rgba(0,255,204,.15);
-  --alert:#ff3300; --ok:#00e676; --text:#e0fffb; --border:rgba(0,255,204,.3);
+  --alert:#ff3300; --ok:#00e676; --text:#e0fffb; --border:rgba(0,255,204,.3); --gold:#ffb800;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Outfit,sans-serif;color:var(--text)}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text)}
 .bg{position:absolute;inset:-50%;width:200%;height:200%;
-  background-image:
-    radial-gradient(var(--border) 1px, transparent 1px),
-    radial-gradient(var(--border) 1px, transparent 1px);
-  background-size:60px 60px; background-position:0 0,30px 30px;
-  opacity:.1; animation:spin 60s linear infinite}
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size:60px 60px; opacity:.1; animation:spin 60s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .app{position:relative;max-width:480px;height:100%;margin:0 auto;border:1px solid var(--border);
-  background:rgba(0,15,10,.9);display:flex;flex-direction:column}
-@media(min-width:520px){.app{height:92vh;border-radius:20px}}
+  background:rgba(0,15,10,.9);display:flex;flex-direction:column;z-index:5}
+@media(min-width:520px){.app{height:92vh;border-radius:24px;margin-top:4vh}}
 
 .header{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--border)}
-.btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--radar-dim);
-  color:var(--radar);display:flex;align-items:center;justify-content:center;cursor:pointer}
-.title{font-family:Share Tech Mono;font-size:20px;letter-spacing:2px;color:var(--radar)}
-.badge{font-size:10px;padding:2px 6px;background:var(--radar);color:#000;border-radius:2px;margin-left:8px}
+.score-box{text-align:left}
+.score{font-family:'Share Tech Mono';font-size:20px;color:var(--radar);text-shadow:0 0 10px var(--radar)}
+.pb-chip{font-size:10px;color:var(--gold);font-weight:800}
 
 .main{flex:1;padding:16px;display:none;flex-direction:column;justify-content:space-between}
 
-.visual{width:200px;height:200px;border:2px solid var(--border);border-radius:50%;margin:10px auto 0;
-  position:relative;background:radial-gradient(circle,rgba(0,255,204,.1) 0%,transparent 70%);
+.visual{width:180px;height:180px;border:2px solid var(--border);border-radius:50%;margin:10px auto;
+  position:relative;background:radial-gradient(circle,rgba(0,255,204,0.1) 0%,transparent 70%);
   box-shadow:0 0 30px var(--radar-dim)}
 .scan{position:absolute;inset:0;border-radius:50%;
-  background:conic-gradient(from 0deg,transparent 0deg,rgba(0,255,204,.12) 60deg,var(--radar) 360deg);
-  opacity:.12; animation:scan 4s linear infinite}
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(0,255,204,0.12) 60deg,var(--radar) 360deg);
+  opacity:.15; animation:scan 4s linear infinite}
 @keyframes scan{to{transform:rotate(360deg)}}
 
 .wave{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:4px}
 .wave.playing .bar{animation:eq .5s infinite ease-in-out alternate;background:var(--radar)}
-.bar{width:6px;height:10px;border-radius:3px;background:var(--radar);opacity:.5}
-.bar:nth-child(1){animation-delay:.1s}.bar:nth-child(2){animation-delay:.3s}
-.bar:nth-child(3){animation-delay:.0s}.bar:nth-child(4){animation-delay:.4s}
-.bar:nth-child(5){animation-delay:.2s}
+.bar{width:6px;height:12px;border-radius:3px;background:var(--radar);opacity:.3}
 @keyframes eq{to{height:50px;opacity:1;box-shadow:0 0 10px var(--radar)}}
 
-.listen{margin:-20px auto 10px;padding:12px 30px;border-radius:30px;border:2px solid var(--radar);
-  background:var(--bg);color:var(--radar);font-family:Share Tech Mono;font-size:16px;cursor:pointer}
+.listen-btn{margin:10px auto;padding:12px 30px;border-radius:30px;border:2px solid var(--radar);
+  background:transparent;color:var(--radar);font-family:'Share Tech Mono';font-size:15px;cursor:pointer;transition:0.2s}
+.listen-btn:active{transform:scale(0.95);background:var(--radar-dim)}
 
-.opts{display:flex;flex-direction:column;gap:12px}
-.opt{padding:16px;border-radius:12px;border:1px solid var(--border);
-  background:rgba(0,40,30,.6);cursor:pointer}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{padding:16px;border-radius:14px;border:1px solid var(--border);
+  background:rgba(0,40,30,.6);cursor:pointer;font-weight:700;transition:0.2s;text-align:center}
 .opt.correct{border-color:var(--ok);background:rgba(0,230,118,.2);color:var(--ok)}
 .opt.wrong{border-color:var(--alert);background:rgba(255,51,0,.2);color:var(--alert)}
 
-.stats{display:flex;justify-content:space-between;font-family:Share Tech Mono;font-size:12px;color:var(--radar)}
+.stats-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-family:'Share Tech Mono';font-size:12px;color:var(--radar)}
 
-.modal{position:absolute;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:50}
-.card{background:#001510;border:1px solid var(--radar);border-radius:16px;padding:26px;width:85%;text-align:center}
-.langs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:16px}
-.lang{padding:10px;border-radius:6px;border:1px solid var(--radar);color:var(--radar);
-  font-family:Share Tech Mono;font-weight:900;cursor:pointer}
-.lang.active{background:var(--radar);color:#000}
-.primary{width:100%;padding:14px;border:none;border-radius:10px;background:var(--radar);
-  color:#000;font-weight:900;margin-top:16px}
-.secondary{width:100%;padding:14px;border:1px solid var(--radar);border-radius:10px;background:transparent;
-  color:var(--radar);font-weight:900;margin-top:10px}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,0.96);display:flex;align-items:center;justify-content:center;z-index:100}
+.card{background:#001510;border:1px solid var(--radar);border-radius:24px;padding:30px;width:88%;text-align:center}
+.lang-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:20px 0}
+.lang-btn{padding:12px 0;border-radius:10px;border:1px solid var(--radar);color:var(--radar);
+  font-family:'Share Tech Mono';font-weight:900;cursor:pointer;background:transparent}
+.lang-btn.active{background:var(--radar);color:#000}
+.main-btn{width:100%;padding:16px;border:none;border-radius:14px;background:var(--radar);
+  color:#000;font-weight:900;margin-top:15px;cursor:pointer}
+.secondary-btn{width:100%;padding:14px;border:1px solid var(--radar);border-radius:14px;background:transparent;
+  color:var(--radar);font-weight:900;margin-top:10px;cursor:pointer}
 
 .hidden{display:none!important}
 </style>
@@ -81,12 +74,15 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 
 <div class="app">
   <div class="header">
-    <div class="btn" onclick="location.href='/pages/game.html'">←</div>
-    <div class="title">AUDIO_SPY <span id="langBadge" class="badge">EN</span></div>
+    <div class="score-box">
+      <div class="score" id="scoreDisp">0</div>
+      <div class="pb-chip" id="pbDisp">PB: 0</div>
+    </div>
+    <div class="title">AUDIO_SPY</div>
     <div class="btn" id="soundBtn">🔊</div>
   </div>
 
-  <div class="main" id="game">
+  <div class="main" id="gameArea">
     <div class="visual">
       <div class="scan"></div>
       <div class="wave" id="wave">
@@ -94,169 +90,237 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
       </div>
     </div>
 
-    <button class="listen" id="listenBtn">▶ SİNYALİ DİNLE</button>
+    <button class="listen-btn" id="listenBtn">▶ SİNYALİ DİNLE</button>
 
-    <div class="opts" id="opts"></div>
+    <div class="opts" id="optionsArea"></div>
 
-    <div class="stats">
-      <span>SIGNAL: <b id="score">0</b>%</span>
-      <span>LIVES: <b id="lives">❤️❤️❤️</b></span>
+    <div class="stats-bar">
+      <div id="momDisp" style="color:var(--ok); font-weight:800">x1.00 MOMENTUM</div>
+      <div id="livesDisp">❤️❤️❤️</div>
     </div>
   </div>
 </div>
 
-<div class="modal" id="start">
+<div class="modal" id="startModal">
   <div class="card">
-    <h2 style="color:var(--radar);font-family:Share Tech Mono;margin:0">INCOMING SIGNAL</h2>
-    <p style="opacity:.7;font-size:13px">Sinyali dinle ve doğru anlamı seç.</p>
-    <div class="langs" id="langs">
-      <div class="lang active" data-lang="en">EN</div>
-      <div class="lang" data-lang="de">DE</div>
-      <div class="lang" data-lang="fr">FR</div>
-      <div class="lang" data-lang="es">ES</div>
-      <div class="lang" data-lang="it">IT</div>
+    <h2 style="color:var(--radar);font-family:'Share Tech Mono';margin:0">INCOMING SIGNAL</h2>
+    <p style="opacity:.7;font-size:13px;margin:10px 0">Sinyali dinle ve deşifre et başkanım.</p>
+    <div class="lang-grid">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="de">DE</button>
+      <button class="lang-btn" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="es">ES</button>
+      <button class="lang-btn" data-lang="it">IT</button>
     </div>
-    <button class="primary" id="startBtn">BAŞLA</button>
+    <button class="main-btn" id="startBtn">SİSTEMİ BOOT ET</button>
   </div>
 </div>
 
-<div class="modal hidden" id="end">
+<div class="modal hidden" id="endModal">
   <div class="card">
-    <h2 style="color:var(--alert);font-family:Share Tech Mono;margin:0">SIGNAL LOST</h2>
-    <p id="endTxt" style="margin:14px 0"></p>
-    <button class="primary" onclick="restart()">RECONNECT</button>
-    <button class="secondary" onclick="location.href='/pages/game.html'">ABORT</button>
+    <h2 id="endTitle" style="color:var(--radar);font-family:'Share Tech Mono';margin:0">SIGNAL COMPLETE</h2>
+    <p id="endStats" style="margin:16px 0; font-size:15px; line-height:1.6"></p>
+    <button class="main-btn" id="continueBtn">DEŞİFREYE DEVAM (RİSK)</button>
+    <button class="main-btn" id="bankBtn" style="background:var(--gold)">YEDEKLE (%5 BONUS + TAMİR)</button>
+    <button class="secondary-btn" id="exitBtn">SİSTEMİ KAPAT</button>
   </div>
 </div>
 
 <script type="module">
 import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
-const $=id=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-let lang="en";
-let muted=false;
-let score=0,lives=3;
-let current=null;
-let playing=false;
-let cooldown=false;
+let lang = "en";
+let muted = false, totalScore = 0, setScore = 0, momentum = 1.0, lives = 3;
+let currentItem = null, playing = false, cooldown = false;
+let setCounter = 0, runActive = false;
+let poolItems = [];
 
-const LANGMAP={en:"en-US",de:"de-DE",fr:"fr-FR",es:"es-ES",it:"it-IT"};
+const LANGMAP = {en:"en-US", de:"de-DE", fr:"fr-FR", es:"es-ES", it:"it-IT"};
 
-document.querySelectorAll(".lang").forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll(".lang").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    lang=b.dataset.lang;
-    $("langBadge").textContent=lang.toUpperCase();
-  };
+function updatePB() {
+    const pb = localStorage.getItem(`audio_spy_pb_${lang}`) || 0;
+    $("pbDisp").textContent = `PB: ${pb}`;
+}
+
+document.querySelectorAll(".lang-btn").forEach(b => {
+    b.onclick = () => {
+        document.querySelectorAll(".lang-btn").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        lang = b.dataset.lang;
+        updatePB();
+    };
 });
 
-$("soundBtn").onclick=()=>{
-  muted=!muted;
-  $("soundBtn").textContent=muted?"🔇":"🔊";
+$("soundBtn").onclick = () => {
+    muted = !muted;
+    $("soundBtn").textContent = muted ? "🔇" : "🔊";
 };
 
-$("startBtn").onclick=async()=>{
-  $("start").classList.add("hidden");
-  $("game").style.display="flex";
-  score=0;lives=3;
-  updateUI();
-  await next();
+$("startBtn").onclick = async () => {
+    $("startModal").classList.add("hidden");
+    $("gameArea").style.display = "flex";
+    if(!runActive) {
+        totalScore = 0; lives = 3; momentum = 1.0; runActive = true;
+    }
+    await initSet();
 };
 
-$("listenBtn").onclick=play;
+async function initSet(isBank = false) {
+    if(isBank) { lives = 3; momentum = 1.0; }
+    setCounter = 0; setScore = 0;
+    
+    const data = await loadLangPool(lang);
+    const USED_KEY = `used_audio_spy_v2_${lang}`;
+    const { used, save } = createUsedSet(USED_KEY);
 
-async function next(){
-  if(lives<=0){finish();return;}
-  const pool=await loadLangPool(lang);
-  const {used,save}=createUsedSet("audio_spy_"+lang);
-  const picked=pick(pool,1,used,save);
-  const w=picked[0];
-  current={ say: (w.sentence || `Please listen: ${w.w}.`), ans:w.tr, w:w.w };
-  buildOptions(pool.items.map(x=>x.tr), current.ans);
-  setTimeout(play,500);
+    // ✅ ETERNAL DÖNGÜ: Havuz bittiyse temizle başkanım
+    let picked = pick(data, 10, used, save);
+    if (!picked || picked.length < 8) {
+        localStorage.removeItem(USED_KEY);
+        const cleanUsed = new Set();
+        picked = pick(data, 10, cleanUsed, save);
+    }
+    
+    poolItems = picked;
+    // ✅ Used set mühürleme (sentence bazlı)
+    try { save(poolItems.map(x => x.sentence || x.w)); } catch(e){}
+
+    updateUI();
+    nextSignal();
 }
 
-function buildOptions(all,correct){
-  const opts=[correct];
-  while(opts.length<4){
-    const r=all[Math.floor(Math.random()*all.length)];
-    if(r && !opts.includes(r)) opts.push(r);
-  }
-  opts.sort(()=>Math.random()-.5);
-  const o=$("opts"); o.innerHTML="";
-  opts.forEach(v=>{
-    const d=document.createElement("div");
-    d.className="opt";
-    d.textContent=v;
-    d.onclick=()=>choose(d,v);
-    o.appendChild(d);
-  });
+function nextSignal() {
+    if(setCounter >= 8 || lives <= 0) {
+        finishSet(lives <= 0);
+        return;
+    }
+    
+    const w = poolItems[setCounter];
+    currentItem = { 
+        say: (w.sentence || `Listen: ${w.w}.`), 
+        ans: w.tr, 
+        w: w.w 
+    };
+    
+    buildOptions(currentItem.ans);
+    setTimeout(playSignal, 600);
 }
 
-function play(){
-  if(playing||cooldown||!current) return;
-  speak(current.say);
-  playing=true;
-  $("wave").classList.add("playing");
-  setTimeout(()=>{
-    playing=false;
-    $("wave").classList.remove("playing");
-  },2200);
-}
-
-function choose(el,val){
-  if(cooldown) return;
-  cooldown=true;
-  document.querySelectorAll(".opt").forEach(x=>x.style.pointerEvents="none");
-  if(val===current.ans){
-    el.classList.add("correct");
-    score=Math.min(100,score+10);
-    setTimeout(()=>{ updateUI(); resetOpts(); next(); },900);
-  }else{
-    el.classList.add("wrong");
-    lives--;
-    document.querySelectorAll(".opt").forEach(x=>{
-      if(x.textContent===current.ans) x.classList.add("correct");
+function buildOptions(correct) {
+    const opts = [correct];
+    while(opts.length < 4) {
+        const r = poolItems[Math.floor(Math.random() * poolItems.length)].tr;
+        if(r && !opts.includes(r)) opts.push(r);
+    }
+    opts.sort(() => Math.random() - 0.5);
+    
+    const area = $("optionsArea");
+    area.innerHTML = "";
+    opts.forEach(v => {
+        const d = document.createElement("div");
+        d.className = "opt";
+        d.textContent = v;
+        d.onclick = () => handleChoice(d, v);
+        area.appendChild(d);
     });
-    setTimeout(()=>{ updateUI(); resetOpts(); lives>0?next():finish(); },1200);
-  }
 }
 
-function resetOpts(){
-  cooldown=false;
-  document.querySelectorAll(".opt").forEach(x=>x.style.pointerEvents="auto");
+function playSignal() {
+    if(playing || cooldown || !currentItem) return;
+    speak(currentItem.say);
+    playing = true;
+    $("wave").classList.add("playing");
+    setTimeout(() => {
+        playing = false;
+        $("wave").classList.remove("playing");
+    }, 2200);
 }
 
-function updateUI(){
-  $("score").textContent=score;
-  $("lives").textContent="❤️".repeat(lives)+"💀".repeat(3-lives);
+$("listenBtn").onclick = playSignal;
+
+function handleChoice(el, val) {
+    if(cooldown) return;
+    cooldown = true;
+    document.querySelectorAll(".opt").forEach(x => x.style.pointerEvents = "none");
+    
+    if(val === currentItem.ans) {
+        el.classList.add("correct");
+        const gain = Math.round(100 * momentum);
+        totalScore += gain; setScore += gain;
+        momentum = Math.min(1.6, momentum + 0.05);
+        speak(currentItem.say); // Tekrar doğrula
+        setTimeout(() => { resetSignal(); nextSignal(); }, 1200);
+    } else {
+        el.classList.add("wrong");
+        lives--;
+        momentum = Math.max(1.0, momentum - 0.2);
+        document.querySelectorAll(".opt").forEach(x => {
+            if(x.textContent === currentItem.ans) x.classList.add("correct");
+        });
+        speak(currentItem.say); // Doğrusunu duysun başkanım
+        setTimeout(() => { resetSignal(); lives > 0 ? nextSignal() : finishSet(true); }, 2200);
+    }
+    updateUI();
 }
 
-function finish(){
-  $("end").classList.remove("hidden");
-  $("endTxt").innerHTML=`Bağlantı Başarısı: <b style="color:var(--radar)">%${score}</b><br><br>
-  Son Sinyal:<br><i>${current?.say||""}</i><br><b>${current?.ans||""}</b>`;
-  speak(current?.say||"");
+function resetSignal() {
+    cooldown = false;
+    setCounter++;
+    document.querySelectorAll(".opt").forEach(x => x.style.pointerEvents = "auto");
 }
 
-function restart(){
-  $("end").classList.add("hidden");
-  $("game").style.display="flex";
-  score=0;lives=3;
-  updateUI();
-  next();
+function updateUI() {
+    $("scoreDisp").textContent = totalScore;
+    $("momDisp").textContent = `x${momentum.toFixed(2)} MOMENTUM`;
+    $("livesDisp").textContent = "❤️".repeat(Math.max(0, lives)) + "💀".repeat(3 - Math.max(0, lives));
 }
 
-function speak(txt){
-  if(muted||!txt) return;
-  const u=new SpeechSynthesisUtterance(txt);
-  u.lang=LANGMAP[lang]||"en-US";
-  u.rate=.95;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
+function finishSet(died) {
+    const pb = parseInt(localStorage.getItem(`audio_spy_pb_${lang}`) || 0);
+    if(totalScore > pb) localStorage.setItem(`audio_spy_pb_${lang}`, totalScore);
+    
+    $("endModal").classList.remove("hidden");
+    $("endTitle").textContent = died ? "SIGNAL LOST" : "SECTOR DECODED";
+    $("endTitle").style.color = died ? "var(--alert)" : "var(--radar)";
+    $("endStats").innerHTML = `TOPLAM SKOR: <b>${totalScore}</b><br>MOMENTUM: <b>x${momentum.toFixed(2)}</b>`;
+    
+    if(died) {
+        $("continueBtn").classList.add("hidden");
+        $("bankBtn").classList.add("hidden");
+        runActive = false;
+    } else {
+        $("continueBtn").classList.remove("hidden");
+        $("bankBtn").classList.remove("hidden");
+    }
+    updatePB();
 }
+
+$("continueBtn").onclick = () => {
+    $("endModal").classList.add("hidden");
+    initSet(false);
+};
+
+$("bankBtn").onclick = () => {
+    const bonus = Math.round(setScore * 0.05);
+    totalScore += bonus;
+    $("endModal").classList.add("hidden");
+    initSet(true);
+};
+
+$("exitBtn").onclick = () => location.reload();
+
+function speak(txt) {
+    if(muted || !txt) return;
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = LANGMAP[lang] || "en-US";
+    u.rate = 0.85;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+}
+
+window.addEventListener('load', updatePB);
 </script>
 </body>
 </html>
