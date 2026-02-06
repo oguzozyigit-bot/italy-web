@@ -19,15 +19,20 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 
 .header{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 16px; border-bottom:1px solid var(--border)}
 .title{font-size:16px; letter-spacing:1px; color:var(--cyan); font-weight:900;}
+.pb-badge{font-size:10px;padding:4px 8px;background:var(--cyan);color:#000;font-weight:800;border-radius:4px}
 
 .game{flex:1;padding:16px;display:none;flex-direction:column;justify-content:space-between; position: relative;}
 .stats{display:flex;justify-content:space-between;font-size:11px;color:var(--cyan);font-weight:bold;margin-bottom:5px; text-transform: uppercase;}
 
 .mom-bar-container { width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-bottom: 10px; overflow: hidden; }
-#momBarFill { width: 0%; height: 100%; background: var(--cyan); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#momBarFill { width: 0%; height: 100%; background: var(--cyan); transition: 0.5s; }
 
 .terminal{flex:1;border:2px solid var(--border);background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:25px;text-align:center;border-radius:20px;transition: 0.3s; cursor: pointer;}
 .terminal.boss-mode { border-color: var(--pink); box-shadow: inset 0 0 30px rgba(255,0,85,0.2); }
+
+@keyframes alarm { 0%, 100% { border-color: var(--border); } 50% { border-color: var(--pink); box-shadow: 0 0 20px var(--pink); } }
+.terminal.alarm-active { animation: alarm 0.6s infinite; }
+
 .boss-label { position: absolute; top: 10px; font-size: 10px; color: var(--pink); font-weight: 900; display: none; letter-spacing: 2px; }
 
 .sentence{font-size:28px; color:#fff; line-height:1.3; font-weight:700;}
@@ -92,8 +97,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 
 <div class="modal" id="start">
   <div class="card">
-    <h2 style="color:var(--cyan); font-size:24px; margin-bottom: 5px;">Cyber Flow</h2>
-    <p style="opacity:.6; font-size:11px; margin-bottom: 15px;">Dili ayırt etme kasını çalıştır.</p>
+    <h2 style="color:var(--cyan); font-size:24px; margin-bottom: 5px;">Neural Sync</h2>
+    <p style="opacity:.6; font-size:11px; margin-bottom: 15px;">Dili ayırt etme kasını çalıştır başkanım.</p>
     
     <div class="lang-grid">
         <button data-lang="en" class="lang-btn active">🇬🇧</button>
@@ -111,7 +116,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 <div class="modal hidden" id="end">
   <div class="card">
     <h2 id="endTitle" style="color:var(--green)">SYNC COMPLETE</h2>
-    <p id="learningReport" style="color:var(--cyan); font-size:12px; margin-bottom:15px; font-weight:bold;"></p>
+    <div id="learningReport" style="color:var(--cyan); font-size:12px; margin-bottom:15px; font-weight:bold; line-height:1.5;"></div>
+    <div id="bankFeedback" style="color:var(--pink); font-size:11px; margin-bottom:10px; font-weight:900; display:none;"></div>
     <p id="endStats" style="font-size:18px; margin-bottom: 20px"></p>
     
     <button class="mainbtn" id="btnContinue">CONTINUE <span class="btn-sub">HIZLI / KIRILGAN</span></button>
@@ -125,7 +131,8 @@ import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
 const $ = id => document.getElementById(id);
 let lang="en", totalScore=0, setScore=0, integrity=100, momentum=1.0, wordList=[], currentIndex=0, busy=false, currentItem=null, runActive=false, autoProceedTimer=null;
-let missedCats = {};
+let statsCats = { missed:{}, hit:{} };
+let flowStreak = 0;
 
 const SET_SIZE = 12;
 
@@ -138,7 +145,7 @@ function speak(text, targetLang) {
 }
 
 function updateLeaderboardUI() {
-    const records = JSON.parse(localStorage.getItem('glitch_eternal_v61') || '[]');
+    const records = JSON.parse(localStorage.getItem('glitch_eternal_v63') || '[]');
     const pb = records.filter(r => r.lang === lang.toUpperCase()).reduce((max, r) => Math.max(max, r.score), 0);
     $("pbBadge").textContent = `PB: ${pb}`;
     $('leaderboardBox').innerHTML = records.slice(0,3).map((r,i)=> `<div>${i+1}. ${r.score} - ${r.lang}</div>`).join('');
@@ -156,7 +163,7 @@ document.querySelectorAll(".lang-btn").forEach(b=>{
 $("startBtn").onclick=async()=>{
   $("start").classList.add("hidden"); 
   $("game").style.display="flex";
-  if(!runActive) { totalScore=0; integrity=100; momentum=1.0; runActive=true; missedCats={}; }
+  if(!runActive) { totalScore=0; integrity=100; momentum=1.0; runActive=true; statsCats={ missed:{}, hit:{} }; flowStreak=0; }
   await initGame();
 };
 
@@ -165,26 +172,35 @@ async function initGame(isBank = false) {
   if(isBank) { integrity = 100; momentum = 1.0; }
   const pool = await loadLangPool(lang);
   const randomizedItems = [...pool.items].sort(() => Math.random() - 0.5);
-  const {used, save} = createUsedSet("glitch_v61_"+lang);
+  const USED_KEY = `used_glitch_v63_${lang}`; // ✅ FIX 1: Versiyon anahtarı senkronize edildi
+  const {used, save} = createUsedSet(USED_KEY);
+
   wordList = pick({items: randomizedItems}, SET_SIZE, used, save, (it) => it.sentence && it.sentence.length > 5);
-  if(wordList.length < SET_SIZE) { localStorage.removeItem("glitch_v61_"+lang); return initGame(); }
+  
+  if(wordList.length < SET_SIZE) { 
+    localStorage.removeItem(USED_KEY); // ✅ FIX 1: Doğru anahtar siliniyor
+    return initGame(); 
+  }
+
+  // ✅ FIX 2: Used mühürü eklendi
+  try { save(wordList.map(x => x.w)); await Promise.resolve(); } catch(e){}
+
   nextRound();
 }
 
 function produceGlitch(original) {
   const rules = [
-    { cat: "Subject-Verb", f: " am ", t: " is ", subtle: false },
-    { cat: "Subject-Verb", f: " are ", t: " is ", subtle: false },
-    { cat: "Article", f: " a ", t: " an ", subtle: true },
-    { cat: "Article", f: " an ", t: " a ", subtle: true },
-    { cat: "Tense", f: " did ", t: " do ", subtle: true },
-    { cat: "Plural", f: "s ", t: " ", subtle: true }
+    { cat: "Subject-Verb", f: " am ", t: " is ", s: false },
+    { cat: "Subject-Verb", f: " are ", t: " is ", s: false },
+    { cat: "Article", f: " a ", t: " an ", s: true },
+    { cat: "Tense", f: " did ", t: " do ", s: true },
+    { cat: "Pronoun", f: " me ", t: " I ", s: true }
   ];
   let text = original;
-  const applicableRules = rules.filter(r => text.toLowerCase().includes(r.f));
-  if (applicableRules.length > 0) {
-    const rule = applicableRules[Math.floor(Math.random() * applicableRules.length)];
-    return { text: text.replace(new RegExp(rule.f, "i"), rule.t), category: rule.cat, subtle: rule.subtle };
+  const applicable = rules.filter(r => text.toLowerCase().includes(r.f));
+  if (applicable.length > 0) {
+    const rule = applicable[Math.floor(Math.random() * applicable.length)];
+    return { text: text.replace(new RegExp(rule.f, "i"), rule.t), category: rule.cat, subtle: rule.s };
   }
   return { text: text + "s", category: "Syntax", subtle: true };
 }
@@ -197,20 +213,23 @@ function nextRound() {
   if(isBoss) { $("terminal").classList.add("boss-mode"); $("bossLabel").style.display = "block"; }
   else { $("terminal").classList.remove("boss-mode"); $("bossLabel").style.display = "none"; }
 
+  // ✅ Alarm pulse sadece boşta beklerken aktif, feedback sırasında border-color ezilecek başkanım
+  if(integrity <= 25) $("terminal").classList.add("alarm-active");
+  else $("terminal").classList.remove("alarm-active");
+
   const isOk = Math.random() > 0.5;
   const glitch = isOk ? { text: item.sentence, category: "Verified", subtle: false } : produceGlitch(item.sentence);
 
-  currentItem = { text: glitch.text, original: item.sentence, isOk, category: glitch.category, subtle: glitch.subtle, tr: item.tr || "" };
+  currentItem = { text: glitch.text, original: item.sentence, isOk, category: glitch.category, subtle: glitch.subtle, tr: item.tr || "Anlam yüklenemedi." };
   $("sentence").textContent = currentItem.text;
   $("correctionBox").style.opacity = "0";
   $("tapHint").style.display = "none";
   $("setCounter").textContent = `${currentIndex + 1}/12`;
   
-  // ✅ Momentum Renk Hikayesi başkanım
-  const momPercent = ((momentum - 1.0) / 0.6) * 100;
-  $("momBarFill").style.width = momPercent + "%";
-  if(momentum < 1.2) $("momBarFill").style.background = "var(--cyan)";
-  else if(momentum < 1.4) $("momBarFill").style.background = "var(--purple)";
+  const p = ((momentum - 1.0) / 0.6) * 100;
+  $("momBarFill").style.width = p + "%";
+  if(momentum < 1.25) $("momBarFill").style.background = "var(--cyan)";
+  else if(momentum < 1.45) $("momBarFill").style.background = "var(--purple)";
   else $("momBarFill").style.background = "var(--pink)";
   
   $("momVal").textContent = `x${momentum.toFixed(2)}`;
@@ -228,36 +247,49 @@ function handleAnswer(userPick) {
   const correct = (userPick === currentItem.isOk);
   const isBoss = currentIndex >= 10;
 
+  // ✅ FIX 3 & 4: Doğru olsa da oku ve anlamı göster başkanım
+  speak(currentItem.original, lang);
+  
   if(correct) {
+    flowStreak++;
+    statsCats.hit[currentItem.category] = (statsCats.hit[currentItem.category] || 0) + 1;
     const points = isBoss ? 150 : 100;
     totalScore += Math.round(points * momentum);
     setScore += points;
     momentum = Math.min(1.6, momentum + 0.05);
-    $("terminal").style.borderColor = "var(--green)";
-    if(isBoss) $("sentence").innerHTML = `<span style="color:var(--green)">NEURAL SYNC +</span>`;
     
-    // ✅ Doğruda bekletmiyoruz başkanım
-    autoProceedTimer = setTimeout(proceedNext, 700);
+    // Doğruda alarmı geçici durdur başkanım
+    $("terminal").classList.remove("alarm-active");
+    $("terminal").style.borderColor = "var(--green)";
+    
+    // ✅ Mini Meaning Display (Flow'u bozmadan anlamı fısılda başkanım)
+    if(isBoss) $("sentence").innerHTML = `<span style="color:var(--green)">BOSS CLEARED</span>`;
+    else if(flowStreak % 3 === 0) $("sentence").innerHTML = `<span style="color:var(--cyan)">FLOW +</span>`;
+    
+    $("trTxt").textContent = "Anlamı: " + currentItem.tr;
+    $("correctTxt").textContent = ""; // Temizle
+    $("correctionBox").style.opacity = "1";
+
+    autoProceedTimer = setTimeout(proceedNext, 850); // Hızlı geçiş
   } else {
-    // ✅ Near-Miss Adaleti başkanım
-    const isNearMiss = currentItem.subtle || isBoss;
-    const damage = isNearMiss ? 15 : 25;
+    flowStreak = 0;
+    statsCats.missed[currentItem.category] = (statsCats.missed[currentItem.category] || 0) + 1;
+    const damage = (currentItem.subtle || isBoss) ? 15 : 25;
     integrity -= damage;
     momentum = Math.max(1.0, momentum - 0.15);
     
-    // Kategori Raporu için
-    missedCats[currentItem.category] = (missedCats[currentItem.category] || 0) + 1;
-    
+    $("terminal").classList.remove("alarm-active");
     $("frame").classList.add("glitch-anim");
     $("terminal").style.borderColor = "var(--pink)";
-    $("correctTxt").textContent = (isNearMiss ? "⚠ NEAR MISS / " : "✖ CORRUPTED / ") + currentItem.original;
+    
+    $("correctTxt").textContent = (damage === 15 ? "⚠ NEAR MISS / " : "✖ CORRUPTED / ") + currentItem.original;
     $("trTxt").textContent = "Anlamı: " + currentItem.tr;
     $("correctionBox").style.opacity = "1";
     $("tapHint").style.display = "block";
-    speak(currentItem.original, lang);
 
-    autoProceedTimer = setTimeout(proceedNext, 4000);
+    autoProceedTimer = setTimeout(proceedNext, 4500);
   }
+  $("scoreDisp").textContent = totalScore;
 }
 
 function proceedNext() {
@@ -270,15 +302,19 @@ $("btnGlitch").onclick = () => handleAnswer(false);
 $("btnStable").onclick = () => handleAnswer(true);
 
 function finish(died) {
-  const records = JSON.parse(localStorage.getItem('glitch_eternal_v61') || '[]');
+  const records = JSON.parse(localStorage.getItem('glitch_eternal_v63') || '[]');
   records.push({score: totalScore, lang: lang.toUpperCase(), id: Date.now()});
   records.sort((a,b)=>b.score - a.score);
-  localStorage.setItem('glitch_eternal_v61', JSON.stringify(records.slice(0,10)));
+  localStorage.setItem('glitch_eternal_v63', JSON.stringify(records.slice(0,10)));
   updateLeaderboardUI();
   
-  // ✅ Öğrenme Kası Raporu başkanım
-  const worstCat = Object.entries(missedCats).sort((a,b)=>b[1]-a[1])[0];
-  $("learningReport").textContent = worstCat ? `BUGÜN EN ÇOK ${worstCat[0].toUpperCase()} KAÇIRDIN.` : "RADARIN BUGÜN KESKİNDİ!";
+  const worst = Object.entries(statsCats.missed).sort((a,b)=>b[1]-a[1])[0];
+  const best = Object.entries(statsCats.hit).filter(x=>x[0]!=="Verified").sort((a,b)=>b[1]-a[1])[0];
+  
+  let report = worst ? `BUGÜN EN ÇOK ${worst[0].toUpperCase()} KAÇIRDIN.` : "RADARIN KUSURSUZDU!";
+  if(best) report += `<br><span style="color:var(--green)">EN GÜÇLÜ ALANIN: ${best[0].toUpperCase()}</span>`;
+  $("learningReport").innerHTML = report;
+  $("bankFeedback").style.display = "none";
 
   $("end").classList.remove("hidden");
   $("endTitle").textContent = died ? "SYSTEM CRASHED" : "SYNC COMPLETE";
@@ -290,7 +326,16 @@ function finish(died) {
 }
 
 $("btnContinue").onclick = () => { $("end").classList.add("hidden"); initGame(false); };
-$("btnBank").onclick = () => { totalScore += Math.round(setScore * 0.05); $("end").classList.add("hidden"); initGame(true); };
+$("btnBank").onclick = () => { 
+    const bonus = Math.round(setScore * 0.05);
+    totalScore += bonus;
+    // ✅ FIX 8: Bank geri bildirimi artık modal üzerinde başkanım
+    $("bankFeedback").style.display = "block";
+    $("bankFeedback").innerHTML = `CASHED IN: +${bonus} | MOMENTUM RESET`;
+    
+    momentum = 1.0; setScore = 0; flowStreak = 0;
+    setTimeout(() => { $("end").classList.add("hidden"); initGame(true); }, 1600);
+};
 $("btnExit").onclick = () => location.reload();
 
 window.onload = updateLeaderboardUI;
