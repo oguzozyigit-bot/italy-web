@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Akıllı Çeviri</title>
+  <title>italkyAI • Manuel Çeviri</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,6 @@
       --navyB: rgba(255,255,255,.05);
       --burgA: rgba(120, 20, 35, .85);
       --burgB: rgba(90, 15, 30, .65);
-      --burgC: rgba(70, 10, 25, .45);
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -64,7 +63,7 @@
       }
     }
 
-    /* UI ELEMENTS */
+    /* TOP BAR */
     .topbar{
       height: var(--topH); display:flex; align-items:center; justify-content:space-between;
       padding: 0 16px; border-bottom:1px solid rgba(255,255,255,.08);
@@ -81,10 +80,11 @@
 
     .main{ flex:1; padding: 12px; overflow:hidden; display:flex; flex-direction:column; gap: 10px; }
 
+    /* TOOLBAR (DİLLER) */
     .toolbar{ display:flex; gap:10px; align-items:center; flex: 0 0 auto; }
     .langBtn{
       flex:1; height: 46px; border-radius: 16px; border: 1px solid var(--btnBd); 
-      background: var(--btnBg); color:#fff; font-weight: 700; font-size: 12px;
+      background: var(--btnBg); color:#fff; font-weight: 700; font-size: 13px;
       padding: 0 12px; display:flex; align-items:center; justify-content:space-between;
       cursor:pointer;
     }
@@ -93,6 +93,7 @@
       background: var(--btnBg); color:#fff; font-weight: 1000; cursor:pointer;
     }
 
+    /* PANE & BOXES */
     .pane{ flex:1; display:flex; flex-direction: column; gap: 8px; min-height:0; }
     .box{
       border-radius: 22px; border: 1px solid rgba(255,255,255,.10);
@@ -148,7 +149,7 @@
       font-size: 11px; color: rgba(255,255,255,0.4); flex: 0 0 auto;
     }
 
-    /* SHEET */
+    /* SHEET (DİL LİSTESİ) */
     .sheetBackdrop{
       position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.7);
       display:none; align-items:flex-end; justify-content:center; padding: 16px;
@@ -188,12 +189,14 @@
     <div class="main">
       <div class="toolbar">
         <button class="langBtn" id="fromLangBtn">
-          <span class="langLeft"><span id="fromFlag">🌐</span> <span id="fromLangTxt">Otomatik</span></span>
+          <span class="langLeft"><span id="fromFlag">🇹🇷</span> <span id="fromLangTxt">Türkçe</span></span>
           <span>▾</span>
         </button>
+
         <button class="swapBtn" id="swapBtn">⇄</button>
+
         <button class="langBtn" id="toLangBtn">
-          <span class="langLeft"><span id="toFlag">🇹🇷</span> <span id="toLangTxt">Türkçe</span></span>
+          <span class="langLeft"><span id="toFlag">🇬🇧</span> <span id="toLangTxt">İngilizce</span></span>
           <span>▾</span>
         </button>
       </div>
@@ -204,7 +207,7 @@
             <div class="headTitle">Giriş</div>
             <button class="iconBtn" id="micIn"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg></button>
           </div>
-          <textarea id="inText" placeholder="Yaz ya da konuş..."></textarea>
+          <textarea id="inText" placeholder="Metni girin..."></textarea>
         </div>
 
         <div class="actions-mid">
@@ -214,7 +217,7 @@
 
         <div class="box bottom">
           <div class="boxHead">
-            <div class="headTitle">Sonuç</div>
+            <div class="headTitle">Çeviri</div>
             <button class="iconBtn" id="speakOut"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
           </div>
           <div class="out" id="outText">...</div>
@@ -236,7 +239,7 @@
   </div>
 
 <script>
-    // --- ELEMENTLER ---
+    // --- GEREKLİ ELEMENTLER ---
     const inText = document.getElementById('inText');
     const outText = document.getElementById('outText');
     const translateBtn = document.getElementById('translateBtn');
@@ -244,35 +247,29 @@
     const micIn = document.getElementById('micIn');
     const speakOut = document.getElementById('speakOut');
     const swapBtn = document.getElementById('swapBtn');
-
-    // Dil Durumu
-    let fromLangCode = "auto";
-    let toLangCode = "tr";
     
-    // Dil Listesi
+    const fromLangBtn = document.getElementById('fromLangBtn');
+    const toLangBtn = document.getElementById('toLangBtn');
+    const langSheet = document.getElementById('langSheet');
+    const sheetList = document.getElementById('sheetList');
+    const sheetClose = document.getElementById('sheetClose');
+
+    // --- BAŞLANGIÇ AYARLARI (Manuel) ---
+    // Varsayılan: Türkçe -> İngilizce
+    let fromLangCode = "tr"; 
+    let toLangCode = "en";
+    
+    // Dil Listesi ('Auto' kaldırıldı)
     const langs = [
-      { code: "auto", name: "Otomatik", flag: "🌐" },
       { code: "tr", name: "Türkçe", flag: "🇹🇷" },
       { code: "en", name: "İngilizce", flag: "🇬🇧" },
       { code: "de", name: "Almanca", flag: "🇩🇪" },
       { code: "fr", name: "Fransızca", flag: "🇫🇷" },
       { code: "es", name: "İspanyolca", flag: "🇪🇸" },
       { code: "ru", name: "Rusça", flag: "🇷🇺" },
+      { code: "it", name: "İtalyanca", flag: "🇮🇹" },
       { code: "ar", name: "Arapça", flag: "🇸🇦" },
     ];
-
-    // --- ÖZEL MANTIK: DİLİ TAHMİN ET ---
-    function detectLanguage(text) {
-        // Türkçe'ye özgü harfler
-        const trChars = /[ğĞşŞıİüÜöÖçÇ]/;
-        // Basit Türkçe kelime kontrolü
-        const trWords = /\b(bir|ve|ile|ben|sen|evet|hayır|tamam|merhaba)\b/i;
-
-        if (trChars.test(text) || trWords.test(text)) {
-            return 'tr';
-        }
-        return 'foreign'; // Türkçe değilse Yabancı kabul et
-    }
 
     // --- ÇEVİRİ FONKSİYONU ---
     async function doTranslate() {
@@ -282,62 +279,24 @@
         translateBtn.innerText = "⏳";
         outText.style.opacity = "0.5";
 
-        let apiSource = fromLangCode;
-        let apiTarget = toLangCode;
-
-        // EĞER "OTOMATİK" SEÇİLİYSE KARAR VER
-        if(fromLangCode === "auto") {
-            const detected = detectLanguage(text);
-
-            if(detected === 'tr') {
-                // Algılanan: Türkçe -> Hedef: İngilizce
-                apiSource = "tr";
-                apiTarget = "en";
-                updateToLangDisplay("en"); // Sağ tarafı İngilizce yap
-            } else {
-                // Algılanan: Yabancı -> Hedef: Türkçe
-                // API hatasını önlemek için kaynak dili "en" (İngilizce) varsayıyoruz
-                // veya "autodetect" yerine MyMemory'nin kabul edeceği bir kod yollamalıyız.
-                // En garantisi: Kaynak bilinmiyorsa İngilizce dene.
-                apiSource = "en"; 
-                apiTarget = "tr";
-                updateToLangDisplay("tr"); // Sağ tarafı Türkçe yap
-            }
-        }
-
-        // URL OLUŞTUR
-        // MyMemory 'auto' kabul etmez, bu yüzden yukarıda apiSource'u 'tr' veya 'en' yaptık.
-        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${apiSource}|${apiTarget}`;
+        // API URL (Artık direkt seçili dilleri gönderiyoruz)
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromLangCode}|${toLangCode}`;
 
         try {
             const res = await fetch(url);
             const data = await res.json();
             
-            if(data.responseData) {
+            if(data.responseData && data.responseData.translatedText) {
                 outText.innerText = data.responseData.translatedText;
-                
-                // Eğer API kaynak dili değiştirdiyse biz de değişkeni güncelleyelim
-                if(data.matches && data.matches.length > 0) {
-                   // Gelişmiş kontrol (gerekirse)
-                }
             } else {
-                outText.innerText = "Hata oluştu.";
+                outText.innerText = "Hata: Çeviri alınamadı.";
             }
         } catch(e) {
-            outText.innerText = "Bağlantı hatası.";
-        }
-        
-        translateBtn.innerText = "Çevir";
-        outText.style.opacity = "1";
-    }
-
-    // --- GÖRSEL GÜNCELLEME ---
-    function updateToLangDisplay(code) {
-        toLangCode = code;
-        const l = langs.find(x => x.code === code);
-        if(l) {
-            document.getElementById('toFlag').innerText = l.flag;
-            document.getElementById('toLangTxt').innerText = l.name;
+            console.error(e);
+            outText.innerText = "İnternet bağlantısını kontrol edin.";
+        } finally {
+            translateBtn.innerText = "Çevir";
+            outText.style.opacity = "1";
         }
     }
 
@@ -348,6 +307,7 @@
     clearBtn.addEventListener('click', () => {
         inText.value = "";
         outText.innerText = "...";
+        inText.focus();
     });
 
     // --- MİKROFON (SES TANIMA) ---
@@ -362,11 +322,14 @@
             if(micIn.classList.contains('listening')) {
                 recognition.stop();
             } else {
-                // Hangi dilde dinleyecek?
-                // Eğer Otomatik ise Türkçe dinle, değilse seçili dili dinle
-                if(fromLangCode === 'auto') recognition.lang = 'tr-TR';
-                else if(fromLangCode === 'en') recognition.lang = 'en-US';
-                else recognition.lang = fromLangCode; // 'de', 'fr' vb. genelde uyar
+                // Seçili dile göre mikrofonu ayarla
+                if(fromLangCode === 'en') recognition.lang = 'en-US';
+                else if(fromLangCode === 'de') recognition.lang = 'de-DE';
+                else if(fromLangCode === 'fr') recognition.lang = 'fr-FR';
+                else if(fromLangCode === 'es') recognition.lang = 'es-ES';
+                else if(fromLangCode === 'ru') recognition.lang = 'ru-RU';
+                else if(fromLangCode === 'ar') recognition.lang = 'ar-SA';
+                else recognition.lang = 'tr-TR'; // Varsayılan Türkçe
 
                 recognition.start();
             }
@@ -379,8 +342,9 @@
         
         recognition.onend = () => {
             micIn.classList.remove('listening');
-            inText.placeholder = "Yaz ya da konuş...";
-            if(inText.value.length > 1) doTranslate(); // Konuşma bitince çevir
+            inText.placeholder = "Metni girin...";
+            // Konuşma bitince otomatik çevir
+            if(inText.value.length > 0) doTranslate();
         };
 
         recognition.onresult = (event) => {
@@ -398,58 +362,83 @@
         
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(txt);
-        u.lang = toLangCode; // Hedef dilde oku
+        // Hedef dil neyse o aksanla oku
+        u.lang = toLangCode; 
         window.speechSynthesis.speak(u);
     });
 
-
-    // --- DİL MENÜSÜ İŞLEMLERİ ---
-    let activeSide = 'from';
-    const sheet = document.getElementById('langSheet');
+    // --- DİL SEÇİM MENÜSÜ ---
+    let activeSide = 'from'; // 'from' veya 'to'
     
-    function renderSheet() {
-        const list = document.getElementById('sheetList');
-        list.innerHTML = "";
-        langs.forEach(l => {
-            // Sağ tarafta auto olmasın
-            if(activeSide === 'to' && l.code === 'auto') return;
+    function openSheet(side) {
+        activeSide = side;
+        renderSheet();
+        langSheet.classList.add('show');
+    }
 
-            const d = document.createElement('div');
-            d.className = 'sheetRow';
-            d.innerHTML = `<span>${l.flag} ${l.name}</span> <span style="opacity:0.5;font-size:12px">${l.code.toUpperCase()}</span>`;
-            d.onclick = () => {
+    function renderSheet() {
+        sheetList.innerHTML = "";
+        langs.forEach(l => {
+            const row = document.createElement('div');
+            row.className = 'sheetRow';
+            row.innerHTML = `
+                <div style="display:flex;align-items:center;gap:10px">
+                    <span style="font-size:20px">${l.flag}</span>
+                    <span style="font-weight:700;font-size:14px;color:#fff">${l.name}</span>
+                </div>
+                <span style="opacity:0.5;font-size:12px;color:#fff">${l.code.toUpperCase()}</span>
+            `;
+            
+            row.onclick = () => {
                 const flagEl = document.getElementById(activeSide === 'from' ? 'fromFlag' : 'toFlag');
                 const txtEl = document.getElementById(activeSide === 'from' ? 'fromLangTxt' : 'toLangTxt');
                 
+                // UI Güncelle
                 flagEl.innerText = l.flag;
                 txtEl.innerText = l.name;
                 
+                // Değişkeni Güncelle
                 if(activeSide === 'from') fromLangCode = l.code;
                 else toLangCode = l.code;
                 
-                sheet.classList.remove('show');
+                langSheet.classList.remove('show');
             };
-            list.appendChild(d);
+            sheetList.appendChild(row);
         });
     }
 
-    document.getElementById('fromLangBtn').onclick = () => { activeSide='from'; renderSheet(); sheet.classList.add('show'); };
-    document.getElementById('toLangBtn').onclick = () => { activeSide='to'; renderSheet(); sheet.classList.add('show'); };
-    document.getElementById('sheetClose').onclick = () => sheet.classList.remove('show');
+    // Eventler
+    fromLangBtn.onclick = () => openSheet('from');
+    toLangBtn.onclick = () => openSheet('to');
+    sheetClose.onclick = () => langSheet.classList.remove('show');
+    langSheet.onclick = (e) => {
+        if(e.target === langSheet) langSheet.classList.remove('show');
+    }
 
-    // Swap
+    // --- SWAP (DEĞİŞTİR) BUTONU ---
     swapBtn.onclick = () => {
-        if(fromLangCode === 'auto') { alert("Otomatik modda değişim yapılmaz."); return; }
-        // Değişkenleri değiştir
-        let tC = fromLangCode; fromLangCode = toLangCode; toLangCode = tC;
-        // Görselleri değiştir
-        let tF = document.getElementById('fromFlag').innerText;
-        document.getElementById('fromFlag').innerText = document.getElementById('toFlag').innerText;
-        document.getElementById('toFlag').innerText = tF;
-        
-        let tN = document.getElementById('fromLangTxt').innerText;
-        document.getElementById('fromLangTxt').innerText = document.getElementById('toLangTxt').innerText;
-        document.getElementById('toLangTxt').innerText = tN;
+        // Kodları takas et
+        let tempCode = fromLangCode;
+        fromLangCode = toLangCode;
+        toLangCode = tempCode;
+
+        // UI Görsellerini takas et
+        const fromFlag = document.getElementById('fromFlag');
+        const toFlag = document.getElementById('toFlag');
+        const fromTxt = document.getElementById('fromLangTxt');
+        const toTxt = document.getElementById('toLangTxt');
+
+        let tFlag = fromFlag.innerText;
+        fromFlag.innerText = toFlag.innerText;
+        toFlag.innerText = tFlag;
+
+        let tTxt = fromTxt.innerText;
+        fromTxt.innerText = toTxt.innerText;
+        toTxt.innerText = tTxt;
+
+        // Metinleri de takas edelim mi? (Opsiyonel ama kullanışlı)
+        // Giriş kutusunu temizleyip sonucu girişe atmak bazen kafa karıştırır,
+        // o yüzden sadece dilleri değiştiriyoruz.
     };
 
 </script>
