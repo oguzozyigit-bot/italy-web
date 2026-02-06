@@ -23,40 +23,30 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 .game{flex:1;padding:16px;display:none;flex-direction:column;justify-content:space-between}
 .stats{display:flex;justify-content:space-between;font-size:16px;color:var(--cyan);font-weight:bold;margin-bottom:10px}
 
-.terminal{flex:1;border:2px solid var(--border);background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;position:relative;padding:20px;text-align:center;border-radius:14px;transition: border-color 0.3s;}
+.terminal{flex:1;border:2px solid var(--border);background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:20px;text-align:center;border-radius:14px;transition: border-color 0.3s;}
 
-/* ✅ KOCAMAN CÜMLE */
-.sentence{
-  font-family:'Space Grotesk', sans-serif;
-  font-size:32px; 
-  color:#fff;
-  line-height:1.2;
-  font-weight:900;
-  text-transform: uppercase;
-}
+.sentence{font-family:'Space Grotesk', sans-serif; font-size:32px; color:#fff; line-height:1.2; font-weight:900; text-transform: uppercase;}
+#correctionBox{font-size:16px; color:var(--green); margin-top:15px; font-weight:bold; opacity:0; transition:0.3s;}
 
-.controls{display:flex;gap:16px;height:120px;margin-top:20px}
-.action{flex:1;border:3px solid var(--border);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:.15s; font-weight:bold;border-radius:12px;color:#fff; background: transparent;}
+.controls{display:flex;gap:12px;height:100px;margin-top:20px}
+.action{flex:1;border:3px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:.1s; font-weight:bold;border-radius:12px;color:#fff; background: transparent;}
 .bug{background:rgba(255,0,85,0.1);border-color:var(--pink)}
 .ok{background:rgba(0,255,102,0.1);border-color:var(--green)}
 .action:active{transform:scale(.95)}
-.action:disabled{opacity:0.3; pointer-events:none;}
+.action:disabled{opacity:0.2; pointer-events:none;}
 
 .modal{position:absolute;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:200}
-.card{background:#111;border:1px solid var(--cyan);padding:30px;width:85%;text-align:center;border-radius:20px}
-.mainbtn{width:100%;padding:18px;margin-top:20px;border:none;background:var(--cyan);color:#000;font-weight:900;cursor:pointer;font-size:18px;border-radius:10px}
+.card{background:#111;border:1px solid var(--cyan);padding:20px;width:90%;text-align:center;border-radius:20px}
+.mainbtn{width:100%;padding:18px;margin-top:15px;border:none;background:var(--cyan);color:#000;font-weight:900;cursor:pointer;font-size:18px;border-radius:10px}
 
-.lang-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:25px 0}
-.lang-btn{font-size:28px; padding:12px; background:rgba(255,255,255,0.05); border:2px solid #444; border-radius:12px; cursor:pointer; transition:0.2s}
-.lang-btn.active{border-color:var(--cyan); background:rgba(0,255,255,0.1)}
+/* ✅ TAŞMAYAN DİL PANELİ */
+.lang-grid{display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:15px 0}
+.lang-btn{font-size:24px; padding:8px 12px; background:rgba(255,255,255,0.05); border:2px solid #444; border-radius:12px; cursor:pointer; flex: 1 1 15%; min-width: 60px;}
+.lang-btn.active{border-color:var(--cyan); background:rgba(0,243,255,0.1)}
 
 .hidden{display:none!important}
 .glitch-anim{animation:shake 0.3s}
-@keyframes shake{
-  0%, 100% {transform: translateX(0)}
-  25% {transform: translateX(-10px)}
-  75% {transform: translateX(10px)}
-}
+@keyframes shake{ 0%, 100% {transform: translateX(0)} 25% {transform: translateX(-10px)} 75% {transform: translateX(10px)} }
 </style>
 </head>
 
@@ -75,7 +65,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
     </div>
 
     <div class="terminal" id="terminal">
-      <div class="sentence" id="sentence">YÜKLENİYOR...</div>
+      <div class="sentence" id="sentence">LOADING...</div>
+      <div id="correctionBox">DOĞRUSU: <span id="correctTxt"></span></div>
     </div>
 
     <div class="controls">
@@ -88,7 +79,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 <div class="modal" id="start">
   <div class="card">
     <h2 style="color:var(--cyan); font-size:24px">Oyun Başlıyor</h2>
-    <p style="opacity:.8;">Cümlede gramer hatası varsa HATALI, doğruysa DOĞRU seçin.</p>
+    <p style="opacity:.8; font-size:14px">Dilinizi seçin ve hataları avlayın.</p>
     
     <div class="lang-grid">
         <button data-lang="en" class="lang-btn active">🇬🇧</button>
@@ -107,7 +98,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
     <h2 id="endTitle" style="color:var(--green)">SET BİTTİ</h2>
     <p id="endStats" style="font-size:22px; margin:20px 0"></p>
     <button class="mainbtn" id="btnContinue">DEVAM ET</button>
-    <button class="mainbtn" style="background:#333;color:#fff" id="btnExit">ÇIKIŞ</button>
+    <button class="mainbtn" style="background:#333;color:#fff" id="btnExit">ÇIKIS</button>
   </div>
 </div>
 
@@ -117,14 +108,16 @@ import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 const $ = id => document.getElementById(id);
 let lang="en", score=0, integrity=100, wordList=[], currentIndex=0, busy=false, currentItem=null;
 
-const SET_SIZE = 12;
-
-function setBtns(disabled) {
-    $("btnGlitch").disabled = disabled;
-    $("btnStable").disabled = disabled;
+// Seslendirme Fonksiyonu
+function speak(text, targetLang) {
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const m = { en: "en-US", de: "de-DE", fr: "fr-FR", es: "es-ES", it: "it-IT" };
+  u.lang = m[targetLang] || "en-US";
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
 }
 
-// Dil Seçimi
 document.querySelectorAll(".lang-btn").forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll(".lang-btn").forEach(x=>x.classList.remove("active"));
@@ -133,7 +126,6 @@ document.querySelectorAll(".lang-btn").forEach(b=>{
   };
 });
 
-// Başlat
 $("startBtn").onclick=async()=>{
   $("start").classList.add("hidden"); 
   $("game").style.display="flex";
@@ -146,11 +138,11 @@ async function initGame() {
   const pool = await loadLangPool(lang);
   const items = pool?.items || [];
   const randomizedItems = [...items].sort(() => Math.random() - 0.5);
-  const {used, save} = createUsedSet("glitch_v5_"+lang);
-  wordList = pick({items: randomizedItems}, SET_SIZE, used, save, (it) => it.sentence && it.sentence.length > 5);
+  const {used, save} = createUsedSet("glitch_v6_"+lang);
+  wordList = pick({items: randomizedItems}, 12, used, save, (it) => it.sentence && it.sentence.length > 5);
   
-  if(wordList.length < SET_SIZE) {
-    localStorage.removeItem("glitch_v5_"+lang);
+  if(wordList.length < 12) {
+    localStorage.removeItem("glitch_v6_"+lang);
     return initGame();
   }
   nextRound();
@@ -179,35 +171,52 @@ function nextRound() {
   const isOk = Math.random() > 0.5;
   const displayText = isOk ? item.sentence : produceGlitch(item.sentence);
 
-  currentItem = { text: displayText, isOk: isOk };
+  currentItem = { text: displayText, original: item.sentence, isOk: isOk };
   $("sentence").textContent = currentItem.text;
-  $("setCounter").textContent = `${currentIndex + 1}/${SET_SIZE}`;
+  $("correctionBox").style.opacity = "0";
+  $("setCounter").textContent = `${currentIndex + 1}/12`;
   $("scoreDisp").textContent = score;
   $("life").textContent = integrity + "%";
   $("terminal").style.borderColor = "var(--border)";
   busy=false;
-  setBtns(false);
+  $("btnGlitch").disabled = false;
+  $("btnStable").disabled = false;
 }
 
 function handleAnswer(userSaysStable) {
   if(busy) return;
   busy=true;
-  setBtns(true);
+  $("btnGlitch").disabled = true;
+  $("btnStable").disabled = true;
   
   const correct = (userSaysStable === currentItem.isOk);
   
   if(correct) {
     score += 100;
     $("terminal").style.borderColor = "var(--green)";
+    speak(currentItem.original, lang); // Doğruysa cümleyi oku
+    setTimeout(() => proceed(), 1200);
   } else {
     integrity -= 25;
     $("frame").classList.add("glitch-anim");
     $("terminal").style.borderColor = "var(--pink)";
-    setTimeout(()=> $("frame").classList.remove("glitch-anim"), 300);
-  }
+    
+    // Eğitim: Doğruyu göster ve oku
+    $("correctTxt").textContent = currentItem.original;
+    $("correctionBox").style.opacity = "1";
+    speak(currentItem.original, lang); 
 
-  if(integrity <= 0) setTimeout(() => finish(true), 600);
-  else setTimeout(() => { currentIndex++; nextRound(); }, 800);
+    setTimeout(()=> {
+        $("frame").classList.remove("glitch-anim");
+        if(integrity <= 0) finish(true);
+        else proceed();
+    }, 2500); // Yanlışta doğrusunu incelemek için süre daha uzun
+  }
+}
+
+function proceed() {
+    currentIndex++;
+    nextRound();
 }
 
 $("btnGlitch").onclick = () => handleAnswer(false);
