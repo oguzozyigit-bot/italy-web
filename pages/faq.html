@@ -93,17 +93,11 @@
   <div class="mobile-frame">
     <div class="topbar">
       <button class="back-btn" onclick="window.history.length > 1 ? window.history.back() : window.location.href='/pages/home.html'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="mini-brand">
-        <div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
-        <div class="mini-slogan">BE FREE</div>
-      </div>
+      <div class="mini-brand"><div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div><div class="mini-slogan">BE FREE</div></div>
     </div>
 
-    <!-- ✅ Bu alanı JS diline göre dolduracak -->
     <div class="page-content" id="contentHost"></div>
 
     <div class="footerbar">
@@ -117,7 +111,7 @@
     </div>
   </div>
 
-  <!-- ✅ İçerikler: TR/EN/DE/IT/FR (silinmez) -->
+  <!-- ===== TR ===== -->
   <template id="faq_tr">
     <div class="faq-card">
       <h1>Sıkça Sorulan <span>Sorular</span></h1>
@@ -160,6 +154,7 @@
     </div>
   </template>
 
+  <!-- ===== EN (birebir) ===== -->
   <template id="faq_en">
     <div class="faq-card">
       <h1>Frequently Asked <span>Questions</span></h1>
@@ -167,62 +162,167 @@
       <div class="faq-item">
         <span class="tag ai">GENERAL</span>
         <div class="faq-q">What is italkyAI and how does it work?</div>
-        <div class="faq-a">italkyAI is a next-gen assistant that provides instant voice, text, and image translation, and helps you learn languages through conversation.</div>
+        <div class="faq-a">italkyAI is a next-generation assistant that provides instant voice, text, and visual translation using advanced AI models, and also teaches languages by chatting with you.</div>
       </div>
 
       <div class="faq-item">
         <span class="tag free">MEMBERSHIP</span>
         <div class="faq-q">Is the app paid?</div>
-        <div class="faq-a">Signing in and using core AI features is <strong>free</strong>. Premium plans unlock extended voice time and advanced voice models.</div>
+        <div class="faq-a">Signing in and using the core AI features is completely <strong>free.</strong> Premium plans are offered for unlimited speaking time and advanced voice models (Voice AI).</div>
       </div>
 
       <div class="faq-item">
-        <span class="tag ai">TECH</span>
+        <span class="tag ai">TECHNOLOGY</span>
         <div class="faq-q">What is Talk AI (Voice AI)?</div>
-        <div class="faq-a">A low-latency mode where you can talk like a phone call: it listens, thinks, and responds with natural voice.</div>
+        <div class="faq-a">It is our mode where you can chat with no latency and no interruptions, just like talking to a real person on the phone. It listens to you, thinks, and replies instantly with a natural voice.</div>
       </div>
 
       <div class="faq-item">
-        <span class="tag pro">LANGUAGES</span>
-        <div class="faq-q">Which languages are supported?</div>
-        <div class="faq-a">We support many languages and keep expanding regularly.</div>
+        <span class="tag pro">LANGUAGE SUPPORT</span>
+        <div class="faq-q">Which languages do you support?</div>
+        <div class="faq-a">Currently, we provide full support for Turkish, English, German, French, Italian, Spanish, Russian, and Arabic. Our list grows every day.</div>
       </div>
 
       <div class="faq-item">
         <span class="tag ai">SECURITY</span>
-        <div class="faq-q">Are my conversations stored?</div>
-        <div class="faq-a">No. Audio is processed in real-time and is not stored on our servers.</div>
+        <div class="faq-q">Are my conversations recorded?</div>
+        <div class="faq-a">No. Your audio data is processed in real time and is not stored on our servers. Your privacy is our top priority.</div>
       </div>
 
       <div class="faq-item">
-        <span class="tag pro">REQUIREMENTS</span>
-        <div class="faq-q">Do I need internet?</div>
-        <div class="faq-a">Yes. Internet access is required to use the AI models.</div>
+        <span class="tag pro">FEATURE</span>
+        <div class="faq-q">Is an internet connection required?</div>
+        <div class="faq-a">Yes. To use the most powerful AI models (LLM), your device must be connected to the internet.</div>
       </div>
     </div>
   </template>
 
+  <!-- ===== DE (birebir) ===== -->
   <template id="faq_de">
     <div class="faq-card">
-      <h1>Häufige <span>Fragen</span></h1>
-      <div class="faq-item"><span class="tag ai">ALLGEMEIN</span><div class="faq-q">Was ist italkyAI?</div><div class="faq-a">italkyAI bietet Übersetzung und Sprachlernen in einem.</div></div>
-      <div class="faq-item"><span class="tag free">ABO</span><div class="faq-q">Ist es kostenlos?</div><div class="faq-a">Basisfunktionen sind kostenlos, Premium erweitert die Limits.</div></div>
+      <h1>Häufig gestellte <span>Fragen</span></h1>
+
+      <div class="faq-item">
+        <span class="tag ai">ALLGEMEIN</span>
+        <div class="faq-q">Was ist italkyAI und wie funktioniert es?</div>
+        <div class="faq-a">italkyAI ist ein Assistent der nächsten Generation, der mithilfe fortschrittlicher KI-Modelle sofortige Sprach-, Text- und Bildübersetzungen liefert und Ihnen zugleich durch Chat-Unterhaltungen beim Sprachenlernen hilft.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag free">MITGLIEDSCHAFT</span>
+        <div class="faq-q">Ist die App kostenpflichtig?</div>
+        <div class="faq-a">Die Anmeldung und die Nutzung der grundlegenden KI-Funktionen sind vollständig <strong>kostenlos.</strong> Für unbegrenzte Sprechzeit und erweiterte Sprachmodelle (Voice AI) werden Premium-Pläne angeboten.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag ai">TECHNOLOGIE</span>
+        <div class="faq-q">Was ist Sprech-KI (Voice AI)?</div>
+        <div class="faq-a">Das ist unser Modus, in dem Sie ohne Verzögerung und ohne Unterbrechungen sprechen können – wie bei einem Telefonat mit einem echten Menschen. Es hört Ihnen zu, denkt nach und antwortet sofort mit einer natürlichen Stimme.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag pro">SPRACHUNTERSTÜTZUNG</span>
+        <div class="faq-q">Welche Sprachen werden unterstützt?</div>
+        <div class="faq-a">Derzeit unterstützen wir vollständig Türkisch, Englisch, Deutsch, Französisch, Italienisch, Spanisch, Russisch und Arabisch. Unsere Liste wächst jeden Tag.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag ai">SICHERHEIT</span>
+        <div class="faq-q">Werden meine Gespräche gespeichert?</div>
+        <div class="faq-a">Nein. Ihre Audiodaten werden in Echtzeit verarbeitet und nicht auf unseren Servern gespeichert. Ihre Privatsphäre hat für uns höchste Priorität.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag pro">FUNKTION</span>
+        <div class="faq-q">Ist eine Internetverbindung erforderlich?</div>
+        <div class="faq-a">Ja. Um die leistungsstärksten KI-Modelle (LLM) nutzen zu können, muss Ihr Gerät mit dem Internet verbunden sein.</div>
+      </div>
     </div>
   </template>
 
+  <!-- ===== IT (birebir) ===== -->
   <template id="faq_it">
     <div class="faq-card">
       <h1>Domande <span>frequenti</span></h1>
-      <div class="faq-item"><span class="tag ai">GENERALE</span><div class="faq-q">Cos’è italkyAI?</div><div class="faq-a">Traduzione e apprendimento linguistico in un’unica app.</div></div>
-      <div class="faq-item"><span class="tag free">ABBONAMENTO</span><div class="faq-q">È gratuito?</div><div class="faq-a">Base gratuita, Premium sblocca funzioni avanzate.</div></div>
+
+      <div class="faq-item">
+        <span class="tag ai">GENERALE</span>
+        <div class="faq-q">Che cos’è italkyAI e come funziona?</div>
+        <div class="faq-a">italkyAI è un assistente di nuova generazione che, usando modelli di intelligenza artificiale avanzati, offre traduzioni istantanee vocali, testuali e visive e, allo stesso tempo, ti insegna le lingue dialogando con te.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag free">ABBONAMENTO</span>
+        <div class="faq-q">L’app è a pagamento?</div>
+        <div class="faq-a">Accedere e utilizzare le funzionalità IA di base è completamente <strong>gratuito.</strong> Sono disponibili piani Premium per tempo di conversazione illimitato e modelli vocali avanzati (Voice AI).</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag ai">TECNOLOGIA</span>
+        <div class="faq-q">Che cos’è Talk AI (Voice AI)?</div>
+        <div class="faq-a">È la modalità in cui puoi conversare senza ritardi e senza interruzioni, proprio come parlare al telefono con una persona reale. Ti ascolta, elabora e risponde subito con una voce naturale.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag pro">SUPPORTO LINGUE</span>
+        <div class="faq-q">Quali lingue supportate?</div>
+        <div class="faq-a">Al momento supportiamo pienamente turco, inglese, tedesco, francese, italiano, spagnolo, russo e arabo. La nostra lista cresce ogni giorno.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag ai">SICUREZZA</span>
+        <div class="faq-q">Le mie conversazioni vengono registrate?</div>
+        <div class="faq-a">No. I tuoi dati audio vengono elaborati in tempo reale e non vengono archiviati sui nostri server. La tua privacy è la nostra massima priorità.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag pro">FUNZIONALITÀ</span>
+        <div class="faq-q">È necessaria una connessione internet?</div>
+        <div class="faq-a">Sì. Per utilizzare i modelli di IA più potenti (LLM), il tuo dispositivo deve essere connesso a internet.</div>
+      </div>
     </div>
   </template>
 
+  <!-- ===== FR (birebir) ===== -->
   <template id="faq_fr">
     <div class="faq-card">
       <h1>Questions <span>fréquentes</span></h1>
-      <div class="faq-item"><span class="tag ai">GÉNÉRAL</span><div class="faq-q">Qu’est-ce que italkyAI ?</div><div class="faq-a">Traduction et apprentissage des langues au même endroit.</div></div>
-      <div class="faq-item"><span class="tag free">ABONNEMENT</span><div class="faq-q">Est-ce gratuit ?</div><div class="faq-a">Fonctions de base gratuites, Premium débloque plus.</div></div>
+
+      <div class="faq-item">
+        <span class="tag ai">GÉNÉRAL</span>
+        <div class="faq-q">Qu’est-ce que italkyAI et comment ça fonctionne ?</div>
+        <div class="faq-a">italkyAI est un assistant de nouvelle génération qui, grâce à des modèles d’IA avancés, réalise des traductions instantanées vocales, écrites et visuelles, tout en vous aidant à apprendre une langue en conversant avec vous.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag free">ABONNEMENT</span>
+        <div class="faq-q">L’application est-elle payante ?</div>
+        <div class="faq-a">La connexion et l’utilisation des fonctionnalités IA de base sont entièrement <strong>gratuites.</strong> Des offres Premium existent pour un temps de conversation illimité et des modèles vocaux avancés (Voice AI).</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag ai">TECHNOLOGIE</span>
+        <div class="faq-q">Qu’est-ce que Talk AI (Voice AI) ?</div>
+        <div class="faq-a">C’est notre mode où vous pouvez discuter sans latence et sans coupure, comme au téléphone avec une vraie personne. Il vous écoute, réfléchit et répond instantanément avec une voix naturelle.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag pro">PRISE EN CHARGE DES LANGUES</span>
+        <div class="faq-q">Quelles langues prenez-vous en charge ?</div>
+        <div class="faq-a">Actuellement, nous prenons en charge entièrement le turc, l’anglais, l’allemand, le français, l’italien, l’espagnol, le russe et l’arabe. Notre liste s’agrandit chaque jour.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag ai">SÉCURITÉ</span>
+        <div class="faq-q">Mes conversations sont-elles enregistrées ?</div>
+        <div class="faq-a">Non. Vos données audio sont traitées en temps réel et ne sont pas stockées sur nos serveurs. Votre confidentialité est notre priorité absolue.</div>
+      </div>
+
+      <div class="faq-item">
+        <span class="tag pro">FONCTIONNALITÉ</span>
+        <div class="faq-q">Une connexion internet est-elle obligatoire ?</div>
+        <div class="faq-a">Oui. Pour utiliser les modèles d’IA les plus puissants (LLM), votre appareil doit être connecté à internet.</div>
+      </div>
     </div>
   </template>
 
@@ -236,9 +336,6 @@
     }
 
     function setFooterLang(){
-      const lang = getSiteLang();
-      // footer link text: use i18n dictionary keys
-      // Keep it simple: read from t(...)
       const a = document.getElementById("lnkAbout");
       const f = document.getElementById("lnkFaq");
       const p = document.getElementById("lnkPrivacy");
@@ -247,7 +344,7 @@
       if(f) f.textContent = t("nav_faq");
       if(p) p.textContent = t("nav_privacy");
       if(c) c.textContent = t("nav_contact");
-      document.documentElement.lang = lang;
+      document.documentElement.lang = getSiteLang();
     }
 
     function render(){
@@ -256,7 +353,6 @@
       const tpl = document.getElementById(pickId());
       if(tpl) host.appendChild(tpl.content.cloneNode(true));
 
-      // title
       const lang = getSiteLang();
       const titles = { tr:"italkyAI • SSS", en:"italkyAI • FAQ", de:"italkyAI • FAQ", it:"italkyAI • FAQ", fr:"italkyAI • FAQ" };
       document.title = titles[lang] || "italkyAI • FAQ";
