@@ -3,50 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ITALKY • Glitch Hunter</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<title>ITALKY • Glitch Hunter Eternal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
 
 <style>
 :root{
   --bg:#050505; --cyan:#00ffff; --pink:#ff0055; --green:#00ff66;
-  --panel:rgba(20,20,20,.95); --border:rgba(0,255,255,.3); --text:#fff;
+  --panel:rgba(10,20,20,.95); --border:rgba(0,255,255,.3); --text:#fff;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:sans-serif;color:var(--text)}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Outfit', sans-serif;color:var(--text)}
 
 .app{position:relative;max-width:480px;height:100%;margin:0 auto;background:var(--panel);border:1px solid var(--border);display:flex;flex-direction:column;z-index:5}
-@media(min-width:520px){.app{height:92vh;border-radius:20px;margin-top:4vh}}
+@media(min-width:520px){.app{height:92vh;border-radius:24px;margin-top:4vh}}
 
 .header{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 16px; border-bottom:1px solid var(--border)}
-.title{font-size:18px; color:var(--cyan); font-weight:bold;}
+.title{font-size:18px; color:var(--cyan); font-weight:900; letter-spacing:1px;}
+.pb-badge{font-size:10px;padding:4px 8px;background:var(--cyan);color:#000;font-weight:800;border-radius:4px}
 
 .game{flex:1;padding:16px;display:none;flex-direction:column;justify-content:space-between}
-.stats{display:flex;justify-content:space-between;font-size:16px;color:var(--cyan);font-weight:bold;margin-bottom:10px}
+.stats{display:flex;justify-content:space-between;font-size:13px;color:var(--cyan);font-weight:bold;margin-bottom:10px}
 
-.terminal{flex:1;border:2px solid var(--border);background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:20px;text-align:center;border-radius:14px;transition: border-color 0.3s;}
+.terminal{flex:1;border:2px solid var(--border);background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:25px;text-align:center;border-radius:20px;transition: 0.3s;}
 
-.sentence{font-family:'Space Grotesk', sans-serif; font-size:32px; color:#fff; line-height:1.2; font-weight:900; text-transform: uppercase;}
-#correctionBox{font-size:16px; color:var(--green); margin-top:15px; font-weight:bold; opacity:0; transition:0.3s;}
+.sentence{font-size:28px; color:#fff; line-height:1.3; font-weight:700;}
+
+#correctionBox{font-size:15px; color:var(--green); margin-top:15px; font-weight:bold; opacity:0; transition:0.3s; background: rgba(0,255,102,0.1); padding: 12px; border-radius: 10px; width: 100%; text-align: left;}
+.tr-text { color: var(--cyan); font-style: italic; font-weight: 500; margin-top: 5px; display: block; }
 
 .controls{display:flex;gap:12px;height:100px;margin-top:20px}
-.action{flex:1;border:3px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:.1s; font-weight:bold;border-radius:12px;color:#fff; background: transparent;}
-.bug{background:rgba(255,0,85,0.1);border-color:var(--pink)}
-.ok{background:rgba(0,255,102,0.1);border-color:var(--green)}
+.action{flex:1;border:3px solid var(--border);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:.1s; font-weight:900;border-radius:16px;color:#fff; background: transparent;}
+.bug{background:rgba(255,0,85,0.1);border-color:var(--pink); color: var(--pink)}
+.ok{background:rgba(0,255,102,0.1);border-color:var(--green); color: var(--green)}
 .action:active{transform:scale(.95)}
 .action:disabled{opacity:0.2; pointer-events:none;}
 
-.modal{position:absolute;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:200}
-.card{background:#111;border:1px solid var(--cyan);padding:20px;width:90%;text-align:center;border-radius:20px}
-.mainbtn{width:100%;padding:18px;margin-top:15px;border:none;background:var(--cyan);color:#000;font-weight:900;cursor:pointer;font-size:18px;border-radius:10px}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.98);display:flex;align-items:center;justify-content:center;z-index:200}
+.card{background:#0a0a0a;border:1px solid var(--cyan);padding:25px;width:90%;text-align:center;border-radius:28px; max-height: 90vh; overflow-y: auto;}
+.mainbtn{width:100%;padding:18px;margin-top:10px;border:none;background:var(--cyan);color:#000;font-weight:900;cursor:pointer;font-size:18px;border-radius:14px}
 
-/* ✅ TAŞMAYAN DİL PANELİ */
-.lang-grid{display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:15px 0}
-.lang-btn{font-size:24px; padding:8px 12px; background:rgba(255,255,255,0.05); border:2px solid #444; border-radius:12px; cursor:pointer; flex: 1 1 15%; min-width: 60px;}
+.lang-grid{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:15px 0}
+.lang-btn{font-size:26px; padding:10px 15px; background:rgba(255,255,255,0.05); border:2px solid #333; border-radius:12px; cursor:pointer; flex: 1 1 18%;}
 .lang-btn.active{border-color:var(--cyan); background:rgba(0,243,255,0.1)}
+
+.daily-card { background: linear-gradient(135deg, rgba(255,0,255,0.1), rgba(0,243,255,0.1)); border: 1px solid var(--pink); padding: 12px; border-radius: 15px; margin-bottom: 15px; }
 
 .hidden{display:none!important}
 .glitch-anim{animation:shake 0.3s}
-@keyframes shake{ 0%, 100% {transform: translateX(0)} 25% {transform: translateX(-10px)} 75% {transform: translateX(10px)} }
+@keyframes shake{ 0%, 100% {transform: translateX(0)} 25% {transform: translateX(-8px)} 75% {transform: translateX(8px)} }
 </style>
 </head>
 
@@ -55,18 +59,22 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
   <div class="header">
     <div style="cursor:pointer; color:var(--cyan); font-size:24px" onclick="location.href='/pages/game.html'">←</div>
     <div class="title">GLITCH HUNTER</div>
-    <div id="scoreDisp" style="font-weight:bold; color:var(--green)">0</div>
+    <div id="pbBadge" class="pb-badge">PB: 0</div>
   </div>
 
   <div class="game" id="game">
     <div class="stats">
-      <span>CAN: <b id="life">100%</b></span>
+      <span>INTEGRITY: <b id="life">100%</b></span>
+      <span>SCORE: <b id="scoreDisp" style="color:var(--green)">0</b></span>
       <span id="setCounter">1/12</span>
     </div>
 
     <div class="terminal" id="terminal">
-      <div class="sentence" id="sentence">LOADING...</div>
-      <div id="correctionBox">DOĞRUSU: <span id="correctTxt"></span></div>
+      <div class="sentence" id="sentence">Initializing...</div>
+      <div id="correctionBox">
+        CORRECTION: <span id="correctTxt"></span>
+        <span id="trTxt" class="tr-text"></span>
+      </div>
     </div>
 
     <div class="controls">
@@ -78,9 +86,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 
 <div class="modal" id="start">
   <div class="card">
-    <h2 style="color:var(--cyan); font-size:24px">Oyun Başlıyor</h2>
-    <p style="opacity:.8; font-size:14px">Dilinizi seçin ve hataları avlayın.</p>
+    <h2 style="color:var(--cyan); font-size:24px; margin-bottom: 5px;">Cyber Boot Eternal</h2>
     
+    <div class="daily-card" id="dailyCard">
+        <div style="font-size:10px; color:var(--pink); font-weight:900; margin-bottom:3px;">👑 BUGÜNÜN LİDERİ</div>
+        <div id="dailyInfo" style="font-size:14px; font-weight:800;">Yükleniyor...</div>
+    </div>
+
     <div class="lang-grid">
         <button data-lang="en" class="lang-btn active">🇬🇧</button>
         <button data-lang="de" class="lang-btn">🇩🇪</button>
@@ -89,16 +101,18 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
         <button data-lang="it" class="lang-btn">🇮🇹</button>
     </div>
 
-    <button class="mainbtn" id="startBtn">BAŞLA</button>
+    <button class="mainbtn" id="startBtn">START MISSION</button>
+    <div id="leaderboardBox" style="margin-top:20px; font-size:11px; text-align:left; color:rgba(255,255,255,0.5)"></div>
   </div>
 </div>
 
 <div class="modal hidden" id="end">
   <div class="card">
-    <h2 id="endTitle" style="color:var(--green)">SET BİTTİ</h2>
+    <h2 id="endTitle" style="color:var(--green)">SECTOR CLEARED</h2>
     <p id="endStats" style="font-size:22px; margin:20px 0"></p>
-    <button class="mainbtn" id="btnContinue">DEVAM ET</button>
-    <button class="mainbtn" style="background:#333;color:#fff" id="btnExit">ÇIKIS</button>
+    <button class="mainbtn" id="btnContinue">DEVAM ET (RİSK)</button>
+    <button class="mainbtn" id="btnBank" style="background:var(--pink); color:#fff">BANKALA (%5 BONUS + TAMİR)</button>
+    <button class="mainbtn" style="background:#222;color:#fff" id="btnExit">KAYDET VE ÇIK</button>
   </div>
 </div>
 
@@ -106,9 +120,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
 const $ = id => document.getElementById(id);
-let lang="en", score=0, integrity=100, wordList=[], currentIndex=0, busy=false, currentItem=null;
+let lang="en", totalScore=0, setScore=0, integrity=100, wordList=[], currentIndex=0, busy=false, currentItem=null, runActive=false;
 
-// Seslendirme Fonksiyonu
 function speak(text, targetLang) {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
@@ -118,31 +131,55 @@ function speak(text, targetLang) {
   window.speechSynthesis.speak(u);
 }
 
+function updateLeaderboardUI() {
+    const records = JSON.parse(localStorage.getItem('glitch_eternal_v4') || '[]');
+    const today = new Date().toLocaleDateString('tr-TR');
+    const daily = JSON.parse(localStorage.getItem('glitch_daily_v4') || '{}');
+
+    if (daily.date !== today) {
+        localStorage.removeItem('glitch_daily_v4');
+        $('dailyInfo').textContent = "Lider Yok";
+    } else if (daily.score) {
+        $('dailyInfo').textContent = `${daily.score} Puan (${daily.lang})`;
+    }
+
+    const pb = records.filter(r => r.lang === lang.toUpperCase())[0]?.score || 0;
+    $("pbBadge").textContent = `PB: ${pb}`;
+    
+    $('leaderboardBox').innerHTML = records.slice(0,5).map((r,i)=> `<div>${i+1}. ${r.score} - ${r.lang}</div>`).join('');
+}
+
 document.querySelectorAll(".lang-btn").forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll(".lang-btn").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
     lang=b.dataset.lang;
+    updateLeaderboardUI();
   };
 });
 
 $("startBtn").onclick=async()=>{
   $("start").classList.add("hidden"); 
   $("game").style.display="flex";
-  score=0; integrity=100;
+  if(!runActive) {
+      totalScore=0; integrity=100; runActive=true;
+  }
   await initGame();
 };
 
-async function initGame() {
+async function initGame(isBank = false) {
   currentIndex=0;
+  setScore=0;
+  if(isBank) integrity = 100;
+
   const pool = await loadLangPool(lang);
   const items = pool?.items || [];
   const randomizedItems = [...items].sort(() => Math.random() - 0.5);
-  const {used, save} = createUsedSet("glitch_v6_"+lang);
+  const {used, save} = createUsedSet("glitch_eternal_v4_"+lang);
   wordList = pick({items: randomizedItems}, 12, used, save, (it) => it.sentence && it.sentence.length > 5);
   
   if(wordList.length < 12) {
-    localStorage.removeItem("glitch_v6_"+lang);
+    localStorage.removeItem("glitch_eternal_v4_"+lang);
     return initGame();
   }
   nextRound();
@@ -151,31 +188,26 @@ async function initGame() {
 function produceGlitch(original) {
   let text = original;
   const rules = [
-    { f: " am ", t: " is " }, { f: " are ", t: " is " },
-    { f: " have ", t: " has " }, { f: " don't ", t: " doesn't " },
-    { f: " doesn't ", t: " don't " }, { f: " a ", t: " an " }
+    { f: " am ", t: " is " }, { f: " are ", t: " is " }, { f: " have ", t: " has " },
+    { f: " don't ", t: " doesn't " }, { f: " doesn't ", t: " don't " }, { f: " a ", t: " an " }
   ];
   const rule = rules.find(r => text.toLowerCase().includes(r.f));
-  if(rule) {
-      const reg = new RegExp(rule.f, "i");
-      text = text.replace(reg, rule.t);
-  } else {
-      text = text.replace(/\bis\b/i, "are").replace(/\bs /g, " "); 
-  }
+  if(rule) text = text.replace(new RegExp(rule.f, "i"), rule.t);
+  else text = text.replace(/\bis\b/i, "are").replace(/\bs /g, " ");
   return text;
 }
 
 function nextRound() {
-  if(currentIndex >= wordList.length) { finish(false); return; }
+  if(currentIndex >= wordList.length || integrity <= 0) { finish(integrity <= 0); return; }
   const item = wordList[currentIndex];
   const isOk = Math.random() > 0.5;
   const displayText = isOk ? item.sentence : produceGlitch(item.sentence);
 
-  currentItem = { text: displayText, original: item.sentence, isOk: isOk };
+  currentItem = { text: displayText, original: item.sentence, isOk: isOk, tr: item.tr || "" };
   $("sentence").textContent = currentItem.text;
   $("correctionBox").style.opacity = "0";
   $("setCounter").textContent = `${currentIndex + 1}/12`;
-  $("scoreDisp").textContent = score;
+  $("scoreDisp").textContent = totalScore;
   $("life").textContent = integrity + "%";
   $("terminal").style.borderColor = "var(--border)";
   busy=false;
@@ -183,59 +215,86 @@ function nextRound() {
   $("btnStable").disabled = false;
 }
 
-function handleAnswer(userSaysStable) {
+function handleAnswer(userPick) {
   if(busy) return;
   busy=true;
   $("btnGlitch").disabled = true;
   $("btnStable").disabled = true;
   
-  const correct = (userSaysStable === currentItem.isOk);
+  const correct = (userPick === currentItem.isOk);
   
   if(correct) {
-    score += 100;
+    totalScore += 100; setScore += 100;
     $("terminal").style.borderColor = "var(--green)";
-    speak(currentItem.original, lang); // Doğruysa cümleyi oku
-    setTimeout(() => proceed(), 1200);
+    speak(currentItem.original, lang);
+    setTimeout(() => { currentIndex++; nextRound(); }, 1200);
   } else {
     integrity -= 25;
     $("frame").classList.add("glitch-anim");
     $("terminal").style.borderColor = "var(--pink)";
     
-    // Eğitim: Doğruyu göster ve oku
     $("correctTxt").textContent = currentItem.original;
+    $("trTxt").textContent = "Anlamı: " + currentItem.tr;
     $("correctionBox").style.opacity = "1";
-    speak(currentItem.original, lang); 
+    speak(currentItem.original, lang);
 
     setTimeout(()=> {
         $("frame").classList.remove("glitch-anim");
         if(integrity <= 0) finish(true);
-        else proceed();
-    }, 2500); // Yanlışta doğrusunu incelemek için süre daha uzun
+        else { currentIndex++; nextRound(); }
+    }, 4000); // 4 saniye bekleme başkanım
   }
-}
-
-function proceed() {
-    currentIndex++;
-    nextRound();
 }
 
 $("btnGlitch").onclick = () => handleAnswer(false);
 $("btnStable").onclick = () => handleAnswer(true);
 
+function saveRecord() {
+    const records = JSON.parse(localStorage.getItem('glitch_eternal_v4') || '[]');
+    const today = new Date().toLocaleDateString('tr-TR');
+    
+    records.push({score: totalScore, lang: lang.toUpperCase(), date: today, id: Date.now()});
+    records.sort((a,b)=>b.score - a.score);
+    localStorage.setItem('glitch_eternal_v4', JSON.stringify(records.slice(0,10)));
+
+    const daily = JSON.parse(localStorage.getItem('glitch_daily_v4') || '{}');
+    if (daily.date !== today || totalScore > (daily.score || 0)) {
+        localStorage.setItem('glitch_daily_v4', JSON.stringify({score: totalScore, lang: lang.toUpperCase(), date: today}));
+    }
+}
+
 function finish(died) {
+  saveRecord();
+  updateLeaderboardUI();
   $("end").classList.remove("hidden");
-  $("endTitle").textContent = died ? "SİSTEM ÇÖKTÜ" : "SET TAMAMLANDI";
+  $("endTitle").textContent = died ? "SYSTEM CRASHED" : "SECTOR CLEARED";
   $("endTitle").style.color = died ? "var(--pink)" : "var(--green)";
-  $("endStats").innerHTML = `SKOR: <b>${score}</b>`;
-  $("btnContinue").classList.toggle("hidden", died);
+  $("endStats").innerHTML = `SCORE: <b>${totalScore}</b>`;
+  
+  if(died) {
+      $("btnContinue").classList.add("hidden");
+      $("btnBank").classList.add("hidden");
+      runActive = false;
+  } else {
+      $("btnContinue").classList.remove("hidden");
+      $("btnBank").classList.remove("hidden");
+  }
 }
 
 $("btnContinue").onclick = () => {
   $("end").classList.add("hidden");
-  initGame();
+  initGame(false);
+};
+
+$("btnBank").onclick = () => {
+  totalScore += Math.round(setScore * 0.05);
+  $("end").classList.add("hidden");
+  initGame(true);
 };
 
 $("btnExit").onclick = () => location.reload();
+
+window.onload = updateLeaderboardUI;
 </script>
 </body>
 </html>
