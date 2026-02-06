@@ -1,11 +1,14 @@
 // FILE: italky-web/js/teacher_page.js
-// FINAL v23.0 (15 MIN LESSON + 24H COOLDOWN + EXAM EVERY 7 LESSONS)
+// FINAL v23.1 (BACKEND OPENAI STT+TTS + 15 MIN LESSON + 24H COOLDOWN + EXAM EVERY 7 LESSONS)
 // Kurallar:
 // - 15 dk dolmadan çıkarsa ders bitmiş sayılmaz, kaldığı yerden devam eder.
 // - 15 dk tamamlanırsa ders tamamlanır, yeni ders 24 saat sonra açılır.
 // - Her 7 dersin sonunda sınav (sınav geçilmeden yeni ders başlamaz).
 
 const $ = (id) => document.getElementById(id);
+
+// ✅ Backend Base Domain (istersen window.BASE_DOMAIN ile override)
+const BASE_DOMAIN = (window.BASE_DOMAIN || "https://italky-api.onrender.com").replace(/\/+$/, "");
 
 function toast(msg) {
   const t = $("toast");
@@ -72,33 +75,121 @@ function similarity(a, b) {
   return 1 - (dist / Math.max(m, n));
 }
 
-/* --- TTS & STT --- */
-function speakOnce(word, langCode) {
-  return new Promise((resolve) => {
-    if (!("speechSynthesis" in window)) { resolve(false); return; }
-    try {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(String(word || ""));
-      u.lang = LOCALES[langCode] || "en-US";
-      u.rate = 0.9;
-      u.pitch = 1.0;
-      u.onend = () => resolve(true);
-      u.onerror = () => resolve(false);
-      window.speechSynthesis.speak(u);
-    } catch {
-      resolve(false);
+/* =========================================================
+   ✅ BACKEND OPENAI VOICE (TTS + STT)
+   - TTS: GET  /api/voice/tts?text=...&locale=...
+   - STT: POST /api/voice/stt?locale=...  (FormData audio)
+   ========================================================= */
+
+let __audioEl = null;
+let __lastObjUrl = null;
+
+async function speakOnce(text, langCode) {
+  try {
+    const q = encodeURIComponent(String(text || ""));
+    const lc = encodeURIComponent(String(langCode || "en"));
+    const url = `${BASE_DOMAIN}/api/voice/tts?text=${q}&locale=${lc}`;
+
+    const r = await fetch(url, { method: "GET" });
+    if (!r.ok) return false;
+
+    const blob = await r.blob();
+    const objUrl = URL.createObjectURL(blob);
+
+    if (__lastObjUrl) {
+      try { URL.revokeObjectURL(__lastObjUrl); } catch {}
+      __lastObjUrl = null;
     }
-  });
+
+    if (!__audioEl) __audioEl = new Audio();
+    __audioEl.pause();
+    __audioEl.currentTime = 0;
+    __audioEl.src = objUrl;
+    __lastObjUrl = objUrl;
+
+    await __audioEl.play();
+
+    __audioEl.onended = () => {
+      if (__lastObjUrl) {
+        try { URL.revokeObjectURL(__lastObjUrl); } catch {}
+        __lastObjUrl = null;
+      }
+    };
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-function makeRecognizer(langCode) {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return null;
-  const rec = new SR();
-  rec.lang = LOCALES[langCode] || "en-US";
-  rec.interimResults = false;
-  rec.continuous = false;
-  return rec;
+function pickRecorderMime() {
+  // Chrome: audio/webm;codecs=opus genelde OK
+  const candidates = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+    "audio/ogg",
+  ];
+  if (!window.MediaRecorder) return null;
+  for (const t of candidates) {
+    try {
+      if (MediaRecorder.isTypeSupported(t)) return t;
+    } catch {}
+  }
+  return ""; // boş -> tarayıcı kendi seçer
+}
+
+async function sttOnce(langCode, ms = 1200) {
+  if (!navigator.mediaDevices?.getUserMedia) return "";
+
+  let stream = null;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    return "";
+  }
+
+  const chunks = [];
+  const mimeType = pickRecorderMime();
+
+  let rec = null;
+  try {
+    rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+  } catch {
+    // MediaRecorder kurulamıyorsa stream’i kapat
+    try { stream.getTracks().forEach(t => t.stop()); } catch {}
+    return "";
+  }
+
+  return await new Promise((resolve) => {
+    rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+
+    rec.onstop = async () => {
+      try { stream.getTracks().forEach(t => t.stop()); } catch {}
+
+      try {
+        const blob = new Blob(chunks, { type: mimeType || "audio/webm" });
+        const fd = new FormData();
+        fd.append("audio", blob, "speech.webm");
+
+        const lc = encodeURIComponent(String(langCode || "en"));
+        const url = `${BASE_DOMAIN}/api/voice/stt?locale=${lc}`;
+
+        const r = await fetch(url, { method: "POST", body: fd });
+        if (!r.ok) return resolve("");
+
+        const j = await r.json();
+        resolve(String(j.text || ""));
+      } catch {
+        resolve("");
+      }
+    };
+
+    rec.start();
+    setTimeout(() => {
+      try { rec.stop(); } catch { resolve(""); }
+    }, ms);
+  });
 }
 
 /* --- LESSON DATA --- */
@@ -114,7 +205,8 @@ const LESSON1 = {
     { tr: "bugün", t: "today", em: "📅" }
   ],
   de: [ { tr:"elma", t:"apfel", em:"🍎" }, { tr:"su", t:"wasser", em:"💧" }, { tr:"ekmek", t:"brot", em:"🍞" }, { tr:"menü", t:"speisekarte", em:"📜" }, { tr:"fiyat", t:"preis", em:"🏷️" }, { tr:"evet", t:"ja", em:"✅" }, { tr:"hayır", t:"nein", em:"❌" }, { tr:"merhaba", t:"hallo", em:"👋" }, { tr:"güle güle", t:"tschüss", em:"👋" }, { tr:"teşekkürler", t:"danke", em:"🙏" }, { tr:"lütfen", t:"bitte", em:"🤝" }, { tr:"affedersiniz", t:"entschuldigung", em:"🙋" }, { tr:"anlamıyorum", t:"ich verstehe nicht", em:"🤷" }, { tr:"yardım", t:"hilfe", em:"🆘" }, { tr:"tuvalet", t:"toilette", em:"🚻" }, { tr:"hesap", t:"die rechnung", em:"🧾" }, { tr:"çok güzel", t:"sehr gut", em:"🌟" }, { tr:"sıcak", t:"heiß", em:"🔥" }, { tr:"soğuk", t:"kalt", em:"❄️" }, { tr:"bugün", t:"heute", em:"📅" } ],
-  fr: [ { tr:"elma", t:"pomme", em:"🍎" }, { tr:"su", t:"eau", em:"💧" }, { tr:"ekmek", t:"pain", em:"🍞" }, { tr:"menü", t:"menu", em:"📜" }, { tr:"fiyat", t:"prix", em:"🏷️" }, { tr:"evet", t:"oui", em:"✅" }, { tr:"hayır", t:"non", em:"❌" }, { tr:"merhaba", t:"bonjour", em:"👋" }, { tr:"güle güle", t:"au revoir", em:"👋" }, { tr:"teşekkürler", t:"merci", em:"🙏" }, { tr:"lütfen", t:"s'il vous plaît", em:"🤝" }, { tr:"affedersiniz", t:"excusez-moi", em:"🙋" }, { tr:"anlamıyorum", t:"je ne comprends pas", em:"🤷" }, { tr:"yardım", t:"aide", em:"🆘" }, { tr:"tuvalet", t:"toilettes", em:"🚻" }, {ümle, t:"l'addition", em:"🧾" }, { tr:"çok güzel", t:"très bien", em:"🌟" }, { tr:"sıcak", t:"chaud", em:"🔥" }, { tr:"soğuk", t:"froid", em:"❄️" }, { tr:"bugün", t:"aujourd'hui", em:"📅" } ],
+  // ✅ FIX: FR array içindeki bozuk obje düzeltildi (hesap)
+  fr: [ { tr:"elma", t:"pomme", em:"🍎" }, { tr:"su", t:"eau", em:"💧" }, { tr:"ekmek", t:"pain", em:"🍞" }, { tr:"menü", t:"menu", em:"📜" }, { tr:"fiyat", t:"prix", em:"🏷️" }, { tr:"evet", t:"oui", em:"✅" }, { tr:"hayır", t:"non", em:"❌" }, { tr:"merhaba", t:"bonjour", em:"👋" }, { tr:"güle güle", t:"au revoir", em:"👋" }, { tr:"teşekkürler", t:"merci", em:"🙏" }, { tr:"lütfen", t:"s'il vous plaît", em:"🤝" }, { tr:"affedersiniz", t:"excusez-moi", em:"🙋" }, { tr:"anlamıyorum", t:"je ne comprends pas", em:"🤷" }, { tr:"yardım", t:"aide", em:"🆘" }, { tr:"tuvalet", t:"toilettes", em:"🚻" }, { tr:"hesap", t:"l'addition", em:"🧾" }, { tr:"çok güzel", t:"très bien", em:"🌟" }, { tr:"sıcak", t:"chaud", em:"🔥" }, { tr:"soğuk", t:"froid", em:"❄️" }, { tr:"bugün", t:"aujourd'hui", em:"📅" } ],
   it: [ { tr:"elma", t:"mela", em:"🍎" }, { tr:"su", t:"acqua", em:"💧" }, { tr:"ekmek", t:"pane", em:"🍞" }, { tr:"menü", t:"menu", em:"📜" }, { tr:"fiyat", t:"prezzo", em:"🏷️" }, { tr:"evet", t:"sì", em:"✅" }, { tr:"hayır", t:"no", em:"❌" }, { tr:"merhaba", t:"ciao", em:"👋" }, { tr:"güle güle", t:"arrivederci", em:"👋" }, { tr:"teşekkürler", t:"grazie", em:"🙏" }, { tr:"lütfen", t:"per favore", em:"🤝" }, { tr:"affedersiniz", t:"scusi", em:"🙋" }, { tr:"anlamıyorum", t:"non capisco", em:"🤷" }, { tr:"yardım", t:"aiuto", em:"🆘" }, { tr:"tuvalet", t:"bagno", em:"🚻" }, { tr:"hesap", t:"il conto", em:"🧾" }, { tr:"çok güzel", t:"molto bene", em:"🌟" }, { tr:"sıcak", t:"caldo", em:"🔥" }, { tr:"soğuk", t:"freddo", em:"❄️" }, { tr:"bugün", t:"oggi", em:"📅" } ],
   es: [ { tr:"elma", t:"manzana", em:"🍎" }, { tr:"su", t:"agua", em:"💧" }, { tr:"ekmek", t:"pan", em:"🍞" }, { tr:"menü", t:"menú", em:"📜" }, { tr:"fiyat", t:"precio", em:"🏷️" }, { tr:"evet", t:"sí", em:"✅" }, { tr:"hayır", t:"no", em:"❌" }, { tr:"merhaba", t:"hola", em:"👋" }, { tr:"güle güle", t:"adiós", em:"👋" }, { tr:"teşekkürler", t:"gracias", em:"🙏" }, { tr:"lütfen", t:"por favor", em:"🤝" }, { tr:"affedersiniz", t:"perdón", em:"🙋" }, { tr:"anlamıyorum", t:"no entiendo", em:"🤷" }, { tr:"yardım", t:"ayuda", em:"🆘" }, { tr:"tuvalet", t:"baño", em:"🚻" }, { tr:"hesap", t:"la cuenta", em:"🧾" }, { tr:"çok güzel", t:"muy bien", em:"🌟" }, { tr:"sıcak", t:"caliente", em:"🔥" }, { tr:"soğuk", t:"frío", em:"❄️" }, { tr:"bugün", t:"hoy", em:"📅" } ]
 };
@@ -138,7 +230,6 @@ function saveJson(key, val) {
 
 /* --- PROGRESS STATE (ders/gün/sınav kilidi) --- */
 function loadProgress() {
-  const now = Date.now();
   const p = loadJson(PROGRESS_KEY, null) || {};
   return {
     lessonNo: Number.isInteger(p.lessonNo) && p.lessonNo >= 1 ? p.lessonNo : 1,
@@ -178,13 +269,11 @@ function isLockedBy24h() {
 }
 
 function isLockedByExam() {
-  // sınav zorunluysa ve henüz geçilmemişse, yeni ders başlatma engeli
   return !!P.examRequired;
 }
 
 /* --- CURRENT LESSON DATA --- */
 function getLessonData(lessonNo) {
-  // Ders sayısı azsa en azından 1. dersi döndür (fallback)
   const idx = Math.max(0, Math.min((lessonNo - 1), LESSONS.length - 1));
   const pack = LESSONS[idx] || LESSON1;
   return pack[lang] || pack.en || LESSON1.en;
@@ -196,7 +285,6 @@ function loadLessonState(lessonNo) {
   const x = loadJson(key, {}) || {};
   const now = Date.now();
 
-  // aktifStartTime yoksa ve ders kilitli değilse başlat
   if (!P.activeStartTime && !isLockedBy24h() && !isLockedByExam()) {
     P.activeStartTime = now;
     saveProgress(P);
@@ -207,7 +295,6 @@ function loadLessonState(lessonNo) {
     learned: x.learned || {},
     skipped: x.skipped || {},
     exam: x.exam || { pending: false, waiting: false, failCount: 0, q: [], qi: 0, score: 0 },
-    // startTime ders bazlı DEĞİL, global P.activeStartTime
     speaking: false,
     listening: false,
     bound: false
@@ -270,7 +357,6 @@ function setLockedUI(msg) {
 function updateUI() {
   $("langPill").textContent = LANG_LABEL[lang] || "Teacher";
 
-  // Öncelik: sınav kilidi
   if (isLockedByExam()) {
     $("wTarget").textContent = "EXAM";
     $("repeatTxt").textContent = "EXAM";
@@ -279,7 +365,6 @@ function updateUI() {
     return;
   }
 
-  // 24 saat kilidi
   if (isLockedBy24h()) {
     const r = remainingLockTime();
     $("wTarget").textContent = "LOCK";
@@ -289,7 +374,6 @@ function updateUI() {
     return;
   }
 
-  // normal ders
   const item = cur();
   $("wTarget").textContent = item.t;
   $("repeatTxt").textContent = item.t;
@@ -308,7 +392,7 @@ function updateUI() {
   $("studentTop").textContent = "Mikrofona bas ve söyle.";
 }
 
-/* --- TIMER BADGE (15 dk) + LOCK BADGE (opsiyonel) --- */
+/* --- TIMER BADGE --- */
 let timerInterval = null;
 
 function startTimer() {
@@ -318,7 +402,6 @@ function startTimer() {
   if (timerInterval) clearInterval(timerInterval);
 
   timerInterval = setInterval(() => {
-    // Ders kilitliyse farklı göster
     if (isLockedByExam()) {
       el.style.color = "#f59e0b";
       el.textContent = "EXAM";
@@ -335,10 +418,6 @@ function startTimer() {
     el.style.color = (r <= 0) ? "#ef4444" : "";
     el.textContent = (r <= 0) ? "0:00" : formatTime(r);
 
-    // 15 dk dolduysa ders tamamlanma koşulu, ama ders "tamamlama" aksiyonu:
-    // - Kullanıcı sayfada kalsa bile, bu ders artık "bitmeye hazır". Biz bunu
-    // otomatik tamamlamıyoruz; kelime turu devam edebilir ama “dersi bitirdin” sayabiliriz.
-    // Bu yüzden sadece bilgilendirme toast’u (1 kere).
     if (r <= 0 && !window.__lessonTimeDoneToast) {
       window.__lessonTimeDoneToast = true;
       toast("15 dk doldu ✅ Dersi bitirebilirsin.");
@@ -348,34 +427,25 @@ function startTimer() {
 
 /* --- LESSON COMPLETE (15dk) --- */
 function completeLessonIfEligible() {
-  // sınav/24h kilidi varken zaten yapma
   if (isLockedByExam() || isLockedBy24h()) return false;
 
   const r = remainingLessonTime();
   if (r > 0) return false;
 
-  // Ders tamamlandı:
   const now = Date.now();
   P.lessonsCompleted += 1;
   P.lastCompletedAt = now;
 
-  // 7 ders tamamlandıysa sınav zorunlu
   if (P.lessonsCompleted % 7 === 0) {
     P.examRequired = true;
   }
 
-  // Yeni ders 24 saat sonra (sınav zorunlu olsa bile bu kilit dursun)
   P.nextLessonAt = now + DAY;
-
-  // Ders numarasını artır
   P.lessonNo += 1;
-
-  // aktif startTime reset (yeni ders başladığında tekrar atanacak)
   P.activeStartTime = 0;
 
   saveProgress(P);
 
-  // Bir sonraki dersin state’ini başlatma (kilit varken başlamasın)
   S = loadLessonState(P.lessonNo);
   updateUI();
 
@@ -399,7 +469,8 @@ async function teacherSpeak() {
   if (S.speaking) return;
   S.speaking = true;
   $("teacherStatus").textContent = "🔊";
-  await speakOnce(cur().t, lang);
+  const ok = await speakOnce(cur().t, lang);
+  if (!ok) toast("TTS çalışmadı (backend).");
   $("teacherStatus").textContent = "—";
   S.speaking = false;
 }
@@ -408,12 +479,10 @@ async function teacherSpeak() {
    EXAM SYSTEM (Every 7 lessons)
    ========================= */
 
-// Exam config
 const EXAM_Q = 10;
 const EXAM_PASS = 8;
 
 function buildExamQuestions() {
-  // Sınav havuzu: en azından mevcut ders havuzundan seçiyoruz
   const pool = [...Array(total()).keys()];
   const q = [];
   while (pool.length && q.length < EXAM_Q) {
@@ -445,9 +514,7 @@ function showExamQuestion() {
   const qi = S.exam.qi || 0;
   const idx = S.exam.q?.[qi];
 
-  // güvenlik
   if (typeof idx !== "number") {
-    // q yoksa yeniden başlat
     startExam(true);
     return;
   }
@@ -477,12 +544,10 @@ async function finishExam() {
 
   if (score >= EXAM_PASS) {
     alert("🎉 Tebrikler! Sınavı geçtin.");
-    // sınav kilidini kaldır
     P.examRequired = false;
     P.examPassedCount += 1;
     saveProgress(P);
 
-    // Sınav state sıfırla
     S.exam = { pending: false, waiting: false, failCount: 0, q: [], qi: 0, score: 0 };
     saveLessonState(P.lessonNo, S);
 
@@ -496,7 +561,6 @@ async function finishExam() {
 
   if (S.exam.failCount >= 3) {
     alert("Üzgünüm… 3 kez kaldın. Dersi tekrar edip sonra tekrar dene.");
-    // sınav modunu kapat ama examRequired kalır → yeni ders yok
     S.exam = { pending: false, waiting: true, failCount: 0, q: [], qi: 0, score: 0 };
     saveLessonState(P.lessonNo, S);
     updateUI();
@@ -522,7 +586,7 @@ async function handleExamAnswer(heard) {
   const sc = similarity(expected, heard);
   $("scoreTop").textContent = `Skor: ${Math.round(sc * 100)}%`;
 
-  if (sc >= 0.85 && heard.length >= 2) {
+  if (sc >= 0.90 && heard.length >= 2) {
     S.exam.score++;
     $("resultMsg").textContent = "Doğru ✅";
     $("resultMsg").className = "status ok";
@@ -553,24 +617,37 @@ function pickNextIndex() {
   return null;
 }
 
-/* --- STRICT CHECK --- */
-function strictPassed(target, heard) {
-  const sc = similarity(target, heard);
+/* --- STRICT CHECK (sıkılaştırıldı) --- */
+function strictPassed(targetRaw, heardRaw) {
+  const target = norm(targetRaw);
+  const heard = norm(heardRaw);
+  if (!target || !heard) return false;
 
-  // kısa kelimeler kesin
-  if (target.length <= 4) {
-    return target === heard;
-  }
+  // kelime sayısı aynı olsun
+  const tWords = target.split(" ").filter(Boolean);
+  const hWords = heard.split(" ").filter(Boolean);
+  if (tWords.length !== hWords.length) return false;
 
-  // uzun kelime: %85 + ilk harf
-  return (sc >= 0.85 && target[0] === heard[0]);
+  // çok kısa/çok uzun saçmaları ele
+  const lenT = target.length;
+  const lenH = heard.length;
+  const minLen = Math.max(2, lenT - 2);
+  const maxLen = lenT + 3;
+  if (lenH < minLen || lenH > maxLen) return false;
+
+  // kısa kelime kesin eşleşme
+  if (lenT <= 4) return target === heard;
+
+  // orta kelime çok sıkı
+  if (lenT <= 7) return similarity(target, heard) >= 0.92;
+
+  // uzun kelime/ifade sıkı
+  return similarity(target, heard) >= 0.90;
 }
 
-/* --- LISTEN --- */
+/* --- LISTEN (Backend STT) --- */
 async function startListen() {
-  // kilit kontrolleri
   if (isLockedByExam()) {
-    // eğer sınav beklemede/pending ise sınava sok
     if (S.exam?.waiting) {
       const ok = confirm("Sınav bekliyor. Başlayalım mı?");
       if (ok) startExam(true);
@@ -578,7 +655,6 @@ async function startListen() {
     } else if (S.exam?.pending) {
       // zaten sınav modunda
     } else {
-      // sınav zorunlu ama state yoksa aç
       startExam(true);
     }
     return;
@@ -591,99 +667,69 @@ async function startListen() {
 
   if (S.listening || S.speaking) return;
 
-  const rec = makeRecognizer(lang);
-  if (!rec) { toast("Bu cihaz konuşmayı desteklemiyor."); return; }
-
   S.listening = true;
   $("btnMic")?.classList.add("listening");
   $("studentTop").textContent = "Dinliyorum…";
 
-  rec.onresult = async (e) => {
-    const heardRaw = e.results?.[0]?.[0]?.transcript || "";
-    const heard = norm(heardRaw);
+  const heardRaw = await sttOnce(lang, 1200);
+  const heard = norm(heardRaw);
 
-    $("heardBox").textContent = heard ? `Söyledin: "${heardRaw}"` : "Duyamadım…";
+  S.listening = false;
+  $("btnMic")?.classList.remove("listening");
+  $("studentTop").textContent = "Mikrofona bas ve söyle.";
 
-    S.listening = false;
-    $("btnMic")?.classList.remove("listening");
-    $("studentTop").textContent = "Mikrofona bas ve söyle.";
+  $("heardBox").textContent = heardRaw ? `Söyledin: "${heardRaw}"` : "Duyamadım…";
+  if (!heard) { toast("Ses gelmedi (STT)."); return; }
 
-    if (!heard) { toast("Ses gelmedi."); return; }
+  // sınav modundaysa
+  if (S.exam?.pending) {
+    await handleExamAnswer(heard);
+    return;
+  }
 
-    // sınav modundaysa
-    if (S.exam?.pending) {
-      await handleExamAnswer(heard);
-      return;
-    }
+  const targetRaw = cur().t;
+  const target = norm(targetRaw);
+  const sc = similarity(target, heard);
+  $("scoreTop").textContent = `Eşleşme: ${Math.round(sc * 100)}%`;
 
-    const target = norm(cur().t);
-    const sc = similarity(target, heard);
-    $("scoreTop").textContent = `Eşleşme: ${Math.round(sc * 100)}%`;
+  const passed = strictPassed(targetRaw, heardRaw);
 
-    const passed = strictPassed(target, heard);
+  if (passed) {
+    $("resultMsg").textContent = "Doğru ✅";
+    $("resultMsg").className = "status ok";
 
-    if (passed) {
-      $("resultMsg").textContent = "Doğru ✅";
-      $("resultMsg").className = "status ok";
+    await showCongrats();
 
-      await showCongrats();
+    S.learned[S.pos] = true;
+    delete S.skipped[S.pos];
+    saveLessonState(P.lessonNo, S);
 
-      S.learned[S.pos] = true;
-      delete S.skipped[S.pos];
-      saveLessonState(P.lessonNo, S);
-
-      const next = pickNextIndex();
-      if (next === null) {
-        // Kelime bitti: Ders bitirme kontrolü (15dk dolduysa tamamla)
-        const completed = completeLessonIfEligible();
-        if (completed) {
-          toast("Ders tamamlandı ✅ Yeni ders 24 saat sonra.");
-          updateUI();
-          return;
-        } else {
-          // 15 dk dolmadıysa: ders bitmiş sayılmaz, devam modunda
-          toast("15 dk dolmadan ders bitmez. Devam!");
-          // rastgele dolaştır
-          S.pos = Math.floor(Math.random() * total());
-          saveLessonState(P.lessonNo, S);
-          updateUI();
-          await teacherSpeak();
-          return;
-        }
+    const next = pickNextIndex();
+    if (next === null) {
+      const completed = completeLessonIfEligible();
+      if (completed) {
+        toast("Ders tamamlandı ✅ Yeni ders 24 saat sonra.");
+        updateUI();
+        return;
+      } else {
+        toast("15 dk dolmadan ders bitmez. Devam!");
+        S.pos = Math.floor(Math.random() * total());
+        saveLessonState(P.lessonNo, S);
+        updateUI();
+        await teacherSpeak();
+        return;
       }
-
-      S.pos = next;
-      saveLessonState(P.lessonNo, S);
-      updateUI();
-      await teacherSpeak();
-    } else {
-      $("resultMsg").textContent = `Olmadı ❌ (Beklenen: ${target})`;
-      $("resultMsg").className = "status bad";
-      toast("Tekrar dene.");
-      setTimeout(() => teacherSpeak(), 900);
     }
-  };
 
-  rec.onerror = () => {
-    S.listening = false;
-    $("btnMic")?.classList.remove("listening");
-    $("studentTop").textContent = "Mikrofona bas ve söyle.";
-    toast("Mikrofon hatası.");
-  };
-
-  rec.onend = () => {
-    if (S.listening) {
-      S.listening = false;
-      $("btnMic")?.classList.remove("listening");
-      $("studentTop").textContent = "Mikrofona bas ve söyle.";
-    }
-  };
-
-  try { rec.start(); }
-  catch {
-    S.listening = false;
-    $("btnMic")?.classList.remove("listening");
-    toast("Mikrofon başlatılamadı.");
+    S.pos = next;
+    saveLessonState(P.lessonNo, S);
+    updateUI();
+    await teacherSpeak();
+  } else {
+    $("resultMsg").textContent = `Olmadı ❌ (Beklenen: ${target})`;
+    $("resultMsg").className = "status bad";
+    toast("Tekrar dene.");
+    setTimeout(() => teacherSpeak(), 900);
   }
 }
 
@@ -691,7 +737,6 @@ async function startListen() {
 function skip() {
   if (isLockedByExam()) { toast("Önce sınav."); return; }
   if (isLockedBy24h()) { toast("Yeni ders kilitli."); return; }
-
   if (S.exam?.pending) { toast("Sınavda atlama yok."); return; }
 
   S.skipped[S.pos] = true;
@@ -699,7 +744,6 @@ function skip() {
 
   const next = pickNextIndex();
   if (next === null) {
-    // 15 dk dolduysa ders tamamla, değilse devam
     if (completeLessonIfEligible()) {
       toast("Ders tamamlandı ✅ Yeni ders 24 saat sonra.");
       updateUI();
@@ -721,16 +765,12 @@ function bindOnce() {
   S.bound = true;
 
   $("backBtn")?.addEventListener("click", () => {
-    // 15 dk dolmadan çıkarsa ders tamamlanmış sayılmayacak.
-    // Ama ilerleme kaybolmasın: P.activeStartTime ve lesson state zaten saklı.
-    // Sadece uyarı verelim:
     if (!isLockedBy24h() && !isLockedByExam()) {
       const r = remainingLessonTime();
       if (r > 0 && !S.exam?.pending) {
         const conf = confirm(`Henüz 15 dakika dolmadı (${formatTime(r)} kaldı). Çıkarsan ders bitmiş sayılmayacak ama kaldığın yerden devam edeceksin. Emin misin?`);
         if (!conf) return;
       } else if (r <= 0) {
-        // 15 dk doldu: çıkmadan önce dersi tamamlamayı dene (otomatik)
         const done = completeLessonIfEligible();
         if (done) toast("Ders tamamlandı ✅");
       }
@@ -755,7 +795,6 @@ function bindOnce() {
     skip();
   });
 
-  // Eğer sayfa kapatılırsa state zaten yazılıyor; ekstra güvenlik:
   window.addEventListener("beforeunload", () => {
     saveLessonState(P.lessonNo, S);
     saveProgress(P);
@@ -766,15 +805,12 @@ function bindOnce() {
 document.addEventListener("DOMContentLoaded", async () => {
   bindOnce();
 
-  // Eğer 24h kilidi bitti ve examRequired yoksa yeni dersi başlatırken startTime ata
   if (!isLockedBy24h() && !isLockedByExam() && !P.activeStartTime) {
     P.activeStartTime = Date.now();
     saveProgress(P);
   }
 
-  // Eğer sınav zorunluysa UI’yi sınav moduna hazırla
   if (isLockedByExam()) {
-    // sınav state yoksa beklemeye al
     if (!S.exam) S.exam = { pending: false, waiting: true, failCount: 0, q: [], qi: 0, score: 0 };
     if (!S.exam.pending && !S.exam.waiting) S.exam.waiting = true;
     saveLessonState(P.lessonNo, S);
@@ -783,9 +819,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateUI();
   startTimer();
 
-  // Kilitliyse konuşma yok
   if (isLockedByExam()) {
-    // sınav prompt
     const ok = confirm("7 ders tamamlandı. Sınav zorunlu. Başlayalım mı?");
     if (ok) startExam(true);
     else toast("Sınav beklemede.");
@@ -797,13 +831,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Sınav aktifse devam
   if (S.exam?.pending) {
     showExamQuestion();
     return;
   }
   if (S.exam?.waiting) {
-    // ders modunda beklemesin; sınav beklemede ise prompt ver
     const ok = confirm("Sınav bekliyor. Devam edelim mi?");
     if (ok) startExam(true);
     else toast("Sınav beklemede.");
