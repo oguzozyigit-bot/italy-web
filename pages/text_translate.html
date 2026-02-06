@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Metinden Çeviri</title>
   <link rel="icon" href="data:," />
 
@@ -23,7 +23,6 @@
 
       --ai1:#A5B4FC;
       --ai2:#4F46E5;
-      --befree:#6B7280;
 
       --glass: rgba(255,255,255,.04);
 
@@ -36,16 +35,23 @@
 
       --btnBg: rgba(255,255,255,.06);
       --btnBd: rgba(255,255,255,.12);
+
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
     html,body{
-      margin:0; padding:0; width:100%; height:100dvh;
-      overflow:hidden; position:fixed;
+      margin:0; padding:0; width:100%; height:100%;
       font-family:'Outfit', sans-serif;
       background:var(--bg);
       color:var(--text);
+      overflow:hidden; /* sayfa taşmasın, içeride scroll varsa içerik yönetsin */
+    }
+    body{
+      position:relative; /* ❗ fixed kaldırıldı: Android'te click/scroll/touch buglarını keser */
       display:flex; align-items:center; justify-content:center;
+      min-height:100dvh;
     }
 
     .cosmos-bg{ position:absolute; inset:-50%; width:200%; height:200%; background:var(--bg); z-index:0; pointer-events:none; }
@@ -60,12 +66,18 @@
     }
 
     .mobile-frame{
-      width:100%; max-width:480px; height:100%;
-      position:relative; z-index:10;
+      width:100%;
+      max-width:480px;
+      height:100dvh; /* ❗ daha stabil */
+      position:relative;
+      z-index:10;
       background: rgba(8, 8, 20, 0.65);
       backdrop-filter: blur(25px);
       overflow:hidden;
-      display:flex; flex-direction:column;
+      display:flex;
+      flex-direction:column;
+      padding-top: var(--safeTop);
+      padding-bottom: var(--safeBottom);
     }
     @media(min-width:520px){
       .mobile-frame{
@@ -100,6 +112,7 @@
       font-size:18px;font-weight:1000;
       display:flex;align-items:center;justify-content:center;
       cursor:pointer; user-select:none;
+      touch-action: manipulation; /* ❗ */
     }
     .backBtn:active{ transform: scale(.96); }
 
@@ -107,6 +120,7 @@
       display:flex; flex-direction:column;
       user-select:none; cursor:pointer; line-height:1;
       justify-content:center;
+      touch-action: manipulation;
     }
     .logo-line{
       font-family:'Space Grotesk', sans-serif;
@@ -121,18 +135,20 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-    .logo-slogan{ display: none; }
-    .rightControls{ display: none; }
 
+    /* MAIN */
     .main{
       flex:1;
       padding: 12px;
-      overflow:hidden;
       display:flex;
       flex-direction:column;
       gap: 10px;
-      padding-bottom: calc(var(--footerH) + 12px);
+      min-height:0;
+      overflow:auto;              /* ❗ scroll artık burada */
+      -webkit-overflow-scrolling: touch;
     }
+    .main::-webkit-scrollbar{ display:none; }
+    .main{ scrollbar-width:none; }
 
     .toolbar{
       display:flex;
@@ -158,6 +174,7 @@
       user-select:none;
       min-width:0;
       gap: 10px;
+      touch-action: manipulation; /* ❗ */
     }
     .langLeft{
       display:flex;
@@ -190,6 +207,7 @@
       color: rgba(255,255,255,.92);
       font-weight: 1000;
       cursor:pointer;
+      touch-action: manipulation; /* ❗ */
     }
     .swapBtn:active{ transform: scale(.98); }
 
@@ -212,7 +230,7 @@
       backdrop-filter: blur(10px);
       flex: 1; 
       position: relative;
-      z-index: 1; /* Kutular altta kalsın */
+      z-index: 1;
     }
 
     .box.top{
@@ -274,6 +292,7 @@
       align-items:center;
       justify-content:center;
       user-select:none;
+      touch-action: manipulation; /* ❗ */
     }
     .iconBtn:active{ transform: scale(.98); }
     .iconBtn svg{
@@ -284,27 +303,6 @@
       stroke-linecap:round;
       stroke-linejoin:round;
       opacity:.95;
-    }
-
-    .iconBtn.listening{
-      border-color: rgba(79,70,229,.45);
-      background: rgba(79,70,229,.14);
-      box-shadow: 0 0 18px rgba(79,70,229,.20);
-      position: relative;
-    }
-    .iconBtn.listening::after{
-      content:"";
-      position:absolute;
-      inset:-7px;
-      border-radius: 18px;
-      border: 2px solid rgba(165,180,252,.55);
-      animation: micPulse 1.15s ease-in-out infinite;
-      pointer-events:none;
-    }
-    @keyframes micPulse{
-      0%{ transform: scale(0.92); opacity:.75; }
-      50%{ transform: scale(1.08); opacity:.28; }
-      100%{ transform: scale(0.92); opacity:.75; }
     }
 
     textarea{
@@ -334,8 +332,6 @@
     .out::-webkit-scrollbar{ display:none; }
 
     /* AKSİYON BUTONLARI */
-    /* .actions sınıfı JS için korunuyor. */
-    /* position: relative ve z-index: 50 ile en öne alıyorum. */
     .actions{
       display:flex;
       gap: 10px;
@@ -354,6 +350,7 @@
       font-weight: 1000;
       cursor:pointer;
       font-size: 13px;
+      touch-action: manipulation; /* ❗ */
     }
     .btn.primary{
       background: linear-gradient(135deg, var(--ai1), var(--ai2));
@@ -361,23 +358,17 @@
     }
     .btn:active{ transform: scale(.98); }
 
+    /* ❗ Footer artık frame içinde: sabit katman gibi üstte durup tıklamayı boğmaz */
     .footerbar{
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      width: var(--frameW);
-      bottom: 0;
-      z-index: 2400;
+      flex: 0 0 auto;
       height: var(--footerH);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-      background: rgba(3, 0, 20, 0.95);
-      border-top: 1px solid rgba(255,255,255,.05);
-      backdrop-filter: blur(10px);
       display:flex;
-      flex-direction:column;
+      align-items:center;
       justify-content:center;
-      align-items: center;
-      pointer-events: none;
+      border-top: 1px solid rgba(255,255,255,.05);
+      background: rgba(3, 0, 20, 0.75);
+      backdrop-filter: blur(10px);
+      padding: 0 16px;
     }
     .footerBrand{
       text-align:center;
@@ -429,6 +420,7 @@
       color: rgba(255,255,255,.88);
       font-weight: 1000;
       cursor:pointer;
+      touch-action: manipulation;
     }
     .sheetSearch{
       padding: 10px 14px;
@@ -484,7 +476,7 @@
     }
 
     .toast{
-      position: fixed; left:50%; top:18px;
+      position: fixed; left:50%; top: calc(18px + var(--safeTop));
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,.92);
       border:1px solid rgba(165,180,252,.35);
@@ -496,6 +488,7 @@
       font-size:12px;
       transition:.28s;
       backdrop-filter: blur(12px);
+      pointer-events:none;
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
@@ -511,14 +504,13 @@
   <div class="mobile-frame">
     <div class="topbar">
       <div class="leftControls">
-        <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
-        <div class="mini-brand" id="logoHome" title="Ana sayfa">
+        <button class="backBtn" id="backBtn" aria-label="Geri" type="button">←</button>
+        <div class="mini-brand" id="logoHome" title="Ana sayfa" role="button" tabindex="0">
           <div class="logo-line">
             <span class="logo-main">italky</span><span class="logo-ai">AI</span>
           </div>
         </div>
       </div>
-      <div class="rightControls"></div>
     </div>
 
     <div class="main">
@@ -550,16 +542,16 @@
               <div class="counter" id="countIn">0</div>
             </div>
             <div class="btnsRight">
-              <button class="iconBtn" id="micIn" type="button" aria-label="Mikrofon">
-                <svg viewBox="0 0 24 24">
+              <button class="iconBtn" id="micIn" type="button" aria-label="Mikrofon" title="Mikrofon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                   <line x1="12" y1="19" x2="12" y2="23"></line>
                   <line x1="8" y1="23" x2="16" y2="23"></line>
                 </svg>
               </button>
-              <button class="iconBtn" id="speakIn" type="button" aria-label="Metni oku">
-                <svg viewBox="0 0 24 24">
+              <button class="iconBtn" id="speakIn" type="button" aria-label="Metni oku" title="Metni Oku">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M11 5 6 9H3v6h3l5 4z"></path>
                   <path d="M15 9a4 4 0 0 1 0 6"></path>
                   <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
@@ -582,8 +574,8 @@
               <div class="counter" id="countOut">0</div>
             </div>
             <div class="btnsRight">
-              <button class="iconBtn" id="speakOut" type="button" aria-label="Çeviriyi oku">
-                <svg viewBox="0 0 24 24">
+              <button class="iconBtn" id="speakOut" type="button" aria-label="Çeviriyi oku" title="Çeviriyi Oku">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M11 5 6 9H3v6h3l5 4z"></path>
                   <path d="M15 9a4 4 0 0 1 0 6"></path>
                   <path d="M17.5 6.5a7 7 0 0 1 0 11"></path>
@@ -601,11 +593,11 @@
     </div>
   </div>
 
-  <div class="sheetBackdrop" id="langSheet">
+  <div class="sheetBackdrop" id="langSheet" role="dialog" aria-modal="true" aria-label="Dil Seçimi">
     <div class="sheet">
       <div class="sheetTop">
         <div class="sheetTitle" id="sheetTitle">Dil seç</div>
-        <button class="sheetClose" id="sheetClose" aria-label="Kapat">✕</button>
+        <button class="sheetClose" id="sheetClose" aria-label="Kapat" type="button">✕</button>
       </div>
       <div class="sheetSearch">
         <input id="sheetQuery" placeholder="Dil ara (tr, English, Deutsch…)" />
@@ -616,6 +608,11 @@
 
   <div id="toast" class="toast"></div>
 
+  <!-- ✅ Bu sayfada “tıklanmıyor” sorunu çoğunlukla body fixed + footer fixed kombinasyonundan geliyordu.
+       - body fixed KALDIRILDI
+       - footer artık frame içinde (overlay değil)
+       - main scroll artık içeride
+       Dilersen eski JS dosyanı aynen çağırabilirsin. -->
   <script type="module" src="/js/text_translate_page.js?v=3"></script>
 </body>
 </html>
