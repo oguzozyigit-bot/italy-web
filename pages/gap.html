@@ -139,25 +139,44 @@ window.setLang = (l, btn) => {
 window.initGame = async (diff) => {
   try {
     const rawPool = await loadLangPool(currentLang);
-    const { used, save } = createUsedSet(`gap_master_v4_${currentLang}_${diff}`);
+    if (!rawPool || !rawPool.items) throw new Error("Havuz boş");
+
+    // ✅ KURAL GÜNCELLEMESİ: Havuzu pick öncesi agresif karıştır
+    const randomizedItems = shuffle(rawPool.items);
+
+    // ✅ KURAL GÜNCELLEMESİ: Benzersiz oturum kaydı
+    const { used, save } = createUsedSet(`gap_master_v53_${currentLang}_${diff}`);
+    
     maxLives = (diff === "A2") ? 4 : 3;
     lives = maxLives;
-    puzzles = pick(rawPool, 15, used, save, it => {
+
+    puzzles = pick({ items: randomizedItems }, 15, used, save, it => {
       const itLvl = String(it.lvl || "").toUpperCase();
       const targetLvl = diff.toUpperCase();
       return it.sentence && (targetLvl === "A2" ? ["A1","A2"].includes(itLvl) : itLvl === targetLvl);
     });
+
+    if (puzzles.length === 0) {
+        alert("Bu seviyede tüm kelimeleri bitirdiniz! İlerleme sıfırlanıyor.");
+        localStorage.removeItem(`gap_master_v53_${currentLang}_${diff}`);
+        location.reload();
+        return;
+    }
+
     $('statusChip').textContent = `${currentLang.toUpperCase()} • ${diff}`;
     $('startModal').style.display = 'none';
+    currentIdx = 0;
     loadPuzzle();
-  } catch (e) { alert("Havuz yüklenemedi!"); }
+  } catch (e) { 
+    console.error(e);
+    alert("Havuz yüklenemedi!"); 
+  }
 };
 
 function loadPuzzle() {
   if (lives <= 0 || currentIdx >= puzzles.length) return showFinal();
   const p = puzzles[currentIdx];
   const word = norm(p.w).trim();
-  // ✅ Regex Dokunuşu: Boşlukları \\s+ yap başkanım
   const escapedWord = escapeRegExp(word).replace(/\s+/g, "\\s+");
   
   $('progFill').style.width = `${((currentIdx + 1) / puzzles.length) * 100}%`;
@@ -184,7 +203,6 @@ function renderOptions(opts) {
   opts.forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'opt-btn'; 
-    // ✅ Normalize edilerek gönderiliyor başkanım
     const normalizedOpt = norm(opt).trim().toUpperCase();
     btn.textContent = normalizedOpt;
     btn.onclick = () => handleChoice(normalizedOpt, btn);
@@ -211,7 +229,6 @@ function handleChoice(val, btn) {
     $('scoreTxt').classList.remove('score-pop'); void $('scoreTxt').offsetWidth;
     $('scoreTxt').classList.add('score-pop');
     
-    // ✅ Premium Cila: Doğru durumda feedback
     $('resInfo').textContent = `+${roundScore} PUAN ${speedBonus > 0 ? '• HIZ BONUSU' : ''}`;
     $('resInfo').style.opacity = "1";
     speak(p.sentence);
@@ -233,7 +250,6 @@ function showFinal() {
   $('endModal').style.display = 'flex';
   const acc = totalAnswered ? Math.round((totalCorrect/totalAnswered)*100) : 0;
   const totalQ = puzzles.length;
-  // ✅ Detaylı Final İstatistikleri
   $('endStats').innerHTML = `
     • Toplam Skor: <b>${score}</b><br>
     • Doğruluk: <b>%${acc}</b> (<b>${totalCorrect}/${totalQ}</b>)
