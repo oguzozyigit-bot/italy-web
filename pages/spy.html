@@ -80,6 +80,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
   color:#000;font-weight:900;margin-top:15px;cursor:pointer}
 .secondary-btn{width:100%;padding:14px;border:1px solid var(--radar);border-radius:14px;background:transparent;
   color:var(--radar);font-weight:900;margin-top:10px;cursor:pointer}
+.exit-btn { background: #1a1a1a !important; color: #ff3300 !important; border: 1px solid #ff3300 !important; }
 
 .hidden{display:none!important}
 </style>
@@ -138,7 +139,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
     <p id="endStats" style="margin:16px 0; font-size:15px; line-height:1.6"></p>
     <button class="main-btn" id="continueBtn">DEŞİFREYE DEVAM (RİSK)</button>
     <button class="main-btn" id="bankBtn" style="background:var(--gold)">YEDEKLE (%5 BONUS + TAMİR)</button>
-    <button class="secondary-btn" id="exitBtn">SİSTEMİ KAPAT</button>
+    <button class="main-btn exit-btn" id="exitBtn">OPERASYONU DURDUR (ÇIKIŞ)</button>
   </div>
 </div>
 
@@ -289,7 +290,6 @@ function handleChoice(el, val) {
         totalScore += gain; setScore += gain;
         momentum = Math.min(1.6, momentum + 0.05);
         
-        // Doğru sinyali bir daha duyur (Reinforcement)
         $("wave").classList.add("playing");
         speak(currentItem.say, () => {
             $("wave").classList.remove("playing");
@@ -304,7 +304,6 @@ function handleChoice(el, val) {
             if(x.textContent === currentItem.ans) x.classList.add("correct");
         });
         
-        // Doğrusunu deşifre et (Learning)
         $("wave").classList.add("playing");
         speak(currentItem.say, () => {
             $("wave").classList.remove("playing");
@@ -362,7 +361,12 @@ $("bankBtn").onclick = () => {
     initSet(true);
 };
 
-$("exitBtn").onclick = () => location.reload();
+// ✅ ÇIKIŞ BUTONU: Görev sayfasından güvenli ayrılış sağlar başkanım.
+$("exitBtn").onclick = () => {
+    if(confirm("Operasyonu durdurup üsse dönmek istiyor musunuz başkanım?")) {
+        location.href = '/pages/game.html'; 
+    }
+};
 
 function stopSpeak(){
   speaking = false;
