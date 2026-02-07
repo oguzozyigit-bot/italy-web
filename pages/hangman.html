@@ -3,102 +3,486 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>ITALKY • Arena (Supabase Pool)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <title>ITALKY • Arena V25 Supreme</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    :root{--bg:#030305;--border:rgba(255,255,255,.12);--p0:#00f0ff;--p1:#ff0055;--p2:#00e676;--p3:#ffd700;--green:#00e676;--red:#ff1744;--gold:#ffd700;--font-main:'Outfit',sans-serif;--font-display:'Space Grotesk',sans-serif;}
-    *{box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;outline:none}
-    html,body{margin:0;padding:0;width:100%;height:100%;background:var(--bg);font-family:var(--font-main);color:#fff;overflow:hidden;position:fixed}
-    .bg-fx{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 50%,#0a0a12 0%,#000 100%)}
-    .nebula{position:absolute;width:100%;height:100%;filter:blur(90px);opacity:.15;animation:pulseBg 10s infinite alternate}
-    @keyframes pulseBg{0%{opacity:.1}100%{opacity:.2}}
-    .app-header{position:absolute;top:0;left:0;right:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100;pointer-events:none}
-    .header-logo{font-family:var(--font-display);font-weight:700;font-size:18px;opacity:.8;pointer-events:auto}
-    .header-back{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.1);text-decoration:none;color:#fff;font-size:18px;pointer-events:auto;border:1px solid rgba(255,255,255,.1)}
-    .arena-wrap{position:relative;z-index:10;width:100%;height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center}
-    .active-card-container{width:90%;max-width:380px;height:65%;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:30px;backdrop-filter:blur(12px);padding:20px;transition:all .35s ease;box-shadow:0 20px 50px rgba(0,0,0,.5)}
-    .active-card-container.p0{border-color:var(--p0);box-shadow:0 0 40px rgba(0,240,255,.15)}
-    .active-card-container.p1{border-color:var(--p1);box-shadow:0 0 40px rgba(255,0,85,.15)}
-    .active-card-container.p2{border-color:var(--p2);box-shadow:0 0 40px rgba(0,230,118,.15)}
-    .active-card-container.p3{border-color:var(--p3);box-shadow:0 0 40px rgba(255,215,0,.15)}
-    .player-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-    .player-name{font-family:var(--font-display);font-size:22px;font-weight:700;text-transform:uppercase}
-    .turn-badge{font-size:12px;font-weight:800;background:rgba(255,255,255,.1);padding:4px 10px;border-radius:8px;letter-spacing:1px}
-    .word-display{width:100%;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-    .main-word{font-family:var(--font-display);font-size:40px;font-weight:700;line-height:1.1;margin:0 0 6px}
-    .sub-word{font-size:18px;color:rgba(255,255,255,.65);font-weight:500;min-height:24px}
-    .letter-slots{display:none;font-family:monospace;font-size:32px;letter-spacing:4px;color:var(--gold);margin-top:14px;text-shadow:0 0 10px rgba(255,215,0,.25)}
-    .hint-info{display:none;font-size:10px;opacity:.55;margin-top:6px;letter-spacing:1px}
-    .controls{display:flex;gap:10px;width:100%;margin-top:auto;height:60px}
-    .btn{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;border-radius:16px;font-family:var(--font-display);font-weight:700;font-size:13px;cursor:pointer;flex:1;transition:.12s}
-    .btn:active{transform:scale(.95)}
-    .btn:disabled{opacity:.3;cursor:not-allowed;filter:grayscale(1)}
-    .btn-mic{flex:2;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);font-size:15px}
-    .btn-hint{flex:.7;color:var(--green);border-color:rgba(0,230,118,.35);background:rgba(0,230,118,.06)}
-    .btn.listening{background:#fff!important;color:#000!important;animation:pulse 1s infinite}
-    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.4)}100%{box-shadow:0 0 0 15px rgba(255,255,255,0)}}
-    .bottom-bar{position:absolute;bottom:20px;left:10px;right:10px;height:70px;background:#080808;border:1px solid var(--border);border-radius:20px;display:flex;align-items:center;justify-content:space-around;padding:0 6px;z-index:20}
-    .mini-score{display:flex;flex-direction:column;align-items:center;opacity:.4;transition:.25s;transform:scale(.9)}
-    .mini-score.active{opacity:1;transform:scale(1.1)}
-    .ms-name{font-size:9px;font-weight:700;margin-bottom:3px;text-transform:uppercase}
-    .ms-val{font-family:var(--font-display);font-size:18px;font-weight:700;line-height:1}
-    .ms-sets{font-size:8px;color:var(--gold);font-weight:700;margin-top:2px}
+    :root{
+      --bg:#030305;
+      --border: rgba(255,255,255,0.12);
 
-    .result-overlay{position:absolute;inset:-1px;z-index:50;background:rgba(5,5,8,.98);backdrop-filter:blur(15px);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:30px;opacity:0;pointer-events:none;transform:scale(.95);transition:.2s}
-    .result-overlay.show{opacity:1;transform:scale(1);pointer-events:auto}
-    .res-title{font-size:40px;font-weight:800;font-family:var(--font-display);margin:0;line-height:1}
-    .res-sub{margin-top:10px;font-size:16px;color:#ccc;margin-bottom:18px}
-    .overlay-actions{display:none;gap:10px;width:85%}
-    .btn-var-action{padding:16px;border-radius:12px;font-weight:800;flex:1;border:none;cursor:pointer;font-size:14px}
-    .btn-object{background:var(--gold);color:#000;box-shadow:0 0 25px rgba(255,215,0,.25)}
-    .btn-continue{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
-    .badge{display:none;margin-top:12px;padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;background:rgba(255,255,255,.1)}
+      /* base player colors */
+      --p0:#00f0ff;
+      --p1:#ff0055;
+      --p2:#00e676;
+      --p3:#ffd700;
 
-    .modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.95);backdrop-filter:blur(15px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.25s}
-    .modal:not(.hidden){opacity:1;pointer-events:auto}
-    .modal-box{width:90%;max-width:360px;background:#121216;border:1px solid var(--border);border-radius:32px;padding:30px;text-align:center;max-height:90vh;overflow-y:auto}
-    .toggle-grp{display:flex;background:rgba(255,255,255,.05);padding:4px;border-radius:12px;margin-bottom:20px}
-    .toggle-btn{flex:1;padding:10px;border-radius:8px;cursor:pointer;text-align:center;font-size:13px;font-weight:700;opacity:.6;transition:.2s}
-    .toggle-btn.active{background:#fff;color:#000;opacity:1}
-    .btn-block{width:100%;padding:18px;margin-top:10px;border-radius:16px;border:none;font-weight:800;font-size:16px;cursor:pointer;background:#fff;color:#000}
-    .name-input{width:100%;background:#1a1a20;border:1px solid var(--border);color:#fff;padding:12px;border-radius:10px;font-family:var(--font-main);font-weight:600;text-align:center;margin-bottom:8px}
-    .lang-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
-    .lang-btn{background:rgba(255,255,255,.05);border:1px solid var(--border);color:#fff;border-radius:12px;padding:10px 0;font-size:20px;cursor:pointer}
-    .lang-btn.active{background:#fff;color:#000}
+      --green:#00e676;
+      --red:#ff1744;
+      --gold:#ffd700;
+
+      --font-main:'Outfit',sans-serif;
+      --font-display:'Space Grotesk',sans-serif;
+
+      /* dynamic theme (changes per active player) */
+      --accent: var(--p0);
+      --accent2: rgba(255,255,255,0.06);
+      --accentGlow: rgba(0,240,255,0.18);
+    }
+
+    *{box-sizing:border-box; user-select:none; -webkit-tap-highlight-color:transparent; outline:none}
+    html,body{margin:0; padding:0; width:100%; height:100%; overflow:hidden; position:fixed; font-family:var(--font-main); color:#fff; background:var(--bg)}
+    button{font-family:inherit}
+
+    /* ====== BACKGROUND ====== */
+    .bg-fx{
+      position:absolute; inset:0; z-index:0;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(15,15,35,0.85) 0%, rgba(0,0,0,1) 70%),
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0) 55%);
+    }
+    .nebula{
+      position:absolute; width:120vmax; height:120vmax; border-radius:50%;
+      filter: blur(90px); opacity:0.16;
+      animation: breathe 10s infinite alternate ease-in-out;
+      pointer-events:none;
+      mix-blend-mode: screen;
+    }
+    .nebula.a{ left:-35vmax; top:-35vmax; background: var(--accent); }
+    .nebula.b{ right:-35vmax; bottom:-35vmax; background: rgba(255,255,255,0.14); animation-delay:-4s; }
+    @keyframes breathe{ 0%{ transform:scale(1); opacity:.11 } 100%{ transform:scale(1.18); opacity:.22 } }
+
+    /* ====== HEADER ====== */
+    .app-header{
+      position:absolute; top:0; left:0; right:0; height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 0 18px;
+      z-index: 50;
+      pointer-events:none;
+    }
+    .header-back{
+      pointer-events:auto;
+      width:40px; height:40px;
+      display:flex; align-items:center; justify-content:center;
+      border-radius:14px;
+      background: rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.12);
+      color:#fff; text-decoration:none; font-size:20px;
+      backdrop-filter: blur(12px);
+      transition:.15s;
+    }
+    .header-back:active{ transform: scale(.92); background: rgba(255,255,255,0.14); }
+    .brand{
+      pointer-events:none;
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      line-height:1;
+    }
+    .brand .logo{
+      font-family: var(--font-display);
+      font-weight:800;
+      font-size:18px;
+      letter-spacing:-0.3px;
+      opacity:.95;
+    }
+    .brand .logo .ai{
+      background: linear-gradient(90deg, var(--accent), #ff48c4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand .tag{
+      font-family: var(--font-display);
+      font-weight:700;
+      font-size:10px;
+      letter-spacing:2.2px;
+      opacity:.65;
+      transform: translateY(-1px);
+    }
+    .header-spacer{ width:40px; height:40px; }
+
+    /* ====== LAYOUT ====== */
+    .arena-wrap{
+      position:relative; z-index:10;
+      width:100%; height:100dvh;
+      display:flex; flex-direction:column;
+      justify-content:center; align-items:center;
+      padding: 72px 0 110px; /* header + bottom bar space */
+    }
+
+    /* ====== MAIN CARD ====== */
+    .card{
+      width: min(92vw, 420px);
+      height: min(64vh, 520px);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.035);
+      backdrop-filter: blur(14px);
+      box-shadow:
+        0 28px 70px rgba(0,0,0,0.55),
+        0 0 40px var(--accentGlow);
+      position:relative;
+      padding: 18px 18px 16px;
+      overflow:hidden;
+      transition:.25s;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(circle at 20% 10%, rgba(255,255,255,0.06), transparent 55%);
+      pointer-events:none;
+    }
+
+    .card.p0{ --accent: var(--p0); --accentGlow: rgba(0,240,255,0.18); }
+    .card.p1{ --accent: var(--p1); --accentGlow: rgba(255,0,85,0.16); }
+    .card.p2{ --accent: var(--p2); --accentGlow: rgba(0,230,118,0.16); }
+    .card.p3{ --accent: var(--p3); --accentGlow: rgba(255,215,0,0.16); }
+
+    .toprow{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px;
+      margin-bottom: 12px;
+      position:relative;
+      z-index:2;
+    }
+    .pname{
+      font-family: var(--font-display);
+      font-weight:800;
+      font-size:18px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-shadow: 0 0 18px rgba(255,255,255,0.06);
+    }
+    .meta{
+      display:flex; flex-direction:column; align-items:flex-end; gap:6px;
+    }
+    .chip{
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:1px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      opacity:.92;
+    }
+    .rights{
+      display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .rchip{
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:1px;
+      padding: 5px 8px;
+      border-radius: 10px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      opacity:.9;
+    }
+    .rchip strong{ color: var(--accent); }
+
+    .mid{
+      height: calc(100% - 150px);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding: 4px 4px;
+      position:relative;
+      z-index:2;
+    }
+    .word{
+      font-family: var(--font-display);
+      font-weight:800;
+      font-size:42px;
+      letter-spacing:-1px;
+      line-height:1.05;
+      margin: 0 0 10px;
+      text-shadow: 0 18px 60px rgba(0,0,0,0.55);
+    }
+    .meaning{
+      font-size:18px;
+      font-weight:600;
+      color: rgba(255,255,255,0.68);
+      min-height: 26px;
+    }
+    .slots{
+      display:none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 30px;
+      letter-spacing: 4px;
+      margin-top: 14px;
+      color: var(--gold);
+      text-shadow: 0 0 14px rgba(255,215,0,0.18);
+    }
+    .hintInfo{
+      display:none;
+      margin-top: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      opacity: .6;
+    }
+
+    .controls{
+      display:flex;
+      gap: 10px;
+      width:100%;
+      height: 56px;
+      position:relative;
+      z-index:2;
+    }
+    .btn{
+      flex:1;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing:.4px;
+      cursor:pointer;
+      transition: .12s;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+    }
+    .btn:active{ transform: scale(.95); background: rgba(255,255,255,0.12); }
+    .btn:disabled{ opacity:.25; cursor:not-allowed; filter: grayscale(1); box-shadow:none; transform:none; }
+    .btn-mic{
+      flex:2;
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.25);
+      font-size: 15px;
+    }
+    .btn-hint{
+      flex:.9;
+      color: var(--green);
+      border-color: rgba(0,230,118,0.35);
+      background: rgba(0,230,118,0.06);
+    }
+    .btn.listening{
+      background:#fff !important;
+      color:#000 !important;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse{
+      0%{ box-shadow: 0 0 0 0 rgba(255,255,255,0.38); }
+      100%{ box-shadow: 0 0 0 18px rgba(255,255,255,0); }
+    }
+
+    /* ====== OVERLAY ====== */
+    .overlay{
+      position:absolute; inset:0;
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(16px);
+      opacity:0;
+      pointer-events:none;
+      transition: .18s;
+      z-index: 20;
+      padding: 18px;
+      text-align:center;
+    }
+    .overlay.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .ovTitle{
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 42px;
+      margin:0;
+      letter-spacing:-1px;
+    }
+    .ovSub{
+      margin-top: 10px;
+      font-size: 16px;
+      color: rgba(255,255,255,0.8);
+      min-height: 20px;
+    }
+    .ovBadge{
+      margin-top: 14px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 13px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      display:none;
+    }
+    .ovTap{
+      margin-top: 14px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      opacity: .55;
+    }
+    .ovActions{
+      display:none;
+      gap: 10px;
+      width: 100%;
+      max-width: 320px;
+      margin-top: 16px;
+    }
+    .ovBtn{
+      flex:1;
+      padding: 14px 12px;
+      border-radius: 14px;
+      border:none;
+      font-weight: 900;
+      cursor:pointer;
+      font-family: var(--font-display);
+      letter-spacing:.4px;
+      transition:.12s;
+    }
+    .ovBtn:active{ transform: scale(.96); }
+    .ovBtnVar{
+      background: var(--gold);
+      color:#000;
+      box-shadow: 0 0 26px rgba(255,215,0,0.25);
+    }
+    .ovBtnCont{
+      background: rgba(255,255,255,0.10);
+      color:#fff;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+
+    /* ====== BOTTOM SCORE ====== */
+    .bottom-bar{
+      position:absolute; left:10px; right:10px; bottom:16px;
+      height: 92px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(10,10,12,0.75);
+      backdrop-filter: blur(14px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 8px;
+      padding: 10px;
+      z-index: 30;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+    }
+    .pCard{
+      flex:1;
+      height: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap: 4px;
+      opacity: .55;
+      transform: scale(.96);
+      transition: .18s;
+      position:relative;
+      overflow:hidden;
+    }
+    .pCard.active{
+      opacity: 1;
+      transform: scale(1);
+      border-color: rgba(255,255,255,0.18);
+      box-shadow: 0 0 24px var(--accentGlow);
+    }
+    .pCard .n{
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      opacity: .9;
+    }
+    .pCard .s{
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .pCard .sets{
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      color: var(--gold);
+      opacity: .9;
+    }
+    .pCard .mini{
+      position:absolute;
+      bottom:6px;
+      display:flex;
+      gap:8px;
+      font-size: 9px;
+      font-weight: 900;
+      opacity: .7;
+    }
+
+    /* ====== MODALS ====== */
+    .modal{position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.92); backdrop-filter: blur(16px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:.25s}
+    .modal:not(.hidden){opacity:1; pointer-events:auto}
+    .modal-box{width:92%; max-width:380px; background:#121216; border:1px solid rgba(255,255,255,.12); border-radius:32px; padding:28px; text-align:center; max-height:90vh; overflow:auto; box-shadow: 0 25px 70px rgba(0,0,0,0.7)}
+    .sectionTitle{font-family:var(--font-display); font-weight:900; font-size:22px; margin:0 0 14px}
+    .hintText{font-size:12px; opacity:.6; margin:10px 0 6px}
+    .toggle-grp{display:flex; background:rgba(255,255,255,.06); padding:4px; border-radius:12px; gap:4px; margin-bottom:14px}
+    .toggle-btn{flex:1; padding:10px; border-radius:10px; cursor:pointer; text-align:center; font-size:13px; font-weight:900; opacity:.6; transition:.16s}
+    .toggle-btn.active{background:#fff; color:#000; opacity:1}
+    .name-input{width:100%; background:#1a1a20; border:1px solid rgba(255,255,255,.12); color:#fff; padding:12px; border-radius:12px; font-weight:800; text-align:center; margin-bottom:8px}
+    .lang-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:12px}
+    .lang-btn{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#fff; border-radius:12px; padding:10px 0; font-size:20px; cursor:pointer; transition:.14s}
+    .lang-btn.active{background:#fff; color:#000}
+    .btn-block{width:100%; padding:16px; border-radius:16px; border:none; font-weight:900; font-size:16px; cursor:pointer; background:#fff; color:#000; transition:.12s}
+    .btn-block:active{transform:scale(.98)}
+    .statsBox{background:rgba(255,255,255,.05); padding:14px; border-radius:16px; text-align:left; margin:12px 0}
+    .row{display:flex; justify-content:space-between; margin-bottom:6px}
+    .champ{font-size:22px; font-weight:900; color:var(--gold); margin:10px 0}
   </style>
 </head>
 <body>
+
 <div class="bg-fx"></div>
-<div class="nebula" style="background:var(--p0); top:-20%; left:-20%;"></div>
+<div class="nebula a"></div>
+<div class="nebula b"></div>
 
 <div class="app-header">
   <a href="/pages/game.html" class="header-back">←</a>
-  <div class="header-logo">italkyAI</div>
-  <div style="width:36px"></div>
+  <div class="brand">
+    <div class="logo">italky<span class="ai">AI</span></div>
+    <div class="tag">BE FREE</div>
+  </div>
+  <div class="header-spacer"></div>
 </div>
 
 <div class="arena-wrap">
-  <div class="active-card-container" id="gameCard">
-    <div class="result-overlay" id="overlay">
-      <div class="res-title" id="ovTitle">...</div>
-      <div class="res-sub" id="ovSub">...</div>
-      <div class="overlay-actions" id="varActions">
-        <button class="btn-var-action btn-object" id="btnVarObjection">İTİRAZ (VAR)</button>
-        <button class="btn-var-action btn-continue" id="btnVarContinue">DEVAM ET</button>
+  <div class="card p0" id="card">
+    <div class="overlay" id="overlay">
+      <h2 class="ovTitle" id="ovTitle">HARİKA!</h2>
+      <div class="ovSub" id="ovSub">+2 PUAN</div>
+      <div class="ovBadge" id="ovBadge">%100 BENZERLİK</div>
+
+      <div class="ovActions" id="ovActions">
+        <button class="ovBtn ovBtnVar" id="btnVar">İTİRAZ (VAR)</button>
+        <button class="ovBtn ovBtnCont" id="btnCont">DEVAM ET</button>
       </div>
-      <div class="badge" id="ovBadge"></div>
+
+      <div class="ovTap" id="ovTap">DOKUN → DEVAM</div>
     </div>
 
-    <div class="player-header">
-      <div class="player-name" id="pName">OYUNCU</div>
-      <div class="turn-badge" id="pCounter">0/20</div>
+    <div class="toprow">
+      <div>
+        <div class="pname" id="pName">OYUNCU</div>
+      </div>
+      <div class="meta">
+        <div class="chip" id="chipCount">0/20</div>
+        <div class="rights" id="rightsRow"></div>
+      </div>
     </div>
 
-    <div class="word-display">
-      <div class="main-word" id="wMain">...</div>
-      <div class="sub-word" id="wSub">...</div>
-      <div class="letter-slots" id="wSlots">_ _ _</div>
-      <div class="hint-info" id="wHintInfo"></div>
+    <div class="mid">
+      <div class="word" id="wMain">...</div>
+      <div class="meaning" id="wSub">...</div>
+      <div class="slots" id="wSlots">_ _ _</div>
+      <div class="hintInfo" id="wHintInfo"></div>
     </div>
 
     <div class="controls">
@@ -113,9 +497,9 @@
 
 <div class="modal" id="setupModal">
   <div class="modal-box">
-    <div class="header-logo" style="font-size:24px; margin-bottom:20px;">CHAMPIONSHIP</div>
+    <div class="sectionTitle">CHAMPIONSHIP</div>
 
-    <div style="font-size:12px; opacity:.6; margin-bottom:5px">OYUNCU SAYISI</div>
+    <div class="hintText">OYUNCU SAYISI</div>
     <div class="toggle-grp" id="grpPlayers">
       <div class="toggle-btn active" data-n="2">2 Kişi</div>
       <div class="toggle-btn" data-n="3">3 Kişi</div>
@@ -127,7 +511,7 @@
       <input type="text" class="name-input" id="inp1" value="Oyuncu 2" style="border-color:var(--p1)">
     </div>
 
-    <div style="font-size:12px; opacity:.6; margin:15px 0 6px">DİL</div>
+    <div class="hintText">DİL</div>
     <div class="lang-grid" id="grpLang">
       <button class="lang-btn active" data-lang="en">🇬🇧</button>
       <button class="lang-btn" data-lang="de">🇩🇪</button>
@@ -136,24 +520,24 @@
       <button class="lang-btn" data-lang="it">🇮🇹</button>
     </div>
 
-    <div style="font-size:12px; opacity:.6; margin:10px 0 6px">MOD</div>
+    <div class="hintText">MOD</div>
     <div class="toggle-grp" id="grpMode">
       <div class="toggle-btn active" data-mode="pron">🎙️ Telaffuz</div>
       <div class="toggle-btn" data-mode="vocab">🧠 Kelime</div>
     </div>
 
     <button class="btn-block" id="btnStart">BAŞLA (3 SET)</button>
-    <div style="margin-top:10px; font-size:11px; opacity:.6">Havuz Supabase’den alınır (cache destekli)</div>
+    <div style="margin-top:10px;font-size:11px;opacity:.6">Supabase havuzu + cache kullanılır</div>
   </div>
 </div>
 
 <div class="modal hidden" id="pauseModal">
   <div class="modal-box">
-    <div style="font-family:var(--font-display); font-weight:800; font-size:20px; margin-bottom:12px" id="pauseTitle">SET SONUCU</div>
-    <div id="setStats" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:16px; margin-bottom:16px; text-align:left;"></div>
-    <div style="font-size:20px; font-weight:800; color:var(--gold); margin-bottom:16px;" id="setWinnerMsg">...</div>
-    <button class="btn-block" style="background:var(--green); color:#000" id="btnContinueSet">DEVAM ET</button>
-    <button class="btn-block" style="background:rgba(255,255,255,0.1); color:#fff" onclick="location.href='/pages/game.html'">ÇIKIŞ</button>
+    <div class="sectionTitle" id="pauseTitle">SET SONUCU</div>
+    <div class="statsBox" id="setStats"></div>
+    <div class="champ" id="setWinnerMsg">...</div>
+    <button class="btn-block" id="btnNextSet" style="background:var(--green);color:#000">DEVAM ET</button>
+    <button class="btn-block" style="background:rgba(255,255,255,0.1);color:#fff" onclick="location.href='/pages/game.html'">ÇIKIŞ</button>
   </div>
 </div>
 
@@ -171,45 +555,49 @@ function normalize(s){
     .replace(/[^a-z0-9 ]/g,"")
     .trim();
 }
-function editDistance(s1, s2){
-  const a = String(s1), b = String(s2);
-  const costs = new Array(b.length+1);
-  for(let j=0;j<=b.length;j++) costs[j]=j;
-  for(let i=1;i<=a.length;i++){
-    let prev = i-1;
+function editDistance(a,b){
+  const s1=String(a), s2=String(b);
+  const costs = new Array(s2.length+1);
+  for(let j=0;j<=s2.length;j++) costs[j]=j;
+  for(let i=1;i<=s1.length;i++){
+    let prev=i-1;
     costs[0]=i;
-    for(let j=1;j<=b.length;j++){
-      const tmp = costs[j];
-      const val = Math.min(costs[j]+1, costs[j-1]+1, prev + (a[i-1]===b[j-1]?0:1));
+    for(let j=1;j<=s2.length;j++){
+      const tmp=costs[j];
+      const val=Math.min(costs[j]+1, costs[j-1]+1, prev+(s1[i-1]===s2[j-1]?0:1));
       costs[j]=val; prev=tmp;
     }
   }
-  return costs[b.length];
+  return costs[s2.length];
 }
 function similarityScore(a,b){
-  const s1 = normalize(a), s2 = normalize(b);
+  const s1=normalize(a), s2=normalize(b);
   if(!s1 && !s2) return 100;
   if(!s1 || !s2) return 0;
   if(s2.includes(s1)) return 100;
   const longer = s1.length >= s2.length ? s1 : s2;
   const shorter = s1.length >= s2.length ? s2 : s1;
   const dist = editDistance(longer, shorter);
-  return Math.max(0, Math.min(100, Math.floor(((longer.length - dist) / longer.length)*100)));
+  return Math.max(0, Math.min(100, Math.floor(((longer.length - dist)/longer.length)*100)));
 }
 
 const STATE = { IDLE:0, SPEAKING:1, LISTENING:2, RESOLVING:3, PAUSED:4 };
 
 const setup = { playerCount:2, mode:'pron', lang:'en' };
 
-function rebuildNameInputs(){
-  const n = setup.playerCount;
+function setThemeForPlayer(pid){
+  document.documentElement.style.setProperty("--accent", `var(--p${pid})`);
+}
+
+function buildNameInputs(){
   const container = $("nameInputs");
   container.innerHTML = "";
   const colors = ["var(--p0)","var(--p1)","var(--p2)","var(--p3)"];
-  for(let i=0;i<n;i++){
-    const inp = document.createElement("input");
+  for(let i=0;i<setup.playerCount;i++){
+    const inp=document.createElement("input");
     inp.type="text"; inp.className="name-input"; inp.id=`inp${i}`;
-    inp.value=`Oyuncu ${i+1}`; inp.style.borderColor = colors[i];
+    inp.value=`Oyuncu ${i+1}`;
+    inp.style.borderColor = colors[i];
     container.appendChild(inp);
   }
 }
@@ -219,15 +607,16 @@ const game = {
   players: [],
   turnIndex: 0,
 
-  // pool: items from supabase mapped to {w,tr}
   poolItems: [],
-  usedWords: new Set(), // per set, normalized word
+  usedWords: new Set(), // per set, word keys
   current: null,
 
-  pendingWrong: null, // deferred commit on wrong
+  pendingWrong: null, // { playerId, score, spokenScore }
+  overlayTimer: null,
+  lastRec: null,
 
   async init(){
-    // build players
+    // players
     this.players = [];
     for(let i=0;i<setup.playerCount;i++){
       const name = ($(`inp${i}`)?.value || `Oyuncu ${i+1}`).trim() || `Oyuncu ${i+1}`;
@@ -238,59 +627,58 @@ const game = {
         passRight:1, varRight:1,
         hintRight:5, // match-long
         slots:null,
-        hintUsedThisWord:false,
+        hintUsedThisWord:false
       });
     }
 
-    // LOAD FROM SUPABASE (via your langpool.js)
+    // load from supabase via your langpool.js (same as hangman)
     const pool = await loadLangPool(setup.lang);
-    if(!pool || !Array.isArray(pool.items) || pool.items.length === 0){
-      alert("Dil havuzu yüklenemedi (Supabase).");
+    if(!pool || !Array.isArray(pool.items) || pool.items.length===0){
+      alert("Supabase havuzu yüklenemedi.");
       return;
     }
 
-    // Map pool.items -> Arena items
-    // pool.items entries look like: {w, tr, lvl, pos ...}
-    this.poolItems = pool.items
-      .filter(it => it && it.w)
-      .map(it => ({ w: String(it.w).trim(), tr: String(it.tr || "").trim() }))
-      .filter(it => it.w.length >= 2);
+    // make UNIQUE by normalized word so set repeats are truly prevented
+    const map = new Map();
+    for(const it of pool.items){
+      if(!it || !it.w) continue;
+      const w = String(it.w).trim();
+      if(w.length < 2) continue;
+      const key = normalize(w);
+      if(!key) continue;
+      if(!map.has(key)){
+        map.set(key, { w, tr: String(it.tr||"").trim() });
+      }
+    }
+    this.poolItems = Array.from(map.values());
 
-    if(this.poolItems.length === 0){
-      alert("Havuz boş görünüyor.");
-      return;
+    if(this.poolItems.length < 25){
+      // not fatal, but warn: small pools will force repeats after exhaustion
+      console.warn("Pool küçük:", this.poolItems.length);
     }
 
-    // match start
-    this.turnIndex = Math.floor(Math.random()*this.players.length);
     $("setupModal").classList.add("hidden");
+
+    this.turnIndex = Math.floor(Math.random()*this.players.length);
     this.startNewSet();
   },
 
   startNewSet(){
-    // per-set reset
     this.players.forEach(p=>{
-      p.score = 0;
-      p.wordsPlayed = 0;
-      p.passRight = 1;
-      p.varRight = 1;
-      p.slots = null;
-      p.hintUsedThisWord = false;
-      // hintRight is match-long (DO NOT reset)
+      p.score=0; p.wordsPlayed=0; p.passRight=1; p.varRight=1;
+      p.slots=null; p.hintUsedThisWord=false;
+      // hintRight stays match-long
     });
     this.usedWords.clear();
     this.pendingWrong = null;
-
-    // pick first word
     this.pickNextWordStrict();
     this.state = STATE.IDLE;
-    this.updateUI();
+    this.render();
     this.startTurnFlow();
   },
 
   pickNextWordStrict(){
-    // choose an unused word within this set
-    // if set needs more than pool size, we’ll allow repeats but warn (better: grow your pool)
+    // try find unused word for this set
     let tries = 0;
     while(tries < this.poolItems.length){
       const item = this.poolItems[Math.floor(Math.random()*this.poolItems.length)];
@@ -302,22 +690,24 @@ const game = {
       }
       tries++;
     }
-    // pool exhausted for this set
+    // exhausted: cannot satisfy "no repeats" with current pool size
+    // best behavior: reset usedWords with visible warning (otherwise game stalls)
     this.usedWords.clear();
     this.current = this.poolItems[Math.floor(Math.random()*this.poolItems.length)];
     this.usedWords.add(normalize(this.current.w));
-    // small toast via badge
-    const b = $("ovBadge");
-    b.style.display = "block";
-    b.textContent = "Havuz tükendi • Tekrar olabilir";
-    setTimeout(()=>{ if(!$("overlay").classList.contains("show")) b.style.display="none"; }, 1200);
+    // soft warning
+    $("ovBadge").style.display = "block";
+    $("ovBadge").textContent = "Havuz küçük • Tekrar olabilir";
+    setTimeout(()=>{ if(!$("overlay").classList.contains("show")) $("ovBadge").style.display="none"; }, 1200);
   },
 
   startTurnFlow(){
+    // set end?
     if(this.players.every(p=>p.wordsPlayed>=20)){
       this.endSet();
       return;
     }
+    // skip finished players
     if(this.players[this.turnIndex].wordsPlayed>=20){
       this.nextPlayer(true);
       return;
@@ -325,109 +715,115 @@ const game = {
 
     const p = this.players[this.turnIndex];
 
-    if(setup.mode === 'vocab'){
+    // per-word state
+    if(setup.mode==='vocab'){
       if(!p.slots){
         p.slots = this.current.w.split("").map((ch,i)=> i===0 ? ch : "_");
-        p.hintUsedThisWord = false;
+        p.hintUsedThisWord=false;
       }
     } else {
-      p.slots = null;
-      p.hintUsedThisWord = false;
+      p.slots=null; p.hintUsedThisWord=false;
     }
 
-    if(setup.mode === 'pron'){
+    if(setup.mode==='pron'){
       this.state = STATE.SPEAKING;
-      this.updateUI();
-      this.speak(this.current.w, () => {
+      this.render();
+      this.speak(this.current.w, ()=>{
         this.state = STATE.IDLE;
-        this.updateUI();
+        this.render();
       });
     } else {
       this.state = STATE.IDLE;
-      this.updateUI();
+      this.render();
     }
   },
 
-  updateUI(){
+  render(){
     const p = this.players[this.turnIndex];
-
-    $("gameCard").className = `active-card-container p${p.id}`;
+    setThemeForPlayer(p.id);
+    $("card").className = `card p${p.id}`;
     $("pName").textContent = p.name;
-    $("pName").style.color = `var(--p${p.id})`;
-    $("pCounter").textContent = `${p.wordsPlayed}/20`;
+    $("chipCount").textContent = `${p.wordsPlayed}/20`;
 
-    if(setup.mode === 'pron'){
+    // rights row
+    const rights = [];
+    rights.push(`<span class="rchip">PAS <strong>${p.passRight}</strong></span>`);
+    rights.push(`<span class="rchip">VAR <strong>${p.varRight}</strong></span>`);
+    if(setup.mode==='vocab') rights.push(`<span class="rchip">HARF <strong>${p.hintRight}</strong></span>`);
+    $("rightsRow").innerHTML = rights.join("");
+
+    if(setup.mode==='pron'){
       $("wMain").textContent = this.current.w;
-      $("wSub").textContent = this.current.tr;
-      $("wSlots").style.display = "none";
-      $("wHintInfo").style.display = "none";
-      $("btnHint").style.display = "none";
+      $("wSub").textContent = this.current.tr || "";
+      $("wSlots").style.display="none";
+      $("wHintInfo").style.display="none";
+      $("btnHint").style.display="none";
     } else {
-      $("wMain").textContent = this.current.tr;
+      $("wMain").textContent = this.current.tr || "";
       $("wSub").textContent = "???";
-      $("wSlots").style.display = "block";
-      $("wHintInfo").style.display = "block";
-      $("btnHint").style.display = "block";
+      $("wSlots").style.display="block";
+      $("wHintInfo").style.display="block";
+      $("btnHint").style.display="block";
       const slots = p.slots || this.current.w.split("").map((ch,i)=> i===0 ? ch : "_");
       const revealed = slots.filter(x=>x!=="_").length;
       $("wSlots").textContent = slots.join(" ");
       $("wHintInfo").textContent = `AÇILAN HARF: ${revealed}/${this.current.w.length}`;
     }
 
+    // button texts
     $("btnPass").textContent = `PAS (${p.passRight})`;
     $("btnHint").textContent = `HARF (${p.hintRight})`;
     $("btnMic").textContent = "🎙️ CEVAPLA";
 
+    // control enable
     const allBtns = [$("btnHint"), $("btnPass"), $("btnMic")];
-    const micBtn = $("btnMic");
-
-    if(this.state === STATE.LISTENING){
-      allBtns.forEach(b=> b.disabled = true);
-      micBtn.classList.add("listening");
-      micBtn.textContent = "👂...";
+    if(this.state===STATE.SPEAKING || this.state===STATE.RESOLVING || this.state===STATE.PAUSED){
+      allBtns.forEach(b=>b.disabled=true);
+      $("btnMic").classList.remove("listening");
+    } else if(this.state===STATE.LISTENING){
+      allBtns.forEach(b=>b.disabled=true);
+      $("btnMic").classList.add("listening");
+      $("btnMic").textContent = "👂...";
     } else {
-      micBtn.classList.remove("listening");
-    }
-
-    if(this.state === STATE.SPEAKING || this.state === STATE.RESOLVING || this.state === STATE.PAUSED){
-      allBtns.forEach(b=> b.disabled = true);
-    } else if(this.state === STATE.IDLE){
-      micBtn.disabled = false;
-      $("btnPass").disabled = !(p.passRight > 0);
-      if(setup.mode === 'vocab'){
-        $("btnHint").disabled = !(p.hintRight > 0);
+      // IDLE
+      $("btnMic").classList.remove("listening");
+      $("btnMic").disabled=false;
+      $("btnPass").disabled = !(p.passRight>0);
+      if(setup.mode==='vocab'){
+        $("btnHint").disabled = !(p.hintRight>0);
       } else {
-        $("btnHint").disabled = true;
+        $("btnHint").disabled=true;
       }
     }
 
-    // score bar
+    // bottom bar
     const bar = $("scoreBar");
-    bar.innerHTML = "";
-    this.players.forEach((pl, i)=>{
-      const div = document.createElement("div");
-      div.className = `mini-score ${i===this.turnIndex?"active":""}`;
+    bar.innerHTML="";
+    this.players.forEach((pl,i)=>{
+      const div=document.createElement("div");
+      div.className = `pCard ${i===this.turnIndex?"active":""}`;
+      div.style.setProperty("--accentGlow", `rgba(255,255,255,0.0)`);
       div.innerHTML = `
-        <div class="ms-name" style="color:var(--p${pl.id})">${pl.name}</div>
-        <div class="ms-val">${pl.score}</div>
-        <div class="ms-sets">SET: ${pl.setWins}</div>
+        <div class="n" style="color:var(--p${pl.id})">${pl.name}</div>
+        <div class="s">${pl.score}</div>
+        <div class="sets">SET: ${pl.setWins}</div>
+        <div class="mini">K ${pl.wordsPlayed}/20</div>
       `;
       bar.appendChild(div);
     });
   },
 
   action(type){
-    if(this.state !== STATE.IDLE) return;
+    if(this.state!==STATE.IDLE) return;
     const p = this.players[this.turnIndex];
 
     if(type==="pass"){
       if(p.passRight<=0) return;
       p.passRight -= 1;
-      // new word, same player, no counter inc
-      p.slots = null;
-      p.hintUsedThisWord = false;
+      // new word, same player
+      p.slots=null; p.hintUsedThisWord=false;
       this.pickNextWordStrict();
-      this.updateUI();
+      this.render();
       this.startTurnFlow();
       return;
     }
@@ -435,6 +831,7 @@ const game = {
     if(type==="hint"){
       if(setup.mode!=="vocab") return;
       if(p.hintRight<=0) return;
+
       const target = this.current.w;
       const slots = p.slots || target.split("").map((ch,i)=> i===0 ? ch : "_");
       let changed=false;
@@ -442,10 +839,11 @@ const game = {
         if(slots[i]==="_"){ slots[i]=target[i]; changed=true; break; }
       }
       if(!changed) return;
+
       p.hintRight -= 1;
       p.slots = slots;
       p.hintUsedThisWord = true;
-      this.updateUI();
+      this.render();
       return;
     }
 
@@ -456,14 +854,13 @@ const game = {
 
   startListening(){
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR){
-      alert("Bu cihazda SpeechRecognition yok.");
-      return;
-    }
+    if(!SR){ alert("Bu cihazda SpeechRecognition yok."); return; }
+
     this.state = STATE.LISTENING;
-    this.updateUI();
+    this.render();
 
     const rec = new SR();
+    this.lastRec = rec;
     rec.lang = LANG_CODES[setup.lang] || "en-US";
     rec.interimResults = false;
     rec.maxAlternatives = 1;
@@ -477,141 +874,147 @@ const game = {
     };
     rec.onerror = ()=>{
       clearTimeout(watchdog);
-      this.state = STATE.IDLE;
-      this.updateUI();
+      if(this.state===STATE.LISTENING){
+        this.state=STATE.IDLE;
+        this.render();
+      }
     };
     rec.onend = ()=>{
       clearTimeout(watchdog);
       if(this.state===STATE.LISTENING){
-        this.state = STATE.IDLE;
-        this.updateUI();
+        this.state=STATE.IDLE;
+        this.render();
       }
     };
 
     rec.start();
   },
 
+  showOverlay({title, titleColor, sub, badgeText, badgeColor, showActions}){
+    // safe reset visuals
+    $("ovTitle").textContent = title;
+    $("ovTitle").style.color = titleColor || "#fff";
+    $("ovSub").textContent = sub || "";
+    $("ovBadge").style.display = badgeText ? "block" : "none";
+    $("ovBadge").textContent = badgeText || "";
+    $("ovBadge").style.color = badgeColor || "#fff";
+    $("ovActions").style.display = showActions ? "flex" : "none";
+    $("overlay").classList.add("show");
+  },
+
+  hideOverlay(){
+    $("overlay").classList.remove("show");
+    $("ovActions").style.display = "none";
+    $("ovBadge").style.display = "none";
+  },
+
+  finalizeOverlay(){
+    // hard fail-safe: never freeze on overlay
+    clearTimeout(this.overlayTimer);
+    this.hideOverlay();
+    this.state = STATE.IDLE;
+    this.render();
+  },
+
   onSpoken(spoken){
     this.state = STATE.RESOLVING;
-    this.updateUI();
+    this.render();
 
     const p = this.players[this.turnIndex];
     const target = this.current.w;
     const score = similarityScore(target, spoken);
-    const isCorrect = score >= 90;
+    const ok = score >= 90;
 
-    const overlay = $("overlay");
-    const title = $("ovTitle");
-    const sub = $("ovSub");
-    const badge = $("ovBadge");
-    const actions = $("varActions");
-
-    overlay.classList.add("show");
-
-    if(isCorrect){
-      actions.style.display = "none";
-      badge.style.display = "block";
-      badge.textContent = `%${score} BENZERLİK`;
-      badge.style.color = "var(--green)";
-
+    if(ok){
       const pts = (setup.mode==="vocab" && p.hintUsedThisWord) ? 1 : 2;
       p.score += pts;
       p.wordsPlayed += 1;
+      p.slots=null; p.hintUsedThisWord=false;
 
-      title.textContent = "HARİKA!";
-      title.style.color = "var(--green)";
-      sub.textContent = `+${pts} PUAN`;
+      this.pendingWrong = null;
 
-      p.slots = null;
-      p.hintUsedThisWord = false;
+      this.showOverlay({
+        title: "HARİKA!",
+        titleColor: "var(--green)",
+        sub: `+${pts} PUAN`,
+        badgeText: `%${score} BENZERLİK`,
+        badgeColor: "var(--green)",
+        showActions: false
+      });
 
-      setTimeout(()=> this.finishCommittedTurn(), 1100);
-    } else {
-      title.textContent = "OLMADI";
-      title.style.color = "var(--red)";
-      sub.textContent = `Doğrusu: ${target}`;
+      // fallback: even if timer fails, tap closes
+      this.overlayTimer = setTimeout(()=>{ this.finishCommittedTurn(); }, 1100);
+      return;
+    }
 
-      // deferred commit
-      this.pendingWrong = { playerId:p.id, deltaScore:-1, deltaWords:+1 };
+    // wrong: deferred commit
+    this.pendingWrong = { playerId: p.id, score };
+    this.showOverlay({
+      title: "OLMADI",
+      titleColor: "var(--red)",
+      sub: `Doğrusu: ${target}`,
+      badgeText: `%${score} BENZERLİK`,
+      badgeColor: "var(--red)",
+      showActions: (p.varRight > 0)
+    });
 
-      if(p.varRight > 0){
-        actions.style.display = "flex";
-        badge.style.display = "none";
-        $("btnVarObjection").textContent = `İTİRAZ (VAR: ${p.varRight})`;
-      } else {
-        actions.style.display = "none";
-        badge.style.display = "block";
-        badge.textContent = `%${score} BENZERLİK`;
-        badge.style.color = "var(--red)";
-        setTimeout(()=> this.commitWrongAndAdvance(), 1100);
-      }
+    // If no VAR right, auto-commit after short delay
+    if(p.varRight <= 0){
+      this.overlayTimer = setTimeout(()=>{ this.commitWrongAndAdvance(); }, 1200);
     }
   },
 
   varObjection(){
-    if(this.state !== STATE.RESOLVING) return;
+    if(this.state!==STATE.RESOLVING) return;
     const p = this.players[this.turnIndex];
+    if(p.varRight<=0) return;
     if(!this.pendingWrong || this.pendingWrong.playerId !== p.id) return;
-    if(p.varRight <= 0) return;
 
     p.varRight -= 1;
+    // cancel commit, retry same word, same player, keep slots in vocab
     this.pendingWrong = null;
 
-    $("overlay").classList.remove("show");
-    $("varActions").style.display = "none";
-    $("ovBadge").style.display = "none";
-
-    // same word, same player; keep slots in vocab
-    this.state = STATE.IDLE;
-    this.updateUI();
-    this.startTurnFlow();
+    this.finalizeOverlay(); // returns to IDLE
+    this.startTurnFlow();   // will TTS again in pron mode (rule)
   },
 
   varContinue(){
-    if(this.state !== STATE.RESOLVING) return;
+    if(this.state!==STATE.RESOLVING) return;
     this.commitWrongAndAdvance();
   },
 
   commitWrongAndAdvance(){
     const p = this.players[this.turnIndex];
-    if(this.pendingWrong && this.pendingWrong.playerId === p.id){
-      p.score = Math.max(0, p.score + this.pendingWrong.deltaScore);
-      p.wordsPlayed += this.pendingWrong.deltaWords;
-      this.pendingWrong = null;
-      p.slots = null;
-      p.hintUsedThisWord = false;
-    }
-
-    $("overlay").classList.remove("show");
-    $("varActions").style.display = "none";
-    $("ovBadge").style.display = "none";
-
+    // commit wrong: -1 score, +1 wordsPlayed
+    p.score = Math.max(0, p.score - 1);
+    p.wordsPlayed += 1;
+    p.slots=null; p.hintUsedThisWord=false;
+    this.pendingWrong = null;
     this.finishCommittedTurn();
   },
 
   finishCommittedTurn(){
-    this.pickNextWordStrict();
-    this.nextPlayer();
-  },
+    // close overlay safely
+    this.finalizeOverlay();
 
-  nextPlayer(skipQuotaCheck=false){
+    // pick next word, next player
+    this.pickNextWordStrict();
     this.turnIndex = (this.turnIndex + 1) % this.players.length;
 
-    if(!skipQuotaCheck){
-      let guard=0;
-      while(this.players[this.turnIndex].wordsPlayed >= 20 && guard < this.players.length){
-        this.turnIndex = (this.turnIndex + 1) % this.players.length;
-        guard++;
-      }
+    // skip finished players
+    let guard=0;
+    while(this.players[this.turnIndex].wordsPlayed >= 20 && guard < this.players.length){
+      this.turnIndex = (this.turnIndex + 1) % this.players.length;
+      guard++;
     }
 
-    this.state = STATE.IDLE;
-    this.updateUI();
     this.startTurnFlow();
   },
 
   endSet(){
     this.state = STATE.PAUSED;
+    this.render();
+
     $("pauseModal").classList.remove("hidden");
 
     const sorted = [...this.players].sort((a,b)=> b.score - a.score);
@@ -626,29 +1029,26 @@ const game = {
 
     let html="";
     sorted.forEach(pl=>{
-      html += `<div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-        <span style="color:var(--p${pl.id})">${pl.name}</span><b>${pl.score}</b>
-      </div>`;
+      html += `<div class="row"><span style="color:var(--p${pl.id});font-weight:900">${pl.name}</span><b>${pl.score}</b></div>`;
     });
     $("setStats").innerHTML = html;
 
-    const matchWinner = this.players.find(x=> x.setWins >= 3) || null;
-
+    const matchWinner = this.players.find(x=>x.setWins>=3) || null;
     if(matchWinner){
       $("pauseTitle").textContent = "ŞAMPİYON!";
       $("setWinnerMsg").textContent = `${matchWinner.name} MAÇI KAZANDI!`;
-      $("btnContinueSet").textContent = "YENİ MAÇ";
-      $("btnContinueSet").onclick = ()=> location.reload();
+      $("btnNextSet").textContent = "YENİ MAÇ";
+      $("btnNextSet").onclick = ()=> location.reload();
     } else if(winner){
       $("pauseTitle").textContent = "SET SONUCU";
       $("setWinnerMsg").textContent = `${winner.name} SETİ KAZANDI!`;
-      $("btnContinueSet").textContent = "SONRAKİ SET";
-      $("btnContinueSet").onclick = ()=> this.continueGame();
+      $("btnNextSet").textContent = "SONRAKİ SET";
+      $("btnNextSet").onclick = ()=> this.continueGame();
     } else {
       $("pauseTitle").textContent = "SET SONUCU";
       $("setWinnerMsg").textContent = "SET BERABERE!";
-      $("btnContinueSet").textContent = "SONRAKİ SET";
-      $("btnContinueSet").onclick = ()=> this.continueGame();
+      $("btnNextSet").textContent = "SONRAKİ SET";
+      $("btnNextSet").onclick = ()=> this.continueGame();
     }
   },
 
@@ -657,13 +1057,14 @@ const game = {
     this.players.forEach(p=>{
       p.score=0; p.wordsPlayed=0; p.passRight=1; p.varRight=1;
       p.slots=null; p.hintUsedThisWord=false;
-      // hintRight match-long
+      // hintRight stays match-long
     });
     this.usedWords.clear();
     this.pendingWrong = null;
+    this.turnIndex = (this.turnIndex + 1) % this.players.length; // slight fairness
     this.pickNextWordStrict();
     this.state = STATE.IDLE;
-    this.updateUI();
+    this.render();
     this.startTurnFlow();
   },
 
@@ -677,7 +1078,7 @@ const game = {
   }
 };
 
-// wiring setup UI
+// ===== UI wiring =====
 (function(){
   // players
   $("grpPlayers").querySelectorAll(".toggle-btn").forEach(btn=>{
@@ -685,11 +1086,11 @@ const game = {
       $("grpPlayers").querySelectorAll(".toggle-btn").forEach(x=>x.classList.remove("active"));
       btn.classList.add("active");
       setup.playerCount = Number(btn.dataset.n);
-      rebuildNameInputs();
+      buildNameInputs();
     });
   });
 
-  // language
+  // lang
   $("grpLang").querySelectorAll(".lang-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       $("grpLang").querySelectorAll(".lang-btn").forEach(x=>x.classList.remove("active"));
@@ -710,15 +1111,33 @@ const game = {
   // start
   $("btnStart").addEventListener("click", ()=> game.init());
 
-  // controls
+  // main controls
   $("btnPass").addEventListener("click", ()=> game.action("pass"));
   $("btnHint").addEventListener("click", ()=> game.action("hint"));
   $("btnMic").addEventListener("click", ()=> game.action("mic"));
 
   // overlay actions
-  $("btnVarObjection").addEventListener("click", ()=> game.varObjection());
-  $("btnVarContinue").addEventListener("click", ()=> game.varContinue());
+  $("btnVar").addEventListener("click", ()=> game.varObjection());
+  $("btnCont").addEventListener("click", ()=> game.varContinue());
+
+  // tap overlay to continue (anti-freeze)
+  $("overlay").addEventListener("click", (e)=>{
+    // if actions visible, ignore tap (force choice) unless user taps outside buttons
+    const actionsVisible = $("ovActions").style.display === "flex";
+    if(actionsVisible){
+      // allow tap on background to act like "DEVAM ET" (premium UX)
+      if(e.target === $("overlay") || e.target === $("ovTap") || e.target === $("ovTitle") || e.target === $("ovSub") || e.target === $("ovBadge")){
+        game.varContinue();
+      }
+      return;
+    }
+    // correct overlay: tap = proceed
+    if(game.state === STATE.RESOLVING){
+      game.finishCommittedTurn();
+    }
+  });
 })();
 </script>
+
 </body>
 </html>
