@@ -3,64 +3,33 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>ITALKY • Arena V17 Unstoppable</title>
+  <title>ITALKY • Arena V18 Architect</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
       --bg: #030305;
-      --border: rgba(255,255,255,0.08);
-      --glass: rgba(255, 255, 255, 0.03);
-      --pA: #00f0ff; /* Cyber Cyan */
-      --pB: #ff0055; /* Neon Pink */
+      --border: rgba(255,255,255,0.1);
+      --pA: #00f0ff; --pB: #ff0055;
       --green: #00e676; --red: #ff1744; --gold: #ffd700;
       --font-main: 'Outfit', sans-serif;
       --font-display: 'Space Grotesk', sans-serif;
     }
 
     * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
-    
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      background: var(--bg); font-family: var(--font-main);
-      color: #fff; overflow: hidden; position: fixed;
-    }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); font-family: var(--font-main); color: #fff; overflow: hidden; position: fixed; }
 
-    /* ARKA PLAN */
+    /* FX & HEADER */
     .bg-fx { position: absolute; inset: 0; z-index: 0; background: radial-gradient(circle at 50% 50%, #0a0a12 0%, #000 100%); }
-    .nebula { position: absolute; width: 600px; height: 600px; border-radius: 50%; filter: blur(90px); opacity: 0.15; animation: breathe 10s infinite alternate; }
-    .nebula-a { background: var(--pA); top: -200px; left: -100px; }
-    .nebula-b { background: var(--pB); bottom: -200px; right: -100px; animation-delay: -5s; }
-    @keyframes breathe { 0% { transform: scale(1); opacity: 0.1; } 100% { transform: scale(1.2); opacity: 0.2; } }
-
-    /* HEADER */
-    .app-header {
-      position: absolute; top: 0; left: 0; right: 0; height: 60px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 20px; z-index: 100; pointer-events: none;
-    }
-    .header-logo { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: -0.5px; opacity: 0.8; pointer-events: auto; }
-    .header-back {
-      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-      border-radius: 12px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
-      text-decoration: none; color: #fff; font-size: 20px; pointer-events: auto;
-      border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;
-    }
-    .header-back:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+    .app-header { position: absolute; top: 0; left: 0; right: 0; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 100; pointer-events: none; }
+    .header-logo { font-family: var(--font-display); font-weight: 700; font-size: 18px; opacity: 0.8; pointer-events: auto; }
+    .header-back { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.1); text-decoration: none; color: #fff; font-size: 20px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.1); }
 
     /* OYUN ALANI */
     .arena-wrap { position: relative; z-index: 10; width: 100%; height: 100dvh; display: flex; flex-direction: column; }
     
-    .player-zone {
-      flex: 1; position: relative; display: flex; justify-content: center; align-items: center;
-      transition: all 0.4s ease-out; overflow: hidden;
-      opacity: 0.4; filter: blur(3px) grayscale(0.8); pointer-events: none;
-    }
-    /* Aktif oyuncu parlar, diğeri söner */
-    .player-zone.active {
-      opacity: 1; filter: blur(0) grayscale(0); pointer-events: auto;
-      background: radial-gradient(circle at center, rgba(255,255,255,0.04) 0%, transparent 70%);
-    }
+    .player-zone { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; transition: all 0.4s ease; overflow: hidden; opacity: 0.4; filter: blur(3px) grayscale(0.8); pointer-events: none; }
+    .player-zone.active { opacity: 1; filter: blur(0) grayscale(0); pointer-events: auto; background: radial-gradient(circle at center, rgba(255,255,255,0.04) 0%, transparent 70%); }
     
     #zoneB { border-bottom: 1px solid var(--border); align-items: flex-end; padding-bottom: 20px; }
     #zoneB .card-content { transform: rotate(180deg); }
@@ -68,84 +37,64 @@
 
     .card-content { width: 88%; max-width: 360px; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
     
-    .player-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
-    .player-label { font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
-    .var-indicator { 
-      font-size: 10px; background: rgba(255,215,0,0.2); color: var(--gold); 
-      padding: 3px 8px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(255,215,0,0.3);
-      opacity: 0.5; transition: 0.3s;
-    }
-    .var-indicator.has-rights { opacity: 1; box-shadow: 0 0 10px rgba(255,215,0,0.2); }
-
-    #zoneA .player-label { color: var(--pA); text-shadow: 0 0 15px rgba(0, 240, 255, 0.4); }
-    #zoneB .player-label { color: var(--pB); text-shadow: 0 0 15px rgba(255, 0, 85, 0.4); }
-
     .main-word { font-family: var(--font-display); font-size: 40px; font-weight: 700; line-height: 1.1; margin: 5px 0; letter-spacing: -1px; }
     .sub-word { font-size: 18px; color: rgba(255,255,255,0.6); margin-bottom: 30px; font-weight: 500; min-height: 24px; }
 
+    .player-header { display: flex; align-items: center; gap: 10px; margin-top:10px; margin-bottom: 10px; }
+    .player-label { font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+    .var-indicator { font-size: 10px; background: rgba(255,215,0,0.2); color: var(--gold); padding: 3px 8px; border-radius: 6px; font-weight: 800; border: 1px solid rgba(255,215,0,0.3); opacity: 0.5; transition: 0.3s; }
+    .var-indicator.active { opacity: 1; box-shadow: 0 0 10px rgba(255,215,0,0.2); }
+
+    #zoneA .player-label { color: var(--pA); } #zoneB .player-label { color: var(--pB); }
+
+    /* CONTROLS */
     .controls { display: flex; gap: 12px; width: 100%; margin-top: auto; }
-    .btn {
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.06); backdrop-filter: blur(10px);
-      color: #fff; padding: 16px 0; border-radius: 18px;
-      font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: 0.5px;
-      cursor: pointer; flex: 1; transition: all 0.15s;
-    }
-    .btn:active { transform: scale(0.94); background: rgba(255,255,255,0.12); }
+    .btn { border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.06); color: #fff; padding: 16px 0; border-radius: 18px; font-family: var(--font-display); font-weight: 700; font-size: 13px; cursor: pointer; flex: 1; transition: 0.15s; }
+    .btn:active { transform: scale(0.95); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; filter: grayscale(1); }
     
-    /* Disabled stili sadece gerçekten kilitliyken */
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); transform: none; }
+    .btn-mic { flex: 1.8; background: rgba(255,255,255,0.12); }
+    .btn.listening { background: #fff !important; color: #000 !important; animation: pulse 1s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); } 70% { box-shadow: 0 0 0 15px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
 
-    .btn-mic { flex: 1.8; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
-    .btn-var { flex: 0.7; color: var(--gold); border-color: rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.05); }
+    .btn-var { flex: 0.7; color: var(--gold); border-color: rgba(255,215,0,0.3); }
 
-    .btn.listening { background: #fff !important; color: #000 !important; box-shadow: 0 0 20px rgba(255,255,255,0.5); border-color: #fff; animation: pulse 1s infinite; }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-
-    .round-badge { position: absolute; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; }
-    #zoneA .round-badge { bottom: 0; }
-    #zoneB .round-badge { top: 0; }
-
-    .arena-center {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 140px; height: 56px; background: #000; border: 1px solid var(--border); border-radius: 28px;
-      display: flex; align-items: center; justify-content: space-evenly; z-index: 20; box-shadow: 0 0 40px rgba(0,0,0,0.8);
-    }
+    /* CENTER */
+    .arena-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 56px; background: #000; border: 1px solid var(--border); border-radius: 28px; display: flex; align-items: center; justify-content: space-evenly; z-index: 20; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
     .score-txt { font-family: var(--font-display); font-size: 24px; font-weight: 700; }
-    .vs-line { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
+    .round-badge { position: absolute; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; }
+    #zoneA .round-badge { bottom: 0; } #zoneB .round-badge { top: 0; }
 
-    .modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+    /* MODAL */
+    .modal { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
     .modal:not(.hidden) { opacity: 1; pointer-events: auto; }
-    .modal-box { width: 90%; max-width: 360px; background: #121216; border: 1px solid var(--border); border-radius: 32px; padding: 32px 24px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6); transform: scale(0.95); transition: 0.3s; }
-    .modal:not(.hidden) .modal-box { transform: scale(1); }
+    .modal-box { width: 90%; max-width: 360px; background: #121216; border: 1px solid var(--border); border-radius: 32px; padding: 30px; text-align: center; }
+    
+    .mode-select { display: flex; gap: 10px; margin-bottom: 20px; }
+    .mode-btn { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; font-weight: 700; opacity: 0.6; transition: 0.2s; }
+    .mode-btn.active { opacity: 1; background: var(--pA); color: #000; border-color: var(--pA); }
+    .mode-btn.vocab.active { background: var(--pB); border-color: var(--pB); }
 
-    .input-group { display: flex; gap: 12px; margin-bottom: 25px; }
-    .name-input { width: 100%; background: #1a1a20; border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 14px; font-family: var(--font-main); font-weight: 600; text-align: center; font-size: 15px; }
-    .name-input:focus { background: #222; border-color: var(--pA); outline:none; }
-    .name-input.p2:focus { border-color: var(--pB); }
-
+    .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+    .name-input { width: 100%; background: #1a1a20; border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 12px; font-weight: 700; text-align: center; }
+    
     .lang-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 25px; }
-    .lang-btn { background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: rgba(255,255,255,0.6); border-radius: 12px; padding: 10px 0; font-size: 20px; cursor: pointer; transition: 0.2s; }
-    .lang-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.05); }
+    .lang-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; border-radius: 12px; padding: 10px 0; font-size: 20px; cursor: pointer; }
+    .lang-btn.active { background: #fff; color: #000; }
 
-    .btn-block { width: 100%; padding: 18px; margin-top: 10px; border-radius: 16px; border: none; font-weight: 700; font-family: var(--font-display); font-size: 16px; cursor: pointer; letter-spacing: 0.5px; }
-    .set-stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 15px; }
+    .btn-block { width: 100%; padding: 18px; border-radius: 16px; border: none; font-weight: 800; font-size: 16px; cursor: pointer; background: #fff; color: #000; }
 
     /* OVERLAY */
     .result-overlay { position: absolute; inset: -20px; z-index: 50; background: rgba(8, 8, 10, 0.96); backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 24px; opacity: 0; pointer-events: none; transform: scale(0.9); transition: 0.25s; }
     .result-overlay.show { opacity: 1; transform: scale(1); }
-    .res-val { font-size: 14px; font-weight: 600; opacity: 0.7; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
-    .res-title { font-size: 42px; font-weight: 800; margin: 0; line-height: 1; font-family: var(--font-display); }
-    .res-sub { margin-top: 10px; font-size: 16px; opacity: 0.8; }
-    .badge { margin-top: 15px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); }
+    .res-title { font-size: 42px; font-weight: 800; font-family: var(--font-display); margin:0; line-height:1; }
+    .res-sub { margin-top: 10px; font-size: 16px; color:#ccc; }
+    .badge { margin-top: 15px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
 
   <div class="bg-fx"></div>
-  <div class="nebula nebula-a"></div>
-  <div class="nebula nebula-b"></div>
-
   <div class="app-header">
     <a href="game.html" class="header-back">✕</a>
     <div class="header-logo">italkyAI</div>
@@ -153,67 +102,67 @@
   </div>
 
   <div class="arena-wrap">
-    
     <div class="player-zone" id="zoneB">
       <div class="card-content">
-        <div class="result-overlay" id="ovB"><div class="res-val">SONUÇ</div><div class="res-title"></div><div class="res-sub"></div><div class="badge"></div></div>
-        
+        <div class="result-overlay" id="ovB"><div class="res-title"></div><div class="res-sub"></div><div class="badge"></div></div>
         <div class="controls">
-          <button class="btn btn-var" id="varB" onclick="game.useVar('B')">VAR</button>
-          <button class="btn btn-pass" id="passB" onclick="game.pass('B')">PAS</button>
-          <button class="btn btn-mic" id="micB" onclick="game.listen('B')">🎙️ CEVAPLA</button>
+          <button class="btn btn-var" id="varB" onclick="game.action('var', 'B')">VAR</button>
+          <button class="btn" id="passB" onclick="game.action('pass', 'B')">PAS</button>
+          <button class="btn btn-mic" id="micB" onclick="game.action('mic', 'B')">🎙️ CEVAPLA</button>
         </div>
-        
         <div style="margin: auto 0;">
           <div class="main-word" id="wB">...</div>
           <div class="sub-word" id="mB">...</div>
         </div>
-        
-        <div class="player-header" style="justify-content:center; margin-top:20px;">
+        <div class="player-header">
           <div class="player-label" id="lblB">OYUNCU B</div>
           <div class="var-indicator" id="indB">VAR: 1</div>
         </div>
-        <div class="round-badge" id="rndB">ROUND 1</div>
+        <div class="round-badge" id="rndB">R1</div>
       </div>
     </div>
 
     <div class="arena-center">
       <span class="score-txt" style="color:var(--pB)" id="sB">0</span>
-      <div class="vs-line"></div>
+      <div style="width:1px; height:20px; background:rgba(255,255,255,0.2)"></div>
       <span class="score-txt" style="color:var(--pA)" id="sA">0</span>
     </div>
 
     <div class="player-zone" id="zoneA">
       <div class="card-content">
-        <div class="result-overlay" id="ovA"><div class="res-val">SONUÇ</div><div class="res-title"></div><div class="res-sub"></div><div class="badge"></div></div>
-        
-        <div class="player-header" style="justify-content:center; margin-bottom:20px;">
+        <div class="result-overlay" id="ovA"><div class="res-title"></div><div class="res-sub"></div><div class="badge"></div></div>
+        <div class="player-header">
           <div class="player-label" id="lblA">OYUNCU A</div>
           <div class="var-indicator" id="indA">VAR: 1</div>
         </div>
-
         <div style="margin: auto 0;">
           <div class="main-word" id="wA">...</div>
           <div class="sub-word" id="mA">...</div>
         </div>
-
         <div class="controls">
-          <button class="btn btn-pass" id="passA" onclick="game.pass('A')">PAS</button>
-          <button class="btn btn-mic" id="micA" onclick="game.listen('A')">🎙️ CEVAPLA</button>
-          <button class="btn btn-var" id="varA" onclick="game.useVar('A')">VAR</button>
+          <button class="btn" id="passA" onclick="game.action('pass', 'A')">PAS</button>
+          <button class="btn btn-mic" id="micA" onclick="game.action('mic', 'A')">🎙️ CEVAPLA</button>
+          <button class="btn btn-var" id="varA" onclick="game.action('var', 'A')">VAR</button>
         </div>
-        <div class="round-badge" id="rndA">ROUND 1</div>
+        <div class="round-badge" id="rndA">R1</div>
       </div>
     </div>
   </div>
 
   <div class="modal" id="setupModal">
     <div class="modal-box">
-      <div class="header-logo" style="font-size:26px; margin-bottom:20px;">italkyAI ARENA</div>
+      <div class="header-logo" style="font-size:24px; margin-bottom:20px;">ARENA SETUP</div>
+      
+      <div class="mode-select">
+        <div class="mode-btn active" onclick="setup.setMode('pron')" id="btnModePron">🎙️ TELAFFUZ<br><span style="font-size:10px; opacity:0.7">Oku & Puanla</span></div>
+        <div class="mode-btn vocab" onclick="setup.setMode('vocab')" id="btnModeVocab">🧠 KELİME<br><span style="font-size:10px; opacity:0.7">Bil & Söyle</span></div>
+      </div>
+
       <div class="input-group">
         <input type="text" class="name-input" id="inpA" placeholder="Oyuncu A">
         <input type="text" class="name-input p2" id="inpB" placeholder="Oyuncu B">
       </div>
+
       <div class="lang-grid">
         <button class="lang-btn active" data-lang="en">🇬🇧</button>
         <button class="lang-btn" data-lang="de">🇩🇪</button>
@@ -221,47 +170,24 @@
         <button class="lang-btn" data-lang="es">🇪🇸</button>
         <button class="lang-btn" data-lang="it">🇮🇹</button>
       </div>
-      <button class="btn-block" style="background:var(--pA); color:#000" onclick="game.init()">BAŞLA</button>
-    </div>
-  </div>
 
-  <div class="modal hidden" id="pauseModal">
-    <div class="modal-box">
-      <div style="font-family:var(--font-display); font-weight:700; font-size:20px; margin-bottom:15px; color:#fff;">SET ÖZETİ</div>
-      <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:16px; margin-bottom:20px;">
-        <div class="set-stat-row"><span style="color:var(--pA); font-weight:700" id="statNameA">A</span><span id="statScoreA">0</span></div>
-        <div class="set-stat-row" style="border:none; padding-bottom:0;"><span style="color:var(--pB); font-weight:700" id="statNameB">B</span><span id="statScoreB">0</span></div>
-      </div>
-      <div style="font-size:22px; font-weight:800; color:var(--gold); margin-bottom:25px; font-family:var(--font-display);" id="setWinnerMsg">...</div>
-      <button class="btn-block" style="background:var(--green); color:#000" onclick="game.continueGame()">DEVAM ET</button>
-      <button class="btn-block" style="background:rgba(255,255,255,0.1); color:#fff" onclick="location.href='game.html'">ÇIKIŞ</button>
+      <button class="btn-block" onclick="game.init()">BAŞLA</button>
     </div>
   </div>
 
 <script>
-const RAW_DB = {
-  en: [{w:"Excellent",tr:"Mükemmel"},{w:"Decision",tr:"Karar"},{w:"Challenge",tr:"Meydan Okuma"},{w:"Opportunity",tr:"Fırsat"},{w:"Journey",tr:"Yolculuk"},{w:"Environment",tr:"Çevre"},{w:"Development",tr:"Gelişim"},{w:"Necessary",tr:"Gerekli"},{w:"Beautiful",tr:"Güzel"},{w:"Dangerous",tr:"Tehlikeli"},{w:"Knowledge",tr:"Bilgi"},{w:"Experience",tr:"Deneyim"},{w:"Incredible",tr:"İnanılmaz"},{w:"Understand",tr:"Anlamak"},{w:"Remember",tr:"Hatırlamak"},{w:"Question",tr:"Soru"},{w:"Solution",tr:"Çözüm"},{w:"Language",tr:"Dil"},{w:"Computer",tr:"Bilgisayar"},{w:"History",tr:"Tarih"},{w:"Together",tr:"Birlikte"},{w:"Family",tr:"Aile"},{w:"Friend",tr:"Arkadaş"},{w:"Success",tr:"Başarı"}],
-  de: [{w:"Entscheidung",tr:"Karar"},{w:"Möglichkeit",tr:"İmkan"},{w:"Erfahrung",tr:"Deneyim"},{w:"Natürlich",tr:"Doğal"},{w:"Wichtig",tr:"Önemli"},{w:"Zusammen",tr:"Birlikte"},{w:"Schmetterling",tr:"Kelebek"},{w:"Gefährlich",tr:"Tehlikeli"},{w:"Entschuldigung",tr:"Özür Dilerim"}],
-  fr: [{w:"Bonjour",tr:"Merhaba"},{w:"Amour",tr:"Aşk"},{w:"Voiture",tr:"Araba"},{w:"Maison",tr:"Ev"},{w:"Magnifique",tr:"Muhteşem"},{w:"Toujours",tr:"Her zaman"}],
-  es: [{w:"Corazón",tr:"Kalp"},{w:"Amigo",tr:"Arkadaş"},{w:"Tiempo",tr:"Zaman"},{w:"Vida",tr:"Hayat"},{w:"Felicidad",tr:"Mutluluk"},{w:"Peligroso",tr:"Tehlikeli"}],
-  it: [{w:"Ciao",tr:"Merhaba"},{w:"Grazie",tr:"Teşekkürler"},{w:"Famiglia",tr:"Aile"},{w:"Piccolo",tr:"Küçük"},{w:"Mangiare",tr:"Yemek"},{w:"Dormire",tr:"Uyumak"}]
-};
-
-let selLang = 'en';
-document.querySelectorAll('.lang-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selLang = btn.getAttribute('data-lang');
-  });
-});
-
-// TEK VE GÜÇLÜ NORMALIZE
-function normalize(str) { return str.toLowerCase().replace(/ß/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "").trim(); }
+// --- GLOBAL UTILS ---
+function normalize(str) { 
+  return str.toLowerCase().replace(/ß/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "").trim(); 
+}
 
 function getBestMatchScore(target, spoken) {
   const normTarget = normalize(target);
   const normSpoken = normalize(spoken);
+  // Basit check: içeriyor mu?
+  if (normSpoken.includes(normTarget)) return 100;
+  
+  // Detaylı check
   let bestScore = similarity(normTarget, normSpoken);
   normSpoken.split(" ").forEach(w => {
     const score = similarity(normTarget, w);
@@ -296,235 +222,239 @@ function editDistance(s1, s2) {
   return costs[s2.length];
 }
 
-const SFX = {
-  ctx: null,
-  init: function() { window.AudioContext = window.AudioContext || window.webkitAudioContext; this.ctx = new AudioContext(); },
-  play: function(type) {
-    if(!this.ctx) this.init(); if(this.ctx.state === 'suspended') this.ctx.resume();
-    const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-    osc.connect(gain); gain.connect(this.ctx.destination);
-    if(type === 'correct') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(600, this.ctx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime+0.1);
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+0.4);
-      osc.start(); osc.stop(this.ctx.currentTime+0.4);
-    } else {
-      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, this.ctx.currentTime); osc.frequency.linearRampToValueAtTime(100, this.ctx.currentTime+0.2);
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime+0.3);
-      osc.start(); osc.stop(this.ctx.currentTime+0.3);
-    }
+// --- DATA ---
+const DB = {
+  en: [{w:"Excellent",tr:"Mükemmel"},{w:"Challenge",tr:"Meydan Okuma"},{w:"Opportunity",tr:"Fırsat"},{w:"Journey",tr:"Yolculuk"},{w:"Environment",tr:"Çevre"},{w:"Necessary",tr:"Gerekli"},{w:"Dangerous",tr:"Tehlikeli"},{w:"Knowledge",tr:"Bilgi"},{w:"Experience",tr:"Deneyim"},{w:"Incredible",tr:"İnanılmaz"},{w:"Understand",tr:"Anlamak"},{w:"Remember",tr:"Hatırlamak"},{w:"Solution",tr:"Çözüm"},{w:"Together",tr:"Birlikte"},{w:"Success",tr:"Başarı"},{w:"Future",tr:"Gelecek"},{w:"Freedom",tr:"Özgürlük"}],
+  de: [{w:"Entscheidung",tr:"Karar"},{w:"Möglichkeit",tr:"İmkan"},{w:"Erfahrung",tr:"Deneyim"},{w:"Natürlich",tr:"Doğal"},{w:"Wichtig",tr:"Önemli"},{w:"Zusammen",tr:"Birlikte"},{w:"Schmetterling",tr:"Kelebek"},{w:"Gefährlich",tr:"Tehlikeli"},{w:"Entschuldigung",tr:"Özür Dilerim"}],
+  fr: [{w:"Bonjour",tr:"Merhaba"},{w:"Amour",tr:"Aşk"},{w:"Voiture",tr:"Araba"},{w:"Maison",tr:"Ev"},{w:"Magnifique",tr:"Muhteşem"},{w:"Toujours",tr:"Her zaman"}],
+  es: [{w:"Corazón",tr:"Kalp"},{w:"Amigo",tr:"Arkadaş"},{w:"Tiempo",tr:"Zaman"},{w:"Vida",tr:"Hayat"},{w:"Felicidad",tr:"Mutluluk"},{w:"Peligroso",tr:"Tehlikeli"}],
+  it: [{w:"Ciao",tr:"Merhaba"},{w:"Grazie",tr:"Teşekkürler"},{w:"Famiglia",tr:"Aile"},{w:"Piccolo",tr:"Küçük"},{w:"Mangiare",tr:"Yemek"},{w:"Dormire",tr:"Uyumak"}]
+};
+
+// --- SETUP LOGIC ---
+const setup = {
+  mode: 'pron', // pron | vocab
+  lang: 'en',
+  setMode: function(m) {
+    this.mode = m;
+    document.getElementById('btnModePron').className = `mode-btn ${m==='pron'?'active':''}`;
+    document.getElementById('btnModeVocab').className = `mode-btn vocab ${m==='vocab'?'active':''}`;
   }
 };
 
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setup.lang = btn.getAttribute('data-lang');
+  }
+});
+
+// --- GAME ENGINE (STATE MACHINE) ---
+const STATE = { IDLE:0, LISTENING:1, RESOLVING:2, PAUSED:3 };
+
 const game = {
-  words: [], idx: 0, moveCount: 0, lastPauseCheck: 0, setNumber: 1, 
-  turn: 'A', score: { A:0, B:0 }, setScore: { A:0, B:0 }, names: { A:'A', B:'B' }, 
-  busy: false, inputLocked: false, isPaused: false, currentSnapshot: null, 
-  varRights: { A:1, B:1 }, activeMicId: null,
+  state: STATE.IDLE,
+  turn: 'A',
+  words: [],
+  idx: 0,
+  scores: { A:0, B:0 },
+  varRights: { A:1, B:1 },
+  names: { A:'A', B:'B' },
+  activeMicId: null,
+  watchdog: null,
 
   init: function() {
     const nA = document.getElementById('inpA').value.trim();
     const nB = document.getElementById('inpB').value.trim();
-    if (!nA || !nB) { alert("Lütfen oyuncu isimlerini giriniz!"); return; }
-
-    this.names.A = nA; this.names.B = nB;
-    document.getElementById('lblA').innerText = this.names.A;
-    document.getElementById('lblB').innerText = this.names.B;
-    this.fillPool();
-    this.idx = 0; this.moveCount = 0; this.lastPauseCheck = 0; this.setNumber = 1;
-    this.score = {A:0, B:0}; this.setScore = {A:0, B:0}; this.varRights = {A:1, B:1};
-    this.turn = Math.random()>0.5 ? 'A' : 'B';
+    if(!nA || !nB) { alert("Lütfen isimleri giriniz."); return; }
+    
+    this.names = { A:nA, B:nB };
+    this.loadWords();
+    this.idx = 0;
+    this.scores = {A:0, B:0};
+    this.varRights = {A:1, B:1};
+    this.state = STATE.IDLE;
+    
+    document.getElementById('lblA').innerText = nA;
+    document.getElementById('lblB').innerText = nB;
     document.getElementById('setupModal').classList.add('hidden');
-    SFX.init(); this.updateUI(); this.startTurn();
+    
+    this.render();
   },
 
-  fillPool: function() {
-    let raw = RAW_DB[selLang] || RAW_DB.en;
-    this.words = [...raw, ...raw, ...raw].sort(() => Math.random() - 0.5);
+  loadWords: function() {
+    let raw = DB[setup.lang] || DB.en;
+    // 3 katına çıkar ve karıştır
+    this.words = [...raw, ...raw, ...raw].sort(()=>Math.random()-0.5);
   },
 
-  startTurn: function() {
-    if (this.moveCount > 0 && this.moveCount % 20 === 0 && this.lastPauseCheck !== this.moveCount) {
-      this.lastPauseCheck = this.moveCount; this.pauseGame(); return;
+  action: function(type, p) {
+    // Sadece IDLE durumunda ve sıra sendeyse işlem yapabilirsin
+    if (this.state !== STATE.IDLE) return;
+    if (this.turn !== p) return;
+
+    if (type === 'pass') {
+      this.nextTurn();
+    } else if (type === 'var') {
+      this.useVar(p);
+    } else if (type === 'mic') {
+      this.startListening(p);
     }
-    if (this.idx >= this.words.length) { this.fillPool(); this.idx = 0; }
-
-    this.renderTurn();
-    const item = this.words[this.idx];
-    setTimeout(() => { if(!this.busy && !this.inputLocked && !this.isPaused) this.speak(item.w, 0.9); }, 600);
   },
 
-  // UI STATE YÖNETİMİ
-  updateUI: function() {
-    // Skorlar ve VAR hakları
-    document.getElementById('sA').innerText = this.score.A;
-    document.getElementById('sB').innerText = this.score.B;
-    
-    document.getElementById('indA').innerText = `VAR: ${this.varRights.A}`;
-    document.getElementById('indB').innerText = `VAR: ${this.varRights.B}`;
-    document.getElementById('indA').classList.toggle('has-rights', this.varRights.A > 0);
-    document.getElementById('indB').classList.toggle('has-rights', this.varRights.B > 0);
-
-    // Buton aktiflik (Akıllı Kilit)
-    const activeA = (!this.busy && !this.inputLocked && this.turn === 'A');
-    const activeB = (!this.busy && !this.inputLocked && this.turn === 'B');
-
-    // ZONE A Butonları
-    document.getElementById('micA').disabled = !activeA;
-    document.getElementById('passA').disabled = !activeA;
-    document.getElementById('varA').disabled = !(activeA && this.varRights.A > 0);
-    
-    // ZONE B Butonları
-    document.getElementById('micB').disabled = !activeB;
-    document.getElementById('passB').disabled = !activeB;
-    document.getElementById('varB').disabled = !(activeB && this.varRights.B > 0);
-  },
-
-  renderTurn: function() {
-    document.getElementById('zoneA').className = `player-zone ${this.turn==='A'?'active':''}`;
-    document.getElementById('zoneB').className = `player-zone ${this.turn==='B'?'active':''}`;
-    const currentRound = Math.floor(this.moveCount / 2) + 1;
-    document.getElementById('rndA').innerText = `SET ${this.setNumber} • ROUND ${currentRound}`;
-    document.getElementById('rndB').innerText = `SET ${this.setNumber} • ROUND ${currentRound}`;
-    
-    const item = this.words[this.idx];
-    document.getElementById('wA').innerText = item.w; document.getElementById('mA').innerText = item.tr;
-    document.getElementById('wB').innerText = item.w; document.getElementById('mB').innerText = item.tr;
-    
-    this.updateUI();
-  },
-
-  listen: function(p) {
-    if(this.busy || this.inputLocked || p !== this.turn) return;
+  startListening: function(p) {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR) { alert("Tarayıcı desteklemiyor."); return; }
+    if(!SR) { alert("Tarayıcı desteklemiyor"); return; }
 
-    this.busy = true; this.updateUI(); window.speechSynthesis.cancel();
-    
+    this.state = STATE.LISTENING;
+    this.updateControls(); // Butonları kilitle
+
+    const btn = document.getElementById(`mic${p}`);
+    btn.classList.add('listening');
     this.activeMicId = `mic${p}`;
-    const btn = document.getElementById(this.activeMicId);
-    btn.innerText = "👂..."; btn.classList.add('listening');
-
-    this.currentSnapshot = { targetWord: this.words[this.idx].w, moveId: this.moveCount, player: p };
 
     const rec = new SR();
-    const langMap = { en:'en-US', de:'de-DE', fr:'fr-FR', es:'es-ES', it:'it-IT' };
-    rec.lang = langMap[selLang]; rec.interimResults = false; rec.maxAlternatives = 1;
+    rec.lang = (setup.lang === 'en') ? 'en-US' : (setup.lang==='de'?'de-DE':(setup.lang==='fr'?'fr-FR':(setup.lang==='es'?'es-ES':'it-IT')));
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+
+    // EMNİYET SİGORTASI: 8sn ses gelmezse resetle
+    this.watchdog = setTimeout(() => {
+      rec.stop(); this.resetState();
+    }, 8000);
 
     rec.onresult = (e) => {
+      clearTimeout(this.watchdog);
       const txt = e.results[0][0].transcript;
-      this.stopMicVisuals();
-      this.check(txt);
+      this.checkAnswer(txt, p);
     };
-    rec.onerror = () => { this.resetToIdle(); };
-    rec.onend = () => { if(this.busy) this.resetToIdle(); };
+
+    rec.onerror = () => { clearTimeout(this.watchdog); this.resetState(); };
+    rec.onend = () => { /* Watchdog halleder */ };
     rec.start();
   },
 
-  stopMicVisuals: function() {
-    if (this.activeMicId) {
-      const btn = document.getElementById(this.activeMicId);
-      if(btn) { btn.innerText = "🎙️ CEVAPLA"; btn.classList.remove('listening'); }
-      this.activeMicId = null;
-    }
-  },
-
-  resetToIdle: function() {
-    this.stopMicVisuals(); this.busy = false; this.inputLocked = false; this.currentSnapshot = null;
-    this.updateUI();
-  },
-
-  check: function(spoken) {
-    if (!this.currentSnapshot || this.currentSnapshot.moveId !== this.moveCount) { this.resetToIdle(); return; }
-
-    const { targetWord, player } = this.currentSnapshot;
-    const score = getBestMatchScore(targetWord, spoken);
-    // EŞİK %90
-    const isCorrect = score >= 90; 
-    this.showResult(player, isCorrect, score, targetWord);
+  checkAnswer: function(spoken, p) {
+    const target = this.words[this.idx].w;
+    const score = getBestMatchScore(target, spoken);
+    // ADİL ZORLUK: %90
+    const isCorrect = score >= 90;
+    
+    // State Resolving'e geçiyor
+    this.state = STATE.RESOLVING;
+    // Görsel temizlik
+    if(this.activeMicId) document.getElementById(this.activeMicId).classList.remove('listening');
+    
+    this.showOverlay(p, isCorrect, score, target);
   },
 
   useVar: function(p) {
-    if(this.busy || this.inputLocked || this.varRights[p] <= 0) return;
-    
-    // VAR basıldığı an dinlemeyi iptal et (HATA ÇÖZÜMÜ)
-    this.stopMicVisuals();
-    this.busy = false; 
-    
+    if (this.varRights[p] <= 0) return;
     this.varRights[p]--;
-    const targetWord = this.words[this.idx].w;
-    this.showResult(p, true, 100, targetWord, true);
+    this.state = STATE.RESOLVING;
+    this.showOverlay(p, true, 100, this.words[this.idx].w, true);
   },
 
-  showResult: function(p, isCorrect, percent, targetWord, isVar = false) {
-    this.inputLocked = true; this.updateUI();
-
+  showOverlay: function(p, isCorrect, score, target, isVar = false) {
     const el = document.getElementById(`ov${p}`);
     const title = el.querySelector('.res-title');
     const sub = el.querySelector('.res-sub');
-    const badge = el.querySelector('.accuracy-badge');
+    const badge = el.querySelector('.badge');
 
     el.classList.add('show');
-    badge.innerText = isVar ? "HAKEM KARARI" : `%${percent} BENZERLİK`;
+    badge.innerText = isVar ? "HAKEM KARARI" : `%${score} BENZERLİK`;
 
-    if(isCorrect) {
-      SFX.play('correct');
+    if (isCorrect) {
       title.innerText = "HARİKA!"; title.style.color = "var(--green)";
-      let pts = 1; if (!isVar && percent >= 98) pts = 2; 
-      sub.innerText = `+${pts} PUAN`; badge.style.color = "var(--green)";
-      this.score[p] += pts; this.setScore[p] += pts;
-      setTimeout(() => { this.finishResult(el); }, 1200);
+      let pts = (score >= 98 && !isVar) ? 2 : 1;
+      sub.innerText = `+${pts} PUAN`;
+      this.scores[p] += pts;
+      badge.style.color = "var(--green)";
+      setTimeout(() => this.finishRound(), 1500);
     } else {
-      SFX.play('wrong');
       title.innerText = "OLMADI"; title.style.color = "var(--red)";
-      sub.innerText = `Doğrusu: ${targetWord}`; badge.style.color = "var(--red)";
-      setTimeout(() => { this.finishResult(el); }, 2000);
+      sub.innerText = `Doğrusu: ${target}`;
+      badge.style.color = "var(--red)";
+      setTimeout(() => this.finishRound(), 2500);
     }
   },
 
-  finishResult: function(el) {
-    el.classList.remove('show');
-    this.resetToIdle();
-    this.next();
+  finishRound: function() {
+    // Overlay kapat
+    document.querySelectorAll('.result-overlay').forEach(el => el.classList.remove('show'));
+    this.nextTurn();
   },
 
-  pass: function(p) { 
-    if(!this.inputLocked && !this.busy && this.turn === p) this.next(); 
+  nextTurn: function() {
+    this.idx++;
+    if(this.idx >= this.words.length) { this.loadWords(); this.idx = 0; }
+    
+    this.turn = (this.turn === 'A') ? 'B' : 'A';
+    this.resetState(); // IDLE'a dön ve çiz
   },
 
-  next: function() {
-    this.idx++; this.moveCount++;
-    this.turn = this.turn === 'A' ? 'B' : 'A';
-    this.currentSnapshot = null;
-    this.startTurn();
+  resetState: function() {
+    clearTimeout(this.watchdog);
+    if(this.activeMicId) document.getElementById(this.activeMicId).classList.remove('listening');
+    this.state = STATE.IDLE;
+    this.render();
   },
 
-  speak: function(txt, rate = 1.0) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(txt);
-    const langMap = { en:'en-US', de:'de-DE', fr:'fr-FR', es:'es-ES', it:'it-IT' };
-    u.lang = langMap[selLang]; u.rate = rate;
-    window.speechSynthesis.speak(u);
+  render: function() {
+    // 1. Zone Aktifliği (Spotlight)
+    const zA = document.getElementById('zoneA');
+    const zB = document.getElementById('zoneB');
+    if (this.turn === 'A') { zA.classList.add('active'); zB.classList.remove('active'); }
+    else { zB.classList.add('active'); zA.classList.remove('active'); }
+
+    // 2. Kelimeler (MODA GÖRE)
+    const item = this.words[this.idx];
+    const wA = document.getElementById('wA'); const mA = document.getElementById('mA');
+    const wB = document.getElementById('wB'); const mB = document.getElementById('mB');
+
+    if (setup.mode === 'pron') {
+      // Telaffuz Modu: Ana kelime İngilizce, altı Türkçe
+      wA.innerText = item.w; mA.innerText = item.tr;
+      wB.innerText = item.w; mB.innerText = item.tr;
+    } else {
+      // Kelime Modu: Ana kelime Türkçe, altı ???
+      wA.innerText = item.tr; mA.innerText = "???";
+      wB.innerText = item.tr; mB.innerText = "???";
+    }
+
+    // 3. Skorlar & VAR
+    document.getElementById('sA').innerText = this.scores.A;
+    document.getElementById('sB').innerText = this.scores.B;
+    
+    const indA = document.getElementById('indA'); const indB = document.getElementById('indB');
+    indA.innerText = `VAR: ${this.varRights.A}`; indA.className = `var-indicator ${this.varRights.A>0?'active':''}`;
+    indB.innerText = `VAR: ${this.varRights.B}`; indB.className = `var-indicator ${this.varRights.B>0?'active':''}`;
+
+    // 4. Butonları Yönet
+    this.updateControls();
   },
 
-  pauseGame: function() {
-    this.isPaused = true;
-    document.getElementById('pauseModal').classList.remove('hidden');
-    document.getElementById('setResultTitle').innerText = `${this.setNumber}. SET SONUCU`;
-    document.getElementById('statNameA').innerText = this.names.A;
-    document.getElementById('statScoreA').innerText = `${this.setScore.A} Puan`;
-    document.getElementById('statNameB').innerText = this.names.B;
-    document.getElementById('statScoreB').innerText = `${this.setScore.B} Puan`;
-    let msg = "BERABERE!"; let color = "#fff";
-    if (this.setScore.A > this.setScore.B) { msg = `${this.names.A} KAZANDI!`; color = "var(--pA)"; }
-    if (this.setScore.B > this.setScore.A) { msg = `${this.names.B} KAZANDI!`; color = "var(--pB)"; }
-    const wEl = document.getElementById('setWinnerMsg'); wEl.innerText = msg; wEl.style.color = color;
-  },
+  updateControls: function() {
+    // Tüm butonları bul
+    const allBtns = document.querySelectorAll('.btn');
+    
+    if (this.state !== STATE.IDLE) {
+      // Oyun meşgulse (dinliyor veya sonuç gösteriyor) HEPSİNİ kilitle
+      allBtns.forEach(b => b.disabled = true);
+      return;
+    }
 
-  continueGame: function() {
-    this.isPaused = false;
-    document.getElementById('pauseModal').classList.add('hidden');
-    this.setNumber++; this.setScore = {A:0, B:0}; this.varRights = {A:1, B:1};
-    this.startTurn();
+    // IDLE ise: Sadece sırası gelenin butonlarını aç
+    allBtns.forEach(b => b.disabled = true); // Önce hepsi kilitli
+
+    // Aktif oyuncunun butonlarını aç
+    const p = this.turn;
+    document.getElementById(`mic${p}`).disabled = false;
+    document.getElementById(`pass${p}`).disabled = false;
+    
+    // VAR butonu hakkı varsa açılır
+    if (this.varRights[p] > 0) document.getElementById(`var${p}`).disabled = false;
   }
 };
 </script>
