@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>ITALKY • Arena V12 Final</title>
+  <title>ITALKY • Arena V13 Supreme</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
@@ -19,6 +19,14 @@
     
     .arena-wrap { position: relative; z-index: 10; width: 100%; height: 100dvh; display: flex; flex-direction: column; }
     
+    /* LOGO & MARKALAMA */
+    .brand-logo {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 5; opacity: 0.1; font-family: 'Space Grotesk'; font-size: 60px; font-weight: 900;
+      white-space: nowrap; pointer-events: none; letter-spacing: -2px;
+    }
+
+    /* OYUNCU ALANLARI */
     .player-zone { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; transition: 0.3s ease; overflow: hidden; opacity: 0.3; pointer-events: none; filter: grayscale(1); }
     .player-zone.active { opacity: 1; pointer-events: auto; filter: grayscale(0); }
     
@@ -36,8 +44,8 @@
     #zoneA .player-label { color: var(--pA); }
     #zoneB .player-label { color: var(--pB); }
 
-    .main-word { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; line-height: 1.1; margin: 5px 0; }
-    .sub-word { font-size: 18px; color: rgba(255,255,255,0.6); margin-bottom: 25px; min-height: 24px; }
+    .main-word { font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; line-height: 1.1; margin: 5px 0; }
+    .sub-word { font-size: 18px; color: #fff; opacity: 0.8; margin-bottom: 25px; min-height: 24px; font-weight: 500; letter-spacing: 0.5px; }
     
     .controls { display: flex; gap: 10px; width: 100%; margin-top: auto; }
     .btn { border: 1px solid var(--border); background: rgba(255,255,255,0.1); color: #fff; padding: 18px 0; border-radius: 16px; font-weight: 800; cursor: pointer; flex: 1; transition: 0.2s; font-size: 14px; }
@@ -49,8 +57,18 @@
     .round-indicator { position: absolute; font-size: 10px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.3); bottom: 10px; }
     #zoneB .round-indicator { top: 10px; bottom: auto; }
 
-    .arena-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 60px; background: #000; border: 1px solid var(--border); border-radius: 30px; display: flex; align-items: center; justify-content: center; z-index: 20; box-shadow: 0 0 30px #000; }
-    .score-board { font-family: 'Space Grotesk'; font-size: 24px; font-weight: 700; display: flex; gap: 15px; align-items: center; }
+    /* ORTA SKOR VE GERİ DÖNÜŞ */
+    .arena-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 60px; background: #000; border: 1px solid var(--border); border-radius: 30px; display: flex; align-items: center; justify-content: center; z-index: 20; box-shadow: 0 0 30px #000; }
+    .score-board { font-family: 'Space Grotesk'; font-size: 24px; font-weight: 700; display: flex; gap: 15px; align-items: center; width: 100%; justify-content: space-evenly; }
+    
+    /* GERİ DÖNÜŞ OKU */
+    .back-arrow {
+      text-decoration: none; color: rgba(255,255,255,0.5); font-size: 20px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.1);
+      transition: 0.2s;
+    }
+    .back-arrow:active { background: #fff; color: #000; }
 
     .modal { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(15px); transition: 0.3s; }
     .modal.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
@@ -69,10 +87,15 @@
     .lang-opt.selected { background:#fff; color:#000; }
     .btn-block { width:100%; padding:15px; margin-top:10px; border-radius:12px; border:none; font-weight:800; cursor:pointer; font-size:16px;}
     .set-stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px; }
+    
+    /* MODAL LOGO */
+    .modal-logo { font-family:'Space Grotesk'; font-weight:900; font-size:24px; margin-bottom:15px; background:linear-gradient(90deg, var(--pA), var(--pB)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
   </style>
 </head>
 <body>
   <div class="bg-fx"></div>
+  <div class="brand-logo">ITALKY</div>
+
   <div class="arena-wrap">
     
     <div class="player-zone" id="zoneB">
@@ -82,7 +105,7 @@
         <div class="controls">
           <button class="btn btn-var" id="varB" onclick="game.useVar('B')">VAR</button>
           <button class="btn btn-pass" id="passB" onclick="game.pass()">PAS</button>
-          <button class="btn btn-mic" id="micB" onclick="game.listen('B')">🎙️ TEKRAR ET</button>
+          <button class="btn btn-mic" id="micB" onclick="game.listen('B')">🎙️ CEVAPLA</button>
         </div>
         
         <div style="margin: auto 0;">
@@ -98,7 +121,13 @@
       </div>
     </div>
 
-    <div class="arena-center"><div class="score-board"><span style="color:var(--pB)" id="sB">0</span><span style="opacity:0.2; font-size:14px">VS</span><span style="color:var(--pA)" id="sA">0</span></div></div>
+    <div class="arena-center">
+      <div class="score-board">
+        <span style="color:var(--pB)" id="sB">0</span>
+        <a href="game.html" class="back-arrow" title="Çıkış">✕</a>
+        <span style="color:var(--pA)" id="sA">0</span>
+      </div>
+    </div>
 
     <div class="player-zone" id="zoneA">
       <div class="card-content">
@@ -116,7 +145,7 @@
         
         <div class="controls">
           <button class="btn btn-pass" id="passA" onclick="game.pass()">PAS</button>
-          <button class="btn btn-mic" id="micA" onclick="game.listen('A')">🎙️ TEKRAR ET</button>
+          <button class="btn btn-mic" id="micA" onclick="game.listen('A')">🎙️ CEVAPLA</button>
           <button class="btn btn-var" id="varA" onclick="game.useVar('A')">VAR</button>
         </div>
         <div class="round-indicator" id="rndA">ROUND 1</div>
@@ -126,12 +155,15 @@
 
   <div class="modal" id="setupModal">
     <div class="modal-box">
-      <h2 style="margin:0 0 15px 0; font-family:'Space Grotesk'; text-align:center">ARENA V12</h2>
-      <div class="input-group"><input type="text" class="name-input" id="inpA" placeholder="Oyuncu A" value="Oyuncu A"><input type="text" class="name-input p2" id="inpB" placeholder="Oyuncu B" value="Oyuncu B"></div>
+      <div class="modal-logo">italkyAI ARENA</div>
+      <div class="input-group">
+        <input type="text" class="name-input" id="inpA" placeholder="Oyuncu A Adı">
+        <input type="text" class="name-input p2" id="inpB" placeholder="Oyuncu B Adı">
+      </div>
       <div style="text-align:center; margin-bottom:15px;">
         <div class="lang-opt selected" onclick="selectLang('en', this)">🇬🇧</div><div class="lang-opt" onclick="selectLang('de', this)">🇩🇪</div><div class="lang-opt" onclick="selectLang('fr', this)">🇫🇷</div><div class="lang-opt" onclick="selectLang('es', this)">🇪🇸</div><div class="lang-opt" onclick="selectLang('it', this)">🇮🇹</div>
       </div>
-      <button class="btn-block" style="background:var(--pA); color:#000" onclick="game.init()">BAŞLA</button>
+      <button class="btn-block" style="background:var(--pA); color:#000" onclick="game.init()">OYUNA BAŞLA</button>
     </div>
   </div>
 
@@ -143,12 +175,13 @@
         <div class="set-stat-row" style="border:none; margin:0; padding:0"><span style="color:var(--pB)" id="statNameB">B</span><span id="statScoreB">0 Puan</span></div>
       </div>
       <div style="font-size:18px; font-weight:700; color:var(--gold); margin-bottom:20px;" id="setWinnerMsg">...</div>
-      <button class="btn-block" style="background:var(--green); color:#000" onclick="game.continueGame()">SONRAKİ SET</button>
-      <button class="btn-block" style="background:#333" onclick="location.reload()">ÇIKIŞ</button>
+      <button class="btn-block" style="background:var(--green); color:#000" onclick="game.continueGame()">DEVAM ET</button>
+      <button class="btn-block" style="background:#333" onclick="location.href='game.html'">ÇIKIŞ</button>
     </div>
   </div>
 
 <script>
+// --- UTILS ---
 function normalize(str) { return str.toLowerCase().replace(/ß/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "").trim(); }
 
 function getBestMatchScore(target, spoken) {
@@ -207,12 +240,35 @@ const SFX = {
   }
 };
 
+// --- DATA: OBJECT FORMAT (Kelime + Anlam) ---
 const RAW_DB = {
-  en: ["Excellent", "Decision", "Challenge", "Opportunity", "Journey", "Environment", "Development", "Necessary", "Beautiful", "Dangerous"],
-  de: ["Entscheidung", "Möglichkeit", "Erfahrung", "Natürlich", "Wichtig", "Zusammen", "Schmetterling", "Gefährlich"],
-  fr: ["Bonjour", "Amour", "Voiture", "Maison", "Magnifique", "Toujours", "Pourquoi", "Comment"],
-  es: ["Corazón", "Amigo", "Tiempo", "Vida", "Felicidad", "Peligroso", "Importante", "Escuela"],
-  it: ["Ciao", "Grazie", "Famiglia", "Piccolo", "Mangiare", "Dormire", "Andiamo", "Aspettare"]
+  en: [
+    { w: "Excellent", tr: "Mükemmel" }, { w: "Decision", tr: "Karar" }, { w: "Challenge", tr: "Meydan Okuma" },
+    { w: "Opportunity", tr: "Fırsat" }, { w: "Journey", tr: "Yolculuk" }, { w: "Environment", tr: "Çevre" },
+    { w: "Development", tr: "Gelişim" }, { w: "Necessary", tr: "Gerekli" }, { w: "Beautiful", tr: "Güzel" },
+    { w: "Dangerous", tr: "Tehlikeli" }, { w: "Knowledge", tr: "Bilgi" }, { w: "Experience", tr: "Deneyim" },
+    { w: "Incredible", tr: "İnanılmaz" }, { w: "Understand", tr: "Anlamak" }, { w: "Remember", tr: "Hatırlamak" },
+    { w: "Question", tr: "Soru" }, { w: "Solution", tr: "Çözüm" }, { w: "Language", tr: "Dil" },
+    { w: "Computer", tr: "Bilgisayar" }, { w: "History", tr: "Tarih" }, { w: "Together", tr: "Birlikte" },
+    { w: "Family", tr: "Aile" }, { w: "Friend", tr: "Arkadaş" }, { w: "Success", tr: "Başarı" }
+  ],
+  de: [
+    { w: "Entscheidung", tr: "Karar" }, { w: "Möglichkeit", tr: "İmkan" }, { w: "Erfahrung", tr: "Deneyim" },
+    { w: "Natürlich", tr: "Doğal" }, { w: "Wichtig", tr: "Önemli" }, { w: "Zusammen", tr: "Birlikte" },
+    { w: "Schmetterling", tr: "Kelebek" }, { w: "Gefährlich", tr: "Tehlikeli" }, { w: "Entschuldigung", tr: "Özür Dilerim" }
+  ],
+  fr: [
+    { w: "Bonjour", tr: "Merhaba" }, { w: "Amour", tr: "Aşk" }, { w: "Voiture", tr: "Araba" },
+    { w: "Maison", tr: "Ev" }, { w: "Magnifique", tr: "Muhteşem" }, { w: "Toujours", tr: "Her zaman" }
+  ],
+  es: [
+    { w: "Corazón", tr: "Kalp" }, { w: "Amigo", tr: "Arkadaş" }, { w: "Tiempo", tr: "Zaman" },
+    { w: "Vida", tr: "Hayat" }, { w: "Felicidad", tr: "Mutluluk" }, { w: "Peligroso", tr: "Tehlikeli" }
+  ],
+  it: [
+    { w: "Ciao", tr: "Merhaba" }, { w: "Grazie", tr: "Teşekkürler" }, { w: "Famiglia", tr: "Aile" },
+    { w: "Piccolo", tr: "Küçük" }, { w: "Mangiare", tr: "Yemek" }, { w: "Dormire", tr: "Uyumak" }
+  ]
 };
 
 let selLang = 'en';
@@ -227,8 +283,14 @@ const game = {
   varRights: { A:1, B:1 }, activeMicId: null,
 
   init: function() {
-    this.names.A = document.getElementById('inpA').value || "A";
-    this.names.B = document.getElementById('inpB').value || "B";
+    const nA = document.getElementById('inpA').value.trim();
+    const nB = document.getElementById('inpB').value.trim();
+    
+    // ZORUNLU İSİM GİRİŞİ
+    if (!nA || !nB) { alert("Lütfen oyuncu isimlerini giriniz!"); return; }
+
+    this.names.A = nA;
+    this.names.B = nB;
     document.getElementById('lblA').innerText = this.names.A;
     document.getElementById('lblB').innerText = this.names.B;
     this.fillPool();
@@ -241,6 +303,7 @@ const game = {
 
   fillPool: function() {
     let raw = RAW_DB[selLang] || RAW_DB.en;
+    // Havuzu 3 katına çıkar ve karıştır
     this.words = [...raw, ...raw, ...raw].sort(() => Math.random() - 0.5);
   },
 
@@ -251,8 +314,8 @@ const game = {
     if (this.idx >= this.words.length) { this.fillPool(); this.idx = 0; }
 
     this.renderUI();
-    const word = this.words[this.idx];
-    setTimeout(() => { if(!this.busy && !this.inputLocked && !this.isPaused) this.speak(word, 0.9); }, 600);
+    const item = this.words[this.idx];
+    setTimeout(() => { if(!this.busy && !this.inputLocked && !this.isPaused) this.speak(item.w, 0.9); }, 600);
   },
 
   renderUI: function() {
@@ -261,9 +324,12 @@ const game = {
     const currentRound = Math.floor(this.moveCount / 2) + 1;
     document.getElementById('rndA').innerText = `SET ${this.setNumber} • ROUND ${currentRound}`;
     document.getElementById('rndB').innerText = `SET ${this.setNumber} • ROUND ${currentRound}`;
-    const word = this.words[this.idx];
-    document.getElementById('wA').innerText = word; document.getElementById('mA').innerText = "Dinle ve Tekrar Et";
-    document.getElementById('wB').innerText = word; document.getElementById('mB').innerText = "Dinle ve Tekrar Et";
+    
+    const item = this.words[this.idx];
+    // MAIN WORD: English, SUB: Turkish (Anlamı)
+    document.getElementById('wA').innerText = item.w; document.getElementById('mA').innerText = item.tr;
+    document.getElementById('wB').innerText = item.w; document.getElementById('mB').innerText = item.tr;
+    
     document.getElementById('sA').innerText = this.score.A; document.getElementById('sB').innerText = this.score.B;
     this.updateVarUI();
   },
@@ -288,7 +354,7 @@ const game = {
     const btn = document.getElementById(this.activeMicId);
     btn.innerText = "👂..."; btn.classList.add('listening');
 
-    this.currentSnapshot = { targetWord: this.words[this.idx], moveId: this.moveCount, player: p };
+    this.currentSnapshot = { targetWord: this.words[this.idx].w, moveId: this.moveCount, player: p };
 
     const rec = new SR();
     const langMap = { en:'en-US', de:'de-DE', fr:'fr-FR', es:'es-ES', it:'it-IT' };
@@ -296,17 +362,14 @@ const game = {
 
     rec.onresult = (e) => {
       const txt = e.results[0][0].transcript;
-      this.stopMicVisuals(); // FLICKER FIX: Sadece animasyonu durdur
+      this.stopMicVisuals();
       this.check(txt);
     };
-    
     rec.onerror = () => { this.resetToIdle(); };
     rec.onend = () => { if(this.busy) this.resetToIdle(); };
-    
     rec.start();
   },
 
-  // FLICKER FIX: Sadece butonu düzeltir, kontrolleri açmaz
   stopMicVisuals: function() {
     if (this.activeMicId) {
       const btn = document.getElementById(this.activeMicId);
@@ -315,13 +378,8 @@ const game = {
     }
   },
 
-  // TAM RESET: Hata veya gecikme durumunda her şeyi açar
   resetToIdle: function() {
-    this.stopMicVisuals();
-    this.busy = false;
-    this.inputLocked = false;
-    this.toggleControls(false);
-    this.currentSnapshot = null;
+    this.stopMicVisuals(); this.busy = false; this.inputLocked = false; this.toggleControls(false); this.currentSnapshot = null;
   },
 
   toggleControls: function(disable) {
@@ -330,14 +388,13 @@ const game = {
   },
 
   check: function(spoken) {
-    if (!this.currentSnapshot || this.currentSnapshot.moveId !== this.moveCount) {
-      this.resetToIdle(); // Gecikmişse tam reset
-      return;
-    }
+    if (!this.currentSnapshot || this.currentSnapshot.moveId !== this.moveCount) { this.resetToIdle(); return; }
 
     const { targetWord, player } = this.currentSnapshot;
     const score = getBestMatchScore(targetWord, spoken);
-    let threshold = 70; if (this.setNumber === 2) threshold = 75; if (this.setNumber >= 3) threshold = 80;
+    
+    // BENZERLİK ORANI %95 (Supreme Difficulty)
+    const threshold = 95; 
     const isCorrect = score >= threshold;
     this.showResult(player, isCorrect, score, targetWord);
   },
@@ -345,14 +402,12 @@ const game = {
   useVar: function(p) {
     if(this.busy || this.inputLocked || this.varRights[p] <= 0) return;
     this.varRights[p]--;
-    const targetWord = this.words[this.idx];
+    const targetWord = this.words[this.idx].w;
     this.showResult(p, true, 100, targetWord, true);
   },
 
   showResult: function(p, isCorrect, percent, targetWord, isVar = false) {
-    this.inputLocked = true; this.toggleControls(true);
-    // Busy false yapabiliriz çünkü artık overlay yönetiyor
-    this.busy = false; 
+    this.inputLocked = true; this.toggleControls(true); this.busy = false; 
 
     const el = document.getElementById(`ov${p}`);
     const title = el.querySelector('.res-title');
@@ -360,27 +415,27 @@ const game = {
     const badge = el.querySelector('.accuracy-badge');
 
     el.classList.add('show');
-    badge.innerText = isVar ? "HAKEM KARARI" : `%${percent} DOĞRULUK`;
+    badge.innerText = isVar ? "HAKEM KARARI" : `%${percent} BENZERLİK`;
 
     if(isCorrect) {
       SFX.play('correct');
       title.innerText = "HARİKA!"; title.style.color = "var(--green)";
-      let pts = 1; if (!isVar && percent >= 90) pts = 2;
+      let pts = 1; if (!isVar && percent >= 98) pts = 2; // %98 üstü bonus
       sub.innerText = `+${pts} PUAN`; badge.style.color = "var(--green)";
       this.score[p] += pts; this.setScore[p] += pts;
       setTimeout(() => { this.finishResult(el); }, 1200);
     } else {
       SFX.play('wrong');
-      title.innerText = "YANLIŞ"; title.style.color = "var(--red)";
+      title.innerText = "OLMADI"; title.style.color = "var(--red)";
       sub.innerText = `Doğrusu: ${targetWord}`; badge.style.color = "var(--red)";
-      this.speak(targetWord, 0.8);
+      // YANLIŞTA TEKRAR OKUMA YOK (İstek Üzerine İptal Edildi)
       setTimeout(() => { this.finishResult(el); }, 2000);
     }
   },
 
   finishResult: function(el) {
     el.classList.remove('show');
-    this.resetToIdle(); // Temiz bir başlangıç için
+    this.resetToIdle();
     this.next();
   },
 
