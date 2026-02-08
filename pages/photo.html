@@ -1,3 +1,4 @@
+<!-- FILE: /pages/photo.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -106,11 +107,7 @@
       padding-bottom: calc(var(--footerH) + 12px);
     }
 
-    .toolbar{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
+    .toolbar{ display:flex; gap:10px; align-items:center; }
     .pill{
       flex:1;
       height: 46px;
@@ -163,7 +160,7 @@
       position:absolute; inset:0;
       width:100%; height:100%;
       object-fit: cover;
-      transform: none; /* ✅ ayna yok */
+      transform: none;
     }
     canvas{
       position:absolute; inset:0;
@@ -232,21 +229,14 @@
     }
     .footerBrand{ text-align:center; font-size: 10px; color: rgba(255,255,255,0.22); letter-spacing: 0.2px; font-weight: 700; }
 
-    /* language sheet */
     .sheetBackdrop{
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
+      position: fixed; inset: 0; z-index: 9999;
       background: rgba(0,0,0,.72);
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 16px;
+      display:none; align-items:flex-end; justify-content:center; padding: 16px;
     }
     .sheetBackdrop.show{ display:flex; }
     .sheet{
-      width: 100%;
-      max-width: 480px;
+      width: 100%; max-width: 480px;
       background: rgba(10,10,18,.96);
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 26px;
@@ -255,34 +245,21 @@
     }
     .sheetTop{
       padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
       border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .sheetTitle{
-      font-weight: 1000;
-      font-size: 13px;
-      color: rgba(255,255,255,.92);
-    }
+    .sheetTitle{ font-weight: 1000; font-size: 13px; color: rgba(255,255,255,.92); }
     .sheetClose{
-      width: 42px; height: 42px;
-      border-radius: 16px;
+      width: 42px; height: 42px; border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.06);
       color: rgba(255,255,255,.88);
       font-weight: 1000;
       cursor:pointer;
     }
-    .sheetSearch{
-      padding: 10px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
+    .sheetSearch{ padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
     .sheetSearch input{
-      width:100%;
-      height: 46px;
-      border-radius: 16px;
+      width:100%; height: 46px; border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.06);
       color: #fff;
@@ -292,26 +269,20 @@
     }
     .sheetList{
       max-height: 55vh;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
+      overflow:auto; -webkit-overflow-scrolling: touch;
       scrollbar-width:none;
     }
     .sheetList::-webkit-scrollbar{ display:none; }
     .sheetRow{
       padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      cursor:pointer;
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      cursor:pointer; border-bottom: 1px solid rgba(255,255,255,.06);
     }
     .sheetRow.selected{ background: rgba(79,70,229,.14); }
     .sheetRow .left{ display:flex; align-items:center; gap:10px; min-width:0; }
     .sheetRow .name{ font-weight: 1000; font-size: 13px; color: rgba(255,255,255,.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .sheetRow .code{ font-weight: 800; font-size: 12px; color: rgba(255,255,255,.55); white-space:nowrap; }
 
-    /* toast */
     .toast{
       position: fixed; left:50%; top:18px;
       transform: translateX(-50%) translateY(-120px);
@@ -346,7 +317,7 @@
           <div class="uname" id="userName">—</div>
           <div class="plan" id="userPlan">FREE</div>
         </div>
-        <button class="avatar-btn" id="avatarBtn" aria-label="Çıkış">
+        <button class="avatar-btn" id="avatarBtn" aria-label="Profil">
           <span class="avatar-fallback" id="avatarFallback">•</span>
         </button>
       </div>
@@ -384,7 +355,6 @@
     </div>
   </div>
 
-  <!-- Language Sheet -->
   <div class="sheetBackdrop" id="langSheet">
     <div class="sheet">
       <div class="sheetTop">
@@ -401,6 +371,6 @@
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script type="module" src="/js/photo_page.js?v=2"></script>
+  <script type="module" src="/js/photo_page.js?v=999"></script>
 </body>
 </html>
