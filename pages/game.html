@@ -17,8 +17,6 @@
       --muted:rgba(255,255,255,.60);
       --ai1:#A5B4FC;
       --ai2:#4F46E5;
-      --pink:#ff00ff;
-      --cyan:#00f3ff;
       --topH:74px;
       --footerH:74px;
     }
@@ -48,74 +46,84 @@
     }
     @media(min-width:520px){ .mobile-frame{ height:92vh; border-radius:40px; border:1px solid rgba(255,255,255,0.08); } }
 
-    /* TOPBAR - YENİ DÜZEN */
+    /* ÜST BAR - PROFIL YER DEĞİŞİMİ */
     .topbar{
       height:var(--topH); display:flex; align-items:center; justify-content:space-between;
       padding:0 12px; border-bottom:1px solid rgba(255,255,255,.08);
-      background:rgba(0,0,0,.35); backdrop-filter:blur(12px); flex:0 0 auto;
+      background:rgba(0,0,0,.35); backdrop-filter:blur(12px); flex:0 0 auto; gap:8px;
     }
     .backBtn{
-      width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.18); color:#fff; font-size:18px; cursor:pointer;
+      width:42px; height:42px; border-radius:14px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18); color:#fff; font-size:20px; cursor:pointer;
     }
-    .brand { display:flex; flex-direction:column; align-items:center; cursor:pointer; }
+    .brand { display:flex; flex-direction:column; align-items:center; cursor:pointer; min-width:0; }
     .logo-line { font-family:"Space Grotesk"; font-size:18px; font-weight:700; }
     .logo-ai { background:linear-gradient(135deg,var(--ai1),var(--ai2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
-    /* AD-SOYAD VE AVATAR YER DEĞİŞTİ */
     .profileMini{
       display:flex; align-items:center; gap:8px; cursor:pointer;
-      padding:5px 10px; border-radius:20px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+      padding:6px 10px; border-radius:20px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,.1);
+      flex:0 0 auto; max-width: 160px;
     }
-    .pName{ font-weight:800; font-size:12px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
-    .pPic{ width:32px; height:32px; border-radius:50%; overflow:hidden; border:1.5px solid var(--ai2); }
+    /* İsim Sola, Resim Sağa */
+    .pName{ font-weight:800; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; flex:1; }
+    .pPic{ width:34px; height:34px; border-radius:50%; overflow:hidden; border:1.5px solid var(--ai2); flex: 0 0 34px; }
     .pPic img{ width:100%; height:100%; object-fit:cover; }
 
-    .main{ flex:1; overflow:auto; padding:15px; padding-bottom:100px; display:flex; flex-direction:column; gap:15px; scrollbar-width:none; }
-    .main::-webkit-scrollbar{display:none;}
+    /* ANA ALAN - GIZLI SCROLL */
+    .main{ 
+      flex:1; overflow-y:scroll; padding:15px; 
+      padding-bottom: 110px; display:flex; flex-direction:column; gap:14px; 
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .main::-webkit-scrollbar{ display:none; }
 
     .hero{
-      border-radius:24px; padding:15px; border:1px solid rgba(255,255,255,0.1);
-      background:rgba(255,255,255,0.03); box-shadow:0 20px 50px rgba(0,0,0,0.3);
+      border-radius:26px; padding:18px; border:1px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.03); box-shadow:0 20px 40px rgba(0,0,0,0.4);
     }
-    .heroTitle{ font-weight:900; font-size:16px; margin-bottom:10px; color:var(--ai1); }
-    .heroDesc{ font-weight:600; font-size:12px; color:var(--muted); line-height:1.4; margin-bottom:15px; }
+    .heroTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .heroTitle{ font-weight:900; font-size:18px; color:var(--ai1); text-transform:uppercase; letter-spacing:1px; }
+    
+    .chips{display:flex;gap:6px;}
+    .chip{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);font-weight:900;font-size:10px;}
+    .chip.pro{background:linear-gradient(135deg,var(--ai1),var(--ai2));border:none;}
 
-    /* RENGÂRENK BUTONLAR */
+    .heroDesc{ font-weight:600; font-size:12px; color:var(--muted); line-height:1.4; margin-bottom:18px; }
+
     .actions{ display:flex; gap:10px; }
     .btn{
-      flex:1; height:44px; border-radius:14px; border:none; font-weight:900; color:#fff; cursor:pointer; font-size:12px;
+      flex:1; height:46px; border-radius:16px; border:none; font-weight:1000; color:#fff; cursor:pointer; font-size:12px;
+      transition: .2s;
     }
-    .btn.earn{ background: linear-gradient(135deg, #00c6ff, #0072ff); box-shadow: 0 10px 20px rgba(0,114,255,0.2); }
-    .btn.upgrade{ background: linear-gradient(135deg, #f093fb, #f5576c); box-shadow: 0 10px 20px rgba(245,87,108,0.2); }
+    .btn:active{transform:scale(0.96)}
+    .btn.earn{ background: linear-gradient(135deg, #00f3ff, #4f46e5); box-shadow: 0 10px 20px rgba(0,243,255,0.15); }
+    .btn.upgrade{ background: linear-gradient(135deg, #ff00ff, #4f46e5); box-shadow: 0 10px 20px rgba(255,0,255,0.15); }
 
-    /* OYUN KARTLARI */
+    /* OYUN KARTLARI - BÜYÜK İKONLAR */
     .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .card{
-      border-radius:24px; border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.04); padding:20px 15px;
-      display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;
-      transition:0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor:pointer;
+      border-radius:26px; border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04); padding:24px 14px;
+      display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px;
+      transition:0.3s ease; cursor:pointer;
     }
-    .card:active { transform: scale(0.95); background:rgba(255,255,255,.08); }
+    .card:active { transform: scale(0.95); }
 
-    /* DAHA BÜYÜK İKONLAR */
     .iconWrap{
-      width:64px; height:64px; border-radius:20px;
+      width:74px; height:74px; border-radius:22px;
       display:flex; align-items:center; justify-content:center;
-      font-size:32px; /* İkon boyutu büyütüldü */
-      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      font-size:38px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
     }
     
-    /* OYUN İSİMLERİ BÜYÜK VE TÜRKÇE */
-    .name{ font-weight:900; font-size:15px; text-transform:uppercase; letter-spacing:0.5px; color:#fff; }
-    .desc{ font-weight:600; font-size:11px; color:var(--muted); }
+    .name{ font-weight:1000; font-size:15px; text-transform:uppercase; letter-spacing:0.8px; color:#fff; }
+    .desc{ font-weight:800; font-size:11px; color:var(--muted); line-height:1.2; }
 
     .footerbar{
       position:absolute; left:0; right:0; bottom:0; height:var(--footerH);
       display:flex; align-items:center; justify-content:center;
-      background:#030014; border-top:1px solid rgba(255,255,255,.05);
+      background:#060018; border-top:1px solid rgba(255,255,255,.05);
       font-size:10px; font-weight:800; color:rgba(255,255,255,.2);
     }
   </style>
@@ -140,34 +148,50 @@
 
     <div class="main">
       <div class="hero">
-        <div class="heroTitle">OYUN MERKEZİ</div>
-        <div class="heroDesc">Öğrenirken eğlen, eğlenirken kazan! Günlük haklarını kullanarak dil becerilerini geliştir.</div>
+        <div class="heroTop">
+          <div class="heroTitle">OYUN MERKEZİ</div>
+          <div class="chips">
+            <div class="chip" id="dailyChip">🎟️ Hak: --</div>
+            <div class="chip" id="planChip">FREE</div>
+          </div>
+        </div>
+        <div class="heroDesc">Günlük 25 hak. Oyuna girince 1 hak düşer. Set bitince devam etmek istersen 1 hak daha düşer.</div>
         <div class="actions">
           <button class="btn earn" id="earnBtn">ÜCRETSİZ HAK AL</button>
           <button class="btn upgrade" id="upgradeBtn">SINIRSIZ YAP</button>
         </div>
       </div>
 
-      <div class="grid">
-        <div class="card" onclick="startLoading()">
-            <div class="iconWrap" style="background:rgba(0,243,255,0.1); border-color:rgba(0,243,255,0.2)">🧩</div>
+      <div class="grid" id="gameGrid">
+        <div class="card">
+            <div class="iconWrap" style="background:rgba(0,243,255,0.12)">🧩</div>
             <div class="name">KELİME AVCI</div>
-            <div class="desc">Eksik harfleri tamamla</div>
+            <div class="desc">Eksik harfleri tamamla ve puan kazan.</div>
         </div>
-        <div class="card" onclick="startLoading()">
-            <div class="iconWrap" style="background:rgba(255,0,255,0.1); border-color:rgba(255,0,255,0.2)">🧠</div>
+        <div class="card">
+            <div class="iconWrap" style="background:rgba(255,0,255,0.12)">🧠</div>
             <div class="name">HAFIZA KARTI</div>
-            <div class="desc">Kelimeleri eşleştir</div>
+            <div class="desc">Kelimeleri eşleştir, zihnini tazele.</div>
         </div>
-        <div class="card" onclick="startLoading()">
-            <div class="iconWrap" style="background:rgba(0,230,118,0.1); border-color:rgba(0,230,118,0.2)">🎤</div>
+        <div class="card">
+            <div class="iconWrap" style="background:rgba(0,230,118,0.12)">🎤</div>
             <div class="name">TELAFFUZ</div>
-            <div class="desc">Doğru oku ve kazan</div>
+            <div class="desc">Doğru oku, AI seni puanlasın.</div>
         </div>
-        <div class="card" onclick="startLoading()">
-            <div class="iconWrap" style="background:rgba(255,171,0,0.1); border-color:rgba(255,171,0,0.2)">⚡</div>
+        <div class="card">
+            <div class="iconWrap" style="background:rgba(255,171,0,0.12)">⚡</div>
             <div class="name">HIZLI TEST</div>
-            <div class="desc">Zamana karşı yarış</div>
+            <div class="desc">Zamana karşı kelime yarışına gir.</div>
+        </div>
+        <div class="card">
+            <div class="iconWrap" style="background:rgba(124,77,255,0.12)">🎬</div>
+            <div class="name">VİDEO ANALİZ</div>
+            <div class="desc">Sahneleri izle ve doğru kelimeyi bul.</div>
+        </div>
+        <div class="card">
+            <div class="iconWrap" style="background:rgba(255,82,82,0.12)">🏹</div>
+            <div class="name">DÜELLO</div>
+            <div class="desc">Rakiplerinle canlı kapışmaya başla.</div>
         </div>
       </div>
     </div>
@@ -183,16 +207,19 @@
       if (raw) {
         try {
           const user = JSON.parse(raw);
-          // Ad Soyad ve Avatar yer değiştirdi
-          document.getElementById('pName').textContent = user.fullname || user.name || "Üye";
+          document.getElementById('pName').textContent = user.fullname || user.name || "Kullanıcı";
           const pic = user.picture || user.avatar;
           if (pic) {
             document.getElementById('pPic').innerHTML = `<img src="${pic}" alt="Profile">`;
           }
+          document.getElementById('planChip').textContent = (user.plan || "FREE").toUpperCase();
+          if(user.plan && user.plan.toLowerCase() !== 'free') document.getElementById('planChip').classList.add('pro');
         } catch (e) {}
       }
     }
     document.addEventListener("DOMContentLoaded", loadProfile);
   </script>
+
+  <script type="module" src="/js/game_page.js?v=1000"></script>
 </body>
 </html>
