@@ -15,12 +15,10 @@
       --bg:#030014;
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.60);
-      --border:rgba(255,255,255,.10);
       --ai1:#A5B4FC;
       --ai2:#4F46E5;
       --pink:#ff00ff;
       --cyan:#00f3ff;
-      --green:#00e676;
       --topH:74px;
       --footerH:74px;
     }
@@ -36,165 +34,90 @@
       background:
         radial-gradient(700px 260px at 20% 20%, rgba(79,70,229,.28), transparent 60%),
         radial-gradient(700px 260px at 90% 80%, rgba(255,0,255,.18), transparent 60%),
-        radial-gradient(700px 260px at 50% 110%, rgba(0,243,255,.12), transparent 60%),
         #030014;
       animation: floatBg 18s ease-in-out infinite alternate;
     }
-    @keyframes floatBg{
-      0%{ transform: translate3d(0,0,0) scale(1); }
-      100%{ transform: translate3d(-2%, -2%, 0) scale(1.02); }
-    }
+    @keyframes floatBg{ 0%{ transform: translate3d(0,0,0); } 100%{ transform: translate3d(-2%, -2%, 0); } }
 
     .mobile-frame{
       width:100%;max-width:480px;height:100%;
       position:relative;z-index:10;
-      display:flex;flex-direction:column;min-height:0;
+      display:flex;flex-direction:column;
       background:rgba(8,8,20,.65);backdrop-filter:blur(25px);
       overflow:hidden;
     }
-    @media(min-width:520px){
-      .mobile-frame{
-        height:92vh;border-radius:40px;border:1px solid rgba(255,255,255,0.08);
-        box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
-      }
-    }
+    @media(min-width:520px){ .mobile-frame{ height:92vh; border-radius:40px; border:1px solid rgba(255,255,255,0.08); } }
 
-    /* top */
+    /* TOPBAR - YENİ DÜZEN */
     .topbar{
-      height:var(--topH);
-      display:flex;align-items:center;justify-content:space-between;
-      padding:0 12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background:rgba(0,0,0,.35);
-      backdrop-filter:blur(12px);
-      flex:0 0 auto;
-      gap:10px;
+      height:var(--topH); display:flex; align-items:center; justify-content:space-between;
+      padding:0 12px; border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.35); backdrop-filter:blur(12px); flex:0 0 auto;
     }
     .backBtn{
-      width:44px;height:44px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.18);
-      color:#fff;font-size:20px;font-weight:1000;
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer;
-      flex:0 0 auto;
+      width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18); color:#fff; font-size:18px; cursor:pointer;
     }
-    .brand{display:flex;flex-direction:column;line-height:1;user-select:none;cursor:pointer;min-width:0}
-    .logo-line{font-family:"Space Grotesk";font-size:18px;font-weight:700;letter-spacing:-.4px;white-space:nowrap}
-    .logo-ai{background:linear-gradient(135deg,var(--ai1),var(--ai2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .slogan{margin-top:5px;font-size:10px;font-weight:900;letter-spacing:4px;color:rgba(255,255,255,.35);text-transform:uppercase}
+    .brand { display:flex; flex-direction:column; align-items:center; cursor:pointer; }
+    .logo-line { font-family:"Space Grotesk"; font-size:18px; font-weight:700; }
+    .logo-ai { background:linear-gradient(135deg,var(--ai1),var(--ai2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
+    /* AD-SOYAD VE AVATAR YER DEĞİŞTİ */
     .profileMini{
-      display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer;
-      padding:6px 10px;border-radius:18px;border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.05);
-      flex:0 0 auto;
-      max-width: 190px;
+      display:flex; align-items:center; gap:8px; cursor:pointer;
+      padding:5px 10px; border-radius:20px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
     }
-    .pPic{width:34px;height:34px;border-radius:999px;overflow:hidden;flex:0 0 34px;background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;font-weight:1000}
-    .pPic img{width:100%;height:100%;object-fit:cover}
-    .pName{font-weight:900;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pName{ font-weight:800; font-size:12px; max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; }
+    .pPic{ width:32px; height:32px; border-radius:50%; overflow:hidden; border:1.5px solid var(--ai2); }
+    .pPic img{ width:100%; height:100%; object-fit:cover; }
 
-    /* main */
-    .main{
-      flex:1;min-height:0;
-      overflow:auto;
-      padding:12px;
-      padding-bottom: calc(var(--footerH) + 16px);
-      display:flex;flex-direction:column;gap:12px;
-      scrollbar-width:none;
-    }
+    .main{ flex:1; overflow:auto; padding:15px; padding-bottom:100px; display:flex; flex-direction:column; gap:15px; scrollbar-width:none; }
     .main::-webkit-scrollbar{display:none;}
 
     .hero{
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.10);
-      background:
-        radial-gradient(560px 200px at 0% 0%, rgba(0,243,255,.18), transparent 60%),
-        radial-gradient(560px 200px at 100% 100%, rgba(255,0,255,.16), transparent 60%),
-        rgba(0,0,0,.14);
-      box-shadow:0 26px 70px rgba(0,0,0,.50);
-      padding:12px;
-      display:flex;flex-direction:column;gap:10px;
+      border-radius:24px; padding:15px; border:1px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.03); box-shadow:0 20px 50px rgba(0,0,0,0.3);
     }
-    .heroTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .heroTitle{font-weight:1000;font-size:14px}
-    .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .chip{
-      padding:8px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.18);
-      font-weight:1000;font-size:11px;white-space:nowrap;
-    }
-    .chip.pro{
-      border:none;
-      background:linear-gradient(135deg,var(--ai1),var(--ai2));
-      box-shadow:0 14px 30px rgba(79,70,229,.20);
-    }
-    .heroDesc{font-weight:800;font-size:12px;line-height:1.35;color:rgba(255,255,255,.72)}
-    .actions{display:flex;gap:10px}
+    .heroTitle{ font-weight:900; font-size:16px; margin-bottom:10px; color:var(--ai1); }
+    .heroDesc{ font-weight:600; font-size:12px; color:var(--muted); line-height:1.4; margin-bottom:15px; }
+
+    /* RENGÂRENK BUTONLAR */
+    .actions{ display:flex; gap:10px; }
     .btn{
-      flex:1;height:46px;border-radius:16px;border:none;
-      font-weight:1000;color:#fff;cursor:pointer;
-      transition:.15s;
+      flex:1; height:44px; border-radius:14px; border:none; font-weight:900; color:#fff; cursor:pointer; font-size:12px;
     }
-    .btn:active{transform:scale(.98)}
-    .btn.earn{background:linear-gradient(135deg,var(--cyan),var(--pink));box-shadow:0 18px 40px rgba(0,243,255,.10)}
-    .btn.upgrade{background:linear-gradient(135deg,var(--ai1),var(--ai2));box-shadow:0 18px 40px rgba(79,70,229,.18)}
+    .btn.earn{ background: linear-gradient(135deg, #00c6ff, #0072ff); box-shadow: 0 10px 20px rgba(0,114,255,0.2); }
+    .btn.upgrade{ background: linear-gradient(135deg, #f093fb, #f5576c); box-shadow: 0 10px 20px rgba(245,87,108,0.2); }
 
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-
+    /* OYUN KARTLARI */
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .card{
-      border-radius:22px; border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.05); padding:12px; min-height:172px;
-      display:flex; flex-direction:column; gap:8px; cursor:pointer;
-      position:relative; overflow:hidden;
+      border-radius:24px; border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04); padding:20px 15px;
+      display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px;
+      transition:0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor:pointer;
     }
-    .card::before{
-      content:""; position:absolute;inset:-1px;border-radius:22px;
-      background:
-        radial-gradient(420px 140px at 20% 0%, rgba(79,70,229,.26), transparent 60%),
-        radial-gradient(420px 140px at 100% 100%, rgba(0,243,255,.14), transparent 55%);
-      pointer-events:none; z-index:0;
-    }
-    .card > *{position:relative;z-index:1}
+    .card:active { transform: scale(0.95); background:rgba(255,255,255,.08); }
 
+    /* DAHA BÜYÜK İKONLAR */
     .iconWrap{
-      width:46px;height:46px;border-radius:18px;
-      display:flex;align-items:center;justify-content:center;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 55%),
-        linear-gradient(135deg, rgba(0,243,255,.28), rgba(255,0,255,.20));
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow: 0 0 18px rgba(0,243,255,.12);
-      font-size:20px;
+      width:64px; height:64px; border-radius:20px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:32px; /* İkon boyutu büyütüldü */
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
-    .name{font-weight:1000;font-size:13px}
-    .desc{font-weight:800;font-size:11px;line-height:1.25;color:rgba(255,255,255,.70)}
-    .tags{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
-    .tag{
-      padding:6px 8px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.18);
-      font-weight:1000;font-size:10px;white-space:nowrap;
-    }
-    .tag.ready{border-color:rgba(0,230,118,.25);background:rgba(0,230,118,.10)}
+    
+    /* OYUN İSİMLERİ BÜYÜK VE TÜRKÇE */
+    .name{ font-weight:900; font-size:15px; text-transform:uppercase; letter-spacing:0.5px; color:#fff; }
+    .desc{ font-weight:600; font-size:11px; color:var(--muted); }
 
     .footerbar{
-      position:absolute;left:0;right:0;bottom:0; height:var(--footerH);
-      display:flex;align-items:center;justify-content:center;
-      border-top:1px solid rgba(255,255,255,.06);
-      background:#060018; font-size:10px;font-weight:800;color:rgba(255,255,255,.22);
+      position:absolute; left:0; right:0; bottom:0; height:var(--footerH);
+      display:flex; align-items:center; justify-content:center;
+      background:#030014; border-top:1px solid rgba(255,255,255,.05);
+      font-size:10px; font-weight:800; color:rgba(255,255,255,.2);
     }
-
-    .toast{
-      position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-120px);
-      background:rgba(10,10,18,.92); border:1px solid rgba(165,180,252,.35);
-      padding:10px 14px;border-radius:999px; color:#fff;z-index:10000;
-      font-weight:900;font-size:12px; transition:.28s; backdrop-filter:blur(12px);
-    }
-    .toast.show{transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
@@ -206,73 +129,70 @@
 
       <div class="brand" onclick="location.href='/pages/home.html'">
         <div class="logo-line">italky<span class="logo-ai">AI</span></div>
-        <div class="slogan">BE FREE</div>
+        <div style="font-size:8px; font-weight:900; letter-spacing:3px; color:rgba(255,255,255,0.3)">BE FREE</div>
       </div>
 
       <div class="profileMini" onclick="location.href='/pages/profile.html'">
-        <div class="pPic" id="pPic">
-            <span id="pFallback">A</span>
-        </div>
         <div class="pName" id="pName">Yükleniyor...</div>
+        <div class="pPic" id="pPic"><span>•</span></div>
       </div>
     </div>
 
     <div class="main">
       <div class="hero">
-        <div class="heroTop">
-          <div class="heroTitle">Oyun Merkezi</div>
-          <div class="chips">
-            <div class="chip" id="dailyChip">🎟️ Hak: --</div>
-            <div class="chip" id="planChip">FREE</div>
-          </div>
-        </div>
-        <div class="heroDesc">Günlük 25 hak. Oyuna girince 1 hak düşer. Set bitince devam etmek istersen 1 hak daha düşer.</div>
+        <div class="heroTitle">OYUN MERKEZİ</div>
+        <div class="heroDesc">Öğrenirken eğlen, eğlenirken kazan! Günlük haklarını kullanarak dil becerilerini geliştir.</div>
         <div class="actions">
-          <button class="btn earn" id="earnBtn">Hak Kazan</button>
-          <button class="btn upgrade" id="upgradeBtn">Abonelik Yükselt</button>
+          <button class="btn earn" id="earnBtn">ÜCRETSİZ HAK AL</button>
+          <button class="btn upgrade" id="upgradeBtn">SINIRSIZ YAP</button>
         </div>
       </div>
-      <div class="grid" id="gameGrid"></div>
+
+      <div class="grid">
+        <div class="card" onclick="startLoading()">
+            <div class="iconWrap" style="background:rgba(0,243,255,0.1); border-color:rgba(0,243,255,0.2)">🧩</div>
+            <div class="name">KELİME AVCI</div>
+            <div class="desc">Eksik harfleri tamamla</div>
+        </div>
+        <div class="card" onclick="startLoading()">
+            <div class="iconWrap" style="background:rgba(255,0,255,0.1); border-color:rgba(255,0,255,0.2)">🧠</div>
+            <div class="name">HAFIZA KARTI</div>
+            <div class="desc">Kelimeleri eşleştir</div>
+        </div>
+        <div class="card" onclick="startLoading()">
+            <div class="iconWrap" style="background:rgba(0,230,118,0.1); border-color:rgba(0,230,118,0.2)">🎤</div>
+            <div class="name">TELAFFUZ</div>
+            <div class="desc">Doğru oku ve kazan</div>
+        </div>
+        <div class="card" onclick="startLoading()">
+            <div class="iconWrap" style="background:rgba(255,171,0,0.1); border-color:rgba(255,171,0,0.2)">⚡</div>
+            <div class="name">HIZLI TEST</div>
+            <div class="desc">Zamana karşı yarış</div>
+        </div>
+      </div>
     </div>
 
     <div class="footerbar">italkyAI By Ozyigit’s 2026</div>
   </div>
 
-  <div id="toast" class="toast"></div>
-
   <script type="module">
     import { STORAGE_KEY } from "/js/config.js";
 
-    // Profil Bilgilerini Yükle
     function loadProfile() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         try {
           const user = JSON.parse(raw);
-          // Ad Soyad Entegresi
-          document.getElementById('pName').textContent = user.fullname || user.name || "Kullanıcı";
-          
-          // Profil Resmi Entegresi
+          // Ad Soyad ve Avatar yer değiştirdi
+          document.getElementById('pName').textContent = user.fullname || user.name || "Üye";
           const pic = user.picture || user.avatar;
           if (pic) {
-            document.getElementById('pPic').innerHTML = `<img src="${pic}" alt="Avatar">`;
-          } else {
-            // Baş harf fallback
-            const initial = (user.fullname || user.name || "A").charAt(0).toUpperCase();
-            document.getElementById('pFallback').textContent = initial;
+            document.getElementById('pPic').innerHTML = `<img src="${pic}" alt="Profile">`;
           }
-          
-          // Plan bilgisini de güncelle
-          document.getElementById('planChip').textContent = (user.plan || "FREE").toUpperCase();
-        } catch (e) {
-          console.error("Profil yükleme hatası", e);
-        }
+        } catch (e) {}
       }
     }
-
     document.addEventListener("DOMContentLoaded", loadProfile);
   </script>
-
-  <script type="module" src="/js/game_page.js?v=1000"></script>
 </body>
 </html>
