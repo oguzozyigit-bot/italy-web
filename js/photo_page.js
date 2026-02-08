@@ -1,11 +1,11 @@
-// /js/photo_page.js
-import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
-import { logout } from "/js/auth.js";
+// FILE: /js/photo_page.js
+import { STORAGE_KEY } from "/js/config.js";
+import { apiPOST } from "/js/api.js";
 
 const $ = (id)=>document.getElementById(id);
 function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
-function base(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
 
+/* ===== Toast ===== */
 function toast(msg){
   const t = $("toast");
   if(!t) return;
@@ -15,6 +15,7 @@ function toast(msg){
   window.__to = setTimeout(()=> t.classList.remove("show"), 1800);
 }
 
+/* ===== Guard (home/profile standard) ===== */
 function termsKey(email=""){
   return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
 }
@@ -25,9 +26,6 @@ function ensureLogged(){
   const u = getUser();
   if(!u || !u.email){ location.replace("/index.html"); return null; }
   if(!localStorage.getItem(termsKey(u.email))){ location.replace("/index.html"); return null; }
-  const gid = (localStorage.getItem("google_id_token") || "").trim();
-  if(!gid){ location.replace("/index.html"); return null; }
-  if(!u.isSessionActive){ location.replace("/index.html"); return null; }
   return u;
 }
 
@@ -40,14 +38,15 @@ function paintHeader(u){
   const fallback = $("avatarFallback");
   const pic = String(u.picture || u.avatar || u.avatar_url || "").trim();
   if(pic){
-    avatarBtn.innerHTML = `<img src="${pic}" alt="avatar">`;
+    avatarBtn.innerHTML = `<img src="${pic}" alt="avatar" referrerpolicy="no-referrer">`;
   }else{
     fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
   }
-  avatarBtn.addEventListener("click", logout);
+
+  avatarBtn.addEventListener("click", ()=> location.href="/pages/profile.html");
 }
 
-/* ===== Diller ===== */
+/* ===== Languages ===== */
 const LANGS = [
   { code:"tr", name:"Türkçe", flag:"🇹🇷" },
   { code:"en", name:"İngilizce", flag:"🇬🇧" },
@@ -90,13 +89,12 @@ const LANGS = [
   { code:"ms", name:"Malayca", flag:"🇲🇾" },
   { code:"he", name:"İbranice", flag:"🇮🇱" },
 ];
-
 function langBy(code){
   return LANGS.find(x=>x.code===code) || { code, name: code, flag:"🌐" };
 }
 
-/* ===== Hedef dil (sessionStorage) ===== */
-const SS_TO = "italky_photo_to_lang_v2";
+/* ===== Target lang session ===== */
+const SS_TO = "italky_photo_to_lang_v3";
 let toLang = sessionStorage.getItem(SS_TO) || "tr";
 
 function setToUI(){
@@ -148,25 +146,26 @@ function renderSheet(filter){
   });
 }
 
-/* ===== Kamera ===== */
+/* ===== Camera ===== */
 let stream = null;
 async function startCamera(){
   const v = $("cam");
   try{
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
+      video: { facingMode: { ideal: "environment" } },
       audio: false
     });
     v.srcObject = stream;
     await v.play();
     $("statusChip").textContent = "✅ Kamera hazır • Yazıya dokun";
-  }catch{
+  }catch(e){
+    console.error(e);
     $("statusChip").textContent = "❌ Kamera açılamadı (izin/cihaz)";
     toast("Kamera izni gerekli");
   }
 }
 
-/* ===== Canvas ===== */
+/* ===== Canvas mapping ===== */
 function fitCanvasToVideo(){
   const v = $("cam");
   const c = $("overlay");
@@ -180,7 +179,6 @@ function drawClear(){
   ctx.clearRect(0,0,c.width,c.height);
 }
 
-/* ===== Snapshot frame ===== */
 function captureFrame(){
   const v = $("cam");
   if(!v || v.videoWidth === 0) return null;
@@ -191,26 +189,19 @@ function captureFrame(){
   return tmp;
 }
 
-/* ===== OCR ROI (dokunduğun bölge) ===== */
-let busy = false;
-const cache = new Map();
-
 function stageToFrameXY(clientX, clientY, frameW, frameH){
   const v = $("cam");
   const rect = v.getBoundingClientRect();
   const x = clientX - rect.left;
   const y = clientY - rect.top;
-
   const sx = frameW / rect.width;
   const sy = frameH / rect.height;
-
   return { fx: x * sx, fy: y * sy };
 }
 
 function cropROI(frameCanvas, fx, fy){
-  // ROI boyutu (piksel) – hızlı OCR
-  const roiW = Math.floor(Math.min(420, frameCanvas.width * 0.55));
-  const roiH = Math.floor(Math.min(220, frameCanvas.height * 0.22));
+  const roiW = Math.floor(Math.min(520, frameCanvas.width * 0.60));
+  const roiH = Math.floor(Math.min(260, frameCanvas.height * 0.25));
 
   let x0 = Math.floor(fx - roiW/2);
   let y0 = Math.floor(fy - roiH/2);
@@ -221,50 +212,72 @@ function cropROI(frameCanvas, fx, fy){
   const roi = document.createElement("canvas");
   roi.width = roiW;
   roi.height = roiH;
-  roi.getContext("2d").drawImage(frameCanvas, x0, y0, roiW, roiH, 0, 0, roiW, roiH);
+
+  const ctx = roi.getContext("2d");
+  ctx.drawImage(frameCanvas, x0, y0, roiW, roiH, 0, 0, roiW, roiH);
 
   return { roi, x0, y0, roiW, roiH };
 }
 
-async function ocrROI(roiCanvas){
-  if(!window.Tesseract) throw new Error("OCR yok");
-  const r = await window.Tesseract.recognize(roiCanvas, "eng");
-  const txt = String(r?.data?.text || "").trim();
+/* ===== OCR (single worker, fast) ===== */
+let OCR_READY = false;
+let OCR_WORKER = null;
+
+async function initOCR(){
+  if(OCR_READY) return;
+  if(!window.Tesseract) throw new Error("Tesseract yüklenmedi");
+
+  $("statusChip").textContent = "🧠 OCR hazırlanıyor…";
+
+  OCR_WORKER = await window.Tesseract.createWorker("eng+tur", 1, {
+    logger: (m)=>{} // sessiz
+  });
+
+  // speed tweaks
+  try{
+    await OCR_WORKER.setParameters({
+      tessedit_pageseg_mode: "6",
+      preserve_interword_spaces: "1"
+    });
+  }catch{}
+
+  OCR_READY = true;
+  $("statusChip").textContent = "✅ Kamera hazır • Yazıya dokun";
+}
+
+async function ocrCanvas(canvas){
+  await initOCR();
+  const { data } = await OCR_WORKER.recognize(canvas);
+  const txt = String(data?.text || "").trim();
   return txt;
 }
 
-/* ===== Translate ===== */
+/* ===== Translate (backend) ===== */
+const cache = new Map();
 async function translateViaApi(text, target){
-  const key = `${text}__${target}`;
+  const clean = String(text||"").replace(/\s+/g," ").trim();
+  if(!clean) return "";
+
+  const key = `${clean}__${target}`;
   if(cache.has(key)) return cache.get(key);
 
-  const b = base();
-  if(!b) return text;
-
-  const body = {
-    text,
+  const data = await apiPOST("/api/translate", {
+    text: clean,
     source: "",
     target,
     from_lang: "",
-    to_lang: target,
-  };
+    to_lang: target
+  }, { timeoutMs: 25000 });
 
-  const r = await fetch(`${b}/api/translate`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify(body)
-  });
-
-  const data = await r.json().catch(()=> ({}));
   const out = String(
     data?.translated || data?.translation || data?.text || data?.translated_text || ""
-  ).trim() || text;
+  ).trim() || clean;
 
   cache.set(key, out);
   return out;
 }
 
-/* ===== Draw overlay ROI result ===== */
+/* ===== Draw overlay ===== */
 function drawOverlayTextBox(x0, y0, w, h, text){
   const c = $("overlay");
   const ctx = c.getContext("2d");
@@ -272,9 +285,9 @@ function drawOverlayTextBox(x0, y0, w, h, text){
   const v = $("cam");
   const rect = v.getBoundingClientRect();
 
-  // frame px -> stage px
   const frameW = v.videoWidth;
   const frameH = v.videoHeight;
+
   const sx = rect.width / frameW;
   const sy = rect.height / frameH;
 
@@ -305,7 +318,8 @@ function drawOverlayTextBox(x0, y0, w, h, text){
   ctx.restore();
 }
 
-/* ===== Instant translate on hold ===== */
+/* ===== Interaction ===== */
+let busy = false;
 let holding = false;
 let lastRun = 0;
 
@@ -324,7 +338,7 @@ async function translateAt(clientX, clientY){
     const { fx, fy } = stageToFrameXY(clientX, clientY, frame.width, frame.height);
     const { roi, x0, y0, roiW, roiH } = cropROI(frame, fx, fy);
 
-    const raw = await ocrROI(roi);
+    const raw = await ocrCanvas(roi);
     const clean = raw.replace(/\s+/g, " ").trim();
 
     if(!clean){
@@ -335,8 +349,9 @@ async function translateAt(clientX, clientY){
     const out = await translateViaApi(clean, toLang);
     drawOverlayTextBox(x0, y0, roiW, roiH, out);
     $("statusChip").textContent = "✅ Basıldı • Tutmaya devam et";
-  }catch{
-    $("statusChip").textContent = "⚠️ Çeviri/OCR hata";
+  }catch(e){
+    console.error(e);
+    $("statusChip").textContent = "⚠️ OCR/Çeviri hata";
     toast("OCR/Çeviri hata");
   }finally{
     busy = false;
@@ -351,19 +366,15 @@ function onPointerDown(e){
 function onPointerMove(e){
   if(!holding) return;
   const now = Date.now();
-  if(now - lastRun < 650) return; // throttle
+  if(now - lastRun < 700) return;
   lastRun = now;
   translateAt(e.clientX, e.clientY);
 }
-function onPointerUp(){
-  holding = false;
-}
+function onPointerUp(){ holding = false; }
 
-/* ===== Optional Full Scan ===== */
+/* ===== Full scan ===== */
 async function doFullScan(){
-  if(!window.Tesseract){ toast("OCR yok"); return; }
   if(busy) return;
-
   const v = $("cam");
   if(!v || v.videoWidth === 0) return toast("Kamera hazır değil");
 
@@ -372,23 +383,26 @@ async function doFullScan(){
 
   try{
     const frame = captureFrame();
-    const r = await window.Tesseract.recognize(frame, "eng");
-    const txt = String(r?.data?.text || "").trim().replace(/\s+/g," ");
+    if(!frame) throw new Error("frame yok");
+
+    const raw = await ocrCanvas(frame);
+    const txt = raw.replace(/\s+/g," ").trim();
     if(!txt){ $("statusChip").textContent = "⚠️ Yazı bulunamadı"; return; }
 
     const out = await translateViaApi(txt, toLang);
     drawClear();
-    // full scan sonucu: ekranın üstüne bir kutu gibi bas
     drawOverlayTextBox(
       Math.floor(frame.width*0.05),
       Math.floor(frame.height*0.05),
       Math.floor(frame.width*0.90),
-      Math.floor(frame.height*0.18),
+      Math.floor(frame.height*0.20),
       out
     );
     $("statusChip").textContent = "✅ SCAN basıldı";
-  }catch{
+  }catch(e){
+    console.error(e);
     $("statusChip").textContent = "❌ SCAN hata";
+    toast("SCAN hata");
   }finally{
     busy = false;
   }
@@ -432,5 +446,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   const ro = new ResizeObserver(()=>{ fitCanvasToVideo(); drawClear(); });
   ro.observe($("cam"));
   window.addEventListener("resize", ()=>{ fitCanvasToVideo(); drawClear(); }, { passive:true });
+
   fitCanvasToVideo();
+  drawClear();
 });
