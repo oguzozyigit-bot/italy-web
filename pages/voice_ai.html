@@ -5,18 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>italkyAI - Voice</title>
   <link rel="icon" href="data:," />
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    /* --- RENK VE TEMEL AYARLAR --- */
     :root {
-      --bg-deep: #020205; 
+      --bg-deep: #020205;
       --text-main: #ffffff;
-      
-      /* Bu sefer değişkenleri CSS içinde dinamik kullanacağız */
+
       --c-cyan: #00f3ff;
       --c-pink: #ff00aa;
       --c-purple: #bc13fe;
@@ -32,7 +30,6 @@
       display: flex; align-items: center; justify-content: center;
     }
 
-    /* --- ATMOSFER (HAFİF YILDIZLAR) --- */
     .cosmos-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(circle at center, #0f0f1a 0%, #000 100%); }
     .star-dust { position: absolute; inset: 0; opacity: 0.3; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 50px 50px; animation: dustMove 100s linear infinite; }
     @keyframes dustMove { from { transform: translateY(0); } to { transform: translateY(-500px); } }
@@ -40,10 +37,10 @@
     .frame { width: 100%; max-width: 480px; height: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; }
 
     /* --- TOPBAR --- */
-    .topbar { height: 90px; padding: 10px 20px 0; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
+    .topbar { height: 90px; padding: 10px 20px 0; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 200; }
     .back-btn { width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; backdrop-filter: blur(10px); transition: 0.2s; }
     .back-btn:active { transform: scale(0.9); }
-    
+
     .brand { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s; }
     .brand:active { transform: scale(0.95); opacity: 0.8; }
     .logo-main { font-family:'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #fff; }
@@ -53,39 +50,34 @@
     .voice-btn { padding: 0 18px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); transition: 0.2s; }
     .voice-btn:active { transform: scale(0.95); }
 
+    /* --- STAGE --- */
+    .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; pointer-events: none; z-index: 120; }
 
-    /* --- SAHNE: MAGIC CLOUD (BURASI KRİTİK) --- */
-    .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; pointer-events: none; }
-    
     .cloud-container {
       position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;
-      /* Bulanıklık efekti renkleri birbirine kaynaştırır (Liquid Effect) */
-      filter: blur(30px) contrast(1.2); 
+      filter: blur(30px) contrast(1.2);
+      z-index: 2;
     }
 
-    /* KATMANLAR (Blob'lar) */
     .blob {
       position: absolute; border-radius: 50%;
-      mix-blend-mode: screen; /* Renklerin ışık gibi karışmasını sağlar */
+      mix-blend-mode: screen;
       transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    /* Katman 1: Çekirdek */
     .layer-core {
       width: 140px; height: 140px; z-index: 10;
       background: var(--c-purple);
       animation: idleMove 8s ease-in-out infinite alternate;
     }
-    
-    /* Katman 2: Uydu 1 */
+
     .layer-1 {
       width: 180px; height: 180px; z-index: 5; opacity: 0.7;
       background: var(--c-cyan);
       transform: translate(-30px, -20px);
       animation: idleMove 10s ease-in-out infinite reverse;
     }
-    
-    /* Katman 3: Uydu 2 */
+
     .layer-2 {
       width: 160px; height: 160px; z-index: 5; opacity: 0.6;
       background: var(--c-pink);
@@ -93,9 +85,6 @@
       animation: idleMove 12s ease-in-out infinite;
     }
 
-
-    /* --- DURUM 1: DİNLİYOR (MAVİ/BEYAZ NEFES) --- */
-    /* Katmanlar birleşir, büyür ve nefes alır */
     .stage.listening .layer-core {
       width: 160px; height: 160px; background: #fff;
       animation: breath 3s ease-in-out infinite;
@@ -111,10 +100,7 @@
       animation: breath 3s ease-in-out infinite 0.5s;
     }
 
-
-    /* --- DURUM 2: DÜŞÜNÜYOR (MOR GİRDAP) --- */
-    /* Katmanlar merkeze çekilir ve hızlı döner */
-    .stage.thinking .cloud-container { filter: blur(20px) contrast(2); } /* Daha keskin */
+    .stage.thinking .cloud-container { filter: blur(20px) contrast(2); }
     .stage.thinking .layer-core {
       width: 80px; height: 80px; background: #fff;
       animation: spin 0.5s linear infinite;
@@ -128,11 +114,7 @@
       animation: spin 2s linear infinite;
     }
 
-
-    /* --- DURUM 3: KONUŞUYOR (RENK CÜMBÜŞÜ / DAĞINIK BULUT) --- */
-    /* Katmanlar AYRILIR, RENKLER ÇILDIRIR */
-    .stage.speaking .cloud-container { filter: blur(35px) contrast(1.1); } /* Daha yumuşak, bulut gibi */
-    
+    .stage.speaking .cloud-container { filter: blur(35px) contrast(1.1); }
     .stage.speaking .layer-core {
       width: 150px; height: 150px; background: var(--c-yellow);
       animation: speakChaos 1s ease-in-out infinite;
@@ -146,19 +128,9 @@
       animation: speakWander2 1.5s ease-in-out infinite alternate;
     }
 
-
-    /* --- ANİMASYONLAR --- */
     @keyframes idleMove { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(10px, -10px) scale(1.05); } }
-    
-    @keyframes breath { 
-      0% { transform: scale(1); filter: brightness(1); } 
-      50% { transform: scale(1.15); filter: brightness(1.2); } 
-      100% { transform: scale(1); filter: brightness(1); } 
-    }
-
+    @keyframes breath { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.15); filter: brightness(1.2); } 100% { transform: scale(1); filter: brightness(1); } }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    /* Konuşma Kaosu: Rastgele hareket ve şekil bozukluğu */
     @keyframes speakChaos {
       0% { transform: scale(1) translate(0,0); border-radius: 50%; }
       25% { transform: scale(1.2) translate(-20px, 10px); border-radius: 40% 60% 50% 50%; background: var(--c-yellow); }
@@ -166,29 +138,90 @@
       75% { transform: scale(1.1) translate(-10px, -10px); border-radius: 40% 60% 30% 70%; background: var(--c-pink); }
       100% { transform: scale(1) translate(0,0); border-radius: 50%; }
     }
-
     @keyframes speakWander1 {
       0% { transform: translate(-40px, -30px) scale(1); background: var(--c-red); }
       100% { transform: translate(20px, 10px) scale(1.2); background: var(--c-purple); }
     }
-
     @keyframes speakWander2 {
       0% { transform: translate(40px, 30px) scale(1); background: var(--c-cyan); }
       100% { transform: translate(-20px, -10px) scale(0.8); background: #00ff66; }
     }
 
-
-    /* STATUS TEXT */
     .status-text {
-      margin-top: 60px; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; 
-      color: rgba(255,255,255,0.8); letter-spacing: 3px; text-transform: uppercase; 
+      margin-top: 60px; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700;
+      color: rgba(255,255,255,0.8); letter-spacing: 3px; text-transform: uppercase;
       opacity: 0; transform: translateY(20px); transition: 0.5s; text-shadow: 0 0 20px rgba(0,0,0,0.5);
+      z-index: 4;
     }
     .status-text.show { opacity: 1; transform: translateY(0); }
 
+    /* ===== NEW: SUBTITLES STREAM ===== */
+    .subtitles {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 120px;
+      width: min(420px, calc(100vw - 48px));
+      z-index: 160;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      padding: 0 8px;
+    }
+
+    .subline{
+      max-width: 100%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+      font-weight: 800;
+      font-size: 13px;
+      line-height: 1.35;
+      color: rgba(255,255,255,0.92);
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      animation: subIn 0.35s ease-out both;
+    }
+
+    /* user vs ai styling */
+    .subline.user{
+      background: rgba(99, 102, 241, 0.16);
+      border-color: rgba(99, 102, 241, 0.22);
+    }
+    .subline.ai{
+      background: rgba(236, 72, 153, 0.14);
+      border-color: rgba(236, 72, 153, 0.20);
+    }
+
+    /* float up then dissolve into clouds */
+    .subline.fadeout{
+      animation: subFloatOut 2.8s ease-in forwards;
+    }
+
+    /* cloud dissolve: use mask + blur + opacity */
+    @keyframes subIn{
+      from{ opacity:0; transform: translateY(10px) scale(0.98); filter: blur(6px); }
+      to  { opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    @keyframes subFloatOut{
+      0%   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      55%  { opacity: .95; transform: translateY(-18px) scale(1.02); filter: blur(1px); }
+      100% { opacity: 0; transform: translateY(-54px) scale(1.04); filter: blur(12px); }
+    }
+
     /* KONTROLLER */
-    .controls { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; z-index: 100; pointer-events: none; }
-    
+    .controls { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; z-index: 200; pointer-events: none; }
+
     .mode-switch { pointer-events: auto; display: flex; gap: 4px; background: rgba(255,255,255,0.08); padding: 4px; border-radius: 24px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
     .mode-btn { padding: 8px 16px; border-radius: 20px; border: none; background: transparent; color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
     .mode-btn.active { background: #fff; color: #000; box-shadow: 0 2px 15px rgba(255,255,255,0.3); }
@@ -196,7 +229,6 @@
     .mic-btn { width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(5px); }
     .mic-btn svg { width: 36px; height: 36px; stroke: #fff; fill: none; stroke-width: 2; transition: 0.3s; }
     .mic-btn:active { transform: scale(0.9); }
-    
     .mic-btn.active { background: #fff; border-color: #fff; box-shadow: 0 0 60px rgba(255, 255, 255, 0.4); animation: pulseMic 2s infinite; }
     .mic-btn.active svg { stroke: #000; }
     @keyframes pulseMic { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 30px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
@@ -232,7 +264,7 @@
       <button class="back-btn" id="btnBack">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </button>
-      
+
       <div class="brand" onclick="window.location.href='/pages/home.html'">
         <div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
         <div class="mini-slogan">BE FREE</div>
@@ -240,6 +272,9 @@
 
       <div class="voice-btn" id="btnSettings">Ses</div>
     </div>
+
+    <!-- NEW: subtitles stream -->
+    <div class="subtitles" id="subtitleStream" aria-hidden="true"></div>
 
     <div class="stage" id="aiStage">
       <div class="cloud-container">
