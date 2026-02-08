@@ -24,18 +24,12 @@
 
     .mobile-frame { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; background: rgba(5, 0, 20, 0.98); position: relative; border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); }
 
-    /* GİZLİ SCROLL */
-    .setup-overlay { 
-      position: absolute; inset: 0; background: var(--bg); z-index: 2000; padding: 25px; 
-      display: flex; flex-direction: column; overflow-y: scroll; scrollbar-width: none; 
-    }
+    .setup-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 2000; padding: 25px; display: flex; flex-direction: column; overflow-y: scroll; scrollbar-width: none; }
     .setup-overlay::-webkit-scrollbar { display: none; }
 
-    /* 3D HANGMAN TITLE */
     .game-title-3d {
-      font-family: 'Space Grotesk'; font-size: 50px; font-weight: 900; text-align: center;
-      color: #fff; margin: 20px 0; letter-spacing: 8px;
-      text-shadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.2), 0 5px 10px rgba(0,0,0,.25), 0 10px 10px rgba(0,0,0,.2), 0 20px 20px rgba(0,0,0,.15), 0 0 20px var(--neon-purple);
+      font-family: 'Space Grotesk'; font-size: 50px; font-weight: 900; text-align: center; color: #fff; margin: 20px 0; letter-spacing: 8px;
+      text-shadow: 0 1px 0 #ccc, 0 3px 0 #bbb, 0 5px 0 #aaa, 0 10px 10px rgba(0,0,0,.2), 0 0 20px var(--neon-purple);
     }
 
     .section-label { font-size: 11px; font-weight: 800; color: var(--neon-purple); margin: 15px 0 8px; text-transform: uppercase; }
@@ -44,12 +38,11 @@
     .grid-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .grid-select-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .opt-card { padding: 12px 5px; border-radius: 12px; border: 1px solid #333; background: rgba(255,255,255,0.03); text-align: center; cursor: pointer; transition: 0.2s; }
-    .opt-card.active { border-color: var(--neon-purple); background: rgba(168, 85, 247, 0.15); transform: translateY(-2px); }
+    .opt-card.active { border-color: var(--neon-purple); background: rgba(168, 85, 247, 0.15); }
     .opt-card span { display: block; font-size: 24px; margin-bottom: 5px; }
 
     .big-btn { width: 100%; padding: 18px; border-radius: 15px; background: var(--ai-grad); border: none; color: #fff; font-weight: 900; font-size: 16px; margin: 20px 0; cursor: pointer; box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
 
-    /* OYUN İÇİ */
     .p-name { font-size: 26px; font-weight: 900; color: var(--neon-purple); text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
     .game-info { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
@@ -59,7 +52,6 @@
 
     .p { position: absolute; background: #fff; display: none; box-shadow: 0 0 8px #fff; }
     .p.show { display: block; }
-    /* Parçalar */
     .p1{width:4px;height:100%;left:20px}.p2{width:60px;height:4px;left:20px;top:0}.p3{width:2px;height:15px;left:80px;top:0}
     .p4{width:26px;height:26px;border-radius:50%;border:3px solid #fff;left:68px;top:15px}.p5{width:3px;height:45px;left:80px;top:41px}
     .p6{width:18px;height:3px;left:63px;top:55px;transform:rotate(-30deg)}.p7{width:18px;height:3px;left:80px;top:55px;transform:rotate(30deg)}
@@ -81,11 +73,14 @@
 
     .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.98); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
     .modal.active { display: flex; }
+    
+    #canvas { position: absolute; top:0; left:0; pointer-events:none; z-index:4000; }
   </style>
 </head>
 <body>
 
   <div class="mobile-frame">
+    <canvas id="canvas"></canvas>
     <div class="setup-overlay" id="setup">
       <div class="game-title-3d">HANGMAN</div>
       
@@ -119,7 +114,7 @@
     <div class="game-info">
       <button onclick="location.href='/pages/home.html'" style="background:none; border:1px solid #333; color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer;">←</button>
       <div class="p-name" id="curPName">PLAYER</div>
-      <div style="text-align:right; font-size:12px; opacity:0.8;">
+      <div style="text-align:right; font-size:12px;">
         HAK: <b id="remR" style="color:var(--neon-green)">5/5</b><br>
         PUAN: <b id="curS" style="color:var(--neon-blue)">0</b>
       </div>
@@ -149,11 +144,15 @@
     <div class="footer">italkyAI By Ozyigit’s 2026</div>
 
     <div class="modal" id="modal">
-      <h1 id="mTitle" style="font-size: 32px;">BİLDİN!</h1>
+      <h1 id="mTitle">BİLDİN!</h1>
       <h2 id="mWord" style="color:var(--neon-blue); font-size:36px; margin:10px 0;">APPLE</h2>
       <p id="mTr" style="opacity:0.7; font-size:18px;">(Elma)</p>
-      <div id="mDesc" style="margin-top:10px; font-weight:800; color:var(--neon-green);"></div>
-      <button class="big-btn" onclick="modalNext()">SIRADAKİ</button>
+      <div id="mDesc" style="margin:10px 0; font-weight:800; color:var(--neon-green);"></div>
+      
+      <div id="mScoreTable" style="width:100%; background:rgba(255,255,255,0.05); border-radius:15px; padding:15px; margin:15px 0;"></div>
+      
+      <div id="nextPlayerNotice" style="font-weight:900; color:var(--neon-purple); margin-bottom:10px;"></div>
+      <button class="big-btn" id="modalBtn" onclick="modalNext()">DEVAM ET</button>
     </div>
   </div>
 
@@ -161,15 +160,14 @@
     import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
     let players = [], curIdx = 0, pool, used, lang = 'en', maxM = 8;
-    let target, guessed = [], mistakes = 0, keysP = 0, totalJokers = 3, wordsDone = 0;
+    let target, guessed = [], mistakes = 0, keysP = 0, totalJokers = 3;
 
-    // SES EFEKTLERİ
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(freq, type, dur) {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
       osc.connect(gain); gain.connect(audioCtx.destination);
       osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
@@ -222,7 +220,6 @@
       document.getElementById('wordGrid').innerHTML = target.w.split('').map(l => 
         `<div class="slot">${guessed.includes(l.toUpperCase())?l.toUpperCase():''}</div>`).join('');
       document.querySelectorAll('.p').forEach((p,i)=>p.classList.toggle('show', i < mistakes));
-      // Joker UI
       for(let i=0; i<3; i++) document.getElementById(`j${i}`).className = i < totalJokers ? 'j-btn' : 'j-btn used';
     }
 
@@ -240,11 +237,11 @@
       if(guessed.includes(l) || mistakes >= maxM) return;
       keysP++;
       if(target.w.toUpperCase().includes(l)) {
-        playSound(800, 'sine', 0.1); // BİB
+        playSound(800, 'sine', 0.1);
         guessed.push(l); if(btn) btn.classList.add('correct');
         if(target.w.split('').every(c => guessed.includes(c.toUpperCase()))) finish(true);
       } else {
-        playSound(150, 'sawtooth', 0.2); // DITTT
+        playSound(150, 'sawtooth', 0.2);
         mistakes++; if(btn) btn.classList.add('wrong');
         if(mistakes >= maxM) finish(false);
       }
@@ -254,14 +251,12 @@
     window.useJ = (id) => {
       if(totalJokers <= 0) return;
       const rem = target.w.toUpperCase().split('').filter(l => !guessed.includes(l));
-      if(rem.length) {
-        totalJokers--;
-        makeG(rem[0], document.getElementById(`key-${rem[0]}`));
-      }
+      if(rem.length) { totalJokers--; makeG(rem[0], document.getElementById(`key-${rem[0]}`)); }
     };
 
     function finish(win) {
-      const p = players[curIdx]; let bonus = false;
+      const p = players[curIdx];
+      let bonus = false;
       if(win) {
         p.s += Math.max(1, 10 - (keysP - target.w.length));
         if(mistakes === 0 && keysP === target.w.length) { p.r++; bonus = true; }
@@ -274,28 +269,76 @@
     }
 
     function showM(win, b) {
+      const modal = document.getElementById('modal');
       document.getElementById('mTitle').innerText = win ? "BİLDİN!" : "OLMADI!";
       document.getElementById('mTitle').style.color = win ? "var(--neon-green)" : "var(--neon-red)";
       document.getElementById('mWord').innerText = target.w.toUpperCase();
       document.getElementById('mTr').innerText = `(${target.tr})`;
-      document.getElementById('mDesc').innerHTML = b ? '0 HATA! +1 HAK KAZANDIN!' : '';
-      document.getElementById('modal').classList.add('active');
+      document.getElementById('mDesc').innerHTML = b ? '0 HATA! +1 ÖDÜL HAK KAZANDIN!' : '';
+      
+      // Puan tablosu
+      document.getElementById('mScoreTable').innerHTML = players.map(p => `
+        <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px; color:${p === players[curIdx] ? 'var(--neon-purple)' : '#fff'}">
+            <span>${p.n}</span><span>Hak: ${p.r} | Puan: ${p.s}</span>
+        </div>
+      `).join('');
+
+      // Sıradaki oyuncu tespiti
+      const nextIdx = findNextPlayerIdx();
+      if(nextIdx !== -1) {
+          document.getElementById('nextPlayerNotice').innerText = `SIRADAKİ: ${players[nextIdx].n.toUpperCase()}`;
+          document.getElementById('modalBtn').innerText = "DEVAM ET";
+      } else {
+          document.getElementById('nextPlayerNotice').innerText = `TURNUVA TAMAMLANDI!`;
+          document.getElementById('modalBtn').innerText = "ŞAMPİYONU GÖR";
+      }
+      modal.classList.add('active');
+    }
+
+    function findNextPlayerIdx() {
+        for(let i = 1; i <= players.length; i++) {
+            let next = (curIdx + i) % players.length;
+            if(players[next].r > 0) return next;
+        }
+        return -1;
     }
 
     window.modalNext = () => {
       document.getElementById('modal').classList.remove('active');
-      wordsDone++;
-      if(wordsDone >= 5) {
-        if(curIdx < players.length - 1) { curIdx++; wordsDone = 0; startTurn(); }
-        else {
-          const lb = JSON.parse(localStorage.getItem('hangman_top5') || "[]");
-          players.forEach(p => lb.push({ n: p.n, s: p.s }));
-          lb.sort((a,b)=>b.s-a.s);
-          localStorage.setItem('hangman_top5', JSON.stringify(lb.slice(0,5)));
-          location.reload();
-        }
-      } else startTurn();
+      const nextIdx = findNextPlayerIdx();
+      if(nextIdx !== -1) {
+          curIdx = nextIdx;
+          startTurn();
+      } else {
+          endTournament();
+      }
     };
+
+    function endTournament() {
+        const winner = [...players].sort((a,b)=>b.s-a.s)[0];
+        let lb = JSON.parse(localStorage.getItem('hangman_top5') || "[]");
+        lb.push({ n: winner.n, s: winner.s });
+        lb.sort((a,b)=>b.s-a.s);
+        localStorage.setItem('hangman_top5', JSON.stringify(lb.slice(0,5)));
+        startFireworks();
+        setTimeout(() => { alert(`ŞAMPİYON: ${winner.n}\nPUAN: ${winner.s}`); location.reload(); }, 3000);
+    }
+
+    function startFireworks() {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        let p = [];
+        setInterval(() => {
+            for(let i=0; i<20; i++) p.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*10, vy:(Math.random()-0.5)*10, a:1, c:`hsl(${Math.random()*360},100%,50%)`});
+        }, 300);
+        function loop() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            p.forEach((it,i) => { it.x+=it.vx; it.y+=it.vy; it.a-=0.02; ctx.globalAlpha=it.a; ctx.fillStyle=it.c; ctx.fillRect(it.x,it.y,4,4); if(it.a<=0) p.splice(i,1); });
+            requestAnimationFrame(loop);
+        }
+        loop();
+    }
   </script>
 </body>
 </html>
