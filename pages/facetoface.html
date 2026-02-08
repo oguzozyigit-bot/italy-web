@@ -1,3 +1,4 @@
+<!-- FILE: pages/facetoface.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -20,8 +21,6 @@
       --muted:rgba(255,255,255,.45);
 
       --icon-bordo:#8b2635;
-
-      /* ✅ görünür lacivert (çok koyu değil) */
       --mic-navy:#5b76ff;
 
       --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
@@ -49,11 +48,11 @@
     .half-screen.top{
       background: linear-gradient(to bottom, #1a0208, var(--brand-burgundy));
       transform: rotate(180deg);
-      --mic-accent: var(--mic-navy);     /* ✅ bordo tarafta mic lacivert */
+      --mic-accent: var(--mic-navy);
     }
     .half-screen.bottom{
       background: linear-gradient(to bottom, var(--brand-lacivert), #02000a);
-      --mic-accent: var(--icon-bordo);   /* ✅ lacivert tarafta mic bordo */
+      --mic-accent: var(--icon-bordo);
     }
 
     /* TOP BACK ARROW (burgundy side) */
@@ -76,7 +75,7 @@
     }
     .top-back:active{transform:scale(.96);}
 
-    /* ✅ Centered lang trigger row (both sides) */
+    /* centered lang trigger row */
     .top-top, .bottom-top{
       width:100%;
       display:flex;
@@ -89,7 +88,7 @@
     .lang-trigger{
       background: rgba(0,0,0,.28);
       border:1px solid rgba(255,255,255,.10);
-      color: rgba(255,255,255,.88);
+      color: rgba(255,255,255,.92);
       padding:10px 14px;
       border-radius: 999px;
       font-size: 12px;
@@ -121,19 +120,27 @@
       overflow:hidden;
     }
     .popover.show{display:flex;}
-    .pop-head{padding:12px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; gap:10px; align-items:center;}
+    .pop-head{padding:12px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between;}
     .pop-title{font-weight:900; font-size:12px; opacity:.9; letter-spacing:.3px;}
-    .pop-search{
-      width:100%;
-      padding:10px 10px;
-      border-radius:14px;
+    .pop-close{
+      width:34px; height:34px; border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.26);
-      color:#fff;
-      font-size:13px;
-      font-weight:700;
+      background: rgba(0,0,0,.18);
+      color:#fff; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
     }
-    .pop-list{flex:1; overflow:auto; padding:10px;}
+    .pop-close:active{transform:scale(.96);}
+
+    .pop-list{
+      flex:1;
+      overflow:auto;
+      padding:10px;
+
+      /* ✅ scrollbar gizli */
+      scrollbar-width:none;
+    }
+    .pop-list::-webkit-scrollbar{ width:0; height:0; display:none; }
+
     .pop-item{
       padding:12px;
       border-radius:14px;
@@ -175,7 +182,7 @@
     }
     .chat-body::-webkit-scrollbar{display:none}
 
-    /* Bubble + inline speaker on TRANSLATION (me) only */
+    /* Bubble + inline speaker only on TRANSLATION (me) */
     .bubble{
       width:100%;
       display:flex;
@@ -214,7 +221,7 @@
       flex: 0 0 auto;
       margin-top: 4px;
     }
-    .bubble.me .spk{display:flex;} /* ✅ only on translated bubble */
+    .bubble.me .spk{display:flex;}
     .bubble .spk svg{width:16px; height:16px;}
     .bubble .spk:active{transform:scale(.95);}
 
@@ -351,20 +358,19 @@
         </svg>
       </button>
 
-      <!-- ✅ centered like bottom -->
       <div class="top-top">
         <button class="lang-trigger" id="topLangBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
           </svg>
-          <span id="topLangTxt">EN</span>
+          <span id="topLangTxt">🇬🇧 EN</span>
         </button>
       </div>
 
-      <div class="popover" id="pop-top">
-        <div class="pop-head"><div class="pop-title">ÜST DİL</div></div>
-        <div style="padding:0 12px 12px;">
-          <input class="pop-search" id="search-top" type="text" placeholder="Dil ara...">
+      <div class="popover" id="pop-top" role="dialog" aria-label="Üst dil seçimi">
+        <div class="pop-head">
+          <div class="pop-title">ÜST DİL</div>
+          <button class="pop-close" id="close-top" aria-label="Kapat">✕</button>
         </div>
         <div class="pop-list" id="list-top"></div>
       </div>
@@ -400,14 +406,14 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
           </svg>
-          <span id="botLangTxt">TR</span>
+          <span id="botLangTxt">🇹🇷 TR</span>
         </button>
       </div>
 
-      <div class="popover" id="pop-bot">
-        <div class="pop-head"><div class="pop-title">ALT DİL</div></div>
-        <div style="padding:0 12px 12px;">
-          <input class="pop-search" id="search-bot" type="text" placeholder="Dil ara...">
+      <div class="popover" id="pop-bot" role="dialog" aria-label="Alt dil seçimi">
+        <div class="pop-head">
+          <div class="pop-title">ALT DİL</div>
+          <button class="pop-close" id="close-bot" aria-label="Kapat">✕</button>
         </div>
         <div class="pop-list" id="list-bot"></div>
       </div>
