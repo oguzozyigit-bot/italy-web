@@ -1,11 +1,8 @@
 // FILE: /js/voice_ai.page.js
-// FINAL — your original logic + 60s/day FREE gate + PRO unlimited
-// Uses:
-// - /api/chat (Gemini via backend)
-// - /api/tts_openai (OpenAI TTS via backend, audio_base64)
-// STT: Web SpeechRecognition
-// Modes: Auto loop + Push-to-talk
-// Silence nudge: 10s, max 2 retries
+// FINAL — Voice AI (your original) + 60s/day FREE gate + PRO unlimited
+// + NEW: subtitleStream (talk text floats & dissolves into clouds)
+//
+// Requires voice_ai.html contains: <div id="subtitleStream" class="subtitles"></div>
 
 import { STORAGE_KEY } from "/js/config.js";
 import { apiPOST } from "/js/api.js";
@@ -104,7 +101,7 @@ function showPaywall(u) {
   if (isPro(u)) return;
   if (paywallEl) return;
 
-  stopConversation(); // stop everything
+  stopConversation();
   setVisual("idle");
   if (status) { status.textContent = "Süre Bitti"; status.classList.add("show"); }
   disableControls(true);
@@ -168,7 +165,6 @@ function showPaywall(u) {
   btnSub.style.color = "#fff";
   btnSub.style.background = "linear-gradient(135deg, #A5B4FC, #4F46E5)";
   btnSub.addEventListener("click", () => {
-    // later: italky://subscribe deep link
     alert("Abonelik uygulama içinden yapılır.");
   });
 
@@ -213,6 +209,41 @@ function ensureHttpsForMic() {
 }
 
 /* ===============================
+   SUBTITLES STREAM (NEW)
+   - pushSubtitle(text, "user"|"ai")
+   =============================== */
+function pushSubtitle(text, who = "ai") {
+  const stream = $("subtitleStream");
+  if (!stream) return;
+
+  const t = String(text || "").trim();
+  if (!t) return;
+
+  // Keep stream tidy
+  while (stream.children.length > 3) {
+    try { stream.removeChild(stream.firstChild); } catch { break; }
+  }
+
+  const line = document.createElement("div");
+  line.className = `subline ${who === "user" ? "user" : "ai"}`;
+  line.textContent = t;
+
+  stream.appendChild(line);
+
+  // Trigger fade-out after a moment, to "dissolve into clouds"
+  const holdMs = 900;
+  const lifeMs = 2800;
+
+  setTimeout(() => {
+    line.classList.add("fadeout");
+  }, holdMs);
+
+  setTimeout(() => {
+    try { line.remove(); } catch {}
+  }, holdMs + lifeMs);
+}
+
+/* ===============================
    YOUR CHARACTER LIST (unchanged)
    =============================== */
 const VOICES = [
@@ -230,7 +261,6 @@ let stagedId = selectedId;
 let isAutoMode = true;
 let chatHistory = [];
 
-// silence retry
 let silenceRetryCount = 0;
 const MAX_SILENCE_RETRIES = 2;
 
@@ -253,12 +283,15 @@ async function playRealVoice(text, openaiVoice, onEndCallback) {
 
     if (data?.audio_base64) {
       setVisual("speaking");
+
       const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
       currentAudio = audio;
+
       audio.onended = () => {
         currentAudio = null;
         if (onEndCallback) onEndCallback();
       };
+
       await audio.play();
     } else {
       if (onEndCallback) onEndCallback();
@@ -270,7 +303,7 @@ async function playRealVoice(text, openaiVoice, onEndCallback) {
 }
 
 /* ===============================
-   VISUAL (your stage logic)
+   VISUAL
    =============================== */
 const stage = $("aiStage");
 const status = $("statusText");
@@ -307,6 +340,8 @@ function setVisual(state) {
 /* ===============================
    Conversation loop
    =============================== */
+let uGlobal = null;
+
 let isConversationActive = false;
 let recognition = null;
 let silenceTimer = null;
@@ -321,7 +356,6 @@ function toggleConversation() {
 
 function startConversation() {
   if (!uGlobal) return;
-
   if (!canUse(uGlobal)) { showPaywall(uGlobal); return; }
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -336,7 +370,7 @@ function startConversation() {
 function stopConversation() {
   isConversationActive = false;
   if (recognition) { try { recognition.stop(); } catch {} recognition = null; }
-  if (silenceTimer) clearTimeout(silenceTimer);
+  if (silenceTimer) { try { clearTimeout(silenceTimer); } catch {} silenceTimer = null; }
   stopAudio();
   setVisual("idle");
 }
@@ -355,11 +389,9 @@ function startListening() {
 
   recognition.onstart = () => {
     if (!isConversationActive) return;
-
     setVisual("listening");
     listenStartTs = Date.now();
 
-    // silence nudge only in auto mode
     if (isAutoMode) {
       if (silenceTimer) clearTimeout(silenceTimer);
       silenceTimer = setTimeout(() => {
@@ -373,9 +405,9 @@ function startListening() {
   recognition.onresult = (event) => {
     if (silenceTimer) clearTimeout(silenceTimer);
     silenceRetryCount = 0;
-
     const text = event.results[0][0].transcript;
-    if (text && isConversationActive) processUserSpeech(String(text || "").trim(), false);
+    const finalText = String(text || "").trim();
+    if (finalText && isConversationActive) processUserSpeech(finalText, false);
   };
 
   recognition.onerror = (e) => {
@@ -392,10 +424,11 @@ function startListening() {
       if (!canUse(uGlobal)) { showPaywall(uGlobal); return; }
     }
 
-    // in auto mode, processUserSpeech will restart listening after speaking
-    // if user stopped speaking and we didn't enter thinking/speaking, keep loop alive
-    if (isConversationActive && isAutoMode && !stage?.classList.contains("thinking") && !stage?.classList.contains("speaking")) {
-      setTimeout(() => startListening(), 250);
+    if (isConversationActive && isAutoMode) {
+      // if not currently thinking/speaking, keep loop alive
+      if (!stage?.classList.contains("thinking") && !stage?.classList.contains("speaking")) {
+        setTimeout(() => startListening(), 250);
+      }
     }
   };
 
@@ -405,7 +438,6 @@ function startListening() {
 // silence nudge
 async function handleSilence() {
   if (!uGlobal) return;
-
   if (!canUse(uGlobal)) { showPaywall(uGlobal); return; }
 
   if (silenceRetryCount >= MAX_SILENCE_RETRIES) {
@@ -419,12 +451,13 @@ async function handleSilence() {
   const nudgePrompt =
     `(SİSTEM UYARISI: Kullanıcı 10 saniyedir sessiz. Eğer kullanıcının ismini biliyorsan ismini kullanarak, bilmiyorsan samimi bir şekilde: "Ne oldu sustun? Sohbet hoşuna gitmedi mi? Konuşmanı bekliyorum" minvalinde, biraz trip atan, samimi ve canlı tek bir cümle kur.)`;
 
+  // show a subtle subtitle (optional)
+  pushSubtitle("…", "ai");
   processUserSpeech(nudgePrompt, true);
 }
 
 async function processUserSpeech(text, isSystemTrigger = false) {
   if (!uGlobal) return;
-
   if (!canUse(uGlobal)) { showPaywall(uGlobal); return; }
 
   setVisual("thinking");
@@ -432,13 +465,16 @@ async function processUserSpeech(text, isSystemTrigger = false) {
   try {
     const v = getSelectedVoice();
 
-    // Keep your current behavior: system trigger also gets into history
+    // Subtitle: user text (but hide system trigger content)
+    if (!isSystemTrigger) pushSubtitle(text, "user");
+
+    // history
     chatHistory.push({ role: "user", content: text });
 
     const started = Date.now();
 
     const chatData = await apiPOST("/api/chat", {
-      text: text,
+      text,
       persona_name: v.label,
       history: chatHistory,
       max_tokens: 150
@@ -454,6 +490,10 @@ async function processUserSpeech(text, isSystemTrigger = false) {
 
     const aiReply = String(chatData?.text || "").trim() || "Orada mısın?";
 
+    // Subtitle: AI reply (always)
+    pushSubtitle(aiReply, "ai");
+
+    // save history
     chatHistory.push({ role: "assistant", content: aiReply });
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
 
@@ -470,7 +510,7 @@ async function processUserSpeech(text, isSystemTrigger = false) {
 }
 
 /* ===============================
-   MODAL (your UI)
+   MODAL
    =============================== */
 const modal = $("voiceModal");
 const listContainer = $("voiceListContainer");
@@ -488,9 +528,7 @@ function renderVoiceList() {
     row.className = `voice-item ${isSelected ? "selected" : ""}`;
     row.innerHTML = `
       <div class="v-left">
-        <button class="play-btn" type="button">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
+        <button class="play-btn" type="button"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
         <div class="v-details">
           <div class="v-name">${v.label}</div>
           <div class="v-lang">${v.gender} • ${v.desc}</div>
@@ -508,8 +546,6 @@ function renderVoiceList() {
     row.querySelector(".play-btn").addEventListener("click", async (e) => {
       e.stopPropagation();
       if (!uGlobal) return;
-
-      // ✅ quota check for preview too (optional; keeps fairness)
       if (!canUse(uGlobal)) { showPaywall(uGlobal); return; }
 
       const btn = e.currentTarget;
@@ -526,11 +562,6 @@ function renderVoiceList() {
 }
 
 /* ===============================
-   GLOBAL USER (for quota)
-   =============================== */
-let uGlobal = null;
-
-/* ===============================
    BOOT
    =============================== */
 document.addEventListener("DOMContentLoaded", () => {
@@ -538,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!uGlobal) return;
 
   // back + settings
-  $("btnBack")?.addEventListener("click", () => location.href = "/pages/home.html");
+  $("btnBack")?.addEventListener("click", () => location.href="/pages/home.html");
   $("btnSettings")?.addEventListener("click", openModal);
   $("closeVoiceModal")?.addEventListener("click", closeModal);
   $("saveVoiceBtn")?.addEventListener("click", () => {
@@ -575,7 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // initial
   setVisual("idle");
 
-  // if no pref, open modal once
+  // open modal first time
   if (!localStorage.getItem(KEY)) setTimeout(openModal, 600);
 
   // if used up already
