@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • Face to Face</title>
+  <title>italkyAI • Karşılıklı Çeviri</title>
   <link rel="icon" href="data:," />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,32 +43,116 @@
       justify-content:space-between;
       padding: calc(16px + var(--safe-top)) 18px calc(16px + var(--safe-bottom));
       gap:14px;
+      overflow:hidden;
     }
     .half-screen.top{
       background: linear-gradient(to bottom, #1a0208, var(--brand-burgundy));
       transform: rotate(180deg);
+      --mic-accent: var(--brand-lacivert);   /* ✅ bordo tarafta mic lacivert */
     }
     .half-screen.bottom{
       background: linear-gradient(to bottom, var(--brand-lacivert), #02000a);
+      --mic-accent: var(--icon-bordo);       /* ✅ lacivert tarafta mic bordo */
     }
 
-    /* LANG PILL (opens sheet) */
-    .lang-pill{
-      background: rgba(0,0,0,.35);
+    /* TOP BACK ARROW (on burgundy side) */
+    .top-back{
+      position:absolute;
+      left:14px;
+      top: calc(14px + var(--safe-top));
+      z-index: 120;
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+    }
+    .top-back:active{transform:scale(.96);}
+
+    /* LANG TRIGGER (now in-page popover, no overlay) */
+    .lang-trigger{
+      background: rgba(0,0,0,.28);
       border:1px solid rgba(255,255,255,.10);
       color: rgba(255,255,255,.88);
-      padding:10px 16px;
+      padding:10px 14px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 800;
-      letter-spacing:.2px;
+      font-weight: 900;
+      letter-spacing:.3px;
       cursor:pointer;
       display:flex;
       align-items:center;
       gap:8px;
       backdrop-filter: blur(10px);
       user-select:none;
+      z-index: 110;
     }
+
+    /* placement */
+    .top .lang-trigger{ position:absolute; right:14px; top: calc(14px + var(--safe-top)); }
+    /* ✅ bottom: lang trigger where mic used to be (upper area) */
+    .bottom .lang-trigger{ margin-top: 6px; }
+
+    .lang-trigger svg{width:14px; height:14px; opacity:.7}
+
+    /* POPOVER (in-page) */
+    .popover{
+      position:absolute;
+      width:min(280px, calc(100vw - 60px));
+      height:320px;
+      background: radial-gradient(circle at 50% 50%, #2a020f 0%, #12000a 58%, #060006 100%);
+      border: 1px solid rgba(139,38,53,.28);
+      border-radius: 22px;
+      box-shadow: 0 22px 46px rgba(0,0,0,.80);
+      display:none;
+      flex-direction:column;
+      z-index: 999;
+      overflow:hidden;
+    }
+    .popover.show{display:flex;}
+    .pop-head{padding:12px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; gap:10px; align-items:center;}
+    .pop-title{font-weight:900; font-size:12px; opacity:.9; letter-spacing:.3px;}
+    .pop-search{
+      width:100%;
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.26);
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+    }
+    .pop-list{flex:1; overflow:auto; padding:10px;}
+    .pop-item{
+      padding:12px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      cursor:pointer;
+      border:1px solid transparent;
+      user-select:none;
+    }
+    .pop-item:hover{background: rgba(255,255,255,.04);}
+    .pop-item.active{
+      background: rgba(139,38,53,.10);
+      border-color: rgba(139,38,53,.24);
+      color: #fff;
+    }
+    .pop-left{display:flex; align-items:center; gap:10px; min-width:0;}
+    .pop-flag{font-size:18px}
+    .pop-name{font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:190px;}
+    .pop-code{font-size:12px; font-weight:900; opacity:.7; text-transform:uppercase;}
+
+    /* Popover placement (bakış yönü tarafında) */
+    .top .popover{ right:14px; top: calc(58px + var(--safe-top)); }
+    .bottom .popover{ right:14px; bottom: 108px; } /* bottom mic below; popover opens above */
 
     /* CHAT */
     .chat-body{
@@ -82,70 +166,110 @@
       overflow-y:auto;
       scrollbar-width:none;
       padding: 6px 0;
+      z-index: 50;
     }
     .chat-body::-webkit-scrollbar{display:none}
 
+    /* Bubble now supports inline speaker for incoming speech */
     .bubble{
       width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
       text-align:center;
       word-break: break-word;
     }
-    .bubble.them{
-      color: rgba(255,255,255,.40);
+    .bubble .txt{
+      display:inline-block;
+      max-width: 92%;
+    }
+    .bubble.them .txt{
+      color: rgba(255,255,255,.42);
       font-size: 16px;
-      font-weight: 400;
+      font-weight: 450;
       line-height:1.25;
     }
-    .bubble.me{
+    .bubble.me .txt{
       color: #fff;
       font-size: 26px;
-      font-weight: 900;
+      font-weight: 950;
       line-height:1.1;
       letter-spacing:.2px;
     }
 
-    /* MIC + SPEAKER row */
-    .speaker-row{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      padding-bottom: 4px;
-    }
-
-    .btn-speak{
-      width:42px;
-      height:42px;
+    /* Inline speaker only for incoming bubble */
+    .bubble .spk{
+      width:34px;
+      height:34px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
-      color: #fff;
-      display:flex;
+      color:#fff;
+      display:none;
       align-items:center;
       justify-content:center;
       cursor:pointer;
-      transition: .18s;
+      flex: 0 0 auto;
     }
-    .btn-speak.muted{opacity:.35; border-color:transparent;}
-    .btn-speak:active{transform:scale(.96);}
+    .bubble.them .spk{display:flex;}
+    .bubble .spk svg{width:16px; height:16px;}
+    .bubble .spk:active{transform:scale(.95);}
+
+    /* MIC (recording feel) */
+    .mic-wrap{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding-bottom: 4px;
+      z-index: 60;
+    }
 
     .btn-mic{
-      width:72px;
-      height:72px;
-      border-radius:22px;
+      width:78px;
+      height:78px;
+      border-radius:26px;
       cursor:pointer;
       display:flex;
       align-items:center;
       justify-content:center;
-      background: radial-gradient(circle at 50% 50%, #2a020f 0%, #12000a 55%, #060006 100%);
+      background: radial-gradient(circle at 50% 50%, #2a020f 0%, #12000a 58%, #060006 100%);
       border: 1px solid rgba(255,255,255,.10);
       box-shadow: 0 14px 30px rgba(0,0,0,.65);
-      transition: transform .18s, border-color .18s;
+      transition: transform .18s, border-color .18s, box-shadow .18s;
+      position:relative;
     }
-    .btn-mic svg{width:32px; height:32px; stroke: var(--icon-bordo); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+    .btn-mic svg{
+      width:34px; height:34px;
+      stroke: var(--mic-accent);
+      fill:none;
+      stroke-width:2;
+      stroke-linecap:round; stroke-linejoin:round;
+    }
+
+    /* ✅ recording animation */
+    @keyframes recPulse{
+      0%,100%{ transform: scale(1); box-shadow: 0 14px 30px rgba(0,0,0,.65); }
+      50%{ transform: scale(1.06); box-shadow: 0 18px 40px rgba(0,0,0,.75); }
+    }
     .btn-mic.listening{
-      transform: scale(1.06);
-      border-color: rgba(139,38,53,.55);
+      border-color: rgba(255,255,255,.18);
+      animation: recPulse 0.9s ease-in-out infinite;
+    }
+    .btn-mic.listening::after{
+      content:"REC";
+      position:absolute;
+      top:-10px;
+      right:-8px;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.6px;
+      padding:6px 8px;
+      border-radius:999px;
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.14);
+      color: #fff;
     }
     .btn-mic:active{transform:scale(1.02);}
 
@@ -155,7 +279,7 @@
       top:50%;
       left:0;
       width:100%;
-      height:64px;
+      height:74px;
       transform: translateY(-50%);
       display:flex;
       align-items:center;
@@ -166,128 +290,62 @@
     .logo-capsule{
       background:#02000a;
       border:1px solid rgba(255,255,255,.10);
-      padding:10px 18px;
+      padding:12px 22px;         /* ✅ biraz büyüdü */
       border-radius:999px;
       display:flex;
       align-items:center;
-      gap:10px;
-      box-shadow: 0 24px 50px rgba(0,0,0,.75);
+      gap:12px;
+      box-shadow: 0 24px 50px rgba(0,0,0,.78);
       pointer-events:auto;
       cursor:pointer;
+      position:relative;
+      overflow:hidden;
     }
-    .logo-text{font-family:"Space Grotesk",sans-serif; font-size:16px; font-weight:700; color:#fff;}
+    .logo-text{
+      font-family:"Space Grotesk",sans-serif;
+      font-size:18px;            /* ✅ bigger */
+      font-weight:800;
+      color:#fff;
+      position:relative;
+      z-index:2;
+    }
     .logo-ai{background:var(--ai-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
 
-    .wave-visual{
+    /* ✅ Wave INSIDE logo, only while listening */
+    .logo-wave{
       position:absolute;
+      inset:0;
       display:flex;
       align-items:center;
+      justify-content:center;
       gap:4px;
       opacity:0;
-      transition:.25s;
+      transition:.2s;
+      z-index:1;
+      pointer-events:none;
     }
-    #frameRoot.listening .wave-visual{opacity:1;}
-    .bar{width:3px; height:10px; border-radius:3px; background: rgba(165,180,252,.42); animation: bounce 0.9s infinite ease-in-out;}
-    .bar:nth-child(2){animation-delay:.15s}
-    .bar:nth-child(3){animation-delay:.28s}
-    .bar:nth-child(4){animation-delay:.15s}
-    .bar:nth-child(5){animation-delay:.0s}
-    @keyframes bounce{0%,100%{height:10px} 50%{height:38px}}
+    #frameRoot.listening .logo-wave{opacity:1;}
+    .logo-wave .bar{
+      width:3px; height:10px;
+      border-radius:3px;
+      background: rgba(165,180,252,.42);
+      animation: bounce 0.9s infinite ease-in-out;
+      filter: blur(.1px);
+    }
+    .logo-wave .bar:nth-child(2){animation-delay:.15s}
+    .logo-wave .bar:nth-child(3){animation-delay:.28s}
+    .logo-wave .bar:nth-child(4){animation-delay:.15s}
+    .logo-wave .bar:nth-child(5){animation-delay:.0s}
+    @keyframes bounce{0%,100%{height:10px} 50%{height:40px}}
 
-    /* ===== Language Sheet (Bottom sheet) ===== */
-    .sheet-overlay{
-      position:fixed;
-      inset:0;
-      background: rgba(0,0,0,.78);
-      backdrop-filter: blur(10px);
-      z-index:1000;
-      display:none;
-      align-items:flex-end;
+    /* tiny helper row for bottom top area */
+    .bottom-top{
+      width:100%;
+      display:flex;
+      align-items:center;
       justify-content:center;
-    }
-    .sheet-overlay.show{display:flex;}
-    .sheet-overlay.fromTop{align-items:flex-start;}
-
-    .sheet-card{
-      width:100%;
-      max-width:480px;
-      background: #0a0a15;
-      border-top: 1px solid rgba(255,255,255,.10);
-      border-radius: 26px 26px 0 0;
-      padding: 16px 16px 18px;
-      max-height: 82vh;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-    }
-    .sheet-overlay.fromTop .sheet-card{
-      border-radius: 0 0 26px 26px;
-      border-top:none;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-    }
-
-    .sheet-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .sheet-title{margin:0; font-size:16px; font-weight:900; letter-spacing:.2px;}
-    .sheet-close{
-      border:none; background:transparent; color:#fff; font-size:22px; cursor:pointer; opacity:.9;
-    }
-    .sheet-close:active{transform:scale(.96)}
-
-    .sheet-search{
-      width:100%;
-      margin-top:12px;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.28);
-      color:#fff;
-      font-size:13px;
-      font-weight:600;
-    }
-
-    .sheet-list{
-      flex:1;
-      overflow:auto;
-      margin-top:12px;
-      padding-right:2px;
-    }
-    .sheetRow{
-      padding:12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid rgba(255,255,255,.05);
-      cursor:pointer;
-      border-radius:14px;
-    }
-    .sheetRow:hover{background: rgba(255,255,255,.04);}
-    .sheetRow.selected{background: rgba(139,38,53,.10); border:1px solid rgba(139,38,53,.22);}
-
-    .sheetRow .left{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-    .sheetRow .flag{font-size:18px}
-    .sheetRow .name{
-      font-weight:800;
-      font-size:13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 240px;
-    }
-    .sheetRow .code{
-      font-size:12px;
-      opacity:.65;
-      font-weight:800;
-      text-transform:uppercase;
+      padding-top: 6px;
+      z-index: 80;
     }
   </style>
 </head>
@@ -296,22 +354,39 @@
   <div class="container">
 
     <!-- TOP (Other person) -->
-    <div class="half-screen top">
-      <button class="lang-pill" id="topLangBtn">
-        <span id="topLangTxt">🌐 English</span>
+    <div class="half-screen top" id="topSection">
+
+      <!-- ✅ back arrow on burgundy side -->
+      <button class="top-back" id="topBack" title="Başa dön">
+        <!-- simple arrow icon -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
       </button>
+
+      <!-- ✅ in-page lang trigger (opens popover) -->
+      <button class="lang-trigger" id="topLangBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
+        </svg>
+        <span id="topLangTxt">EN</span>
+      </button>
+
+      <!-- ✅ popover -->
+      <div class="popover" id="pop-top">
+        <div class="pop-head">
+          <div class="pop-title">ÜST DİL</div>
+        </div>
+        <div style="padding:0 12px 12px;">
+          <input class="pop-search" id="search-top" type="text" placeholder="Dil ara...">
+        </div>
+        <div class="pop-list" id="list-top"></div>
+      </div>
 
       <div class="chat-body" id="topBody"></div>
 
-      <div class="speaker-row">
-        <button class="btn-speak" id="topSpeak" title="Ses (Mute)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
-        </button>
-
+      <!-- TOP mic stays near bottom of that panel -->
+      <div class="mic-wrap">
         <button class="btn-mic" id="topMic" title="Mikrofon">
           <svg viewBox="0 0 24 24">
             <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
@@ -324,18 +399,41 @@
 
     <!-- CENTER HUB -->
     <div class="center-hub">
-      <div class="wave-visual" aria-hidden="true">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      </div>
-
-      <div class="logo-capsule" id="backBtn" title="Geri">
-        <span class="logo-text">← italky<span class="logo-ai">AI</span></span>
+      <div class="logo-capsule" id="homeBtn" title="Ana sayfa">
+        <div class="logo-wave" aria-hidden="true">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+        <span class="logo-text">italky<span class="logo-ai">AI</span></span>
       </div>
     </div>
 
     <!-- BOTTOM (You) -->
-    <div class="half-screen bottom">
-      <div class="speaker-row">
+    <div class="half-screen bottom" id="botSection">
+
+      <!-- ✅ language trigger moved to upper area (mic used to be) -->
+      <div class="bottom-top">
+        <button class="lang-trigger" id="botLangBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
+          </svg>
+          <span id="botLangTxt">TR</span>
+        </button>
+      </div>
+
+      <div class="popover" id="pop-bot">
+        <div class="pop-head">
+          <div class="pop-title">ALT DİL</div>
+        </div>
+        <div style="padding:0 12px 12px;">
+          <input class="pop-search" id="search-bot" type="text" placeholder="Dil ara...">
+        </div>
+        <div class="pop-list" id="list-bot"></div>
+      </div>
+
+      <div class="chat-body" id="botBody"></div>
+
+      <!-- ✅ bottom mic goes DOWN -->
+      <div class="mic-wrap">
         <button class="btn-mic" id="botMic" title="Mikrofon">
           <svg viewBox="0 0 24 24">
             <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
@@ -343,35 +441,9 @@
             <path d="M12 19v3"/>
           </svg>
         </button>
-
-        <button class="btn-speak" id="botSpeak" title="Ses (Mute)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
-        </button>
       </div>
-
-      <div class="chat-body" id="botBody"></div>
-
-      <button class="lang-pill" id="botLangBtn">
-        <span id="botLangTxt">🌐 Türkçe</span>
-      </button>
     </div>
-  </div>
 
-  <!-- Language Sheet -->
-  <div class="sheet-overlay" id="langSheet">
-    <div class="sheet-card">
-      <div class="sheet-head">
-        <h3 class="sheet-title" id="sheetTitle">Dil Seçin</h3>
-        <button class="sheet-close" id="sheetClose" aria-label="Kapat">✕</button>
-      </div>
-
-      <input class="sheet-search" type="text" id="sheetQuery" placeholder="Dil ara (English, Türkçe, de, fr…)">
-      <div class="sheet-list" id="sheetList"></div>
-    </div>
   </div>
 
   <script type="module" src="/js/facetoface_page.js"></script>
