@@ -1,3 +1,4 @@
+<!-- FILE: pages/facetoface.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -73,6 +74,27 @@
       user-select:none;
     }
     .top-back:active{transform:scale(.96);}
+
+    /* ✅ CHAT CLEAR */
+    .top-clear{
+      position:absolute;
+      left:58px;
+      top: calc(14px + var(--safe-top));
+      z-index: 120;
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      font-size:16px;
+    }
+    .top-clear:active{transform:scale(.96);}
 
     /* centered lang trigger row */
     .top-top, .bottom-top{
@@ -199,7 +221,7 @@
       line-height:1.25;
     }
 
-    /* ✅ DEĞİŞTİ: Çeviri balonu artık normalde küçük/ince */
+    /* Translation default small (older translations) */
     .bubble.me .txt{
       color: rgba(255,255,255,.78);
       font-size: 16px;
@@ -207,8 +229,7 @@
       line-height:1.2;
       letter-spacing:.1px;
     }
-
-    /* ✅ En son çeviri (patlayan) */
+    /* Latest translation big/bold */
     .bubble.me.is-latest .txt{
       color:#fff;
       font-size:26px;
@@ -367,6 +388,8 @@
           <path d="M15 18l-6-6 6-6"/>
         </svg>
       </button>
+
+      <button class="top-clear" id="clearChat" title="Sohbeti temizle">🧹</button>
 
       <div class="top-top">
         <button class="lang-trigger" id="topLangBtn">
