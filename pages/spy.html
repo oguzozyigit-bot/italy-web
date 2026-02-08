@@ -78,8 +78,6 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 .lang-btn.active{background:var(--radar);color:#000}
 .main-btn{width:100%;padding:16px;border:none;border-radius:14px;background:var(--radar);
   color:#000;font-weight:900;margin-top:15px;cursor:pointer}
-.secondary-btn{width:100%;padding:14px;border:1px solid var(--radar);border-radius:14px;background:transparent;
-  color:var(--radar);font-weight:900;margin-top:10px;cursor:pointer}
 .exit-btn { background: #1a1a1a !important; color: #ff3300 !important; border: 1px solid #ff3300 !important; }
 
 .hidden{display:none!important}
@@ -130,7 +128,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
 <div class="modal" id="startModal">
   <div class="card">
     <h2 style="color:var(--radar);font-family:'Share Tech Mono';margin:0">INCOMING SIGNAL</h2>
-    <p style="opacity:.7;font-size:13px;margin:10px 0">2 Doğru = +1 Can 🛠️ (Max 3 Can)<br>Sinyali dinle ve doğru çeviriyi seç.</p>
+    <p style="opacity:.7;font-size:13px;margin:10px 0">2 Doğru = +1 Can 🛠️ (Max 3 Can)<br>Sinyali dinle ve deşifre et.</p>
     <div class="lang-grid">
       <button class="lang-btn active" data-lang="en">EN</button>
       <button class="lang-btn" data-lang="de">DE</button>
@@ -147,8 +145,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);f
     <h2 id="endTitle" style="color:var(--radar);font-family:'Share Tech Mono';margin:0">SIGNAL COMPLETE</h2>
     <p id="endStats" style="margin:16px 0; font-size:15px; line-height:1.6"></p>
     <button class="main-btn" id="continueBtn">DEŞİFREYE DEVAM (RİSK)</button>
-    <button class="main-btn" id="bankBtn" style="background:var(--gold)">YEDEKLE (%5 BONUS + TAMİR)</button>
-    <button class="main-btn exit-btn" id="exitBtn">OPERASYONU DURDUR (ÇIKIŞ)</button>
+    <button class="main-btn exit-btn" id="exitBtn">ÇIKIŞ</button>
   </div>
 </div>
 
@@ -157,67 +154,6 @@ import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
 const $ = id => document.getElementById(id);
 
-/* =========================
-   GAMEKIT (minimal, no structure change)
-   - daily 25 tokens (FREE)
-   - spend 1 token on ENTER
-   - spend 1 token on CONTINUE (after end)
-   ========================= */
-const DAILY_FREE_TOKENS = 25;
-
-function termsKey(email=""){ return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`; }
-function getUser(){ try{ return JSON.parse(localStorage.getItem("italky_user_v1")||"{}"); }catch{ return {}; } }
-function isPro(u){
-  const p = String(u?.plan||"").toUpperCase().trim();
-  return p==="PRO" || p==="PREMIUM" || p==="PLUS";
-}
-function isoDateLocal(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-}
-function uid(u){ return String(u.user_id||u.id||u.email||"guest").toLowerCase().trim(); }
-function tokenKey(u){ return `italky_game_tokens::${uid(u)}::${isoDateLocal()}`; }
-function tokenInitKey(u){ return `italky_game_tokens_init::${uid(u)}::${isoDateLocal()}`; }
-
-function ensureDailyTokens(){
-  const u=getUser();
-  if(!u?.email) return false;
-  if(!localStorage.getItem(termsKey(u.email))) return false;
-  if(isPro(u)) return true;
-  if(localStorage.getItem(tokenInitKey(u))) return true;
-  localStorage.setItem(tokenKey(u), String(DAILY_FREE_TOKENS));
-  localStorage.setItem(tokenInitKey(u), "1");
-  return true;
-}
-function getTokens(){
-  const u=getUser();
-  if(isPro(u)) return 9999;
-  const v = Number(localStorage.getItem(tokenKey(u))||"0");
-  return Number.isFinite(v) ? Math.max(0,v) : 0;
-}
-function spendToken(){
-  const u=getUser();
-  if(isPro(u)) return true;
-  const t=getTokens();
-  if(t<=0) return false;
-  localStorage.setItem(tokenKey(u), String(t-1));
-  return true;
-}
-function addToken(){
-  const u=getUser();
-  if(isPro(u)) return;
-  localStorage.setItem(tokenKey(u), String(getTokens()+1));
-}
-
-/* ===== normalize fix for correct detection ===== */
-const norm = (s)=>
-  String(s||"").trim().toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/\s+/g," ");
-
-/* =========================
-   YOUR GAME LOGIC (kept)
-   ========================= */
 let lang = "en";
 let muted = false, totalScore = 0, setScore = 0, momentum = 1.0, lives = 3, combo = 0;
 let currentItem = null, cooldown = false;
@@ -227,6 +163,48 @@ let speaking = false;
 let lastUtter = null;
 
 const LANGMAP = {en:"en-US", de:"de-DE", fr:"fr-FR", es:"es-ES", it:"it-IT"};
+
+/* ===== ONLY FIX: correct detection (no structure change) ===== */
+const norm = (s)=>
+  String(s||"").trim().toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ");
+
+/* ===== GAMEKIT MIN (only gating) ===== */
+const DAILY_FREE_TOKENS = 25;
+function isoDateLocal(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function getUser(){ try{ return JSON.parse(localStorage.getItem("italky_user_v1")||"{}"); }catch{ return {}; } }
+function isPro(u){
+  const p = String(u?.plan||"").toUpperCase().trim();
+  return p==="PRO" || p==="PREMIUM" || p==="PLUS";
+}
+function uid(u){ return String(u.user_id||u.id||u.email||"guest").toLowerCase().trim(); }
+function tokenKey(u){ return `italky_game_tokens::${uid(u)}::${isoDateLocal()}`; }
+function tokenInitKey(u){ return `italky_game_tokens_init::${uid(u)}::${isoDateLocal()}`; }
+function ensureDailyTokens(){
+  const u=getUser();
+  if(isPro(u)) return;
+  if(localStorage.getItem(tokenInitKey(u))) return;
+  localStorage.setItem(tokenKey(u), String(DAILY_FREE_TOKENS));
+  localStorage.setItem(tokenInitKey(u), "1");
+}
+function getTokens(){
+  const u=getUser();
+  if(isPro(u)) return 9999;
+  const v = Number(localStorage.getItem(tokenKey(u))||"0");
+  return Number.isFinite(v)?Math.max(0,v):0;
+}
+function spendToken(){
+  const u=getUser();
+  if(isPro(u)) return true;
+  const t=getTokens();
+  if(t<=0) return false;
+  localStorage.setItem(tokenKey(u), String(t-1));
+  return true;
+}
 
 function updatePB() {
   const pb = parseInt(localStorage.getItem(`audio_spy_pb_${lang}`) || "0", 10);
@@ -268,36 +246,20 @@ $("soundBtn").onclick = () => {
   if(muted) stopSpeak();
 };
 
-function warmUpTTS(){
-  try{
-    if(!("speechSynthesis" in window)) return;
-    speechSynthesis.cancel();
-    speechSynthesis.getVoices();
-    const u = new SpeechSynthesisUtterance(" ");
-    u.volume = 0;
-    u.lang = LANGMAP[lang] || "en-US";
-    speechSynthesis.speak(u);
-    setTimeout(()=>{ try{ speechSynthesis.cancel(); }catch{} }, 120);
-  }catch{}
-}
-
 $("startBtn").onclick = async () => {
-  // ✅ GameKit enter gate (spend on enter)
-  const u = getUser();
-  if(!ensureDailyTokens()){
-    location.href = "/index.html";
-    return;
-  }
+  ensureDailyTokens();
+  const u=getUser();
   if(!isPro(u) && !spendToken()){
     alert("Hakkın bitti. Hak kazan veya PRO’ya geç.");
-    location.href = "/pages/game.html";
+    location.href="/pages/game.html";
     return;
   }
 
-  warmUpTTS();
   $("startModal").classList.add("hidden");
   $("gameArea").style.display = "flex";
-  if(!runActive) { totalScore = 0; lives = 3; momentum = 1.0; combo = 0; runActive = true; }
+  if(!runActive) {
+    totalScore = 0; lives = 3; momentum = 1.0; combo = 0; runActive = true;
+  }
   await initSet();
 };
 
@@ -308,19 +270,7 @@ async function initSet(isBank = false) {
   stopSpeak();
   setListenLabel("idle");
 
-  const dataRaw = await loadLangPool(lang);
-  const data = (dataRaw||[]).filter(x=>{
-    const tr = String(x?.tr||"").trim();
-    const say = String(x?.sentence || x?.w || "").trim();
-    return tr.length >= 1 && say.length >= 1;
-  });
-
-  if(data.length < 10){
-    alert("Dil havuzu yüklenemedi.");
-    location.href="/pages/game.html";
-    return;
-  }
-
+  const data = await loadLangPool(lang);
   const USED_KEY = `used_audio_spy_v2_${lang}`;
   const { used, save } = createUsedSet(USED_KEY);
 
@@ -332,7 +282,7 @@ async function initSet(isBank = false) {
   }
 
   poolItems = picked || [];
-  try { save(poolItems.map(x => x.sentence || x.w || x.tr || "")); } catch(e){}
+  try { save(poolItems.map(x => x.sentence || x.w)); } catch(e){}
 
   updateUI();
   nextSignal();
@@ -346,41 +296,21 @@ function nextSignal() {
 
   const w = poolItems[setCounter];
   currentItem = {
-    say: String(w?.sentence || `Listen: ${w?.w || "signal"}.`),
-    ans: String(w?.tr || "")
+    say: (w?.sentence || `Listen: ${w?.w || "signal"}.`),
+    ans: w?.tr || "",
+    w: w?.w || ""
   };
 
-  // ✅ safety: skip blank answers
-  if(!currentItem.ans.trim() || !currentItem.say.trim()){
-    setCounter++;
-    nextSignal();
-    return;
-  }
-
-  const ok = buildOptions(currentItem.ans);
-  if(!ok){
-    setCounter++;
-    nextSignal();
-    return;
-  }
-
+  buildOptions(currentItem.ans);
   setTimeout(() => playSignal(), 500);
 }
 
 function buildOptions(correct) {
-  const correctClean = String(correct||"").trim();
-  if(!correctClean) return false;
-
-  const opts = [correctClean];
-
-  let tries = 0;
-  while(opts.length < 4 && tries < 120) {
-    tries++;
-    const r = String(poolItems[Math.floor(Math.random() * poolItems.length)]?.tr || "").trim();
+  const opts = [correct];
+  while(opts.length < 4) {
+    const r = poolItems[Math.floor(Math.random() * poolItems.length)]?.tr;
     if(r && !opts.some(x=>norm(x)===norm(r))) opts.push(r);
   }
-  if(opts.length < 4) return false;
-
   opts.sort(() => Math.random() - 0.5);
 
   const area = $("optionsArea");
@@ -392,7 +322,6 @@ function buildOptions(correct) {
     d.onclick = () => handleChoice(d, v);
     area.appendChild(d);
   });
-  return true;
 }
 
 function lockOptions(lock=true){
@@ -426,10 +355,9 @@ function handleChoice(el, val) {
     momentum = Math.min(1.6, momentum + 0.05);
     combo++;
 
-    // 2 correct => +1 life (max 3)
     if(combo > 0 && combo % 2 === 0) {
-      if(lives < 3) { lives++; toast("SİNYAL TAMİR EDİLDİ! ❤️+1", "var(--ok)"); }
-      else { toast("FLOW STABİL! ⚡", "var(--radar)"); }
+      if(lives < 3) { lives++; toast("TAMİR EDİLDİ ❤️+1", "var(--ok)"); }
+      else { toast("FLOW STABİL ⚡", "var(--radar)"); }
     }
 
     $("wave").classList.add("playing");
@@ -455,7 +383,6 @@ function handleChoice(el, val) {
       (lives > 0) ? nextSignal() : finishSet(true);
     });
   }
-
   updateUI();
 }
 
@@ -475,7 +402,6 @@ function updateUI() {
 function finishSet(died) {
   stopSpeak();
   setListenLabel("idle");
-
   const pb = parseInt(localStorage.getItem(`audio_spy_pb_${lang}`) || "0", 10);
   if(totalScore > pb) localStorage.setItem(`audio_spy_pb_${lang}`, totalScore);
 
@@ -486,41 +412,25 @@ function finishSet(died) {
 
   if(died) {
     $("continueBtn").classList.add("hidden");
-    $("bankBtn").classList.add("hidden");
     runActive = false;
   } else {
     $("continueBtn").classList.remove("hidden");
-    $("bankBtn").classList.remove("hidden");
   }
   updatePB();
 }
 
-/* ✅ continue uses token if FREE */
 $("continueBtn").onclick = () => {
-  const u=getUser();
   ensureDailyTokens();
-
-  if(!isPro(u)){
-    if(!spendToken()){
-      alert("Hakkın bitti. Hak kazan veya PRO’ya geç.");
-      location.href="/pages/game.html";
-      return;
-    }
+  const u=getUser();
+  if(!isPro(u) && !spendToken()){
+    alert("Hakkın bitti. Hak kazan veya PRO’ya geç.");
+    location.href="/pages/game.html";
+    return;
   }
-
   $("endModal").classList.add("hidden");
   initSet(false);
 };
 
-/* ✅ bank keeps your flow, adds bonus; does NOT spend token now (token is spent on continue/enter) */
-$("bankBtn").onclick = () => {
-  const bonus = Math.round(setScore * 0.05);
-  totalScore += bonus;
-  $("endModal").classList.add("hidden");
-  initSet(true);
-};
-
-/* ✅ exit: no “başkanım” */
 $("exitBtn").onclick = () => {
   if(confirm("Operasyonu durdurup üsse dönmek istiyor musunuz?")) {
     location.href = '/pages/game.html';
