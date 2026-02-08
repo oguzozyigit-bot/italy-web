@@ -4,7 +4,6 @@ import { BASE_DOMAIN } from "/js/config.js";
 const $ = (id)=>document.getElementById(id);
 function base(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
 
-/* ✅ Dil listesi + bayrak + TTS locale */
 const LANGS = [
   { code:"tr", name:"Türkçe", flag:"🇹🇷", bcp:"tr-TR" },
   { code:"en", name:"İngilizce", flag:"🇬🇧", bcp:"en-US" },
@@ -14,13 +13,11 @@ const LANGS = [
   { code:"es", name:"İspanyolca", flag:"🇪🇸", bcp:"es-ES" },
   { code:"pt", name:"Portekizce", flag:"🇵🇹", bcp:"pt-PT" },
   { code:"pt-br", name:"Portekizce (Brezilya)", flag:"🇧🇷", bcp:"pt-BR" },
-
   { code:"nl", name:"Felemenkçe", flag:"🇳🇱", bcp:"nl-NL" },
   { code:"sv", name:"İsveççe", flag:"🇸🇪", bcp:"sv-SE" },
   { code:"no", name:"Norveççe", flag:"🇳🇴", bcp:"nb-NO" },
   { code:"da", name:"Danca", flag:"🇩🇰", bcp:"da-DK" },
   { code:"fi", name:"Fince", flag:"🇫🇮", bcp:"fi-FI" },
-
   { code:"pl", name:"Lehçe", flag:"🇵🇱", bcp:"pl-PL" },
   { code:"cs", name:"Çekçe", flag:"🇨🇿", bcp:"cs-CZ" },
   { code:"sk", name:"Slovakça", flag:"🇸🇰", bcp:"sk-SK" },
@@ -28,14 +25,12 @@ const LANGS = [
   { code:"ro", name:"Romence", flag:"🇷🇴", bcp:"ro-RO" },
   { code:"bg", name:"Bulgarca", flag:"🇧🇬", bcp:"bg-BG" },
   { code:"el", name:"Yunanca", flag:"🇬🇷", bcp:"el-GR" },
-
   { code:"ru", name:"Rusça", flag:"🇷🇺", bcp:"ru-RU" },
   { code:"uk", name:"Ukraynaca", flag:"🇺🇦", bcp:"uk-UA" },
   { code:"sr", name:"Sırpça", flag:"🇷🇸", bcp:"sr-RS" },
   { code:"hr", name:"Hırvatça", flag:"🇭🇷", bcp:"hr-HR" },
   { code:"bs", name:"Boşnakça", flag:"🇧🇦", bcp:"bs-BA" },
   { code:"sq", name:"Arnavutça", flag:"🇦🇱", bcp:"sq-AL" },
-
   { code:"ar", name:"Arapça", flag:"🇸🇦", bcp:"ar-SA" },
   { code:"fa", name:"Farsça", flag:"🇮🇷", bcp:"fa-IR" },
   { code:"ur", name:"Urduca", flag:"🇵🇰", bcp:"ur-PK" },
@@ -43,12 +38,10 @@ const LANGS = [
   { code:"bn", name:"Bengalce", flag:"🇧🇩", bcp:"bn-BD" },
   { code:"ta", name:"Tamilce", flag:"🇮🇳", bcp:"ta-IN" },
   { code:"te", name:"Teluguca", flag:"🇮🇳", bcp:"te-IN" },
-
   { code:"th", name:"Tayca", flag:"🇹🇭", bcp:"th-TH" },
   { code:"vi", name:"Vietnamca", flag:"🇻🇳", bcp:"vi-VN" },
   { code:"id", name:"Endonezce", flag:"🇮🇩", bcp:"id-ID" },
   { code:"ms", name:"Malayca", flag:"🇲🇾", bcp:"ms-MY" },
-
   { code:"zh", name:"Çince", flag:"🇨🇳", bcp:"zh-CN" },
   { code:"zh-tw", name:"Çince (Geleneksel)", flag:"🇹🇼", bcp:"zh-TW" },
   { code:"ja", name:"Japonca", flag:"🇯🇵", bcp:"ja-JP" },
@@ -59,16 +52,12 @@ const LANGS = [
 let topLang = "en";
 let botLang = "tr";
 
-function langName(code){ return LANGS.find(x=>x.code===code)?.name || code; }
-function langFlag(code){ return LANGS.find(x=>x.code===code)?.flag || "🌐"; }
 function bcp(code){ return LANGS.find(x=>x.code===code)?.bcp || "en-US"; }
 
-/* ===== TTS ===== */
 function speak(text, langCode){
   const t = String(text||"").trim();
   if(!t) return;
   if(!("speechSynthesis" in window)) return;
-
   try{
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
@@ -77,7 +66,9 @@ function speak(text, langCode){
   }catch{}
 }
 
-/* ===== bubbles (with inline speaker for incoming speech) ===== */
+/* ===== bubbles =====
+   ✅ Hoparlör SADECE çeviri (me) bubble’ında.
+*/
 function addBubble(side, kind, text, langForSpeak){
   const wrap = (side === "top") ? $("topBody") : $("botBody");
   if(!wrap) return;
@@ -88,11 +79,9 @@ function addBubble(side, kind, text, langForSpeak){
   const txt = document.createElement("span");
   txt.className = "txt";
   txt.textContent = String(text||"").trim() || "—";
-
   row.appendChild(txt);
 
-  // ✅ hoparlör sadece "them" (gelen konuşma) yanında
-  if(kind === "them"){
+  if(kind === "me"){
     const spk = document.createElement("button");
     spk.className = "spk";
     spk.type = "button";
@@ -147,15 +136,15 @@ function renderPop(side){
   list.querySelectorAll(".pop-item").forEach(item=>{
     item.addEventListener("click", ()=>{
       const code = item.getAttribute("data-code") || "en";
+
       if(side === "top"){
         topLang = code;
-        const t = $("topLangTxt");
-        if(t) t.textContent = `${topLang.toUpperCase()}`;
+        if($("topLangTxt")) $("topLangTxt").textContent = topLang.toUpperCase();
       }else{
         botLang = code;
-        const t = $("botLangTxt");
-        if(t) t.textContent = `${botLang.toUpperCase()}`;
+        if($("botLangTxt")) $("botLangTxt").textContent = botLang.toUpperCase();
       }
+
       stopAll();
       closeAllPop();
     });
@@ -163,7 +152,8 @@ function renderPop(side){
 }
 
 function applySearch(side){
-  const q = String($(side === "top" ? "search-top" : "search-bot")?.value || "").toLowerCase().trim();
+  const inp = $(side === "top" ? "search-top" : "search-bot");
+  const q = String(inp?.value || "").toLowerCase().trim();
   const list = $(side === "top" ? "list-top" : "list-bot");
   if(!list) return;
 
@@ -243,7 +233,6 @@ function buildRecognizer(langCode){
 }
 
 async function start(which){
-  // Mikrofon HTTPS ister (localhost hariç)
   if(location.protocol !== "https:" && location.hostname !== "localhost"){
     alert("Mikrofon için HTTPS gerekli. (Vercel/HTTPS kullan)");
     return;
@@ -274,16 +263,16 @@ async function start(which){
     const finalText = String(t||"").trim();
     if(!finalText) return;
 
-    // ✅ gelen konuşma (them) + yanında hoparlör
+    // konuşulan metin (them) — hoparlör YOK
     addBubble(which, "them", finalText, src);
 
-    // ✅ çeviriyi diğer tarafa yaz (me)
+    // çeviri diğer tarafa (me) — hoparlör VAR
     const other = (which === "top") ? "bot" : "top";
     try{
       const translated = await translateViaApi(finalText, src, dst);
       addBubble(other, "me", translated, dst);
 
-      // otomatik ses: çeviri hangi tarafa yazıldıysa o tarafın dilinde okur
+      // otomatik ses: çeviriyi hedef dilde okut
       speak(translated, dst);
     }catch{}
   };
@@ -310,17 +299,15 @@ async function start(which){
 
 /* ===== Buttons ===== */
 function bindNav(){
-  // ✅ Logo: home
   $("homeBtn")?.addEventListener("click", ()=>{
     location.href = "/pages/home.html";
   });
 
-  // ✅ burgundy-side arrow: back/start
   $("topBack")?.addEventListener("click", ()=>{
     stopAll();
     closeAllPop();
     if(history.length > 1) history.back();
-    else location.href = "/pages/home.html";
+    else location.href="/pages/home.html";
   });
 }
 
@@ -345,21 +332,17 @@ function bindMicButtons(){
   });
 }
 
-// click outside closes popover (no page overlay)
 function bindOutsideClose(){
   document.addEventListener("click", (e)=>{
     const t = e.target;
-
     const inTop = $("pop-top")?.contains(t) || $("topLangBtn")?.contains(t);
     const inBot = $("pop-bot")?.contains(t) || $("botLangBtn")?.contains(t);
-
     if(inTop || inBot) return;
     closeAllPop();
   }, { capture:true });
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  // initial labels
   if($("topLangTxt")) $("topLangTxt").textContent = topLang.toUpperCase();
   if($("botLangTxt")) $("botLangTxt").textContent = botLang.toUpperCase();
 
