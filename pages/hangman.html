@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>italkyAI • HANGMAN 3D</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -34,7 +34,7 @@
 
     .section-label { font-size: 11px; font-weight: 800; color: var(--neon-purple); margin: 15px 0 8px; text-transform: uppercase; }
     .neon-input { width: 100%; padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid #333; color: #fff; font-weight: 600; margin-bottom: 10px; }
-    
+
     .grid-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .grid-select-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .opt-card { padding: 12px 5px; border-radius: 12px; border: 1px solid #333; background: rgba(255,255,255,0.03); text-align: center; cursor: pointer; transition: 0.2s; }
@@ -73,7 +73,7 @@
 
     .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.98); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
     .modal.active { display: flex; }
-    
+
     #canvas { position: absolute; top:0; left:0; pointer-events:none; z-index:4000; }
   </style>
 </head>
@@ -83,7 +83,7 @@
     <canvas id="canvas"></canvas>
     <div class="setup-overlay" id="setup">
       <div class="game-title-3d">HANGMAN</div>
-      
+
       <div class="section-label">OYUNCULAR 👤</div>
       <div id="pInputs"><input type="text" class="neon-input p-in" placeholder="1. Oyuncu Adı"></div>
       <button onclick="addInput()" style="background:none; border:1px dashed #555; color:#aaa; padding:12px; border-radius:12px; width:100%; cursor:pointer; font-weight: 700;">+ YENİ OYUNCU EKLE</button>
@@ -148,9 +148,9 @@
       <h2 id="mWord" style="color:var(--neon-blue); font-size:36px; margin:10px 0;">APPLE</h2>
       <p id="mTr" style="opacity:0.7; font-size:18px;">(Elma)</p>
       <div id="mDesc" style="margin:10px 0; font-weight:800; color:var(--neon-green);"></div>
-      
+
       <div id="mScoreTable" style="width:100%; background:rgba(255,255,255,0.05); border-radius:15px; padding:15px; margin:15px 0;"></div>
-      
+
       <div id="nextPlayerNotice" style="font-weight:900; color:var(--neon-purple); margin-bottom:10px;"></div>
       <button class="big-btn" id="modalBtn" onclick="modalNext()">DEVAM ET</button>
     </div>
@@ -159,8 +159,40 @@
   <script type="module">
     import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
-    let players = [], curIdx = 0, pool, used, lang = 'en', maxM = 8;
+    let players = [], curIdx = 0, pool, usedPack, lang = 'en', maxM = 8;
     let target, guessed = [], mistakes = 0, keysP = 0, totalJokers = 3;
+
+    /* ===== Daily token gate (FREE 25) — MULTI PLAYER SPEND ===== */
+    const DAILY_FREE_TOKENS = 25;
+    function isoDateLocal(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+    function getUser(){ try{ return JSON.parse(localStorage.getItem("italky_user_v1")||"{}"); }catch{ return {}; } }
+    function isPro(u){ const p=String(u?.plan||"").toUpperCase().trim(); return p==="PRO"||p==="PREMIUM"||p==="PLUS"; }
+    function uid(u){ return String(u.user_id||u.id||u.email||"guest").toLowerCase().trim(); }
+    function tokenKey(u){ return `italky_game_tokens::${uid(u)}::${isoDateLocal()}`; }
+    function tokenInitKey(u){ return `italky_game_tokens_init::${uid(u)}::${isoDateLocal()}`; }
+    function ensureDailyTokens(){
+      const u=getUser();
+      if(isPro(u)) return;
+      if(localStorage.getItem(tokenInitKey(u))) return;
+      localStorage.setItem(tokenKey(u), String(DAILY_FREE_TOKENS));
+      localStorage.setItem(tokenInitKey(u), "1");
+    }
+    function getTokens(){
+      const u=getUser();
+      if(isPro(u)) return 9999;
+      const v = Number(localStorage.getItem(tokenKey(u))||"0");
+      return Number.isFinite(v)?Math.max(0,v):0;
+    }
+    function spendMany(n){
+      const u=getUser();
+      if(isPro(u)) return true;
+      const need = Math.max(1, Math.floor(n||1));
+      const t = getTokens();
+      if(t < need) return false;
+      localStorage.setItem(tokenKey(u), String(t - need));
+      return true;
+    }
+    /* ===== end token gate ===== */
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(freq, type, dur) {
@@ -195,19 +227,64 @@
       document.getElementById('pInputs').appendChild(i);
     };
 
+    function poolItemsOf(p){
+      if(Array.isArray(p)) return p;
+      if(Array.isArray(p?.items)) return p.items;
+      return [];
+    }
+
     window.initGame = async () => {
+      /* ✅ oyuncuları oku (önce sayıyı netleştir) */
+      players = [];
       const ins = document.querySelectorAll('.p-in');
       ins.forEach(i => { if(i.value.trim()) players.push({ n: i.value.trim(), s: 0, r: 5 }); });
       if(!players.length) return alert("İsim yaz!");
+
+      /* ✅ OYUNCU SAYISI KADAR HAK DÜŞ */
+      ensureDailyTokens();
+      const u = getUser();
+      const need = players.length; // 4 oyuncu => 4 hak
+      if(!isPro(u) && !spendMany(need)){
+        alert(`Bu maç için ${need} hak gerekir. Hakkın yetmiyor.`);
+        location.href="/pages/game.html";
+        return;
+      }
+
       pool = await loadLangPool(lang);
-      used = createUsedSet(`used_${lang}`).used;
+      const items = poolItemsOf(pool);
+      if(!items.length) return alert("Havuz boş!");
+
+      const USED_KEY = `used_hangman3d_v1_${lang}`;
+      usedPack = createUsedSet(USED_KEY);
+
       document.getElementById('setup').style.display = 'none';
       startTurn();
     };
 
     function startTurn() {
       guessed = []; mistakes = 0; keysP = 0;
-      target = pick(pool, 1, used, null, (x)=>x.w.length >= 5)[0];
+
+      const picked = pick({ items: poolItemsOf(pool) }, 1, usedPack.used, usedPack.save, (x)=>{
+        const w = String(x.w||"").trim();
+        const tr = String(x.tr||"").trim();
+        return w.length >= 5 && tr.length >= 1 && !w.includes(" ");
+      });
+
+      target = picked?.[0];
+
+      if(!target){
+        localStorage.removeItem(`used_hangman3d_v1_${lang}`);
+        usedPack = createUsedSet(`used_hangman3d_v1_${lang}`);
+        const picked2 = pick({ items: poolItemsOf(pool) }, 1, usedPack.used, usedPack.save, (x)=>{
+          const w = String(x.w||"").trim();
+          const tr = String(x.tr||"").trim();
+          return w.length >= 5 && tr.length >= 1 && !w.includes(" ");
+        });
+        target = picked2?.[0];
+      }
+
+      if(!target) return alert("Havuzda uygun kelime yok.");
+
       updateUI(); renderKB();
     }
 
@@ -216,30 +293,30 @@
       document.getElementById('curPName').innerText = p.n.toUpperCase();
       document.getElementById('remR').innerText = `${p.r}/5`;
       document.getElementById('curS').innerText = p.s;
-      document.getElementById('trHint').innerText = target.tr;
-      document.getElementById('wordGrid').innerHTML = target.w.split('').map(l => 
+      document.getElementById('trHint').innerText = String(target.tr||"");
+      document.getElementById('wordGrid').innerHTML = String(target.w||"").split('').map(l =>
         `<div class="slot">${guessed.includes(l.toUpperCase())?l.toUpperCase():''}</div>`).join('');
-      document.querySelectorAll('.p').forEach((p,i)=>p.classList.toggle('show', i < mistakes));
+      document.querySelectorAll('.p').forEach((pp,i)=>pp.classList.toggle('show', i < mistakes));
       for(let i=0; i<3; i++) document.getElementById(`j${i}`).className = i < totalJokers ? 'j-btn' : 'j-btn used';
     }
 
     function renderKB() {
       const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZÜĞŞİÖÇ".split('');
-      const wordChars = [...new Set(target.w.toUpperCase().split(''))];
+      const wordChars = [...new Set(String(target.w||"").toUpperCase().split(''))];
       let keys = [...wordChars];
       const others = abc.filter(l => !keys.includes(l));
       for(let i=0; i<10; i++) keys.push(others.splice(Math.floor(Math.random()*others.length), 1)[0]);
-      document.getElementById('kb').innerHTML = keys.sort((a,b)=>a.localeCompare(b)).map(l => 
+      document.getElementById('kb').innerHTML = keys.sort((a,b)=>a.localeCompare(b)).map(l =>
         `<button class="key" id="key-${l}" onclick="makeG('${l}', this)">${l}</button>`).join('');
     }
 
     window.makeG = (l, btn) => {
       if(guessed.includes(l) || mistakes >= maxM) return;
       keysP++;
-      if(target.w.toUpperCase().includes(l)) {
+      if(String(target.w||"").toUpperCase().includes(l)) {
         playSound(800, 'sine', 0.1);
         guessed.push(l); if(btn) btn.classList.add('correct');
-        if(target.w.split('').every(c => guessed.includes(c.toUpperCase()))) finish(true);
+        if(String(target.w||"").split('').every(c => guessed.includes(c.toUpperCase()))) finish(true);
       } else {
         playSound(150, 'sawtooth', 0.2);
         mistakes++; if(btn) btn.classList.add('wrong');
@@ -250,7 +327,7 @@
 
     window.useJ = (id) => {
       if(totalJokers <= 0) return;
-      const rem = target.w.toUpperCase().split('').filter(l => !guessed.includes(l));
+      const rem = String(target.w||"").toUpperCase().split('').filter(l => !guessed.includes(l));
       if(rem.length) { totalJokers--; makeG(rem[0], document.getElementById(`key-${rem[0]}`)); }
     };
 
@@ -258,13 +335,14 @@
       const p = players[curIdx];
       let bonus = false;
       if(win) {
-        p.s += Math.max(1, 10 - (keysP - target.w.length));
-        if(mistakes === 0 && keysP === target.w.length) { p.r++; bonus = true; }
+        p.s += Math.max(1, 10 - (keysP - String(target.w||"").length));
+        if(mistakes === 0 && keysP === String(target.w||"").length) { p.r++; bonus = true; }
       }
       p.r--;
       showM(win, bonus);
-      const u = new SpeechSynthesisUtterance(target.w);
-      u.lang = {en:'en-US', de:'de-DE', fr:'fr-FR', it:'it-IT', es:'es-ES'}[lang];
+      const u = new SpeechSynthesisUtterance(String(target.w||""));
+      u.lang = {en:'en-US', de:'de-DE', fr:'fr-FR', it:'it-IT', es:'es-ES'}[lang] || "en-US";
+      speechSynthesis.cancel();
       speechSynthesis.speak(u);
     }
 
@@ -272,18 +350,16 @@
       const modal = document.getElementById('modal');
       document.getElementById('mTitle').innerText = win ? "BİLDİN!" : "OLMADI!";
       document.getElementById('mTitle').style.color = win ? "var(--neon-green)" : "var(--neon-red)";
-      document.getElementById('mWord').innerText = target.w.toUpperCase();
-      document.getElementById('mTr').innerText = `(${target.tr})`;
+      document.getElementById('mWord').innerText = String(target.w||"").toUpperCase();
+      document.getElementById('mTr').innerText = `(${String(target.tr||"")})`;
       document.getElementById('mDesc').innerHTML = b ? '0 HATA! +1 ÖDÜL HAK KAZANDIN!' : '';
-      
-      // Puan tablosu
-      document.getElementById('mScoreTable').innerHTML = players.map(p => `
-        <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px; color:${p === players[curIdx] ? 'var(--neon-purple)' : '#fff'}">
-            <span>${p.n}</span><span>Hak: ${p.r} | Puan: ${p.s}</span>
+
+      document.getElementById('mScoreTable').innerHTML = players.map(pp => `
+        <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px; color:${pp === players[curIdx] ? 'var(--neon-purple)' : '#fff'}">
+            <span>${pp.n}</span><span>Hak: ${pp.r} | Puan: ${pp.s}</span>
         </div>
       `).join('');
 
-      // Sıradaki oyuncu tespiti
       const nextIdx = findNextPlayerIdx();
       if(nextIdx !== -1) {
           document.getElementById('nextPlayerNotice').innerText = `SIRADAKİ: ${players[nextIdx].n.toUpperCase()}`;
