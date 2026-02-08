@@ -1,18 +1,18 @@
-// /js/text_translate_page.js
-import { BASE_DOMAIN, STORAGE_KEY } from "/js/config.js";
-import { logout } from "/js/auth.js";
+// /js/text_translate_page.js — FINAL (api.js + relaxed guard + no random redirects)
+import { STORAGE_KEY } from "/js/config.js";
+import { apiPOST } from "/js/api.js";
+import { applyI18n, t } from "/js/i18n.js";
 
 const $ = (id) => document.getElementById(id);
-function base(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
 function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
 
 function toast(msg){
-  const t = $("toast");
-  if(!t) return;
-  t.textContent = msg;
-  t.classList.add("show");
+  const el = $("toast");
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
   clearTimeout(window.__to);
-  window.__to = setTimeout(()=> t.classList.remove("show"), 1800);
+  window.__to = setTimeout(()=> el.classList.remove("show"), 1800);
 }
 
 /* ✅ Bayraklı dil listesi */
@@ -74,7 +74,7 @@ function getLang(code){
   return LANGS.find(l=>l.code===code) || { code, tr: code, native: code, flag:"🌐", tts:"en-US" };
 }
 
-/* ===== Session + Terms guard (home/chat ile aynı mantık) ===== */
+/* ===== Session + Terms guard (HOME/PROFILE ile aynı) ===== */
 function termsKey(email=""){
   return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
 }
@@ -85,31 +85,33 @@ function ensureLogged(){
   const u = getUser();
   if(!u || !u.email){ location.replace("/index.html"); return null; }
   if(!localStorage.getItem(termsKey(u.email))){ location.replace("/index.html"); return null; }
-  const gid = (localStorage.getItem("google_id_token") || "").trim();
-  if(!gid){ location.replace("/index.html"); return null; }
-  if(!u.isSessionActive){ location.replace("/index.html"); return null; }
   return u;
 }
 
 function paintHeader(u){
   const full = (u.fullname || u.name || u.display_name || u.email || "—").trim();
-  $("userName").textContent = full;
-  $("userPlan").textContent = String(u.plan || "FREE").toUpperCase();
+  $("userName") && ($("userName").textContent = full);
+  $("userPlan") && ($("userPlan").textContent = String(u.plan || "FREE").toUpperCase());
 
   const avatarBtn = $("avatarBtn");
   const fallback = $("avatarFallback");
   const pic = String(u.picture || u.avatar || u.avatar_url || "").trim();
-  if(pic){
-    avatarBtn.innerHTML = `<img src="${pic}" alt="avatar">`;
-  }else{
-    fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
-  }
 
-  // şimdilik: avatara basınca çıkış (home ile aynı)
-  avatarBtn.addEventListener("click", logout);
+  if(avatarBtn){
+    if(pic){
+      avatarBtn.innerHTML = `<img src="${pic}" alt="avatar" referrerpolicy="no-referrer">`;
+    }else if(fallback){
+      fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
+    }
+    // ✅ avatara basınca profile (logout değil)
+    avatarBtn.addEventListener("click", (e)=>{
+      e.preventDefault();
+      location.href = "/pages/profile.html";
+    });
+  }
 }
 
-/* ===== Persist: sayfadan çıkana kadar kalsın (sessionStorage) ===== */
+/* ===== Persist (sessionStorage) ===== */
 const SS_FROM = "italky_text_translate_from_v2";
 const SS_TO   = "italky_text_translate_to_v2";
 const SS_MANUAL_TO = "italky_text_translate_to_manual_v2";
@@ -131,13 +133,13 @@ function setLangUI(){
     ? `Dili Algıla${detectedFrom ? ` (${String(detectedFrom).toUpperCase()})` : ""}`
     : getLang(fromLang).tr;
 
-  $("fromLangTxt").textContent = fromShown;
-  $("fromFlag").textContent = fromLang==="auto"
-    ? (detectedFrom ? getLang(detectedFrom).flag : "🌐")
-    : getLang(fromLang).flag;
+  $("fromLangTxt") && ($("fromLangTxt").textContent = fromShown);
+  $("fromFlag") && ($("fromFlag").textContent =
+    fromLang==="auto" ? (detectedFrom ? getLang(detectedFrom).flag : "🌐") : getLang(fromLang).flag
+  );
 
-  $("toLangTxt").textContent = getLang(toLang).tr;
-  $("toFlag").textContent = getLang(toLang).flag;
+  $("toLangTxt") && ($("toLangTxt").textContent = getLang(toLang).tr);
+  $("toFlag") && ($("toFlag").textContent = getLang(toLang).flag);
 }
 
 /* ===== Language sheet ===== */
@@ -146,8 +148,8 @@ let sheetFor = "from"; // from|to
 function openSheet(which){
   sheetFor = which;
   $("langSheet")?.classList.add("show");
-  $("sheetTitle").textContent = which === "from" ? "Kaynak Dil" : "Hedef Dil";
-  $("sheetQuery").value = "";
+  $("sheetTitle") && ($("sheetTitle").textContent = which === "from" ? "Kaynak Dil" : "Hedef Dil");
+  if($("sheetQuery")) $("sheetQuery").value = "";
   renderSheet("");
   setTimeout(()=>{ try{ $("sheetQuery")?.focus(); }catch{} }, 0);
 }
@@ -188,7 +190,7 @@ function renderSheet(filter){
         detectedFrom = null;
       }else{
         toLang = code;
-        manualTo = true; // kullanıcı hedefi seçerse sayfada kilitle
+        manualTo = true;
       }
       persist();
       setLangUI();
@@ -198,11 +200,104 @@ function renderSheet(filter){
   });
 }
 
-/* ===== Translate API ===== */
-async function translateViaApi(text, source, target){
-  const b = base();
-  if(!b) return { out:"", detected:null };
+/* ===== Auto target rule ===== */
+function applyAutoTargetRule(detected){
+  if(manualTo) return;
+  const d = String(detected||"").toLowerCase().trim();
+  if(!d) return;
 
+  detectedFrom = d;
+  toLang = (d === "tr") ? "en" : "tr";
+
+  persist();
+  setLangUI();
+}
+
+/* ===== counts ===== */
+function updateCounts(){
+  const inV = String($("inText")?.value || "");
+  $("countIn") && ($("countIn").textContent = String(inV.length));
+
+  const outV = String($("outText")?.textContent || "");
+  $("countOut") && ($("countOut").textContent = String(outV === "—" ? 0 : outV.length));
+}
+
+/* ===== TTS ===== */
+function speak(text, langCode){
+  const tt = String(text||"").trim();
+  if(!tt) return;
+  if(!("speechSynthesis" in window)) { toast("Ses desteği yok"); return; }
+
+  try{
+    const u = new SpeechSynthesisUtterance(tt);
+    u.lang = getLang(langCode).tts || "en-US";
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }catch{
+    toast("Okuma başlatılamadı");
+  }
+}
+
+/* ===== STT ===== */
+let sttBusy = false;
+function detectLightTR(text){
+  const tt = String(text||"").toLowerCase();
+  if(/[çğıöşü]/.test(tt)) return "tr";
+  const trHints = [" ve ", " bir ", " için ", " değil ", " merhaba", " selam", " nasılsın", " teşekkür"];
+  for(const h of trHints) if(tt.includes(h)) return "tr";
+  return "en";
+}
+
+function startSTT(){
+  if(location.protocol !== "https:" && location.hostname !== "localhost"){
+    toast("Mikrofon için HTTPS gerekli.");
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast("Bu cihaz konuşmayı yazıya çevirmiyor."); return; }
+  if(sttBusy) return;
+
+  const micBtn = $("micIn");
+  const rec = new SR();
+  const listenCode = (fromLang === "auto") ? "tr" : fromLang;
+  rec.lang = getLang(listenCode).tts || "tr-TR";
+  rec.interimResults = false;
+  rec.continuous = false;
+
+  sttBusy = true;
+  micBtn?.classList.add("listening");
+
+  rec.onresult = async (e)=>{
+    const tr = e.results?.[0]?.[0]?.transcript || "";
+    const finalText = String(tr||"").trim();
+    if(!finalText) return;
+
+    if($("inText")) $("inText").value = finalText;
+    updateCounts();
+
+    if(fromLang === "auto"){
+      applyAutoTargetRule(detectLightTR(finalText));
+    }
+
+    await doTranslate(true);
+  };
+
+  rec.onend = ()=>{
+    micBtn?.classList.remove("listening");
+    sttBusy = false;
+  };
+
+  try{ rec.start(); }
+  catch{
+    micBtn?.classList.remove("listening");
+    sttBusy = false;
+    toast("Mikrofon açılamadı.");
+  }
+}
+
+/* ===== Translate (apiPOST) ===== */
+async function translateViaApi(text, source, target){
   const body = {
     text,
     source,
@@ -211,13 +306,7 @@ async function translateViaApi(text, source, target){
     to_lang: target,
   };
 
-  const r = await fetch(`${b}/api/translate`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify(body)
-  });
-
-  const data = await r.json().catch(()=> ({}));
+  const data = await apiPOST("/api/translate", body, { timeoutMs: 20000 });
 
   const out = String(
     data?.translated || data?.translation || data?.text || data?.translated_text || ""
@@ -230,120 +319,14 @@ async function translateViaApi(text, source, target){
   return { out: out || "", detected: det || null };
 }
 
-/* ===== Auto target rule (senin kuralın) =====
-   - Algıladığı dil Türkçe ise hedef otomatik İngilizce
-   - Türkçe harici ne algılarsa algılasın hedef otomatik Türkçe
-   - Kullanıcı hedefi değiştirirse sayfa boyunca sabit (manualTo=true)
-*/
-function applyAutoTargetRule(detected){
-  if(manualTo) return;
-
-  const d = String(detected||"").toLowerCase().trim();
-  if(!d) return;
-
-  detectedFrom = d;
-
-  if(d === "tr") toLang = "en";
-  else toLang = "tr";
-
-  persist();
-  setLangUI();
-}
-
-/* ===== counts ===== */
-function updateCounts(){
-  const inV = String($("inText").value || "");
-  $("countIn").textContent = String(inV.length);
-
-  const outV = String($("outText").textContent || "");
-  $("countOut").textContent = String(outV === "—" ? 0 : outV.length);
-}
-
-/* ===== TTS ===== */
-function speak(text, langCode){
-  const t = String(text||"").trim();
-  if(!t) return;
-  if(!("speechSynthesis" in window)) { toast("Ses desteği yok"); return; }
-
-  try{
-    const u = new SpeechSynthesisUtterance(t);
-    const info = getLang(langCode);
-    u.lang = info.tts || "en-US";
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-  }catch{
-    toast("Okuma başlatılamadı");
-  }
-}
-
-/* ===== STT (mikrofon) ===== */
-let sttBusy = false;
-function detectLightTR(text){
-  const t = String(text||"").toLowerCase();
-  if(/[çğıöşü]/.test(t)) return "tr";
-  const trHints = [" ve ", " bir ", " için ", " değil ", " merhaba", " selam", " nasılsın", " teşekkür"];
-  for(const h of trHints) if(t.includes(h)) return "tr";
-  return "en";
-}
-
-function startSTT(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ toast("Bu cihaz konuşmayı yazıya çevirmiyor."); return; }
-  if(sttBusy) return;
-
-  const micBtn = $("micIn");
-  const rec = new SR();
-  // kaynak auto ise TR dinleyelim (Türkiye default), değilse seçilen dili dinle
-  const listenCode = (fromLang === "auto") ? "tr" : fromLang;
-  rec.lang = getLang(listenCode).tts || "tr-TR";
-  rec.interimResults = false;
-  rec.continuous = false;
-
-  sttBusy = true;
-  micBtn.classList.add("listening");
-
-  rec.onresult = async (e)=>{
-    const t = e.results?.[0]?.[0]?.transcript || "";
-    const finalText = String(t||"").trim();
-    if(!finalText) return;
-
-    $("inText").value = finalText;
-    updateCounts();
-
-    // auto kaynak ise: yazıdan hızlı TR tahmini (backend detected yoksa diye)
-    if(fromLang === "auto"){
-      const guess = detectLightTR(finalText);
-      applyAutoTargetRule(guess); // TR -> EN, diğer -> TR
-    }
-
-    await doTranslate(true);
-  };
-
-  rec.onerror = ()=>{
-    // sessiz geç
-  };
-  rec.onend = ()=>{
-    micBtn.classList.remove("listening");
-    sttBusy = false;
-  };
-
-  try{ rec.start(); }
-  catch{
-    micBtn.classList.remove("listening");
-    sttBusy = false;
-    toast("Mikrofon açılamadı.");
-  }
-}
-
-/* ===== translate ===== */
 async function doTranslate(silent=false){
-  const text = String($("inText").value || "").trim();
+  const text = String($("inText")?.value || "").trim();
   if(!text){
     if(!silent) toast("Metin yaz");
     return;
   }
 
-  $("outText").textContent = "Çevriliyor…";
+  if($("outText")) $("outText").textContent = "Çevriliyor…";
   updateCounts();
 
   const src = (fromLang === "auto") ? "" : fromLang;
@@ -351,15 +334,14 @@ async function doTranslate(silent=false){
   try{
     const { out, detected } = await translateViaApi(text, src, toLang);
 
-    // auto ise backend detected geldiyse asıl kuralı onunla uygula
     if(fromLang === "auto"){
       applyAutoTargetRule(detected || detectLightTR(text));
     }
 
-    $("outText").textContent = out || "—";
-  }catch{
-    $("outText").textContent = "—";
-    if(!silent) toast("Çeviri alınamadı");
+    if($("outText")) $("outText").textContent = out || "—";
+  }catch(e){
+    if($("outText")) $("outText").textContent = "—";
+    if(!silent) toast(String(e?.message || "Çeviri alınamadı"));
   }
 
   setLangUI();
@@ -379,9 +361,16 @@ function swapLang(){
   toast("Diller değişti");
 }
 
+/* ===== Boot ===== */
 document.addEventListener("DOMContentLoaded", ()=>{
   const u = ensureLogged();
   if(!u) return;
+
+  // i18n minimal
+  try{
+    applyI18n(document);
+    // istersen i18n.js'e text_translate_title ekleriz, şimdilik dokunmuyorum
+  }catch{}
 
   paintHeader(u);
 
@@ -400,13 +389,12 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   $("sheetClose")?.addEventListener("click", closeSheet);
   $("langSheet")?.addEventListener("click", (e)=>{ if(e.target === $("langSheet")) closeSheet(); });
-  $("sheetQuery")?.addEventListener("input", ()=> renderSheet($("sheetQuery").value));
+  $("sheetQuery")?.addEventListener("input", ()=> renderSheet($("sheetQuery")?.value));
 
   $("clearBtn")?.addEventListener("click", ()=>{
-    $("inText").value = "";
-    $("outText").textContent = "—";
+    if($("inText")) $("inText").value = "";
+    if($("outText")) $("outText").textContent = "—";
     detectedFrom = null;
-    // hedef dili kullanıcı manuel seçmediyse burada resetlemiyoruz; sayfada kalsın
     persist();
     setLangUI();
     updateCounts();
@@ -418,14 +406,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
   $("micIn")?.addEventListener("click", startSTT);
 
   $("speakIn")?.addEventListener("click", ()=>{
-    const txt = String($("inText").value||"").trim();
+    const txt = String($("inText")?.value||"").trim();
     if(!txt) return toast("Metin yok");
     const lang = (fromLang === "auto") ? (detectedFrom || detectLightTR(txt)) : fromLang;
     speak(txt, lang);
   });
 
   $("speakOut")?.addEventListener("click", ()=>{
-    const txt = String($("outText").textContent||"").trim();
+    const txt = String($("outText")?.textContent||"").trim();
     if(!txt || txt==="—") return toast("Çeviri yok");
     speak(txt, toLang);
   });
