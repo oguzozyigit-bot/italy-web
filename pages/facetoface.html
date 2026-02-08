@@ -20,10 +20,11 @@
       --muted:rgba(255,255,255,.45);
 
       --icon-bordo:#8b2635;
-      --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
 
-      --glass: rgba(255,255,255,.06);
-      --border: rgba(255,255,255,.12);
+      /* ✅ görünür lacivert (çok koyu değil) */
+      --mic-navy:#5b76ff;
+
+      --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
 
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -48,14 +49,14 @@
     .half-screen.top{
       background: linear-gradient(to bottom, #1a0208, var(--brand-burgundy));
       transform: rotate(180deg);
-      --mic-accent: var(--brand-lacivert);   /* ✅ bordo tarafta mic lacivert */
+      --mic-accent: var(--mic-navy);     /* ✅ bordo tarafta mic lacivert */
     }
     .half-screen.bottom{
       background: linear-gradient(to bottom, var(--brand-lacivert), #02000a);
-      --mic-accent: var(--icon-bordo);       /* ✅ lacivert tarafta mic bordo */
+      --mic-accent: var(--icon-bordo);   /* ✅ lacivert tarafta mic bordo */
     }
 
-    /* TOP BACK ARROW (on burgundy side) */
+    /* TOP BACK ARROW (burgundy side) */
     .top-back{
       position:absolute;
       left:14px;
@@ -75,7 +76,16 @@
     }
     .top-back:active{transform:scale(.96);}
 
-    /* LANG TRIGGER (now in-page popover, no overlay) */
+    /* ✅ Centered lang trigger row (both sides) */
+    .top-top, .bottom-top{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:110;
+      padding-top: 6px;
+    }
+
     .lang-trigger{
       background: rgba(0,0,0,.28);
       border:1px solid rgba(255,255,255,.10);
@@ -91,19 +101,14 @@
       gap:8px;
       backdrop-filter: blur(10px);
       user-select:none;
-      z-index: 110;
     }
-
-    /* placement */
-    .top .lang-trigger{ position:absolute; right:14px; top: calc(14px + var(--safe-top)); }
-    /* ✅ bottom: lang trigger where mic used to be (upper area) */
-    .bottom .lang-trigger{ margin-top: 6px; }
-
     .lang-trigger svg{width:14px; height:14px; opacity:.7}
 
-    /* POPOVER (in-page) */
+    /* POPOVER (in-page, centered) */
     .popover{
       position:absolute;
+      left:50%;
+      transform: translateX(-50%);
       width:min(280px, calc(100vw - 60px));
       height:320px;
       background: radial-gradient(circle at 50% 50%, #2a020f 0%, #12000a 58%, #060006 100%);
@@ -150,9 +155,9 @@
     .pop-name{font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:190px;}
     .pop-code{font-size:12px; font-weight:900; opacity:.7; text-transform:uppercase;}
 
-    /* Popover placement (bakış yönü tarafında) */
-    .top .popover{ right:14px; top: calc(58px + var(--safe-top)); }
-    .bottom .popover{ right:14px; bottom: 108px; } /* bottom mic below; popover opens above */
+    /* placement (centered) */
+    .top .popover{ top: calc(62px + var(--safe-top)); }
+    .bottom .popover{ bottom: 120px; }
 
     /* CHAT */
     .chat-body{
@@ -170,20 +175,17 @@
     }
     .chat-body::-webkit-scrollbar{display:none}
 
-    /* Bubble now supports inline speaker for incoming speech */
+    /* Bubble + inline speaker on TRANSLATION (me) only */
     .bubble{
       width:100%;
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
       gap:10px;
       text-align:center;
       word-break: break-word;
     }
-    .bubble .txt{
-      display:inline-block;
-      max-width: 92%;
-    }
+    .bubble .txt{display:inline-block; max-width: 92%;}
     .bubble.them .txt{
       color: rgba(255,255,255,.42);
       font-size: 16px;
@@ -198,7 +200,6 @@
       letter-spacing:.2px;
     }
 
-    /* Inline speaker only for incoming bubble */
     .bubble .spk{
       width:34px;
       height:34px;
@@ -211,12 +212,13 @@
       justify-content:center;
       cursor:pointer;
       flex: 0 0 auto;
+      margin-top: 4px;
     }
-    .bubble.them .spk{display:flex;}
+    .bubble.me .spk{display:flex;} /* ✅ only on translated bubble */
     .bubble .spk svg{width:16px; height:16px;}
     .bubble .spk:active{transform:scale(.95);}
 
-    /* MIC (recording feel) */
+    /* MIC */
     .mic-wrap{
       width:100%;
       display:flex;
@@ -248,7 +250,6 @@
       stroke-linecap:round; stroke-linejoin:round;
     }
 
-    /* ✅ recording animation */
     @keyframes recPulse{
       0%,100%{ transform: scale(1); box-shadow: 0 14px 30px rgba(0,0,0,.65); }
       50%{ transform: scale(1.06); box-shadow: 0 18px 40px rgba(0,0,0,.75); }
@@ -290,7 +291,7 @@
     .logo-capsule{
       background:#02000a;
       border:1px solid rgba(255,255,255,.10);
-      padding:12px 22px;         /* ✅ biraz büyüdü */
+      padding:12px 22px;
       border-radius:999px;
       display:flex;
       align-items:center;
@@ -303,7 +304,7 @@
     }
     .logo-text{
       font-family:"Space Grotesk",sans-serif;
-      font-size:18px;            /* ✅ bigger */
+      font-size:18px;
       font-weight:800;
       color:#fff;
       position:relative;
@@ -311,7 +312,6 @@
     }
     .logo-ai{background:var(--ai-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
 
-    /* ✅ Wave INSIDE logo, only while listening */
     .logo-wave{
       position:absolute;
       inset:0;
@@ -330,23 +330,12 @@
       border-radius:3px;
       background: rgba(165,180,252,.42);
       animation: bounce 0.9s infinite ease-in-out;
-      filter: blur(.1px);
     }
     .logo-wave .bar:nth-child(2){animation-delay:.15s}
     .logo-wave .bar:nth-child(3){animation-delay:.28s}
     .logo-wave .bar:nth-child(4){animation-delay:.15s}
     .logo-wave .bar:nth-child(5){animation-delay:.0s}
     @keyframes bounce{0%,100%{height:10px} 50%{height:40px}}
-
-    /* tiny helper row for bottom top area */
-    .bottom-top{
-      width:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding-top: 6px;
-      z-index: 80;
-    }
   </style>
 </head>
 
@@ -356,27 +345,24 @@
     <!-- TOP (Other person) -->
     <div class="half-screen top" id="topSection">
 
-      <!-- ✅ back arrow on burgundy side -->
       <button class="top-back" id="topBack" title="Başa dön">
-        <!-- simple arrow icon -->
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 18l-6-6 6-6"/>
         </svg>
       </button>
 
-      <!-- ✅ in-page lang trigger (opens popover) -->
-      <button class="lang-trigger" id="topLangBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
-        </svg>
-        <span id="topLangTxt">EN</span>
-      </button>
+      <!-- ✅ centered like bottom -->
+      <div class="top-top">
+        <button class="lang-trigger" id="topLangBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
+          </svg>
+          <span id="topLangTxt">EN</span>
+        </button>
+      </div>
 
-      <!-- ✅ popover -->
       <div class="popover" id="pop-top">
-        <div class="pop-head">
-          <div class="pop-title">ÜST DİL</div>
-        </div>
+        <div class="pop-head"><div class="pop-title">ÜST DİL</div></div>
         <div style="padding:0 12px 12px;">
           <input class="pop-search" id="search-top" type="text" placeholder="Dil ara...">
         </div>
@@ -385,7 +371,6 @@
 
       <div class="chat-body" id="topBody"></div>
 
-      <!-- TOP mic stays near bottom of that panel -->
       <div class="mic-wrap">
         <button class="btn-mic" id="topMic" title="Mikrofon">
           <svg viewBox="0 0 24 24">
@@ -410,7 +395,6 @@
     <!-- BOTTOM (You) -->
     <div class="half-screen bottom" id="botSection">
 
-      <!-- ✅ language trigger moved to upper area (mic used to be) -->
       <div class="bottom-top">
         <button class="lang-trigger" id="botLangBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -421,9 +405,7 @@
       </div>
 
       <div class="popover" id="pop-bot">
-        <div class="pop-head">
-          <div class="pop-title">ALT DİL</div>
-        </div>
+        <div class="pop-head"><div class="pop-title">ALT DİL</div></div>
         <div style="padding:0 12px 12px;">
           <input class="pop-search" id="search-bot" type="text" placeholder="Dil ara...">
         </div>
@@ -432,7 +414,6 @@
 
       <div class="chat-body" id="botBody"></div>
 
-      <!-- ✅ bottom mic goes DOWN -->
       <div class="mic-wrap">
         <button class="btn-mic" id="botMic" title="Mikrofon">
           <svg viewBox="0 0 24 24">
