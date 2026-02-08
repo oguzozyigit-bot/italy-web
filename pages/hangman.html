@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Kelime Avcı</title>
+  <title>italkyAI • Kelime Avcı PRO</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,80 +20,57 @@
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    html, body { 
-      margin: 0; width: 100%; height: 100dvh; overflow: hidden; position: fixed;
-      font-family: 'Outfit', sans-serif; background: var(--bg); color: #fff;
-      display: flex; align-items: center; justify-content: center;
-    }
+    html, body { margin: 0; width: 100%; height: 100dvh; overflow: hidden; position: fixed; font-family: 'Outfit', sans-serif; background: var(--bg); color: #fff; }
 
-    .cosmos { 
-      position: absolute; inset: -50%; width: 200%; height: 200%; z-index: 0; 
-      background: radial-gradient(700px 260px at 20% 20%, rgba(79,70,229,.28), transparent 60%), #030014;
-      animation: floatBg 18s ease-in-out infinite alternate;
-    }
-    @keyframes floatBg { 0% { transform: translate3d(0,0,0); } 100% { transform: translate3d(-2%, -2%, 0); } }
+    .cosmos { position: absolute; inset: -50%; width: 200%; height: 200%; z-index: 0; background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #030014 70%); }
 
-    .mobile-frame {
-      width: 100%; max-width: 480px; height: 100%; position: relative; z-index: 10;
-      display: flex; flex-direction: column; background: rgba(8,8,20,.65); backdrop-filter: blur(25px);
-    }
+    .mobile-frame { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; position: relative; z-index: 10; display: flex; flex-direction: column; background: rgba(8,8,20,.65); backdrop-filter: blur(25px); }
 
     /* TOPBAR */
-    .topbar {
-      height: var(--topH); display: flex; align-items: center; justify-content: space-between;
-      padding: 0 12px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.35);
-    }
-    .backBtn {
-      width: 42px; height: 42px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18); color: #fff; font-size: 20px; cursor: pointer;
-    }
+    .topbar { height: var(--topH); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.35); }
+    .backBtn { width: 42px; height: 42px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.18); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-    /* OYUN ALANI */
-    .game-main { 
-      flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; 
-      align-items: center; gap: 25px; scrollbar-width: none;
-    }
+    /* GAME UI */
+    .game-main { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; scrollbar-width: none; }
     .game-main::-webkit-scrollbar { display: none; }
 
-    /* Adam Asmaca Çizimi (Minimalist) */
-    .hangman-box {
-      width: 120px; height: 140px; border-bottom: 4px solid #fff; position: relative;
-    }
-    .draw-part { position: absolute; background: #fff; display: none; }
-    .draw-part.show { display: block; }
-    .base { width: 4px; height: 100%; left: 20px; }
-    .top { width: 60px; height: 4px; left: 20px; top: 0; }
-    .rope { width: 2px; height: 20px; left: 80px; top: 0; }
-    .head { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #fff; left: 65px; top: 20px; background: none; }
-    .body { width: 3px; height: 50px; left: 80px; top: 50px; }
+    .stat-row { width: 100%; display: flex; justify-content: space-between; gap: 10px; }
+    .stat-card { flex: 1; padding: 10px; border-radius: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+    .stat-val { font-weight: 900; font-size: 16px; color: var(--cyan); }
+    .stat-lbl { font-size: 10px; font-weight: 700; opacity: 0.6; text-transform: uppercase; }
 
-    /* Kelime Kutucukları */
-    .word-display { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-    .letter-slot {
-      width: 35px; height: 45px; border-bottom: 3px solid var(--ai1);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px; font-weight: 900; text-transform: uppercase;
-    }
+    /* HANGMAN STAGE */
+    .hangman-stage { height: 120px; display: flex; align-items: flex-end; position: relative; width: 100px; border-bottom: 3px solid #fff; }
+    .h-part { position: absolute; background: #fff; display: none; }
+    .h-part.show { display: block; }
+    .h-base { width: 3px; height: 100%; left: 20px; }
+    .h-top { width: 50px; height: 3px; left: 20px; top: 0; }
+    .h-rope { width: 2px; height: 15px; left: 70px; top: 0; }
+    .h-head { width: 24px; height: 24px; border-radius: 50%; border: 3px solid #fff; left: 59px; top: 15px; }
+    .h-body { width: 3px; height: 40px; left: 70px; top: 39px; }
+    .h-l-arm { width: 20px; height: 3px; left: 51px; top: 50px; transform: rotate(-30deg); }
+    .h-r-arm { width: 20px; height: 3px; left: 70px; top: 50px; transform: rotate(30deg); }
+    .h-l-leg { width: 20px; height: 3px; left: 51px; top: 85px; transform: rotate(-45deg); }
+    .h-r-leg { width: 20px; height: 3px; left: 70px; top: 85px; transform: rotate(45deg); }
 
-    /* Klavye */
-    .keyboard {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
-      gap: 8px; width: 100%; max-width: 400px; padding: 10px;
-    }
-    .key {
-      height: 45px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.05); color: #fff; font-weight: 800;
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
-    }
-    .key.used { opacity: 0.3; cursor: default; }
-    .key.wrong { background: rgba(255, 0, 0, 0.2); }
-    .key.correct { background: rgba(0, 230, 118, 0.2); }
+    /* WORD & KEYBOARD */
+    .word-box { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 50px; }
+    .l-slot { width: 32px; height: 40px; border-bottom: 3px solid var(--ai2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; }
 
-    /* Durum Kartı */
-    .status-card {
-      width: 100%; padding: 15px; border-radius: 20px; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08); text-align: center;
-    }
+    .kb-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; width: 100%; }
+    .key { height: 45px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+    .key.wrong { background: rgba(255, 0, 0, 0.3); opacity: 0.5; pointer-events: none; }
+    .key.correct { background: rgba(0, 230, 118, 0.3); pointer-events: none; }
+
+    /* JOKER ACTIONS */
+    .joker-row { display: flex; gap: 10px; width: 100%; }
+    .j-btn { flex: 1; height: 40px; border-radius: 12px; border: none; font-weight: 800; font-size: 11px; cursor: pointer; color: #fff; text-transform: uppercase; }
+    .j-btn.pas { background: #64748b; }
+    .j-btn.hint { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    .modal { position: absolute; inset: 0; background: rgba(3,0,20,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+    .modal.active { display: flex; }
+    .btn-next { margin-top: 20px; padding: 15px 40px; border-radius: 15px; border: none; background: var(--ai2); color: #fff; font-weight: 900; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -101,80 +78,192 @@
   <div class="mobile-frame">
     <div class="topbar">
       <button class="backBtn" onclick="history.back()">←</button>
-      <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 18px;">KELİME AVCI</div>
-      <div style="width: 42px;"></div>
+      <div style="font-family:'Space Grotesk'; font-weight:700; font-size:16px;">KELİME AVCI PRO</div>
+      <div id="levelTag" class="stat-val" style="font-size:12px; color:var(--pink)">KOLAY</div>
     </div>
 
     <div class="game-main">
-      <div class="status-card">
-        <div id="hintText" style="font-weight: 800; color: var(--muted); margin-bottom: 5px;">İpucu Yükleniyor...</div>
-        <div id="scoreText" style="font-weight: 900; color: var(--cyan);">Puan: 0</div>
+      <div class="stat-row">
+        <div class="stat-card"><div id="curWordIdx" class="stat-val">1/5</div><div class="stat-lbl">Kelime</div></div>
+        <div class="stat-card"><div id="lifeVal" class="stat-val">8</div><div class="stat-lbl">Can</div></div>
+        <div class="stat-card"><div id="scoreVal" class="stat-val">0</div><div class="stat-lbl">Puan</div></div>
       </div>
 
-      <div class="hangman-box">
-        <div class="draw-part base"></div>
-        <div class="draw-part top"></div>
-        <div class="draw-part rope"></div>
-        <div class="draw-part head"></div>
-        <div class="draw-part body"></div>
+      <div class="hangman-stage" id="hangmanBox">
+        <div class="h-part h-base"></div><div class="h-part h-top"></div><div class="h-part h-rope"></div>
+        <div class="h-part h-head"></div><div class="h-part h-body"></div><div class="h-part h-l-arm"></div>
+        <div class="h-part h-r-arm"></div><div class="h-part h-l-leg"></div><div class="h-part h-r-leg"></div>
       </div>
 
-      <div class="word-display" id="wordDisplay"></div>
+      <div id="hintArea" style="font-size:13px; color:var(--muted); font-weight:600; text-align:center;"></div>
+      
+      <div class="word-box" id="wordBox"></div>
 
-      <div class="keyboard" id="keyboard"></div>
+      <div class="joker-row">
+        <button class="j-btn pas" onclick="useJoker('pas')">PAS (1)</button>
+        <button class="j-btn hint" onclick="useJoker('hint')">İPUCU (1)</button>
+      </div>
+
+      <div class="kb-box" id="kbBox"></div>
+    </div>
+
+    <div class="modal" id="gameModal">
+        <h2 id="modalTitle">Tebrikler!</h2>
+        <p id="modalDesc"></p>
+        <button class="btn-next" onclick="nextWord()">DEVAM ET</button>
     </div>
   </div>
 
-  <script type="module">
-    // Dün bitirdiğimiz mantık: Kelimeleri STORAGE veya API'den çekme
-    import { STORAGE_KEY } from "/js/config.js";
-
-    const wordList = [
-      { w: "APPLE", h: "Bir meyve" },
-      { w: "COMPUTER", h: "Yazılım çalıştıran cihaz" },
-      { w: "GALAXY", h: "Yıldızlar topluluğu" }
+  <script>
+    // KURALLAR & VERİLER
+    const WORDS = [
+      { w: "APPLE", h: "A red or green fruit" },
+      { w: "GALAXY", h: "System of millions of stars" },
+      { w: "PYTHON", h: "A popular programming language" },
+      { w: "TURKİYE", h: "A bridge between Europe and Asia" },
+      { w: "CHROME", h: "Fast web browser by Google" },
+      { w: "GUİTAR", h: "Six-stringed musical instrument" },
+      { w: "MOON", h: "Earth's natural satellite" }
     ];
 
-    let selectedWord = "";
-    let guessedLetters = [];
+    const LEVELS = {
+      "KOLAY": 8, "ORTA": 6, "ZOR": 4, "EN ZOR": 2
+    };
+
+    let currentLevel = "KOLAY"; 
+    let wordIdx = 0;
+    let score = 0;
     let mistakes = 0;
+    let maxMistakes = 8;
+    let selectedWord = "";
+    let guessed = [];
+    let jokers = { pas: 1, hint: 1 };
+    let perfectStreak = true; // Hiç hata yapmama takibi
 
     function initGame() {
-      const item = wordList[Math.floor(Math.random() * wordList.length)];
-      selectedWord = item.w;
-      document.getElementById('hintText').innerText = "İpucu: " + item.h;
-      guessedLetters = [];
+      wordIdx = 0;
+      score = 0;
+      jokers = { pas: 1, hint: 1 };
+      maxMistakes = LEVELS[currentLevel];
+      document.getElementById('lifeVal').innerText = maxMistakes;
+      document.getElementById('levelTag').innerText = currentLevel;
+      loadWord();
+    }
+
+    function loadWord() {
+      if (wordIdx >= 5) {
+        showModal("OYUN BİTTİ", `Toplam Puanın: ${score}`);
+        return;
+      }
+      
+      const rand = WORDS[Math.floor(Math.random() * WORDS.length)];
+      selectedWord = rand.w.toUpperCase();
+      document.getElementById('hintArea').innerText = rand.h;
+      guessed = [];
       mistakes = 0;
-      renderWord();
+      perfectStreak = true;
+      
+      updateUI();
       renderKeyboard();
     }
 
-    function renderWord() {
-      const display = document.getElementById('wordDisplay');
-      display.innerHTML = selectedWord.split('').map(char => `
-        <div class="letter-slot">${guessedLetters.includes(char) ? char : ''}</div>
+    function updateUI() {
+      // Kelime slotları
+      const box = document.getElementById('wordBox');
+      box.innerHTML = selectedWord.split('').map(l => `
+        <div class="l-slot">${guessed.includes(l) ? l : ''}</div>
       `).join('');
+
+      // Can ve İndeks
+      document.getElementById('lifeVal').innerText = maxMistakes - mistakes;
+      document.getElementById('curWordIdx').innerText = `${wordIdx + 1}/5`;
+      document.getElementById('scoreVal').innerText = score;
+
+      // Asmaca çizimi
+      const parts = document.querySelectorAll('.h-part');
+      parts.forEach((p, i) => {
+        p.classList.toggle('show', i < mistakes);
+      });
     }
 
+    // KRİTİK KURAL: Harf sayısına göre sınırlı klavye
     function renderKeyboard() {
-      const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      const kb = document.getElementById('keyboard');
-      kb.innerHTML = abc.split('').map(char => `
-        <button class="key" onclick="guess('${char}')">${char}</button>
-      `).join('');
-    }
-
-    window.guess = (char) => {
-      if (guessedLetters.includes(char) || mistakes >= 5) return;
-      guessedLetters.push(char);
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const wordLetters = [...new Set(selectedWord.split(''))];
       
-      if (!selectedWord.includes(char)) {
-        mistakes++;
-        document.querySelectorAll('.draw-part')[mistakes-1].classList.add('show');
+      // Kelimenin harfleri + 10 rastgele harf
+      let pool = [...wordLetters];
+      const remaining = alphabet.split('').filter(l => !pool.includes(l));
+      
+      for(let i=0; i<10; i++) {
+        if(remaining.length > 0) {
+          const randIdx = Math.floor(Math.random() * remaining.length);
+          pool.push(remaining.splice(randIdx, 1)[0]);
+        }
       }
       
-      renderWord();
-      // Kazandın/Kaybettin kontrolü buraya...
+      pool.sort(); // Alfabetik diz
+
+      const kb = document.getElementById('kbBox');
+      kb.innerHTML = pool.map(l => `
+        <button class="key" id="key-${l}" onclick="makeGuess('${l}')">${l}</button>
+      `).join('');
+    }
+
+    window.makeGuess = (l) => {
+      if (guessed.includes(l) || mistakes >= maxMistakes) return;
+
+      const keyBtn = document.getElementById(`key-${l}`);
+      if (selectedWord.includes(l)) {
+        guessed.push(l);
+        keyBtn.classList.add('correct');
+        checkWin();
+      } else {
+        mistakes++;
+        perfectStreak = false;
+        keyBtn.classList.add('wrong');
+        if (mistakes >= maxMistakes) {
+          showModal("KAYBETTİN!", `Doğru Kelime: ${selectedWord}`);
+        }
+      }
+      updateUI();
+    };
+
+    function checkWin() {
+      const isWon = selectedWord.split('').every(l => guessed.includes(l));
+      if (isWon) {
+        let bonus = "";
+        if (perfectStreak) {
+          bonus = "Mükemmel! 0 Hata ile bildiğin için +1 Kelime Hakkı kazandın.";
+          wordIdx--; // Bir kelime hakkı daha ver
+        }
+        score += (maxMistakes - mistakes) * 10;
+        showModal("BİLDİN!", bonus);
+      }
+    }
+
+    function useJoker(type) {
+        if(jokers[type] <= 0) return;
+        if(type === 'pas') {
+            jokers.pas--;
+            loadWord();
+        } else if(type === 'hint') {
+            jokers.hint--;
+            const unrevealed = selectedWord.split('').filter(l => !guessed.includes(l));
+            if(unrevealed.length > 0) makeGuess(unrevealed[0]);
+        }
+    }
+
+    function showModal(title, desc) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
+      document.getElementById('gameModal').classList.add('active');
+    }
+
+    function nextWord() {
+      wordIdx++;
+      document.getElementById('gameModal').classList.remove('active');
+      loadWord();
     }
 
     initGame();
