@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Neon Hangman Tournament</title>
+  <title>italkyAI • HANGMAN</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,8 +12,8 @@
   <style>
     :root {
       --bg: #02000a;
-      --neon-pink: #ff00ff;
       --neon-blue: #00f3ff;
+      --neon-pink: #ff00ff;
       --neon-green: #00ff9d;
       --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
     }
@@ -23,112 +23,112 @@
 
     .mobile-frame { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; background: rgba(5, 0, 20, 0.98); position: relative; }
 
-    /* HEADER & BACK BUTTON */
-    .topbar { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(0, 243, 255, 0.1); }
-    .back-btn { background: none; border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s; }
-    .back-btn:hover { border-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-    .neon-title { flex: 1; font-family: 'Space Grotesk'; font-size: 22px; font-weight: 900; text-align: center; text-shadow: 0 0 10px var(--neon-blue); text-transform: uppercase; letter-spacing: 2px; }
+    /* KURULUM EKRANI - GİZLİ SCROLL */
+    .setup-overlay { 
+      position: absolute; inset: 0; background: var(--bg); z-index: 2000; padding: 25px; 
+      display: flex; flex-direction: column; overflow-y: scroll; 
+      scrollbar-width: none; -ms-overflow-style: none;
+    }
+    .setup-overlay::-webkit-scrollbar { display: none; }
 
-    /* SETUP OVERLAY */
-    .setup-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 2000; padding: 25px; display: flex; flex-direction: column; overflow-y: auto; }
-    .section-label { font-size: 11px; font-weight: 800; color: var(--neon-blue); margin: 15px 0 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .game-title { 
+      font-family: 'Space Grotesk'; font-size: 42px; font-weight: 900; text-align: center; 
+      color: #fff; margin: 20px 0; letter-spacing: 5px; 
+      text-shadow: 0 0 15px var(--neon-blue);
+    }
+
+    .section-label { font-size: 11px; font-weight: 800; color: var(--neon-blue); margin: 15px 0 8px; text-transform: uppercase; }
     .neon-input { width: 100%; padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid #333; color: #fff; font-weight: 600; margin-bottom: 10px; }
+    
     .grid-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .opt-card { padding: 10px 5px; border-radius: 12px; border: 1px solid #333; background: rgba(255,255,255,0.03); text-align: center; cursor: pointer; transition: 0.3s; }
-    .opt-card.active { border-color: var(--neon-blue); background: rgba(0, 243, 255, 0.1); transform: scale(1.05); }
+    .opt-card { padding: 12px 5px; border-radius: 12px; border: 1px solid #333; background: rgba(255,255,255,0.03); text-align: center; cursor: pointer; }
+    .opt-card.active { border-color: var(--neon-blue); background: rgba(0, 243, 255, 0.1); }
+    .opt-card span { display: block; font-size: 22px; margin-bottom: 5px; }
 
-    /* GAME UI */
-    .game-info { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); }
-    .player-name-big { font-size: 22px; font-weight: 900; color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
-    .stat-line { font-size: 11px; font-weight: 700; opacity: 0.8; text-align: right; }
-    .stat-line b { color: var(--neon-green); font-size: 14px; }
+    .big-btn { width: 100%; padding: 18px; border-radius: 15px; background: var(--ai-grad); border: none; color: #fff; font-weight: 900; font-size: 16px; margin: 20px 0; cursor: pointer; }
 
-    /* HANGMAN & LIVES */
-    .hangman-area { height: 160px; display: flex; align-items: center; justify-content: center; position: relative; }
+    /* OYUN İÇİ */
+    .topbar { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .back-btn { background: none; border: 1px solid rgba(255,255,255,0.1); color: #fff; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; }
+    
+    .game-info { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .p-name { font-size: 24px; font-weight: 900; color: var(--neon-pink); }
+
+    .hangman-box { height: 160px; display: flex; align-items: center; justify-content: center; position: relative; }
     .stage { width: 100px; height: 120px; position: relative; border-bottom: 4px solid #fff; }
     .p { position: absolute; background: #fff; display: none; box-shadow: 0 0 10px #fff; }
     .p.show { display: block; }
-    .p1 { width: 4px; height: 100%; left: 20px; } .p2 { width: 60px; height: 4px; left: 20px; top: 0; }
-    .p3 { width: 2px; height: 15px; left: 80px; top: 0; } .p4 { width: 26px; height: 26px; border-radius: 50%; border: 3px solid #fff; left: 68px; top: 15px; }
-    .p5 { width: 3px; height: 45px; left: 80px; top: 41px; } .p6 { width: 18px; height: 3px; left: 63px; top: 55px; transform: rotate(-30deg); }
-    .p7 { width: 18px; height: 3px; left: 80px; top: 55px; transform: rotate(30deg); } .p8 { width: 18px; height: 3px; left: 63px; top: 85px; transform: rotate(-45deg); }
-    .p9 { width: 18px; height: 3px; left: 80px; top: 85px; transform: rotate(45deg); }
+    /* Parça koordinatları */
+    .p1{width:4px;height:100%;left:20px}.p2{width:60px;height:4px;left:20px;top:0}.p3{width:2px;height:15px;left:80px;top:0}
+    .p4{width:26px;height:26px;border-radius:50%;border:3px solid #fff;left:68px;top:15px}.p5{width:3px;height:45px;left:80px;top:41px}
+    .p6{width:18px;height:3px;left:63px;top:55px;transform:rotate(-30deg)}.p7{width:18px;height:3px;left:80px;top:55px;transform:rotate(30deg)}
+    .p8{width:18px;height:3px;left:63px;top:85px;transform:rotate(-45deg)}.p9{width:18px;height:3px;left:80px;top:85px;transform:rotate(45deg)}
 
-    .lives-row { display: flex; justify-content: center; gap: 5px; margin-bottom: 5px; }
-    .heart { font-size: 18px; color: var(--neon-pink); text-shadow: 0 0 5px var(--neon-pink); }
-    .heart.lost { opacity: 0.1; }
-
-    /* JOKER AREA */
     .joker-row { display: flex; justify-content: center; gap: 15px; margin: 10px 0; }
-    .joker-btn { background: rgba(0, 243, 255, 0.05); border: 1px solid var(--neon-blue); color: var(--neon-blue); width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.3s; }
-    .joker-btn.used { opacity: 0.2; pointer-events: none; border-color: #333; color: #333; }
+    .j-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--neon-blue); color: var(--neon-blue); background: none; font-size: 20px; cursor: pointer; }
+    .j-btn.used { opacity: 0.2; pointer-events: none; }
 
-    /* WORD AREA */
-    .word-area { text-align: center; padding: 5px; }
-    .tr-hint { font-size: 14px; color: rgba(255,255,255,0.4); font-style: italic; margin-bottom: 10px; }
-    .word-grid { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 5px; }
-    .slot { width: 28px; height: 38px; border-bottom: 3px solid var(--neon-blue); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; }
+    .word-area { text-align: center; padding: 10px; }
+    .slot { width: 28px; height: 38px; border-bottom: 3px solid var(--neon-blue); display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; margin: 0 3px; }
 
-    .keyboard { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; padding: 10px; margin-top: auto; }
-    .key { height: 38px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; cursor: pointer; font-size: 12px; }
-    .key.wrong { background: #4a0000; opacity: 0.4; }
-    .key.correct { background: #004a80; border-color: var(--neon-blue); }
+    .keyboard { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; padding: 15px; margin-top: auto; }
+    .key { height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; cursor: pointer; }
 
-    /* MODAL & LEADERBOARD */
-    .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.98); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+    .leaderboard { width: 100%; background: rgba(255,255,255,0.03); border-radius: 15px; padding: 15px; }
+    .lb-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 600; }
+
+    .footer { height: 50px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; opacity: 0.2; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    .modal { position: absolute; inset: 0; background: rgba(0,0,0,0.98); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
     .modal.active { display: flex; }
-    .big-btn { width: 100%; padding: 16px; border-radius: 15px; background: var(--ai-grad); border: none; color: #fff; font-weight: 900; cursor: pointer; font-size: 16px; margin-top: 15px; }
-    
-    .leaderboard { width: 100%; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; margin-top: 20px; }
-    .lb-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12px; }
-
-    /* FIREWORKS (HAVAİ FİŞEK) */
-    #canvas { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 4000; }
   </style>
 </head>
 <body>
 
-  <div class="mobile-frame" id="frame">
-    <canvas id="canvas"></canvas>
-
+  <div class="mobile-frame">
     <div class="setup-overlay" id="setup">
-      <div class="neon-title">italkyAI HANGMAN</div>
+      <div class="game-title">HANGMAN</div>
       
-      <div class="leaderboard" id="globalLB">
-        <div style="font-weight:900; color:var(--neon-green); margin-bottom:10px; font-size:12px;">🏆 EFSANELER LİSTESİ (TOP 5)</div>
-        <div id="lbList"></div>
-      </div>
-
       <div class="section-label">OYUNCULAR</div>
       <div id="pInputs">
-        <div class="player-entry"><input type="text" class="neon-input p-in" placeholder="Oyuncu Adı"></div>
+        <input type="text" class="neon-input p-in" placeholder="1. Oyuncu Adı">
       </div>
-      <button onclick="addInput()" style="background:none; border:1px dashed #444; color:#888; padding:10px; border-radius:10px; width:100%; cursor:pointer;">+ OYUNCU EKLE</button>
+      <button onclick="addInput()" style="background:none; border:1px dashed #444; color:#888; padding:10px; border-radius:12px; width:100%; cursor:pointer;">+ YENİ OYUNCU EKLE</button>
 
-      <div class="section-label">DİL SEÇİMİ</div>
+      <div class="section-label">DİL SEÇİN</div>
       <div class="grid-select" id="langGrid">
         <div class="opt-card active" data-val="en"><span>🇬🇧</span><label>EN</label></div>
         <div class="opt-card" data-val="de"><span>🇩🇪</span><label>DE</label></div>
         <div class="opt-card" data-val="fr"><span>🇫🇷</span><label>FR</label></div>
       </div>
 
-      <button class="big-btn" onclick="initTournament()">BAŞLAT</button>
+      <div class="section-label">ZORLUK</div>
+      <div class="grid-select" id="diffGrid">
+        <div class="opt-card active" data-val="8"><span>🌱</span><label>KOLAY</label></div>
+        <div class="opt-card" data-val="6"><span>🔥</span><label>ORTA</label></div>
+        <div class="opt-card" data-val="4"><span>💀</span><label>ZOR</label></div>
+      </div>
+
+      <button class="big-btn" onclick="initGame()">OYUNA BAŞLA</button>
+
+      <div class="section-label">EFSANELER LİSTESİ (TOP 5)</div>
+      <div class="leaderboard" id="lbList"></div>
     </div>
 
     <div class="topbar">
       <button class="back-btn" onclick="location.href='/pages/home.html'">←</button>
-      <div class="neon-title">Neon Hangman</div>
+      <div style="flex:1; text-align:center; font-weight:900; letter-spacing:2px;">HANGMAN</div>
     </div>
 
     <div class="game-info">
-      <div class="player-name-big" id="curPlayerName">PLAYER</div>
-      <div class="game-stats">
-        <div class="stat-line">HAK: <b id="remRights">5/5</b></div>
-        <div class="stat-line">PUAN: <b id="curScore">0</b></div>
+      <div class="p-name" id="curPName">PLAYER</div>
+      <div style="text-align:right; font-size:12px;">
+        HAK: <b id="remR">5/5</b><br>
+        PUAN: <b id="curS">0</b>
       </div>
     </div>
 
-    <div class="hangman-area">
+    <div class="hangman-box">
       <div class="stage">
         <div class="p p1"></div><div class="p p2"></div><div class="p p3"></div>
         <div class="p p4"></div><div class="p p5"></div><div class="p p6"></div>
@@ -136,107 +136,99 @@
       </div>
     </div>
 
-    <div class="lives-row" id="hearts"></div>
-
     <div class="joker-row">
-      <button class="joker-btn" id="j0" onclick="useJoker(0)">🃏</button>
-      <button class="joker-btn" id="j1" onclick="useJoker(1)">🃏</button>
-      <button class="joker-btn" id="j2" onclick="useJoker(2)">🃏</button>
+      <button class="j-btn" id="j0" onclick="useJ(0)">🃏</button>
+      <button class="j-btn" id="j1" onclick="useJ(1)">🃏</button>
+      <button class="j-btn" id="j2" onclick="useJ(2)">🃏</button>
     </div>
 
     <div class="word-area">
-      <div class="tr-hint" id="trHint">...</div>
-      <div class="word-grid" id="wordGrid"></div>
+      <div id="wordGrid"></div>
+      <div id="trHint" style="margin-top:10px; font-style:italic; opacity:0.4; font-size:14px;"></div>
     </div>
 
     <div class="keyboard" id="kb"></div>
-
-    <div class="footer" style="padding-bottom: 10px;">italkyAI By Ozyigit’s 2026</div>
+    <div class="footer">italkyAI By Ozyigit’s 2026</div>
 
     <div class="modal" id="modal">
-      <h1 id="mTitle">TEBRİKLER!</h1>
-      <div style="margin: 20px 0;">
-          <p style="font-size:12px; opacity:0.5; margin:0;">DOĞRU KELİME:</p>
-          <h2 id="mWord" style="color:var(--neon-blue); margin:5px 0; font-size:28px;">APPLE</h2>
-          <p id="mTr" style="font-style:italic;">(Elma)</p>
-      </div>
-      <div id="mDesc" style="font-size:13px;"></div>
-      <div class="leaderboard" id="mScores"></div>
-      <button class="big-btn" id="mBtn" onclick="modalAction()">DEVAM ET</button>
+      <h1 id="mTitle">BİLDİN!</h1>
+      <h2 id="mWord" style="color:var(--neon-blue); font-size:32px;">APPLE</h2>
+      <p id="mTr" style="opacity:0.6;">(Elma)</p>
+      <div id="mDesc"></div>
+      <button class="big-btn" onclick="modalNext()">DEVAM ET</button>
     </div>
   </div>
 
   <script type="module">
     import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
-    let players = [], curPIdx = 0, pool, used, lang = 'en', maxM = 8;
-    let target, guessed = [], mistakes = 0, keysP = 0, jokersUsed = [false, false, false];
+    let players = [], curIdx = 0, pool, used, lang = 'en', maxM = 8;
+    let target, guessed = [], mistakes = 0, keysP = 0, jokers = [false, false, false], wordsDone = 0;
 
-    // TOP 5 YÜKLE
-    const LB_KEY = "italky_hangman_top5";
+    // LEADERBOARD
     function updateLB() {
-        const lb = JSON.parse(localStorage.getItem(LB_KEY) || "[]");
-        document.getElementById('lbList').innerHTML = lb.map((p,i) => `
-            <div class="lb-item"><span>${i+1}. ${p.n}</span><b>${p.s}</b></div>
-        `).join('') || '<p style="font-size:10px; opacity:0.3">Henüz efsane yok.</p>';
+      const lb = JSON.parse(localStorage.getItem('hangman_top5') || "[]");
+      document.getElementById('lbList').innerHTML = lb.map((p,i)=>`
+        <div class="lb-item"><span>${i+1}. ${p.n}</span><b>${p.s} Puan</b></div>
+      `).join('') || '<div style="opacity:0.3; font-size:12px;">Henüz skor yok.</div>';
     }
     updateLB();
 
+    // SETUP SELECTIONS
+    document.querySelectorAll('.grid-select').forEach(grid => {
+      grid.onclick = (e) => {
+        const c = e.target.closest('.opt-card'); if(!c) return;
+        grid.querySelectorAll('.opt-card').forEach(x=>x.classList.remove('active'));
+        c.classList.add('active');
+        if(grid.id === 'langGrid') lang = c.dataset.val;
+        if(grid.id === 'diffGrid') maxM = parseInt(c.dataset.val);
+      };
+    });
+
     window.addInput = () => {
-      const div = document.createElement('div'); div.className = 'player-entry';
-      div.innerHTML = `<input type="text" class="neon-input p-in" placeholder="Oyuncu Adı">`;
-      document.getElementById('pInputs').appendChild(div);
+      const i = document.createElement('input'); i.className = 'neon-input p-in'; i.placeholder = 'Oyuncu Adı';
+      document.getElementById('pInputs').appendChild(i);
     };
 
-    window.initTournament = async () => {
+    window.initGame = async () => {
       const ins = document.querySelectorAll('.p-in');
       ins.forEach(i => { if(i.value.trim()) players.push({ n: i.value.trim(), s: 0, r: 5 }); });
-      if(!players.length) return alert("İsim yazın!");
-      
-      lang = document.querySelector('#langGrid .active').dataset.val;
+      if(!players.length) return alert("İsim gir!");
       pool = await loadLangPool(lang);
-      used = createUsedSet(`tour_${lang}`).used;
+      used = createUsedSet(`used_${lang}`).used;
       document.getElementById('setup').style.display = 'none';
       startTurn();
     };
 
     function startTurn() {
-      guessed = []; mistakes = 0; keysP = 0; jokersUsed = [false, false, false];
-      target = pick(pool, 1, used, null, (x) => x.w.length >= 5)[0];
-      
-      // Joker butonlarını sıfırla
+      guessed = []; mistakes = 0; keysP = 0; jokers = [false, false, false];
+      target = pick(pool, 1, used, null, (x)=>x.w.length >= 5)[0];
       for(let i=0; i<3; i++) document.getElementById(`j${i}`).classList.remove('used');
-      
-      updateUI();
-      renderKB();
+      updateUI(); renderKB();
     }
 
     function updateUI() {
-      const p = players[curPIdx];
-      document.getElementById('curPlayerName').innerText = p.n.toUpperCase();
-      document.getElementById('remRights').innerText = `${p.r}/5`;
-      document.getElementById('curScore').innerText = p.s;
+      const p = players[curIdx];
+      document.getElementById('curPName').innerText = p.n.toUpperCase();
+      document.getElementById('remR').innerText = `${p.r}/5`;
+      document.getElementById('curS').innerText = p.s;
       document.getElementById('trHint').innerText = target.tr;
       document.getElementById('wordGrid').innerHTML = target.w.split('').map(l => 
         `<div class="slot">${guessed.includes(l.toUpperCase())?l.toUpperCase():''}</div>`).join('');
-      
-      document.querySelectorAll('.p').forEach((p, i) => p.classList.toggle('show', i < mistakes));
-      let hHtml = "";
-      for(let i=0; i<maxM; i++) hHtml += `<span class="heart ${i >= (maxM-mistakes)?'lost':''}">❤️</span>`;
-      document.getElementById('hearts').innerHTML = hHtml;
+      document.querySelectorAll('.p').forEach((p,i)=>p.classList.toggle('show', i < mistakes));
     }
 
     function renderKB() {
-      const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+      const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZÜĞŞİÖÇ".split('');
       const wordChars = [...new Set(target.w.toUpperCase().split(''))];
       let keys = [...wordChars];
       const others = abc.filter(l => !keys.includes(l));
       for(let i=0; i<10; i++) keys.push(others.splice(Math.floor(Math.random()*others.length), 1)[0]);
-      document.getElementById('kb').innerHTML = keys.sort().map(l => 
-        `<button class="key" id="k-${l}" onclick="handleGuess('${l}', this)">${l}</button>`).join('');
+      document.getElementById('kb').innerHTML = keys.sort((a,b)=>a.localeCompare(b)).map(l => 
+        `<button class="key" id="k-${l}" onclick="makeG('${l}', this)">${l}</button>`).join('');
     }
 
-    window.handleGuess = (l, btn) => {
+    window.makeG = (l, btn) => {
       if(guessed.includes(l) || mistakes >= maxM) return;
       keysP++;
       if(target.w.toUpperCase().includes(l)) {
@@ -249,104 +241,49 @@
       updateUI();
     };
 
-    window.useJoker = (id) => {
-        const rem = target.w.toUpperCase().split('').filter(l => !guessed.includes(l));
-        if(rem.length > 0) {
-            document.getElementById(`j${id}`).classList.add('used');
-            handleGuess(rem[0], document.getElementById(`k-${rem[0]}`));
-        }
+    window.useJ = (id) => {
+      const rem = target.w.toUpperCase().split('').filter(l => !guessed.includes(l));
+      if(rem.length) {
+        document.getElementById(`j${id}`).classList.add('used');
+        makeG(rem[0], document.getElementById(`k-${rem[0]}`));
+      }
     };
 
     function finish(win) {
-      const p = players[curPIdx];
-      let bonus = false;
+      const p = players[curIdx]; let bonus = false;
       if(win) {
         p.s += Math.max(1, 10 - (keysP - target.w.length));
         if(mistakes === 0 && keysP === target.w.length) { p.r++; bonus = true; }
       }
       p.r--;
-      showModal(win, bonus);
+      showM(win, bonus);
+      const u = new SpeechSynthesisUtterance(target.w);
+      u.lang = lang === 'en' ? 'en-US' : 'de-DE'; speechSynthesis.speak(u);
     }
 
-    function showModal(win, bonus) {
-      const modal = document.getElementById('modal');
-      document.getElementById('mTitle').innerText = win ? "TEBRİKLER!" : "OLMADI!";
+    function showM(win, b) {
+      document.getElementById('mTitle').innerText = win ? "BİLDİN!" : "BİLEMEDİN!";
       document.getElementById('mWord').innerText = target.w.toUpperCase();
       document.getElementById('mTr').innerText = `(${target.tr})`;
-      document.getElementById('mDesc').innerHTML = bonus ? '<b style="color:var(--neon-green)">0 HATA! +1 HAK KAZANDINIZ!</b>' : '';
-      document.getElementById('mScores').innerHTML = players.map(p => `
-        <div class="lb-item"><span>${p.n}</span><span>Hak: ${p.r} | Puan: ${p.s}</span></div>
-      `).join('');
-      modal.classList.add('active');
+      document.getElementById('mDesc').innerHTML = b ? '<b style="color:var(--neon-green)">0 HATA! +1 HAK!</b>' : '';
+      document.getElementById('modal').classList.add('active');
     }
 
-    window.modalAction = () => {
+    window.modalNext = () => {
       document.getElementById('modal').classList.remove('active');
-      checkNext();
+      wordsDone++;
+      if(wordsDone >= 5) {
+        if(curIdx < players.length - 1) { curIdx++; wordsDone = 0; startTurn(); }
+        else endGame();
+      } else startTurn();
     };
 
-    function checkNext() {
-      curPIdx++;
-      if(curPIdx >= players.length) {
-        if(players.every(p => p.r <= 0)) { endTournament(); return; }
-        curPIdx = 0;
-      }
-      if(players[curPIdx].r <= 0) checkNext();
-      else startTurn();
-    }
-
-    function endTournament() {
-        const winner = [...players].sort((a,b)=>b.s-a.s)[0];
-        
-        // Leaderboard Kayıt
-        let lb = JSON.parse(localStorage.getItem(LB_KEY) || "[]");
-        lb.push({ n: winner.n, s: winner.s });
-        lb.sort((a,b)=>b.s-a.s);
-        localStorage.setItem(LB_KEY, JSON.stringify(lb.slice(0, 5)));
-
-        // Havai Fişek ve Duyuru
-        startFireworks();
-        alert(`BÜYÜK ŞAMPİYON: ${winner.n}\nToplam Puan: ${winner.s}`);
-        location.reload();
-    }
-
-    // BASİT HAVAİ FİŞEK MOTORU
-    function startFireworks() {
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        let particles = [];
-
-        function createParticle(x, y) {
-            for (let i = 0; i < 30; i++) {
-                particles.push({
-                    x, y,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 10,
-                    alpha: 1,
-                    color: `hsl(${Math.random() * 360}, 100%, 50%)`
-                });
-            }
-        }
-
-        let interval = setInterval(() => {
-            createParticle(Math.random() * canvas.width, Math.random() * canvas.height);
-        }, 500);
-
-        function loop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy; p.alpha -= 0.01;
-                ctx.globalAlpha = p.alpha;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, 4, 4);
-                if (p.alpha <= 0) particles.splice(i, 1);
-            });
-            requestAnimationFrame(loop);
-        }
-        loop();
-        setTimeout(() => clearInterval(interval), 5000);
+    function endGame() {
+      const lb = JSON.parse(localStorage.getItem('hangman_top5') || "[]");
+      players.forEach(p => lb.push({ n: p.n, s: p.s }));
+      lb.sort((a,b)=>b.s-a.s);
+      localStorage.setItem('hangman_top5', JSON.stringify(lb.slice(0,5)));
+      alert("Oyun Bitti!"); location.reload();
     }
   </script>
 </body>
