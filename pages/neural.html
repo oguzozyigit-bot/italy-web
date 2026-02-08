@@ -22,10 +22,7 @@ html,body{margin:0;width:100%;height:100%;background:var(--bg);font-family:Outfi
 .header{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--border)}
 .title{font-family:Space Grotesk;font-weight:900;color:var(--pink);letter-spacing:1px;text-shadow:0 0 12px var(--pink)}
 .pb-badge{font-size:10px;padding:4px 8px;border-radius:6px;background:var(--purple);color:#fff;font-weight:800}
-
-/* ✅ Momentum Chip UI */
 .momentum-chip { font-size: 11px; background: var(--pink); color: #000; padding: 4px 10px; border-radius: 12px; font-weight: 900; box-shadow: 0 0 10px var(--pink); transition: 0.3s; }
-
 .stats{display:flex;justify-content:space-between;padding:10px 16px;font-family:Space Grotesk;color:var(--cyan);border-bottom:1px dashed var(--border)}
 .stats span b{color:#fff}
 
@@ -118,6 +115,47 @@ import { loadLangPool, createUsedSet, pick } from "/js/langpool.js";
 
 const $ = id => document.getElementById(id);
 
+/* =========================
+   GAMEKIT MIN (ONLY GATING)
+   ========================= */
+const DAILY_FREE_TOKENS = 25;
+
+function isoDateLocal(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function getUser(){ try{ return JSON.parse(localStorage.getItem("italky_user_v1")||"{}"); }catch{ return {}; } }
+function isPro(u){
+  const p = String(u?.plan||"").toUpperCase().trim();
+  return p==="PRO" || p==="PREMIUM" || p==="PLUS";
+}
+function uid(u){ return String(u.user_id||u.id||u.email||"guest").toLowerCase().trim(); }
+function tokenKey(u){ return `italky_game_tokens::${uid(u)}::${isoDateLocal()}`; }
+function tokenInitKey(u){ return `italky_game_tokens_init::${uid(u)}::${isoDateLocal()}`; }
+
+function ensureDailyTokens(){
+  const u=getUser();
+  if(isPro(u)) return;
+  if(localStorage.getItem(tokenInitKey(u))) return;
+  localStorage.setItem(tokenKey(u), String(DAILY_FREE_TOKENS));
+  localStorage.setItem(tokenInitKey(u), "1");
+}
+function getTokens(){
+  const u=getUser();
+  if(isPro(u)) return 9999;
+  const v = Number(localStorage.getItem(tokenKey(u))||"0");
+  return Number.isFinite(v) ? Math.max(0,v) : 0;
+}
+function spendToken(){
+  const u=getUser();
+  if(isPro(u)) return true;
+  const t=getTokens();
+  if(t<=0) return false;
+  localStorage.setItem(tokenKey(u), String(t-1));
+  return true;
+}
+/* ========================= */
+
 let lang = "en";
 let cards = [], flipped = [], matched = 0, moves = 0, wrongMoves = 0, locked = false;
 let totalScore = 0, setScore = 0, momentum = 1.0;
@@ -162,6 +200,15 @@ $("soundBtn").onclick = () => {
 };
 
 $("startBtn").onclick = async () => {
+  // ✅ spend on ENTER
+  ensureDailyTokens();
+  const u=getUser();
+  if(!isPro(u) && !spendToken()){
+    alert("Hakkın bitti. Hak kazan veya PRO’ya geç.");
+    location.href="/pages/game.html";
+    return;
+  }
+
   $("start").classList.add("hidden");
   $("game").style.display = "flex";
   totalScore = 0;
@@ -173,31 +220,27 @@ async function initGame(isNewRun = false) {
   $("btnContinue").disabled = false;
   $("btnBank").disabled = false;
   matched = 0; moves = 0; wrongMoves = 0; flipped = []; locked = false; setScore = 0;
-  
+
   if (isNewRun) {
     totalScore = 0;
     momentum = 1.0;
   }
 
   updateStats();
-  
+
   const pool = await loadLangPool(lang);
   const randomizedItems = shuffle([...pool.items]);
   const USED_KEY = `used_neural_v3_${lang}`;
   const {used, save} = createUsedSet(USED_KEY);
-  
+
   let picked = pick({items: randomizedItems}, 8, used, save);
 
-  // ✅ SOFT RESET: Havuz bittiyse reload yapma, used set'i temizle başkanım
   if (picked.length < 8) {
-      localStorage.removeItem(USED_KEY);
-      return initGame(isNewRun); 
+    localStorage.removeItem(USED_KEY);
+    return initGame(isNewRun);
   }
 
-  try { 
-    save(picked.map(x => x.w)); 
-    await Promise.resolve();
-  } catch(e){}
+  try { save(picked.map(x => x.w)); } catch(e){}
 
   cards = [];
   picked.forEach((it, i) => {
@@ -235,15 +278,13 @@ function check() {
   const [a, b] = flipped;
   if (a.data.pair === b.data.pair) {
     play("match");
-    // ✅ FIX: speakCard dili hatasız gönderiliyor başkanım
     const speakCard = a.data.lang !== "tr" ? a.data : b.data;
     speak(speakCard.text, speakCard.lang);
-    
+
     setTimeout(() => {
       a.el.classList.add("matched");
       b.el.classList.add("matched");
       matched++;
-      // ✅ Puan Formülü
       const roundPoints = Math.round(Math.max(10, 60 - (wrongMoves * 6)) * momentum);
       setScore += roundPoints;
       totalScore += roundPoints;
@@ -253,7 +294,6 @@ function check() {
   } else {
     play("error");
     wrongMoves++;
-    // ✅ MOMENTUM BREAK: Yanlışta momentum kırılır başkanım
     momentum = Math.max(1.0, momentum - 0.10);
     updateStats();
     setTimeout(() => {
@@ -286,29 +326,45 @@ function finish() {
   $("endTitle").textContent = isPB ? "YENİ REKOR! 👑" : "SET TAMAMLANDI";
   $("finalWrong").textContent = wrongMoves;
   $("finalScore").textContent = totalScore;
-  
-  // ✅ Banka Bonus Önizleme
+
   $("bankBonusText").textContent = `+${Math.round(setScore * 0.05)}`;
-  
+
   $("end").classList.remove("hidden");
   updatePBDisplay();
 }
 
+/* ✅ spend on CONTINUE */
 $("btnContinue").onclick = () => {
+  ensureDailyTokens();
+  const u=getUser();
+  if(!isPro(u) && !spendToken()){
+    alert("Hakkın bitti. Hak kazan veya PRO’ya geç.");
+    location.href="/pages/game.html";
+    return;
+  }
+
   $("btnContinue").disabled = true; $("btnBank").disabled = true;
-  // ✅ Momentum Cap: x1.60 sınırı başkanım
   momentum = Math.min(1.6, momentum + 0.10);
-  toastRes(`MOMENTUM YÜKSELDİ: x${momentum.toFixed(2)} 🚀`, 'var(--purple)');
+  toastRes(`MOMENTUM: x${momentum.toFixed(2)} 🚀`, 'var(--purple)');
   $("end").classList.add("hidden");
   initGame(false);
 };
 
+/* ✅ spend on BANK */
 $("btnBank").onclick = () => {
+  ensureDailyTokens();
+  const u=getUser();
+  if(!isPro(u) && !spendToken()){
+    alert("Hakkın bitti. Hak kazan veya PRO’ya geç.");
+    location.href="/pages/game.html";
+    return;
+  }
+
   $("btnContinue").disabled = true; $("btnBank").disabled = true;
   const bonus = Math.round(setScore * 0.05);
   totalScore += bonus;
-  momentum = 1.0; 
-  toastRes(`BANKA BONUSU +${bonus} PUAN! 💰`, 'var(--green)');
+  momentum = 1.0;
+  toastRes(`BANKA +${bonus} 💰`, 'var(--green)');
   $("end").classList.add("hidden");
   initGame(false);
 };
