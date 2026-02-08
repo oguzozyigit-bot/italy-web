@@ -1,4 +1,4 @@
-<!-- FILE: /pages/photo.html -->
+<!-- FILE: /pages/photo.html  (FINAL + VOICE READ) -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -139,6 +139,11 @@
       color: rgba(255,255,255,.92);
       font-weight: 1000;
       cursor:pointer;
+    }
+    .btnSmall.primary{
+      border: none;
+      background: linear-gradient(135deg, var(--ai1), var(--ai2));
+      box-shadow: 0 18px 40px rgba(79,70,229,.18);
     }
 
     .stage{
@@ -332,6 +337,8 @@
           </span>
           <span class="caret">▾</span>
         </button>
+
+        <button class="btnSmall primary" id="speakBtn" type="button" title="Okut">SAY</button>
         <button class="btnSmall" id="scanBtn" type="button" title="Tam tarama">SCAN</button>
         <button class="btnSmall" id="clearBtn" type="button" title="Temizle">CLR</button>
       </div>
@@ -345,7 +352,7 @@
         </div>
 
         <div class="hint">
-          Yazının üstüne <b>dokun ve bırakma</b> → anında çeviri basar. (SCAN: tüm ekran tarama)
+          Yazının üstüne <b>dokun ve bırakma</b> → anında çeviri basar. (SAY: Dora okur • SCAN: tüm ekran)
         </div>
       </div>
     </div>
