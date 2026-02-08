@@ -2,6 +2,7 @@
 // - google_id_token şartı KALKTI (home gibi)
 // - terms + email + STORAGE_KEY yeterli
 // - dil değişimi anında applyI18n
+// ✅ FIX: title i18n + null-guards + better initials
 
 import { STORAGE_KEY } from "/js/config.js";
 import { logout } from "/js/auth.js";
@@ -40,11 +41,19 @@ function ensureLogged(){
     location.replace("/index.html");
     return null;
   }
-  // bazı kayıtlarda isSessionActive olmayabilir; bozmayalım
   return u;
 }
 
+function initialsFrom(full=""){
+  const s = String(full||"").trim();
+  if(!s) return "•";
+  const parts = s.split(/\s+/).filter(Boolean);
+  if(parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return s.slice(0,1).toUpperCase();
+}
+
 function buildLangOptions(selectEl){
+  if(!selectEl) return; // ✅ guard
   const labels = {
     tr: "TR • Türkçe",
     en: "EN • English",
@@ -78,14 +87,17 @@ async function deleteAccountFlow(u){
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  // i18n uygula
-  applyI18n(document);
-
   const u = ensureLogged();
   if(!u) return;
 
+  // i18n uygula + title
+  applyI18n(document);
+  document.title = t("profile_title"); // ✅
+
   // Back/Home
-  $("backBtn")?.addEventListener("click", ()=>{
+  $("backBtn")?.addEventListener("click", (e)=>{
+    // link var ama safe olsun
+    e?.preventDefault?.();
     if(history.length>1) history.back();
     else location.href="/pages/home.html";
   });
@@ -98,19 +110,20 @@ document.addEventListener("DOMContentLoaded", ()=>{
   $("planBadge").textContent = String(u.plan || "FREE").toUpperCase();
 
   const pic = String(u.picture || u.avatar || u.avatar_url || "").trim();
-  if(pic) $("avatarBox").innerHTML = `<img src="${pic}" alt="avatar">`;
-  else $("avatarBox").textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
+  if(pic) $("avatarBox").innerHTML = `<img src="${pic}" alt="avatar" referrerpolicy="no-referrer">`;
+  else $("avatarBox").textContent = initialsFrom(full);
 
   // Site language
   const sel = $("siteLangSelect");
   buildLangOptions(sel);
-  sel.value = getSiteLang();
+  if(sel) sel.value = getSiteLang();
 
-  sel.addEventListener("change", ()=>{
+  sel?.addEventListener("change", ()=>{
     const newLang = setSiteLang(sel.value);
     sel.value = newLang;
 
     applyI18n(document);
+    document.title = t("profile_title");
     toast(t("profile_lang_saved"));
 
     // diğer sayfalar anında güncellensin
@@ -121,7 +134,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
   window.addEventListener("storage",(e)=>{
     if(e.key==="italky_site_lang_v1" || e.key==="italky_lang_ping"){
       applyI18n(document);
-      sel.value = getSiteLang();
+      document.title = t("profile_title");
+      if(sel) sel.value = getSiteLang();
     }
   });
 
