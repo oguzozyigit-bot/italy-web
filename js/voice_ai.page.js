@@ -40,7 +40,7 @@ function isPro(u) {
    DAILY FREE 60s (voice)
    - counts: mic listening seconds + AI wait seconds
    =============================== */
-const FREE_SECONDS_PER_DAY = 60; // PROD: 60 (testte 600 yapabilirsin)
+const FREE_SECONDS_PER_DAY = 600; // PROD: 60 (testte 600 yapabilirsin)
 const MIN_AI_WAIT_CHARGE = 1;
 const MAX_AI_WAIT_CHARGE = 15;
 
