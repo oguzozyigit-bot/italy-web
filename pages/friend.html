@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>ITALKY • Arena Final (Rules-Compliant)</title>
+  <title>ITALKY • Arena Final V25 Fixed</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -213,7 +213,6 @@ function normalize(s){
     .trim();
 }
 
-// Levenshtein similarity (0-100)
 function similarityScore(a,b){
   const s1 = normalize(a), s2 = normalize(b);
   if(!s1 && !s2) return 100;
@@ -248,14 +247,13 @@ const STATE = { IDLE:0, SPEAKING:1, LISTENING:2, RESOLVING:3, PAUSED:4, END:5 };
 
 const setup = {
   playerCount: 2,
-  mode: 'pron', // pron | vocab
+  mode: 'pron', 
   lang: 'en',
 };
 
 function $(id){ return document.getElementById(id); }
 
 function toast(msg){
-  // minimal non-blocking: reuse ovBadge when overlay hidden
   const b = $("ovBadge");
   b.style.display = "block";
   b.textContent = msg;
@@ -267,75 +265,47 @@ const game = {
   state: STATE.IDLE,
   players: [],
   turnIndex: 0,
-
-  // current word object
   current: null,
-  // pool (shuffled)
   pool: [],
   poolPos: 0,
-  usedWords: new Set(), // per set, normalized word
-
-  // per wrong attempt for VAR window (deferred commit)
-  pendingWrong: null, // { playerId, wordKey, targetWord, scoreDelta:-1, wordsDelta:+1 }
+  usedWords: new Set(),
+  pendingWrong: null,
 
   init(){
-    // build players
     this.players = [];
     for(let i=0;i<setup.playerCount;i++){
       const name = ($(`inp${i}`)?.value || `Oyuncu ${i+1}`).trim() || `Oyuncu ${i+1}`;
       this.players.push({
-        id:i, name,
-        score:0, setWins:0,
-        wordsPlayed:0,
-        passRight:1, varRight:1,
-        hintRight:5, // match-long
-        // vocab per-word state:
-        slots:null,
-        hintUsedThisWord:false,
+        id:i, name, score:0, setWins:0, wordsPlayed:0,
+        passRight:1, varRight:1, hintRight:5, slots:null, hintUsedThisWord:false,
       });
     }
-
-    // reset match state
     this.turnIndex = Math.floor(Math.random()*this.players.length);
     this.startNewSet(true);
     $("setupModal").classList.add("hidden");
   },
 
   startNewSet(isFirst=false){
-    // per-set resets
     this.players.forEach(p=>{
-      p.score = 0;
-      p.wordsPlayed = 0;
-      p.passRight = 1;
-      p.varRight = 1;
-      p.slots = null;
-      p.hintUsedThisWord = false;
-      // hintRight NOT reset (match-long)
+      p.score = 0; p.wordsPlayed = 0; p.passRight = 1; p.varRight = 1; p.slots = null; p.hintUsedThisWord = false;
     });
     this.usedWords.clear();
     this.pendingWrong = null;
 
-    // build pool
     const raw = DB[setup.lang] || DB.en;
-    // shuffle copy; NOT duplicating excessively to avoid repeats; rely on re-shuffle if needed
     this.pool = raw.slice().sort(()=>Math.random()-0.5);
     this.poolPos = 0;
 
-    // pick first word
     this.pickNextWordStrict();
     this.state = STATE.IDLE;
     this.updateUI();
     this.startTurnFlow();
   },
 
-  // strict: no repeats within set; if pool insufficient, we reshuffle and if still insufficient, we allow repeats only after warning
   pickNextWordStrict(){
-    const needKey = () => normalize(this.pool[this.poolPos]?.w);
-
     let tries = 0;
     while(tries < this.pool.length){
       if(this.poolPos >= this.pool.length){
-        // reshuffle once
         this.pool = this.pool.slice().sort(()=>Math.random()-0.5);
         this.poolPos = 0;
       }
@@ -348,12 +318,7 @@ const game = {
       }
       tries++;
     }
-
-    // fallback: pool exhausted (DB too small). We must not freeze.
-    // Clear set and warn.
     this.usedWords.clear();
-    toast("Havuz bitti • Tekrarlar başlayabilir");
-    // pick first available
     if(this.poolPos >= this.pool.length){
       this.pool = (DB[setup.lang]||DB.en).slice().sort(()=>Math.random()-0.5);
       this.poolPos = 0;
@@ -362,34 +327,27 @@ const game = {
     this.usedWords.add(normalize(this.current.w));
   },
 
-  // called at start of each turn/word
   startTurnFlow(){
-    // set end?
     if(this.players.every(p=>p.wordsPlayed>=20)){
       this.endSet();
       return;
     }
-    // if current player already finished quota, advance to next eligible
     if(this.players[this.turnIndex].wordsPlayed>=20){
       this.nextPlayer(true);
       return;
     }
 
-    // clear per-word vocab state if new word just picked
     const p = this.players[this.turnIndex];
     if(setup.mode === 'vocab'){
-      // create slots on demand for THIS word (keep during VAR retry)
       if(!p.slots){
         p.slots = this.current.w.split("").map((ch,i)=> i===0 ? ch : "_");
         p.hintUsedThisWord = false;
       }
     } else {
-      // pron mode doesn't use slots
       p.slots = null;
       p.hintUsedThisWord = false;
     }
 
-    // TTS gate in pron mode
     if(setup.mode === 'pron'){
       this.state = STATE.SPEAKING;
       this.updateUI();
@@ -410,7 +368,6 @@ const game = {
     $("pName").style.color = `var(--p${p.id})`;
     $("pCounter").textContent = `${p.wordsPlayed}/20`;
 
-    // word display
     if(setup.mode === 'pron'){
       $("wMain").textContent = this.current.w;
       $("wSub").textContent = this.current.tr;
@@ -430,12 +387,10 @@ const game = {
       $("wHintInfo").textContent = `AÇILAN HARF: ${revealed}/${this.current.w.length}`;
     }
 
-    // button texts
     $("btnPass").textContent = `PAS (${p.passRight})`;
     $("btnHint").textContent = `HARF (${p.hintRight})`;
     $("btnMic").textContent = "🎙️ CEVAPLA";
 
-    // buttons enabled/disabled by state
     const all = [$("btnHint"), $("btnPass"), $("btnMic")];
     if(this.state === STATE.LISTENING){
       all.forEach(b=> b.disabled = true);
@@ -448,9 +403,7 @@ const game = {
     if(this.state === STATE.SPEAKING || this.state === STATE.RESOLVING || this.state === STATE.PAUSED || this.state === STATE.END){
       all.forEach(b=> b.disabled = true);
     } else if(this.state === STATE.IDLE){
-      // enable mic always in idle
       $("btnMic").disabled = false;
-      // pass/hint only if rights
       $("btnPass").disabled = !(p.passRight > 0);
       if(setup.mode === 'vocab'){
         $("btnHint").disabled = !(p.hintRight > 0);
@@ -459,7 +412,6 @@ const game = {
       }
     }
 
-    // bottom bar
     const bar = $("scoreBar");
     bar.innerHTML = "";
     this.players.forEach((pl, i)=>{
@@ -474,7 +426,6 @@ const game = {
     });
   },
 
-  // UI button actions
   action(type){
     if(this.state !== STATE.IDLE) return;
     const p = this.players[this.turnIndex];
@@ -482,8 +433,6 @@ const game = {
     if(type === "pass"){
       if(p.passRight <= 0) return;
       p.passRight -= 1;
-      // new word, same player, no counter inc
-      // also reset per-word vocab state for this player
       p.slots = null;
       p.hintUsedThisWord = false;
       this.pickNextWordStrict();
@@ -495,7 +444,6 @@ const game = {
     if(type === "hint"){
       if(setup.mode !== 'vocab') return;
       if(p.hintRight <= 0) return;
-      // reveal next underscore
       const target = this.current.w;
       const slots = p.slots || target.split("").map((ch,i)=> i===0 ? ch : "_");
       let changed = false;
@@ -506,7 +454,7 @@ const game = {
           break;
         }
       }
-      if(!changed) return; // all revealed
+      if(!changed) return;
       p.hintRight -= 1;
       p.slots = slots;
       p.hintUsedThisWord = true;
@@ -522,10 +470,7 @@ const game = {
 
   startListening(){
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR){
-      alert("Bu cihazda Ses Tanıma (SpeechRecognition) yok.");
-      return;
-    }
+    if(!SR){ alert("Bu cihazda Ses Tanıma (SpeechRecognition) yok."); return; }
     this.state = STATE.LISTENING;
     this.updateUI();
 
@@ -534,7 +479,6 @@ const game = {
     rec.interimResults = false;
     rec.maxAlternatives = 1;
 
-    // watchdog
     const watchdog = setTimeout(()=>{ try{ rec.stop(); }catch{} }, 8000);
 
     rec.onresult = (e)=>{
@@ -549,13 +493,11 @@ const game = {
     };
     rec.onend = ()=>{
       clearTimeout(watchdog);
-      // if still listening, return to idle
       if(this.state === STATE.LISTENING){
         this.state = STATE.IDLE;
         this.updateUI();
       }
     };
-
     rec.start();
   },
 
@@ -582,7 +524,6 @@ const game = {
       badge.textContent = `%${score} BENZERLİK`;
       badge.style.color = "var(--green)";
 
-      // scoring
       const pts = (setup.mode === 'vocab' && p.hintUsedThisWord) ? 1 : 2;
       p.score += pts;
       p.wordsPlayed += 1;
@@ -591,19 +532,15 @@ const game = {
       title.style.color = "var(--green)";
       sub.textContent = `+${pts} PUAN`;
 
-      // reset per-word state for next word
       p.slots = null;
       p.hintUsedThisWord = false;
 
-      // auto advance
       setTimeout(()=> this.finishCommittedTurn(), 1200);
     } else {
-      // WRONG: deferred commit until "DEVAM" or "VAR absent"
       title.textContent = "OLMADI";
       title.style.color = "var(--red)";
       sub.textContent = `Doğrusu: ${target}`;
 
-      // store pending wrong (do NOT change score/wordsPlayed yet)
       this.pendingWrong = {
         playerId: p.id,
         wordKey: normalize(target),
@@ -620,16 +557,11 @@ const game = {
         badge.style.display = "block";
         badge.textContent = `%${score} BENZERLİK`;
         badge.style.color = "var(--red)";
-
-        // auto commit wrong and advance
-        setTimeout(()=>{
-          this.commitWrongAndAdvance();
-        }, 1400);
+        setTimeout(()=>{ this.commitWrongAndAdvance(); }, 1400);
       }
     }
   },
 
-  // overlay buttons
   varObjection(){
     if(this.state !== STATE.RESOLVING) return;
     const p = this.players[this.turnIndex];
@@ -637,19 +569,15 @@ const game = {
     if(p.varRight <= 0) return;
 
     p.varRight -= 1;
-
-    // cancel pending wrong (no commit), repeat same word, same player
     this.pendingWrong = null;
 
     $("overlay").classList.remove("show");
     $("varActions").style.display = "none";
     $("ovBadge").style.display = "none";
 
-    // keep slots state in vocab (do NOT reset)
-    // return to turn flow (retry) – same word, same player
     this.state = STATE.IDLE;
     this.updateUI();
-    this.startTurnFlow(); // will TTS if pron, otherwise idle
+    this.startTurnFlow(); 
   },
 
   varContinue(){
@@ -660,15 +588,11 @@ const game = {
   commitWrongAndAdvance(){
     const p = this.players[this.turnIndex];
     if(this.pendingWrong && this.pendingWrong.playerId === p.id){
-      // commit wrong
       p.score = Math.max(0, p.score + this.pendingWrong.deltaScore);
       p.wordsPlayed += this.pendingWrong.deltaWords;
       this.pendingWrong = null;
-      // reset per-word state for next word
       p.slots = null;
       p.hintUsedThisWord = false;
-    } else {
-      // if no pending, still advance
     }
 
     $("overlay").classList.remove("show");
@@ -679,27 +603,22 @@ const game = {
   },
 
   finishCommittedTurn(){
-    // advance to next word + next player
+    $("overlay").classList.remove("show"); 
     this.pickNextWordStrict();
     this.nextPlayer(false);
   },
 
   nextPlayer(skipQuotaCheck){
-    // advance index
     this.turnIndex = (this.turnIndex + 1) % this.players.length;
-
-    // if next player already finished, keep advancing until eligible or set ends
     if(skipQuotaCheck){
       this.startTurnFlow();
       return;
     }
-
     let guard = 0;
     while(this.players[this.turnIndex].wordsPlayed >= 20 && guard < this.players.length){
       this.turnIndex = (this.turnIndex + 1) % this.players.length;
       guard++;
     }
-
     this.state = STATE.IDLE;
     this.updateUI();
     this.startTurnFlow();
@@ -709,9 +628,7 @@ const game = {
     this.state = STATE.PAUSED;
     $("pauseModal").classList.remove("hidden");
 
-    // compute sorted (copy)
     const sorted = [...this.players].sort((a,b)=> b.score - a.score);
-
     let winner = null;
     if(sorted.length === 1){
       winner = sorted[0];
@@ -720,12 +637,10 @@ const game = {
     }
 
     if(winner){
-      // increment setWins on real player
       const real = this.players.find(x=>x.id===winner.id);
       real.setWins += 1;
     }
 
-    // stats list
     let html = "";
     sorted.forEach(pl=>{
       html += `<div style="display:flex; justify-content:space-between; margin-bottom:6px;">
@@ -734,9 +649,7 @@ const game = {
     });
     $("setStats").innerHTML = html;
 
-    // match winner?
     const matchWinner = this.players.find(x=> x.setWins >= 3) || null;
-
     if(matchWinner){
       $("pauseTitle").textContent = "ŞAMPİYON!";
       $("setWinnerMsg").textContent = `${matchWinner.name} MAÇI KAZANDI!`;
@@ -757,8 +670,6 @@ const game = {
 
   continueGame(){
     $("pauseModal").classList.add("hidden");
-
-    // per-set reset (match-long hint remains)
     this.players.forEach(p=>{
       p.score = 0;
       p.wordsPlayed = 0;
@@ -766,17 +677,12 @@ const game = {
       p.varRight = 1;
       p.slots = null;
       p.hintUsedThisWord = false;
-      // hintRight stays (match-long)
     });
-
     this.usedWords.clear();
     this.pendingWrong = null;
-
-    // rebuild pool (same language)
     const raw = DB[setup.lang] || DB.en;
     this.pool = raw.slice().sort(()=>Math.random()-0.5);
     this.poolPos = 0;
-
     this.pickNextWordStrict();
     this.state = STATE.IDLE;
     this.updateUI();
@@ -792,15 +698,12 @@ const game = {
   }
 };
 
-// --- UI wiring ---
 (function initUI(){
-  // player count
   $("grpPlayers").querySelectorAll(".toggle-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       $("grpPlayers").querySelectorAll(".toggle-btn").forEach(x=>x.classList.remove("active"));
       btn.classList.add("active");
       setup.playerCount = Number(btn.dataset.n);
-
       const container = $("nameInputs");
       container.innerHTML = "";
       const colors = ["var(--p0)","var(--p1)","var(--p2)","var(--p3)"];
@@ -816,7 +719,6 @@ const game = {
     });
   });
 
-  // language
   $("grpLang").querySelectorAll(".lang-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       $("grpLang").querySelectorAll(".lang-btn").forEach(x=>x.classList.remove("active"));
@@ -825,7 +727,6 @@ const game = {
     });
   });
 
-  // mode
   $("grpMode").querySelectorAll(".toggle-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       $("grpMode").querySelectorAll(".toggle-btn").forEach(x=>x.classList.remove("active"));
@@ -834,19 +735,13 @@ const game = {
     });
   });
 
-  // start
   $("btnStart").addEventListener("click", ()=> game.init());
-
-  // main controls
   $("btnPass").addEventListener("click", ()=> game.action("pass"));
   $("btnHint").addEventListener("click", ()=> game.action("hint"));
   $("btnMic").addEventListener("click", ()=> game.action("mic"));
-
-  // overlay actions
   $("btnVarObjection").addEventListener("click", ()=> game.varObjection());
   $("btnVarContinue").addEventListener("click", ()=> game.varContinue());
 })();
 </script>
-
 </body>
 </html>
