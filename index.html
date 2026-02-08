@@ -10,7 +10,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -47,12 +47,12 @@
 
     .action-section { width: 100%; padding: 0 32px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
     
-    /* Google Buton Konteynırı Fix */
+    /* Google Buton Konteynırı */
     #googleBtnContainer { width: 100%; min-height: 44px; display: flex; justify-content: center; }
 
     .glass-btn {
-      width: 100%; height: 44px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);
-      background: #000; color: #fff; font-size: 14px; font-weight: 500;
+      width: 100%; height: 44px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15);
+      background: #000; color: #fff; font-size: 14px; font-weight: 600;
       display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
     }
 
@@ -91,7 +91,7 @@
       <div id="googleBtnContainer"></div>
 
       <div class="glass-btn" onclick="showToast('Apple girişi hazırlanıyor, lütfen Google ile devam edin.')">
-        <span style="font-size: 18px; line-height: 0;"></span>
+        <span style="font-size: 20px; line-height: 0; margin-bottom: 3px;"></span>
         <span>Apple Hesabın İle Devam Et</span>
       </div>
     </div>
@@ -120,24 +120,24 @@
 
   function startApp() {
     if (window.google?.accounts?.id) {
-      initAuth(); // Kimlik bilgilerini hazırla
+      initAuth(); 
       
-      // Resmi Google Butonunu Render Et
+      // Sadece G İkonu ve "Google ile devam et" metni
       google.accounts.id.renderButton(
         document.getElementById("googleBtnContainer"),
         { 
+          type: "standard",
           theme: "outline", 
           size: "large", 
-          width: "320", // Apple butonuyla genişliği eşitlemek için
           text: "continue_with",
           shape: "rectangular",
-          logo_alignment: "left"
+          logo_alignment: "left",
+          width: "320" 
         }
       );
     }
   }
 
-  // Google kütüphanesinin yüklenmesini bekle
   let checkGoogle = setInterval(() => {
     if (window.google?.accounts?.id) {
       clearInterval(checkGoogle);
