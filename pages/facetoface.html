@@ -1,185 +1,189 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>italkyAI • Yüz Yüze Çeviri</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>italkyAI • Face to Face Translator</title>
 
-    <style>
-        :root {
-            --bg-void: #030014;
-            --text-main: #fff;
-            --text-muted: rgba(255, 255, 255, 0.5);
-            --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
+<link rel="icon" href="data:," />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body {
-            margin: 0; padding: 0; width: 100%; height: 100dvh;
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-void);
-            color: var(--text-main);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
+<style>
+:root{
+  --bg:#030014;
+  --glass:rgba(255,255,255,.08);
+  --border:rgba(255,255,255,.15);
+  --text:#fff;
+  --muted:#9ca3af;
+  --neon-blue:#00f3ff;
+  --neon-pink:#ff00ff;
+  --neon-green:#00e676;
+  --danger:#ff1744;
+  --radius:18px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
 
-        /* Arka Plan Efektleri */
-        .orb {
-            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; z-index: 0;
-        }
-        .orb-top { top: -10%; right: -10%; width: 60vw; height: 60vw; background: #4338ca; }
-        .orb-bottom { bottom: -10%; left: -10%; width: 50vw; height: 50vw; background: #5b21b6; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--bg);
+  font-family:Outfit,sans-serif;
+  color:var(--text);
+  overflow:hidden;
+}
 
-        .app-container {
-            width: 100%; max-width: 480px; height: 100%; margin: 0 auto;
-            position: relative; z-index: 10; display: flex; flex-direction: column;
-            background: rgba(8, 8, 20, 0.6); backdrop-filter: blur(25px);
-        }
+.app{
+  max-width:480px;
+  height:100%;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+}
 
-        /* Header */
-        .header {
-            padding: 20px; display: flex; align-items: center; justify-content: space-between;
-        }
-        .back-btn {
-            width: 40px; height: 40px; border-radius: 12px; background: var(--glass);
-            border: 1px solid var(--glass-border); color: #fff; display: flex;
-            align-items: center; justify-content: center; cursor: pointer; text-decoration: none;
-        }
+/* TOP */
+.top{
+  padding:calc(14px + var(--safe-top)) 16px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.logo{
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:.3px;
+}
+.logo span{color:var(--neon-blue)}
+.mode{
+  font-size:12px;
+  color:var(--muted);
+}
 
-        /* Karşılıklı Çeviri Alanı */
-        .translate-area {
-            flex: 1; display: flex; flex-direction: column; padding: 15px; gap: 15px;
-        }
+/* VIDEO */
+.video-wrap{
+  position:relative;
+  margin:0 16px;
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:#000;
+  border:1px solid var(--border);
+}
+video{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+}
+.video-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:10px;
+  background:linear-gradient(to top, rgba(0,0,0,.6), transparent);
+}
+.lang-chip{
+  background:rgba(0,0,0,.55);
+  border:1px solid var(--border);
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:13px;
+}
 
-        /* Bölmeler (Üst ve Alt Kişi) */
-        .person-box {
-            flex: 1; border-radius: 24px; padding: 20px;
-            display: flex; flex-direction: column; justify-content: space-between;
-            background: var(--glass); border: 1px solid var(--glass-border);
-            position: relative; transition: 0.3s;
-        }
-        .person-box.active { border-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
+/* CONTROLS */
+.controls{
+  margin:14px 16px 0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.select{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  font-size:14px;
+  color:#fff;
+}
+button{
+  grid-column:span 2;
+  margin-top:10px;
+  height:52px;
+  border-radius:16px;
+  border:none;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+  background:linear-gradient(135deg,var(--neon-blue),var(--neon-pink));
+  color:#000;
+}
 
-        /* Üsttekini ters çevir (Yüz yüze bakmak için) */
-        .top-person { transform: rotate(180deg); }
+/* RESULT */
+.result{
+  margin:14px 16px;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  font-size:15px;
+  line-height:1.5;
+  min-height:72px;
+}
+.result span{
+  color:var(--neon-green);
+  font-weight:700;
+}
 
-        .lang-label { font-size: 11px; font-weight: 800; color: #6366f1; text-transform: uppercase; letter-spacing: 1px; }
-        .transcript { font-size: 20px; font-weight: 600; margin-top: 10px; line-height: 1.4; height: 60px; overflow-y: auto; }
-        .translation { font-size: 16px; color: var(--text-muted); font-style: italic; }
-
-        /* Mic Button */
-        .mic-trigger {
-            width: 70px; height: 70px; border-radius: 50%;
-            background: var(--ai-grad); border: none; color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; position: absolute; left: 50%; top: 50%;
-            transform: translate(-50%, -50%); z-index: 20;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-        }
-        .mic-trigger svg { width: 30px; height: 30px; fill: currentColor; }
-
-        /* Animasyonlu Ses Dalgaları (Kayıt sırasında) */
-        .waves { display: none; gap: 3px; height: 20px; align-items: center; }
-        .person-box.active .waves { display: flex; }
-        .wave-bar { width: 3px; height: 100%; background: #6366f1; border-radius: 10px; animation: wave 1s infinite alternate; }
-        @keyframes wave { from { height: 5px; } to { height: 20px; } }
-
-        /* Footer / Kontroller */
-        .controls {
-            padding: 20px; background: rgba(0,0,0,0.2); border-top: 1px solid var(--glass-border);
-            display: flex; justify-content: center; gap: 20px;
-        }
-        .lang-select {
-            background: var(--glass); border: 1px solid var(--glass-border);
-            color: #fff; padding: 8px 15px; border-radius: 10px; font-weight: 600; font-size: 13px;
-        }
-    </style>
+/* FOOT */
+.footer{
+  margin-top:auto;
+  padding:10px 16px calc(12px + var(--safe-bottom));
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+}
+</style>
 </head>
+
 <body>
+<div class="app">
 
-    <div class="orb orb-top"></div>
-    <div class="orb orb-bottom"></div>
+  <!-- TOP -->
+  <div class="top">
+    <div class="logo">italky<span>AI</span></div>
+    <div class="mode">Face to Face</div>
+  </div>
 
-    <div class="app-container">
-        <div class="header">
-            <a href="home.html" class="back-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-            </a>
-            <div style="font-weight: 800; font-size: 15px; letter-spacing: 1px;">YÜZ YÜZE ÇEVİRİ</div>
-            <div style="width: 40px;"></div> </div>
-
-        <div class="translate-area">
-            <div class="person-box top-person" id="topBox">
-                <div>
-                    <div class="lang-label">ENGLISH</div>
-                    <div class="transcript" id="topTranscript">How can I help you today?</div>
-                    <div class="translation" id="topTranslation">Bugün size nasıl yardımcı olabilirim?</div>
-                </div>
-                <div class="waves">
-                    <div class="wave-bar" style="animation-delay: 0.1s"></div>
-                    <div class="wave-bar" style="animation-delay: 0.3s"></div>
-                    <div class="wave-bar" style="animation-delay: 0.5s"></div>
-                </div>
-            </div>
-
-            <button class="mic-trigger" onclick="toggleMic()">
-                <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-            </button>
-
-            <div class="person-box" id="bottomBox">
-                <div class="waves">
-                    <div class="wave-bar" style="animation-delay: 0.2s"></div>
-                    <div class="wave-bar" style="animation-delay: 0.4s"></div>
-                    <div class="wave-bar" style="animation-delay: 0.6s"></div>
-                </div>
-                <div>
-                    <div class="lang-label">TÜRKÇE</div>
-                    <div class="transcript" id="bottomTranscript">Lütfen bana yolu tarif eder misiniz?</div>
-                    <div class="translation" id="bottomTranslation">Could you please show me the way?</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <select class="lang-select">
-                <option>TÜRKÇE</option>
-                <option>İNGİLİZCE</option>
-                <option>ALMANCA</option>
-            </select>
-            <div style="display: flex; align-items: center; justify-content: center;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#6366f1"><path d="M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>
-            </div>
-            <select class="lang-select">
-                <option>İNGİLİZCE</option>
-                <option>TÜRKÇE</option>
-                <option>FRANSIZCA</option>
-            </select>
-        </div>
+  <!-- VIDEO -->
+  <div class="video-wrap">
+    <video id="camera" autoplay muted playsinline></video>
+    <div class="video-overlay">
+      <div class="lang-chip" id="fromLang">🎙️ Konuşulan Dil</div>
+      <div class="lang-chip" id="toLang">🧠 Çeviri Dili</div>
     </div>
+  </div>
 
-    <script>
-        let isRecording = false;
+  <!-- CONTROLS -->
+  <div class="controls">
+    <select id="fromSelect" class="select"></select>
+    <select id="toSelect" class="select"></select>
+    <button id="startBtn">🎧 Dinlemeyi Başlat</button>
+  </div>
 
-        function toggleMic() {
-            isRecording = !isRecording;
-            const micBtn = document.querySelector('.mic-trigger');
-            const bottomBox = document.getElementById('bottomBox');
+  <!-- RESULT -->
+  <div class="result" id="resultBox">
+    <span>Hazır.</span> Konuşmaya başlayabilirsin.
+  </div>
 
-            if (isRecording) {
-                micBtn.style.transform = 'translate(-50%, -50%) scale(1.1)';
-                micBtn.style.boxShadow = '0 0 40px rgba(99, 102, 241, 0.8)';
-                bottomBox.classList.add('active');
-            } else {
-                micBtn.style.transform = 'translate(-50%, -50%) scale(1)';
-                micBtn.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.4)';
-                bottomBox.classList.remove('active');
-            }
-        }
-    </script>
+  <!-- FOOT -->
+  <div class="footer">
+    Gerçek zamanlı yüz yüze çeviri • italkyAI
+  </div>
+
+</div>
+
+<script type="module" src="/js/facetoface_page.js"></script>
 </body>
 </html>
