@@ -158,7 +158,6 @@ function speak(text, langCode){
 
 /* ===============================
    ✅ NEW: latest translation marker
-   - For each side, only the most recent ".bubble.me" becomes ".is-latest"
    =============================== */
 function markLatestTranslation(side){
   const wrap = (side === "top") ? $("topBody") : $("botBody");
@@ -171,6 +170,20 @@ function markLatestTranslation(side){
   const allMe = wrap.querySelectorAll(".bubble.me");
   const last = allMe[allMe.length - 1];
   if(last) last.classList.add("is-latest");
+}
+
+/* ===============================
+   ✅ NEW: clear chat
+   =============================== */
+function clearChat(){
+  closeAllPop();
+  stopAll();
+  try{ window.speechSynthesis?.cancel?.(); }catch{}
+
+  const top = $("topBody");
+  const bot = $("botBody");
+  if(top) top.innerHTML = "";
+  if(bot) bot.innerHTML = "";
 }
 
 /* ===============================
@@ -210,7 +223,7 @@ function addBubble(side, kind, text, langForSpeak){
 
   wrap.appendChild(row);
 
-  // ✅ NEW: “son çeviri patlasın”
+  // “son çeviri patlasın”
   if(kind === "me"){
     markLatestTranslation(side);
   }
@@ -228,7 +241,7 @@ function setMicUI(which, on){
 }
 
 /* ===============================
-   Popovers (no search, no keyboard)
+   Popovers
    =============================== */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
@@ -416,6 +429,10 @@ function bindNav(){
     if(history.length > 1) history.back();
     else location.href="/pages/home.html";
   });
+
+  $("clearChat")?.addEventListener("click", ()=>{
+    clearChat();
+  });
 }
 
 function bindLangButtons(){
@@ -460,13 +477,11 @@ function refreshUILang(){
   if(now === UI_LANG) return;
   UI_LANG = now;
 
-  // update chips
   const t1 = $("topLangTxt");
   const t2 = $("botLangTxt");
   if(t1) t1.textContent = labelChip(topLang);
   if(t2) t2.textContent = labelChip(botLang);
 
-  // update lists if open
   if($("pop-top")?.classList.contains("show")) renderPop("top");
   if($("pop-bot")?.classList.contains("show")) renderPop("bot");
 }
