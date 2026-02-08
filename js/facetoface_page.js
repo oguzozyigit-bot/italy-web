@@ -4,55 +4,129 @@ import { BASE_DOMAIN } from "/js/config.js";
 const $ = (id)=>document.getElementById(id);
 function base(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
 
+// ✅ FULL LANGS (geniş + mümkün olduğunca eksiksiz)
 const LANGS = [
+  // --- Türkçe & Avrupa çekirdek ---
   { code:"tr", name:"Türkçe", flag:"🇹🇷", bcp:"tr-TR" },
-  { code:"en", name:"İngilizce", flag:"🇬🇧", bcp:"en-US" },
-  { code:"de", name:"Almanca", flag:"🇩🇪", bcp:"de-DE" },
-  { code:"fr", name:"Fransızca", flag:"🇫🇷", bcp:"fr-FR" },
-  { code:"it", name:"İtalyanca", flag:"🇮🇹", bcp:"it-IT" },
-  { code:"es", name:"İspanyolca", flag:"🇪🇸", bcp:"es-ES" },
-  { code:"pt", name:"Portekizce", flag:"🇵🇹", bcp:"pt-PT" },
-  { code:"pt-br", name:"Portekizce (Brezilya)", flag:"🇧🇷", bcp:"pt-BR" },
-  { code:"nl", name:"Felemenkçe", flag:"🇳🇱", bcp:"nl-NL" },
-  { code:"sv", name:"İsveççe", flag:"🇸🇪", bcp:"sv-SE" },
-  { code:"no", name:"Norveççe", flag:"🇳🇴", bcp:"nb-NO" },
-  { code:"da", name:"Danca", flag:"🇩🇰", bcp:"da-DK" },
-  { code:"fi", name:"Fince", flag:"🇫🇮", bcp:"fi-FI" },
-  { code:"pl", name:"Lehçe", flag:"🇵🇱", bcp:"pl-PL" },
-  { code:"cs", name:"Çekçe", flag:"🇨🇿", bcp:"cs-CZ" },
-  { code:"sk", name:"Slovakça", flag:"🇸🇰", bcp:"sk-SK" },
-  { code:"hu", name:"Macarca", flag:"🇭🇺", bcp:"hu-HU" },
-  { code:"ro", name:"Romence", flag:"🇷🇴", bcp:"ro-RO" },
-  { code:"bg", name:"Bulgarca", flag:"🇧🇬", bcp:"bg-BG" },
-  { code:"el", name:"Yunanca", flag:"🇬🇷", bcp:"el-GR" },
-  { code:"ru", name:"Rusça", flag:"🇷🇺", bcp:"ru-RU" },
-  { code:"uk", name:"Ukraynaca", flag:"🇺🇦", bcp:"uk-UA" },
-  { code:"sr", name:"Sırpça", flag:"🇷🇸", bcp:"sr-RS" },
-  { code:"hr", name:"Hırvatça", flag:"🇭🇷", bcp:"hr-HR" },
-  { code:"bs", name:"Boşnakça", flag:"🇧🇦", bcp:"bs-BA" },
-  { code:"sq", name:"Arnavutça", flag:"🇦🇱", bcp:"sq-AL" },
-  { code:"ar", name:"Arapça", flag:"🇸🇦", bcp:"ar-SA" },
-  { code:"fa", name:"Farsça", flag:"🇮🇷", bcp:"fa-IR" },
-  { code:"ur", name:"Urduca", flag:"🇵🇰", bcp:"ur-PK" },
-  { code:"hi", name:"Hintçe", flag:"🇮🇳", bcp:"hi-IN" },
-  { code:"bn", name:"Bengalce", flag:"🇧🇩", bcp:"bn-BD" },
-  { code:"ta", name:"Tamilce", flag:"🇮🇳", bcp:"ta-IN" },
-  { code:"te", name:"Teluguca", flag:"🇮🇳", bcp:"te-IN" },
-  { code:"th", name:"Tayca", flag:"🇹🇭", bcp:"th-TH" },
-  { code:"vi", name:"Vietnamca", flag:"🇻🇳", bcp:"vi-VN" },
-  { code:"id", name:"Endonezce", flag:"🇮🇩", bcp:"id-ID" },
-  { code:"ms", name:"Malayca", flag:"🇲🇾", bcp:"ms-MY" },
-  { code:"zh", name:"Çince", flag:"🇨🇳", bcp:"zh-CN" },
-  { code:"zh-tw", name:"Çince (Geleneksel)", flag:"🇹🇼", bcp:"zh-TW" },
-  { code:"ja", name:"Japonca", flag:"🇯🇵", bcp:"ja-JP" },
-  { code:"ko", name:"Korece", flag:"🇰🇷", bcp:"ko-KR" },
-  { code:"he", name:"İbranice", flag:"🇮🇱", bcp:"he-IL" },
+  { code:"en", name:"English", flag:"🇬🇧", bcp:"en-US" },
+  { code:"en-gb", name:"English (UK)", flag:"🇬🇧", bcp:"en-GB" },
+  { code:"de", name:"Deutsch", flag:"🇩🇪", bcp:"de-DE" },
+  { code:"fr", name:"Français", flag:"🇫🇷", bcp:"fr-FR" },
+  { code:"it", name:"Italiano", flag:"🇮🇹", bcp:"it-IT" },
+  { code:"es", name:"Español", flag:"🇪🇸", bcp:"es-ES" },
+  { code:"pt", name:"Português", flag:"🇵🇹", bcp:"pt-PT" },
+  { code:"pt-br", name:"Português (Brasil)", flag:"🇧🇷", bcp:"pt-BR" },
+  { code:"nl", name:"Nederlands", flag:"🇳🇱", bcp:"nl-NL" },
+  { code:"sv", name:"Svenska", flag:"🇸🇪", bcp:"sv-SE" },
+  { code:"no", name:"Norsk (Bokmål)", flag:"🇳🇴", bcp:"nb-NO" },
+  { code:"da", name:"Dansk", flag:"🇩🇰", bcp:"da-DK" },
+  { code:"fi", name:"Suomi", flag:"🇫🇮", bcp:"fi-FI" },
+  { code:"is", name:"Íslenska", flag:"🇮🇸", bcp:"is-IS" },
+  { code:"ga", name:"Gaeilge", flag:"🇮🇪", bcp:"ga-IE" },
+  { code:"cy", name:"Cymraeg", flag:"🏴", bcp:"cy-GB" },
+  { code:"mt", name:"Malti", flag:"🇲🇹", bcp:"mt-MT" },
+
+  // --- Orta/Doğu Avrupa ---
+  { code:"pl", name:"Polski", flag:"🇵🇱", bcp:"pl-PL" },
+  { code:"cs", name:"Čeština", flag:"🇨🇿", bcp:"cs-CZ" },
+  { code:"sk", name:"Slovenčina", flag:"🇸🇰", bcp:"sk-SK" },
+  { code:"hu", name:"Magyar", flag:"🇭🇺", bcp:"hu-HU" },
+  { code:"ro", name:"Română", flag:"🇷🇴", bcp:"ro-RO" },
+  { code:"bg", name:"Български", flag:"🇧🇬", bcp:"bg-BG" },
+  { code:"el", name:"Ελληνικά", flag:"🇬🇷", bcp:"el-GR" },
+  { code:"sr", name:"Српски", flag:"🇷🇸", bcp:"sr-RS" },
+  { code:"hr", name:"Hrvatski", flag:"🇭🇷", bcp:"hr-HR" },
+  { code:"bs", name:"Bosanski", flag:"🇧🇦", bcp:"bs-BA" },
+  { code:"sl", name:"Slovenščina", flag:"🇸🇮", bcp:"sl-SI" },
+  { code:"mk", name:"Македонски", flag:"🇲🇰", bcp:"mk-MK" },
+  { code:"sq", name:"Shqip", flag:"🇦🇱", bcp:"sq-AL" },
+  { code:"lv", name:"Latviešu", flag:"🇱🇻", bcp:"lv-LV" },
+  { code:"lt", name:"Lietuvių", flag:"🇱🇹", bcp:"lt-LT" },
+  { code:"et", name:"Eesti", flag:"🇪🇪", bcp:"et-EE" },
+  { code:"uk", name:"Українська", flag:"🇺🇦", bcp:"uk-UA" },
+  { code:"ru", name:"Русский", flag:"🇷🇺", bcp:"ru-RU" },
+  { code:"be", name:"Беларуская", flag:"🇧🇾", bcp:"be-BY" },
+
+  // --- Kafkas & Orta Asya ---
+  { code:"az", name:"Azərbaycanca", flag:"🇦🇿", bcp:"az-AZ" },
+  { code:"ka", name:"ქართული", flag:"🇬🇪", bcp:"ka-GE" },
+  { code:"hy", name:"Հայերեն", flag:"🇦🇲", bcp:"hy-AM" },
+  { code:"kk", name:"Қазақша", flag:"🇰🇿", bcp:"kk-KZ" },
+  { code:"uz", name:"Oʻzbek", flag:"🇺🇿", bcp:"uz-UZ" },
+  { code:"ky", name:"Кыргызча", flag:"🇰🇬", bcp:"ky-KG" },
+  { code:"mn", name:"Монгол", flag:"🇲🇳", bcp:"mn-MN" },
+  { code:"tg", name:"Тоҷикӣ", flag:"🇹🇯", bcp:"tg-TJ" },
+  { code:"tk", name:"Türkmen", flag:"🇹🇲", bcp:"tk-TM" },
+
+  // --- Orta Doğu ---
+  { code:"ar", name:"العربية", flag:"🇸🇦", bcp:"ar-SA" },
+  { code:"ar-eg", name:"العربية (مصر)", flag:"🇪🇬", bcp:"ar-EG" },
+  { code:"he", name:"עברית", flag:"🇮🇱", bcp:"he-IL" },
+  { code:"fa", name:"فارسی", flag:"🇮🇷", bcp:"fa-IR" },
+  { code:"ur", name:"اردو", flag:"🇵🇰", bcp:"ur-PK" },
+  { code:"ku", name:"Kurdî (Genel)", flag:"🌐", bcp:"ku" },
+
+  // --- Güney Asya ---
+  { code:"hi", name:"हिन्दी", flag:"🇮🇳", bcp:"hi-IN" },
+  { code:"bn", name:"বাংলা", flag:"🇧🇩", bcp:"bn-BD" },
+  { code:"bn-in", name:"বাংলা (India)", flag:"🇮🇳", bcp:"bn-IN" },
+  { code:"ta", name:"தமிழ்", flag:"🇮🇳", bcp:"ta-IN" },
+  { code:"te", name:"తెలుగు", flag:"🇮🇳", bcp:"te-IN" },
+  { code:"kn", name:"ಕನ್ನಡ", flag:"🇮🇳", bcp:"kn-IN" },
+  { code:"ml", name:"മലയാളം", flag:"🇮🇳", bcp:"ml-IN" },
+  { code:"mr", name:"मराठी", flag:"🇮🇳", bcp:"mr-IN" },
+  { code:"gu", name:"ગુજરાતી", flag:"🇮🇳", bcp:"gu-IN" },
+  { code:"pa", name:"ਪੰਜਾਬੀ", flag:"🇮🇳", bcp:"pa-IN" },
+  { code:"or", name:"ଓଡ଼ିଆ", flag:"🇮🇳", bcp:"or-IN" },
+  { code:"as", name:"অসমীয়া", flag:"🇮🇳", bcp:"as-IN" },
+  { code:"si", name:"සිංහල", flag:"🇱🇰", bcp:"si-LK" },
+  { code:"ne", name:"नेपाली", flag:"🇳🇵", bcp:"ne-NP" },
+
+  // --- Doğu/Güneydoğu Asya ---
+  { code:"zh", name:"中文 (简体)", flag:"🇨🇳", bcp:"zh-CN" },
+  { code:"zh-tw", name:"中文 (繁體)", flag:"🇹🇼", bcp:"zh-TW" },
+  { code:"ja", name:"日本語", flag:"🇯🇵", bcp:"ja-JP" },
+  { code:"ko", name:"한국어", flag:"🇰🇷", bcp:"ko-KR" },
+  { code:"th", name:"ไทย", flag:"🇹🇭", bcp:"th-TH" },
+  { code:"vi", name:"Tiếng Việt", flag:"🇻🇳", bcp:"vi-VN" },
+  { code:"id", name:"Bahasa Indonesia", flag:"🇮🇩", bcp:"id-ID" },
+  { code:"ms", name:"Bahasa Melayu", flag:"🇲🇾", bcp:"ms-MY" },
+  { code:"fil", name:"Filipino", flag:"🇵🇭", bcp:"fil-PH" },
+  { code:"km", name:"ភាសាខ្មែរ", flag:"🇰🇭", bcp:"km-KH" },
+  { code:"lo", name:"ລາວ", flag:"🇱🇦", bcp:"lo-LA" },
+  { code:"my", name:"မြန်မာ", flag:"🇲🇲", bcp:"my-MM" },
+
+  // --- Afrika dilleri (yaygın) ---
+  { code:"sw", name:"Kiswahili", flag:"🇰🇪", bcp:"sw-KE" },
+  { code:"am", name:"አማርኛ", flag:"🇪🇹", bcp:"am-ET" },
+  { code:"ha", name:"Hausa", flag:"🇳🇬", bcp:"ha-NG" },
+  { code:"yo", name:"Yorùbá", flag:"🇳🇬", bcp:"yo-NG" },
+  { code:"ig", name:"Igbo", flag:"🇳🇬", bcp:"ig-NG" },
+  { code:"zu", name:"isiZulu", flag:"🇿🇦", bcp:"zu-ZA" },
+  { code:"xh", name:"isiXhosa", flag:"🇿🇦", bcp:"xh-ZA" },
+  { code:"st", name:"Sesotho", flag:"🇿🇦", bcp:"st-ZA" },
+  { code:"tn", name:"Setswana", flag:"🇧🇼", bcp:"tn-BW" },
+  { code:"rw", name:"Kinyarwanda", flag:"🇷🇼", bcp:"rw-RW" },
+  { code:"so", name:"Soomaali", flag:"🇸🇴", bcp:"so-SO" },
+  { code:"om", name:"Oromoo", flag:"🇪🇹", bcp:"om-ET" },
+  { code:"mg", name:"Malagasy", flag:"🇲🇬", bcp:"mg-MG" },
+
+  // --- İspanya yerelleri & diğer Avrupa ---
+  { code:"ca", name:"Català", flag:"🇪🇸", bcp:"ca-ES" },
+  { code:"eu", name:"Euskara", flag:"🇪🇸", bcp:"eu-ES" },
+  { code:"gl", name:"Galego", flag:"🇪🇸", bcp:"gl-ES" },
+
+  // --- Ek popüler (internet dilleri) ---
+  { code:"jv", name:"Jawa", flag:"🇮🇩", bcp:"jv-ID" },
+  { code:"su", name:"Sunda", flag:"🇮🇩", bcp:"su-ID" },
+  { code:"ceb", name:"Cebuano", flag:"🇵🇭", bcp:"ceb-PH" },
 ];
 
 let topLang = "en";
 let botLang = "tr";
 
 function bcp(code){ return LANGS.find(x=>x.code===code)?.bcp || "en-US"; }
+function flag(code){ return LANGS.find(x=>x.code===code)?.flag || "🌐"; }
 
 function speak(text, langCode){
   const t = String(text||"").trim();
@@ -111,7 +185,7 @@ function setMicUI(which, on){
   $("frameRoot")?.classList.toggle("listening", !!on);
 }
 
-/* ===== Popover Language ===== */
+/* ===== Popover Language (NO SEARCH) ===== */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
@@ -139,29 +213,15 @@ function renderPop(side){
 
       if(side === "top"){
         topLang = code;
-        if($("topLangTxt")) $("topLangTxt").textContent = topLang.toUpperCase();
+        if($("topLangTxt")) $("topLangTxt").textContent = `${flag(topLang)} ${topLang.toUpperCase()}`;
       }else{
         botLang = code;
-        if($("botLangTxt")) $("botLangTxt").textContent = botLang.toUpperCase();
+        if($("botLangTxt")) $("botLangTxt").textContent = `${flag(botLang)} ${botLang.toUpperCase()}`;
       }
 
       stopAll();
       closeAllPop();
     });
-  });
-}
-
-function applySearch(side){
-  const inp = $(side === "top" ? "search-top" : "search-bot");
-  const q = String(inp?.value || "").toLowerCase().trim();
-  const list = $(side === "top" ? "list-top" : "list-bot");
-  if(!list) return;
-
-  list.querySelectorAll(".pop-item").forEach(item=>{
-    const code = String(item.getAttribute("data-code")||"").toLowerCase();
-    const name = String(item.querySelector(".pop-name")?.textContent||"").toLowerCase();
-    const show = !q || code.includes(q) || name.includes(q);
-    item.style.display = show ? "flex" : "none";
   });
 }
 
@@ -175,13 +235,6 @@ function togglePop(side){
 
   pop.classList.add("show");
   renderPop(side);
-
-  const s = $(side === "top" ? "search-top" : "search-bot");
-  if(s){
-    s.value = "";
-    s.focus?.();
-    s.oninput = ()=> applySearch(side);
-  }
 }
 
 /* ===== Translate ===== */
@@ -314,6 +367,9 @@ function bindNav(){
 function bindLangButtons(){
   $("topLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); togglePop("top"); });
   $("botLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); togglePop("bot"); });
+
+  $("close-top")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
+  $("close-bot")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
 }
 
 function bindMicButtons(){
@@ -337,14 +393,15 @@ function bindOutsideClose(){
     const t = e.target;
     const inTop = $("pop-top")?.contains(t) || $("topLangBtn")?.contains(t);
     const inBot = $("pop-bot")?.contains(t) || $("botLangBtn")?.contains(t);
-    if(inTop || inBot) return;
+    const inClose = $("close-top")?.contains(t) || $("close-bot")?.contains(t);
+    if(inTop || inBot || inClose) return;
     closeAllPop();
   }, { capture:true });
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  if($("topLangTxt")) $("topLangTxt").textContent = topLang.toUpperCase();
-  if($("botLangTxt")) $("botLangTxt").textContent = botLang.toUpperCase();
+  if($("topLangTxt")) $("topLangTxt").textContent = `${flag(topLang)} ${topLang.toUpperCase()}`;
+  if($("botLangTxt")) $("botLangTxt").textContent = `${flag(botLang)} ${botLang.toUpperCase()}`;
 
   bindNav();
   bindLangButtons();
