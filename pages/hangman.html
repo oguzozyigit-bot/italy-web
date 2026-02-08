@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Neon Hangman Multiplayer</title>
+  <title>italkyAI • Neon Hangman Turnuva</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,45 +24,32 @@
     .cosmos { position: absolute; inset: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, #1a0208 0%, #02000a 80%); z-index: 0; }
     .mobile-frame { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; position: relative; z-index: 10; display: flex; flex-direction: column; background: rgba(2, 0, 10, 0.85); backdrop-filter: blur(35px); }
 
-    /* OVERLAYS */
-    .overlay { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; padding: 30px; text-align: center; overflow-y: auto; }
+    .overlay { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: flex; flex-direction: column; align-items: center; padding: 30px; text-align: center; overflow-y: auto; scrollbar-width: none; }
+    .overlay::-webkit-scrollbar { display: none; }
     .hidden { display: none !important; }
     
-    .setup-title { font-family: 'Space Grotesk'; font-size: 28px; margin-bottom: 20px; color: var(--lacivert); }
-    .input-group { width: 100%; margin-bottom: 15px; }
-    .neon-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 600; margin-top: 5px; }
-    
-    .grid-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
+    /* OYUNCU EKLEME ALANI */
+    .player-row { display: flex; gap: 10px; width: 100%; margin-bottom: 10px; align-items: center; }
+    .neon-input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 600; }
+    .del-btn { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--burgundy); background: rgba(139, 38, 53, 0.1); color: var(--burgundy); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .add-player-btn { width: 100%; padding: 12px; border-radius: 12px; border: 2px dashed rgba(99, 102, 241, 0.4); color: var(--lacivert); font-weight: 800; cursor: pointer; margin-bottom: 20px; background: none; }
+
     .l-btn { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; cursor: pointer; font-size: 12px; }
     .active-opt { border-color: var(--lacivert); background: rgba(99, 102, 241, 0.2); }
+    .big-btn { margin-top: 15px; width: 100%; padding: 14px; border-radius: 15px; border: none; background: var(--ai-grad); color: #fff; font-weight: 900; cursor: pointer; }
 
-    /* TOPBAR */
     .topbar { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .player-indicator { font-size: 12px; font-weight: 900; color: var(--ai-grad); }
-
-    /* GAME UI */
-    .stats { width: 100%; display: flex; gap: 8px; padding: 15px; }
-    .stat-box { flex: 1; padding: 10px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); text-align: center; }
-    .s-val { font-weight: 900; font-size: 14px; color: var(--lacivert); }
     
-    /* HANGMAN DRAWING */
-    .stage { height: 80px; width: 100px; position: relative; border-bottom: 2px solid #fff; margin: 0 auto; }
-    .p { position: absolute; background: #fff; display: none; }
-    .p.show { display: block; }
+    /* OYUN ALANI */
+    .word-area { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; }
+    .word-grid { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+    .char-slot { width: 30px; height: 40px; border-bottom: 3px solid var(--burgundy); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; }
+    .tr-meaning { font-size: 16px; color: var(--muted); font-weight: 600; font-style: italic; opacity: 0.7; }
 
-    /* KART & KLAVYE */
-    .word-grid { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; padding: 15px; min-height: 45px; }
-    .char-slot { width: 28px; height: 35px; border-bottom: 2px solid var(--burgundy); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; }
-    
-    .keyboard { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; width: 100%; padding: 15px; margin-top: auto; }
-    .key { height: 38px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; font-size: 12px; cursor: pointer; }
-
+    .keyboard { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; width: 100%; padding: 20px; margin-top: auto; }
+    .key { height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; cursor: pointer; }
     .modal { position: absolute; inset: 0; background: rgba(2,0,10,0.98); z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
     .modal.active { display: flex; }
-    .big-btn { margin-top: 15px; width: 100%; padding: 14px; border-radius: 15px; border: none; background: var(--ai-grad); color: #fff; font-weight: 900; cursor: pointer; }
-    
-    .leaderboard { width: 100%; background: rgba(255,255,255,0.05); border-radius: 15px; padding: 15px; margin-top: 20px; }
-    .lb-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
   </style>
 </head>
 <body>
@@ -71,19 +58,18 @@
   <div class="mobile-frame">
     
     <div class="overlay" id="setupOverlay">
-      <h1 class="setup-title">Oyun Ayarları</h1>
+      <h1 style="font-family:'Space Grotesk'; font-size:24px; margin-bottom:20px;">TURNUVA AYARLARI</h1>
       
-      <div class="input-group">
-        <label style="font-size:12px; font-weight:800; opacity:0.6;">OYUNCULAR (1-4)</label>
-        <div id="playerInputs">
-            <input type="text" class="neon-input" placeholder="1. Oyuncu Adı" id="p1">
-            <input type="text" class="neon-input" placeholder="2. Oyuncu Adı (Opsiyonel)" id="p2">
-        </div>
+      <div id="playerContainer" style="width:100%;">
+          <div class="player-row">
+            <input type="text" class="neon-input p-input" placeholder="1. Oyuncu Adı">
+            <div style="width:44px;"></div> </div>
       </div>
+      <button class="add-player-btn" onclick="addPlayerField()">+ YENİ OYUNCU EKLE</button>
 
-      <div class="input-group">
-        <label style="font-size:12px; font-weight:800; opacity:0.6;">ZORLUK SEVİYESİ</label>
-        <div class="grid-btns">
+      <div style="width:100%; margin-bottom:20px;">
+        <label style="font-size:11px; font-weight:800; opacity:0.6; display:block; text-align:left; margin-bottom:8px;">ZORLUK</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
             <button class="l-btn difficulty active-opt" onclick="setDiff('KOLAY', 8, this)">KOLAY (8)</button>
             <button class="l-btn difficulty" onclick="setDiff('ORTA', 6, this)">ORTA (6)</button>
             <button class="l-btn difficulty" onclick="setDiff('ZOR', 4, this)">ZOR (4)</button>
@@ -91,66 +77,29 @@
         </div>
       </div>
 
-      <div class="input-group">
-        <label style="font-size:12px; font-weight:800; opacity:0.6;">DİL</label>
-        <div class="grid-btns">
-            <button class="l-btn lang-opt active-opt" onclick="setLang('en', this)">EN 🇬🇧</button>
-            <button class="l-btn lang-opt" onclick="setLang('de', this)">DE 🇩🇪</button>
-            <button class="l-btn lang-opt" onclick="setLang('fr', this)">FR 🇫🇷</button>
-            <button class="l-btn lang-opt" onclick="setLang('es', this)">ES 🇪🇸</button>
-        </div>
-      </div>
-
-      <button class="big-btn" style="margin-top:20px" onclick="startMultiplayer()">OYUNU BAŞLAT</button>
-
-      <div class="leaderboard">
-        <div style="font-weight:900; font-size:14px; margin-bottom:10px; color:var(--lacivert)">🏆 EN İYİ 5 SKOR</div>
-        <div id="top5List"></div>
-      </div>
-    </div>
-
-    <div class="modal" id="resetModal">
-        <h2 style="font-size:24px">Oyun Bitti!</h2>
-        <div id="finalScores" style="width:100%; margin:15px 0"></div>
-        <p style="font-size:14px; opacity:0.7">Tekrar oynamak ister misiniz?</p>
-        <button class="big-btn" onclick="restartGame(true)">SIFIR PUANLA BAŞLA</button>
-        <button class="big-btn" style="background:var(--burgundy)" onclick="restartGame(false)">PUANLARI KORU VE DEVAM ET</button>
-        <button class="big-btn" style="background:#333" onclick="location.reload()">ANA MENÜYE DÖN</button>
+      <button class="big-btn" onclick="startTournament()">TURNUVAYI BAŞLAT</button>
     </div>
 
     <div class="modal" id="gameModal">
         <h2 id="modalTitle">BİLDİN!</h2>
-        <div id="wordResult" style="margin:15px 0">
-            <p id="targetWord" style="font-size:24px; font-weight:900; color:var(--lacivert); margin:0;"></p>
-            <p id="trWord" style="font-size:18px; opacity:0.7; font-style:italic;"></p>
-        </div>
-        <button class="big-btn" id="modalBtn">SIRADAKİ OYUNCU</button>
+        <button class="big-btn" id="modalBtn">DEVAM ET</button>
     </div>
 
     <div class="topbar">
       <button class="backBtn" onclick="history.back()">←</button>
-      <div class="player-indicator" id="turnDisplay">SIRADA: --</div>
-      <div id="diffTag" style="font-size:10px; font-weight:900; color:var(--burgundy);">KOLAY</div>
+      <div id="turnDisplay" style="font-weight:900; font-size:14px; color:var(--lacivert);">SIRA: --</div>
+      <div id="jokerDisplay" style="font-size:12px; font-weight:800; color:var(--pink);">🃏 Joker: 3</div>
     </div>
 
-    <div class="stats">
-      <div class="stat-box"><span id="curWord" class="s-val">0/5</span><span style="font-size:8px; opacity:0.5">KELİME</span></div>
-      <div class="stat-box"><span id="life" class="s-val">--</span><span style="font-size:8px; opacity:0.5">CAN</span></div>
-      <div class="stat-box"><span id="score" class="s-val">0</span><span style="font-size:8px; opacity:0.5">PUAN</span></div>
+    <div class="word-area">
+        <div class="word-grid" id="wordGrid"></div>
+        <div class="tr-meaning" id="trMeaning"></div>
     </div>
 
-    <div class="stage">
-      <div class="p p1" style="width:2px; height:100%; left:20px;"></div>
-      <div class="p p2" style="width:50px; height:2px; left:20px; top:0;"></div>
-      <div class="p p3" style="width:2px; height:10px; left:70px; top:0;"></div>
-      <div class="p p4" style="width:20px; height:20px; border-radius:50%; border:2px solid #fff; left:60px; top:10px;"></div>
-      <div class="p p5" style="width:2px; height:30px; left:70px; top:30px;"></div>
-      <div class="p p6" style="width:12px; height:2px; left:58px; top:40px; transform:rotate(-30deg)"></div>
-      <div class="p p7" style="width:12px; height:2px; left:70px; top:40px; transform:rotate(30deg)"></div>
-      <div class="p p8" style="width:12px; height:2px; left:58px; top:60px; transform:rotate(-45deg)"></div>
+    <div style="padding:0 20px;">
+        <button class="l-btn" id="jokerBtn" style="width:100%; border-color:var(--pink);" onclick="useJoker()">JOKER KULLAN (HARF AÇ)</button>
     </div>
 
-    <div class="word-grid" id="wordGrid"></div>
     <div class="keyboard" id="kb"></div>
   </div>
 
@@ -160,28 +109,23 @@
     let pool, usedManager;
     let players = [];
     let currentPlayerIdx = 0;
-    let currentConfig = { lang: 'en', diff: 'KOLAY', maxMistakes: 8 };
+    let currentConfig = { diff: 'KOLAY', maxMistakes: 8, lang: 'en' };
     let currentWordObj = null;
     let guessed = [];
     let mistakes = 0;
     let wordsCount = 0;
+    let totalJokers = 3;
 
-    // Hafıza: Eski oyuncuları hatırla
-    const LAST_PLAYERS_KEY = "italky_last_players";
-    const LEADERBOARD_KEY = "italky_neon_hangman_lb";
-
-    document.addEventListener("DOMContentLoaded", () => {
-        loadLastPlayers();
-        renderLeaderboard();
-    });
-
-    function loadLastPlayers() {
-        const saved = JSON.parse(localStorage.getItem(LAST_PLAYERS_KEY) || "[]");
-        saved.forEach((name, i) => {
-            const input = document.getElementById(`p${i+1}`);
-            if(input) input.value = name;
-        });
-    }
+    // Dinamik Oyuncu Ekleme
+    window.addPlayerField = () => {
+        const div = document.createElement('div');
+        div.className = 'player-row';
+        div.innerHTML = `
+            <input type="text" class="neon-input p-input" placeholder="Yeni Oyuncu">
+            <button class="del-btn" onclick="this.parentElement.remove()">🗑️</button>
+        `;
+        document.getElementById('playerContainer').appendChild(div);
+    };
 
     window.setDiff = (label, val, btn) => {
         currentConfig.diff = label; currentConfig.maxMistakes = val;
@@ -189,41 +133,33 @@
         btn.classList.add('active-opt');
     };
 
-    window.setLang = (lang, btn) => {
-        currentConfig.lang = lang;
-        document.querySelectorAll('.lang-opt').forEach(b => b.classList.remove('active-opt'));
-        btn.classList.add('active-opt');
-    };
-
-    window.startMultiplayer = async () => {
+    window.startTournament = async () => {
+        const inputs = document.querySelectorAll('.p-input');
         const pNames = [];
-        for(let i=1; i<=4; i++) {
-            const val = document.getElementById(`p${i}`)?.value.trim();
-            if(val) pNames.push({ name: val, score: 0 });
-        }
-        if(!pNames.length) return alert("En az 1 oyuncu girmelisiniz!");
+        inputs.forEach(i => { if(i.value.trim()) pNames.push({ name: i.value.trim(), score: 0 }); });
+        
+        if(!pNames.length) return alert("Lütfen en az bir oyuncu ismi yazın!");
         
         players = pNames;
-        localStorage.setItem(LAST_PLAYERS_KEY, JSON.stringify(players.map(p => p.name)));
-        
-        pool = await loadLangPool(currentConfig.lang);
-        usedManager = createUsedSet(`used_hangman_${currentConfig.lang}`);
+        pool = await loadLangPool('en'); // Varsayılan İngilizce
+        usedManager = createUsedSet('tournament_hangman_used');
         
         document.getElementById('setupOverlay').classList.add('hidden');
-        document.getElementById('diffTag').innerText = currentConfig.diff;
         startPlayerTurn(0);
     };
 
     function startPlayerTurn(idx) {
         currentPlayerIdx = idx;
         wordsCount = 0;
-        document.getElementById('turnDisplay').innerText = `SIRADA: ${players[idx].name.toUpperCase()}`;
-        document.getElementById('score').innerText = players[idx].score;
+        totalJokers = 3;
+        document.getElementById('turnDisplay').innerText = `SIRA: ${players[idx].name.toUpperCase()}`;
+        document.getElementById('jokerDisplay').innerText = `🃏 Joker: ${totalJokers}`;
         loadNewWord();
     }
 
     function loadNewWord() {
-        const items = pick(pool, 1, usedManager.used, usedManager.save);
+        // 5 harf ve üzeri kuralı ile kelime seç
+        const items = pick(pool, 1, usedManager.used, usedManager.save, (item) => item.w.length >= 5);
         currentWordObj = items[0];
         guessed = []; mistakes = 0;
         updateUI();
@@ -231,13 +167,11 @@
     }
 
     function updateUI() {
-        const grid = document.getElementById('wordGrid');
-        grid.innerHTML = currentWordObj.w.split('').map(l => `
+        document.getElementById('wordGrid').innerHTML = currentWordObj.w.split('').map(l => `
             <div class="char-slot">${guessed.includes(l.toUpperCase()) ? l.toUpperCase() : ''}</div>
         `).join('');
-        document.getElementById('life').innerText = currentConfig.maxMistakes - mistakes;
-        document.getElementById('curWord').innerText = `${wordsCount + 1}/5`;
-        document.querySelectorAll('.p').forEach((p, i) => p.classList.toggle('show', i < mistakes));
+        // Harf çubuklarının altına Türkçe anlam
+        document.getElementById('trMeaning').innerText = currentWordObj.tr;
     }
 
     function renderKeyboard() {
@@ -246,7 +180,6 @@
         let keys = [...wordChars];
         const others = alphabet.filter(l => !keys.includes(l));
         for(let i=0; i<10; i++) keys.push(others.splice(Math.floor(Math.random()*others.length), 1)[0]);
-        keys.sort().forEach(l => {}); // sort logic
         
         document.getElementById('kb').innerHTML = keys.sort().map(l => `
             <button class="key" id="k-${l}" onclick="makeGuess('${l}')">${l}</button>
@@ -255,33 +188,38 @@
 
     window.makeGuess = (l) => {
         if(currentWordObj.w.toUpperCase().includes(l)) {
-            guessed.push(l); document.getElementById(`k-${l}`).classList.add('correct');
+            guessed.push(l);
             if(currentWordObj.w.split('').every(c => guessed.includes(c.toUpperCase()))) finishWord(true);
         } else {
-            mistakes++; document.getElementById(`k-${l}`).classList.add('wrong');
+            mistakes++;
             if(mistakes >= currentConfig.maxMistakes) finishWord(false);
         }
         updateUI();
     };
 
-    function finishWord(isWin) {
-        if(isWin) players[currentPlayerIdx].score += (currentConfig.maxMistakes - mistakes) * 20;
-        speak(currentWordObj.w);
-        
-        const modal = document.getElementById('gameModal');
-        document.getElementById('modalTitle').innerText = isWin ? "TEBRİKLER!" : "OLMADI!";
-        document.getElementById('targetWord').innerText = currentWordObj.w;
-        document.getElementById('trWord').innerText = `(${currentWordObj.tr})`;
-        
-        const btn = document.getElementById('modalBtn');
-        wordsCount++;
+    window.useJoker = () => {
+        if(totalJokers <= 0) return;
+        const unrevealed = currentWordObj.w.toUpperCase().split('').filter(l => !guessed.includes(l));
+        if(unrevealed.length) {
+            totalJokers--;
+            document.getElementById('jokerDisplay').innerText = `🃏 Joker: ${totalJokers}`;
+            makeGuess(unrevealed[0]);
+        }
+    };
 
+    function finishWord(isWin) {
+        speak(currentWordObj.w);
+        const modal = document.getElementById('gameModal');
+        document.getElementById('modalTitle').innerText = isWin ? "BİLDİN! 🎉" : `BİLEMEDİN! 💀 (${currentWordObj.w})`;
+        const btn = document.getElementById('modalBtn');
+        
+        wordsCount++;
         if(wordsCount >= 5) {
-            btn.innerText = (currentPlayerIdx < players.length - 1) ? "SIRADAKİ OYUNCU" : "SONUÇLARI GÖR";
+            btn.innerText = (currentPlayerIdx < players.length - 1) ? "SIRADAKİ OYUNCU" : "TURNUVA BİTTİ";
             btn.onclick = () => {
                 modal.classList.remove('active');
                 if(currentPlayerIdx < players.length - 1) startPlayerTurn(currentPlayerIdx + 1);
-                else showFinalResults();
+                else location.reload();
             };
         } else {
             btn.innerText = "SIRADAKİ KELİME";
@@ -290,41 +228,9 @@
         modal.classList.add('active');
     }
 
-    function showFinalResults() {
-        saveToLeaderboard();
-        const resModal = document.getElementById('resetModal');
-        document.getElementById('finalScores').innerHTML = players.map(p => `
-            <div class="lb-item"><span>${p.name}</span><span>${p.score} Puan</span></div>
-        `).join('');
-        resModal.classList.add('active');
-    }
-
-    window.restartGame = (resetScores) => {
-        if(resetScores) players.forEach(p => p.score = 0);
-        document.getElementById('resetModal').classList.remove('active');
-        startPlayerTurn(0);
-    };
-
-    function saveToLeaderboard() {
-        let lb = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
-        players.forEach(p => lb.push({ name: p.name, score: p.score }));
-        lb.sort((a,b) => b.score - a.score);
-        localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(lb.slice(0, 5)));
-        renderLeaderboard();
-    }
-
-    function renderLeaderboard() {
-        const lb = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || "[]");
-        document.getElementById('top5List').innerHTML = lb.map((it, i) => `
-            <div class="lb-item" style="color:${i===0?'#ffd700':'#fff'}">
-                <span>${i+1}. ${it.name}</span><span>${it.score}</span>
-            </div>
-        `).join('') || '<div style="font-size:11px; opacity:0.5">Henüz skor yok.</div>';
-    }
-
     function speak(text) {
         const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = currentConfig.lang === 'en' ? 'en-US' : 'de-DE';
+        msg.lang = 'en-US';
         window.speechSynthesis.speak(msg);
     }
   </script>
