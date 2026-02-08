@@ -20,15 +20,13 @@ function getSystemUILang(){
   return "tr";
 }
 
-let UI_LANG = getSystemUILang(); // expected tr|en|de|it|fr (but accepts others)
+let UI_LANG = getSystemUILang();
 
 /* ===============================
    LANGUAGE REGISTRY (code + flag + bcp)
-   - Names are NOT hardcoded anymore.
-   - Add as many languages as you want; display name auto-localizes.
+   - names auto-localized using Intl.DisplayNames
    =============================== */
 const LANGS = [
-  // Core
   { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
   { code:"en", flag:"🇬🇧", bcp:"en-US" },
   { code:"en-gb", flag:"🇬🇧", bcp:"en-GB" },
@@ -51,7 +49,7 @@ const LANGS = [
   { code:"sq", flag:"🇦🇱", bcp:"sq-AL" },
   { code:"mk", flag:"🇲🇰", bcp:"mk-MK" },
 
-  // Caucasus / Central Asia (Turkish travel/work)
+  // Caucasus / Central Asia
   { code:"az", flag:"🇦🇿", bcp:"az-AZ" },
   { code:"ka", flag:"🇬🇪", bcp:"ka-GE" },
   { code:"hy", flag:"🇦🇲", bcp:"hy-AM" },
@@ -69,22 +67,22 @@ const LANGS = [
   { code:"pl", flag:"🇵🇱", bcp:"pl-PL" },
   { code:"cs", flag:"🇨🇿", bcp:"cs-CZ" },
   { code:"sk", flag:"🇸🇰", bcp:"sk-SK" },
-  { code:"hu", flag:"🇭🇺", bcp:"hu-HU" }, // ✅ Macarca
+  { code:"hu", flag:"🇭🇺", bcp:"hu-HU" },
   { code:"sl", flag:"🇸🇮", bcp:"sl-SI" },
 
-  // Middle East / MENA
+  // Middle East
   { code:"ar", flag:"🇸🇦", bcp:"ar-SA" },
   { code:"ar-eg", flag:"🇪🇬", bcp:"ar-EG" },
   { code:"he", flag:"🇮🇱", bcp:"he-IL" },
   { code:"fa", flag:"🇮🇷", bcp:"fa-IR" },
   { code:"ur", flag:"🇵🇰", bcp:"ur-PK" },
 
-  // South / SE Asia travel
+  // South / SE Asia
   { code:"hi", flag:"🇮🇳", bcp:"hi-IN" },
   { code:"bn", flag:"🇧🇩", bcp:"bn-BD" },
   { code:"ta", flag:"🇮🇳", bcp:"ta-IN" },
   { code:"te", flag:"🇮🇳", bcp:"te-IN" },
-  { code:"th", flag:"🇹🇭", bcp:"th-TH" }, // ✅ Tayca
+  { code:"th", flag:"🇹🇭", bcp:"th-TH" },
   { code:"vi", flag:"🇻🇳", bcp:"vi-VN" },
   { code:"id", flag:"🇮🇩", bcp:"id-ID" },
   { code:"ms", flag:"🇲🇾", bcp:"ms-MY" },
@@ -99,10 +97,6 @@ const LANGS = [
   // Africa common
   { code:"sw", flag:"🇰🇪", bcp:"sw-KE" },
   { code:"am", flag:"🇪🇹", bcp:"am-ET" },
-
-  // Extra commonly-requested
-  { code:"la", flag:"🏛️", bcp:"la" },
-  { code:"eo", flag:"🌐", bcp:"eo" },
 ];
 
 /* ===============================
@@ -110,12 +104,9 @@ const LANGS = [
    =============================== */
 let _dn = null;
 function getDisplayNames(){
-  // Rebuild if UI_LANG changed
   if(_dn && _dn.__lang === UI_LANG) return _dn;
-
   _dn = null;
   try{
-    // Intl.DisplayNames expects BCP47 language tags like "tr", "en", "de", etc.
     const dn = new Intl.DisplayNames([UI_LANG], { type:"language" });
     dn.__lang = UI_LANG;
     _dn = dn;
@@ -126,11 +117,7 @@ function getDisplayNames(){
 }
 
 function canonicalLangCode(code){
-  // Intl.DisplayNames works best with base language subtag for “language” type.
-  // For things like zh-tw, it will typically return "Çince" in TR.
-  // We'll feed the language subtag primarily, but keep full for UI code display.
   const c = String(code||"").toLowerCase();
-  // if code is like "pt-br" -> use "pt" for language-name
   return c.split("-")[0];
 }
 
@@ -145,7 +132,6 @@ function langLabel(code){
     const name = dn.of(base);
     if(name) return name;
   }
-  // fallback: show code if Intl missing
   return String(code||"").toUpperCase();
 }
 
@@ -168,6 +154,23 @@ function speak(text, langCode){
     u.lang = bcp(langCode);
     window.speechSynthesis.speak(u);
   }catch{}
+}
+
+/* ===============================
+   ✅ NEW: latest translation marker
+   - For each side, only the most recent ".bubble.me" becomes ".is-latest"
+   =============================== */
+function markLatestTranslation(side){
+  const wrap = (side === "top") ? $("topBody") : $("botBody");
+  if(!wrap) return;
+
+  wrap.querySelectorAll(".bubble.me.is-latest").forEach(el=>{
+    el.classList.remove("is-latest");
+  });
+
+  const allMe = wrap.querySelectorAll(".bubble.me");
+  const last = allMe[allMe.length - 1];
+  if(last) last.classList.add("is-latest");
 }
 
 /* ===============================
@@ -206,6 +209,12 @@ function addBubble(side, kind, text, langForSpeak){
   }
 
   wrap.appendChild(row);
+
+  // ✅ NEW: “son çeviri patlasın”
+  if(kind === "me"){
+    markLatestTranslation(side);
+  }
+
   try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
 }
 
@@ -227,8 +236,6 @@ function closeAllPop(){
 }
 
 function labelChip(code){
-  // ✅ show flag + localized language name
-  // Example in TR: "🇬🇪 Gürcüce"
   return `${langFlag(code)} ${langLabel(code)}`;
 }
 
@@ -366,7 +373,7 @@ async function start(which){
     // spoken (them) — no speaker icon
     addBubble(which, "them", finalText, src);
 
-    // translated (me) on the other side — has speaker icon
+    // translated (me) on other side — speaker icon + latest highlight
     const other = (which === "top") ? "bot" : "top";
     try{
       const translated = await translateViaApi(finalText, src, dst);
@@ -454,8 +461,10 @@ function refreshUILang(){
   UI_LANG = now;
 
   // update chips
-  $("topLangTxt") && ($("topLangTxt").textContent = labelChip(topLang));
-  $("botLangTxt") && ($("botLangTxt").textContent = labelChip(botLang));
+  const t1 = $("topLangTxt");
+  const t2 = $("botLangTxt");
+  if(t1) t1.textContent = labelChip(topLang);
+  if(t2) t2.textContent = labelChip(botLang);
 
   // update lists if open
   if($("pop-top")?.classList.contains("show")) renderPop("top");
@@ -463,7 +472,7 @@ function refreshUILang(){
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  // initial chip labels (flag + localized name)
+  // initial chip labels
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
 
