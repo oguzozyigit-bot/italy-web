@@ -251,16 +251,16 @@ function fadeSubtitle(line) {
    YOUR CHARACTER LIST
    =============================== */
 const VOICES = [
-  { id: "dora",   label: "Dora",   gender: "Kadın", openaiVoice: "nova",    desc: "Enerjik ve Neşeli ⚡" },
+  { id: "huma",   label: "Hüma",   gender: "Kadın", openaiVoice: "nova",    desc: "Enerjik ve Neşeli ⚡" },
   { id: "ayda",   label: "Ayda",   gender: "Kadın", openaiVoice: "shimmer", desc: "Parlak ve Net ✨" },
-  { id: "umay",   label: "Umay",   gender: "Kadın", openaiVoice: "alloy",   desc: "Dengeli ve Akıcı 💧" },
+  { id: "jale",   label: "jale",   gender: "Kadın", openaiVoice: "alloy",   desc: "Dengeli ve Akıcı 💧" },
   { id: "sencer", label: "Sencer", gender: "Erkek", openaiVoice: "echo",    desc: "Sıcak ve Yankılı 🔥" },
-  { id: "toygar", label: "Toygar", gender: "Erkek", openaiVoice: "fable",   desc: "Anlatıcı ve Vurgulu 🎭" },
+  { id: "ozan", label: "Ozan", gender: "Erkek", openaiVoice: "fable",   desc: "Anlatıcı ve Vurgulu 🎭" },
   { id: "sungur", label: "Sungur", gender: "Erkek", openaiVoice: "onyx",    desc: "Derin ve Karizmatik 🗿" }
 ];
 
 const KEY = "italky_voice_pref";
-let selectedId = (localStorage.getItem(KEY) || "dora").trim();
+let selectedId = (localStorage.getItem(KEY) || "huma").trim();
 let stagedId = selectedId;
 let isAutoMode = true;
 
