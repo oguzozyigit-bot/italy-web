@@ -46,60 +46,15 @@ let UI_LANG = getSystemUILang();
 const LANGS = [
   { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
   { code:"en", flag:"🇬🇧", bcp:"en-US" },
-  { code:"en-gb", flag:"🇬🇧", bcp:"en-GB" },
   { code:"de", flag:"🇩🇪", bcp:"de-DE" },
   { code:"fr", flag:"🇫🇷", bcp:"fr-FR" },
   { code:"it", flag:"🇮🇹", bcp:"it-IT" },
   { code:"es", flag:"🇪🇸", bcp:"es-ES" },
-  { code:"pt", flag:"🇵🇹", bcp:"pt-PT" },
-  { code:"pt-br", flag:"🇧🇷", bcp:"pt-BR" },
   { code:"ru", flag:"🇷🇺", bcp:"ru-RU" },
-  { code:"uk", flag:"🇺🇦", bcp:"uk-UA" },
-  { code:"bg", flag:"🇧🇬", bcp:"bg-BG" },
-  { code:"el", flag:"🇬🇷", bcp:"el-GR" },
-  { code:"ro", flag:"🇷🇴", bcp:"ro-RO" },
-  { code:"sr", flag:"🇷🇸", bcp:"sr-RS" },
-  { code:"hr", flag:"🇭🇷", bcp:"hr-HR" },
-  { code:"bs", flag:"🇧🇦", bcp:"bs-BA" },
-  { code:"sq", flag:"🇦🇱", bcp:"sq-AL" },
-  { code:"mk", flag:"🇲🇰", bcp:"mk-MK" },
   { code:"az", flag:"🇦🇿", bcp:"az-AZ" },
-  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" },
-  { code:"hy", flag:"🇦🇲", bcp:"hy-AM" },
-  { code:"kk", flag:"🇰🇿", bcp:"kk-KZ" },
-  { code:"uz", flag:"🇺🇿", bcp:"uz-UZ" },
-  { code:"ky", flag:"🇰🇬", bcp:"ky-KG" },
-  { code:"mn", flag:"🇲🇳", bcp:"mn-MN" },
-  { code:"nl", flag:"🇳🇱", bcp:"nl-NL" },
-  { code:"sv", flag:"🇸🇪", bcp:"sv-SE" },
-  { code:"no", flag:"🇳🇴", bcp:"nb-NO" },
-  { code:"da", flag:"🇩🇰", bcp:"da-DK" },
-  { code:"fi", flag:"🇫🇮", bcp:"fi-FI" },
-  { code:"pl", flag:"🇵🇱", bcp:"pl-PL" },
-  { code:"cs", flag:"🇨🇿", bcp:"cs-CZ" },
-  { code:"sk", flag:"🇸🇰", bcp:"sk-SK" },
-  { code:"hu", flag:"🇭🇺", bcp:"hu-HU" },
-  { code:"sl", flag:"🇸🇮", bcp:"sl-SI" },
-  { code:"ar", flag:"🇸🇦", bcp:"ar-SA" },
-  { code:"ar-eg", flag:"🇪🇬", bcp:"ar-EG" },
-  { code:"he", flag:"🇮🇱", bcp:"he-IL" },
-  { code:"fa", flag:"🇮🇷", bcp:"fa-IR" },
-  { code:"ur", flag:"🇵🇰", bcp:"ur-PK" },
-  { code:"hi", flag:"🇮🇳", bcp:"hi-IN" },
-  { code:"bn", flag:"🇧🇩", bcp:"bn-BD" },
-  { code:"ta", flag:"🇮🇳", bcp:"ta-IN" },
-  { code:"te", flag:"🇮🇳", bcp:"te-IN" },
-  { code:"th", flag:"🇹🇭", bcp:"th-TH" },
-  { code:"vi", flag:"🇻🇳", bcp:"vi-VN" },
-  { code:"id", flag:"🇮🇩", bcp:"id-ID" },
-  { code:"ms", flag:"🇲🇾", bcp:"ms-MY" },
-  { code:"fil", flag:"🇵🇭", bcp:"fil-PH" },
-  { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
-  { code:"zh-tw", flag:"🇹🇼", bcp:"zh-TW" },
   { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
   { code:"ko", flag:"🇰🇷", bcp:"ko-KR" },
-  { code:"sw", flag:"🇰🇪", bcp:"sw-KE" },
-  { code:"am", flag:"🇪🇹", bcp:"am-ET" },
+  { code:"ar", flag:"🇸🇦", bcp:"ar-SA" }
 ];
 
 let _dn = null;
@@ -139,18 +94,37 @@ let topLang = "en";
 let botLang = "tr";
 
 /* ===============================
-   TTS
+   TTS (ZORLAMALI SES ÇIKIŞI)
    =============================== */
-function speak(text, langCode){
-  const t = String(text||"").trim();
-  if(!t) return;
-  if(!("speechSynthesis" in window)) return;
-  try{
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(t);
-    u.lang = bcp(langCode);
+function speak(text, langCode) {
+  const t = String(text || "").trim();
+  if (!t) return;
+  
+  if (!window.speechSynthesis) {
+    console.error("speechSynthesis bulunamadı!");
+    return;
+  }
+
+  // Önceki sesleri durdur
+  window.speechSynthesis.cancel();
+
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = bcp(langCode);
+  u.volume = 1.0;
+  u.rate = 1.0;
+  u.pitch = 1.0;
+
+  // ✅ KRİTİK: Android bazen ses listesi yüklenmeden konuşmaz
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    const target = voices.find(v => v.lang.startsWith(langCode.split("-")[0])) || voices[0];
+    u.voice = target;
+  }
+
+  // ✅ Android WebView'da bazen konuşma başlamazsa diye küçük bir gecikme
+  setTimeout(() => {
     window.speechSynthesis.speak(u);
-  }catch{}
+  }, 50);
 }
 
 function markLatestTranslation(side){
@@ -227,13 +201,9 @@ function renderPop(side){
   list.querySelectorAll(".pop-item").forEach(item=>{
     item.addEventListener("click", ()=>{
       const code = item.getAttribute("data-code") || "en";
-      if(side === "top"){
-        topLang = code;
-        if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
-      }else{
-        botLang = code;
-        if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
-      }
+      if(side === "top") topLang = code; else botLang = code;
+      const tTxt = side === "top" ? $("topLangTxt") : $("botLangTxt");
+      if(tTxt) tTxt.textContent = labelChip(code);
       stopAll(); closeAllPop();
     });
   });
@@ -263,14 +233,10 @@ async function translateViaApi(text, source, target){
     });
     if(!r.ok) return text;
     const data = await r.json().catch(()=> ({}));
-    const out = String(data?.translated || data?.translation || data?.text || "").trim();
-    return out || text;
+    return String(data?.translated || data?.translation || data?.text || "").trim() || text;
   }catch{ return text; }finally{ clearTimeout(to); }
 }
 
-/* ===============================
-   STT (Speech To Text)
-   =============================== */
 let active = null;
 let recTop = null;
 let recBot = null;
@@ -295,18 +261,13 @@ function buildRecognizer(langCode){
 }
 
 async function start(which){
-  // ✅ APK İÇİNDE PROTOKOL KONTROLÜNÜ ESNETİYORUZ
   const isAndroid = navigator.userAgent.includes("Android");
   if(location.protocol !== "https:" && location.hostname !== "localhost" && !isAndroid){
     alert("Mikrofon için HTTPS gerekli.");
     return;
   }
-
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){
-    alert("Bu tarayıcı SpeechRecognition desteklemiyor.");
-    return;
-  }
+  if(!SR){ alert("Bu tarayıcı SpeechRecognition desteklemiyor."); return; }
 
   if(active && active !== which) stopAll();
   const src = (which === "top") ? topLang : botLang;
@@ -325,13 +286,12 @@ async function start(which){
     const other = (which === "top") ? "bot" : "top";
     const translated = await translateViaApi(finalText, src, dst);
     addBubble(other, "me", translated, dst);
+    
+    // ✅ BURASI KONUŞTURMA KISMI
     speak(translated, dst);
   };
 
-  rec.onerror = (err)=>{ 
-    console.error("STT Error:", err); 
-    stopAll(); 
-  };
+  rec.onerror = (err)=>{ console.error("STT Error:", err); stopAll(); };
   rec.onend = ()=>{
     if(active === which) active = null;
     setMicUI(which, false);
@@ -342,11 +302,7 @@ async function start(which){
   try{ rec.start(); } catch{ stopAll(); }
 }
 
-/* ===============================
-   Nav + Bindings
-   =============================== */
 const HOME_PATH = "/pages/home.html";
-
 function bindNav(){
   $("homeBtn")?.addEventListener("click", ()=>{ location.href = HOME_PATH; });
   $("topBack")?.addEventListener("click", ()=>{
@@ -380,6 +336,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
   bindNav(); bindLangButtons(); bindMicButtons();
   
+  // ✅ SES MOTORUNU ÖNCEDEN TETİKLE (WEBVIEW İÇİN)
+  if (window.speechSynthesis) window.speechSynthesis.getVoices();
+
   document.addEventListener("click", (e)=>{
     if(!$("pop-top")?.contains(e.target) && !$("pop-bot")?.contains(e.target) && !e.target.closest(".lang-trigger")) closeAllPop();
   }, { capture:true });
