@@ -2,543 +2,243 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI - Ana Menü</title>
-  <link rel="icon" href="data:," />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI - Be Free</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg:#030014;
-      --text:#fff;
-      --muted: rgba(255,255,255,.62);
-
-      --glass: rgba(255,255,255,.06);
-      --glass2: rgba(255,255,255,.10);
-      --bd: rgba(255,255,255,.10);
-
-      --ai1:#A5B4FC;
-      --ai2:#4F46E5;
-
-      --footerH: 92px;
-      --ease: cubic-bezier(.22,1,.36,1);
+    :root {
+      /* Tasarımdaki Ana Renk Paleti */
+      --bg-deep: #030014;
+      --accent-purple: #6d28d9;
+      --accent-blue: #3b82f6;
+      --neon-glow: rgba(139, 92, 246, 0.5);
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.6);
+      --safe-top: env(safe-area-inset-top, 0px);
     }
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    html,body{
-      margin:0; padding:0; width:100%; height:100%;
-      overflow:hidden; position:fixed;
-      font-family:'Outfit', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display:flex; align-items:center; justify-content:center;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      background: var(--bg-deep);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
     }
 
-    /* ====== COSMIC BACKDROP (vitrin vibe) ====== */
-    .cosmos{
-      position:absolute; inset:0; z-index:0; pointer-events:none;
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(99,102,241,.55), transparent 60%),
-        radial-gradient(900px 600px at 85% 15%, rgba(168,85,247,.35), transparent 60%),
-        radial-gradient(900px 700px at 70% 90%, rgba(236,72,153,.18), transparent 55%),
-        radial-gradient(1200px 900px at 10% 90%, rgba(14,165,233,.18), transparent 55%),
-        linear-gradient(180deg, #040019 0%, #030014 55%, #020012 100%);
-    }
-    .stars{
-      position:absolute; inset:-20%; z-index:1; pointer-events:none;
-      background-image:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,.22) 0 1px, transparent 2px),
-        radial-gradient(circle at 35% 60%, rgba(255,255,255,.18) 0 1px, transparent 2px),
-        radial-gradient(circle at 60% 25%, rgba(255,255,255,.16) 0 1px, transparent 2px),
-        radial-gradient(circle at 78% 52%, rgba(255,255,255,.14) 0 1px, transparent 2px),
-        radial-gradient(circle at 15% 85%, rgba(255,255,255,.14) 0 1px, transparent 2px),
-        radial-gradient(circle at 88% 82%, rgba(255,255,255,.12) 0 1px, transparent 2px);
-      background-size: 220px 220px;
-      opacity:.55;
-      filter: blur(.2px);
-      animation: drift 18s linear infinite;
-    }
-    @keyframes drift{
-      from{ transform: translate3d(0,0,0); }
-      to{ transform: translate3d(-120px, 80px, 0); }
+    /* ====== DYNAMIC COSMIC BACKGROUND ====== */
+    .nebula {
+      position: fixed; inset: 0; z-index: -1;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(79, 70, 229, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(192, 38, 211, 0.3) 0%, transparent 50%),
+        #030014;
+      filter: blur(40px);
     }
 
-    .noise{
-      position:absolute; inset:0; z-index:2; pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-      mix-blend-mode:overlay;
+    .stars-overlay {
+      position: fixed; inset: 0; z-index: -1;
+      background-image: radial-gradient(white 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.1;
     }
 
-    /* ====== PHONE FRAME ====== */
-    .mobile-frame{
-      width:100%;
-      max-width:480px;
-      height:100%;
-      position:relative;
-      z-index:10;
-      display:flex;
-      flex-direction:column;
-      background: rgba(8,8,20,.45);
-      backdrop-filter: blur(26px);
-      overflow:hidden;
-    }
-    @media (min-width:520px){
-      .mobile-frame{
-        height:92vh;
-        border-radius:40px;
-        border:1px solid rgba(255,255,255,0.08);
-        box-shadow: 0 40px 110px -25px rgba(0,0,0,.92);
-      }
+    /* ====== APP CONTAINER ====== */
+    .app-wrapper {
+      display: flex; flex-direction: column;
+      height: 100vh;
+      max-width: 500px; margin: 0 auto;
+      padding-top: var(--safe-top);
     }
 
-    /* subtle inner glow */
-    .mobile-frame:before{
-      content:"";
-      position:absolute; inset:-2px;
-      background:
-        radial-gradient(800px 500px at 30% 0%, rgba(99,102,241,.22), transparent 60%),
-        radial-gradient(700px 500px at 90% 15%, rgba(236,72,153,.12), transparent 55%);
-      pointer-events:none;
-      z-index:0;
+    /* ====== PREMIUM HEADER ====== */
+    .header {
+      padding: 24px 20px;
+      display: flex; align-items: center; justify-content: space-between;
     }
 
-    /* ====== HEADER ====== */
-    .header{
-      flex:0 0 96px;
-      padding: 0 20px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      position:relative;
-      z-index:5;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.22);
-      backdrop-filter: blur(14px);
+    .brand { display: flex; flex-direction: column; }
+    .brand h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px; margin: 0; font-weight: 700;
+      letter-spacing: -1px;
     }
-    .mini-brand{ display:flex; flex-direction:column; align-items:flex-start; user-select:none; }
-    .logo-container{
-      font-family:'Space Grotesk', sans-serif;
-      font-size: 30px;
-      font-weight:700;
-      letter-spacing: -0.6px;
+    .brand h1 span {
+      background: linear-gradient(to right, #a5b4fc, #818cf8, #c084fc);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .logo-ai{
-      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 60%, #ec4899 120%);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      text-shadow: 0 0 18px rgba(165,180,252,.18);
-    }
-    .mini-slogan{
-      font-size: 10px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.40);
-      letter-spacing: 4px;
-      margin-top: 4px;
+    .slogan {
+      font-size: 11px; font-weight: 800; letter-spacing: 4px;
+      color: var(--text-muted); margin-top: 4px;
     }
 
-    .userbox{ display:flex; align-items:center; gap:12px; }
-    .usertext{ display:flex; flex-direction:column; align-items:flex-end; line-height:1.1; }
-    .uname{ font-weight: 900; font-size: 13px; color:#fff; max-width: 140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .plan{ font-weight: 900; font-size: 10px; color:#a5b4fc; opacity:.95; }
-
-    .avatar-link{
-      width: 42px; height: 42px; border-radius: 50%;
-      overflow:hidden;
-      border: 1px solid rgba(165,180,252,.25);
-      background: rgba(255,255,255,0.06);
-      box-shadow: 0 0 0 6px rgba(99,102,241,.10);
+    .user-pill {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 6px 6px 14px; border-radius: 999px;
+      border: 1px solid var(--glass-border);
     }
-    .avatar-link img{ width:100%; height:100%; object-fit:cover; display:block; }
-
-    /* ====== CONTENT ====== */
-    .menu-scroll{
-      position:relative;
-      z-index:4;
-      flex:1;
-      overflow-y:auto;
-      padding: 16px 18px 120px;
-      scrollbar-width:none;
-    }
-    .menu-scroll::-webkit-scrollbar{ display:none; }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      animation: enter .65s var(--ease);
-    }
-    @keyframes enter{
-      from{ transform: translateY(18px); opacity:0; }
-      to{ transform: translateY(0); opacity:1; }
+    .user-info { display: flex; flex-direction: column; align-items: flex-end; }
+    .user-name { font-size: 13px; font-weight: 700; }
+    .user-status { font-size: 10px; color: #a5b4fc; font-weight: 900; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid #818cf8; object-fit: cover;
     }
 
-    /* ====== CARD (bigger, glow, app-store feel) ====== */
-    .card{
-      border-radius: 26px;
-      padding: 18px 16px 16px;
-      background:
-        radial-gradient(120px 120px at 30% 20%, rgba(255,255,255,.10), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 14px 30px rgba(0,0,0,.28);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap: 8px;
-      text-align:left;
-      cursor:pointer;
-      aspect-ratio: 1/1.15;
-      position:relative;
-      overflow:hidden;
-      transform: translateZ(0);
-      transition: transform .18s var(--ease), background .18s var(--ease);
+    /* ====== MENU GRID (THE CORE) ====== */
+    .menu-container {
+      flex: 1; overflow-y: auto;
+      padding: 10px 20px 120px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      scrollbar-width: none;
     }
-    .card:before{
-      content:"";
-      position:absolute; inset:-1px;
-      background:
-        radial-gradient(260px 180px at 10% 10%, rgba(99,102,241,.22), transparent 60%),
-        radial-gradient(260px 200px at 90% 20%, rgba(236,72,153,.14), transparent 55%),
-        radial-gradient(240px 200px at 70% 95%, rgba(14,165,233,.10), transparent 60%);
-      opacity:.85;
-      pointer-events:none;
-    }
-    .card:after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.12) 100%);
-      pointer-events:none;
-    }
-    .card:active{
-      transform: scale(.97);
-      background:
-        radial-gradient(120px 120px at 30% 20%, rgba(255,255,255,.14), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+    .menu-container::-webkit-scrollbar { display: none; }
+
+    .menu-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      cursor: pointer;
     }
 
-    /* ====== ICON (premium gradient tile) ====== */
-    .icon-row{
-      position:relative;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      z-index:2;
+    .menu-card:active { transform: scale(0.95); background: rgba(255,255,255,0.12); }
+
+    /* Neon Icon Tiles */
+    .icon-box {
+      width: 54px; height: 54px; border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      position: relative;
     }
-    .icon-tile{
-      width: 62px;
-      height: 44px;
-      border-radius: 16px;
-      position:relative;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.10);
-      overflow:hidden;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-    }
-    .icon-tile .g1{
-      position:absolute; inset:-30%;
-      background: linear-gradient(135deg, rgba(56,189,248,.95), rgba(99,102,241,.85));
-      filter: blur(0px);
-      opacity:.95;
-      transform: rotate(12deg);
-    }
-    .icon-tile .g2{
-      position:absolute; inset:-30%;
-      background: linear-gradient(135deg, rgba(236,72,153,.90), rgba(251,146,60,.85));
-      opacity:.90;
-      transform: rotate(-12deg) translateX(18px);
-      mix-blend-mode: screen;
-    }
-    .icon-tile .mark{
-      position:absolute; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 1000;
-      color:#fff;
-      text-shadow: 0 6px 18px rgba(0,0,0,.45);
-    }
-    .icon-tile svg{
-      width: 22px; height: 22px;
-      stroke:#fff; fill:none; stroke-width:2.2;
-      opacity:.95;
+    .icon-box svg { width: 26px; height: 26px; stroke-width: 2; color: #fff; }
+
+    /* Card Glows - Tasarımdaki parlamalar */
+    .menu-card::before {
+      content: ""; position: absolute; top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%);
+      pointer-events: none;
     }
 
-    .label{
-      z-index:2;
-      font-size: 16px;
-      font-weight: 1000;
-      color:#fff;
-      letter-spacing: -0.2px;
-      margin-top: 2px;
-    }
-    .sub{
-      z-index:2;
-      font-size: 11px;
-      font-weight: 800;
-      color: rgba(255,255,255,.72);
-      line-height: 1.2;
-      max-width: 92%;
-    }
+    .card-label { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+    .card-sub { font-size: 11px; color: var(--text-muted); font-weight: 600; line-height: 1.3; }
 
-    /* ====== FOOTER ====== */
-    .footerbar{
-      position:absolute;
-      bottom:0;
-      width:100%;
-      height: var(--footerH);
-      background: rgba(3,0,20,.92);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid rgba(255,255,255,0.06);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      z-index: 20;
-      gap: 8px;
+    /* ====== FOOTER NAVIGATION ====== */
+    .footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      padding: 20px 20px 30px;
+      background: linear-gradient(to top, var(--bg-deep) 70%, transparent);
+      text-align: center;
+      z-index: 10;
     }
-    .links{
-      display:flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      justify-content:center;
-      padding: 0 14px;
+    .footer-links {
+      display: flex; justify-content: center; gap: 20px; margin-bottom: 12px;
     }
-    .links a{
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.45);
-      text-decoration:none;
-      text-transform: uppercase;
-      letter-spacing: .6px;
+    .footer-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 12px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
     }
-    .footerBrand{
-      font-size: 10px;
-      color: rgba(255,255,255,0.18);
-      font-weight: 800;
-      letter-spacing: .4px;
-    }
+    .copyright { font-size: 10px; color: rgba(255,255,255,0.2); font-weight: 600; }
   </style>
 </head>
 
 <body>
-  <div class="cosmos"></div>
-  <div class="stars"></div>
-  <div class="noise"></div>
+  <div class="nebula"></div>
+  <div class="stars-overlay"></div>
 
-  <div class="mobile-frame">
-    <div class="header">
-      <div class="mini-brand">
-        <div class="logo-container">italky<span class="logo-ai">AI</span></div>
-        <div class="mini-slogan">BE FREE</div>
+  <div class="app-wrapper">
+    <header class="header">
+      <div class="brand">
+        <h1>italky<span>AI</span></h1>
+        <div class="slogan">BE FREE</div>
+      </div>
+      <div class="user-pill" onclick="location.href='/pages/profile.html'">
+        <div class="user-info">
+          <span class="user-name" id="userName">Başkanım</span>
+          <span class="user-status">UNLIMITED</span>
+        </div>
+        <img src="/assets/ozyigits_logo.png" class="avatar" id="userPic" alt="User">
+      </div>
+    </header>
+
+    <main class="menu-container">
+      <div class="menu-card" onclick="location.href='/pages/facetoface.html'">
+        <div class="icon-box" style="box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <span class="card-label">Yüzyüze Çeviri</span>
+        <span class="card-sub">Anlık Karşılıklı Konuşma</span>
       </div>
 
-      <div class="userbox">
-        <div class="usertext">
-          <div class="uname" id="userName">Yükleniyor...</div>
-          <div class="plan" id="userPlan">FREE</div>
+      <div class="menu-card" onclick="location.href='/pages/voice_ai.html'">
+        <div class="icon-box" style="box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
         </div>
-        <a href="/pages/profile.html" class="avatar-link" id="avatarBtn">
-          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" id="userPic" alt="U">
-        </a>
+        <span class="card-label">Konuşkan AI</span>
+        <span class="card-sub">Sesli Yapay Zeka Asistanı</span>
       </div>
-    </div>
 
-    <div class="menu-scroll">
-      <div class="grid">
-
-        <div class="card" onclick="location.href='/pages/facetoface.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_face_to_face">Yüzyüze Çeviri</div>
-          <div class="sub" data-i18n="home_live_translate">Hızlı Çeviri</div>
+      <div class="menu-card" onclick="location.href='/pages/text_translate.html'">
+        <div class="icon-box" style="box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
         </div>
-
-        <div class="card" onclick="location.href='/pages/voice_ai.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" y1="19" x2="12" y2="23"/>
-                  <line x1="8" y1="23" x2="16" y2="23"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_talk_ai">Konuşkan AI</div>
-          <div class="sub" data-i18n="home_assistant">Yapay Zeka İle Konuş</div>
-        </div>
-
-        <div class="card" onclick="location.href='/pages/text_translate.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <path d="M4 7h16M4 12h16M4 17h10"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_text_translate">Metinden Çeviri</div>
-          <div class="sub" data-i18n="home_text_translate_sub">Yaz, Yapıştır, Çevir</div>
-        </div>
-
-        <div class="card" onclick="location.href='/pages/chat.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.5 8.38 8.38 0 0 1 3.8.9L21 3z"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_chat_ai">Sohbet AI</div>
-          <div class="sub" data-i18n="home_assistant">Yapay Zeka İle Sohbet Et</div>
-        </div>
-
-        <div class="card" onclick="location.href='/pages/photo.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_photo_translate">Fotoğraftan Çeviri</div>
-          <div class="sub" data-i18n="home_overlay_translate">Göster fotoğrafı çevirsin</div>
-        </div>
-
-        <div class="card" onclick="location.href='/pages/teachers.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_teacher">Öğretmen AI</div>
-          <div class="sub" data-i18n="home_pronounce_lessons">Dil Öğretmenleri</div>
-        </div>
-
-        <div class="card" onclick="location.href='/pages/document.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_document_translate">Belgeden Çeviri</div>
-          <div class="sub" data-i18n="home_pdf_camera">Yükle tara çevir</div>
-        </div>
-
-        <div class="card" onclick="location.href='/pages/game.html'">
-          <div class="icon-row">
-            <div class="icon-tile">
-              <div class="g1"></div><div class="g2"></div>
-              <div class="mark">
-                <svg viewBox="0 0 24 24">
-                  <rect x="2" y="6" width="20" height="12" rx="2"/>
-                  <path d="M6 12h4M8 10v4"/>
-                  <circle cx="15" cy="11" r="1"/>
-                  <circle cx="18" cy="13" r="1"/>
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div class="label" data-i18n="home_learn_fun">Oyunlar</div>
-          <div class="sub" data-i18n="home_games_quiz">Eğlenerek öğren</div>
-        </div>
-
+        <span class="card-label">Metin Çeviri</span>
+        <span class="card-sub">Yaz, Yapıştır ve Çevir</span>
       </div>
-    </div>
 
-    <div class="footerbar">
-      <div class="links">
-        <a href="/pages/about.html" data-i18n="nav_about">Hakkımızda</a>
-        <a href="/pages/faq.html" data-i18n="nav_faq">SSS</a>
-        <a href="/pages/privacy.html" data-i18n="nav_privacy">Gizlilik</a>
-        <a href="/pages/contact.html" data-i18n="nav_contact">İletişim</a>
+      <div class="menu-card" onclick="location.href='/pages/photo.html'">
+        <div class="icon-box" style="box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <span class="card-label">Görsel Çeviri</span>
+        <span class="card-sub">Fotoğrafı Çek, Anında Oku</span>
       </div>
-      <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
-    </div>
+
+      <div class="menu-card" onclick="location.href='/pages/game.html'">
+        <div class="icon-box" style="box-shadow: 0 0 20px rgba(251, 146, 60, 0.3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>
+        </div>
+        <span class="card-label">Oyunlar</span>
+        <span class="card-sub">Eğlenerek Kelime Öğren</span>
+      </div>
+
+      <div class="menu-card" onclick="location.href='/pages/teachers.html'">
+        <div class="icon-box" style="box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <span class="card-label">Öğretmen AI</span>
+        <span class="card-sub">Kişisel Dil Eğitmenlerin</span>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="#">Hakkımızda</a>
+        <a href="#">Gizlilik</a>
+        <a href="#">İletişim</a>
+      </div>
+      <div class="copyright">italkyAI By Ozyigit’s 2026</div>
+    </footer>
   </div>
 
   <script type="module">
-    import { STORAGE_KEY } from "/js/config.js";
-    import { applyI18n, t } from "/js/i18n.js";
-
-    function requireLogin(){
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw){ window.location.replace("/index.html"); return null; }
-      try{
-        const u = JSON.parse(raw);
-        if(!u?.email){
-          localStorage.removeItem(STORAGE_KEY);
-          window.location.replace("/index.html");
-          return null;
-        }
-        return u;
-      }catch{
-        window.location.replace("/index.html");
-        return null;
-      }
-    }
-
-    function fillUser(u){
-      document.getElementById("userName").textContent = u.name || u.fullname || "Kullanıcı";
-      document.getElementById("userPlan").textContent = (u.plan || "FREE").toUpperCase();
-      if (u.picture || u.avatar) document.getElementById("userPic").src = u.picture || u.avatar;
-    }
-
-    function boot(){
-      applyI18n(document);
-      document.title = t("home_title");
-      const u = requireLogin();
-      if(!u) return;
-      fillUser(u);
-    }
-
-    boot();
-
-    window.addEventListener("storage", (e)=>{
-      if(e.key === "italky_site_lang_v1" || e.key === "italky_lang_ping"){
-        try{
-          applyI18n(document);
-          document.title = t("home_title");
-        }catch{}
-      }
+    // Süre kısıtlamalarını kaldırdık, kullanıcı planını UNLIMITED yaptık.
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("italkyAI Premium Modu Aktif.");
     });
   </script>
 </body>
