@@ -314,28 +314,7 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <!-- ✅ MODE LOADER: online/offline ayrımı (online kod bozulmaz) -->
-<script type="module">
-  const qs = new URLSearchParams(location.search);
-  const modeRaw = (qs.get("mode") || "online").toLowerCase();
-  const mode = (modeRaw === "offline") ? "offline" : "online";
-
-  // Offline varsa onu yükle, yoksa online'a düş (sayfa patlamasın)
-  async function load(){
-    if(mode === "offline"){
-      try{
-        await import("/js/text_translate_offline.js");
-        return;
-      }catch(e){
-        console.warn("Offline module missing/failed, falling back to online:", e);
-        await import("/js/text_translate_page.js?v=999");
-        return;
-      }
-    }
-    await import("/js/text_translate_page.js?v=999");
-  }
-
-  load();
-</script>
+ <!-- ✅ Tek JS: bizim standard -->
+<script type="module" src="/js/text_translate_page.js?v=999"></script>
 </body>
 </html>
