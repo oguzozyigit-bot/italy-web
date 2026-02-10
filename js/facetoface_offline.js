@@ -1,12 +1,12 @@
 // FILE: italky-web/js/facetoface_offline.js
-// Offline mode: CT2 bridge + only en <-> tr
+// Offline mode: CT2 bridge + SINGLE language pair (EN <-> TR) fixed
 import { STORAGE_KEY } from "/js/config.js";
 import { getSiteLang } from "/js/i18n.js";
 
 const $ = (id)=>document.getElementById(id);
 
 /* ===============================
-   AUTH GUARD (aynı)
+   AUTH GUARD
    =============================== */
 function requireLogin(){
   try{
@@ -41,7 +41,7 @@ function getSystemUILang(){
 let UI_LANG = getSystemUILang();
 
 /* ===============================
-   OFFLINE LANGUAGE REGISTRY (Sadece EN/TR)
+   OFFLINE LANGUAGE REGISTRY (ONLY EN/TR)
    =============================== */
 const LANGS = [
   { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
@@ -80,13 +80,13 @@ function langLabel(code){
 function labelChip(code){ return `${langFlag(code)} ${langLabel(code)}`; }
 
 /* ===============================
-   State
+   State (FIXED)
    =============================== */
-let topLang = "en";
-let botLang = "tr";
+let topLang = "en"; // FIXED
+let botLang = "tr"; // FIXED
 
 /* ===============================
-   TTS (aynı)
+   TTS
    =============================== */
 function speak(text, langCode) {
   const t = String(text || "").trim();
@@ -112,7 +112,7 @@ function speak(text, langCode) {
 }
 
 /* ===============================
-   UI helpers (aynı mantık)
+   UI helpers
    =============================== */
 function markLatestTranslation(side){
   const wrap = (side === "top") ? $("topBody") : $("botBody");
@@ -124,6 +124,7 @@ function markLatestTranslation(side){
 }
 
 function closeAllPop(){
+  // Offline: popover hiç kullanılmayacak ama yine de kapatalım
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
 }
@@ -188,55 +189,6 @@ function stopAll(){
 }
 
 /* ===============================
-   Language popover (sadece EN/TR)
-   =============================== */
-function renderPop(side){
-  const list = $(side === "top" ? "list-top" : "list-bot");
-  if(!list) return;
-  const sel = (side === "top") ? topLang : botLang;
-
-  list.innerHTML = LANGS.map(l => `
-    <div class="pop-item ${l.code===sel ? "active":""}" data-code="${l.code}">
-      <div class="pop-left">
-        <div class="pop-flag">${l.flag}</div>
-        <div class="pop-name">${langLabel(l.code)}</div>
-      </div>
-      <div class="pop-code">${String(l.code).toUpperCase()}</div>
-    </div>`).join("");
-
-  list.querySelectorAll(".pop-item").forEach(item=>{
-    item.addEventListener("click", ()=>{
-      const code = item.getAttribute("data-code") || "en";
-
-      // offline’da iki tarafın aynı dil olmasını engelle (en pratik UX)
-      if(side === "top"){
-        topLang = code;
-        if(topLang === botLang) botLang = (topLang === "en" ? "tr" : "en");
-        $("topLangTxt") && ($("topLangTxt").textContent = labelChip(topLang));
-        $("botLangTxt") && ($("botLangTxt").textContent = labelChip(botLang));
-      } else {
-        botLang = code;
-        if(botLang === topLang) topLang = (botLang === "en" ? "tr" : "en");
-        $("topLangTxt") && ($("topLangTxt").textContent = labelChip(topLang));
-        $("botLangTxt") && ($("botLangTxt").textContent = labelChip(botLang));
-      }
-
-      stopAll(); closeAllPop();
-    });
-  });
-}
-
-function togglePop(side){
-  const pop = $(side === "top" ? "pop-top" : "pop-bot");
-  if(!pop) return;
-  const willShow = !pop.classList.contains("show");
-  closeAllPop();
-  if(!willShow) return;
-  pop.classList.add("show");
-  renderPop(side);
-}
-
-/* ===============================
    OFFLINE CT2 BRIDGE
    =============================== */
 const CT2_REQUIRED = ["en-tr", "tr-en"];
@@ -253,7 +205,6 @@ function ct2Direction(source, target){
 }
 
 function checkCt2Packs(){
-  // Web’de test kolay olsun diye: localStorage ile simülasyon
   const sim = String(localStorage.getItem("ct2_sim_state")||"").trim(); // installed / missing
   if(sim === "installed"){ CT2_OK = true; return true; }
   if(sim === "missing"){ CT2_OK = false; return false; }
@@ -261,7 +212,7 @@ function checkCt2Packs(){
   if(!isAndroidBridgeReady()){
     CT2_OK = false;
     return false;
-    }
+  }
 
   try{
     const raw = window.Android.ct2Check(JSON.stringify({ required: CT2_REQUIRED }));
@@ -279,7 +230,6 @@ async function translateViaCt2(text, source, target){
   const t = String(text||"").trim();
   if(!t) return t;
 
-  // sadece en<->tr destek
   const dir = ct2Direction(source, target);
   if(dir !== "en-tr" && dir !== "tr-en") return t;
 
@@ -287,7 +237,6 @@ async function translateViaCt2(text, source, target){
   if(!isAndroidBridgeReady()) return t;
 
   try{
-    // Beklenen dönüş: {"ok":true,"text":"..."} veya {"text":"..."} vb.
     const raw = window.Android.ct2Translate(JSON.stringify({ direction: dir, text: t, source, target }));
     const res = JSON.parse(raw || "{}");
     const out = String(res?.text || res?.translated || res?.translation || "").trim();
@@ -298,7 +247,7 @@ async function translateViaCt2(text, source, target){
 }
 
 /* ===============================
-   STT (aynı, web speech)
+   STT (web speech)
    =============================== */
 function buildRecognizer(langCode){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -312,7 +261,6 @@ function buildRecognizer(langCode){
 }
 
 async function start(which){
-  // CT2 paket yoksa başlatma (şimdilik net)
   if(!CT2_OK){
     alert("Offline paketler eksik. (en-tr / tr-en) Paketler yüklenmeden Offline çalışmaz.");
     return;
@@ -329,6 +277,7 @@ async function start(which){
 
   if(active && active !== which) stopAll();
 
+  // FIXED LANGS:
   const src = (which === "top") ? topLang : botLang;
   const dst = (which === "top") ? botLang : topLang;
 
@@ -367,6 +316,7 @@ async function start(which){
    Bindings
    =============================== */
 const HOME_PATH = "/pages/home.html";
+
 function bindNav(){
   $("homeBtn")?.addEventListener("click", ()=>{ location.href = HOME_PATH; });
   $("topBack")?.addEventListener("click", ()=>{
@@ -376,9 +326,10 @@ function bindNav(){
   $("clearChat")?.addEventListener("click", ()=>{ clearChat(); });
 }
 
+// OFFLINE: Dil butonları kilit (popover yok)
 function bindLangButtons(){
-  $("topLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); togglePop("top"); });
-  $("botLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); togglePop("bot"); });
+  $("topLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); });
+  $("botLangBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); });
   $("close-top")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
   $("close-bot")?.addEventListener("click", (e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
 }
@@ -394,36 +345,28 @@ function bindMicButtons(){
   });
 }
 
-function setOfflineDefaultLangs(){
-  // Offline varsayılan: üst EN, alt TR
+function setOfflineFixedLangs(){
   topLang = "en";
   botLang = "tr";
   $("topLangTxt") && ($("topLangTxt").textContent = labelChip(topLang));
   $("botLangTxt") && ($("botLangTxt").textContent = labelChip(botLang));
+  // popover'ları asla açma
+  closeAllPop();
 }
 
-function applyOfflineGuardUI(){
-  // Paket yoksa microfon tıklayınca zaten uyarı veriyoruz.
-  // İstersen burada butonu görsel olarak da soluklaştırırız (şimdilik dokunmadım).
-}
-
-/* ===============================
-   Boot
-   =============================== */
 document.addEventListener("DOMContentLoaded", ()=>{
   if(!requireLogin()) return;
 
-  setOfflineDefaultLangs();
-  bindNav(); bindLangButtons(); bindMicButtons();
+  setOfflineFixedLangs();
+  bindNav();
+  bindLangButtons();
+  bindMicButtons();
 
-  // WebView TTS hazırlığı
   try{ window.speechSynthesis?.getVoices?.(); }catch{}
 
-  // Paket kontrol
   checkCt2Packs();
-  applyOfflineGuardUI();
 
-  // click outside popovers
+  // popover dış tık kapatma (offline’da zaten açılmayacak ama kalsın)
   document.addEventListener("click", (e)=>{
     if(!$("pop-top")?.contains(e.target) && !$("pop-bot")?.contains(e.target) && !e.target.closest(".lang-trigger")) closeAllPop();
   }, { capture:true });
