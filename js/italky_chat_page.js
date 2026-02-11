@@ -1,5 +1,5 @@
 // FILE: /js/italky_chat_page.js
-import { STORAGE_KEY } from "/js/config.js";
+import { STORAGE_KEY, BASE_DOMAIN } from "/js/config.js";
 import { apiPOST } from "/js/api.js";
 import { getSiteLang } from "/js/i18n.js";
 
@@ -10,10 +10,12 @@ function termsKey(email=""){
   return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
 }
 function getUser(){ return safeJson(localStorage.getItem(STORAGE_KEY), {}); }
+
+// ✅ terms zorunluluğunu testte gevşettik (beyaz ekran / loop riskini azaltır)
 function ensureLogged(){
   const u = getUser();
   if(!u?.email){ location.replace("/index.html"); return null; }
-  if(!localStorage.getItem(termsKey(u.email))){ location.replace("/index.html"); return null; }
+  // terms yoksa bile chat açılabilsin (test sürecinde)
   return u;
 }
 
@@ -40,7 +42,7 @@ function maybeCaptureMemory(mem, text){
   return mem;
 }
 
-/* ===== Daily 60s gate (same as before) ===== */
+/* ===== Daily 60s gate ===== */
 const FREE_SECONDS_PER_DAY = 60;
 const MIN_AI_WAIT_CHARGE = 1;
 const MAX_AI_WAIT_CHARGE = 15;
@@ -162,16 +164,75 @@ function autoGrow(){
   ta.style.height=Math.min(ta.scrollHeight,120)+"px";
 }
 
-async function apiChat(text, history, persona){
-  const data = await apiPOST("/api/chat", {
-    text,
-    persona_name: persona || "italkyAI",
-    history: (history||[]).slice(-4),  // ✅ faster
-    max_tokens: 120                     // ✅ faster
-  }, { timeoutMs: 25000 });
-  return String(data?.text || "").trim() || "…";
+/* ===== Render cold start warmup + endpoint fallback ===== */
+const API_BASE = String(BASE_DOMAIN || "").replace(/\/+$/,"");
+
+async function warmUpBackend(){
+  const tries = [
+    `${API_BASE}/health`,
+    `${API_BASE}/api/health`,
+    `${API_BASE}/`
+  ];
+  for(const u of tries){
+    try{
+      const r = await fetch(u, { method:"GET" });
+      if(r.ok) return true;
+    }catch{}
+  }
+  return false;
 }
 
+async function apiChat(text, history, persona){
+  // backend uykuda ise ilk mesajda patlamasın
+  // (warmup başarısız olsa da devam ediyoruz)
+  await warmUpBackend();
+
+  const payload = {
+    text,
+    persona_name: persona || "italkyAI",
+    history: (history||[]).slice(-4),
+    max_tokens: 160
+  };
+
+  // 1) standart endpoint
+  try{
+    const data = await apiPOST("/api/chat", payload, { timeoutMs: 60000 });
+    const out = String(data?.text || data?.reply || data?.answer || "").trim();
+    if(out) return out;
+  }catch(e){
+    // devam et, fallback dene
+  }
+
+  // 2) fallback endpoint (api.js relative path ile çalışıyorsa aynı kalır)
+  try{
+    const data = await apiPOST("/api/ai/chat", payload, { timeoutMs: 60000 });
+    const out = String(data?.text || data?.reply || data?.answer || "").trim();
+    if(out) return out;
+  }catch(e){
+    // devam
+  }
+
+  // 3) son çare: doğrudan absolute fetch (api.js bozulduysa bile)
+  const ctrl = new AbortController();
+  const to = setTimeout(()=>ctrl.abort(), 60000);
+  try{
+    const r = await fetch(`${API_BASE}/api/chat`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal
+    });
+    const data = await r.json().catch(()=> ({}));
+    const out = String(data?.text || data?.reply || data?.answer || "").trim();
+    return out || "…";
+  }catch(e){
+    throw new Error(String(e?.message || e));
+  }finally{
+    clearTimeout(to);
+  }
+}
+
+/* ===== STT (Mic In) ===== */
 let sttBusy=false;
 let sttStartTs=0;
 function startSTT(u, onFinal){
@@ -243,6 +304,9 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   addBubble("meta", isPro(u) ? "PRO: sınırsız" : `Bugünkü kalan: ${remaining(u)}s`);
   scrollBottom(true);
 
+  // warmup info
+  addBubble("meta", "Bağlantı hazırlanıyor… (Render uyandırılıyor)");
+
   $("clearChat").addEventListener("click",()=>{
     chat.innerHTML="";
     addBubble("meta","Sohbet temizlendi.");
@@ -272,7 +336,6 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
     const loader=typingBubble();
 
-    // ✅ smaller memBlock for speed
     const memLines=[];
     if(mem.name) memLines.push(`Ad: ${mem.name}`);
     if(mem.city) memLines.push(`Şehir: ${mem.city}`);
@@ -293,9 +356,12 @@ document.addEventListener("DOMContentLoaded", async ()=>{
       saveHist(u, h);
     }catch(e){
       try{ loader.remove(); }catch{}
-      const msg = uiLang==="tr" ? "Şu an cevap veremedim." : "I couldn't answer now.";
-      addBubble("assistant", msg);
-      h.push({ role:"assistant", text: msg });
+      const errTxt = String(e?.message || e || "");
+      const msg = uiLang==="tr" ? "Bağlantı hatası: " + errTxt : "Connection error: " + errTxt;
+      addBubble("meta", msg);
+      const fb = uiLang==="tr" ? "Şu an cevap veremedim." : "I couldn't answer now.";
+      addBubble("assistant", fb);
+      h.push({ role:"assistant", text: fb });
       saveHist(u, h);
     }finally{
       if(!isPro(u)){
