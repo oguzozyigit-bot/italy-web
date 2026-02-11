@@ -81,88 +81,6 @@
     .card-title { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
     .card-desc { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 4px; text-align:center; }
 
-    .pkgBadge{
-      position:absolute;
-      top:12px; right:12px;
-      font-size:11px;
-      font-weight:900;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.06);
-      letter-spacing:.2px;
-      white-space:nowrap;
-      backdrop-filter: blur(8px);
-      z-index:3;
-    }
-    .pkgInstalled{ border-color: rgba(0,230,118,.45); background: rgba(0,230,118,.14); }
-    .pkgDownloading{ border-color: rgba(0,243,255,.45); background: rgba(0,243,255,.12); overflow:hidden; }
-    .pkgDownloading::after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
-      transform: translateX(-100%);
-      animation: shimmer 1.2s linear infinite;
-    }
-    @keyframes shimmer { to { transform: translateX(100%); } }
-    .pkgMissing{ border-color: rgba(255,23,68,.45); background: rgba(255,23,68,.12); }
-
-    .offline-section{
-      grid-column: 1 / -1;
-      margin-top: 10px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255,255,255,0.10);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .offline-title{
-      font-size:12px;
-      font-weight:900;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.78);
-    }
-    .offline-sub{
-      font-size:11px;
-      font-weight:800;
-      color: rgba(255,255,255,.45);
-    }
-
-    .premium-card.offline-pack{
-      border-color: rgba(0,243,255,0.16);
-      background: linear-gradient(145deg, rgba(0,243,255,0.10) 0%, rgba(255,255,255,0.02) 60%);
-    }
-    .premium-card.offline-pack:active{
-      background: linear-gradient(145deg, rgba(0,243,255,0.14) 0%, rgba(255,255,255,0.03) 60%);
-    }
-
-    .offline-pack.card-offline-text .neon-icon-wrap::after{
-      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 45%, #a8ff78 100%);
-      box-shadow: 0 0 24px rgba(0,243,255,0.35);
-    }
-    .offline-pack.card-offline-f2f .neon-icon-wrap::after{
-      background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 55%, #00f2fe 100%);
-      box-shadow: 0 0 24px rgba(143,211,244,0.35);
-    }
-
-    .offline-tag{
-      position:absolute;
-      left:12px; top:12px;
-      font-size:10px;
-      font-weight:950;
-      letter-spacing: 1px;
-      padding:6px 9px;
-      border-radius:999px;
-      border:1px solid rgba(0,243,255,.22);
-      background: rgba(0,0,0,.22);
-      color: rgba(0,243,255,.95);
-      backdrop-filter: blur(8px);
-      user-select:none;
-      z-index:3;
-    }
-
     .premium-footer {
       position: absolute; bottom: 0; width: 100%; height: var(--footerH);
       background: linear-gradient(to top, rgba(2, 0, 15, 1) 80%, transparent);
@@ -212,7 +130,6 @@
     <main class="main-content">
       <div class="grid-layout">
 
-        <!-- Mevcut kartların -->
         <div class="premium-card card-face" data-href="/pages/facetoface.html">
           <div class="neon-icon-wrap"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <span class="card-title">Yüzyüze</span>
@@ -261,49 +178,6 @@
           <span class="card-desc">Eğlenerek Öğren</span>
         </div>
 
-        <!-- ===== OFFLINE PAKETLER (EN ALT) ===== -->
-        <div class="offline-section">
-          <div style="display:flex;flex-direction:column;gap:2px;">
-            <div class="offline-title">Offline Paketler</div>
-            <div class="offline-sub">CT2 • cihaz içi çeviri</div>
-          </div>
-        </div>
-
-        <!-- ✅ OFFLINE TEXT -->
-        <div class="premium-card offline-pack card-offline-text" id="offlineTextBtn" data-href="/pages/text_translate_offline.html">
-          <span class="offline-tag">OFFLINE</span>
-          <span class="pkgBadge pkgMissing" id="badgeOfflineText">Eksik</span>
-          <div class="neon-icon-wrap">
-            <svg viewBox="0 0 24 24">
-              <path d="M21 8.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8.5"/>
-              <path d="M3 8.5 12 3l9 5.5"/>
-              <path d="M12 3v6"/>
-              <path d="M7 13h10"/>
-              <path d="M7 17h7"/>
-            </svg>
-          </div>
-          <span class="card-title">Offline Text</span>
-          <span class="card-desc">Metin çeviri • EN ⇄ TR</span>
-        </div>
-
-        <!-- ✅ OFFLINE FACETOFACE -->
-        <div class="premium-card offline-pack card-offline-f2f" id="offlineF2FBtn" data-href="/pages/facetoface_offline.html">
-          <span class="offline-tag">OFFLINE</span>
-          <span class="pkgBadge pkgMissing" id="badgeOfflineF2F">Eksik</span>
-          <div class="neon-icon-wrap">
-            <svg viewBox="0 0 24 24">
-              <path d="M7 21v-2a4 4 0 0 1 4-4h0"/>
-              <circle cx="9" cy="7" r="3"/>
-              <path d="M17 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.5a3 3 0 0 1 0 7"/>
-              <rect x="14.5" y="10" width="7" height="12" rx="2"/>
-              <path d="M18 20h0.01"/>
-            </svg>
-          </div>
-          <span class="card-title">Offline FaceToFace</span>
-          <span class="card-desc">Karşılıklı • EN ⇄ TR</span>
-        </div>
-
       </div>
     </main>
 
@@ -321,56 +195,6 @@
   <script type="module">
     import { STORAGE_KEY } from "/js/config.js";
     import { applyI18n } from "/js/i18n.js";
-
-    const CT2_REQUIRED = ["en-tr", "tr-en"];
-
-    function setBadge(el, state){
-      el.classList.remove("pkgInstalled","pkgDownloading","pkgMissing");
-      if(state === "installed"){
-        el.textContent = "Yüklü";
-        el.classList.add("pkgInstalled");
-      } else if(state === "downloading"){
-        el.textContent = "İndiriliyor";
-        el.classList.add("pkgDownloading");
-      } else {
-        el.textContent = "Eksik";
-        el.classList.add("pkgMissing");
-      }
-    }
-
-    function checkCt2Packs(){
-      const bText = document.getElementById("badgeOfflineText");
-      const bF2F  = document.getElementById("badgeOfflineF2F");
-
-      setBadge(bText, "missing");
-      setBadge(bF2F, "missing");
-
-      const sim = (localStorage.getItem("ct2_sim_state") || "").trim();
-      if(sim === "downloading"){
-        setBadge(bText, "downloading");
-        setBadge(bF2F, "downloading");
-        return;
-      }
-      if(sim === "installed"){
-        setBadge(bText, "installed");
-        setBadge(bF2F, "installed");
-        return;
-      }
-
-      try{
-        if(window.Android && typeof window.Android.ct2Check === "function"){
-          const raw = window.Android.ct2Check(JSON.stringify({ required: CT2_REQUIRED }));
-          const res = JSON.parse(raw || "{}");
-          const ok = CT2_REQUIRED.every(k => !!res[k]);
-          if(ok){
-            setBadge(bText, "installed");
-            setBadge(bF2F, "installed");
-          }
-        }
-      }catch(e){
-        console.warn("CT2 check failed:", e);
-      }
-    }
 
     function bindCardNav(){
       document.querySelectorAll(".premium-card[data-href]").forEach(card=>{
@@ -392,7 +216,6 @@
       }
 
       bindCardNav();
-      checkCt2Packs();
     }
     boot();
   </script>
