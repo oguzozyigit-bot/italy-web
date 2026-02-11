@@ -94,53 +94,40 @@ let topLang = "en";
 let botLang = "tr";
 
 /* ===============================
-   ✅ TTS UNLOCK (Android WebView fix)
-   - WebView bazen user gesture olmadan speak() çalıştırmaz.
-   - İlk dokunuşta sessiz bir utterance ile motoru "açarız".
+   ✅ TTS
+   - APK (WebView): NativeTTS varsa Android okur
+   - Web: speechSynthesis fallback
    =============================== */
-let __ttsUnlocked = false;
-let __ttsQueue = null;
-
-function unlockTTS(){
-  if(__ttsUnlocked) return;
-  __ttsUnlocked = true;
-
+function nativeTtsAvailable(){
+  return !!(window.NativeTTS && typeof window.NativeTTS.speak === "function");
+}
+function nativeTtsStop(){
   try{
-    if(!window.speechSynthesis) return;
-    // sessiz tetik
-    const u = new SpeechSynthesisUtterance(" ");
-    u.volume = 0;
-    u.rate = 1;
-    u.pitch = 1;
-    u.lang = "en-US";
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
-    window.speechSynthesis.cancel();
+    if(window.NativeTTS && typeof window.NativeTTS.stop === "function"){
+      window.NativeTTS.stop();
+    }
   }catch{}
-
-  // kuyruk varsa hemen konuş
-  if(__ttsQueue){
-    const q = __ttsQueue;
-    __ttsQueue = null;
-    speak(q.text, q.lang);
-  }
 }
 
-/* ===============================
-   TTS (ZORLAMALI SES ÇIKIŞI)
-   =============================== */
 function speak(text, langCode) {
   const t = String(text || "").trim();
   if (!t) return;
 
-  if (!window.speechSynthesis) {
-    console.error("speechSynthesis bulunamadı!");
-    return;
+  // ✅ APK: Native TTS
+  if(nativeTtsAvailable()){
+    try{
+      // langCode ör: "tr" / "en" / ...
+      window.NativeTTS.speak(t, String(langCode || "en"));
+      return;
+    }catch(e){
+      console.warn("NativeTTS.speak failed:", e);
+      // fallback dene
+    }
   }
 
-  // ✅ unlock olmadan otomatik konuşma WebView'da çoğu cihazda sessiz olur
-  if(!__ttsUnlocked){
-    __ttsQueue = { text: t, lang: langCode };
+  // ✅ Web fallback: speechSynthesis
+  if (!window.speechSynthesis) {
+    console.warn("speechSynthesis bulunamadı!");
     return;
   }
 
@@ -152,31 +139,18 @@ function speak(text, langCode) {
   u.rate = 1.0;
   u.pitch = 1.0;
 
-  // ✅ Android: voice listesi geç gelirse 2 defa dene
-  const pickVoice = () => {
+  // voice seç
+  try{
     const voices = window.speechSynthesis.getVoices() || [];
     if (voices.length > 0) {
       const base = String(langCode||"").split("-")[0];
       const target = voices.find(v => String(v.lang||"").startsWith(base)) || voices[0];
       u.voice = target;
     }
-  };
-
-  pickVoice();
-
-  // voices geç gelirse tekrar
-  try{
-    window.speechSynthesis.onvoiceschanged = () => {
-      pickVoice();
-    };
   }catch{}
 
   setTimeout(() => {
-    try{
-      window.speechSynthesis.speak(u);
-    }catch(e){
-      console.warn("speak failed:", e);
-    }
+    try{ window.speechSynthesis.speak(u); }catch(e){ console.warn("speak failed:", e); }
   }, 60);
 }
 
@@ -193,6 +167,7 @@ function clearChat(){
   closeAllPop();
   stopAll();
   try{ window.speechSynthesis?.cancel?.(); }catch{}
+  nativeTtsStop();
   const top = $("topBody");
   const bot = $("botBody");
   if(top) top.innerHTML = "";
@@ -218,7 +193,6 @@ function addBubble(side, kind, text, langForSpeak){
       </svg>`;
     spk.addEventListener("click", (e)=>{
       e.preventDefault(); e.stopPropagation();
-      unlockTTS(); // ✅ kullanıcı tıklaması kesin gesture
       speak(txt.textContent, langForSpeak);
     });
     row.appendChild(spk);
@@ -301,6 +275,8 @@ function stopAll(){
   recTop = null; recBot = null; active = null;
   setMicUI("top", false); setMicUI("bot", false);
   $("frameRoot")?.classList.remove("listening");
+  nativeTtsStop();
+  try{ window.speechSynthesis?.cancel?.(); }catch{}
 }
 
 function buildRecognizer(langCode){
@@ -315,8 +291,6 @@ function buildRecognizer(langCode){
 }
 
 async function start(which){
-  unlockTTS(); // ✅ mic tıklaması da user gesture
-
   const isAndroid = navigator.userAgent.includes("Android");
   if(location.protocol !== "https:" && location.hostname !== "localhost" && !isAndroid){
     alert("Mikrofon için HTTPS gerekli.");
@@ -345,7 +319,7 @@ async function start(which){
     const translated = await translateViaApi(finalText, src, dst);
     addBubble(other, "me", translated, dst);
 
-    // ✅ konuşma
+    // ✅ konuşma (APK’de NativeTTS, web’de speechSynthesis)
     speak(translated, dst);
   };
 
@@ -391,15 +365,11 @@ function bindMicButtons(){
 document.addEventListener("DOMContentLoaded", ()=>{
   if(!requireLogin()) return;
 
-  // ✅ TTS unlock: ilk dokunuşla motor aç
-  document.addEventListener("pointerdown", unlockTTS, { once:true });
-  document.addEventListener("touchstart", unlockTTS, { once:true });
-
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
   bindNav(); bindLangButtons(); bindMicButtons();
 
-  // ✅ voices preload
+  // voices preload (web için)
   try{ window.speechSynthesis?.getVoices?.(); }catch{}
 
   document.addEventListener("click", (e)=>{
