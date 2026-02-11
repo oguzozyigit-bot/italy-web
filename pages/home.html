@@ -1,123 +1,187 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI • Giriş</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>italkyAI - Premium</title>
+<link rel="icon" href="data:," />
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#02000f;
+  --text:#fff;
+  --muted:rgba(255,255,255,.6);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
+html,body{
+  margin:0;padding:0;width:100%;height:100%;
+  background:var(--bg);
+  font-family:'Outfit',sans-serif;
+  color:var(--text);
+}
 
-  <style>
-    :root {
-      --bg-deep: #020205; --text-white: #ffffff; --text-grey: #9ca3af;
-      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #4338ca 100%);
-    }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100dvh; overflow: hidden;
-      font-family: 'Outfit', sans-serif; background-color: var(--bg-deep);
-      color: var(--text-white); display: flex; align-items: center; justify-content: center;
-    }
-    .app-frame {
-      width: 100%; max-width: 440px; height: 100%;
-      position: relative; z-index: 10;
-      display: flex; flex-direction: column; justify-content: space-between;
-      background: rgba(8, 8, 12, 0.85); backdrop-filter: blur(30px);
-      padding: 40px 20px;
-    }
-    .logo-text { font-size: 50px; font-weight: 700; text-align: center; }
-    .txt-ai { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .action-section { display: flex; flex-direction: column; gap: 15px; align-items: center; width: 100%; }
-    #googleBtnContainer { width: 100%; max-width: 320px; min-height: 44px; display: flex; justify-content: center; }
-    .toast {
-      position: fixed; top: 20px; left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: #1a1a2e; border: 1px solid #6366f1;
-      padding: 12px 24px; border-radius: 30px;
-      transition: 0.4s; z-index: 9999;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); }
-  </style>
+.app{
+  max-width:480px;
+  margin:0 auto;
+  min-height:100dvh;
+  padding-bottom:100px;
+}
+
+.header{
+  padding:30px 20px 10px;
+  text-align:center;
+}
+
+.logo{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:34px;
+  font-weight:700;
+}
+
+.logo span{
+  background:linear-gradient(135deg,#a5b4fc,#6366f1,#ec4899);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  padding:20px;
+}
+
+.card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  padding:24px 16px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.card:active{
+  transform:scale(.96);
+  background:rgba(255,255,255,.1);
+}
+
+.card-title{
+  font-weight:800;
+  font-size:16px;
+}
+
+.card-desc{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.footer{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  max-width:480px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#02000f;
+  border-top:1px solid rgba(255,255,255,.08);
+  padding:16px;
+  text-align:center;
+}
+
+.footer a{
+  font-size:11px;
+  margin:0 8px;
+  text-decoration:none;
+  color:rgba(255,255,255,.4);
+  font-weight:700;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="app-frame">
-    <div class="header-section" style="text-align: center;">
-      <div class="logo-text">italky<span class="txt-ai">AI</span></div>
-      <h2 style="font-size: 22px; margin-top: 20px;">Hoş Geldiniz</h2>
-      <p style="color: var(--text-grey); font-size: 14px;">Devam etmek için giriş yapın.</p>
-    </div>
+<div class="app">
 
-    <div class="action-section">
-      <div id="googleBtnContainer"></div>
-    </div>
-
-    <div style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.2);">
-      italkyAI © 2026
-    </div>
+  <div class="header">
+    <div class="logo">italky<span>AI</span></div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div class="grid">
 
-  <script type="module">
-    const HOME_PATH = "/pages/home.html"; // ✅ doğru yol
+    <div class="card" onclick="go('/pages/facetoface.html')">
+      <div class="card-title">Yüzyüze</div>
+      <div class="card-desc">Karşılıklı Çeviri</div>
+    </div>
 
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = String(msg || "");
-      t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 2400);
+    <div class="card" onclick="go('/pages/voice_ai.html')">
+      <div class="card-title">Konuşkan AI</div>
+      <div class="card-desc">Yapay Zeka Sohbet</div>
+    </div>
+
+    <div class="card" onclick="go('/pages/text_translate.html')">
+      <div class="card-title">Metin Çeviri</div>
+      <div class="card-desc">Hızlı Çeviri</div>
+    </div>
+
+    <div class="card" onclick="go('/pages/chat.html')">
+      <div class="card-title">Sohbet AI</div>
+      <div class="card-desc">Akıllı Asistan</div>
+    </div>
+
+    <div class="card" onclick="go('/pages/photo.html')">
+      <div class="card-title">Foto Çeviri</div>
+      <div class="card-desc">Görselden Çevir</div>
+    </div>
+
+    <div class="card" onclick="go('/pages/teachers.html')">
+      <div class="card-title">Öğretmen AI</div>
+      <div class="card-desc">Dil Eğitmeni</div>
+    </div>
+
+    <div class="card" onclick="go('/pages/document.html')">
+      <div class="card-title">Belge Çeviri</div>
+      <div class="card-desc">PDF & Dosya</div>
+    </div>
+
+    <div class="card" onclick="go('/pages/game.html')">
+      <div class="card-title">Oyunlar</div>
+      <div class="card-desc">Eğlenerek Öğren</div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  <a href="/pages/about.html">Hakkımızda</a>
+  <a href="/pages/faq.html">SSS</a>
+  <a href="/pages/privacy.html">Gizlilik</a>
+  <a href="/pages/contact.html">İletişim</a>
+</div>
+
+<script>
+function go(path){
+  window.location.href = path;
+}
+
+/* 🔐 LOGIN GUARD */
+(function(){
+  try{
+    const u = JSON.parse(localStorage.getItem("italky_user_v1") || "null");
+    if(!u || !u.email){
+      location.replace("/index.html");
     }
-    window.showToast = showToast;
+  }catch(e){
+    location.replace("/index.html");
+  }
+})();
+</script>
 
-    async function init() {
-      // Google script yüklenene kadar bekle
-      const waitGoogle = () => new Promise((resolve) => {
-        const t0 = Date.now();
-        const tick = () => {
-          if (window.google?.accounts?.id) return resolve(true);
-          if (Date.now() - t0 > 6000) return resolve(false);
-          setTimeout(tick, 120);
-        };
-        tick();
-      });
-
-      // auth.js yükle
-      let authModule = null;
-      try {
-        authModule = await import("/js/auth.js?v=" + Date.now());
-      } catch (e) {
-        console.error("auth.js yüklenemedi:", e);
-        showToast("Giriş sistemi yüklenemedi.");
-        return;
-      }
-
-      // Zaten login ise auth.js HOME'a gönderir (çift yönlendirme yapma)
-      try {
-        const already = authModule.redirectIfLoggedIn?.();
-        if (already) return;
-      } catch {}
-
-      const okGoogle = await waitGoogle();
-      if (!okGoogle) {
-        showToast("Google bileşeni yüklenemedi.");
-        return;
-      }
-
-      // Google butonunu başlat
-      try {
-        authModule.initAuth?.();
-      } catch (e) {
-        console.error("initAuth hata:", e);
-        showToast("Giriş başlatılamadı.");
-      }
-    }
-
-    window.addEventListener("load", init);
-  </script>
 </body>
 </html>
