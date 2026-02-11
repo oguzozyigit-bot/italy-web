@@ -94,19 +94,57 @@ let topLang = "en";
 let botLang = "tr";
 
 /* ===============================
+   ✅ TTS UNLOCK (Android WebView fix)
+   - WebView bazen user gesture olmadan speak() çalıştırmaz.
+   - İlk dokunuşta sessiz bir utterance ile motoru "açarız".
+   =============================== */
+let __ttsUnlocked = false;
+let __ttsQueue = null;
+
+function unlockTTS(){
+  if(__ttsUnlocked) return;
+  __ttsUnlocked = true;
+
+  try{
+    if(!window.speechSynthesis) return;
+    // sessiz tetik
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+    u.lang = "en-US";
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+    window.speechSynthesis.cancel();
+  }catch{}
+
+  // kuyruk varsa hemen konuş
+  if(__ttsQueue){
+    const q = __ttsQueue;
+    __ttsQueue = null;
+    speak(q.text, q.lang);
+  }
+}
+
+/* ===============================
    TTS (ZORLAMALI SES ÇIKIŞI)
    =============================== */
 function speak(text, langCode) {
   const t = String(text || "").trim();
   if (!t) return;
-  
+
   if (!window.speechSynthesis) {
     console.error("speechSynthesis bulunamadı!");
     return;
   }
 
-  // Önceki sesleri durdur
-  window.speechSynthesis.cancel();
+  // ✅ unlock olmadan otomatik konuşma WebView'da çoğu cihazda sessiz olur
+  if(!__ttsUnlocked){
+    __ttsQueue = { text: t, lang: langCode };
+    return;
+  }
+
+  try{ window.speechSynthesis.cancel(); }catch{}
 
   const u = new SpeechSynthesisUtterance(t);
   u.lang = bcp(langCode);
@@ -114,17 +152,32 @@ function speak(text, langCode) {
   u.rate = 1.0;
   u.pitch = 1.0;
 
-  // ✅ KRİTİK: Android bazen ses listesi yüklenmeden konuşmaz
-  const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    const target = voices.find(v => v.lang.startsWith(langCode.split("-")[0])) || voices[0];
-    u.voice = target;
-  }
+  // ✅ Android: voice listesi geç gelirse 2 defa dene
+  const pickVoice = () => {
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (voices.length > 0) {
+      const base = String(langCode||"").split("-")[0];
+      const target = voices.find(v => String(v.lang||"").startsWith(base)) || voices[0];
+      u.voice = target;
+    }
+  };
 
-  // ✅ Android WebView'da bazen konuşma başlamazsa diye küçük bir gecikme
+  pickVoice();
+
+  // voices geç gelirse tekrar
+  try{
+    window.speechSynthesis.onvoiceschanged = () => {
+      pickVoice();
+    };
+  }catch{}
+
   setTimeout(() => {
-    window.speechSynthesis.speak(u);
-  }, 50);
+    try{
+      window.speechSynthesis.speak(u);
+    }catch(e){
+      console.warn("speak failed:", e);
+    }
+  }, 60);
 }
 
 function markLatestTranslation(side){
@@ -165,6 +218,7 @@ function addBubble(side, kind, text, langForSpeak){
       </svg>`;
     spk.addEventListener("click", (e)=>{
       e.preventDefault(); e.stopPropagation();
+      unlockTTS(); // ✅ kullanıcı tıklaması kesin gesture
       speak(txt.textContent, langForSpeak);
     });
     row.appendChild(spk);
@@ -261,6 +315,8 @@ function buildRecognizer(langCode){
 }
 
 async function start(which){
+  unlockTTS(); // ✅ mic tıklaması da user gesture
+
   const isAndroid = navigator.userAgent.includes("Android");
   if(location.protocol !== "https:" && location.hostname !== "localhost" && !isAndroid){
     alert("Mikrofon için HTTPS gerekli.");
@@ -282,12 +338,14 @@ async function start(which){
     const t = e.results?.[0]?.[0]?.transcript || "";
     const finalText = String(t||"").trim();
     if(!finalText) return;
+
     addBubble(which, "them", finalText, src);
+
     const other = (which === "top") ? "bot" : "top";
     const translated = await translateViaApi(finalText, src, dst);
     addBubble(other, "me", translated, dst);
-    
-    // ✅ BURASI KONUŞTURMA KISMI
+
+    // ✅ konuşma
     speak(translated, dst);
   };
 
@@ -332,12 +390,17 @@ function bindMicButtons(){
 
 document.addEventListener("DOMContentLoaded", ()=>{
   if(!requireLogin()) return;
+
+  // ✅ TTS unlock: ilk dokunuşla motor aç
+  document.addEventListener("pointerdown", unlockTTS, { once:true });
+  document.addEventListener("touchstart", unlockTTS, { once:true });
+
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
   bindNav(); bindLangButtons(); bindMicButtons();
-  
-  // ✅ SES MOTORUNU ÖNCEDEN TETİKLE (WEBVIEW İÇİN)
-  if (window.speechSynthesis) window.speechSynthesis.getVoices();
+
+  // ✅ voices preload
+  try{ window.speechSynthesis?.getVoices?.(); }catch{}
 
   document.addEventListener("click", (e)=>{
     if(!$("pop-top")?.contains(e.target) && !$("pop-bot")?.contains(e.target) && !e.target.closest(".lang-trigger")) closeAllPop();
