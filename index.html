@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>italkyAI • Giriş</title>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- ❌ APP/WebView’de beyaz ekran yapan şey bu olabiliyor:
+       <script src="https://accounts.google.com/gsi/client" async defer></script>
+       Bunu kaldırdık. WEB’de JS ile dinamik yükleyeceğiz. -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,10 +68,10 @@
 
     .action-area { width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center; }
 
-    /* ✅ GSI container (webde auth.js render eder) */
+    /* ✅ GSI container (WEB’de auth.js render eder) */
     #googleBtnContainer { width: 100%; max-width: 320px; min-height: 44px; display: flex; justify-content: center; }
 
-    /* ✅ Native Google butonu (app/webview’de görünür) */
+    /* ✅ Native Google butonu (APP/WebView’de görünür) */
     .google-native-btn{
       width: 100%;
       max-width: 320px;
@@ -88,10 +90,7 @@
       user-select:none;
     }
     .google-native-btn:active{ transform: scale(.99); }
-    .g-icon{
-      width:18px; height:18px;
-      display:inline-flex; align-items:center; justify-content:center;
-    }
+    .g-icon{ width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; }
 
     .apple-btn {
       width: 100%; max-width: 320px; height: 44px; border-radius: 6px; border: none;
@@ -165,7 +164,6 @@
         <!-- ✅ APP/WebView: Native Google -->
         <button class="google-native-btn" id="nativeGoogleBtn" type="button" style="display:none;">
           <span class="g-icon" aria-hidden="true">
-            <!-- basit Google G -->
             <svg viewBox="0 0 24 24" width="18" height="18">
               <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-1.5 3.6-5.5 3.6-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17.9 2.5 15.3 1.2 12 1.2 5.9 1.2 1 6.1 1 12s4.9 10.8 11 10.8c6.3 0 10.4-4.4 10.4-10.6 0-.7-.1-1.2-.2-1.7H12z"/>
               <path fill="#34A853" d="M3.6 7.7l3.2 2.3C7.7 8 9.7 6.5 12 6.5c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17.9 2.5 15.3 1.2 12 1.2c-4.2 0-7.8 2.4-9.6 6.5z"/>
@@ -214,13 +212,26 @@
     // ✅ Uygulama/WebView tespiti: Native bridge var mı?
     const hasNative = !!(window.Native && typeof window.Native.startGoogleLogin === "function");
 
-    // Native varsa: GSI container'ı gizle, native butonu göster
     const nativeBtn = document.getElementById("nativeGoogleBtn");
     const gsiWrap = document.getElementById("googleBtnContainer");
 
+    // ✅ WEB’de GSI script’ini dinamik yükle (APP’de ASLA yükleme)
+    function loadGsiScript(){
+      return new Promise((resolve, reject)=>{
+        if (window.google?.accounts?.id) return resolve(true);
+        const s = document.createElement("script");
+        s.src = "https://accounts.google.com/gsi/client";
+        s.async = true;
+        s.defer = true;
+        s.onload = ()=>resolve(true);
+        s.onerror = ()=>reject(new Error("gsi load failed"));
+        document.head.appendChild(s);
+      });
+    }
+
     if (hasNative) {
+      // APP/WebView: sadece native login
       nativeBtn.style.display = "flex";
-      // web gsi butonunu gizle (beyaz ekran tetiklemesin)
       gsiWrap.style.display = "none";
 
       nativeBtn.addEventListener("click", ()=>{
@@ -231,20 +242,7 @@
         }
       });
 
-      // Native modda auth.js çalıştırmıyoruz
     } else {
-      // WEB mod: auth.js + GSI devam
-      async function waitGoogle(maxMs=10000){
-        const t0 = Date.now();
-        return new Promise((resolve)=>{
-          const tick=()=>{
-            if(window.google?.accounts?.id) return resolve(true);
-            if(Date.now()-t0>maxMs) return resolve(false);
-            setTimeout(tick, 150);
-          };
-          tick();
-        });
-      }
 
       async function bootWeb(){
         // auth.js dinamik yükle
@@ -266,8 +264,11 @@
           }
         }catch{}
 
-        const ok = await waitGoogle();
-        if(!ok){
+        // ✅ GSI script’i WEB’de yükle
+        try{
+          await loadGsiScript();
+        }catch(e){
+          console.error(e);
           toast("Google bileşeni yüklenemedi.");
           return;
         }
