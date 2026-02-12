@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
   <style>
-    :root{ --bg:#030014; --text:#fff; --muted:rgba(255,255,255,.55); --ai1:#A5B4FC; --ai2:#4F46E5; }
+    :root{ --bg:#030014; --text:#fff; --muted:rgba(255,255,255,.58); --ai1:#A5B4FC; --ai2:#4F46E5; }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Outfit,sans-serif;color:var(--text)}
     .nebula{position:absolute;inset:-30%;filter:blur(70px);opacity:.35;background:
@@ -24,9 +24,11 @@
     .logo{font-family:"Space Grotesk",sans-serif;font-size:22px;font-weight:800}
     .logo .ai{background:linear-gradient(135deg,var(--ai1),var(--ai2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .sub{font-size:10px;letter-spacing:5px;color:rgba(255,255,255,.45);font-weight:900}
+
     .title{padding:14px 18px 6px}
     .title h1{margin:0;font-size:18px;font-weight:1000;letter-spacing:-.2px}
-    .title p{margin:6px 0 0;color:var(--muted);font-weight:800;font-size:12px;line-height:1.4}
+    .title p{margin:6px 0 0;color:var(--muted);font-weight:800;font-size:13px;line-height:1.45}
+
     .grid{flex:1;overflow:auto;padding:12px 18px 18px;display:grid;grid-template-columns:1fr;gap:12px;scrollbar-width:none}
     .grid::-webkit-scrollbar{display:none}
     .card{border-radius:22px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);padding:14px 14px;display:flex;gap:12px;align-items:center;cursor:pointer}
@@ -34,7 +36,7 @@
     .flag{width:46px;height:46px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;font-size:22px}
     .meta{flex:1;min-width:0}
     .name{font-weight:1000;font-size:16px}
-    .desc{font-weight:800;color:rgba(255,255,255,.6);font-size:12px;margin-top:2px}
+    .desc{font-weight:800;color:rgba(255,255,255,.62);font-size:13px;margin-top:2px}
     .go{font-weight:1000;color:rgba(255,255,255,.7)}
 
     /* bottom sheet */
@@ -53,14 +55,12 @@
       backdrop-filter:blur(18px);
       box-shadow:0 40px 120px rgba(0,0,0,.75);
       padding:14px;
-      transform:translateY(14px);
       animation: sheetIn .18s ease-out both;
     }
     @keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
     .sheetTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .sheetTitle{font-weight:1000;font-size:14px}
-    .sheetClose{width:38px;height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:1000;cursor:pointer}
-    .sheetInfo{font-weight:800;font-size:12px;color:rgba(255,255,255,.65);line-height:1.4;margin-bottom:12px}
+    .sheetTitle{font-weight:1000;font-size:15px}
+    .sheetClose{width:40px;height:40px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:1000;cursor:pointer}
     .teacherRow{
       border-radius:18px;border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.05);
@@ -68,21 +68,25 @@
     }
     .tFlag{width:38px;height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)}
     .tMeta{flex:1}
-    .tName{font-weight:1000}
-    .tDesc{font-weight:800;font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+    .tName{font-weight:1000;font-size:14px}
+    .tDesc{font-weight:800;font-size:12px;color:rgba(255,255,255,.62);margin-top:2px}
 
-    .minsGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-    .minsBtn{
-      height:54px;border-radius:18px;
+    .label{margin:10px 0 8px;font-weight:1000;font-size:13px;color:rgba(255,255,255,.86)}
+    .pillRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .pillBtn{
+      height:52px;border-radius:18px;
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.06);
       color:#fff;font-weight:1000;font-size:14px;cursor:pointer;
     }
-    .minsBtn.active{
+    .pillBtn.active{
       border-color: rgba(99,102,241,.55);
       background: rgba(99,102,241,.18);
       box-shadow:0 0 22px rgba(99,102,241,.18);
     }
+    .levelRow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+    .levelBtn{height:46px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:1000;cursor:pointer}
+    .levelBtn.active{border-color: rgba(236,72,153,.55);background: rgba(236,72,153,.16);box-shadow:0 0 22px rgba(236,72,153,.16)}
 
     .startBtn{
       margin-top:12px;width:100%;height:56px;border-radius:20px;border:none;
@@ -91,7 +95,6 @@
       box-shadow:0 14px 40px rgba(79,70,229,.25);
     }
     .startBtn:active{transform:scale(.99)}
-    .note{padding:10px 18px 18px;color:rgba(255,255,255,.35);font-weight:900;font-size:11px;text-align:center}
   </style>
 </head>
 <body>
@@ -109,73 +112,73 @@
 
     <div class="title">
       <h1>Öğretmenini Seç</h1>
-      <p>Bu ders tamamen hedef dilde ilerler. Türkçe yok. %95 eşik, 3 hak.</p>
+      <p>Ders hedef dilde ilerler. Öğretmen Türkçe konuşmaz. Altta parantez içinde çeviri görürsün.</p>
     </div>
 
-    <div class="grid" id="teacherGrid">
-      <div class="card" data-teacher="dora" data-flag="🇬🇧" data-name="İngilizce Öğretmeni Dora" data-desc="English only • course">
-        <div class="flag">🇬🇧</div><div class="meta"><div class="name">İngilizce Öğretmeni Dora</div><div class="desc">English only • course mode</div></div><div class="go">›</div>
+    <div class="grid">
+      <div class="card" data-teacher="dora" data-flag="🇬🇧" data-name="English Teacher Dora" data-desc="Sweet but disciplined">
+        <div class="flag">🇬🇧</div><div class="meta"><div class="name">İngilizce Öğretmeni Dora</div><div class="desc">English only • kurs</div></div><div class="go">›</div>
       </div>
-
-      <div class="card" data-teacher="sencer" data-flag="🇮🇹" data-name="İtalyanca Öğretmeni Sencer" data-desc="Solo italiano • course">
-        <div class="flag">🇮🇹</div><div class="meta"><div class="name">İtalyanca Öğretmeni Sencer</div><div class="desc">Solo italiano • course mode</div></div><div class="go">›</div>
+      <div class="card" data-teacher="ayda" data-flag="🇩🇪" data-name="Deutsch Teacher Ayda" data-desc="Sweet but disciplined">
+        <div class="flag">🇩🇪</div><div class="meta"><div class="name">Almanca Öğretmeni Ayda</div><div class="desc">Nur Deutsch • kurs</div></div><div class="go">›</div>
       </div>
-
-      <div class="card" data-teacher="jale" data-flag="🇫🇷" data-name="Fransızca Öğretmeni Jale" data-desc="Français seulement • course">
-        <div class="flag">🇫🇷</div><div class="meta"><div class="name">Fransızca Öğretmeni Jale</div><div class="desc">Français seulement • course mode</div></div><div class="go">›</div>
+      <div class="card" data-teacher="jale" data-flag="🇫🇷" data-name="Français Teacher Jale" data-desc="Sweet but disciplined">
+        <div class="flag">🇫🇷</div><div class="meta"><div class="name">Fransızca Öğretmeni Jale</div><div class="desc">Français seulement • kurs</div></div><div class="go">›</div>
       </div>
-
-      <div class="card" data-teacher="ozan" data-flag="🇪🇸" data-name="İspanyolca Öğretmeni Ozan" data-desc="Solo español • course">
-        <div class="flag">🇪🇸</div><div class="meta"><div class="name">İspanyolca Öğretmeni Ozan</div><div class="desc">Solo español • course mode</div></div><div class="go">›</div>
+      <div class="card" data-teacher="sencer" data-flag="🇮🇹" data-name="Italiano Teacher Sencer" data-desc="Sweet but disciplined">
+        <div class="flag">🇮🇹</div><div class="meta"><div class="name">İtalyanca Öğretmeni Sencer</div><div class="desc">Solo italiano • kurs</div></div><div class="go">›</div>
       </div>
-
-      <div class="card" data-teacher="ayda" data-flag="🇩🇪" data-name="Almanca Öğretmeni Ayda" data-desc="Nur Deutsch • course">
-        <div class="flag">🇩🇪</div><div class="meta"><div class="name">Almanca Öğretmeni Ayda</div><div class="desc">Nur Deutsch • course mode</div></div><div class="go">›</div>
+      <div class="card" data-teacher="ozan" data-flag="🇪🇸" data-name="Español Teacher Ozan" data-desc="Sweet but disciplined">
+        <div class="flag">🇪🇸</div><div class="meta"><div class="name">İspanyolca Öğretmeni Ozan</div><div class="desc">Solo español • kurs</div></div><div class="go">›</div>
       </div>
-
-      <div class="card" data-teacher="sungur" data-flag="🇷🇺" data-name="Rusça Öğretmeni Sungur" data-desc="Только по-русски • course">
-        <div class="flag">🇷🇺</div><div class="meta"><div class="name">Rusça Öğretmeni Sungur</div><div class="desc">Только по-русски • course mode</div></div><div class="go">›</div>
+      <div class="card" data-teacher="sungur" data-flag="🇷🇺" data-name="Русский Teacher Sungur" data-desc="Sweet but disciplined">
+        <div class="flag">🇷🇺</div><div class="meta"><div class="name">Rusça Öğretmeni Sungur</div><div class="desc">Только по-русски • kurs</div></div><div class="go">›</div>
       </div>
-
-      <div class="card" data-teacher="huma" data-flag="🇯🇵" data-name="Japonca Öğretmeni Hüma" data-desc="日本語だけ • course">
-        <div class="flag">🇯🇵</div><div class="meta"><div class="name">Japonca Öğretmeni Hüma</div><div class="desc">日本語だけ • course mode</div></div><div class="go">›</div>
+      <div class="card" data-teacher="huma" data-flag="🇯🇵" data-name="日本語 Teacher Hüma" data-desc="Sweet but disciplined">
+        <div class="flag">🇯🇵</div><div class="meta"><div class="name">Japonca Öğretmeni Hüma</div><div class="desc">日本語だけ • kurs</div></div><div class="go">›</div>
       </div>
     </div>
-
-    <div class="note">Öğretmen seçince ders süresi sorulacak.</div>
   </div>
 
-  <!-- duration sheet -->
+  <!-- sheet -->
   <div class="sheetBack" id="sheetBack">
-    <div class="sheet" role="dialog" aria-label="Ders süresi seç">
+    <div class="sheet">
       <div class="sheetTop">
-        <div class="sheetTitle">Ders Süresi</div>
+        <div class="sheetTitle">Ders Ayarları</div>
         <button class="sheetClose" id="sheetClose" type="button">✕</button>
       </div>
 
-      <div class="teacherRow" id="teacherRow">
-        <div class="tFlag" id="tFlag">🇬🇧</div>
+      <div class="teacherRow">
+        <div class="tFlag" id="tFlag">🌐</div>
         <div class="tMeta">
           <div class="tName" id="tName">—</div>
           <div class="tDesc" id="tDesc">—</div>
         </div>
       </div>
 
-      <div class="sheetInfo">10 / 20 / 30 dakika seç. (İleride üyeliğe göre değişecek)</div>
-
-      <div class="minsGrid" id="minsGrid">
-        <button class="minsBtn active" data-mins="10" type="button">10 dk</button>
-        <button class="minsBtn" data-mins="20" type="button">20 dk</button>
-        <button class="minsBtn" data-mins="30" type="button">30 dk</button>
+      <div class="label">Ders Süresi</div>
+      <div class="pillRow" id="minsRow">
+        <button class="pillBtn active" data-mins="10" type="button">10 dk</button>
+        <button class="pillBtn" data-mins="20" type="button">20 dk</button>
+        <button class="pillBtn" data-mins="30" type="button">30 dk</button>
       </div>
 
-      <button class="startBtn" id="startBtn" type="button">DERSİ BAŞLAT</button>
+      <div class="label">Seviye</div>
+      <div class="levelRow" id="levelRow">
+        <button class="levelBtn active" data-level="A0" type="button">A0</button>
+        <button class="levelBtn" data-level="A1" type="button">A1</button>
+        <button class="levelBtn" data-level="A2" type="button">A2</button>
+        <button class="levelBtn" data-level="B1" type="button">B1</button>
+      </div>
+
+      <button class="startBtn" id="startBtn" type="button">DERSE GİR</button>
     </div>
   </div>
 
   <script>
     const KEY_TEACHER = "italky_teacher_pref";
     const KEY_MINS = "italky_lesson_mins";
+    const KEY_LEVEL = "italky_lesson_level";
 
     const sheetBack = document.getElementById("sheetBack");
     const closeBtn = document.getElementById("sheetClose");
@@ -183,9 +186,9 @@
 
     let pickedTeacher = "dora";
     let pickedMins = "10";
+    let pickedLevel = "A0";
 
     function openSheet(meta){
-      // meta: {id, flag, name, desc}
       pickedTeacher = meta.id;
       document.getElementById("tFlag").textContent = meta.flag || "🌐";
       document.getElementById("tName").textContent = meta.name || "—";
@@ -197,23 +200,29 @@
     closeBtn.addEventListener("click", closeSheet);
     sheetBack.addEventListener("click", (e)=>{ if(e.target === sheetBack) closeSheet(); });
 
-    document.querySelectorAll(".minsBtn").forEach(b=>{
+    document.querySelectorAll("#minsRow .pillBtn").forEach(b=>{
       b.addEventListener("click", ()=>{
-        document.querySelectorAll(".minsBtn").forEach(x=>x.classList.remove("active"));
+        document.querySelectorAll("#minsRow .pillBtn").forEach(x=>x.classList.remove("active"));
         b.classList.add("active");
         pickedMins = b.getAttribute("data-mins") || "10";
+      });
+    });
+    document.querySelectorAll("#levelRow .levelBtn").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        document.querySelectorAll("#levelRow .levelBtn").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        pickedLevel = b.getAttribute("data-level") || "A0";
       });
     });
 
     document.querySelectorAll(".card[data-teacher]").forEach(card=>{
       card.addEventListener("click", ()=>{
-        const meta = {
+        openSheet({
           id: card.getAttribute("data-teacher"),
           flag: card.getAttribute("data-flag"),
           name: card.getAttribute("data-name"),
           desc: card.getAttribute("data-desc")
-        };
-        openSheet(meta);
+        });
       });
     });
 
@@ -221,8 +230,9 @@
       try{
         localStorage.setItem(KEY_TEACHER, String(pickedTeacher));
         localStorage.setItem(KEY_MINS, String(pickedMins));
+        localStorage.setItem(KEY_LEVEL, String(pickedLevel));
       }catch(e){}
-      location.href = "/pages/voice_ai.html";
+      location.href = "/pages/teacher_course.html";
     });
   </script>
 </body>
