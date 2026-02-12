@@ -1,13 +1,6 @@
 // FILE: /js/teacher_course.page.js
 // italkyAI Teacher Course — Speech-only, Sweet but Disciplined
-// - Teacher speaks target language only
-// - UI shows Turkish translation in parentheses
-// - 95% similarity, 3 tries
-// - No typing, no mic button
-// - Start/Pause button controls the lesson
-// - Classic bell (WebAudio)
 
-// deps
 import { STORAGE_KEY, BASE_DOMAIN } from "/js/config.js";
 import { apiPOST } from "/js/api.js";
 
@@ -55,9 +48,7 @@ function getLevel(){
 
 // UI helpers
 const chatEl = $("chat");
-function scrollBottom(){
-  try{ chatEl.scrollTop = chatEl.scrollHeight; }catch{}
-}
+function scrollBottom(){ try{ chatEl.scrollTop = chatEl.scrollHeight; }catch{} }
 function addBubble(cls, text){
   const d=document.createElement("div");
   d.className = `bubble ${cls}`;
@@ -109,7 +100,7 @@ function tokenSimilarity(a,b){
   return Math.max(hit/len, bagHit/len);
 }
 
-// bell (classic-ish)
+// bell
 function playBell(){
   try{
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -119,8 +110,8 @@ function playBell(){
     const o2 = ctx.createOscillator();
     const g  = ctx.createGain();
     o1.type="sine"; o2.type="sine";
-    o1.frequency.value = 880;  // A5
-    o2.frequency.value = 1320; // E6
+    o1.frequency.value = 880;
+    o2.frequency.value = 1320;
     g.gain.setValueAtTime(0.0001, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime+0.02);
     g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+1.4);
@@ -177,7 +168,6 @@ Rules:
 TEACH: (1-3 short lines)
 REPEAT: (ONE single sentence the student must say)
 - Level: ${level}. Keep it appropriate.
-- Today’s focus can include sounds/letters (e.g., vowel pronunciation).
 Student name: ${studentName}.
 `.trim();
 }
@@ -229,40 +219,26 @@ function setBadges(){
   $("pillTry").textContent = "●".repeat(Math.max(0, triesLeft)) + "○".repeat(Math.max(0, MAX_TRIES-triesLeft));
   $("pillScore").textContent = "95%";
 }
-
 function setHeader(){
   const title = `${teacher.nameTR} • ${teacher.lang.toUpperCase()} • ${level}`;
   $("teacherName").textContent = title;
   $("lessonInfo").textContent = `${mins} dk`;
 }
-
 function setStatus(s){ $("statusText").textContent = s; }
-
-function resetRepeat(){
-  pendingRepeat="";
-  triesLeft=MAX_TRIES;
-  setBadges();
-}
+function resetRepeat(){ pendingRepeat=""; triesLeft=MAX_TRIES; setBadges(); }
 
 function pauseLesson(){
-  paused=true;
-  stopAudio();
-  stopSTT();
+  paused=true; stopAudio(); stopSTT();
   setStatus("PAUSED");
   $("btnLesson").textContent = "Devam Et";
 }
 function resumeLesson(){
-  paused=false;
-  setStatus("RUNNING");
+  paused=false; setStatus("RUNNING");
   $("btnLesson").textContent = "Mola Ver";
-  // Continue flow: if waiting repeat, listen; else teacher continues
-  if(pendingRepeat) listenStudent();
-  else teacherNext("Continue.");
+  if(pendingRepeat) listenStudent(); else teacherNext("Continue.");
 }
-
 function stopLesson(){
-  running=false;
-  paused=false;
+  running=false; paused=false;
   stopAudio(); stopSTT();
   setStatus("READY");
   $("btnLesson").textContent = "Dersi Başlat";
@@ -275,15 +251,9 @@ function formatTimeLeft(){
   const ss = String(s%60).padStart(2,"0");
   return `${mm}:${ss}`;
 }
-
 function tickTime(){
   if(!running || paused) return;
-  if(Date.now() >= endAt){
-    // time ended: finish current turn only, do not start new topics
-    // We will let the current repeat/turn finish, then close.
-    // Mark endAt=now to prevent new topics.
-    endAt = Date.now();
-  }
+  if(Date.now() >= endAt) endAt = Date.now();
   $("lessonInfo").textContent = `${mins} dk • ${formatTimeLeft()}`;
   requestAnimationFrame(tickTime);
 }
@@ -295,15 +265,14 @@ async function startLesson(){
     alert("Bu cihaz konuşmayı yazıya çevirmiyor (SpeechRecognition yok).");
     return;
   }
-  running=true;
-  paused=false;
+
+  running=true; paused=false;
   endAt = Date.now() + mins*60*1000;
   setStatus("RUNNING");
   $("btnLesson").textContent = "Mola Ver";
   $("lessonInfo").textContent = `${mins} dk • ${formatTimeLeft()}`;
   resetRepeat();
 
-  // Teacher auto starts (with student name)
   const studentName = (u?.name || u?.fullname || "Student").split(" ")[0].trim() || "Student";
   addBubble("teacher", `Hello ${studentName}.`);
   const tr1 = await translateToTR(`Hello ${studentName}.`, teacher.lang);
@@ -317,8 +286,6 @@ async function startLesson(){
 
 async function teacherNext(userText){
   if(!running || paused) return;
-
-  // If time ended, do not start new blocks; only close when current cycle ends
   const timeEnded = Date.now() >= endAt;
 
   setStatus("THINKING");
@@ -327,9 +294,7 @@ async function teacherNext(userText){
   if(history.length>12) history = history.slice(-12);
 
   let reply="";
-  try{
-    reply = await apiTeacherText(userText, teacher, level, (u?.name||"Student").split(" ")[0], history);
-  }catch{}
+  try{ reply = await apiTeacherText(userText, teacher, level, (u?.name||"Student").split(" ")[0], history); }catch{}
 
   const { teach, repeat } = parseTeachRepeat(reply);
   const teachText = (teach||"").trim();
@@ -346,7 +311,6 @@ async function teacherNext(userText){
   }
 
   if(repeatText){
-    // If time ended and we are about to start a fresh repeat cycle, allow ONE final cycle then finish.
     pendingRepeat = repeatText;
     triesLeft = MAX_TRIES;
     setBadges();
@@ -355,18 +319,24 @@ async function teacherNext(userText){
     const tr = await translateToTR(`Repeat: ${repeatText}`, teacher.lang);
     if(tr) addBubble("tr", `(${tr})`);
 
-    await speakTTS(`Repeat: ${repeatText}`, teacher.voice, ()=>{
-      listenStudent();
-    });
+    await speakTTS(`Repeat: ${repeatText}`, teacher.voice, ()=>listenStudent());
     return;
   }
 
-  // If no repeat line, just continue listening
-  if(timeEnded){
-    await endLessonProperly();
-  }else{
-    listenStudent();
-  }
+  if(timeEnded) await endLessonProperly();
+  else listenStudent();
+}
+
+function buildSyllableHint(sentence){
+  const s = normText(sentence);
+  const words = s.split(" ").filter(Boolean);
+  const parts = words.map(w=>{
+    if(w.length<=4) return w;
+    const seg=[];
+    for(let i=0;i<w.length;i+=2) seg.push(w.slice(i,i+2));
+    return seg.join("-");
+  });
+  return parts.join(" | ");
 }
 
 function listenStudent(){
@@ -376,11 +346,7 @@ function listenStudent(){
 
   stopSTT();
   const rec = buildRecognizer(teacher.stt);
-  if(!rec){
-    alert("SpeechRecognition yok.");
-    stopLesson();
-    return;
-  }
+  if(!rec){ alert("SpeechRecognition yok."); stopLesson(); return; }
   recognition = rec;
 
   rec.onresult = async (e)=>{
@@ -389,38 +355,30 @@ function listenStudent(){
 
     addBubble("student", said);
 
-    // Repeat check
     if(pendingRepeat){
       const score = tokenSimilarity(said, pendingRepeat);
+
       if(score >= TARGET_SIM){
-        addBubble("teacher", `Good. (${Math.round(score*100)}%)`);
+        addBubble("teacher", `Good.`);
         const tr = await translateToTR(`Good.`, teacher.lang);
         if(tr) addBubble("tr", `(${tr})`);
 
         await speakTTS("Good.", teacher.voice, async ()=>{
           resetRepeat();
-
-          // If time ended, finish now with bell + goodbye
-          if(Date.now() >= endAt){
-            await endLessonProperly();
-          }else{
-            await teacherNext("Continue.");
-          }
+          if(Date.now() >= endAt) await endLessonProperly();
+          else await teacherNext("Continue.");
         });
 
       } else {
         triesLeft -= 1;
         setBadges();
 
-        // syllable / sound breakdown (heceleme)
-        const breakdown = buildSyllableHint(pendingRepeat, teacher.lang);
-
-        addBubble("teacher", `Not yet. Listen: ${breakdown} (tries left: ${triesLeft})`);
+        const breakdown = buildSyllableHint(pendingRepeat);
+        addBubble("teacher", `Not yet. Listen: ${breakdown}`);
         const tr = await translateToTR(`Not yet. Listen carefully.`, teacher.lang);
         if(tr) addBubble("tr", `(${tr})`);
 
         await speakTTS(`Not yet. Listen carefully.`, teacher.voice, async ()=>{
-          // replay repeat
           if(triesLeft <= 0){
             addBubble("teacher", `Okay. We move on.`);
             const trm = await translateToTR(`Okay. We move on.`, teacher.lang);
@@ -435,45 +393,24 @@ function listenStudent(){
             addBubble("teacher", `Repeat: ${pendingRepeat}`);
             const tr2 = await translateToTR(`Repeat: ${pendingRepeat}`, teacher.lang);
             if(tr2) addBubble("tr", `(${tr2})`);
-
-            await speakTTS(`Repeat: ${pendingRepeat}`, teacher.voice, ()=>{
-              listenStudent();
-            });
+            await speakTTS(`Repeat: ${pendingRepeat}`, teacher.voice, ()=>listenStudent());
           }
         });
       }
       return;
     }
 
-    // If no pending repeat, continue lesson
     await teacherNext(said);
   };
 
-  rec.onerror = ()=>{ /* keep silent */ };
-  rec.onend = ()=>{ /* we control flow */ };
-
+  rec.onerror = ()=>{};
+  rec.onend = ()=>{};
   try{ rec.start(); }catch{}
-}
-
-function buildSyllableHint(sentence, lang){
-  // Basic syllable-ish hint: split words, then hyphenate long words
-  const s = normText(sentence);
-  const words = s.split(" ").filter(Boolean);
-  const parts = words.map(w=>{
-    if(w.length<=4) return w;
-    // naive split: 2+2+...
-    const seg=[];
-    for(let i=0;i<w.length;i+=2) seg.push(w.slice(i,i+2));
-    return seg.join("-");
-  });
-  return parts.join(" | ");
 }
 
 async function endLessonProperly(){
   if(!running) return;
   setStatus("ENDING");
-
-  // sweet but disciplined goodbye with name (only at end)
   const studentName = (u?.name || u?.fullname || "Student").split(" ")[0].trim() || "Student";
   const bye = `Good job today, ${studentName}. See you tomorrow.`;
   addBubble("teacher", bye);
@@ -481,7 +418,7 @@ async function endLessonProperly(){
   if(tr) addBubble("tr", `(${tr})`);
 
   await speakTTS(bye, teacher.voice, ()=>{
-    playBell(); // classic bell
+    playBell();
     stopLesson();
     setStatus("DONE");
   });
@@ -504,16 +441,17 @@ document.addEventListener("DOMContentLoaded", ()=>{
   $("logoHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
 
   const btn = $("btnLesson");
-  btn.addEventListener("click", async ()=>{
-    if(!running){
-      await startLesson();
-      return;
-    }
-    // running: toggle pause/resume
-    if(paused) resumeLesson();
-    else pauseLesson();
-  });
 
-  // initial info
+  // ✅ EN GARANTİ: click + touchstart + pointerdown
+  const handler = async (e)=>{
+    try{ e.preventDefault?.(); e.stopPropagation?.(); }catch{}
+    if(!running){ await startLesson(); return; }
+    if(paused) resumeLesson(); else pauseLesson();
+  };
+  btn?.addEventListener("click", handler);
+  btn?.addEventListener("touchstart", handler, { passive:false });
+  btn?.addEventListener("pointerdown", handler);
+
+  // ✅ Eğer JS çalışıyorsa bunu görmen lazım:
   addBubble("teacher", `Lesson ready. Press “Dersi Başlat”.`);
 });
