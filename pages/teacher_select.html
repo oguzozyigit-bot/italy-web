@@ -18,12 +18,13 @@
       width:100%;
       display:flex;
       flex-direction:column;
-      gap:14px;
+      gap:12px;
       padding: 4px 2px 10px;
+      overflow:hidden; /* scroll yok */
     }
 
     .hero{
-      padding:14px 14px;
+      padding:12px 14px;
       border-radius:24px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.05);
@@ -36,7 +37,7 @@
       letter-spacing:-0.2px;
     }
     .hero p{
-      margin:8px 0 0;
+      margin:7px 0 0;
       font-size:12px;
       font-weight:800;
       color: rgba(255,255,255,.65);
@@ -44,18 +45,19 @@
     }
 
     .section{
-      padding:14px;
+      padding:12px 14px;
       border-radius:24px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
       backdrop-filter: blur(10px);
+      overflow:hidden;
     }
     .sec-title{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin-bottom:12px;
+      margin-bottom:10px;
     }
     .sec-title .t{
       font-size:13px;
@@ -71,45 +73,28 @@
       white-space:nowrap;
     }
 
-    /* teacher grid */
     .grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap:12px;
+      gap:10px;
     }
     .card{
       border-radius:22px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
-      padding:12px;
+      padding:11px 12px;
       cursor:pointer;
       transition:.2s;
       user-select:none;
       position:relative;
       overflow:hidden;
-      min-height:88px;
+      min-height:86px;
     }
     .card:active{ transform: scale(.98); }
     .card.selected{
       border-color: rgba(99,102,241,.55);
       background: rgba(99,102,241,.12);
       box-shadow: 0 0 24px rgba(99,102,241,.12);
-    }
-    .flag{
-      font-size:20px;
-      margin-bottom:8px;
-    }
-    .name{
-      font-size:14px;
-      font-weight:1000;
-      line-height:1.1;
-    }
-    .sub{
-      margin-top:6px;
-      font-size:11px;
-      font-weight:900;
-      color: rgba(255,255,255,.62);
-      line-height:1.25;
     }
     .badge{
       position:absolute;
@@ -123,38 +108,21 @@
       color: rgba(255,255,255,.86);
       backdrop-filter: blur(8px);
     }
-
-    /* mins pills */
-    .pills{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .pill{
-      flex:1 1 30%;
-      min-width:92px;
-      height:44px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      color:#fff;
-      font-weight:1000;
-      font-size:12px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .pill:active{ transform: scale(.99); }
-    .pill.selected{
-      border-color: rgba(99,102,241,.55);
-      background: rgba(99,102,241,.14);
+    .flag{ font-size:20px; margin-bottom:8px; }
+    .name{ font-size:14px; font-weight:1000; line-height:1.1; }
+    .sub{
+      margin-top:6px;
+      font-size:11px;
+      font-weight:900;
+      color: rgba(255,255,255,.62);
+      line-height:1.25;
     }
 
-    /* CTA */
     .cta{
       display:flex;
       flex-direction:column;
       gap:10px;
-      padding:14px;
+      padding:12px 14px;
       border-radius:24px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
@@ -165,6 +133,7 @@
       font-weight:900;
       color: rgba(255,255,255,.78);
       line-height:1.35;
+      min-height:16px;
     }
     .btn{
       height:52px;
@@ -179,7 +148,6 @@
     }
     .btn:active{ transform: scale(.99); }
 
-    /* tiny toast */
     .toast{
       position: fixed;
       left:50%;
@@ -204,41 +172,27 @@
 </head>
 
 <body>
-
   <!-- ✅ CONTENT ONLY (shell bunu saracak) -->
   <main id="pageContent">
     <div class="wrap">
 
       <div class="hero">
         <h2>🎓 Dil Kursu</h2>
-        <p>Öğretmenini seç, ders süresini belirle ve derse gir. Öğretmen seçtiğin dilde konuşur.</p>
+        <p>Önce dilini seç. Sonra <b>15 dakikalık seviye tespit sınavı</b> ile seviyeni belirleyeceğiz.</p>
       </div>
 
-      <section class="section" aria-label="Öğretmen seçimi">
+      <section class="section" aria-label="Dil seçimi">
         <div class="sec-title">
-          <div class="t">Öğretmen Seç</div>
+          <div class="t">Dil Seç</div>
           <div class="s" id="selTeacherMini">Seçilmedi</div>
         </div>
 
         <div class="grid" id="teacherGrid"></div>
       </section>
 
-      <section class="section" aria-label="Ders süresi">
-        <div class="sec-title">
-          <div class="t">Ders Süresi</div>
-          <div class="s" id="selMinsMini">10 dk</div>
-        </div>
-
-        <div class="pills" id="minsPills">
-          <button class="pill selected" data-min="10" type="button">10 dk</button>
-          <button class="pill" data-min="20" type="button">20 dk</button>
-          <button class="pill" data-min="30" type="button">30 dk</button>
-        </div>
-      </section>
-
-      <section class="cta" aria-label="Derse gir">
-        <div class="sum" id="summaryText">Önce öğretmen seç.</div>
-        <button class="btn" id="btnGo" type="button">Derse Gir</button>
+      <section class="cta" aria-label="Devam">
+        <div class="sum" id="summaryText">Önce bir dil seç.</div>
+        <button class="btn" id="btnGo" type="button">Devam Et</button>
       </section>
 
     </div>
@@ -247,15 +201,16 @@
   <div class="toast" id="toast"></div>
 
   <script type="module">
-    // ✅ HOME shell’i bu sayfaya uygula
+    // ✅ HOME shell’i bu sayfaya uygula (üst/alt bar HOME ile aynı)
     import { mountShell } from "/js/ui_shell.js";
     mountShell();
 
-    // ===== prefs keys (mevcut teacher_course.page.js ile uyumlu) =====
-    const KEY_TEACHER = "italky_teacher_pref";
-    const KEY_MINS = "italky_lesson_mins";
+    // ===== prefs keys =====
+    const KEY_TEACHER = "italky_teacher_pref"; // dil+öğretmen
+    const KEY_LEVEL = "italky_level";          // sınav sonucu
+    const KEY_LEVEL_DONE = "italky_level_done";// "1" olduysa sınav tamamlandı
 
-    // teacher registry (senin liste)
+    // ✅ Öğretmen listesi (Çince: Umay, diğer isimler aynı)
     const TEACHERS = [
       { id:"dora",   flag:"🇬🇧", title:"İngilizce Öğretmeni", name:"Dora" },
       { id:"sencer", flag:"🇮🇹", title:"İtalyanca Öğretmeni", name:"Sencer" },
@@ -263,7 +218,8 @@
       { id:"ozan",   flag:"🇪🇸", title:"İspanyolca Öğretmeni", name:"Ozan" },
       { id:"ayda",   flag:"🇩🇪", title:"Almanca Öğretmeni", name:"Ayda" },
       { id:"sungur", flag:"🇷🇺", title:"Rusça Öğretmeni", name:"Sungur" },
-      { id:"huma",   flag:"🇯🇵", title:"Japonca Öğretmeni", name:"Hüma" }
+      { id:"huma",   flag:"🇯🇵", title:"Japonca Öğretmeni", name:"Hüma" },
+      { id:"umay",   flag:"🇨🇳", title:"Çince Öğretmeni", name:"Umay" } // ✅ YENİ
     ];
 
     const $ = (id)=>document.getElementById(id);
@@ -277,17 +233,6 @@
     }
 
     let selTeacher = (localStorage.getItem(KEY_TEACHER) || "").trim();
-    let selMins = (localStorage.getItem(KEY_MINS) || "10").trim();
-    if(!["10","20","30"].includes(selMins)) selMins = "10";
-
-    function setMinsUI(){
-      $("selMinsMini").textContent = `${selMins} dk`;
-      document.querySelectorAll("#minsPills .pill").forEach(p=>{
-        p.classList.toggle("selected", p.getAttribute("data-min") === selMins);
-      });
-      localStorage.setItem(KEY_MINS, selMins);
-      setSummary();
-    }
 
     function setTeacherUI(){
       const t = TEACHERS.find(x=>x.id===selTeacher);
@@ -302,10 +247,10 @@
     function setSummary(){
       const t = TEACHERS.find(x=>x.id===selTeacher);
       if(!t){
-        $("summaryText").textContent = "Önce öğretmen seç.";
+        $("summaryText").textContent = "Önce bir dil seç.";
         return;
       }
-      $("summaryText").textContent = `${t.flag} ${t.title} • ${t.name}  |  Süre: ${selMins} dk`;
+      $("summaryText").textContent = `${t.flag} ${t.title} • ${t.name} — Seviye tespit sınavına geçeceğiz.`;
     }
 
     function renderTeachers(){
@@ -322,32 +267,24 @@
       grid.querySelectorAll(".card").forEach(card=>{
         card.addEventListener("click", ()=>{
           selTeacher = card.getAttribute("data-id") || "";
+          // dil değiştiyse seviye sınavını tekrar zorunlu yap
+          localStorage.removeItem(KEY_LEVEL);
+          localStorage.removeItem(KEY_LEVEL_DONE);
           setTeacherUI();
         });
       });
     }
 
-    // mins click
-    document.querySelectorAll("#minsPills .pill").forEach(p=>{
-      p.addEventListener("click", ()=>{
-        selMins = p.getAttribute("data-min") || "10";
-        setMinsUI();
-      });
-    });
-
-    // go
     $("btnGo").addEventListener("click", ()=>{
       if(!selTeacher){
-        toast("Önce öğretmen seç.");
+        toast("Önce bir dil seç.");
         return;
       }
-      // derse gir
-      location.href = "/pages/teacher_course.html";
+      // Seviye tespit sınavına geç
+      location.href = "/pages/level_test.html";
     });
 
-    // init
     renderTeachers();
-    setMinsUI();
     setTeacherUI();
   </script>
 </body>
