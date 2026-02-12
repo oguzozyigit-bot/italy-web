@@ -148,14 +148,22 @@ html,body{
 }
 .main-content::-webkit-scrollbar{ display:none; }
 
-/* FOOTER */
+/* FOOTER — HOME header ile aynı zemin */
 .premium-footer{
   position:absolute; bottom:0; width:100%; height: var(--footerH);
-  background: linear-gradient(to top, rgba(2,0,15,1) 80%, transparent);
+
+  /* ✅ Header ile aynı cam zemin */
+  background: rgba(10,10,30,0.4);
+  backdrop-filter: blur(30px);
+
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   border-top: 1px solid rgba(255,255,255,0.08);
   z-index:20;
+
+  /* çok hafif premium glow */
+  box-shadow: 0 -10px 40px rgba(99,102,241,0.08);
 }
+
 .footer-nav{ display:flex; gap:24px; margin-bottom:16px; }
 .footer-nav a{
   font-size:12px; font-weight:800;
@@ -244,17 +252,13 @@ export function mountShell(options = {}){
   // app-shell
   const shell = document.createElement("div");
   shell.className = "app-shell";
-
-  // maxWidth override (home ile aynı kalsın istiyorsan 480px bırak)
   shell.style.maxWidth = maxWidth;
 
-  // header/footer HTML seçimi
   const headerHTML = header ? HOME_HEADER_HTML : "";
   const footerHTML = footer ? HOME_FOOTER_HTML : "";
 
   shell.innerHTML = headerHTML + `<main class="main-content"></main>` + footerHTML;
 
-  // mode classları
   if(!header) shell.classList.add("no-header");
   if(!footer) shell.classList.add("no-footer");
   if(scroll === "none") shell.classList.add("no-scroll");
