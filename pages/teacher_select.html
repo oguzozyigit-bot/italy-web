@@ -13,10 +13,9 @@
 <style>
   #pageContent{ height:100%; }
 
-  /* ✅ EŞİT boşluk + altta biraz daha güvenlik */
   .wrap{
     height:100%;
-    padding: 12px 12px 18px; /* üst, sağ-sol, alt */
+    padding: 12px 12px 18px;
     overflow:hidden;
     display:flex;
   }
@@ -28,16 +27,17 @@
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     grid-auto-rows: var(--cardH);
-
-    /* ✅ hepsini bir tık yukarı */
-    transform: translateY(-6px);
   }
 
   .card{
     height: var(--cardH);
     border-radius: 26px;
     border: 1px solid rgba(255,255,255,0.10);
-    background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+    background: linear-gradient(
+      145deg,
+      rgba(255,255,255,0.08) 0%,
+      rgba(255,255,255,0.02) 100%
+    );
     padding: 12px;
     cursor:pointer;
     user-select:none;
@@ -61,7 +61,11 @@
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.12);
   }
-  .flag{ font-size: var(--flagSize); line-height:1; }
+
+  .flag{
+    font-size: var(--flagSize);
+    line-height:1;
+  }
 
   .role{
     font-size: var(--roleSize);
@@ -111,12 +115,22 @@
 
   function goNext(){
     const levelDone = (localStorage.getItem(KEY_LEVEL_DONE)||"")==="1";
-    if(!levelDone){ location.href="/pages/level_test.html"; return; }
 
+    // ✅ İlk kez → intro sayfası
+    if(!levelDone){
+      location.href="/pages/level_test_intro.html";
+      return;
+    }
+
+    // ✅ Seviye yapıldıysa
     const plan = (localStorage.getItem(KEY_PLAN)||"").trim();
     const mins = (localStorage.getItem(KEY_MINS)||"").trim();
-    if(plan && mins) location.href="/pages/teacher_course.html";
-    else location.href="/pages/plan_select.html";
+
+    if(plan && mins){
+      location.href="/pages/teacher_course.html";
+    } else {
+      location.href="/pages/plan_select.html";
+    }
   }
 
   function render(){
@@ -143,7 +157,6 @@
     const headerH = header ? header.offsetHeight : 0;
     const footerH = footer ? footer.offsetHeight : 0;
 
-    // ✅ ekstra güvenli pay: 46px (alttaki taşmayı bitirir)
     const usable = window.innerHeight - headerH - footerH - 46;
 
     const rows = 4;
