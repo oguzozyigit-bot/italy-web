@@ -1,0 +1,258 @@
+<!-- FILE: /pages/trial_lesson.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Deneme Dersi</title>
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    #pageContent{ height:100%; }
+
+    .wrap{
+      height:100%;
+      padding: 12px 12px 18px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .chip{
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      font-weight:1000;
+      font-size:12px;
+      color: rgba(255,255,255,0.86);
+      white-space:nowrap;
+    }
+
+    .card{
+      flex:1;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      padding: 16px 14px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .big{
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-0.2px;
+      line-height:1.2;
+    }
+    .sub{
+      font-size:13px;
+      font-weight:900;
+      color: rgba(255,255,255,0.70);
+      line-height:1.45;
+    }
+
+    .task{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      padding: 14px 12px;
+    }
+    .q{
+      font-weight:1000;
+      font-size:14px;
+      line-height:1.25;
+    }
+    .inp{
+      margin-top:10px;
+      width:100%;
+      height:48px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:900;
+      font-size:14px;
+      padding: 0 12px;
+    }
+
+    .btn{
+      height:54px;
+      border-radius:22px;
+      border:none;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:14px;
+      color:#fff;
+      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
+      box-shadow: 0 16px 44px rgba(79,70,229,.22);
+    }
+    .btn:active{ transform: scale(.99); }
+
+    .ghost{
+      height:52px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:1000;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .ghost:active{ transform: scale(.99); }
+
+    .toast{
+      position: fixed;
+      left:50%;
+      top:18px;
+      transform:translateX(-50%) translateY(-120px);
+      background:rgba(10,10,18,.92);
+      border:1px solid rgba(165,180,252,.35);
+      padding:10px 14px;
+      border-radius:999px;
+      color:#fff;
+      z-index:99999;
+      font-weight:900;
+      font-size:12px;
+      transition:.28s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw,520px);
+      text-align:center;
+    }
+    .toast.show{ transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+
+<body>
+  <main id="pageContent">
+    <div class="wrap">
+
+      <div class="topbar">
+        <div class="chip" id="whoChip">Deneme Dersi</div>
+        <div class="chip" id="timerChip">05:00</div>
+      </div>
+
+      <section class="card">
+        <div class="big" id="headline">Hadi mini bir ders yapalım.</div>
+        <div class="sub" id="desc">3 küçük görev → bittiğinde seni kayıt sayfasına götüreceğim.</div>
+
+        <div class="task" id="taskBox">
+          <div class="q" id="qText">1) “Merhaba, nasılsın?” cümlesini hedef dilde yaz.</div>
+          <input class="inp" id="answer" placeholder="Cevabını yaz..." />
+        </div>
+
+        <button class="btn" id="btnNext" type="button">Devam</button>
+        <button class="ghost" id="btnExit" type="button">Çık</button>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell({ scroll:"none" });
+
+    const KEY_TEACHER = "italky_teacher_pref";
+
+    const TEACHERS = {
+      dora:{flag:"🇬🇧", role:"İngilizce", name:"Dora"},
+      ayda:{flag:"🇩🇪", role:"Almanca", name:"Ayda"},
+      jale:{flag:"🇫🇷", role:"Fransızca", name:"Jale"},
+      ozan:{flag:"🇪🇸", role:"İspanyolca", name:"Ozan"},
+      sencer:{flag:"🇮🇹", role:"İtalyanca", name:"Sencer"},
+      sungur:{flag:"🇷🇺", role:"Rusça", name:"Sungur"},
+      huma:{flag:"🇯🇵", role:"Japonca", name:"Hüma"},
+      umay:{flag:"🇨🇳", role:"Çince", name:"Umay"},
+    };
+
+    const $ = (id)=>document.getElementById(id);
+    function toast(msg){
+      const t = $("toast");
+      t.textContent = String(msg||"");
+      t.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
+    }
+
+    const sel = (localStorage.getItem(KEY_TEACHER) || "").trim();
+    const t = TEACHERS[sel] || {flag:"🌍", role:"Dil", name:"Öğretmen"};
+
+    $("whoChip").textContent = `${t.flag} ${t.role} • ${t.name}`;
+
+    // 5 dk timer
+    let remaining = 5 * 60;
+    let tick = null;
+    function fmt(s){
+      const m = String(Math.floor(s/60)).padStart(2,"0");
+      const ss = String(s%60).padStart(2,"0");
+      return `${m}:${ss}`;
+    }
+    function start(){
+      $("timerChip").textContent = fmt(remaining);
+      tick = setInterval(()=>{
+        remaining--;
+        if(remaining <= 0){
+          remaining = 0;
+          $("timerChip").textContent = fmt(remaining);
+          clearInterval(tick);
+          location.href = "/pages/enroll_prompt.html";
+          return;
+        }
+        $("timerChip").textContent = fmt(remaining);
+      }, 1000);
+    }
+
+    // Mini görevler (basit, hızlı, dil bazlı “hissiyat”)
+    const TASKS = [
+      `1) “Merhaba, nasılsın?” cümlesini ${t.role} olarak yaz.`,
+      `2) “Ben bugün meşgulüm.” cümlesini ${t.role} olarak yaz.`,
+      `3) “Yarın görüşürüz.” cümlesini ${t.role} olarak yaz.`
+    ];
+    let step = 0;
+
+    function render(){
+      $("qText").textContent = TASKS[step];
+      $("answer").value = "";
+      $("btnNext").textContent = (step === TASKS.length-1) ? "Bitir" : "Devam";
+    }
+
+    $("btnNext").addEventListener("click", ()=>{
+      const val = ($("answer").value || "").trim();
+      if(!val){
+        toast("Cevap yaz 😊");
+        return;
+      }
+      step++;
+      if(step >= TASKS.length){
+        clearInterval(tick);
+        location.href = "/pages/enroll_prompt.html";
+        return;
+      }
+      render();
+    });
+
+    $("btnExit").addEventListener("click", ()=>{
+      clearInterval(tick);
+      location.href = "/pages/enroll_prompt.html";
+    });
+
+    render();
+    start();
+  </script>
+</body>
+</html>
