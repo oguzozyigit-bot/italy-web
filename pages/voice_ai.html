@@ -3,311 +3,197 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>italkyAI - Voice</title>
+  <title>italkyAI • Teacher Course</title>
   <link rel="icon" href="data:," />
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --bg-deep: #020205;
-      --text-main: #ffffff;
+    :root{
+      --bg:#020205; --text:#fff; --muted:rgba(255,255,255,.55);
+      --ai1:#A5B4FC; --ai2:#4F46E5;
+      --glass: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.10);
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Outfit,sans-serif;color:var(--text);}
+    .bg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,#0f0f1a 0%,#000 100%)}
+    .dust{position:absolute;inset:0;opacity:.25;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:52px 52px;animation:dustMove 100s linear infinite}
+    @keyframes dustMove{from{transform:translateY(0)}to{transform:translateY(-500px)}}
 
-      --c-cyan: #00f3ff;
-      --c-pink: #ff00aa;
-      --c-purple: #bc13fe;
-      --c-yellow: #ffd700;
-      --c-red: #ff3300;
+    .frame{position:relative;z-index:5;max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column}
+
+    /* topbar */
+    .topbar{height:88px;padding:10px 18px 0;display:flex;align-items:center;justify-content:space-between;z-index:50}
+    .back-btn{width:44px;height:44px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;backdrop-filter:blur(10px)}
+    .brand{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+    .logo{font-family:"Space Grotesk",sans-serif;font-size:22px;font-weight:800}
+    .logo .ai{background:linear-gradient(135deg,var(--ai1),var(--ai2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .mini{font-size:10px;font-weight:900;letter-spacing:5px;color:rgba(255,255,255,.45);margin-top:6px}
+    .pill{height:40px;padding:0 14px;border-radius:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;cursor:pointer}
+
+    /* stage area */
+    .stageWrap{padding:0 18px;display:flex;flex-direction:column;align-items:center;gap:10px}
+    .stage{position:relative;width:280px;height:280px;display:flex;align-items:center;justify-content:center;filter:blur(30px) contrast(1.2);pointer-events:none}
+    .blob{position:absolute;border-radius:50%;mix-blend-mode:screen}
+    .layer-core{width:140px;height:140px;background:#bc13fe;z-index:5}
+    .layer-1{width:180px;height:180px;background:#00f3ff;opacity:.7;transform:translate(-30px,-20px)}
+    .layer-2{width:160px;height:160px;background:#ff00aa;opacity:.6;transform:translate(30px,20px)}
+    .status{margin-top:-10px;font-family:"Space Grotesk",sans-serif;font-size:14px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.75)}
+    .status.show{opacity:1}
+
+    /* listening/thinking/speaking hooks (JS class adds on stage element) */
+    .stage.listening .layer-core{background:#fff}
+    .stage.thinking .layer-core{background:#fff}
+    .stage.speaking .layer-core{background:#ffd700}
+
+    /* lesson panel */
+    .panel{
+      flex:1;
+      margin: 12px 18px 16px;
+      border-radius: 26px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    .panelHead{
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(0,0,0,.18);
+    }
+    .panelTitle{font-weight:1000;font-size:13px}
+    .panelMeta{font-weight:900;font-size:11px;color:rgba(255,255,255,.55)}
+    .chips{display:flex;gap:8px;align-items:center}
+    .chip{padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);font-weight:1000;font-size:11px}
 
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-      background: var(--bg-deep); font-family: 'Outfit', sans-serif; color: var(--text-main);
-      display: flex; align-items: center; justify-content: center;
+    /* transcript */
+    .subtitles{
+      flex:1;
+      overflow:auto;
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      scrollbar-width:none;
     }
-
-    .cosmos-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(circle at center, #0f0f1a 0%, #000 100%); }
-    .star-dust { position: absolute; inset: 0; opacity: 0.3; background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 50px 50px; animation: dustMove 100s linear infinite; }
-    @keyframes dustMove { from { transform: translateY(0); } to { transform: translateY(-500px); } }
-
-    .frame { width: 100%; max-width: 480px; height: 100%; position: relative; z-index: 10; display: flex; flex-direction: column; }
-
-    /* --- TOPBAR --- */
-    .topbar { height: 90px; padding: 10px 20px 0; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 200; }
-    .back-btn { width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; backdrop-filter: blur(10px); transition: 0.2s; }
-    .back-btn:active { transform: scale(0.9); }
-
-    .brand { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.2s; }
-    .brand:active { transform: scale(0.95); opacity: 0.8; }
-    .logo-main { font-family:'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: #fff; }
-    .logo-ai { font-family:'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .mini-slogan { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.5); letter-spacing: 5px; margin-top: 6px; }
-
-    .voice-btn { padding: 0 18px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(10px); transition: 0.2s; }
-    .voice-btn:active { transform: scale(0.95); }
-
-    /* --- STAGE --- */
-    .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; pointer-events: none; z-index: 120; }
-
-    .cloud-container {
-      position: relative; width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;
-      filter: blur(30px) contrast(1.2);
-      z-index: 2;
-    }
-
-    .blob {
-      position: absolute; border-radius: 50%;
-      mix-blend-mode: screen;
-      transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    .layer-core {
-      width: 140px; height: 140px; z-index: 10;
-      background: var(--c-purple);
-      animation: idleMove 8s ease-in-out infinite alternate;
-    }
-
-    .layer-1 {
-      width: 180px; height: 180px; z-index: 5; opacity: 0.7;
-      background: var(--c-cyan);
-      transform: translate(-30px, -20px);
-      animation: idleMove 10s ease-in-out infinite reverse;
-    }
-
-    .layer-2 {
-      width: 160px; height: 160px; z-index: 5; opacity: 0.6;
-      background: var(--c-pink);
-      transform: translate(30px, 20px);
-      animation: idleMove 12s ease-in-out infinite;
-    }
-
-    .stage.listening .layer-core {
-      width: 160px; height: 160px; background: #fff;
-      animation: breath 3s ease-in-out infinite;
-    }
-    .stage.listening .layer-1 {
-      width: 220px; height: 220px; background: var(--c-cyan); opacity: 0.6;
-      transform: translate(0, 0);
-      animation: breath 3s ease-in-out infinite reverse;
-    }
-    .stage.listening .layer-2 {
-      width: 200px; height: 200px; background: #0066ff; opacity: 0.4;
-      transform: translate(0, 0);
-      animation: breath 3s ease-in-out infinite 0.5s;
-    }
-
-    .stage.thinking .cloud-container { filter: blur(20px) contrast(2); }
-    .stage.thinking .layer-core {
-      width: 80px; height: 80px; background: #fff;
-      animation: spin 0.5s linear infinite;
-    }
-    .stage.thinking .layer-1 {
-      width: 120px; height: 120px; background: var(--c-purple); opacity: 0.8;
-      animation: spin 1s linear infinite reverse;
-    }
-    .stage.thinking .layer-2 {
-      width: 140px; height: 140px; background: var(--c-pink); opacity: 0.6;
-      animation: spin 2s linear infinite;
-    }
-
-    .stage.speaking .cloud-container { filter: blur(35px) contrast(1.1); }
-    .stage.speaking .layer-core {
-      width: 150px; height: 150px; background: var(--c-yellow);
-      animation: speakChaos 1s ease-in-out infinite;
-    }
-    .stage.speaking .layer-1 {
-      width: 200px; height: 200px; background: var(--c-red); opacity: 0.8;
-      animation: speakWander1 2s ease-in-out infinite alternate;
-    }
-    .stage.speaking .layer-2 {
-      width: 200px; height: 200px; background: var(--c-cyan); opacity: 0.8;
-      animation: speakWander2 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes idleMove { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(10px, -10px) scale(1.05); } }
-    @keyframes breath { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.15); filter: brightness(1.2); } 100% { transform: scale(1); filter: brightness(1); } }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes speakChaos {
-      0% { transform: scale(1) translate(0,0); border-radius: 50%; }
-      25% { transform: scale(1.2) translate(-20px, 10px); border-radius: 40% 60% 50% 50%; background: var(--c-yellow); }
-      50% { transform: scale(0.9) translate(10px, -20px); border-radius: 60% 40% 70% 30%; background: #fff; }
-      75% { transform: scale(1.1) translate(-10px, -10px); border-radius: 40% 60% 30% 70%; background: var(--c-pink); }
-      100% { transform: scale(1) translate(0,0); border-radius: 50%; }
-    }
-    @keyframes speakWander1 {
-      0% { transform: translate(-40px, -30px) scale(1); background: var(--c-red); }
-      100% { transform: translate(20px, 10px) scale(1.2); background: var(--c-purple); }
-    }
-    @keyframes speakWander2 {
-      0% { transform: translate(40px, 30px) scale(1); background: var(--c-cyan); }
-      100% { transform: translate(-20px, -10px) scale(0.8); background: #00ff66; }
-    }
-
-    .status-text {
-      margin-top: 60px; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700;
-      color: rgba(255,255,255,0.8); letter-spacing: 3px; text-transform: uppercase;
-      opacity: 0; transform: translateY(20px); transition: 0.5s; text-shadow: 0 0 20px rgba(0,0,0,0.5);
-      z-index: 4;
-    }
-    .status-text.show { opacity: 1; transform: translateY(0); }
-
-    /* ===== NEW: SUBTITLES STREAM ===== */
-    .subtitles {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      top: 120px;
-      width: min(420px, calc(100vw - 48px));
-      z-index: 160;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-      padding: 0 8px;
-    }
-
+    .subtitles::-webkit-scrollbar{display:none}
     .subline{
       max-width: 100%;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
-      font-weight: 800;
+      background: rgba(0,0,0,0.20);
+      font-weight: 900;
       font-size: 13px;
       line-height: 1.35;
       color: rgba(255,255,255,0.92);
-      text-align: center;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      animation: subIn 0.35s ease-out both;
     }
-
-    /* user vs ai styling */
     .subline.user{
-      background: rgba(99, 102, 241, 0.16);
-      border-color: rgba(99, 102, 241, 0.22);
+      align-self:flex-end;
+      background: rgba(99,102,241,0.16);
+      border-color: rgba(99,102,241,0.22);
+      text-align:right;
     }
     .subline.ai{
-      background: rgba(236, 72, 153, 0.14);
-      border-color: rgba(236, 72, 153, 0.20);
+      align-self:flex-start;
+      background: rgba(236,72,153,0.14);
+      border-color: rgba(236,72,153,0.20);
     }
 
-    /* float up then dissolve into clouds */
-    .subline.fadeout{
-      animation: subFloatOut 2.8s ease-in forwards;
+    /* bottom controls */
+    .controls{
+      padding:12px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(0,0,0,.18);
     }
+    .mode-switch{display:flex;gap:4px;background:rgba(255,255,255,0.08);padding:4px;border-radius:999px;border:1px solid rgba(255,255,255,0.10)}
+    .mode-btn{padding:8px 12px;border-radius:999px;border:none;background:transparent;color:rgba(255,255,255,0.55);font-weight:1000;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase}
+    .mode-btn.active{background:#fff;color:#000}
 
-    /* cloud dissolve: use mask + blur + opacity */
-    @keyframes subIn{
-      from{ opacity:0; transform: translateY(10px) scale(0.98); filter: blur(6px); }
-      to  { opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+    .mic-btn{
+      width:72px;height:72px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+      box-shadow:0 10px 40px rgba(0,0,0,.4);
     }
-
-    @keyframes subFloatOut{
-      0%   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-      55%  { opacity: .95; transform: translateY(-18px) scale(1.02); filter: blur(1px); }
-      100% { opacity: 0; transform: translateY(-54px) scale(1.04); filter: blur(12px); }
-    }
-
-    /* KONTROLLER */
-    .controls { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 24px; z-index: 200; pointer-events: none; }
-
-    .mode-switch { pointer-events: auto; display: flex; gap: 4px; background: rgba(255,255,255,0.08); padding: 4px; border-radius: 24px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-    .mode-btn { padding: 8px 16px; border-radius: 20px; border: none; background: transparent; color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; letter-spacing: 1px; }
-    .mode-btn.active { background: #fff; color: #000; box-shadow: 0 2px 15px rgba(255,255,255,0.3); }
-
-    .mic-btn { width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; pointer-events: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.4); backdrop-filter: blur(5px); }
-    .mic-btn svg { width: 36px; height: 36px; stroke: #fff; fill: none; stroke-width: 2; transition: 0.3s; }
-    .mic-btn:active { transform: scale(0.9); }
-    .mic-btn.active { background: #fff; border-color: #fff; box-shadow: 0 0 60px rgba(255, 255, 255, 0.4); animation: pulseMic 2s infinite; }
-    .mic-btn.active svg { stroke: #000; }
-    @keyframes pulseMic { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 30px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
-
-    /* MODAL */
-    .modal-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-    .modal-overlay.show { display: flex; opacity: 1; }
-    .voice-sheet { width: 100%; max-width: 480px; background: #0b0b10; border-top: 1px solid rgba(255,255,255,0.15); border-radius: 32px 32px 0 0; padding: 24px; padding-bottom: 40px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 80vh; display: flex; flex-direction: column; }
-    .modal-overlay.show .voice-sheet { transform: translateY(0); }
-    .vs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .vs-title { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
-    .vs-close { background: rgba(255,255,255,0.1); border:none; color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; }
-    .voice-list { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-    .voice-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-radius: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: 0.2s; }
-    .voice-item.selected { background: rgba(99, 102, 241, 0.15); border-color: #6366f1; box-shadow: 0 0 20px rgba(99, 102, 241, 0.1); }
-    .v-left { display: flex; align-items: center; gap: 16px; flex: 1; }
-    .play-btn { width: 40px; height: 40px; border-radius: 14px; background: rgba(255,255,255,0.1); border: none; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; transition: 0.2s; }
-    .play-btn:active { background: #fff; color: #000; }
-    .play-btn svg { width: 16px; height: 16px; fill: currentColor; }
-    .v-details { display: flex; flex-direction: column; gap: 2px; }
-    .v-name { font-weight: 700; font-size: 16px; color: #fff; }
-    .v-lang { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-    .save-btn { margin-top: 24px; width: 100%; height: 60px; border-radius: 22px; background: linear-gradient(135deg, #6366f1, #ec4899); border: none; color: #fff; font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4); letter-spacing: 0.5px; transition: transform 0.2s; }
-    .save-btn:active { transform: scale(0.98); }
+    .mic-btn svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2}
+    .mic-btn.active{background:#fff;border-color:#fff}
+    .mic-btn.active svg{stroke:#000}
   </style>
 </head>
 
 <body>
-  <div class="cosmos-bg"><div class="star-dust"></div></div>
+  <div class="bg"></div><div class="dust"></div>
 
   <div class="frame">
     <div class="topbar">
-      <button class="back-btn" id="btnBack">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      </button>
-
-      <div class="brand" onclick="window.location.href='/pages/home.html'">
-        <div class="logo-container"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
-        <div class="mini-slogan">BE FREE</div>
+      <button class="back-btn" id="btnBack" aria-label="Geri">←</button>
+      <div class="brand" onclick="location.href='/pages/home.html'">
+        <div class="logo">italky<span class="ai">AI</span></div>
+        <div class="mini">BE FREE</div>
       </div>
-
-      <div class="voice-btn" id="btnSettings">Ses</div>
+      <button class="pill" id="btnSettings" type="button">Öğretmen</button>
     </div>
 
-    <!-- NEW: subtitles stream -->
-    <div class="subtitles" id="subtitleStream" aria-hidden="true"></div>
-
-    <div class="stage" id="aiStage">
-      <div class="cloud-container">
+    <div class="stageWrap">
+      <div class="stage" id="aiStage">
         <div class="blob layer-1"></div>
         <div class="blob layer-2"></div>
         <div class="blob layer-core"></div>
       </div>
-      <div class="status-text" id="statusText">Başlat</div>
+      <div class="status show" id="statusText">Start</div>
     </div>
 
-    <div class="controls">
-      <div class="mode-switch">
-        <button class="mode-btn active" id="modeAuto">Otomatik</button>
-        <button class="mode-btn" id="modeManual">Bas-Konuş</button>
+    <div class="panel">
+      <div class="panelHead">
+        <div>
+          <div class="panelTitle">Teacher Course</div>
+          <div class="panelMeta">English only • 95% • 3 tries</div>
+        </div>
+        <div class="chips">
+          <div class="chip" id="chipTries">●●●</div>
+          <div class="chip" id="chipScore">95%</div>
+        </div>
       </div>
 
-      <button class="mic-btn" id="micToggle">
-        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      </button>
+      <!-- ✅ transcript (JS buraya yazacak) -->
+      <div class="subtitles" id="subtitleStream"></div>
+
+      <div class="controls">
+        <div class="mode-switch">
+          <button class="mode-btn active" id="modeAuto" type="button">Otomatik</button>
+          <button class="mode-btn" id="modeManual" type="button">Bas-Konuş</button>
+        </div>
+
+        <button class="mic-btn" id="micToggle" type="button" aria-label="Mikrofon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="voiceModal">
-    <div class="voice-sheet">
-      <div class="vs-header">
-        <div class="vs-title">Karakter Seç</div>
-        <button class="vs-close" id="closeVoiceModal">✕</button>
-      </div>
-      <div class="voice-list" id="voiceListContainer"></div>
-      <button class="save-btn" id="saveVoiceBtn">SEÇİMİ KAYDET</button>
-    </div>
-  </div>
-
+  <!-- ✅ Teacher Engine -->
   <script type="module" src="/js/voice_ai.page.js"></script>
 </body>
 </html>
