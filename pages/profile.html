@@ -1,266 +1,569 @@
+<!-- FILE: /pages/profile.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Profile</title>
   <link rel="icon" href="data:," />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --topH: 74px;
-      --bg:#030014;
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.60);
-      --ai1:#A5B4FC;
-      --ai2:#4F46E5;
-      --befree:#6B7280;
-      --glass: rgba(255,255,255,.06);
-      --border: rgba(255,255,255,.12);
-      --navyA: rgba(40,120,255,.12);
-      --navyB: rgba(255,255,255,.05);
-    }
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    html,body{
-      margin:0; padding:0; width:100%; height:100dvh;
-      overflow:hidden; position:fixed;
-      font-family:'Outfit', sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .mobile-frame{
-      width:100%; max-width:480px; height:100%;
-      background: rgba(8, 8, 20, 0.65);
-      backdrop-filter: blur(25px);
+    /* Bu sayfa HOME shell ile sarılacak. Buradaki CSS sadece içerik. */
+    #pageContent{ height:100%; }
+
+    .wrap{
+      height:100%;
+      padding: 12px 12px 18px;
       overflow:hidden;
-      display:flex; flex-direction:column;
-      position:relative;
-    }
-    @media(min-width:520px){
-      .mobile-frame{
-        height:92vh;
-        border-radius:40px;
-        border:1px solid rgba(255,255,255,0.08);
-        box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
-      }
-    }
-
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 3000;
-      height: var(--topH);
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding: 0 12px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(12px);
+      flex-direction:column;
+      gap:12px;
     }
-    .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .backBtn{
-      width:44px;height:44px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color:#fff;
-      font-size:20px;font-weight:1000;
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer; user-select:none;
-      text-decoration:none;
-    }
-    .backBtn:active{ transform: scale(.96); }
-
-    .mini-brand{ display:flex; flex-direction:column; user-select:none; cursor:pointer; line-height:1; margin-top:2px; }
-    .logo-line{ font-family:'Space Grotesk', sans-serif; font-size: 20px; letter-spacing:-0.4px; display:flex; align-items:flex-end; gap:2px; }
-    .logo-main{ font-weight:700; color:#FFFFFF; }
-    .logo-ai{ font-weight:700; background: linear-gradient(135deg, var(--ai1), var(--ai2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .logo-slogan{ font-size:10px; font-weight:700; letter-spacing:4px; color: var(--befree); margin-top:5px; padding-left:2px; text-transform: uppercase; }
-
-    .main{
-      flex:1;
-      padding: 14px 12px 18px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width:none;
-    }
-    .main::-webkit-scrollbar{ display:none; }
 
     .hero{
-      border-radius: 26px;
-      border: 1px solid rgba(255,255,255,.10);
-      overflow:hidden;
-      background:
-        radial-gradient(800px 240px at 0% 0%, var(--navyA), transparent 62%),
-        radial-gradient(800px 240px at 100% 0%, var(--navyB), transparent 62%),
-        rgba(0,0,0,.12);
-      box-shadow: 0 28px 90px rgba(0,0,0,.55);
-      padding: 16px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      padding: 16px 14px;
       display:flex;
+      gap:12px;
       align-items:center;
-      gap: 14px;
-      margin-bottom: 12px;
     }
 
     .avatar{
-      width: 64px; height: 64px; border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
+      width:60px; height:60px;
+      border-radius:999px;
       overflow:hidden;
-      flex: 0 0 64px;
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 1000; font-size: 18px;
+      border: 2px solid rgba(99,102,241,0.55);
+      background: rgba(255,255,255,0.06);
+      flex:0 0 60px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-    .who{ min-width:0; flex:1; display:flex; flex-direction:column; gap: 6px; }
-    .name{ font-weight: 1000; font-size: 16px; white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
-    .email{ font-weight: 800; font-size: 12px; color: rgba(255,255,255,.60); white-space: nowrap; overflow:hidden; text-overflow: ellipsis; }
-    .planRow{ display:flex; gap: 10px; align-items:center; flex-wrap:wrap; margin-top: 4px; }
-    .badge{ padding: 8px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.20); font-weight: 1000; font-size: 11px; }
-    .upgradeBtn{ padding: 8px 12px; border-radius: 999px; border: none; background: linear-gradient(135deg, var(--ai1), var(--ai2)); font-weight: 1000; font-size: 11px; color: #fff; cursor:pointer; }
+    .who{ min-width:0; flex:1; display:flex; flex-direction:column; gap:6px; }
+    .name{ font-size:16px; font-weight:1000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .email{ font-size:12px; font-weight:900; color: rgba(255,255,255,0.65); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .pillRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:2px; }
+    .pill{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      font-weight:1000;
+      font-size:11px;
+      color: rgba(255,255,255,0.86);
+    }
 
     .card{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-      padding: 12px;
-      margin-bottom: 10px;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      padding: 14px 12px;
+      overflow:hidden;
     }
-    .rowItem{
+
+    .row{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
+      gap:10px;
     }
-    .rowLeft{ display:flex; flex-direction:column; gap:4px; min-width:0; }
-    .rowName{ font-weight: 1000; font-size: 13px; color: rgba(255,255,255,.92); }
-    .rowDesc{ font-weight: 800; font-size: 11px; color: rgba(255,255,255,.55); }
+    .left{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+    .title{
+      font-size:13px;
+      font-weight:1000;
+      color: rgba(255,255,255,0.92);
+    }
+    .desc{
+      font-size:11px;
+      font-weight:900;
+      color: rgba(255,255,255,0.60);
+      line-height:1.35;
+    }
 
     .select{
-      height: 40px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
+      height:40px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
       color:#fff;
-      font-weight: 900;
+      font-weight:900;
       padding: 0 10px;
-      cursor:pointer;
     }
 
-    .btnRow{ display:flex; gap:10px; margin-top: 10px; }
-    .primaryBtn{ flex:1; height: 42px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--ai1), var(--ai2)); color:#fff; font-weight:1000; cursor:pointer; }
-    .safeBtn{ flex:1; height: 42px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color:#fff; font-weight:1000; cursor:pointer; }
-    .dangerBtn{ flex:1; height: 42px; border-radius: 14px; border: 1px solid rgba(255,82,82,.35); background: rgba(255,82,82,.12); color:#fff; font-weight:1000; cursor:pointer; }
+    .grid2{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .mini{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+    }
+    .k{
+      font-size:11px;
+      font-weight:1000;
+      color: rgba(255,255,255,0.60);
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+    .v{
+      margin-top:6px;
+      font-size:16px;
+      font-weight:1000;
+      letter-spacing:-0.2px;
+      color:#fff;
+      word-break: break-word;
+    }
+
+    .list{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .tag{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .btnRow{ margin-top:12px; display:flex; gap:10px; }
+    .btn{
+      flex:1;
+      height:48px;
+      border-radius:16px;
+      border:none;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:13px;
+      color:#fff;
+    }
+    .btn:active{ transform: scale(.99); }
+
+    /* ✅ Güvenli çıkış yeşil */
+    .btnSafe{
+      background: rgba(0, 200, 120, 0.18);
+      border: 1px solid rgba(0, 200, 120, 0.35);
+    }
+
+    /* ✅ Sil kırmızı */
+    .btnDanger{
+      background: rgba(255, 60, 60, 0.16);
+      border: 1px solid rgba(255, 60, 60, 0.35);
+    }
 
     .footerNote{
-      margin-top: 12px;
       text-align:center;
-      color: rgba(255,255,255,.22);
-      font-weight: 800;
+      color: rgba(255,255,255,0.25);
+      font-weight: 900;
       font-size: 10px;
+      margin-top: 6px;
     }
 
+    /* Confirm modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index: 999999;
+      padding: 18px;
+    }
+    .modal{
+      width:min(420px, 92vw);
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(10,10,18,0.92);
+      padding: 16px 14px;
+    }
+    .modal h3{
+      margin:0;
+      font-size:16px;
+      font-weight:1000;
+      letter-spacing:-0.2px;
+    }
+    .modal p{
+      margin:10px 0 0;
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.70);
+      line-height:1.45;
+    }
+    .modalBtns{
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+    }
+    .mBtn{
+      flex:1;
+      height:46px;
+      border-radius:16px;
+      border:none;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:13px;
+      color:#fff;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .mBtnDanger{
+      background: rgba(255,60,60,0.18);
+      border: 1px solid rgba(255,60,60,0.35);
+    }
+    .mBtn:active{ transform: scale(.99); }
+
     .toast{
-      position: fixed; left:50%; top:18px;
+      position: fixed;
+      left:50%;
+      top: 18px;
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,.92);
       border:1px solid rgba(165,180,252,.35);
       padding: 10px 14px;
       border-radius: 999px;
       color:#fff;
-      z-index:10000;
+      z-index: 9999999;
       font-weight:900;
       font-size:12px;
       transition:.28s;
       backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw, 520px);
+      text-align:center;
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 
 <body>
-  <div class="mobile-frame">
-    <div class="topbar">
-      <div class="leftControls">
-        <a class="backBtn" id="backBtn" href="/pages/home.html" aria-label="Back">←</a>
-        <div class="mini-brand" id="logoHome" title="Home">
-          <div class="logo-line"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
-          <div class="logo-slogan">BE FREE</div>
-        </div>
-      </div>
-    </div>
+  <main id="pageContent">
+    <div class="wrap">
 
-    <div class="main">
-      <div class="hero">
+      <section class="hero">
         <div class="avatar" id="avatarBox">•</div>
         <div class="who">
           <div class="name" id="fullName">—</div>
           <div class="email" id="email">—</div>
-          <div class="planRow">
-            <div class="badge" id="planBadge">FREE</div>
-            <button class="upgradeBtn" id="upgradeBtn" type="button" data-i18n="profile_upgrade">Upgrade</button>
+          <div class="pillRow">
+            <div class="pill" id="planBadge">FREE</div>
+            <div class="pill" id="userKeyPill">KEY: —</div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="rowItem">
-          <div class="rowLeft">
-            <div class="rowName" data-i18n="profile_site_lang">Site Language</div>
-            <div class="rowDesc" data-i18n="profile_site_lang_desc">5 languages for now</div>
+      <section class="card">
+        <div class="row">
+          <div class="left">
+            <div class="title">Sistem Dili</div>
+            <div class="desc">Uygulama arayüz dili</div>
           </div>
           <select class="select" id="siteLangSelect"></select>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="rowItem">
-          <div class="rowLeft">
-            <div class="rowName" data-i18n="profile_upgrade">Upgrade</div>
-            <div class="rowDesc" data-i18n="profile_upgrade_desc">Premium features</div>
+      <section class="card">
+        <div class="row">
+          <div class="left">
+            <div class="title">Seviye Bilgisi</div>
+            <div class="desc" id="lvlDesc">Seçili dil için sonuç</div>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="mini">
+            <div class="k">Seviye</div>
+            <div class="v" id="levelVal">—</div>
+          </div>
+          <div class="mini">
+            <div class="k">Sınav Sayısı</div>
+            <div class="v" id="attemptVal">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <div class="left">
+            <div class="title">Offline İndirilen Diller</div>
+            <div class="desc">Cihazında indirili paketler</div>
+          </div>
+        </div>
+        <div class="list" id="offlineList"></div>
+      </section>
+
+      <section class="card">
+        <div class="row">
+          <div class="left">
+            <div class="title">Güvenli Çıkış</div>
+            <div class="desc">Hesabından güvenli şekilde çık</div>
           </div>
         </div>
         <div class="btnRow">
-          <button class="primaryBtn" id="upgradeBtn2" type="button" data-i18n="profile_upgrade_btn">Upgrade</button>
+          <button class="btn btnSafe" id="logoutBtn" type="button">Güvenli Çıkış</button>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div class="rowItem">
-          <div class="rowLeft">
-            <div class="rowName" data-i18n="profile_secure_logout">Secure Logout</div>
-            <div class="rowDesc" data-i18n="profile_secure_logout_desc">Sign out</div>
+      <section class="card">
+        <div class="row">
+          <div class="left">
+            <div class="title">Hesabımı Kalıcı Olarak Sil</div>
+            <div class="desc">Bu işlem geri alınamaz</div>
           </div>
         </div>
         <div class="btnRow">
-          <button class="safeBtn" id="logoutBtn" type="button" data-i18n="profile_logout_btn">Logout</button>
+          <button class="btn btnDanger" id="deleteBtn" type="button">Hesabımı Kalıcı Olarak Sil</button>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="rowItem">
-          <div class="rowLeft">
-            <div class="rowName" data-i18n="profile_delete">Delete Account</div>
-            <div class="rowDesc" data-i18n="profile_delete_desc">Cannot be undone</div>
-          </div>
-        </div>
-        <div class="btnRow">
-          <button class="dangerBtn" id="deleteBtn" type="button" data-i18n="profile_delete_btn">Delete</button>
-        </div>
-      </div>
+      </section>
 
       <div class="footerNote">italkyAI By Ozyigit's 2026</div>
     </div>
-  </div>
+  </main>
 
   <div id="toast" class="toast"></div>
 
-  <script type="module" src="/js/profile_page.js?v=999"></script>
+  <!-- Confirm Modal -->
+  <div class="modalBack" id="confirmBack">
+    <div class="modal">
+      <h3>Emin misiniz?</h3>
+      <p>Hesabınızı kalıcı olarak silmek üzeresiniz. Bu işlem geri alınamaz.</p>
+      <div class="modalBtns">
+        <button class="mBtn" id="confirmNo" type="button">Vazgeç</button>
+        <button class="mBtn mBtnDanger" id="confirmYes" type="button">Evet, Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { STORAGE_KEY } from "/js/config.js";
+    import { applyI18n } from "/js/i18n.js";
+
+    mountShell(); // ✅ alt/üst bar var (Home ile aynı)
+    try{ applyI18n(document); }catch{}
+
+    const $ = (id)=>document.getElementById(id);
+
+    function toast(msg){
+      const t = $("toast");
+      t.textContent = String(msg||"");
+      t.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1700);
+    }
+
+    // ---- USER KEY: 3 harf + 6 rakam (takip etmeyen) ----
+    const USER_KEY_STORAGE = "italky_user_key";
+
+    function randLetters3(){
+      const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let s="";
+      for(let i=0;i<3;i++) s += A[Math.floor(Math.random()*A.length)];
+      return s;
+    }
+
+    function randDigits6(){
+      let s="";
+      for(let i=0;i<6;i++) s += String(Math.floor(Math.random()*10));
+      return s;
+    }
+
+    // "birbirini takip etmeyen": ardışık 3+ rakam olmasın (123,234...) veya aynı 3+ tekrar (000,111)
+    function digitsOk(d){
+      // 3'lü pencere kontrol
+      for(let i=0;i<=d.length-3;i++){
+        const a = Number(d[i]), b = Number(d[i+1]), c = Number(d[i+2]);
+        if(a+1===b && b+1===c) return false;        // artan ardışık
+        if(a-1===b && b-1===c) return false;        // azalan ardışık
+        if(a===b && b===c) return false;            // üçlü tekrar
+      }
+      return true;
+    }
+
+    function getOrCreateUserKey(){
+      let k = (localStorage.getItem(USER_KEY_STORAGE) || "").trim();
+      if(k && /^[A-Z]{3}\d{6}$/.test(k)) return k;
+
+      // üret
+      for(let tries=0; tries<50; tries++){
+        const letters = randLetters3();
+        const digits = randDigits6();
+        if(!digitsOk(digits)) continue;
+        k = `${letters}${digits}`;
+        localStorage.setItem(USER_KEY_STORAGE, k);
+        return k;
+      }
+      // fallback
+      k = `${randLetters3()}${randDigits6()}`;
+      localStorage.setItem(USER_KEY_STORAGE, k);
+      return k;
+    }
+
+    // ---- Profile fill (Google login STORAGE_KEY) ----
+    function fillHeader(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      let name = "Kullanıcı";
+      let email = "—";
+      let pic = "";
+
+      try{
+        if(raw){
+          const u = JSON.parse(raw);
+          name = (u.name || u.fullname || "Kullanıcı").trim();
+          email = (u.email || "—").trim();
+          pic = (u.picture || u.avatar || "").trim();
+        }
+      }catch{}
+
+      $("fullName").textContent = name || "Kullanıcı";
+      $("email").textContent = email || "—";
+
+      if(pic){
+        $("avatarBox").innerHTML = `<img src="${pic}" alt="">`;
+      }else{
+        $("avatarBox").textContent = (name && name[0]) ? name[0].toUpperCase() : "•";
+      }
+
+      $("userKeyPill").textContent = `KEY: ${getOrCreateUserKey()}`;
+
+      // plan badge (şimdilik local)
+      const isPremium = (localStorage.getItem("italky_is_premium") || "0")==="1";
+      $("planBadge").textContent = isPremium ? "PRO" : "FREE";
+    }
+
+    // ---- Language level + attempts (selected teacher) ----
+    function fillLevelBox(){
+      const sel = (localStorage.getItem("italky_teacher_pref") || "").trim();
+      const prof = JSON.parse(localStorage.getItem("italky_profile") || "{}");
+      const lang = (prof.languages && sel && prof.languages[sel]) ? prof.languages[sel] : null;
+
+      const labelMap = {
+        dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca",
+        sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince"
+      };
+
+      const langName = labelMap[sel] || "Seçili Dil Yok";
+      $("lvlDesc").textContent = `Dil: ${langName}`;
+
+      $("levelVal").textContent = (lang && lang.level) ? lang.level : "—";
+      $("attemptVal").textContent = (lang && typeof lang.attempt_count === "number") ? String(lang.attempt_count) : "0";
+    }
+
+    // ---- Offline downloaded languages ----
+    function fillOffline(){
+      // beklenen: localStorage.italky_offline_langs = JSON ["en-tr","tr-en","de-tr"...] veya ["English","German"...]
+      let arr = [];
+      try{
+        const raw = localStorage.getItem("italky_offline_langs");
+        if(raw) arr = JSON.parse(raw);
+      }catch{}
+
+      const box = $("offlineList");
+      box.innerHTML = "";
+
+      if(!arr || !arr.length){
+        box.innerHTML = `<div class="tag">Henüz indirilmedi</div>`;
+        return;
+      }
+
+      arr.slice(0, 20).forEach(x=>{
+        const t = String(x);
+        const el = document.createElement("div");
+        el.className = "tag";
+        el.textContent = t;
+        box.appendChild(el);
+      });
+    }
+
+    // ---- System language select ----
+    function fillLangSelect(){
+      const select = $("siteLangSelect");
+      const options = [
+        { v:"tr", t:"Türkçe" },
+        { v:"en", t:"English" },
+        { v:"de", t:"Deutsch" },
+        { v:"fr", t:"Français" },
+        { v:"es", t:"Español" },
+      ];
+      select.innerHTML = options.map(o=>`<option value="${o.v}">${o.t}</option>`).join("");
+
+      const cur = (localStorage.getItem("italky_site_lang") || "tr").trim();
+      select.value = cur;
+
+      select.addEventListener("change", ()=>{
+        localStorage.setItem("italky_site_lang", select.value);
+        toast("Dil ayarı kaydedildi");
+        try{ applyI18n(document); }catch{}
+      });
+    }
+
+    // ---- Logout / Delete ----
+    $("logoutBtn").addEventListener("click", ()=>{
+      // güvenli çıkış: auth bilgisini temizle (ilerleme profili kalabilir)
+      try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+      toast("Çıkış yapıldı");
+      setTimeout(()=>location.href="/pages/home.html", 500);
+    });
+
+    $("deleteBtn").addEventListener("click", ()=>{
+      $("confirmBack").style.display = "flex";
+    });
+
+    $("confirmNo").addEventListener("click", ()=>{
+      $("confirmBack").style.display = "none";
+    });
+
+    $("confirmYes").addEventListener("click", ()=>{
+      // kalıcı sil: localStorage temizle
+      try{
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("italky_profile");
+        localStorage.removeItem("italky_teacher_pref");
+        localStorage.removeItem("italky_level");
+        localStorage.removeItem("italky_level_done");
+        localStorage.removeItem("italky_level_weighted_score");
+        localStorage.removeItem("italky_level_raw_correct");
+        localStorage.removeItem("italky_recommended_mins");
+        localStorage.removeItem("italky_plan_pref");
+        localStorage.removeItem("italky_lesson_mins");
+        localStorage.removeItem("italky_accelerated");
+        localStorage.removeItem("italky_offline_langs");
+        localStorage.removeItem("italky_is_premium");
+        localStorage.removeItem(USER_KEY_STORAGE);
+      }catch{}
+      $("confirmBack").style.display = "none";
+      toast("Hesap silindi");
+      setTimeout(()=>location.href="/pages/home.html", 650);
+    });
+
+    // init
+    fillHeader();
+    fillLangSelect();
+    fillLevelBox();
+    fillOffline();
+  </script>
 </body>
 </html>
