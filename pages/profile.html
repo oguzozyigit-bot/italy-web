@@ -14,10 +14,10 @@
   <style>
     #pageContent{ height:100%; }
 
-    /* ✅ Scroll açık: bu wrapper main-content içinde kayar */
+    /* ✅ Scroll var + footer örtmesin diye extra bottom padding */
     .wrap{
       min-height: 100%;
-      padding: 12px 12px 18px;
+      padding: 12px 12px 160px; /* ✅ footer üstünde garanti */
       display:flex;
       flex-direction:column;
       gap:12px;
@@ -28,40 +28,46 @@
       border: 1px solid rgba(255,255,255,0.10);
       background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
       padding: 16px 14px;
-      display:flex;
-      gap:12px;
-      align-items:center;
     }
-
-    .avatar{
-      width:60px; height:60px;
-      border-radius:999px;
-      overflow:hidden;
-      border: 2px solid rgba(99,102,241,0.55);
-      background: rgba(255,255,255,0.06);
-      flex:0 0 60px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    .name{
+      font-size:16px;
       font-weight:1000;
-      font-size:18px;
       color:#fff;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .email{
+      margin-top:6px;
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.65);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-    .who{ min-width:0; flex:1; display:flex; flex-direction:column; gap:6px; }
-    .name{ font-size:16px; font-weight:1000; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .email{ font-size:12px; font-weight:900; color: rgba(255,255,255,0.65); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-    .pillRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:2px; }
+    .keyLine{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
     .pill{
       padding:8px 10px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
       font-weight:1000;
-      font-size:11px;
-      color: rgba(255,255,255,0.86);
+      font-size:12px;
+      color: rgba(255,255,255,0.90);
+    }
+    .pill.key{
+      border-color: rgba(99,102,241,0.35);
+      background: rgba(99,102,241,0.12);
+      color:#fff;
+      letter-spacing: .6px;
     }
 
     .card{
@@ -98,6 +104,7 @@
 
     .select{
       height:40px;
+      min-width:140px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.06);
@@ -182,7 +189,6 @@
       font-weight: 900;
       font-size: 10px;
       margin-top: 6px;
-      margin-bottom: 10px;
     }
 
     /* Confirm modal */
@@ -266,14 +272,10 @@
     <div class="wrap">
 
       <section class="hero">
-        <div class="avatar" id="avatarBox">•</div>
-        <div class="who">
-          <div class="name" id="fullName">—</div>
-          <div class="email" id="email">—</div>
-          <div class="pillRow">
-            <div class="pill" id="planBadge">FREE</div>
-            <div class="pill" id="userKeyPill">KEY: —</div>
-          </div>
+        <div class="name" id="fullName">—</div>
+        <div class="email" id="email">—</div>
+        <div class="keyLine">
+          <div class="pill key" id="userKeyPill">KEY: —</div>
         </div>
       </section>
 
@@ -314,7 +316,13 @@
             <div class="desc">Cihazında indirili paketler</div>
           </div>
         </div>
+
         <div class="list" id="offlineList"></div>
+
+        <!-- ✅ “Dil indir” seçeneği -->
+        <div class="btnRow">
+          <button class="btn" id="downloadLangBtn" type="button">Dil İndir</button>
+        </div>
       </section>
 
       <section class="card">
@@ -361,10 +369,8 @@
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { STORAGE_KEY } from "/js/config.js";
-    import { applyI18n } from "/js/i18n.js";
 
-    mountShell(); // ✅ scroll açık (default)
-    try{ applyI18n(document); }catch{}
+    mountShell(); // scroll açık (default)
 
     const $ = (id)=>document.getElementById(id);
 
@@ -376,7 +382,7 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1700);
     }
 
-    // ---- USER KEY: 3 harf + 6 rakam (takip etmeyen) ----
+    // ---- KEY üretimi (3 harf + 6 rakam, ardışık/üçlü tekrar yok) ----
     const USER_KEY_STORAGE = "italky_user_key";
 
     function randLetters3(){
@@ -393,16 +399,15 @@
     function digitsOk(d){
       for(let i=0;i<=d.length-3;i++){
         const a = Number(d[i]), b = Number(d[i+1]), c = Number(d[i+2]);
-        if(a+1===b && b+1===c) return false; // 123
-        if(a-1===b && b-1===c) return false; // 321
-        if(a===b && b===c) return false;     // 000
+        if(a+1===b && b+1===c) return false;
+        if(a-1===b && b-1===c) return false;
+        if(a===b && b===c) return false;
       }
       return true;
     }
     function getOrCreateUserKey(){
       let k = (localStorage.getItem(USER_KEY_STORAGE) || "").trim();
       if(k && /^[A-Z]{3}\d{6}$/.test(k)) return k;
-
       for(let tries=0; tries<80; tries++){
         const letters = randLetters3();
         const digits = randDigits6();
@@ -416,35 +421,24 @@
       return k;
     }
 
-    function fillHeader(){
-      const raw = localStorage.getItem(STORAGE_KEY);
+    // ---- Kullanıcı adı/email ----
+    function fillUser(){
       let name = "Kullanıcı";
       let email = "—";
-      let pic = "";
-
       try{
+        const raw = localStorage.getItem(STORAGE_KEY);
         if(raw){
           const u = JSON.parse(raw);
           name = (u.name || u.fullname || "Kullanıcı").trim();
           email = (u.email || "—").trim();
-          pic = (u.picture || u.avatar || "").trim();
         }
       }catch{}
-
       $("fullName").textContent = name || "Kullanıcı";
       $("email").textContent = email || "—";
       $("userKeyPill").textContent = `KEY: ${getOrCreateUserKey()}`;
-
-      const isPremium = (localStorage.getItem("italky_is_premium") || "0")==="1";
-      $("planBadge").textContent = isPremium ? "PRO" : "FREE";
-
-      if(pic){
-        $("avatarBox").innerHTML = `<img src="${pic}" alt="">`;
-      }else{
-        $("avatarBox").textContent = (name && name[0]) ? name[0].toUpperCase() : "•";
-      }
     }
 
+    // ---- Sistem dili select (boş kalmasın) ----
     function fillLangSelect(){
       const select = $("siteLangSelect");
       const options = [
@@ -462,11 +456,11 @@
       select.addEventListener("change", ()=>{
         localStorage.setItem("italky_site_lang", select.value);
         toast("Dil ayarı kaydedildi");
-        try{ applyI18n(document); }catch{}
       });
     }
 
-    function fillLevelBox(){
+    // ---- Seviye + sınav sayısı ----
+    function fillLevel(){
       const sel = (localStorage.getItem("italky_teacher_pref") || "").trim();
       const prof = JSON.parse(localStorage.getItem("italky_profile") || "{}");
       const lang = (prof.languages && sel && prof.languages[sel]) ? prof.languages[sel] : null;
@@ -475,29 +469,25 @@
         dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca",
         sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince"
       };
-      const langName = labelMap[sel] || "Seçili Dil Yok";
-      $("lvlDesc").textContent = `Dil: ${langName}`;
-
+      $("lvlDesc").textContent = `Dil: ${labelMap[sel] || "Seçili Dil Yok"}`;
       $("levelVal").textContent = (lang && lang.level) ? lang.level : "—";
       $("attemptVal").textContent = (lang && typeof lang.attempt_count === "number") ? String(lang.attempt_count) : "0";
     }
 
+    // ---- Offline diller ----
     function fillOffline(){
       let arr = [];
       try{
         const raw = localStorage.getItem("italky_offline_langs");
         if(raw) arr = JSON.parse(raw);
       }catch{}
-
       const box = $("offlineList");
       box.innerHTML = "";
-
       if(!arr || !arr.length){
         box.innerHTML = `<div class="tag">Henüz indirilmedi</div>`;
         return;
       }
-
-      arr.slice(0, 20).forEach(x=>{
+      arr.slice(0, 30).forEach(x=>{
         const el = document.createElement("div");
         el.className = "tag";
         el.textContent = String(x);
@@ -505,42 +495,42 @@
       });
     }
 
-    // Logout
+    // ---- Dil indir butonu ----
+    $("downloadLangBtn").addEventListener("click", ()=>{
+      // Eğer offline sayfan varsa buraya bağla:
+      // location.href = "/pages/offline.html";
+      toast("Dil indirme ekranı yakında bağlanacak");
+    });
+
+    // ---- Güvenli çıkış ----
     $("logoutBtn").addEventListener("click", ()=>{
       try{ localStorage.removeItem(STORAGE_KEY); }catch{}
       toast("Çıkış yapıldı");
       setTimeout(()=>location.href="/pages/home.html", 500);
     });
 
-    // Delete confirm
-    $("deleteBtn").addEventListener("click", ()=>{ $("confirmBack").style.display = "flex"; });
-    $("confirmNo").addEventListener("click", ()=>{ $("confirmBack").style.display = "none"; });
+    // ---- Silme onayı ----
+    $("deleteBtn").addEventListener("click", ()=>{ $("confirmBack").style.display="flex"; });
+    $("confirmNo").addEventListener("click", ()=>{ $("confirmBack").style.display="none"; });
     $("confirmYes").addEventListener("click", ()=>{
       try{
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem("italky_profile");
         localStorage.removeItem("italky_teacher_pref");
-        localStorage.removeItem("italky_level");
-        localStorage.removeItem("italky_level_done");
-        localStorage.removeItem("italky_level_weighted_score");
-        localStorage.removeItem("italky_level_raw_correct");
-        localStorage.removeItem("italky_recommended_mins");
-        localStorage.removeItem("italky_plan_pref");
-        localStorage.removeItem("italky_lesson_mins");
-        localStorage.removeItem("italky_accelerated");
+        localStorage.removeItem("italky_site_lang");
         localStorage.removeItem("italky_offline_langs");
         localStorage.removeItem("italky_is_premium");
         localStorage.removeItem(USER_KEY_STORAGE);
       }catch{}
-      $("confirmBack").style.display = "none";
+      $("confirmBack").style.display="none";
       toast("Hesap silindi");
       setTimeout(()=>location.href="/pages/home.html", 650);
     });
 
     // init
-    fillHeader();
+    fillUser();
     fillLangSelect();
-    fillLevelBox();
+    fillLevel();
     fillOffline();
   </script>
 </body>
