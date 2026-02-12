@@ -64,6 +64,25 @@
       line-height:1.45;
     }
 
+    .progress{
+      display:flex;
+      gap:8px;
+      margin-top:2px;
+    }
+    .dot{
+      flex:1;
+      height:8px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.10);
+      border:1px solid rgba(255,255,255,0.10);
+      overflow:hidden;
+    }
+    .dot.on{
+      background: rgba(99,102,241,0.35);
+      border-color: rgba(99,102,241,0.35);
+      box-shadow: 0 0 16px rgba(99,102,241,0.16);
+    }
+
     .task{
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.10);
@@ -146,11 +165,17 @@
       </div>
 
       <section class="card">
-        <div class="big" id="headline">Hadi mini bir ders yapalım.</div>
-        <div class="sub" id="desc">3 küçük görev → bittiğinde seni kayıt sayfasına götüreceğim.</div>
+        <div class="big" id="headline">Deneme Dersi</div>
+        <div class="sub" id="desc">Kısa bir mini ders. Bittiğinde kayıt ekranına geçeceğiz.</div>
 
-        <div class="task" id="taskBox">
-          <div class="q" id="qText">1) “Merhaba, nasılsın?” cümlesini hedef dilde yaz.</div>
+        <div class="progress" id="prog">
+          <div class="dot on"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+
+        <div class="task">
+          <div class="q" id="qText">—</div>
           <input class="inp" id="answer" placeholder="Cevabını yaz..." />
         </div>
 
@@ -186,26 +211,40 @@
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
     const sel = (localStorage.getItem(KEY_TEACHER) || "").trim();
     const t = TEACHERS[sel] || {flag:"🌍", role:"Dil", name:"Öğretmen"};
-
     $("whoChip").textContent = `${t.flag} ${t.role} • ${t.name}`;
 
-    // 5 dk timer
+    // ✅ 5 dakika
     let remaining = 5 * 60;
     let tick = null;
+
     function fmt(s){
       const m = String(Math.floor(s/60)).padStart(2,"0");
       const ss = String(s%60).padStart(2,"0");
       return `${m}:${ss}`;
     }
+
+    let warned60 = false;
+    let warned10 = false;
+
     function start(){
       $("timerChip").textContent = fmt(remaining);
       tick = setInterval(()=>{
         remaining--;
+
+        if(!warned60 && remaining === 60){
+          warned60 = true;
+          toast("Son 1 dakika! Premium ile devam edebilirsin.");
+        }
+        if(!warned10 && remaining === 10){
+          warned10 = true;
+          toast("Bitiyor…");
+        }
+
         if(remaining <= 0){
           remaining = 0;
           $("timerChip").textContent = fmt(remaining);
@@ -213,11 +252,11 @@
           location.href = "/pages/enroll_prompt.html";
           return;
         }
+
         $("timerChip").textContent = fmt(remaining);
       }, 1000);
     }
 
-    // Mini görevler (basit, hızlı, dil bazlı “hissiyat”)
     const TASKS = [
       `1) “Merhaba, nasılsın?” cümlesini ${t.role} olarak yaz.`,
       `2) “Ben bugün meşgulüm.” cümlesini ${t.role} olarak yaz.`,
@@ -225,10 +264,16 @@
     ];
     let step = 0;
 
+    function setProgress(){
+      const dots = document.querySelectorAll("#prog .dot");
+      dots.forEach((d,i)=>d.classList.toggle("on", i<=step));
+    }
+
     function render(){
       $("qText").textContent = TASKS[step];
       $("answer").value = "";
       $("btnNext").textContent = (step === TASKS.length-1) ? "Bitir" : "Devam";
+      setProgress();
     }
 
     $("btnNext").addEventListener("click", ()=>{
