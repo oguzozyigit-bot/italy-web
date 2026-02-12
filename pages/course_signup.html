@@ -1,0 +1,264 @@
+<!-- FILE: /pages/course_signup.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Paket Seç</title>
+  <link rel="icon" href="data:," />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    #pageContent{ height:100%; }
+
+    .wrap{
+      height:100%;
+      padding: 12px 12px 18px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .hero{
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      padding: 18px 16px;
+    }
+    .big{
+      font-size:20px;
+      font-weight:1000;
+      letter-spacing:-0.4px;
+      line-height:1.15;
+    }
+    .sub{
+      margin-top:10px;
+      font-size:13px;
+      font-weight:900;
+      color: rgba(255,255,255,0.70);
+      line-height:1.45;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    .plan{
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      padding: 14px 12px;
+      cursor:pointer;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+      min-height: 122px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      transition:.18s;
+    }
+    .plan:active{ transform: scale(.98); }
+
+    .plan.selected{
+      border-color: rgba(99,102,241,.55);
+      background: rgba(99,102,241,.14);
+      box-shadow: 0 0 24px rgba(99,102,241,.12);
+    }
+
+    .tag{
+      position:absolute;
+      top:12px; right:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:10px;
+      font-weight:1000;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
+      backdrop-filter: blur(8px);
+    }
+    .tag.lock{
+      border-color: rgba(255,215,0,.28);
+      color: rgba(255,215,0,.95);
+    }
+
+    .pTitle{
+      font-size:16px;
+      font-weight:1000;
+      letter-spacing:-0.3px;
+      margin-top: 10px;
+    }
+    .pDesc{
+      margin-top:8px;
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.68);
+      line-height:1.35;
+    }
+
+    .note{
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.66);
+      line-height:1.45;
+    }
+
+    .spacer{ flex:1; }
+
+    .btn{
+      height: 58px;
+      border-radius: 22px;
+      border: none;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:15px;
+      color:#fff;
+      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
+      box-shadow: 0 16px 44px rgba(79,70,229,.22);
+    }
+    .btn:active{ transform: scale(.98); }
+
+    .ghost{
+      height: 52px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:1000;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .ghost:active{ transform: scale(.99); }
+
+    .toast{
+      position: fixed;
+      left:50%;
+      top:18px;
+      transform:translateX(-50%) translateY(-120px);
+      background:rgba(10,10,18,.92);
+      border:1px solid rgba(165,180,252,.35);
+      padding:10px 14px;
+      border-radius:999px;
+      color:#fff;
+      z-index:99999;
+      font-weight:900;
+      font-size:12px;
+      transition:.28s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw,520px);
+      text-align:center;
+    }
+    .toast.show{ transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+
+<body>
+  <main id="pageContent">
+    <div class="wrap">
+
+      <section class="hero">
+        <div class="big">Paket Seçimi</div>
+        <div class="sub">Kursu başlatmak için bir paket seç.</div>
+      </section>
+
+      <section class="grid" id="planGrid"></section>
+
+      <div class="note">
+        Not: Ders bitmeden çıkarsan ders baştan başlar.
+      </div>
+
+      <div class="spacer"></div>
+
+      <button class="btn" id="btnContinue" type="button">Devam Et</button>
+      <button class="ghost" id="btnLater" type="button">Şimdilik değil</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell({ scroll:"none" });
+
+    const KEY_PLAN = "italky_plan_pref";
+    const KEY_MINS = "italky_lesson_mins";
+    const KEY_ACCEL = "italky_accelerated";
+
+    // Premium flag (şimdilik)
+    const isPremium = (localStorage.getItem("italky_is_premium") || "0") === "1";
+
+    const $ = (id)=>document.getElementById(id);
+    function toast(msg){
+      const t = $("toast");
+      t.textContent = String(msg||"");
+      t.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1700);
+    }
+
+    const PLANS = [
+      { id:"p5",   title:"Ücretsiz Deneme Planı", desc:"Günde 1 ders • 5 dk", mins:5,  paid:false, accelerated:false },
+      { id:"p20",  title:"Standart",             desc:"Günde 1 ders • 20 dk", mins:20, paid:true,  accelerated:false },
+      { id:"p30",  title:"Yoğun",                desc:"Günde 1 ders • 30 dk", mins:30, paid:true,  accelerated:false },
+      { id:"p120", title:"Hızlandırılmış Kurs",  desc:"Günde 4 ders • 30 dk", mins:30, paid:true,  accelerated:true },
+    ];
+
+    let selPlan = (localStorage.getItem(KEY_PLAN) || "p5").trim();
+    if(!PLANS.some(p=>p.id===selPlan)) selPlan = "p5";
+
+    function render(){
+      const grid = $("planGrid");
+      grid.innerHTML = PLANS.map(p=>{
+        const tag = p.paid ? `<div class="tag lock">Ücretli</div>` : `<div class="tag">Ücretsiz</div>`;
+        const cls = (p.id===selPlan) ? "plan selected" : "plan";
+        return `
+          <div class="${cls}" data-id="${p.id}">
+            ${tag}
+            <div>
+              <div class="pTitle">${p.title}</div>
+              <div class="pDesc">${p.desc}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      grid.querySelectorAll(".plan").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          selPlan = el.getAttribute("data-id") || "p5";
+          localStorage.setItem(KEY_PLAN, selPlan);
+          grid.querySelectorAll(".plan").forEach(x=>x.classList.toggle("selected", x===el));
+        });
+      });
+    }
+
+    $("btnContinue").addEventListener("click", ()=>{
+      const p = PLANS.find(x=>x.id===selPlan) || PLANS[0];
+
+      if(p.paid && !isPremium){
+        toast("Bu paket ücretlidir. (Ödeme ekranı eklenecek)");
+        return;
+      }
+
+      localStorage.setItem(KEY_PLAN, p.id);
+      localStorage.setItem(KEY_MINS, String(p.mins));
+      localStorage.setItem(KEY_ACCEL, p.accelerated ? "1" : "0");
+
+      location.href = "/pages/teacher_course.html";
+    });
+
+    $("btnLater").addEventListener("click", ()=>{
+      location.href = "/pages/home.html";
+    });
+
+    render();
+  </script>
+</body>
+</html>
