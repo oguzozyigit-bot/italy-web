@@ -1,0 +1,107 @@
+<!-- FILE: /pages/enroll_prompt.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Kayıt</title>
+  <link rel="icon" href="data:," />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    #pageContent{ height:100%; }
+    .wrap{
+      height:100%;
+      padding: 12px 12px 18px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .hero{
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      padding: 18px 16px;
+    }
+    .big{
+      font-size:20px;
+      font-weight:1000;
+      letter-spacing:-0.4px;
+      line-height:1.15;
+    }
+    .sub{
+      margin-top:10px;
+      font-size:13px;
+      font-weight:900;
+      color: rgba(255,255,255,0.70);
+      line-height:1.45;
+    }
+
+    .spacer{ flex:1; }
+
+    .btn{
+      height: 58px;
+      border-radius: 22px;
+      border: none;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:15px;
+      color:#fff;
+      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
+      box-shadow: 0 16px 44px rgba(79,70,229,.22);
+    }
+    .btn:active{ transform: scale(.98); }
+
+    .ghost{
+      height: 52px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:1000;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .ghost:active{ transform: scale(.99); }
+  </style>
+</head>
+
+<body>
+  <main id="pageContent">
+    <div class="wrap">
+
+      <section class="hero">
+        <div class="big">Dil kursuna kayıt olmak ister misin?</div>
+        <div class="sub">
+          Kayıt olduktan sonra ders planın açılır, seviyene göre günlük programın oluşur ve ilerlemen takip edilir.
+        </div>
+      </section>
+
+      <div class="spacer"></div>
+
+      <button class="btn" id="btnYes" type="button">Evet, kayıt olmak istiyorum</button>
+      <button class="ghost" id="btnNo" type="button">Şimdilik değil</button>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell({ scroll:"none" });
+
+    document.getElementById("btnYes").addEventListener("click", ()=>{
+      // Şimdilik kursa kayıt akışını senin bir sonraki sayfana bağlarız:
+      // örn: /pages/course_signup.html veya /pages/premium.html
+      location.href = "/pages/home.html";
+    });
+
+    document.getElementById("btnNo").addEventListener("click", ()=>{
+      location.href = "/pages/home.html";
+    });
+  </script>
+</body>
+</html>
