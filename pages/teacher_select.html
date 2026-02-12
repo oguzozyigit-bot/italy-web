@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
   <style>
-    :root{ --bg:#030014; --text:#fff; --muted:rgba(255,255,255,.55); --border:rgba(255,255,255,.10); --ai1:#A5B4FC; --ai2:#4F46E5; }
+    :root{ --bg:#030014; --text:#fff; --muted:rgba(255,255,255,.55); --ai1:#A5B4FC; --ai2:#4F46E5; }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Outfit,sans-serif;color:var(--text)}
     .nebula{position:absolute;inset:-30%;filter:blur(70px);opacity:.35;background:
@@ -36,11 +36,67 @@
     .name{font-weight:1000;font-size:16px}
     .desc{font-weight:800;color:rgba(255,255,255,.6);font-size:12px;margin-top:2px}
     .go{font-weight:1000;color:rgba(255,255,255,.7)}
+
+    /* bottom sheet */
+    .sheetBack{
+      position:fixed;inset:0;z-index:9999;
+      background:rgba(0,0,0,.75);
+      display:none;align-items:flex-end;justify-content:center;
+      padding:16px;
+    }
+    .sheetBack.show{display:flex}
+    .sheet{
+      width:min(480px, calc(100vw - 24px));
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(10,10,20,.92);
+      backdrop-filter:blur(18px);
+      box-shadow:0 40px 120px rgba(0,0,0,.75);
+      padding:14px;
+      transform:translateY(14px);
+      animation: sheetIn .18s ease-out both;
+    }
+    @keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .sheetTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .sheetTitle{font-weight:1000;font-size:14px}
+    .sheetClose{width:38px;height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:1000;cursor:pointer}
+    .sheetInfo{font-weight:800;font-size:12px;color:rgba(255,255,255,.65);line-height:1.4;margin-bottom:12px}
+    .teacherRow{
+      border-radius:18px;border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+      padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:12px
+    }
+    .tFlag{width:38px;height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)}
+    .tMeta{flex:1}
+    .tName{font-weight:1000}
+    .tDesc{font-weight:800;font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+
+    .minsGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .minsBtn{
+      height:54px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:#fff;font-weight:1000;font-size:14px;cursor:pointer;
+    }
+    .minsBtn.active{
+      border-color: rgba(99,102,241,.55);
+      background: rgba(99,102,241,.18);
+      box-shadow:0 0 22px rgba(99,102,241,.18);
+    }
+
+    .startBtn{
+      margin-top:12px;width:100%;height:56px;border-radius:20px;border:none;
+      color:#fff;font-weight:1000;font-size:15px;cursor:pointer;
+      background:linear-gradient(135deg,#A5B4FC,#4F46E5);
+      box-shadow:0 14px 40px rgba(79,70,229,.25);
+    }
+    .startBtn:active{transform:scale(.99)}
     .note{padding:10px 18px 18px;color:rgba(255,255,255,.35);font-weight:900;font-size:11px;text-align:center}
   </style>
 </head>
 <body>
   <div class="nebula"></div>
+
   <div class="frame">
     <div class="top">
       <div class="back" onclick="location.href='/pages/home.html'">←</div>
@@ -53,86 +109,120 @@
 
     <div class="title">
       <h1>Öğretmenini Seç</h1>
-      <p>Bu ders tamamen hedef dilde ilerler. Türkçe yok. Gerçek sınıf gibi.</p>
+      <p>Bu ders tamamen hedef dilde ilerler. Türkçe yok. %95 eşik, 3 hak.</p>
     </div>
 
     <div class="grid" id="teacherGrid">
-      <div class="card" data-teacher="dora">
-        <div class="flag">🇬🇧</div>
-        <div class="meta">
-          <div class="name">İngilizce Öğretmeni Dora</div>
-          <div class="desc">English only • disiplinli kurs</div>
-        </div>
-        <div class="go">›</div>
+      <div class="card" data-teacher="dora" data-flag="🇬🇧" data-name="İngilizce Öğretmeni Dora" data-desc="English only • course">
+        <div class="flag">🇬🇧</div><div class="meta"><div class="name">İngilizce Öğretmeni Dora</div><div class="desc">English only • course mode</div></div><div class="go">›</div>
       </div>
 
-      <div class="card" data-teacher="sencer">
-        <div class="flag">🇮🇹</div>
-        <div class="meta">
-          <div class="name">İtalyanca Öğretmeni Sencer</div>
-          <div class="desc">Solo italiano • course mode</div>
-        </div>
-        <div class="go">›</div>
+      <div class="card" data-teacher="sencer" data-flag="🇮🇹" data-name="İtalyanca Öğretmeni Sencer" data-desc="Solo italiano • course">
+        <div class="flag">🇮🇹</div><div class="meta"><div class="name">İtalyanca Öğretmeni Sencer</div><div class="desc">Solo italiano • course mode</div></div><div class="go">›</div>
       </div>
 
-      <div class="card" data-teacher="jale">
-        <div class="flag">🇫🇷</div>
-        <div class="meta">
-          <div class="name">Fransızca Öğretmeni Jale</div>
-          <div class="desc">Français seulement • course mode</div>
-        </div>
-        <div class="go">›</div>
+      <div class="card" data-teacher="jale" data-flag="🇫🇷" data-name="Fransızca Öğretmeni Jale" data-desc="Français seulement • course">
+        <div class="flag">🇫🇷</div><div class="meta"><div class="name">Fransızca Öğretmeni Jale</div><div class="desc">Français seulement • course mode</div></div><div class="go">›</div>
       </div>
 
-      <div class="card" data-teacher="ozan">
-        <div class="flag">🇪🇸</div>
-        <div class="meta">
-          <div class="name">İspanyolca Öğretmeni Ozan</div>
-          <div class="desc">Solo español • course mode</div>
-        </div>
-        <div class="go">›</div>
+      <div class="card" data-teacher="ozan" data-flag="🇪🇸" data-name="İspanyolca Öğretmeni Ozan" data-desc="Solo español • course">
+        <div class="flag">🇪🇸</div><div class="meta"><div class="name">İspanyolca Öğretmeni Ozan</div><div class="desc">Solo español • course mode</div></div><div class="go">›</div>
       </div>
 
-      <div class="card" data-teacher="ayda">
-        <div class="flag">🇩🇪</div>
-        <div class="meta">
-          <div class="name">Almanca Öğretmeni Ayda</div>
-          <div class="desc">Nur Deutsch • course mode</div>
-        </div>
-        <div class="go">›</div>
+      <div class="card" data-teacher="ayda" data-flag="🇩🇪" data-name="Almanca Öğretmeni Ayda" data-desc="Nur Deutsch • course">
+        <div class="flag">🇩🇪</div><div class="meta"><div class="name">Almanca Öğretmeni Ayda</div><div class="desc">Nur Deutsch • course mode</div></div><div class="go">›</div>
       </div>
 
-      <div class="card" data-teacher="sungur">
-        <div class="flag">🇷🇺</div>
-        <div class="meta">
-          <div class="name">Rusça Öğretmeni Sungur</div>
-          <div class="desc">Только по-русски • course mode</div>
-        </div>
-        <div class="go">›</div>
+      <div class="card" data-teacher="sungur" data-flag="🇷🇺" data-name="Rusça Öğretmeni Sungur" data-desc="Только по-русски • course">
+        <div class="flag">🇷🇺</div><div class="meta"><div class="name">Rusça Öğretmeni Sungur</div><div class="desc">Только по-русски • course mode</div></div><div class="go">›</div>
       </div>
 
-      <div class="card" data-teacher="huma">
-        <div class="flag">🇯🇵</div>
-        <div class="meta">
-          <div class="name">Japonca Öğretmeni Hüma</div>
-          <div class="desc">日本語だけ • course mode</div>
-        </div>
-        <div class="go">›</div>
+      <div class="card" data-teacher="huma" data-flag="🇯🇵" data-name="Japonca Öğretmeni Hüma" data-desc="日本語だけ • course">
+        <div class="flag">🇯🇵</div><div class="meta"><div class="name">Japonca Öğretmeni Hüma</div><div class="desc">日本語だけ • course mode</div></div><div class="go">›</div>
       </div>
     </div>
 
-    <div class="note">Süre seçimi bir sonraki ekranda çıkacak.</div>
+    <div class="note">Öğretmen seçince ders süresi sorulacak.</div>
+  </div>
+
+  <!-- duration sheet -->
+  <div class="sheetBack" id="sheetBack">
+    <div class="sheet" role="dialog" aria-label="Ders süresi seç">
+      <div class="sheetTop">
+        <div class="sheetTitle">Ders Süresi</div>
+        <button class="sheetClose" id="sheetClose" type="button">✕</button>
+      </div>
+
+      <div class="teacherRow" id="teacherRow">
+        <div class="tFlag" id="tFlag">🇬🇧</div>
+        <div class="tMeta">
+          <div class="tName" id="tName">—</div>
+          <div class="tDesc" id="tDesc">—</div>
+        </div>
+      </div>
+
+      <div class="sheetInfo">10 / 20 / 30 dakika seç. (İleride üyeliğe göre değişecek)</div>
+
+      <div class="minsGrid" id="minsGrid">
+        <button class="minsBtn active" data-mins="10" type="button">10 dk</button>
+        <button class="minsBtn" data-mins="20" type="button">20 dk</button>
+        <button class="minsBtn" data-mins="30" type="button">30 dk</button>
+      </div>
+
+      <button class="startBtn" id="startBtn" type="button">DERSİ BAŞLAT</button>
+    </div>
   </div>
 
   <script>
-    // ✅ teacher seçimi localStorage’a yaz → session sayfasına geç
-    const KEY = "italky_teacher_pref";
+    const KEY_TEACHER = "italky_teacher_pref";
+    const KEY_MINS = "italky_lesson_mins";
+
+    const sheetBack = document.getElementById("sheetBack");
+    const closeBtn = document.getElementById("sheetClose");
+    const startBtn = document.getElementById("startBtn");
+
+    let pickedTeacher = "dora";
+    let pickedMins = "10";
+
+    function openSheet(meta){
+      // meta: {id, flag, name, desc}
+      pickedTeacher = meta.id;
+      document.getElementById("tFlag").textContent = meta.flag || "🌐";
+      document.getElementById("tName").textContent = meta.name || "—";
+      document.getElementById("tDesc").textContent = meta.desc || "—";
+      sheetBack.classList.add("show");
+    }
+    function closeSheet(){ sheetBack.classList.remove("show"); }
+
+    closeBtn.addEventListener("click", closeSheet);
+    sheetBack.addEventListener("click", (e)=>{ if(e.target === sheetBack) closeSheet(); });
+
+    document.querySelectorAll(".minsBtn").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        document.querySelectorAll(".minsBtn").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        pickedMins = b.getAttribute("data-mins") || "10";
+      });
+    });
+
     document.querySelectorAll(".card[data-teacher]").forEach(card=>{
       card.addEventListener("click", ()=>{
-        const t = card.getAttribute("data-teacher");
-        if(t) localStorage.setItem(KEY, t);
-        location.href = "/pages/voice_ai.html"; // ders sayfası (teacher engine)
+        const meta = {
+          id: card.getAttribute("data-teacher"),
+          flag: card.getAttribute("data-flag"),
+          name: card.getAttribute("data-name"),
+          desc: card.getAttribute("data-desc")
+        };
+        openSheet(meta);
       });
+    });
+
+    startBtn.addEventListener("click", ()=>{
+      try{
+        localStorage.setItem(KEY_TEACHER, String(pickedTeacher));
+        localStorage.setItem(KEY_MINS, String(pickedMins));
+      }catch(e){}
+      location.href = "/pages/voice_ai.html";
     });
   </script>
 </body>
