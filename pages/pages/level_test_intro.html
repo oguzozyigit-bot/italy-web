@@ -1,0 +1,209 @@
+<!-- FILE: /pages/level_test_intro.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Seviye Tespit</title>
+  <link rel="icon" href="data:," />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    #pageContent{ height:100%; }
+
+    /* ✅ header-footer arası tek ekran */
+    .wrap{
+      height:100%;
+      padding: 12px 12px 18px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .card{
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      padding: 18px 16px;
+    }
+
+    .title{
+      font-size: 22px;
+      font-weight: 1000;
+      letter-spacing: -0.6px;
+      line-height: 1.05;
+      margin: 0;
+    }
+    .sub{
+      margin: 8px 0 0;
+      font-size: 13px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.68);
+      line-height: 1.35;
+    }
+
+    .infoGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .pill{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      padding: 14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .pill .k{
+      font-size: 11px;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.60);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .pill .v{
+      font-size: 18px;
+      font-weight: 1000;
+      letter-spacing: -0.3px;
+    }
+
+    .note{
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.66);
+      line-height: 1.45;
+      margin-top: 12px;
+    }
+
+    .spacer{ flex:1; }
+
+    .btn{
+      height: 56px;
+      border-radius: 22px;
+      border: none;
+      cursor: pointer;
+      font-weight: 1000;
+      font-size: 15px;
+      color: #fff;
+      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
+      box-shadow: 0 16px 44px rgba(79,70,229,.22);
+    }
+    .btn:active{ transform: scale(.98); }
+
+    .ghost{
+      height: 52px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight: 1000;
+      font-size: 13px;
+      cursor:pointer;
+    }
+    .ghost:active{ transform: scale(.99); }
+
+    .langLine{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top: 10px;
+    }
+    .chip{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(255,255,255,0.86);
+      white-space:nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <main id="pageContent">
+    <div class="wrap">
+      <div class="card">
+        <h2 class="title">Seviye Tespit Sınavı</h2>
+        <div class="sub">Bu sınav dil seviyenizi belirlemek için hazırlanmıştır. Süre bitince otomatik tamamlanır.</div>
+
+        <div class="langLine" id="langLine"></div>
+
+        <div class="infoGrid">
+          <div class="pill">
+            <div class="k">Soru</div>
+            <div class="v">30</div>
+          </div>
+          <div class="pill">
+            <div class="k">Süre</div>
+            <div class="v">15 dk</div>
+          </div>
+        </div>
+
+        <div class="note">
+          • Sınav sırasında uygulamadan çıkmayınız.<br/>
+          • Sınavı yarıda bırakırsanız baştan başlar.<br/>
+          • Sonuca göre seviyeniz otomatik belirlenir.
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <button class="btn" id="btnStart" type="button">Sınava Başla</button>
+      <button class="ghost" id="btnBack" type="button">Dil Seçimine Dön</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell({ scroll:"none" });
+
+    const KEY_TEACHER = "italky_teacher_pref";
+
+    const TEACHERS = {
+      dora:{flag:"🇬🇧", role:"İngilizce"},
+      ayda:{flag:"🇩🇪", role:"Almanca"},
+      jale:{flag:"🇫🇷", role:"Fransızca"},
+      ozan:{flag:"🇪🇸", role:"İspanyolca"},
+      sencer:{flag:"🇮🇹", role:"İtalyanca"},
+      sungur:{flag:"🇷🇺", role:"Rusça"},
+      huma:{flag:"🇯🇵", role:"Japonca"},
+      umay:{flag:"🇨🇳", role:"Çince"},
+    };
+
+    const sel = (localStorage.getItem(KEY_TEACHER) || "").trim();
+    const info = TEACHERS[sel];
+
+    // seçili dil yoksa geri
+    if(!info){
+      location.href = "/pages/teacher_select.html";
+    } else {
+      const line = document.getElementById("langLine");
+      line.innerHTML = `
+        <div class="chip">${info.flag} Seçili Dil: ${info.role}</div>
+        <div class="chip">Hazır mısın?</div>
+      `;
+    }
+
+    document.getElementById("btnStart").addEventListener("click", ()=>{
+      location.href = "/pages/level_test.html";  // ✅ 30 soru sayfası
+    });
+
+    document.getElementById("btnBack").addEventListener("click", ()=>{
+      location.href = "/pages/teacher_select.html";
+    });
+  </script>
+</body>
+</html>
