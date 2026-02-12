@@ -1,239 +1,354 @@
+<!-- FILE: /pages/teacher_select.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Öğretmen Seç</title>
+  <title>italkyAI • Dil Kursu</title>
   <link rel="icon" href="data:," />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
   <style>
-    :root{ --bg:#030014; --text:#fff; --muted:rgba(255,255,255,.58); --ai1:#A5B4FC; --ai2:#4F46E5; }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:Outfit,sans-serif;color:var(--text)}
-    .nebula{position:absolute;inset:-30%;filter:blur(70px);opacity:.35;background:
-      radial-gradient(circle at 20% 20%, rgba(79,70,229,.45), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgba(236,72,153,.28), transparent 45%),
-      radial-gradient(circle at 50% 50%, rgba(2,0,15,1), #02000f 60%);
+    /* ✅ Bu sayfa HOME shell ile sarılacak. Buradaki CSS sadece içerik için. */
+
+    .wrap{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      padding: 4px 2px 10px;
     }
-    .frame{position:relative;z-index:2;max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column;background:rgba(10,10,30,.35);backdrop-filter:blur(22px)}
-    .top{padding:18px 18px 10px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between}
-    .back{width:44px;height:44px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.2);color:#fff;font-weight:1000;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .brand{display:flex;flex-direction:column;align-items:center;gap:4px}
-    .logo{font-family:"Space Grotesk",sans-serif;font-size:22px;font-weight:800}
-    .logo .ai{background:linear-gradient(135deg,var(--ai1),var(--ai2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .sub{font-size:10px;letter-spacing:5px;color:rgba(255,255,255,.45);font-weight:900}
 
-    .title{padding:14px 18px 6px}
-    .title h1{margin:0;font-size:18px;font-weight:1000;letter-spacing:-.2px}
-    .title p{margin:6px 0 0;color:var(--muted);font-weight:800;font-size:13px;line-height:1.45}
-
-    .grid{flex:1;overflow:auto;padding:12px 18px 18px;display:grid;grid-template-columns:1fr;gap:12px;scrollbar-width:none}
-    .grid::-webkit-scrollbar{display:none}
-    .card{border-radius:22px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);padding:14px 14px;display:flex;gap:12px;align-items:center;cursor:pointer}
-    .card:active{transform:scale(.99)}
-    .flag{width:46px;height:46px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;font-size:22px}
-    .meta{flex:1;min-width:0}
-    .name{font-weight:1000;font-size:16px}
-    .desc{font-weight:800;color:rgba(255,255,255,.62);font-size:13px;margin-top:2px}
-    .go{font-weight:1000;color:rgba(255,255,255,.7)}
-
-    /* bottom sheet */
-    .sheetBack{
-      position:fixed;inset:0;z-index:9999;
-      background:rgba(0,0,0,.75);
-      display:none;align-items:flex-end;justify-content:center;
-      padding:16px;
+    .hero{
+      padding:14px 14px;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(10px);
     }
-    .sheetBack.show{display:flex}
-    .sheet{
-      width:min(480px, calc(100vw - 24px));
-      border-radius:26px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(10,10,20,.92);
-      backdrop-filter:blur(18px);
-      box-shadow:0 40px 120px rgba(0,0,0,.75);
+    .hero h2{
+      margin:0;
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-0.2px;
+    }
+    .hero p{
+      margin:8px 0 0;
+      font-size:12px;
+      font-weight:800;
+      color: rgba(255,255,255,.65);
+      line-height:1.45;
+    }
+
+    .section{
       padding:14px;
-      animation: sheetIn .18s ease-out both;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
     }
-    @keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-    .sheetTop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .sheetTitle{font-weight:1000;font-size:15px}
-    .sheetClose{width:40px;height:40px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:1000;cursor:pointer}
-    .teacherRow{
-      border-radius:18px;border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.05);
-      padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:12px
+    .sec-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
     }
-    .tFlag{width:38px;height:38px;border-radius:14px;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)}
-    .tMeta{flex:1}
-    .tName{font-weight:1000;font-size:14px}
-    .tDesc{font-weight:800;font-size:12px;color:rgba(255,255,255,.62);margin-top:2px}
+    .sec-title .t{
+      font-size:13px;
+      font-weight:1000;
+      letter-spacing:.6px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.88);
+    }
+    .sec-title .s{
+      font-size:11px;
+      font-weight:900;
+      color: rgba(255,255,255,.55);
+      white-space:nowrap;
+    }
 
-    .label{margin:10px 0 8px;font-weight:1000;font-size:13px;color:rgba(255,255,255,.86)}
-    .pillRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-    .pillBtn{
-      height:52px;border-radius:18px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
-      color:#fff;font-weight:1000;font-size:14px;cursor:pointer;
+    /* teacher grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
     }
-    .pillBtn.active{
+    .card{
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding:12px;
+      cursor:pointer;
+      transition:.2s;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+      min-height:88px;
+    }
+    .card:active{ transform: scale(.98); }
+    .card.selected{
       border-color: rgba(99,102,241,.55);
-      background: rgba(99,102,241,.18);
-      box-shadow:0 0 22px rgba(99,102,241,.18);
+      background: rgba(99,102,241,.12);
+      box-shadow: 0 0 24px rgba(99,102,241,.12);
     }
-    .levelRow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
-    .levelBtn{height:46px;border-radius:16px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:1000;cursor:pointer}
-    .levelBtn.active{border-color: rgba(236,72,153,.55);background: rgba(236,72,153,.16);box-shadow:0 0 22px rgba(236,72,153,.16)}
+    .flag{
+      font-size:20px;
+      margin-bottom:8px;
+    }
+    .name{
+      font-size:14px;
+      font-weight:1000;
+      line-height:1.1;
+    }
+    .sub{
+      margin-top:6px;
+      font-size:11px;
+      font-weight:900;
+      color: rgba(255,255,255,.62);
+      line-height:1.25;
+    }
+    .badge{
+      position:absolute;
+      top:10px; right:10px;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:10px;
+      font-weight:1000;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
+      backdrop-filter: blur(8px);
+    }
 
-    .startBtn{
-      margin-top:12px;width:100%;height:56px;border-radius:20px;border:none;
-      color:#fff;font-weight:1000;font-size:15px;cursor:pointer;
-      background:linear-gradient(135deg,#A5B4FC,#4F46E5);
-      box-shadow:0 14px 40px rgba(79,70,229,.25);
+    /* mins pills */
+    .pills{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
-    .startBtn:active{transform:scale(.99)}
+    .pill{
+      flex:1 1 30%;
+      min-width:92px;
+      height:44px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color:#fff;
+      font-weight:1000;
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .pill:active{ transform: scale(.99); }
+    .pill.selected{
+      border-color: rgba(99,102,241,.55);
+      background: rgba(99,102,241,.14);
+    }
+
+    /* CTA */
+    .cta{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding:14px;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+    }
+    .sum{
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,.78);
+      line-height:1.35;
+    }
+    .btn{
+      height:52px;
+      border-radius:18px;
+      border:none;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:14px;
+      color:#fff;
+      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
+      box-shadow: 0 14px 40px rgba(79,70,229,.18);
+    }
+    .btn:active{ transform: scale(.99); }
+
+    /* tiny toast */
+    .toast{
+      position: fixed;
+      left:50%;
+      top: 18px;
+      transform: translateX(-50%) translateY(-120px);
+      background: rgba(10,10,18,.92);
+      border: 1px solid rgba(165,180,252,.35);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color:#fff;
+      z-index:99999;
+      font-weight:900;
+      font-size:12px;
+      transition:.28s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw, 520px);
+      text-align:center;
+    }
+    .toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
 </head>
+
 <body>
-  <div class="nebula"></div>
 
-  <div class="frame">
-    <div class="top">
-      <div class="back" onclick="location.href='/pages/home.html'">←</div>
-      <div class="brand">
-        <div class="logo">italky<span class="ai">AI</span></div>
-        <div class="sub">BE FREE</div>
-      </div>
-      <div style="width:44px"></div>
-    </div>
+  <!-- ✅ CONTENT ONLY (shell bunu saracak) -->
+  <main id="pageContent">
+    <div class="wrap">
 
-    <div class="title">
-      <h1>Öğretmenini Seç</h1>
-      <p>Ders hedef dilde ilerler. Öğretmen Türkçe konuşmaz. Altta parantez içinde çeviri görürsün.</p>
-    </div>
-
-    <div class="grid">
-      <div class="card" data-teacher="dora" data-flag="🇬🇧" data-name="English Teacher Dora" data-desc="Sweet but disciplined">
-        <div class="flag">🇬🇧</div><div class="meta"><div class="name">İngilizce Öğretmeni Dora</div><div class="desc">English only • kurs</div></div><div class="go">›</div>
-      </div>
-      <div class="card" data-teacher="ayda" data-flag="🇩🇪" data-name="Deutsch Teacher Ayda" data-desc="Sweet but disciplined">
-        <div class="flag">🇩🇪</div><div class="meta"><div class="name">Almanca Öğretmeni Ayda</div><div class="desc">Nur Deutsch • kurs</div></div><div class="go">›</div>
-      </div>
-      <div class="card" data-teacher="jale" data-flag="🇫🇷" data-name="Français Teacher Jale" data-desc="Sweet but disciplined">
-        <div class="flag">🇫🇷</div><div class="meta"><div class="name">Fransızca Öğretmeni Jale</div><div class="desc">Français seulement • kurs</div></div><div class="go">›</div>
-      </div>
-      <div class="card" data-teacher="sencer" data-flag="🇮🇹" data-name="Italiano Teacher Sencer" data-desc="Sweet but disciplined">
-        <div class="flag">🇮🇹</div><div class="meta"><div class="name">İtalyanca Öğretmeni Sencer</div><div class="desc">Solo italiano • kurs</div></div><div class="go">›</div>
-      </div>
-      <div class="card" data-teacher="ozan" data-flag="🇪🇸" data-name="Español Teacher Ozan" data-desc="Sweet but disciplined">
-        <div class="flag">🇪🇸</div><div class="meta"><div class="name">İspanyolca Öğretmeni Ozan</div><div class="desc">Solo español • kurs</div></div><div class="go">›</div>
-      </div>
-      <div class="card" data-teacher="sungur" data-flag="🇷🇺" data-name="Русский Teacher Sungur" data-desc="Sweet but disciplined">
-        <div class="flag">🇷🇺</div><div class="meta"><div class="name">Rusça Öğretmeni Sungur</div><div class="desc">Только по-русски • kurs</div></div><div class="go">›</div>
-      </div>
-      <div class="card" data-teacher="huma" data-flag="🇯🇵" data-name="日本語 Teacher Hüma" data-desc="Sweet but disciplined">
-        <div class="flag">🇯🇵</div><div class="meta"><div class="name">Japonca Öğretmeni Hüma</div><div class="desc">日本語だけ • kurs</div></div><div class="go">›</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- sheet -->
-  <div class="sheetBack" id="sheetBack">
-    <div class="sheet">
-      <div class="sheetTop">
-        <div class="sheetTitle">Ders Ayarları</div>
-        <button class="sheetClose" id="sheetClose" type="button">✕</button>
+      <div class="hero">
+        <h2>🎓 Dil Kursu</h2>
+        <p>Öğretmenini seç, ders süresini belirle ve derse gir. Öğretmen seçtiğin dilde konuşur.</p>
       </div>
 
-      <div class="teacherRow">
-        <div class="tFlag" id="tFlag">🌐</div>
-        <div class="tMeta">
-          <div class="tName" id="tName">—</div>
-          <div class="tDesc" id="tDesc">—</div>
+      <section class="section" aria-label="Öğretmen seçimi">
+        <div class="sec-title">
+          <div class="t">Öğretmen Seç</div>
+          <div class="s" id="selTeacherMini">Seçilmedi</div>
         </div>
-      </div>
 
-      <div class="label">Ders Süresi</div>
-      <div class="pillRow" id="minsRow">
-        <button class="pillBtn active" data-mins="10" type="button">10 dk</button>
-        <button class="pillBtn" data-mins="20" type="button">20 dk</button>
-        <button class="pillBtn" data-mins="30" type="button">30 dk</button>
-      </div>
+        <div class="grid" id="teacherGrid"></div>
+      </section>
 
-      <div class="label">Seviye</div>
-      <div class="levelRow" id="levelRow">
-        <button class="levelBtn active" data-level="A0" type="button">A0</button>
-        <button class="levelBtn" data-level="A1" type="button">A1</button>
-        <button class="levelBtn" data-level="A2" type="button">A2</button>
-        <button class="levelBtn" data-level="B1" type="button">B1</button>
-      </div>
+      <section class="section" aria-label="Ders süresi">
+        <div class="sec-title">
+          <div class="t">Ders Süresi</div>
+          <div class="s" id="selMinsMini">10 dk</div>
+        </div>
 
-      <button class="startBtn" id="startBtn" type="button">DERSE GİR</button>
+        <div class="pills" id="minsPills">
+          <button class="pill selected" data-min="10" type="button">10 dk</button>
+          <button class="pill" data-min="20" type="button">20 dk</button>
+          <button class="pill" data-min="30" type="button">30 dk</button>
+        </div>
+      </section>
+
+      <section class="cta" aria-label="Derse gir">
+        <div class="sum" id="summaryText">Önce öğretmen seç.</div>
+        <button class="btn" id="btnGo" type="button">Derse Gir</button>
+      </section>
+
     </div>
-  </div>
+  </main>
 
-  <script>
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    // ✅ HOME shell’i bu sayfaya uygula
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell();
+
+    // ===== prefs keys (mevcut teacher_course.page.js ile uyumlu) =====
     const KEY_TEACHER = "italky_teacher_pref";
     const KEY_MINS = "italky_lesson_mins";
-    const KEY_LEVEL = "italky_lesson_level";
 
-    const sheetBack = document.getElementById("sheetBack");
-    const closeBtn = document.getElementById("sheetClose");
-    const startBtn = document.getElementById("startBtn");
+    // teacher registry (senin liste)
+    const TEACHERS = [
+      { id:"dora",   flag:"🇬🇧", title:"İngilizce Öğretmeni", name:"Dora" },
+      { id:"sencer", flag:"🇮🇹", title:"İtalyanca Öğretmeni", name:"Sencer" },
+      { id:"jale",   flag:"🇫🇷", title:"Fransızca Öğretmeni", name:"Jale" },
+      { id:"ozan",   flag:"🇪🇸", title:"İspanyolca Öğretmeni", name:"Ozan" },
+      { id:"ayda",   flag:"🇩🇪", title:"Almanca Öğretmeni", name:"Ayda" },
+      { id:"sungur", flag:"🇷🇺", title:"Rusça Öğretmeni", name:"Sungur" },
+      { id:"huma",   flag:"🇯🇵", title:"Japonca Öğretmeni", name:"Hüma" }
+    ];
 
-    let pickedTeacher = "dora";
-    let pickedMins = "10";
-    let pickedLevel = "A0";
+    const $ = (id)=>document.getElementById(id);
 
-    function openSheet(meta){
-      pickedTeacher = meta.id;
-      document.getElementById("tFlag").textContent = meta.flag || "🌐";
-      document.getElementById("tName").textContent = meta.name || "—";
-      document.getElementById("tDesc").textContent = meta.desc || "—";
-      sheetBack.classList.add("show");
+    function toast(msg){
+      const t = $("toast");
+      t.textContent = String(msg||"");
+      t.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 2200);
     }
-    function closeSheet(){ sheetBack.classList.remove("show"); }
 
-    closeBtn.addEventListener("click", closeSheet);
-    sheetBack.addEventListener("click", (e)=>{ if(e.target === sheetBack) closeSheet(); });
+    let selTeacher = (localStorage.getItem(KEY_TEACHER) || "").trim();
+    let selMins = (localStorage.getItem(KEY_MINS) || "10").trim();
+    if(!["10","20","30"].includes(selMins)) selMins = "10";
 
-    document.querySelectorAll("#minsRow .pillBtn").forEach(b=>{
-      b.addEventListener("click", ()=>{
-        document.querySelectorAll("#minsRow .pillBtn").forEach(x=>x.classList.remove("active"));
-        b.classList.add("active");
-        pickedMins = b.getAttribute("data-mins") || "10";
+    function setMinsUI(){
+      $("selMinsMini").textContent = `${selMins} dk`;
+      document.querySelectorAll("#minsPills .pill").forEach(p=>{
+        p.classList.toggle("selected", p.getAttribute("data-min") === selMins);
       });
-    });
-    document.querySelectorAll("#levelRow .levelBtn").forEach(b=>{
-      b.addEventListener("click", ()=>{
-        document.querySelectorAll("#levelRow .levelBtn").forEach(x=>x.classList.remove("active"));
-        b.classList.add("active");
-        pickedLevel = b.getAttribute("data-level") || "A0";
-      });
-    });
+      localStorage.setItem(KEY_MINS, selMins);
+      setSummary();
+    }
 
-    document.querySelectorAll(".card[data-teacher]").forEach(card=>{
-      card.addEventListener("click", ()=>{
-        openSheet({
-          id: card.getAttribute("data-teacher"),
-          flag: card.getAttribute("data-flag"),
-          name: card.getAttribute("data-name"),
-          desc: card.getAttribute("data-desc")
+    function setTeacherUI(){
+      const t = TEACHERS.find(x=>x.id===selTeacher);
+      $("selTeacherMini").textContent = t ? `${t.flag} ${t.name}` : "Seçilmedi";
+      document.querySelectorAll("#teacherGrid .card").forEach(c=>{
+        c.classList.toggle("selected", c.getAttribute("data-id") === selTeacher);
+      });
+      if(selTeacher) localStorage.setItem(KEY_TEACHER, selTeacher);
+      setSummary();
+    }
+
+    function setSummary(){
+      const t = TEACHERS.find(x=>x.id===selTeacher);
+      if(!t){
+        $("summaryText").textContent = "Önce öğretmen seç.";
+        return;
+      }
+      $("summaryText").textContent = `${t.flag} ${t.title} • ${t.name}  |  Süre: ${selMins} dk`;
+    }
+
+    function renderTeachers(){
+      const grid = $("teacherGrid");
+      grid.innerHTML = TEACHERS.map(t=>`
+        <div class="card ${t.id===selTeacher ? "selected":""}" data-id="${t.id}">
+          <div class="badge">${t.flag}</div>
+          <div class="flag">${t.flag}</div>
+          <div class="name">${t.name}</div>
+          <div class="sub">${t.title}</div>
+        </div>
+      `).join("");
+
+      grid.querySelectorAll(".card").forEach(card=>{
+        card.addEventListener("click", ()=>{
+          selTeacher = card.getAttribute("data-id") || "";
+          setTeacherUI();
         });
       });
+    }
+
+    // mins click
+    document.querySelectorAll("#minsPills .pill").forEach(p=>{
+      p.addEventListener("click", ()=>{
+        selMins = p.getAttribute("data-min") || "10";
+        setMinsUI();
+      });
     });
 
-    startBtn.addEventListener("click", ()=>{
-      try{
-        localStorage.setItem(KEY_TEACHER, String(pickedTeacher));
-        localStorage.setItem(KEY_MINS, String(pickedMins));
-        localStorage.setItem(KEY_LEVEL, String(pickedLevel));
-      }catch(e){}
+    // go
+    $("btnGo").addEventListener("click", ()=>{
+      if(!selTeacher){
+        toast("Önce öğretmen seç.");
+        return;
+      }
+      // derse gir
       location.href = "/pages/teacher_course.html";
     });
+
+    // init
+    renderTeachers();
+    setMinsUI();
+    setTeacherUI();
   </script>
 </body>
 </html>
