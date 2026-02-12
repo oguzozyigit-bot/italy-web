@@ -1,40 +1,10 @@
 // FILE: /js/ui_shell.js
 // ✅ HOME header+footer'ını HER SAYFAYA birebir basar (milim şaşmaz)
-// ✅ Anti-Flash Boot: beyaz sayfa flash'ını tek seferde azaltır
 // Kural: Sayfada <main id="pageContent"> ... </main> olmalı.
 // mountShell({ scroll:"none" }) => içerik scroll yok, barlar sabit.
 
 import { STORAGE_KEY } from "/js/config.js";
 import { applyI18n } from "/js/i18n.js";
-
-/* ✅ ANTI-FLASH BOOT (tek seferde tüm sayfalarda) */
-(function antiFlashBoot(){
-  try{
-    // 1) İlk paint için html/body arka planını hemen koyulaştır
-    document.documentElement.style.backgroundColor = "#02000f";
-    document.documentElement.style.colorScheme = "dark";
-    if(document.body) document.body.style.backgroundColor = "#02000f";
-
-    // 2) Head'e hızlı global style bas
-    if(!document.getElementById("italkyAntiFlash")){
-      const st = document.createElement("style");
-      st.id = "italkyAntiFlash";
-      st.textContent = `html,body{ background:#02000f !important; }`;
-      document.head.appendChild(st);
-    }
-
-    // 3) Theme color (Android/WebView)
-    const existing = document.querySelector('meta[name="theme-color"]');
-    if(existing){
-      existing.setAttribute("content", "#02000f");
-    }else{
-      const meta = document.createElement("meta");
-      meta.setAttribute("name","theme-color");
-      meta.setAttribute("content","#02000f");
-      document.head.appendChild(meta);
-    }
-  }catch{}
-})();
 
 /* ✅ HOME HEADER (BİREBİR) */
 const HOME_HEADER_HTML = `
@@ -73,13 +43,8 @@ const SHELL_CSS = `
   --neon-glow: 0 0 20px rgba(99,102,241,0.45);
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* ✅ HOME footer yüksekliği */
   --footerH: 92px;
-
-  /* ✅ HOME üst bar zemini = alt bar zemini */
   --bar-bg: rgba(0,0,0,0.18);
-
-  /* ✅ Home'da kullandığın eşit üst/alt boşluk fikri */
   --edgePad: 14px;
 }
 
@@ -126,7 +91,7 @@ html,body{
   backdrop-filter: blur(30px);
 }
 
-/* ✅ HOME HEADER BİREBİR */
+/* HEADER */
 .premium-header{
   padding: calc(10px + env(safe-area-inset-top)) 18px 10px;
   display:flex;
@@ -208,7 +173,7 @@ html,body{
   display:block;
 }
 
-/* ✅ main content (shell içi) */
+/* main content */
 .main-content{
   flex:1;
   overflow-y:auto;
@@ -217,7 +182,7 @@ html,body{
 }
 .main-content::-webkit-scrollbar{ display:none; }
 
-/* ✅ HOME FOOTER BİREBİR (fixed + aynı zemin) */
+/* FOOTER */
 .premium-footer{
   position: fixed;
   left: 50%;
@@ -274,7 +239,7 @@ html,body{
   margin: 0;
 }
 
-/* seçenekler */
+/* options */
 .app-shell.no-header .premium-header{ display:none; }
 .app-shell.no-footer .premium-footer{ display:none; }
 .app-shell.no-scroll .main-content{ overflow:hidden; }
@@ -322,7 +287,6 @@ export function mountShell(options = {}){
     return;
   }
 
-  // bg
   if(background){
     if(!document.querySelector(".nebula-bg")){
       const n = document.createElement("div");
@@ -336,7 +300,6 @@ export function mountShell(options = {}){
     }
   }
 
-  // shell
   const shell = document.createElement("div");
   shell.className = "app-shell";
   shell.style.maxWidth = maxWidth;
@@ -349,11 +312,9 @@ export function mountShell(options = {}){
   if(!footer) shell.classList.add("no-footer");
   if(scroll === "none") shell.classList.add("no-scroll");
 
-  // move content
   const main = shell.querySelector(".main-content");
   main.appendChild(content);
 
-  // rebuild body keep bg
   const keep = Array.from(document.body.children).filter(el =>
     el.classList.contains("nebula-bg") || el.classList.contains("stars-field")
   );
@@ -361,12 +322,9 @@ export function mountShell(options = {}){
   keep.forEach(el=>document.body.appendChild(el));
   document.body.appendChild(shell);
 
-  // bind clicks (HOME ile aynı davranış)
   document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
   document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
 
-  // i18n + user
   try{ applyI18n?.(document); }catch{}
   fillUser();
 }
-```0
