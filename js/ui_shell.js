@@ -1,36 +1,27 @@
 // FILE: /js/ui_shell.js
-// Home.html üst/alt barı (isteğe bağlı) sayfalara standart olarak basar.
+// ✅ HOME header+footer'ını HER SAYFAYA birebir basar (milim şaşmaz)
 // Kural: Sayfada <main id="pageContent"> ... </main> olmalı.
-//
-// mountShell(options) ile kontrol:
-//  - enabled: false -> hiç dokunma
-//  - header: false  -> header basma
-//  - footer: false  -> footer basma
-//  - background: false -> nebula/stars basma
-//  - scroll: "main" | "none"  -> main-content scroll kalsın mı? (default: "main")
-//  - maxWidth: "480px" gibi -> app-shell max-width override (default: 480px)
+// mountShell({ scroll:"none" }) => içerik scroll yok, barlar sabit.
 
 import { STORAGE_KEY } from "/js/config.js";
 import { applyI18n } from "/js/i18n.js";
 
+/* ✅ HOME HEADER (BİREBİR) */
 const HOME_HEADER_HTML = `
 <header class="premium-header">
-  <div class="brand-group">
-    <h1>italky<span>AI</span></h1>
-    <div class="brand-slogan">Be Free</div>
+  <div class="brand-group" id="brandHome" title="Ana sayfa">
+    <h1><span>italky</span><span class="ai">AI</span></h1>
+    <div class="brand-slogan">BE FREE</div>
   </div>
-  <div class="user-pill" id="shellUserPill" role="button" aria-label="Profil">
-    <div style="display:flex; flex-direction:column; align-items:flex-end">
-      <span class="name" id="userName">Kullanıcı</span>
-      <span class="status" id="userStatus">UNLIMITED</span>
-    </div>
-    <div class="avatar-circle">
-      <img src="" id="userPic" alt="">
-    </div>
+
+  <div class="user-plain" id="profileBtn" title="Profil">
+    <div class="uName" id="userName">Kullanıcı</div>
+    <div class="avatar"><img src="" id="userPic" alt=""></div>
   </div>
 </header>
 `;
 
+/* ✅ HOME FOOTER (BİREBİR) */
 const HOME_FOOTER_HTML = `
 <footer class="premium-footer">
   <nav class="footer-nav">
@@ -39,40 +30,44 @@ const HOME_FOOTER_HTML = `
     <a href="/pages/privacy.html">Gizlilik</a>
     <a href="/pages/contact.html">İletişim</a>
   </nav>
-  <div class="prestige-signature">italkyAI By Ozyigit's 2026</div>
+  <div class="prestige-signature">italkyAI By Ozyigit’s 2026</div>
 </footer>
 `;
 
-// HOME'dan taşınan CSS (sadece shell + header/footer + arkaplan)
-// ✅ İSTEK: Alt bar ve üst bar zemin rengi birebir aynı.
+/* ✅ HOME CSS (BİREBİR) + shell taşıma kuralları */
 const SHELL_CSS = `
 :root{
   --bg-void:#02000f;
   --text-main:#fff;
-  --text-muted:rgba(255,255,255,0.65);
-  --neon-glow:0 0 20px rgba(99,102,241,0.5);
-  --ease-premium:cubic-bezier(0.22, 1, 0.36, 1);
-  --footerH:120px;
+  --text-muted: rgba(255,255,255,0.65);
+  --neon-glow: 0 0 20px rgba(99,102,241,0.45);
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* ✅ HOME üst bar zemini — ALT BAR DA AYNI */
-  --bar-bg: rgba(10,10,30,0.55);
-  --bar-blur: 30px;
+  /* ✅ HOME footer yüksekliği */
+  --footerH: 92px;
+
+  /* ✅ HOME üst bar zemini = alt bar zemini */
+  --bar-bg: rgba(0,0,0,0.18);
+
+  /* ✅ Home'da kullandığın eşit üst/alt boşluk fikri */
+  --edgePad: 14px;
 }
 
-/* sayfa genel kilit */
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
 html,body{
   margin:0; padding:0; width:100%; height:100%;
   overflow:hidden; position:fixed;
-  font-family:'Outfit',sans-serif;
+  font-family:'Outfit', sans-serif;
   background-color: var(--bg-void);
   color: var(--text-main);
 }
 
+/* background */
 .nebula-bg{
   position:absolute; inset:-10%; width:120%; height:120%;
   background:
-    radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.4) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.38) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.28) 0%, transparent 40%),
     radial-gradient(circle at 50% 50%, rgba(30, 0, 60, 1) 0%, #02000f 100%);
   filter: blur(60px);
   z-index:0;
@@ -86,119 +81,173 @@ html,body{
 .stars-field{
   position:absolute; inset:0;
   background:url("https://www.transparenttextures.com/patterns/stardust.png");
-  opacity:0.4; z-index:1;
+  opacity:0.38;
+  z-index:1;
   pointer-events:none;
 }
 
-/* ana shell */
+/* shell container */
 .app-shell{
   position:relative; z-index:10;
   width:100%; max-width:480px; height:100%;
   margin:0 auto;
   display:flex; flex-direction:column;
-  background: rgba(10,10,30,0.4);
+  background: rgba(10,10,30,0.40);
   backdrop-filter: blur(30px);
 }
 
-/* HEADER */
+/* ✅ HOME HEADER BİREBİR */
 .premium-header{
-  padding: calc(20px + env(safe-area-inset-top)) 24px 20px;
-  display:flex; align-items:center; justify-content:space-between;
-  flex: 0 0 auto;
+  padding: calc(10px + env(safe-area-inset-top)) 18px 10px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 10px;
 
-  /* ✅ zemin aynı */
   background: var(--bar-bg);
-  backdrop-filter: blur(var(--bar-blur));
-  -webkit-backdrop-filter: blur(var(--bar-blur));
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  border-bottom-left-radius: 22px;
+  border-bottom-right-radius: 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
 }
+
+.brand-group{ cursor:pointer; user-select:none; }
 .brand-group h1{
-  font-family:'Space Grotesk',sans-serif;
-  font-size:32px; margin:0; font-weight:700; letter-spacing:-1px;
+  font-family:'Space Grotesk', sans-serif;
+  font-size: 30px;
+  margin:0;
+  font-weight:700;
+  letter-spacing:-1px;
+  line-height: 1;
+  display:flex;
+  align-items:flex-end;
+  gap:2px;
 }
-.brand-group h1 span{
+.brand-group h1 .ai{
   background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  filter: drop-shadow(0 0 10px rgba(99,102,241,0.4));
+  filter: drop-shadow(0 0 10px rgba(99,102,241,0.35));
 }
 .brand-slogan{
-  font-size:11px; font-weight:900;
-  letter-spacing:5px;
-  color: var(--text-muted);
-  text-transform:uppercase;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 3.6px;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  margin-top: 5px;
+  padding-left: 1px;
+  line-height: 1;
+  max-width: 118px;
+  overflow: hidden;
+  white-space: nowrap;
 }
-.user-pill{
-  display:flex; align-items:center; gap:12px;
-  padding:6px 6px 6px 14px;
-  border-radius:40px;
-  background: rgba(255,255,255,0.07);
-  border:1px solid rgba(255,255,255,0.15);
-  box-shadow: var(--neon-glow);
+
+.user-plain{
+  display:flex;
+  align-items:center;
+  gap:10px;
   cursor:pointer;
   user-select:none;
+  margin-top: 2px;
 }
-.user-pill:active{ transform: scale(.98); }
-.user-pill .name{ font-weight:800; font-size:13px; }
-.user-pill .status{ font-size:10px; color:#a5b4fc; font-weight:900; }
-.avatar-circle{
-  width:36px; height:36px;
-  border-radius:50%;
-  border:2px solid #6366f1;
-  background:#222;
+.uName{
+  font-weight: 1000;
+  font-size: 14px;
+  color: rgba(255,255,255,0.92);
+  white-space: nowrap;
   overflow:hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+  text-align:right;
 }
-.avatar-circle img{ width:100%; height:100%; object-fit:cover; }
+.avatar{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  overflow:hidden;
+  border: 2px solid rgba(99,102,241,0.65);
+  background: rgba(255,255,255,0.10);
+  flex: 0 0 auto;
+}
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
 
-/* MAIN CONTENT: sadece burası scroll */
+/* ✅ main content (shell içi) */
 .main-content{
   flex:1;
   overflow-y:auto;
-  padding: 10px 20px calc(var(--footerH) + 20px);
+  padding: var(--edgePad) 20px calc(var(--footerH) + var(--edgePad) + env(safe-area-inset-bottom));
   scrollbar-width:none;
 }
 .main-content::-webkit-scrollbar{ display:none; }
 
-/* FOOTER — HEADER ile birebir aynı zemin */
+/* ✅ HOME FOOTER BİREBİR (fixed + aynı zemin) */
 .premium-footer{
-  position:absolute; bottom:0; width:100%; height: var(--footerH);
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: min(480px, 100%);
+  height: calc(var(--footerH) + env(safe-area-inset-bottom));
+  z-index: 9999;
 
-  /* ✅ zemin aynı */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 8px;
+
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+
   background: var(--bar-bg);
-  backdrop-filter: blur(var(--bar-blur));
-  -webkit-backdrop-filter: blur(var(--bar-blur));
   border-top: 1px solid rgba(255,255,255,0.08);
-
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:20;
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
 }
-.footer-nav{ display:flex; gap:24px; margin-bottom:16px; }
+
+.footer-nav{
+  display:flex;
+  gap: 22px;
+  justify-content:center;
+  flex-wrap:wrap;
+  line-height:1;
+  margin: 0;
+  padding: 0;
+}
 .footer-nav a{
-  font-size:12px; font-weight:800;
-  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.55);
   text-decoration:none;
-  text-transform:uppercase;
-  letter-spacing:1px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
-.footer-nav a:active{ color:#6366f1; }
+.footer-nav a:active{ opacity:.85; }
+
 .prestige-signature{
-  font-size:12px; font-weight:900; letter-spacing:1.5px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
   background: linear-gradient(to right, #ffffff 0%, #6366f1 50%, #ffffff 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  filter: drop-shadow(0 0 8px rgba(99,102,241,0.5));
-  opacity:0.9;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(99,102,241,0.45));
+  opacity: 0.92;
+  margin: 0;
 }
 
-/* header yokken yukarı boşluk olmasın */
+/* seçenekler */
 .app-shell.no-header .premium-header{ display:none; }
-
-/* footer yokken padding ve footerH etkisini kaldır */
-.app-shell.no-footer{ --footerH: 0px; }
 .app-shell.no-footer .premium-footer{ display:none; }
-
-/* scroll kapalı mod */
-.app-shell.no-scroll .main-content{ overflow:hidden; padding-bottom: 20px; }
+.app-shell.no-scroll .main-content{ overflow:hidden; }
 `;
 
 function ensureStyleOnce(){
@@ -229,7 +278,7 @@ export function mountShell(options = {}){
     header = true,
     footer = true,
     background = true,
-    scroll = "main",     // "main" | "none"
+    scroll = "main",
     maxWidth = "480px"
   } = options;
 
@@ -243,7 +292,7 @@ export function mountShell(options = {}){
     return;
   }
 
-  // arkaplanları bas
+  // bg
   if(background){
     if(!document.querySelector(".nebula-bg")){
       const n = document.createElement("div");
@@ -257,7 +306,7 @@ export function mountShell(options = {}){
     }
   }
 
-  // app-shell oluştur
+  // shell
   const shell = document.createElement("div");
   shell.className = "app-shell";
   shell.style.maxWidth = maxWidth;
@@ -270,11 +319,11 @@ export function mountShell(options = {}){
   if(!footer) shell.classList.add("no-footer");
   if(scroll === "none") shell.classList.add("no-scroll");
 
-  // content'i main-content içine taşı
+  // move content
   const main = shell.querySelector(".main-content");
   main.appendChild(content);
 
-  // body'yi temizle, shell'i bas
+  // rebuild body keep bg
   const keep = Array.from(document.body.children).filter(el =>
     el.classList.contains("nebula-bg") || el.classList.contains("stars-field")
   );
@@ -282,11 +331,11 @@ export function mountShell(options = {}){
   keep.forEach(el=>document.body.appendChild(el));
   document.body.appendChild(shell);
 
-  // profile tık
-  const pill = document.getElementById("shellUserPill");
-  if(pill) pill.addEventListener("click", ()=> location.href="/pages/profile.html");
+  // bind clicks (HOME ile aynı davranış)
+  document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
+  document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
 
-  // i18n + user fill
+  // i18n + user
   try{ applyI18n?.(document); }catch{}
   fillUser();
 }
