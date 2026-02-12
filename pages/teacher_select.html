@@ -13,86 +13,99 @@
 
   <style>
     /* ✅ Bu sayfa HOME shell ile sarılacak. Buradaki CSS sadece içerik için. */
+    #pageContent{ height:100%; }
 
-    /* Shell main-content içine taşınan alan */
-    #pageContent{
-      height: 100%;
-    }
-
-    /* ✅ Üst/alt boşluk EŞİT + scroll yok */
+    /* ✅ Home gibi: eşit üst/alt boşluk, ortalamaya ZORLAMA yok */
     .wrap{
-      height: 100%;
+      height:100%;
       display:flex;
       flex-direction:column;
-      justify-content:center;   /* dikey ortala */
-      padding: 14px 2px;        /* üst/alt eşit */
+      padding: 14px 2px; /* üst/alt eşit */
       overflow:hidden;
     }
 
-    .section{
+    /* ✅ Tek panel (home kart hissi) */
+    .panel{
+      flex:1;
       width:100%;
-      padding: 12px 14px;
-      border-radius:24px;
+      padding: 14px;
+      border-radius:28px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
       backdrop-filter: blur(10px);
       overflow:hidden;
+      display:flex;
     }
 
-    /* ✅ Büyük ikonlar için grid */
+    /* ✅ Grid: ekranı doldursun, dengeli otursun */
     .grid{
+      width:100%;
       display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap:14px;
+      align-content:stretch;
     }
 
-    /* ✅ Kartlar büyüdü, daha dengeli */
+    /* ✅ HOME kart hissi: gradient cam + border + büyük radius */
     .card{
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      padding: 16px 14px;
+      position:relative;
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      padding: 18px 14px;
       cursor:pointer;
       user-select:none;
-      position:relative;
       overflow:hidden;
-      min-height: 118px;
-      transition:.18s;
+      transition: all .25s cubic-bezier(0.22, 1, 0.36, 1);
+
+      /* ✅ kartlar ekrana göre boylansın */
+      min-height: 0;
       display:flex;
       flex-direction:column;
-      justify-content:center;
+      justify-content:flex-end; /* home’da yazılar altta */
     }
-    .card:active{ transform: scale(.98); }
+    .card:active{ transform: scale(0.94); background: rgba(255,255,255,0.10); }
 
+    /* ✅ Home benzeri küçük rozet */
     .badge{
       position:absolute;
       top:12px; right:12px;
-      padding:6px 10px;
+      width:34px; height:34px;
       border-radius:999px;
-      font-size:10px;
-      font-weight:1000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:14px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.86);
       backdrop-filter: blur(8px);
+      color: rgba(255,255,255,.92);
     }
 
+    /* ✅ büyük bayrak ikon (home’daki ikon yerine) */
     .flag{
-      font-size:26px;
-      margin-bottom:10px;
+      position:absolute;
+      left:14px;
+      top:18px;
+      font-size:40px;
       line-height:1;
+      opacity: .98;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,.10));
     }
+
     .name{
-      font-size:16px;
+      font-size:20px;
       font-weight:1000;
-      letter-spacing:-0.2px;
+      letter-spacing:-0.4px;
       line-height:1.1;
+      margin-top: 54px; /* bayrak için boşluk */
     }
+
     .sub{
       margin-top:8px;
       font-size:12px;
       font-weight:900;
-      color: rgba(255,255,255,.68);
+      color: rgba(255,255,255,.62);
       line-height:1.25;
     }
 
@@ -121,10 +134,9 @@
 </head>
 
 <body>
-  <!-- ✅ CONTENT ONLY (shell bunu saracak) -->
   <main id="pageContent">
     <div class="wrap">
-      <section class="section" aria-label="Dil seçimi">
+      <section class="panel" aria-label="Dil seçimi">
         <div class="grid" id="teacherGrid"></div>
       </section>
     </div>
@@ -134,17 +146,13 @@
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
+    mountShell({ scroll:"none" }); // ✅ tek ekran
 
-    // ✅ Scroll yok; barlar HOME ile aynı (milim oynamaz)
-    mountShell({ scroll:"none" });
+    const KEY_TEACHER    = "italky_teacher_pref";
+    const KEY_LEVEL_DONE = "italky_level_done";
+    const KEY_PLAN       = "italky_plan_pref";
+    const KEY_MINS       = "italky_lesson_mins";
 
-    // ===== prefs keys =====
-    const KEY_TEACHER   = "italky_teacher_pref";
-    const KEY_LEVEL_DONE= "italky_level_done";  // "1" ise seviye tamam
-    const KEY_PLAN      = "italky_plan_pref";   // p10/p20/p30/p120
-    const KEY_MINS      = "italky_lesson_mins"; // 10/20/30
-
-    // ✅ Öğretmen listesi (Çince: Umay)
     const TEACHERS = [
       { id:"dora",   flag:"🇬🇧", title:"İngilizce Öğretmeni",   name:"Dora" },
       { id:"ayda",   flag:"🇩🇪", title:"Almanca Öğretmeni",     name:"Ayda" },
@@ -169,14 +177,12 @@
     function goNextAfterSelect(){
       const levelDone = (localStorage.getItem(KEY_LEVEL_DONE) || "") === "1";
 
-      // ✅ Seviye tespit yapılmadıysa: ilk kez sınav
       if(!levelDone){
         toast("Seviye tespit sınavı...");
         setTimeout(()=> location.href = "/pages/level_test.html", 200);
         return;
       }
 
-      // ✅ Seviye yapıldıysa: plan+mins varsa direkt derse
       const plan = (localStorage.getItem(KEY_PLAN) || "").trim();
       const mins = (localStorage.getItem(KEY_MINS) || "").trim();
 
@@ -185,7 +191,6 @@
         return;
       }
 
-      // plan yoksa plan seçimine
       location.href = "/pages/plan_select.html";
     }
 
@@ -204,15 +209,7 @@
         card.addEventListener("click", ()=>{
           const id = (card.getAttribute("data-id") || "").trim();
           if(!id) return;
-
-          // seçimi kaydet
           localStorage.setItem(KEY_TEACHER, id);
-
-          // ✅ dil değiştiyse: seviye tespiti tekrar zorunlu (senin önceki kuralın)
-          // İstersen bunu kaldırırız; şimdilik güvenli kalsın:
-          // localStorage.removeItem("italky_level");
-          // localStorage.removeItem("italky_level_done");
-
           goNextAfterSelect();
         });
       });
