@@ -15,7 +15,9 @@
       --text-muted: rgba(255, 255, 255, 0.65);
       --neon-glow: 0 0 20px rgba(99, 102, 241, 0.5);
       --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
-      --footerH: 120px;
+
+      /* ✅ ALT BAR GÜVENLİ: safe-area + ekstra boşluk */
+      --footerH: calc(120px + env(safe-area-inset-bottom, 0px) + 16px);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -48,6 +50,11 @@
     }
 
     .premium-header { padding: calc(20px + env(safe-area-inset-top)) 24px 20px; display: flex; align-items: center; justify-content: space-between; }
+
+    /* ✅ LOGO TIKLANABİLİR */
+    .brand-group{ cursor:pointer; user-select:none; }
+    .brand-group:active{ transform: scale(.99); opacity:.9; }
+
     .brand-group h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; margin: 0; font-weight: 700; letter-spacing: -1px; }
     .brand-group h1 span { background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.4)); }
     .brand-slogan { font-size: 11px; font-weight: 900; letter-spacing: 5px; color: var(--text-muted); text-transform: uppercase; }
@@ -58,7 +65,8 @@
     .avatar-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #6366f1; background: #222; overflow: hidden; }
     .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
 
-    .main-content { flex: 1; overflow-y: auto; padding: 10px 20px 140px; scrollbar-width: none; }
+    /* ✅ içerik footer'ın altına GİRMEZ */
+    .main-content { flex: 1; overflow-y: auto; padding: 10px 20px calc(var(--footerH) + 20px); scrollbar-width: none; }
     .main-content::-webkit-scrollbar { display: none; }
     .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 
@@ -86,6 +94,9 @@
       background: linear-gradient(to top, rgba(2, 0, 15, 1) 80%, transparent);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       border-top: 1px solid rgba(255,255,255,0.08); z-index: 20;
+
+      /* ✅ safe-area padding */
+      padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px) + 10px);
     }
     .footer-nav { display: flex; gap: 24px; margin-bottom: 16px; }
     .footer-nav a {
@@ -112,7 +123,8 @@
 
   <div class="app-shell">
     <header class="premium-header">
-      <div class="brand-group">
+      <!-- ✅ ID eklendi -->
+      <div class="brand-group" id="goHome">
         <h1>italky<span>AI</span></h1>
         <div class="brand-slogan">Be Free</div>
       </div>
@@ -136,7 +148,6 @@
           <span class="card-desc">Anlık Karşılıklı Çeviri</span>
         </div>
 
-        <!-- ✅ SADECE İSİM/DESC DEĞİŞTİ: Konuşkan AI -> Dil Kursu -->
         <div class="premium-card card-voice" data-href="/pages/teacher_select.html">
           <div class="neon-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></div>
           <span class="card-title">Dil Kursu</span>
@@ -215,6 +226,11 @@
         document.getElementById("userName").textContent = u.name || "Kullanıcı";
         if(u.picture) document.getElementById("userPic").src = u.picture;
       }
+
+      // ✅ logo tıkla -> home
+      document.getElementById("goHome")?.addEventListener("click", ()=>{
+        location.href = "/pages/home.html";
+      });
 
       bindCardNav();
     }
