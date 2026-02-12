@@ -44,6 +44,7 @@ const HOME_FOOTER_HTML = `
 `;
 
 // HOME'dan taşınan CSS (sadece shell + header/footer + arkaplan)
+// ✅ İSTEK: Alt bar ve üst bar zemin rengi birebir aynı.
 const SHELL_CSS = `
 :root{
   --bg-void:#02000f;
@@ -52,6 +53,10 @@ const SHELL_CSS = `
   --neon-glow:0 0 20px rgba(99,102,241,0.5);
   --ease-premium:cubic-bezier(0.22, 1, 0.36, 1);
   --footerH:120px;
+
+  /* ✅ HOME üst bar zemini — ALT BAR DA AYNI */
+  --bar-bg: rgba(10,10,30,0.55);
+  --bar-blur: 30px;
 }
 
 /* sayfa genel kilit */
@@ -100,6 +105,12 @@ html,body{
   padding: calc(20px + env(safe-area-inset-top)) 24px 20px;
   display:flex; align-items:center; justify-content:space-between;
   flex: 0 0 auto;
+
+  /* ✅ zemin aynı */
+  background: var(--bar-bg);
+  backdrop-filter: blur(var(--bar-blur));
+  -webkit-backdrop-filter: blur(var(--bar-blur));
+  border-bottom:1px solid rgba(255,255,255,0.08);
 }
 .brand-group h1{
   font-family:'Space Grotesk',sans-serif;
@@ -139,7 +150,7 @@ html,body{
 }
 .avatar-circle img{ width:100%; height:100%; object-fit:cover; }
 
-/* MAIN CONTENT */
+/* MAIN CONTENT: sadece burası scroll */
 .main-content{
   flex:1;
   overflow-y:auto;
@@ -148,22 +159,19 @@ html,body{
 }
 .main-content::-webkit-scrollbar{ display:none; }
 
-/* FOOTER — HOME header ile aynı zemin */
+/* FOOTER — HEADER ile birebir aynı zemin */
 .premium-footer{
   position:absolute; bottom:0; width:100%; height: var(--footerH);
 
-  /* ✅ Header ile aynı cam zemin */
-  background: rgba(10,10,30,0.4);
-  backdrop-filter: blur(30px);
+  /* ✅ zemin aynı */
+  background: var(--bar-bg);
+  backdrop-filter: blur(var(--bar-blur));
+  -webkit-backdrop-filter: blur(var(--bar-blur));
+  border-top: 1px solid rgba(255,255,255,0.08);
 
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  border-top: 1px solid rgba(255,255,255,0.08);
   z-index:20;
-
-  /* çok hafif premium glow */
-  box-shadow: 0 -10px 40px rgba(99,102,241,0.08);
 }
-
 .footer-nav{ display:flex; gap:24px; margin-bottom:16px; }
 .footer-nav a{
   font-size:12px; font-weight:800;
@@ -235,7 +243,7 @@ export function mountShell(options = {}){
     return;
   }
 
-  // background
+  // arkaplanları bas
   if(background){
     if(!document.querySelector(".nebula-bg")){
       const n = document.createElement("div");
@@ -249,14 +257,13 @@ export function mountShell(options = {}){
     }
   }
 
-  // app-shell
+  // app-shell oluştur
   const shell = document.createElement("div");
   shell.className = "app-shell";
   shell.style.maxWidth = maxWidth;
 
   const headerHTML = header ? HOME_HEADER_HTML : "";
   const footerHTML = footer ? HOME_FOOTER_HTML : "";
-
   shell.innerHTML = headerHTML + `<main class="main-content"></main>` + footerHTML;
 
   if(!header) shell.classList.add("no-header");
@@ -267,7 +274,7 @@ export function mountShell(options = {}){
   const main = shell.querySelector(".main-content");
   main.appendChild(content);
 
-  // body'yi temizle (arka plan divleri kalabilir)
+  // body'yi temizle, shell'i bas
   const keep = Array.from(document.body.children).filter(el =>
     el.classList.contains("nebula-bg") || el.classList.contains("stars-field")
   );
@@ -275,7 +282,7 @@ export function mountShell(options = {}){
   keep.forEach(el=>document.body.appendChild(el));
   document.body.appendChild(shell);
 
-  // profile click (header yoksa zaten olmayacak)
+  // profile tık
   const pill = document.getElementById("shellUserPill");
   if(pill) pill.addEventListener("click", ()=> location.href="/pages/profile.html");
 
