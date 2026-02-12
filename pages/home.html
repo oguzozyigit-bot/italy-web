@@ -16,8 +16,11 @@
       --neon-glow: 0 0 20px rgba(99,102,241,0.45);
       --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
 
-      /* ✅ Alt bar DARALDI (içerik alanı büyür) */
+      /* ✅ Footer toplam alanı (dokunma) */
       --footerH: 80px;
+
+      /* ✅ SADECE SİYAH ALAN YÜKSEKLİĞİ (BUNU AZALT/ARTIR) */
+      --footerBlackH: 64px;
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -60,7 +63,6 @@
       backdrop-filter: blur(30px);
     }
 
-    /* ✅ ÜST BAR: daha DAR + kavis */
     .premium-header{
       padding: calc(10px + env(safe-area-inset-top)) 18px 10px;
       display:flex;
@@ -73,7 +75,6 @@
       border-bottom-right-radius: 22px;
     }
 
-    /* ✅ Logo tıklanınca home */
     .brand-group{ cursor:pointer; user-select:none; }
     .brand-group h1{
       font-family:'Space Grotesk', sans-serif;
@@ -93,24 +94,22 @@
       filter: drop-shadow(0 0 10px rgba(99,102,241,0.35));
     }
 
-    /* ✅ BE FREE: daha küçük + logoya yakın */
     .brand-slogan{
       font-size: 9px;
       font-weight: 900;
       letter-spacing: 3.6px;
       color: rgba(255,255,255,0.55);
       text-transform: uppercase;
-      margin-top: 5px; /* yaklaştır */
+      margin-top: 5px;
       padding-left: 1px;
       line-height: 1;
       width: fit-content;
-      max-width: 118px; /* i'den y kuyruğuna kadar gibi kısa */
+      max-width: 118px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: clip;
     }
 
-    /* ✅ SAĞ: ÇERÇEVESİZ + ORTALI isim ve avatar */
     .user-plain{
       display:flex;
       align-items:center;
@@ -148,7 +147,7 @@
     .main-content{
       flex:1;
       overflow-y:auto;
-      padding: 10px 20px calc(var(--footerH) + 28px); /* ✅ footer daraldı, padding de dar */
+      padding: 10px 20px calc(var(--footerH) + 28px);
       scrollbar-width:none;
     }
     .main-content::-webkit-scrollbar{ display:none; }
@@ -219,8 +218,40 @@
       text-align:center;
     }
 
-    /* ✅ ALT BAR: DAR + çizgi yok + kavis */
+    /* ✅ ALT BAR: içerik yeri sabit, sadece siyah bant yüksekliği ayarlanır */
     .premium-footer{
+      position:absolute;
+      left:0; right:0;
+      bottom:0;
+      height: calc(var(--footerH) + env(safe-area-inset-bottom));
+      z-index:20;
+
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-end;         /* ✅ içerik aşağıda sabit */
+      padding-bottom: 10px;             /* ✅ yazıların yeri sabit */
+      gap: 8px;
+
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+
+      background: transparent;          /* ✅ siyahı ::before yapıyor */
+      border-top: none;                 /* ✅ çizgi çıkmasın */
+    }
+    .premium-footer::before{
+      content:"";
+      position:absolute;
+      left:0; right:0;
+      bottom:0;
+      height: calc(var(--footerBlackH) + env(safe-area-inset-bottom));
+      background: rgba(2,0,15,0.92);    /* ✅ siyah bant */
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      z-index:0;
+    }
+    .premium-footer > *{ position:relative; z-index:1; }
+
     .footer-nav{
       display:flex;
       gap: 22px;
@@ -240,7 +271,6 @@
     }
     .footer-nav a:active{ opacity:.85; }
 
-    /* ✅ İMZA: yeri sabit; sadece footer daha kısa */
     .prestige-signature{
       font-size: 12px;
       font-weight: 900;
@@ -266,7 +296,6 @@
         <div class="brand-slogan">BE FREE</div>
       </div>
 
-      <!-- ✅ ÇERÇEVESİZ, alt yazısız, ortalı -->
       <div class="user-plain" id="profileBtn" title="Profil">
         <div class="uName" id="userName">Kullanıcı</div>
         <div class="avatar"><img src="" id="userPic" alt=""></div>
@@ -295,7 +324,7 @@
         </div>
 
         <div class="premium-card card-chat" data-href="/pages/chat.html">
-          <div class="neon-icon-wrap"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.5 8.38 8.38 0 0 1 3.8.9L21 3z"/></svg></div>
+          <div class="neon-icon-wrap"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.5 a8.38 8.38 0 0 1 3.8.9L21 3z"/></svg></div>
           <span class="card-title">Sohbet AI</span>
           <span class="card-desc">Akıllı Asistan Sohbeti</span>
         </div>
@@ -354,10 +383,7 @@
     function boot(){
       applyI18n(document);
 
-      // logo -> home
       document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
-
-      // profile
       document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
 
       const raw = localStorage.getItem(STORAGE_KEY);
