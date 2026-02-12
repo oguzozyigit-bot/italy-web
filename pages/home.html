@@ -221,28 +221,6 @@
 
     /* ✅ ALT BAR: DAR + çizgi yok + kavis */
     .premium-footer{
-  position:absolute;
-  bottom:0;
-  width:100%;
-  height: calc(var(--footerH) + env(safe-area-inset-bottom));
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-end;   /* ⬅ önemli değişiklik */
-  padding-bottom: 18px;       /* ⬅ yazılar sabit kalır */
-  z-index:20;
-}
-
-.premium-footer::before{
-  content:"";
-  position:absolute;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:80px;                /* ⬅ siyah alan yüksekliği burada */
-  background: rgba(2,0,15,1);
-  border-top:1px solid rgba(255,255,255,0.08);
-}
     .footer-nav{
       display:flex;
       gap: 22px;
