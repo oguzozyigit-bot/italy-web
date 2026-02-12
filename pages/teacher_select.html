@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>italkyAI • Dil Seç</title>
 <link rel="icon" href="data:," />
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -14,74 +13,68 @@
 <style>
   #pageContent{ height:100%; }
 
-  /* ✅ Home gibi dengeli boşluk */
+  /* ✅ EŞİT BOŞLUK (üst-alt / sağ-sol) ve min boşluk */
   .wrap{
     height:100%;
-    padding: 16px 18px; /* üst-alt / sağ-sol dengeli */
+    padding: 12px 12px; /* eşit */
     overflow:hidden;
     display:flex;
   }
 
-  /* ✅ Grid tüm alanı doldurur, kartlar aynı boy */
+  /* ✅ Grid alanı TAM dolacak */
   .grid{
     flex:1;
     width:100%;
     display:grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    grid-auto-rows: var(--cardH);
+    gap: 12px;                 /* az boşluk */
+    grid-auto-rows: var(--cardH); /* JS set eder */
   }
 
-  /* ✅ Home kart hissi */
+  /* ✅ Kartlar kareye yakın */
   .card{
     height: var(--cardH);
-    border-radius: 30px;
+    border-radius: 26px;
     border: 1px solid rgba(255,255,255,0.10);
     background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-    padding: 18px 16px;
+    padding: 12px;
     cursor:pointer;
-    transition: all .25s cubic-bezier(0.22, 1, 0.36, 1);
     user-select:none;
-    overflow:hidden;
-
+    transition:.2s;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     text-align:center;
-    gap: 10px;
+    gap: 8px;
   }
-  .card:active{ transform: scale(.94); background: rgba(255,255,255,0.10); }
+  .card:active{ transform: scale(.95); }
 
-  /* ✅ Home’daki ikon kutusu gibi */
+  /* ikon kutusu (home gibi) */
   .iconWrap{
-    width: 78px;
-    height: 78px;
-    border-radius: 26px;
+    width: var(--iconBox);
+    height: var(--iconBox);
+    border-radius: 22px;
     display:flex;
     align-items:center;
     justify-content:center;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: 0 10px 26px rgba(0,0,0,0.25) inset;
   }
-
-  /* ✅ Bayrak küçük */
   .flag{
     font-size: var(--flagSize);
     line-height:1;
-    filter: drop-shadow(0 0 10px rgba(255,255,255,0.10));
   }
 
-  /* ✅ önce rol (küçük) */
+  /* önce rol küçük */
   .role{
     font-size: var(--roleSize);
     font-weight: 900;
-    color: rgba(255,255,255,0.68);
-    line-height:1.15;
+    color: rgba(255,255,255,0.65);
+    line-height:1.1;
   }
 
-  /* ✅ sonra isim (büyük ve belirgin) */
+  /* sonra isim büyük */
   .name{
     font-size: var(--nameSize);
     font-weight: 1000;
@@ -89,26 +82,6 @@
     line-height:1.05;
     color:#fff;
   }
-
-  /* toast (opsiyonel) */
-  .toast{
-    position: fixed;
-    left:50%;
-    top:18px;
-    transform:translateX(-50%) translateY(-120px);
-    background:rgba(10,10,18,.92);
-    border:1px solid rgba(165,180,252,.35);
-    padding:10px 14px;
-    border-radius:999px;
-    color:#fff;
-    z-index:99999;
-    font-weight:900;
-    font-size:12px;
-    transition:.28s;
-    backdrop-filter: blur(12px);
-    pointer-events:none;
-  }
-  .toast.show{ transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 
@@ -118,8 +91,6 @@
     <div class="grid" id="teacherGrid"></div>
   </div>
 </main>
-
-<div class="toast" id="toast"></div>
 
 <script type="module">
   import { mountShell } from "/js/ui_shell.js";
@@ -141,7 +112,7 @@
     { id:"umay",   flag:"🇨🇳", role:"Çince Öğretmeni",       name:"Umay" },
   ];
 
-  const $ = (id)=>document.getElementById(id);
+  const $ = id => document.getElementById(id);
 
   function goNext(){
     const levelDone = (localStorage.getItem(KEY_LEVEL_DONE)||"")==="1";
@@ -171,24 +142,37 @@
     });
   }
 
-  /* ✅ Kartlar sayfaya dağılsın (aşağı kayma yok) */
+  /* ✅ TAM SIĞDIRMA: header+footer arası yüksekliği 4 satıra böl */
   function fit(){
-    const headerH = document.querySelector(".premium-header")?.offsetHeight || 0;
-    const footerH = document.querySelector(".premium-footer")?.offsetHeight || 0;
+    const header = document.querySelector(".premium-header");
+    const footer = document.querySelector(".premium-footer");
+    const headerH = header ? header.offsetHeight : 0;
+    const footerH = footer ? footer.offsetHeight : 0;
 
-    // wrap padding (16 + 16) ve küçük güvenlik payı
-    const usable = window.innerHeight - headerH - footerH - 40;
+    // wrap padding: 12 + 12 (üst-alt) + küçük emniyet
+    const usable = window.innerHeight - headerH - footerH - 28;
 
-    const rows = 4;   // 8 kart => 4 satır
-    const gap = 18;
+    const rows = 4;     // 8 kart => 4 satır
+    const gap  = 12;    // CSS gap
 
-    let cardH = (usable - (gap*(rows-1))) / rows;
-    cardH = Math.max(150, Math.min(210, cardH)); // dengeli sınır
+    // kart yüksekliği (tam sığar)
+    let cardH = (usable - (gap * (rows - 1))) / rows;
+
+    // kareye yakın görünüm için min/max (çok taşarsa değil)
+    cardH = Math.max(135, Math.min(185, cardH));
+
+    // ikon kutusu kartın içinde orantılı
+    const iconBox = Math.max(52, Math.min(78, cardH * 0.44));
+    const flagSize = Math.max(22, Math.min(34, iconBox * 0.42));
+
+    const roleSize = Math.max(11, Math.min(13, cardH * 0.10));
+    const nameSize = Math.max(16, Math.min(20, cardH * 0.14));
 
     document.documentElement.style.setProperty("--cardH", cardH + "px");
-    document.documentElement.style.setProperty("--flagSize", Math.max(26, Math.min(34, cardH*0.18)) + "px");
-    document.documentElement.style.setProperty("--roleSize", Math.max(12, Math.min(14, cardH*0.09)) + "px");
-    document.documentElement.style.setProperty("--nameSize", Math.max(18, Math.min(22, cardH*0.13)) + "px");
+    document.documentElement.style.setProperty("--iconBox", iconBox + "px");
+    document.documentElement.style.setProperty("--flagSize", flagSize + "px");
+    document.documentElement.style.setProperty("--roleSize", roleSize + "px");
+    document.documentElement.style.setProperty("--nameSize", nameSize + "px");
   }
 
   render();
