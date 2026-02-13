@@ -344,63 +344,51 @@
   </div>
 
   <script type="module">
-    import { STORAGE_KEY } from "/js/config.js";
-    import { applyI18n } from "/js/i18n.js";
-    import { ensureAuthAndCacheUser } from "/js/auth.js";
+import { supabase } from "/js/supabase_client.js";
+import { initAuthState } from "/js/auth_state.js";
+import { applyI18n } from "/js/i18n.js";
 
-    function bindCardNav(){
-      document.querySelectorAll(".premium-card[data-href]").forEach(card=>{
-        card.addEventListener("click", ()=>{
-          const href = card.getAttribute("data-href");
-          if(href) location.href = href;
-        });
-      });
+function updateHeader(user) {
+  const nameEl = document.getElementById("userName");
+  const imgEl = document.getElementById("userPic");
+
+  if (!user) {
+    nameEl.textContent = "…";
+    return;
+  }
+
+  const name = user.user_metadata?.full_name || user.email;
+  nameEl.textContent = name;
+
+  if (user.user_metadata?.avatar_url) {
+    imgEl.src = user.user_metadata.avatar_url;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  applyI18n(document);
+
+  initAuthState(async (user) => {
+
+    if (!user) {
+      location.href = "/pages/login.html";
+      return;
     }
 
-    function safeName(s){
-      try{
-        if(!s) return s;
-        if (/[ÃÂ]/.test(s)) return decodeURIComponent(escape(s));
-        return s;
-      }catch{
-        return s;
-      }
-    }
+    updateHeader(user);
 
-    function paintHeader(u){
-      const elName = document.getElementById("userName");
-      const elPic  = document.getElementById("userPic");
-      if(elName) elName.textContent = safeName(u?.name || "Kullanıcı");
-      if(elPic && u?.picture) elPic.src = u.picture;
-    }
+    // Wallet çek
+    const { data } = await supabase
+      .from("wallets")
+      .select("balance")
+      .maybeSingle();
 
-    function paintHeaderFromStorage(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return false;
-        paintHeader(JSON.parse(raw));
-        return true;
-      }catch{
-        return false;
-      }
-    }
+    console.log("Balance:", data?.balance);
 
-    async function boot(){
-      try{ applyI18n(document); }catch{}
+  });
 
-      // ✅ 0) ilk frame: local varsa bas (Kullanıcı flicker biter)
-      paintHeaderFromStorage();
-
-      // ✅ 1) session’dan çek (login sonrası güncelle)
-      const u = await ensureAuthAndCacheUser();
-      if(u) paintHeader(u);
-
-      document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
-      document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
-      bindCardNav();
-    }
-
-    window.addEventListener("load", boot);
-  </script>
+});
+</script>
 </body>
 </html>
