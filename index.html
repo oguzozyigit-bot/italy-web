@@ -195,118 +195,35 @@
   <script type="module">
     const HOME = "/pages/home.html";
 
-    const toast = (msg)=>{
-      const t = document.getElementById("toast");
-      t.textContent = String(msg||"");
-      t.classList.add("show");
-      clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 2200);
-    };
+    async function boot() {
+        let auth = null;
+        try {
+            // MIME Hatasını önlemek için göreceli yol ve cache breaker
+            auth = await import("./js/auth_state.js?v=" + Date.now());
+        } catch (e) {
+            console.error("Dosya yüklenemedi:", e);
+            return;
+        }
 
-    document.getElementById("appleBtn")?.addEventListener("click", ()=>{
-      toast("Apple girişi yakında. Şimdilik Google ile devam edin.");
-    });
+        // Oturum kontrolü
+        const already = await auth.redirectIfLoggedIn();
+        if (already) {
+            location.replace(HOME);
+            return;
+        }
 
-    const nativeBtn = document.getElementById("nativeGoogleBtn");
-    const gsiWrap = document.getElementById("googleBtnContainer");
+        // Google Butonunu Başlat
+        auth.initAuth();
 
-    function hasNativeBridge(){
-      try{
-        return !!(window.Native && typeof window.Native.startGoogleLogin === "function");
-      }catch(e){
-        return false;
-      }
-    }
-
-    // ✅ Native bridge bazen geç geliyor → 3sn boyunca kontrol et
-    function waitNativeBridge(maxMs=3000){
-      const t0 = Date.now();
-      return new Promise((resolve)=>{
-        const tick=()=>{
-          if(hasNativeBridge()) return resolve(true);
-          if(Date.now()-t0>maxMs) return resolve(false);
-          setTimeout(tick, 120);
-        };
-        tick();
-      });
-    }
-
-    // ✅ WEB’de GSI script’i dinamik yükle
-    function loadGsiScript(){
-      return new Promise((resolve, reject)=>{
-        if (window.google?.accounts?.id) return resolve(true);
-        const s = document.createElement("script");
-        s.src = "https://accounts.google.com/gsi/client";
-        s.async = true;
-        s.defer = true;
-        s.onload = ()=>resolve(true);
-        s.onerror = ()=>reject(new Error("gsi load failed"));
-        document.head.appendChild(s);
-      });
-    }
-
-    async function boot(){
-      // 1) Önce Native var mı bak (APP)
-      const nativeOk = await waitNativeBridge(2800);
-
-      if(nativeOk){
-        // APP/WebView: sadece native login
-        nativeBtn.style.display = "flex";
-        gsiWrap.style.display = "none";
-
-        nativeBtn.addEventListener("click", ()=>{
-          try{
-            window.Native.startGoogleLogin();
-          }catch(e){
-            console.error(e);
-            toast("Native Google Login açılamadı.");
-          }
+        // Auth Durumunu İzle
+        auth.startAuthState(({ user, wallet }) => {
+            if (user && window.location.pathname.includes("index.html")) {
+                location.replace(HOME);
+            }
         });
-
-        return;
-      }
-
-      // 2) WEB: auth.js + GSI
-      let auth = null;
-      try{
-        auth = await import("/js/auth.js?v=" + Date.now());
-      }catch(e){
-        console.error("auth.js yüklenemedi:", e);
-        toast("Giriş sistemi yüklenemedi (auth.js).");
-        return;
-      }
-
-      try{
-        const already = auth.redirectIfLoggedIn?.();
-        if(already){
-          location.replace(HOME);
-          return;
-        }
-      }catch{}
-
-      try{
-        await loadGsiScript();
-      }catch(e){
-        console.error(e);
-        toast("Google bileşeni yüklenemedi.");
-        return;
-      }
-
-      try{
-        auth.initAuth?.();
-      }catch(e){
-        console.error("initAuth hata:", e);
-        toast("Google girişi başlatılamadı.");
-      }
-
-      setTimeout(()=>{
-        if(!gsiWrap || gsiWrap.childElementCount === 0){
-          toast("Google butonu render olmadı.");
-        }
-      }, 1400);
     }
 
     window.addEventListener("load", boot);
-  </script>
+</script>
 </body>
 </html>
