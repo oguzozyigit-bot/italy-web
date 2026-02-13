@@ -12,7 +12,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    /* ✅ yatay kayma KİLİT */
     html, body { overflow-x: hidden !important; }
     #pageContent { width:100%; overflow-x:hidden; }
 
@@ -325,9 +324,11 @@
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { applyI18n, setSiteLang, getSiteLang, t } from "/js/i18n.js";
+    import { logoutEverywhere, ensureAuthAndCacheUser } from "/js/auth.js";
+    import { supabase } from "/js/supabase_client.js";
     import { STORAGE_KEY } from "/js/config.js";
 
-    // ✅ Dil kilidi
+    // Dil kilidi
     setSiteLang(getSiteLang());
 
     mountShell();
@@ -343,6 +344,10 @@
       window.__to = setTimeout(()=>el.classList.remove("show"), 1600);
     }
 
+    // ✅ Session -> STORAGE_KEY + wallet cache (supabase)
+    await ensureAuthAndCacheUser();
+
+    // KEY (local üretim) — sonra DB key'e bağlarız
     const USER_KEY_STORAGE = "italky_user_key";
     function randLetters3(){ const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let s=""; for(let i=0;i<3;i++) s+=A[Math.floor(Math.random()*A.length)]; return s; }
     function randDigits6(){ let s=""; for(let i=0;i<6;i++) s+=String(Math.floor(Math.random()*10)); return s; }
@@ -354,6 +359,7 @@
       return k;
     }
 
+    // Token (wallet cache)
     function loadWallet(){
       try{
         const w = JSON.parse(localStorage.getItem("italky_wallet") || "null");
@@ -363,14 +369,14 @@
     }
     $("tokenVal").textContent = String(loadWallet().balance || 0);
 
-    // user
+    // user (STORAGE_KEY)
     (function(){
       let name="Kullanıcı", email="—";
       try{
         const raw = localStorage.getItem(STORAGE_KEY);
         if(raw){
           const u = JSON.parse(raw);
-          name = (u.name || u.fullname || "Kullanıcı").trim();
+          name = (u.name || "Kullanıcı").trim();
           email = (u.email || "—").trim();
         }
       }catch{}
@@ -390,7 +396,7 @@
       });
     })();
 
-    // offline list
+    // offline list (local cache)
     (function(){
       let arr=[];
       try{ arr = JSON.parse(localStorage.getItem("italky_offline_langs") || "[]"); }catch{}
@@ -411,7 +417,7 @@
     $("buyTokenBtn").addEventListener("click", ()=>location.href="/pages/course_signup.html");
     $("downloadLangBtn").addEventListener("click", ()=>toast("OK"));
 
-    // language menu
+    // language menu (set + reload)
     const UI = {
       tr:{flag:"🇹🇷", label:"Türkçe"},
       en:{flag:"🇬🇧", label:"English"},
@@ -437,7 +443,7 @@
       item.addEventListener("click", ()=>{
         const v = item.getAttribute("data-v");
         setSiteLang(v);
-        location.reload(); // ✅ kilit
+        location.reload();
       });
     });
 
@@ -447,16 +453,41 @@
       }
     });
 
-    $("logoutBtn").addEventListener("click", ()=>{
-      try{ localStorage.removeItem(STORAGE_KEY); }catch{}
-      location.href="/pages/home.html";
+    // ✅ Güvenli çıkış: Supabase + local + login
+    $("logoutBtn").addEventListener("click", async ()=>{
+      await logoutEverywhere();
+      location.replace("/pages/login.html");
     });
 
+    // ✅ Kalıcı sil: Edge Function delete_account (yoksa uyarı)
     $("deleteBtn").addEventListener("click", ()=>{ $("confirmBack").style.display="flex"; });
     $("confirmNo").addEventListener("click", ()=>{ $("confirmBack").style.display="none"; });
-    $("confirmYes").addEventListener("click", ()=>{
-      try{ localStorage.clear(); }catch{}
-      location.href="/pages/home.html";
+
+    $("confirmYes").addEventListener("click", async ()=>{
+      try{
+        const { data: { session } } = await supabase.auth.getSession();
+        if(!session?.access_token){
+          alert("Oturum bulunamadı. Tekrar giriş yapın.");
+          return;
+        }
+
+        const { error } = await supabase.functions.invoke("delete_account", {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        });
+
+        if(error){
+          console.error(error);
+          alert("Kalıcı silme için delete_account function gerekli.");
+          return;
+        }
+
+        await logoutEverywhere();
+        try{ localStorage.clear(); }catch{}
+        location.replace("/pages/login.html");
+      }catch(e){
+        console.error(e);
+        alert("Silme başarısız.");
+      }
     });
   </script>
 </body>
