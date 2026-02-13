@@ -1,5 +1,6 @@
 // FILE: /js/auth.js
 import { supabase } from "./supabase_client.js";
+import { STORAGE_KEY } from "./config.js";   // ✅ aynı key (home/shell ile uyum)
 
 const HOME_PATH = "/pages/home.html";
 const container = document.getElementById("googleBtnContainer");
@@ -36,14 +37,40 @@ function renderGoogleButton(){
   `;
 }
 
+function saveUserToStorage(user){
+  try{
+    if(!user) return;
+
+    const md = user.user_metadata || {};
+    const name =
+      (md.full_name || md.name || md.given_name || user.email || "Kullanıcı").toString();
+
+    const picture =
+      (md.avatar_url || md.picture || "").toString();
+
+    const payload = {
+      id: user.id,
+      name,
+      email: user.email || "",
+      picture,
+      provider: (user.app_metadata && user.app_metadata.provider) ? user.app_metadata.provider : "unknown",
+      ts: Date.now()
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }catch(e){
+    console.error("saveUserToStorage error:", e);
+  }
+}
+
 async function redirectIfLoggedIn(){
   const { data, error } = await supabase.auth.getSession();
   if(error){
     console.error("getSession error:", error);
-    // session hatası varsa yine de giriş butonunu göster
     return false;
   }
-  if(data?.session){
+  if(data?.session?.user){
+    saveUserToStorage(data.session.user);
     window.location.replace(HOME_PATH);
     return true;
   }
@@ -58,12 +85,10 @@ async function startGoogleLogin(){
   }
 
   try{
-    // ✅ Redirect’i sabitle: HOME’a dönsün
     const redirectTo = `${window.location.origin}${HOME_PATH}`;
-
     toast("Google yönlendiriliyor...");
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo }
     });
@@ -74,9 +99,7 @@ async function startGoogleLogin(){
       if(btn){ btn.disabled = false; btn.style.opacity = "1"; }
       return;
     }
-
-    // Normalde burada redirect olur.
-    console.log("OAuth started:", data);
+    // normalde redirect eder
   }catch(e){
     console.error("OAuth crash:", e);
     showError("Google giriş başlatılamadı. (Console hatasına bak)");
@@ -85,9 +108,9 @@ async function startGoogleLogin(){
 }
 
 function listenAuth(){
-  supabase.auth.onAuthStateChange((event, session)=>{
-    console.log("Auth event:", event);
-    if(session){
+  supabase.auth.onAuthStateChange((_event, session)=>{
+    if(session?.user){
+      saveUserToStorage(session.user);
       window.location.replace(HOME_PATH);
     }
   });
