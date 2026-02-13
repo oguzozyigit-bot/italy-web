@@ -491,6 +491,39 @@
       try{ localStorage.clear(); }catch{}
       location.replace("/pages/login.html");
     });
-  </script>
+    <script type="module">
+import { supabase } from "/js/supabase_client.js";
+import { initAuthState } from "/js/auth_state.js";
+import { applyI18n } from "/js/i18n.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  applyI18n(document);
+
+  initAuthState(async (user) => {
+
+    if (!user) {
+      location.href = "/pages/login.html";
+      return;
+    }
+
+    document.getElementById("fullName").textContent =
+      user.user_metadata?.full_name || user.email;
+
+    document.getElementById("email").textContent =
+      user.email;
+
+    const { data } = await supabase
+      .from("wallets")
+      .select("balance")
+      .maybeSingle();
+
+    document.getElementById("tokenVal").textContent =
+      data?.balance ?? 0;
+
+  });
+
+});
+</script>
 </body>
 </html>
