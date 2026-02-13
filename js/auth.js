@@ -1,6 +1,5 @@
 // FILE: /js/auth.js
 import { supabase } from "./supabase_client.js";
-import { STORAGE_KEY } from "./config.js";   // ✅ aynı key (home/shell ile uyum)
 
 const HOME_PATH = "/pages/home.html";
 const container = document.getElementById("googleBtnContainer");
@@ -17,49 +16,52 @@ function toast(msg){
 function showError(msg){
   if(!container) return;
   container.innerHTML = `
-    <div style="width:100%; max-width:320px; padding:10px 12px; border-radius:10px;
-                border:1px solid rgba(255,107,107,0.35); background:rgba(255,107,107,0.10);
-                color:#ffd1d1; font-size:12px; font-weight:900; text-align:center;">
+    <div style="width:100%;max-width:320px;padding:10px 12px;border-radius:10px;
+                border:1px solid rgba(255,107,107,0.35);background:rgba(255,107,107,0.10);
+                color:#ffd1d1;font-size:12px;font-weight:900;text-align:center;">
       ${msg}
-    </div>
-  `;
+    </div>`;
 }
 
 function renderGoogleButton(){
   if(!container) return;
   container.innerHTML = `
     <button id="googleBtn" type="button"
-      style="width:100%; max-width:320px; height:44px; border-radius:10px;
-             border:1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);
-             color:#fff; font-size:15px; font-weight:900; cursor:pointer;">
+      style="width:100%;max-width:320px;height:44px;border-radius:10px;
+             border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.06);
+             color:#fff;font-size:15px;font-weight:900;cursor:pointer;">
       Google ile Giriş Yap
-    </button>
-  `;
+    </button>`;
 }
 
-function saveUserToStorage(user){
+async function getStorageKeySafe(){
+  // config.js varsa oradan STORAGE_KEY al; yoksa fallback
   try{
-    if(!user) return;
+    const mod = await import("/js/config.js");
+    if(mod && mod.STORAGE_KEY) return String(mod.STORAGE_KEY);
+  }catch{}
+  return "italky_user";
+}
 
-    const md = user.user_metadata || {};
-    const name =
-      (md.full_name || md.name || md.given_name || user.email || "Kullanıcı").toString();
-
-    const picture =
-      (md.avatar_url || md.picture || "").toString();
+async function saveUserToStorage(user){
+  try{
+    const STORAGE_KEY = await getStorageKeySafe();
+    const md = user?.user_metadata || {};
+    const name = (md.full_name || md.name || md.given_name || user?.email || "Kullanıcı").toString();
+    const picture = (md.avatar_url || md.picture || "").toString();
 
     const payload = {
       id: user.id,
       name,
       email: user.email || "",
       picture,
-      provider: (user.app_metadata && user.app_metadata.provider) ? user.app_metadata.provider : "unknown",
+      provider: user?.app_metadata?.provider || "unknown",
       ts: Date.now()
     };
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }catch(e){
-    console.error("saveUserToStorage error:", e);
+    console.error("saveUserToStorage failed:", e);
   }
 }
 
@@ -70,7 +72,7 @@ async function redirectIfLoggedIn(){
     return false;
   }
   if(data?.session?.user){
-    saveUserToStorage(data.session.user);
+    await saveUserToStorage(data.session.user);
     window.location.replace(HOME_PATH);
     return true;
   }
@@ -79,10 +81,7 @@ async function redirectIfLoggedIn(){
 
 async function startGoogleLogin(){
   const btn = document.getElementById("googleBtn");
-  if(btn){
-    btn.disabled = true;
-    btn.style.opacity = "0.75";
-  }
+  if(btn){ btn.disabled = true; btn.style.opacity = "0.75"; }
 
   try{
     const redirectTo = `${window.location.origin}${HOME_PATH}`;
@@ -102,35 +101,38 @@ async function startGoogleLogin(){
     // normalde redirect eder
   }catch(e){
     console.error("OAuth crash:", e);
-    showError("Google giriş başlatılamadı. (Console hatasına bak)");
+    showError("Google giriş başlatılamadı. Console hatasına bak.");
     if(btn){ btn.disabled = false; btn.style.opacity = "1"; }
   }
 }
 
 function listenAuth(){
-  supabase.auth.onAuthStateChange((_event, session)=>{
+  supabase.auth.onAuthStateChange(async (_event, session)=>{
     if(session?.user){
-      saveUserToStorage(session.user);
+      await saveUserToStorage(session.user);
       window.location.replace(HOME_PATH);
     }
   });
 }
 
-async function boot(){
+(async function boot(){
   try{
+    // 1) butonu her durumda çiz (erken)
+    renderGoogleButton();
+
+    // 2) session varsa home
     const already = await redirectIfLoggedIn();
     if(already) return;
 
-    renderGoogleButton();
-    listenAuth();
-
+    // 3) click bağla
     const btn = document.getElementById("googleBtn");
     if(btn) btn.onclick = startGoogleLogin;
 
-  }catch(e){
-    console.error("boot error:", e);
-    showError("Sistem yüklenemedi. (auth.js)");
-  }
-}
+    // 4) auth state
+    listenAuth();
 
-boot();
+  }catch(e){
+    console.error("auth.js boot error:", e);
+    showError("Sistem yüklenemedi (auth.js). Console’a bak.");
+  }
+})();
