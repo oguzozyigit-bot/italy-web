@@ -380,48 +380,51 @@
 
   <!-- ✅ DÜZELTİLEN SCRIPT -->
   <script type="module">
-    import { STORAGE_KEY } from "/js/config.js";
-    import { applyI18n } from "/js/i18n.js";
-    import { ensureAuthAndCacheUser } from "/js/auth.js";
+  import { STORAGE_KEY } from "/js/config.js";
+  import { applyI18n } from "/js/i18n.js";
+  import { ensureAuthAndCacheUser } from "/js/auth.js";
 
-    function bindCardNav(){
-      document.querySelectorAll(".premium-card[data-href]").forEach(card=>{
-        card.addEventListener("click", ()=>{
-          const href = card.getAttribute("data-href");
-          if(href) location.href = href;
-        });
+  function bindCardNav(){
+    document.querySelectorAll(".premium-card[data-href]").forEach(card=>{
+      card.addEventListener("click", ()=>{
+        const href = card.getAttribute("data-href");
+        if(href) location.href = href;
       });
-    }
+    });
+  }
 
-    function paintHeaderFromStorage(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return;
-        const u = JSON.parse(raw);
-        const elName = document.getElementById("userName");
-        const elPic  = document.getElementById("userPic");
-        if(elName) elName.textContent = u.name || "Kullanıcı";
-        if(elPic && u.picture) elPic.src = u.picture;
-      }catch{}
-    }
+  function paintHeader(u){
+    const elName = document.getElementById("userName");
+    const elPic  = document.getElementById("userPic");
+    if(elName) elName.textContent = (u?.name || "Kullanıcı");
+    if(elPic && u?.picture) elPic.src = u.picture;
+  }
 
-    async function boot(){
-      // 1) i18n
-      try{ applyI18n(document); }catch{}
+  function paintHeaderFromStorage(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      paintHeader(JSON.parse(raw));
+    }catch{}
+  }
 
-      // 2) Supabase session → STORAGE_KEY (kritik!)
-      await ensureAuthAndCacheUser();
+  async function boot(){
+    try{ applyI18n(document); }catch{}
 
-      // 3) Header’ı storage’dan boya
-      paintHeaderFromStorage();
+    // ✅ 1) önce session’dan user çek (doğrudan)
+    const u = await ensureAuthAndCacheUser();
 
-      // 4) Click bağla
-      document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
-      document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
-      bindCardNav();
-    }
+    // ✅ 2) varsa anında header’a bas
+    if(u) paintHeader(u);
+    else paintHeaderFromStorage();
 
-    window.addEventListener("load", boot);
-  </script>
+    // click bağla
+    document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
+    document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
+    bindCardNav();
+  }
+
+  window.addEventListener("load", boot);
+</script>
 </body>
 </html>
