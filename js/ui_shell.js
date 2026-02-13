@@ -1,12 +1,7 @@
 // FILE: /js/ui_shell.js
-// ✅ HOME header+footer'ını HER SAYFAYA birebir basar (milim şaşmaz)
-// Kural: Sayfada <main id="pageContent"> ... </main> olmalı.
-// mountShell({ scroll:"none" }) => içerik scroll yok, barlar sabit.
-
 import { STORAGE_KEY } from "/js/config.js";
 import { applyI18n } from "/js/i18n.js";
 
-/* ✅ HOME HEADER (BİREBİR) */
 const HOME_HEADER_HTML = `
 <header class="premium-header">
   <div class="brand-group" id="brandHome" title="Ana sayfa">
@@ -21,7 +16,6 @@ const HOME_HEADER_HTML = `
 </header>
 `;
 
-/* ✅ HOME FOOTER (BİREBİR) */
 const HOME_FOOTER_HTML = `
 <footer class="premium-footer">
   <nav class="footer-nav">
@@ -34,15 +28,11 @@ const HOME_FOOTER_HTML = `
 </footer>
 `;
 
-/* ✅ HOME CSS (BİREBİR) + shell taşıma kuralları */
 const SHELL_CSS = `
 :root{
   --bg-void:#02000f;
   --text-main:#fff;
   --text-muted: rgba(255,255,255,0.65);
-  --neon-glow: 0 0 20px rgba(99,102,241,0.45);
-  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
-
   --footerH: 92px;
   --bar-bg: rgba(0,0,0,0.18);
   --edgePad: 14px;
@@ -57,7 +47,6 @@ html,body{
   color: var(--text-main);
 }
 
-/* background */
 .nebula-bg{
   position:absolute; inset:-10%; width:120%; height:120%;
   background:
@@ -81,7 +70,6 @@ html,body{
   pointer-events:none;
 }
 
-/* shell container */
 .app-shell{
   position:relative; z-index:10;
   width:100%; max-width:480px; height:100%;
@@ -91,7 +79,6 @@ html,body{
   backdrop-filter: blur(30px);
 }
 
-/* HEADER */
 .premium-header{
   padding: calc(10px + env(safe-area-inset-top)) 18px 10px;
   display:flex;
@@ -173,7 +160,6 @@ html,body{
   display:block;
 }
 
-/* main content */
 .main-content{
   flex:1;
   overflow-y:auto;
@@ -182,7 +168,6 @@ html,body{
 }
 .main-content::-webkit-scrollbar{ display:none; }
 
-/* FOOTER */
 .premium-footer{
   position: fixed;
   left: 50%;
@@ -239,7 +224,6 @@ html,body{
   margin: 0;
 }
 
-/* options */
 .app-shell.no-header .premium-header{ display:none; }
 .app-shell.no-footer .premium-footer{ display:none; }
 .app-shell.no-scroll .main-content{ overflow:hidden; }
@@ -253,48 +237,73 @@ function ensureStyleOnce(){
   document.head.appendChild(st);
 }
 
-/* ✅ NEW: STORAGE_KEY yoksa localStorage içinde user objesi ara */
-function findUserObjectFromLocalStorage(){
+/* ✅ Bulduğun kullanıcıyı STORAGE_KEY’e yaz (standartlaşsın) */
+function normalizeUserObject(o){
+  if(!o) return null;
+  const name = (o.name || o.fullname || o.displayName || "").trim();
+  const email = (o.email || "").trim();
+  const picture = (o.picture || o.avatar || o.photoURL || "").trim();
+  if(!name && !email && !picture) return null;
+  return { name: name || "Kullanıcı", email, picture };
+}
+
+function findUserAnywhere(){
+  // 1) STORAGE_KEY
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const u = normalizeUserObject(JSON.parse(raw));
+      if(u) return u;
+    }
+  }catch{}
+
+  // 2) localStorage tarama
   for(let i=0;i<localStorage.length;i++){
     const k = localStorage.key(i);
     if(!k) continue;
     const v = localStorage.getItem(k);
-    if(!v || v.length < 10) continue;
+    if(!v || v.length < 8) continue;
     if(v[0] !== "{") continue;
     try{
-      const o = JSON.parse(v);
-      const hasName = !!(o && (o.name || o.fullname || o.displayName));
-      const hasAny = !!(o && (o.picture || o.avatar || o.photoURL || o.email));
-      if(hasName && hasAny) return o;
+      const u = normalizeUserObject(JSON.parse(v));
+      if(u) return u;
     }catch{}
   }
+
+  // 3) sessionStorage tarama (bazı loginler burada tutar)
+  try{
+    for(let i=0;i<sessionStorage.length;i++){
+      const k = sessionStorage.key(i);
+      if(!k) continue;
+      const v = sessionStorage.getItem(k);
+      if(!v || v.length < 8) continue;
+      if(v[0] !== "{") continue;
+      const u = normalizeUserObject(JSON.parse(v));
+      if(u) return u;
+    }
+  }catch{}
+
   return null;
 }
 
 function fillUser(){
   try{
-    let u = null;
-
-    // 1) Önce STORAGE_KEY
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      try{ u = JSON.parse(raw); }catch{ u = null; }
-    }
-
-    // 2) Yoksa tarama
-    if(!u){
-      u = findUserObjectFromLocalStorage();
-    }
-
+    const u = findUserAnywhere();
     if(!u) return;
 
-    const nm = String(u.name || u.fullname || u.displayName || "Kullanıcı").trim();
-    const pic = String(u.picture || u.avatar || u.photoURL || "").trim();
+    // ✅ STANDARDIZE: artık her yerde STORAGE_KEY’den okunabilsin
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        name: u.name,
+        email: u.email,
+        picture: u.picture
+      }));
+    }catch{}
 
     const elName = document.getElementById("userName");
     const elPic  = document.getElementById("userPic");
-    if(elName) elName.textContent = nm || "Kullanıcı";
-    if(elPic && pic) elPic.src = pic;
+    if(elName) elName.textContent = u.name || "Kullanıcı";
+    if(elPic && u.picture) elPic.src = u.picture;
   }catch{}
 }
 
