@@ -1,5 +1,5 @@
 // js/auth_state.js
-import { supabase } from "./supabase_client.js"; // Başına mutlaka . koyun
+import { supabase } from "./supabase_client.js"; // Noktayı unutmayın
 
 export async function redirectIfLoggedIn() {
     const { data: { session } } = await supabase.auth.getSession();
