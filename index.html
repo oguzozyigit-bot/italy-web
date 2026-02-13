@@ -193,36 +193,40 @@
   <div id="toast"></div>
 
   <script type="module">
+    // HOME sayfasının yolu
     const HOME = "/pages/home.html";
 
     async function boot() {
         let auth = null;
         try {
-            // MIME Hatasını önlemek için göreceli yol ve cache breaker
+            // MIME hatasını çözmek için 'js/auth_state.js' şeklinde çağırıyoruz
             auth = await import("./js/auth_state.js?v=" + Date.now());
         } catch (e) {
-            console.error("Dosya yüklenemedi:", e);
+            console.error("Auth modülü yüklenemedi:", e);
+            const gsi = document.getElementById("googleBtnContainer");
+            if(gsi) gsi.innerHTML = '<p style="color:red; font-size:12px;">Sistem yüklenemedi. Lütfen sayfayı yenileyin.</p>';
             return;
         }
 
-        // Oturum kontrolü
+        // 1. Zaten giriş yapmışsa direkt yönlendir
         const already = await auth.redirectIfLoggedIn();
         if (already) {
             location.replace(HOME);
             return;
         }
 
-        // Google Butonunu Başlat
+        // 2. Google butonunu oluştur
         auth.initAuth();
 
-        // Auth Durumunu İzle
-        auth.startAuthState(({ user, wallet }) => {
+        // 3. Auth durumunu başlat ve izle
+        auth.startAuthState(({ user }) => {
             if (user && window.location.pathname.includes("index.html")) {
                 location.replace(HOME);
             }
         });
     }
 
+    // Sayfa yüklenince çalıştır
     window.addEventListener("load", boot);
 </script>
 </body>
