@@ -1,10 +1,12 @@
 import { supabase } from "./supabase_client.js";
 
+// Oturum kontrolü
 export async function redirectIfLoggedIn() {
     const { data: { session } } = await supabase.auth.getSession();
     return !!session;
 }
 
+// Google butonunu render et
 export function initAuth() {
     const container = document.getElementById("googleBtnContainer");
     if (!container) return;
@@ -14,7 +16,7 @@ export function initAuth() {
             width: 100%; max-width: 320px; height: 44px; border-radius: 10px; 
             border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.35);
             color: #fff; font-size: 15px; font-weight: 800; display:flex;
-            align-items:center; justify-content:center; gap:10px; cursor:pointer; margin-bottom: 10px;">
+            align-items:center; justify-content:center; gap:10px; cursor:pointer;">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
             Google ile Devam Et
         </button>
@@ -28,13 +30,16 @@ export function initAuth() {
     });
 }
 
+// Auth durumunu izle ve 10 token bonusunu tanımla
 export function startAuthState(onChange) {
     const emit = async (session, event) => {
         if (!session?.user) {
             onChange?.({ user: null, wallet: null, event });
             return;
         }
+
         const user = session.user;
+
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
             try {
                 await supabase.rpc("ensure_profile_and_welcome", {
@@ -42,8 +47,9 @@ export function startAuthState(onChange) {
                     p_email: user.email || "",
                     p_avatar_url: user.user_metadata?.avatar_url || ""
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("RPC Hatası:", e); }
         }
+
         const { data } = await supabase.from("wallets").select("balance").maybeSingle();
         onChange?.({ user, wallet: data?.balance || 0, event });
     };
