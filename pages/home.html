@@ -346,17 +346,11 @@
   <script type="module">
 import { supabase } from "/js/supabase_client.js";
 import { ensureAuthAndCacheUser } from "/js/auth.js";
-import { STORAGE_KEY } from "/js/config.js";
 import { applyI18n } from "/js/i18n.js";
 
-function updateHeader(user) {
+function updateHeader(user){
   const nameEl = document.getElementById("userName");
   const imgEl  = document.getElementById("userPic");
-
-  if (!user) {
-    nameEl.textContent = "...";
-    return;
-  }
 
   const name =
     user.user_metadata?.full_name ||
@@ -365,30 +359,26 @@ function updateHeader(user) {
 
   nameEl.textContent = name;
 
-  if (user.user_metadata?.avatar_url) {
+  if(user.user_metadata?.avatar_url){
     imgEl.src = user.user_metadata.avatar_url;
   }
 }
 
-async function initHome() {
+async function initHome(){
 
   applyI18n(document);
 
-  // 1️⃣ Session al
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session) {
+  if(!session){
     location.replace("/pages/login.html");
     return;
   }
 
-  // 2️⃣ STORAGE yaz + RPC çalıştır
   await ensureAuthAndCacheUser();
 
-  // 3️⃣ Header güncelle
   updateHeader(session.user);
 
-  // 4️⃣ Kart linkleri
   document.querySelectorAll(".premium-card[data-href]").forEach(card=>{
     card.addEventListener("click", ()=>{
       location.href = card.getAttribute("data-href");
@@ -398,8 +388,6 @@ async function initHome() {
   document.getElementById("profileBtn")
     ?.addEventListener("click", ()=>location.href="/pages/profile.html");
 
-  document.getElementById("brandHome")
-    ?.addEventListener("click", ()=>location.href="/pages/home.html");
 }
 
 document.addEventListener("DOMContentLoaded", initHome);
