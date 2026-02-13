@@ -345,19 +345,24 @@
 
   <script type="module">
 import { supabase } from "/js/supabase_client.js";
-import { initAuthState } from "/js/auth_state.js";
+import { ensureAuthAndCacheUser } from "/js/auth.js";
+import { STORAGE_KEY } from "/js/config.js";
 import { applyI18n } from "/js/i18n.js";
 
 function updateHeader(user) {
   const nameEl = document.getElementById("userName");
-  const imgEl = document.getElementById("userPic");
+  const imgEl  = document.getElementById("userPic");
 
   if (!user) {
-    nameEl.textContent = "…";
+    nameEl.textContent = "...";
     return;
   }
 
-  const name = user.user_metadata?.full_name || user.email;
+  const name =
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email;
+
   nameEl.textContent = name;
 
   if (user.user_metadata?.avatar_url) {
@@ -365,30 +370,39 @@ function updateHeader(user) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+async function initHome() {
 
   applyI18n(document);
 
-  initAuthState(async (user) => {
+  // 1️⃣ Session al
+  const { data: { session } } = await supabase.auth.getSession();
 
-    if (!user) {
-      location.href = "/pages/login.html";
-      return;
-    }
+  if (!session) {
+    location.replace("/pages/login.html");
+    return;
+  }
 
-    updateHeader(user);
+  // 2️⃣ STORAGE yaz + RPC çalıştır
+  await ensureAuthAndCacheUser();
 
-    // Wallet çek
-    const { data } = await supabase
-      .from("wallets")
-      .select("balance")
-      .maybeSingle();
+  // 3️⃣ Header güncelle
+  updateHeader(session.user);
 
-    console.log("Balance:", data?.balance);
-
+  // 4️⃣ Kart linkleri
+  document.querySelectorAll(".premium-card[data-href]").forEach(card=>{
+    card.addEventListener("click", ()=>{
+      location.href = card.getAttribute("data-href");
+    });
   });
 
-});
+  document.getElementById("profileBtn")
+    ?.addEventListener("click", ()=>location.href="/pages/profile.html");
+
+  document.getElementById("brandHome")
+    ?.addEventListener("click", ()=>location.href="/pages/home.html");
+}
+
+document.addEventListener("DOMContentLoaded", initHome);
 </script>
 </body>
 </html>
