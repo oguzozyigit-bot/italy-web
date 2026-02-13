@@ -153,8 +153,8 @@
       </div>
 
       <section class="card">
-        <div class="big" id="headline">Ders Başladı</div>
-        <div class="sub" id="desc">Ders bitmeden çıkarsanız ders baştan başlar.</div>
+        <div class="big">Ders</div>
+        <div class="sub">Ders bitmeden çıkarsanız ders baştan başlar.</div>
 
         <div class="task">
           <div class="q" id="qText">1) Kendini hedef dilde 1 cümle ile tanıt.</div>
@@ -184,21 +184,14 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // REQUIRED KEYS
     const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
     const levelDone = (localStorage.getItem("italky_level_done") || "") === "1";
     const plan = (localStorage.getItem("italky_plan_pref") || "").trim();
     const minsStr = (localStorage.getItem("italky_lesson_mins") || "").trim();
 
-    if(!teacherId){
-      location.href = "/pages/teacher_select.html";
-    }
-    if(!levelDone){
-      location.href = "/pages/level_test_intro.html";
-    }
-    if(!plan || !minsStr){
-      location.href = "/pages/course_signup.html";
-    }
+    if(!teacherId) location.href = "/pages/teacher_select.html";
+    if(!levelDone) location.href = "/pages/level_test_intro.html";
+    if(!plan || !minsStr) location.href = "/pages/course_signup.html";
 
     const TEACHERS = {
       dora:{flag:"🇬🇧", role:"İngilizce", name:"Dora"},
@@ -213,8 +206,6 @@
     const t = TEACHERS[teacherId] || {flag:"🌍", role:"Dil", name:"Öğretmen"};
     $("whoChip").textContent = `${t.flag} ${t.role} • ${t.name}`;
 
-    // ✅ “çıkınca baştan” kuralı:
-    // bu sayfa her açılışta timer'ı sıfırdan başlatır (persist yok)
     const mins = Math.max(1, Math.min(60, Number(minsStr) || 10));
     let remaining = mins * 60;
     let tick = null;
@@ -225,19 +216,10 @@
       return `${m}:${ss}`;
     }
 
-    let breakHintShown = false;
-
     function startTimer(){
       $("timerChip").textContent = fmt(remaining);
       tick = setInterval(()=>{
         remaining--;
-
-        // 15 dk geçince mola öner (pause yok, sadece öneri)
-        if(!breakHintShown && (mins*60 - remaining) >= 15*60){
-          breakHintShown = true;
-          toast("15 dk oldu. 5 dk mola verebilirsin.");
-        }
-
         if(remaining <= 0){
           remaining = 0;
           $("timerChip").textContent = fmt(remaining);
@@ -245,22 +227,18 @@
           finishLesson(true);
           return;
         }
-
         $("timerChip").textContent = fmt(remaining);
       }, 1000);
     }
 
     function incProgress(){
-      // ✅ ders progress: dil bazlı profil altında sakla
       const PROFILE_KEY = "italky_profile";
       const prof = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
       prof.languages = prof.languages || {};
       prof.languages[teacherId] = prof.languages[teacherId] || {};
       const st = prof.languages[teacherId];
-
       st.lesson_count = (st.lesson_count || 0) + 1;
       st.last_lesson_at = new Date().toISOString();
-
       localStorage.setItem(PROFILE_KEY, JSON.stringify(prof));
     }
 
@@ -276,9 +254,8 @@
     });
 
     $("btnExit").addEventListener("click", ()=>{
-      // çıkınca baştan: hiçbir state kaydetme
       clearInterval(tick);
-      location.href = "/pages/home.html";
+      location.href="/pages/home.html";
     });
 
     startTimer();
