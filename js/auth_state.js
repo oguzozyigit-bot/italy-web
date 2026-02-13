@@ -1,12 +1,11 @@
-import { supabase } from "./supabase_client.js";
+// js/auth_state.js
+import { supabase } from "./supabase_client.js"; // Başına mutlaka . koyun
 
-// Oturum kontrolü
 export async function redirectIfLoggedIn() {
     const { data: { session } } = await supabase.auth.getSession();
     return !!session;
 }
 
-// Google butonunu render et
 export function initAuth() {
     const container = document.getElementById("googleBtnContainer");
     if (!container) return;
@@ -30,30 +29,25 @@ export function initAuth() {
     });
 }
 
-// Auth durumunu izle ve 10 token bonusunu tanımla
 export function startAuthState(onChange) {
     const emit = async (session, event) => {
         if (!session?.user) {
             onChange?.({ user: null, wallet: null, event });
             return;
         }
-
         const user = session.user;
-
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
             try {
                 await supabase.rpc("ensure_profile_and_welcome", {
-                    p_full_name: user.user_metadata?.full_name || user.user_metadata?.name || "",
+                    p_full_name: user.user_metadata?.full_name || "",
                     p_email: user.email || "",
                     p_avatar_url: user.user_metadata?.avatar_url || ""
                 });
-            } catch (e) { console.error("RPC Hatası:", e); }
+            } catch (e) { console.error(e); }
         }
-
         const { data } = await supabase.from("wallets").select("balance").maybeSingle();
         onChange?.({ user, wallet: data?.balance || 0, event });
     };
-
     supabase.auth.getSession().then(({ data }) => emit(data?.session, "INITIAL_SESSION"));
     supabase.auth.onAuthStateChange((event, session) => emit(session, event));
 }
