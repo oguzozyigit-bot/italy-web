@@ -8,7 +8,7 @@ export const supabase = createClient(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true, // ✅ OAuth dönüş hash’ini session’a çevirir
-    },
+      detectSessionInUrl: true
+    }
   }
 );
