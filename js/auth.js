@@ -2,13 +2,27 @@
 import { supabase } from "/js/supabase_client.js";
 import { STORAGE_KEY } from "/js/config.js";
 
+// ✅ Türkçe karakter bozulmalarını düzelt (OÄŸuz -> Oğuz gibi)
+function fixMojibake(s){
+  try{
+    if(!s) return s;
+    // tipik mojibake işaretleri
+    if (/[ÃÂ]/.test(s)) return decodeURIComponent(escape(s));
+    return s;
+  }catch{
+    return s;
+  }
+}
+
 // Supabase user -> standart user objesi
 function toStdUser(u){
   if(!u) return null;
   const md = u.user_metadata || {};
-  const name = (md.full_name || md.name || u.email || "Kullanıcı").trim();
+  let name = (md.full_name || md.name || u.email || "Kullanıcı").trim();
   const email = (u.email || "").trim();
   const picture = (md.avatar_url || md.picture || "").trim();
+
+  name = fixMojibake(name);
   return { name, email, picture };
 }
 
@@ -25,6 +39,8 @@ export async function ensureAuthAndCacheUser(){
     if(!session?.user) return null;
 
     const std = toStdUser(session.user);
+
+    // ✅ storage'a temiz isimle yaz
     if(std){
       try{
         localStorage.setItem(STORAGE_KEY, JSON.stringify(std));
@@ -124,3 +140,4 @@ export async function redirectIfLoggedIn(){
 export function initAuth(){
   // Eskiden GSI render ediyordu; artık yok.
 }
+```0
