@@ -13,18 +13,19 @@
   <style>
     #pageContent{ height:100%; }
 
+    /* footer üstüne taşma olmasın */
     .wrap{
-      min-height: 100%;
-      padding: 12px 12px 180px; /* ✅ footer üstünde kesin */
+      min-height:100%;
+      padding: 12px 12px 190px;
       display:flex;
       flex-direction:column;
       gap:12px;
     }
 
     .hero{
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
       padding: 16px 14px;
     }
     .name{
@@ -64,16 +65,14 @@
     .pill.key{
       border-color: rgba(99,102,241,0.35);
       background: rgba(99,102,241,0.12);
-      color:#fff;
       letter-spacing:.8px;
     }
 
     .card{
-      border-radius: 26px;
-      border: 1px solid rgba(255,255,255,0.10);
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
       padding: 14px 12px;
-      overflow:hidden;
     }
 
     .row{
@@ -118,10 +117,10 @@
       gap:10px;
     }
     .mini{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.10);
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.05);
-      padding: 12px;
+      padding:12px;
     }
     .k{
       font-size:11px;
@@ -134,8 +133,8 @@
       margin-top:6px;
       font-size:16px;
       font-weight:1000;
-      letter-spacing:-0.2px;
       color:#fff;
+      word-break: break-word;
     }
 
     .list{
@@ -180,11 +179,12 @@
     .footerNote{
       text-align:center;
       color: rgba(255,255,255,0.25);
-      font-weight: 900;
-      font-size: 10px;
+      font-weight:900;
+      font-size:10px;
       margin-top: 6px;
     }
 
+    /* Modal */
     .modalBack{
       position:fixed; inset:0;
       background: rgba(0,0,0,0.55);
@@ -203,7 +203,13 @@
       padding: 16px 14px;
     }
     .modal h3{ margin:0; font-size:16px; font-weight:1000; }
-    .modal p{ margin:10px 0 0; font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.45; }
+    .modal p{
+      margin:10px 0 0;
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.72);
+      line-height:1.45;
+    }
     .modalBtns{ margin-top:14px; display:flex; gap:10px; }
     .mBtn{
       flex:1; height:46px; border-radius:16px; cursor:pointer;
@@ -248,6 +254,7 @@
         <div class="email" id="email">—</div>
         <div class="pillRow">
           <div class="pill key" id="userKeyPill">KEY: —</div>
+          <div class="pill" id="tokenPill">Token: 0</div>
         </div>
       </section>
 
@@ -264,19 +271,22 @@
       <section class="card">
         <div class="row">
           <div class="left">
-            <div class="title">Seviye Bilgisi</div>
-            <div class="desc" id="lvlDesc">Seçili dil için sonuç</div>
+            <div class="title">Token Cüzdan</div>
+            <div class="desc">Ders ve paketler token ile çalışır</div>
           </div>
         </div>
         <div class="grid2">
           <div class="mini">
-            <div class="k">Seviye</div>
-            <div class="v" id="levelVal">—</div>
+            <div class="k">Kalan Token</div>
+            <div class="v" id="tokenVal">0</div>
           </div>
           <div class="mini">
-            <div class="k">Sınav Sayısı</div>
-            <div class="v" id="attemptVal">0</div>
+            <div class="k">Hediye</div>
+            <div class="v">İlk giriş: 10</div>
           </div>
+        </div>
+        <div class="btnRow">
+          <button class="btn" id="buyTokenBtn" type="button">Token Satın Al</button>
         </div>
       </section>
 
@@ -322,6 +332,7 @@
   </main>
 
   <div id="toast" class="toast"></div>
+
   <div class="modalBack" id="confirmBack">
     <div class="modal">
       <h3>Emin misiniz?</h3>
@@ -335,6 +346,8 @@
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
+    import { STORAGE_KEY } from "/js/config.js";
+
     mountShell(); // scroll açık
 
     const $ = (id)=>document.getElementById(id);
@@ -347,20 +360,20 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1700);
     }
 
-    // --- KEY üretimi ---
+    // ===== KEY (3 harf + 6 rakam) =====
     const USER_KEY_STORAGE = "italky_user_key";
     function randLetters3(){
-      const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      let s=""; for(let i=0;i<3;i++) s += A[Math.floor(Math.random()*A.length)];
+      const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let s="";
+      for(let i=0;i<3;i++) s+=A[Math.floor(Math.random()*A.length)];
       return s;
     }
     function randDigits6(){
-      let s=""; for(let i=0;i<6;i++) s += String(Math.floor(Math.random()*10));
+      let s=""; for(let i=0;i<6;i++) s+=String(Math.floor(Math.random()*10));
       return s;
     }
     function digitsOk(d){
       for(let i=0;i<=d.length-3;i++){
-        const a = Number(d[i]), b = Number(d[i+1]), c = Number(d[i+2]);
+        const a=+d[i], b=+d[i+1], c=+d[i+2];
         if(a+1===b && b+1===c) return false;
         if(a-1===b && b-1===c) return false;
         if(a===b && b===c) return false;
@@ -371,8 +384,8 @@
       let k = (localStorage.getItem(USER_KEY_STORAGE) || "").trim();
       if(k && /^[A-Z]{3}\d{6}$/.test(k)) return k;
       for(let tries=0; tries<80; tries++){
-        const letters = randLetters3();
-        const digits = randDigits6();
+        const letters=randLetters3();
+        const digits=randDigits6();
         if(!digitsOk(digits)) continue;
         k = `${letters}${digits}`;
         localStorage.setItem(USER_KEY_STORAGE, k);
@@ -383,58 +396,54 @@
       return k;
     }
 
-    // ✅ Shell header’dan adı al (GARANTİ)
-    function readNameFromShell(){
+    // ===== WALLET =====
+    const WALLET_KEY = "italky_wallet";
+    function loadWallet(){
+      try{
+        const w = JSON.parse(localStorage.getItem(WALLET_KEY) || "null");
+        if(w && typeof w.balance === "number") return w;
+      }catch{}
+      return { balance:0, earned:0, spent:0, tx:[] };
+    }
+
+    function fillWallet(){
+      const w = loadWallet();
+      $("tokenVal").textContent = String(w.balance || 0);
+      $("tokenPill").textContent = `Token: ${w.balance || 0}`;
+    }
+
+    // ===== USER =====
+    function fillUser(){
+      let name="Kullanıcı", email="—";
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw){
+          const u = JSON.parse(raw);
+          name = (u.name || u.fullname || "Kullanıcı").trim();
+          email = (u.email || "—").trim();
+        }
+      }catch{}
+
+      // fallback: shell header name
       const hn = document.getElementById("userName");
-      return hn ? (hn.textContent || "").trim() : "";
+      if((!name || name==="Kullanıcı") && hn && hn.textContent) name = hn.textContent.trim();
+
+      $("fullName").textContent = name || "Kullanıcı";
+      $("email").textContent = email || "—";
+      $("userKeyPill").textContent = `KEY: ${getOrCreateUserKey()}`;
     }
 
-    // ✅ Email’i nereden bulursak (bulunamazsa —)
-    function readEmailFromStorageScan(){
-      for(let i=0;i<localStorage.length;i++){
-        const k = localStorage.key(i);
-        const v = localStorage.getItem(k);
-        if(!v || v.length < 10 || v[0] !== "{") continue;
-        try{
-          const o = JSON.parse(v);
-          if(o && o.email) return String(o.email);
-        }catch{}
-      }
-      return "—";
-    }
-
-    // init user (retry: shell bazen 1 frame sonra doluyor)
-    function initUser(){
-      let tries = 0;
-      const timer = setInterval(()=>{
-        tries++;
-        const nm = readNameFromShell();
-        if(nm){
-          clearInterval(timer);
-          $("fullName").textContent = nm;
-          $("email").textContent = readEmailFromStorageScan();
-          $("userKeyPill").textContent = `KEY: ${getOrCreateUserKey()}`;
-          return;
-        }
-        if(tries >= 15){
-          clearInterval(timer);
-          $("fullName").textContent = "Kullanıcı";
-          $("email").textContent = readEmailFromStorageScan();
-          $("userKeyPill").textContent = `KEY: ${getOrCreateUserKey()}`;
-        }
-      }, 60);
-    }
-
+    // ===== LANG SELECT =====
     function fillLangSelect(){
       const select = $("siteLangSelect");
-      const options = [
+      const opts = [
         { v:"tr", t:"Türkçe" },
         { v:"en", t:"English" },
         { v:"de", t:"Deutsch" },
         { v:"fr", t:"Français" },
         { v:"es", t:"Español" },
       ];
-      select.innerHTML = options.map(o=>`<option value="${o.v}">${o.t}</option>`).join("");
+      select.innerHTML = opts.map(o=>`<option value="${o.v}">${o.t}</option>`).join("");
       const cur = (localStorage.getItem("italky_site_lang") || "tr").trim();
       select.value = cur;
       select.addEventListener("change", ()=>{
@@ -443,37 +452,9 @@
       });
     }
 
-    function fillLevel(){
-      const sel = (localStorage.getItem("italky_teacher_pref") || "").trim();
-      const labelMap = {
-        dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca",
-        sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince"
-      };
-      $("lvlDesc").textContent = `Dil: ${labelMap[sel] || "Seçili Dil Yok"}`;
-
-      // profile varsa
-      let level = "—";
-      let attempts = 0;
-
-      try{
-        const prof = JSON.parse(localStorage.getItem("italky_profile") || "{}");
-        const st = (prof.languages && sel && prof.languages[sel]) ? prof.languages[sel] : null;
-        if(st && st.level) level = st.level;
-        if(st && typeof st.attempt_count === "number") attempts = st.attempt_count;
-      }catch{}
-
-      // legacy fallback
-      const legacyLevel = (localStorage.getItem("italky_level") || "").trim();
-      const legacyDone  = (localStorage.getItem("italky_level_done") || "").trim();
-      if(level === "—" && legacyLevel) level = legacyLevel;
-      if(attempts === 0 && legacyDone === "1") attempts = 1;
-
-      $("levelVal").textContent = level;
-      $("attemptVal").textContent = String(attempts);
-    }
-
+    // ===== OFFLINE LIST =====
     function fillOffline(){
-      let arr = [];
+      let arr=[];
       try{
         const raw = localStorage.getItem("italky_offline_langs");
         if(raw) arr = JSON.parse(raw);
@@ -484,35 +465,72 @@
         box.innerHTML = `<div class="tag">Henüz indirilmedi</div>`;
         return;
       }
-      arr.slice(0, 30).forEach(x=>{
-        const el = document.createElement("div");
-        el.className = "tag";
-        el.textContent = String(x);
+      arr.slice(0,30).forEach(x=>{
+        const el=document.createElement("div");
+        el.className="tag";
+        el.textContent=String(x);
         box.appendChild(el);
       });
     }
 
+    // ===== BUTTONS (ÇALIŞIR) =====
+    $("buyTokenBtn").addEventListener("click", ()=>{
+      location.href = "/pages/course_signup.html";
+    });
+
     $("downloadLangBtn").addEventListener("click", ()=>{
+      // offline sayfan varsa aç
+      // location.href = "/pages/offline.html";
       toast("Dil indirme ekranı yakında bağlanacak");
     });
 
     $("logoutBtn").addEventListener("click", ()=>{
+      try{
+        // güvenli çıkış: auth datası silinsin (diğer ilerleme kalsın)
+        localStorage.removeItem(STORAGE_KEY);
+      }catch{}
       toast("Çıkış yapıldı");
-      setTimeout(()=>location.href="/pages/home.html", 400);
+      setTimeout(()=>location.href="/pages/home.html", 450);
     });
 
-    $("deleteBtn").addEventListener("click", ()=>{ $("confirmBack").style.display="flex"; });
-    $("confirmNo").addEventListener("click", ()=>{ $("confirmBack").style.display="none"; });
+    $("deleteBtn").addEventListener("click", ()=>{
+      $("confirmBack").style.display = "flex";
+    });
+
+    $("confirmNo").addEventListener("click", ()=>{
+      $("confirmBack").style.display = "none";
+    });
+
     $("confirmYes").addEventListener("click", ()=>{
-      try{ localStorage.clear(); }catch{}
-      $("confirmBack").style.display="none";
+      try{
+        // kalıcı sil: uygulamaya ait her şeyi temizle
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("italky_profile");
+        localStorage.removeItem("italky_teacher_pref");
+        localStorage.removeItem("italky_level");
+        localStorage.removeItem("italky_level_done");
+        localStorage.removeItem("italky_level_weighted_score");
+        localStorage.removeItem("italky_level_raw_correct");
+        localStorage.removeItem("italky_recommended_mins");
+        localStorage.removeItem("italky_plan_pref");
+        localStorage.removeItem("italky_lesson_mins");
+        localStorage.removeItem("italky_accelerated");
+        localStorage.removeItem("italky_offline_langs");
+        localStorage.removeItem("italky_site_lang");
+        localStorage.removeItem("italky_is_premium");
+        localStorage.removeItem(USER_KEY_STORAGE);
+        localStorage.removeItem(WALLET_KEY);
+        localStorage.removeItem("italky_welcome_token_given");
+      }catch{}
+      $("confirmBack").style.display = "none";
       toast("Hesap silindi");
       setTimeout(()=>location.href="/pages/home.html", 650);
     });
 
-    initUser();
+    // INIT
+    fillUser();
+    fillWallet();
     fillLangSelect();
-    fillLevel();
     fillOffline();
   </script>
 </body>
