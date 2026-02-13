@@ -1,12 +1,10 @@
 import { supabase } from "./supabase_client.js";
 
-// index.html'in beklediği fonksiyon: Oturum kontrolü
 export async function redirectIfLoggedIn() {
     const { data: { session } } = await supabase.auth.getSession();
     return !!session;
 }
 
-// index.html'in beklediği fonksiyon: Google butonunu oluşturur
 export function initAuth() {
     const container = document.getElementById("googleBtnContainer");
     if (!container) return;
@@ -16,7 +14,7 @@ export function initAuth() {
             width: 100%; max-width: 320px; height: 44px; border-radius: 10px; 
             border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.35);
             color: #fff; font-size: 15px; font-weight: 800; display:flex;
-            align-items:center; justify-content:center; gap:10px; cursor:pointer;">
+            align-items:center; justify-content:center; gap:10px; cursor:pointer; margin-bottom: 10px;">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
             Google ile Devam Et
         </button>
@@ -30,17 +28,13 @@ export function initAuth() {
     });
 }
 
-// Merkezi auth dinleyicisi
 export function startAuthState(onChange) {
     const emit = async (session, event) => {
         if (!session?.user) {
             onChange?.({ user: null, wallet: null, event });
             return;
         }
-
         const user = session.user;
-
-        // Hoşgeldin bonusu (10 token) ve profil kaydı
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
             try {
                 await supabase.rpc("ensure_profile_and_welcome", {
@@ -50,7 +44,6 @@ export function startAuthState(onChange) {
                 });
             } catch (e) { console.error(e); }
         }
-
         const { data } = await supabase.from("wallets").select("balance").maybeSingle();
         onChange?.({ user, wallet: data?.balance || 0, event });
     };
