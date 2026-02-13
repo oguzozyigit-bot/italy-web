@@ -43,47 +43,47 @@
 
 <script type="module">
 import { supabase } from "/js/supabase_client.js";
-import { logoutEverywhere, ensureAuthAndCacheUser } from "/js/auth.js";
-import { STORAGE_KEY } from "/js/config.js";
+import { ensureAuthAndCacheUser, logoutEverywhere } from "/js/auth.js";
+import { applyI18n } from "/js/i18n.js";
 
-async function init() {
+applyI18n(document);
 
-  // session garanti
-  const user = await ensureAuthAndCacheUser();
+async function initProfile(){
 
-  if (!user) {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if(!session){
     location.replace("/pages/login.html");
     return;
   }
 
-  // kullanıcı bilgisi
+  await ensureAuthAndCacheUser();
+
+  const user = session.user;
+
   document.getElementById("fullName").textContent =
     user.user_metadata?.full_name || user.email;
 
   document.getElementById("email").textContent =
     user.email;
 
-  // token DB’den
-  const { data } = await supabase
+  const { data: wallet } = await supabase
     .from("wallets")
     .select("balance")
     .maybeSingle();
 
   document.getElementById("tokenVal").textContent =
-    data?.balance ?? 0;
+    wallet?.balance ?? 0;
+
 }
 
-document.getElementById("logoutBtn").addEventListener("click", async ()=>{
-  await logoutEverywhere();
-  location.replace("/pages/login.html");
-});
+document.getElementById("logoutBtn")
+  ?.addEventListener("click", async ()=>{
+    await logoutEverywhere();
+    location.replace("/pages/login.html");
+  });
 
-document.getElementById("deleteBtn").addEventListener("click", async ()=>{
-  await logoutEverywhere();
-  location.replace("/pages/login.html");
-});
-
-init();
+document.addEventListener("DOMContentLoaded", initProfile);
 </script>
 
 </body>
