@@ -1,252 +1,123 @@
-<!-- FILE: /pages/level_test_intro.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Seviye Tespit</title>
-  <link rel="icon" href="data:," />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    #pageContent{ height:100%; }
+    #pageContent { height: 100%; overflow: hidden; }
+    .wrap { height: 100%; padding: 10px 16px 20px; display: flex; flex-direction: column; }
 
-    .wrap{
-      height:100%;
-      padding: 12px 12px 18px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .hero{
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-      padding: 18px 16px;
-      overflow:hidden;
+    .hero {
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(165deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
+      backdrop-filter: blur(20px);
+      padding: 24px 20px;
     }
 
-    .topRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
+    .topRow { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .flagBox {
+      width: 70px; height: 70px; border-radius: 24px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);
     }
+    .flagBox span { font-size: 34px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }
 
-    .teacherBadge{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width: 0;
-    }
+    .who { display: flex; flex-direction: column; gap: 2px; }
+    .role { font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 1.5px; }
+    .name { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
 
-    .flagBox{
-      width:64px;
-      height:64px;
-      border-radius:22px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-    .flagBox span{
-      font-size:30px;
-      line-height:1;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,.12));
-    }
+    .title { font-size: 19px; font-weight: 800; line-height: 1.3; color: #fff; margin-bottom: 12px; }
+    .desc { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.5); line-height: 1.5; margin-bottom: 20px; }
 
-    .who{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width: 0;
-    }
-    .role{
-      font-size:12px;
-      font-weight:900;
-      color: rgba(255,255,255,0.65);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .name{
-      font-size:20px;
-      font-weight:1000;
-      letter-spacing:-0.4px;
-      line-height:1.05;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .rule { border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); padding: 15px; text-align: center; }
+    .k { font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
+    .v { font-size: 20px; font-weight: 900; color: #fff; margin-top: 4px; }
 
-    .title{
-      margin: 14px 0 0;
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:-0.2px;
-      line-height:1.2;
-    }
-    .desc{
-      margin: 10px 0 0;
-      font-size:13px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      line-height:1.45;
-    }
+    .note { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); line-height: 1.6; }
+    .spacer { flex: 1; }
 
-    .rules{
-      margin-top: 14px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .rule{
-      border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 14px 12px;
-    }
-    .k{
-      font-size:11px;
-      font-weight:1000;
-      color: rgba(255,255,255,0.60);
-      text-transform:uppercase;
-      letter-spacing:1px;
-    }
-    .v{
-      margin-top:6px;
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:-0.3px;
-    }
-
-    .note{
-      margin-top: 12px;
-      font-size:12px;
-      font-weight:900;
-      color: rgba(255,255,255,0.66);
-      line-height:1.45;
-    }
-
-    .spacer{ flex:1; }
-
-    .btn{
-      height: 58px;
-      border-radius: 22px;
-      border: none;
-      cursor:pointer;
-      font-weight:1000;
-      font-size:15px;
-      color:#fff;
-      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
-      box-shadow: 0 16px 44px rgba(79,70,229,.22);
-    }
-    .btn:active{ transform: scale(.98); }
-
-    .ghost{
-      height: 52px;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:1000;
-      font-size:13px;
-      cursor:pointer;
-    }
-    .ghost:active{ transform: scale(.99); }
+    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .btn { height: 56px; border-radius: 18px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .btn-main { background: #fff; color: #000; }
+    .btn-ghost { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+    .btn:active { transform: scale(0.96); }
   </style>
 </head>
 
 <body>
   <main id="pageContent">
     <div class="wrap">
-
       <section class="hero">
         <div class="topRow">
-          <div class="teacherBadge">
-            <div class="flagBox"><span id="flag">🏳️</span></div>
-            <div class="who">
-              <div class="role" id="role">Dil Dersi</div>
-              <div class="name" id="teacherName">Öğretmen</div>
-            </div>
+          <div class="flagBox"><span id="flag">🏳️</span></div>
+          <div class="who">
+            <div class="role" id="role">DERS SEÇİMİ</div>
+            <div class="name" id="teacherName">Yükleniyor...</div>
           </div>
         </div>
 
-        <div class="title">
-          Bu derse başlayabilmek için öncelikle seviye tespit sınavına katılmanız gereklidir.
-        </div>
+        <div class="title">Seviye tespit sınavı ile size özel eğitim planınızı oluşturalım.</div>
+        <div class="desc">Sınav sonucuna göre yapay zeka eğitmeniniz ders içeriklerini seviyenize uygun hazırlar.</div>
 
-        <div class="desc">
-          Sınav tamamlandıktan sonra seviyeniz otomatik belirlenir ve size özel ders planı oluşturulur.
-        </div>
-
-        <!-- ✅ GÜNCEL: 50 soru / 40 dk -->
         <div class="rules">
-          <div class="rule">
-            <div class="k">Soru</div>
-            <div class="v">50</div>
-          </div>
-          <div class="rule">
-            <div class="k">Süre</div>
-            <div class="v">40 dk</div>
-          </div>
+          <div class="rule"><div class="k">Soru Sayısı</div><div class="v">50</div></div>
+          <div class="rule"><div class="k">Toplam Süre</div><div class="v">40 dk</div></div>
         </div>
 
         <div class="note">
-          • Süre dolunca sınav otomatik tamamlanır.<br/>
-          • Sınav sırasında uygulamadan çıkmayınız.<br/>
-          • Sınavı yarıda bırakırsanız baştan başlar.
+          • Süre dolduğunda sınav otomatik kaydedilir.<br/>
+          • Sınav sırasında tarayıcıyı kapatmayınız.
         </div>
       </section>
 
       <div class="spacer"></div>
 
-      <button class="btn" id="btnStart" type="button">Seviye Tespit Sınavına Başla</button>
-      <button class="ghost" id="btnBack" type="button">Dil Seçimine Dön</button>
+      <div class="btn-group">
+        <button class="btn btn-main" id="btnStart">Sınavı Başlat</button>
+        <button class="btn btn-ghost" id="btnBack">Geri Dön</button>
+      </div>
     </div>
   </main>
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
-    mountShell({ scroll:"none" });
+    import { bootPage } from "/js/ui_guard.js";
 
-    const KEY_TEACHER = "italky_teacher_pref";
+    mountShell({ scroll: "none" });
+    bootPage({
+      protectedPage: true,
+      header: { nameId: "userName", picId: "userPic" }
+    });
 
     const TEACHERS = {
-      dora:{flag:"🇬🇧", role:"İngilizce Öğretmeni", name:"Dora"},
-      ayda:{flag:"🇩🇪", role:"Almanca Öğretmeni", name:"Ayda"},
-      jale:{flag:"🇫🇷", role:"Fransızca Öğretmeni", name:"Jale"},
-      ozan:{flag:"🇪🇸", role:"İspanyolca Öğretmeni", name:"Ozan"},
-      sencer:{flag:"🇮🇹", role:"İtalyanca Öğretmeni", name:"Sencer"},
-      sungur:{flag:"🇷🇺", role:"Rusça Öğretmeni", name:"Sungur"},
-      huma:{flag:"🇯🇵", role:"Japonca Öğretmeni", name:"Hüma"},
-      umay:{flag:"🇨🇳", role:"Çince Öğretmeni", name:"Umay"},
+      jack:  { flag: "🇬🇧", role: "English Teacher", name: "Jack" },
+      heidi: { flag: "🇩🇪", role: "Deutsch Lehrerin", name: "Heidi" },
+      claire:{ flag: "🇫🇷", role: "Prof de Français", name: "Claire" },
+      diego: { flag: "🇪🇸", role: "Profesor de Español", name: "Diego" },
+      marco: { flag: "🇮🇹", role: "Professore Italiano", name: "Marco" },
+      elena: { flag: "🇷🇺", role: "Учитель Русского", name: "Elena" },
+      kenji: { flag: "🇯🇵", role: "日本語の先生", name: "Kenji" },
+      mei:   { flag: "🇨🇳", role: "中文老师", name: "Mei-Ling" }
     };
 
-    const sel = (localStorage.getItem(KEY_TEACHER) || "").trim();
+    const sel = localStorage.getItem("italky_teacher_pref");
     const t = TEACHERS[sel];
 
-    if(!t){
+    if (!t) {
       location.href = "/pages/teacher_select.html";
-    }else{
+    } else {
       document.getElementById("flag").textContent = t.flag;
       document.getElementById("role").textContent = t.role;
       document.getElementById("teacherName").textContent = t.name;
     }
 
-    document.getElementById("btnStart").addEventListener("click", ()=>{
-      location.href = "/pages/level_test.html";
-    });
-
-    document.getElementById("btnBack").addEventListener("click", ()=>{
-      location.href = "/pages/teacher_select.html";
-    });
+    document.getElementById("btnStart").onclick = () => location.href = "/pages/level_test.html";
+    document.getElementById("btnBack").onclick = () => location.href = "/pages/teacher_select.html";
   </script>
 </body>
 </html>
