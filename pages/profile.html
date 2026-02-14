@@ -3,7 +3,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>italkyAI • Profil</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,145 +11,222 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    #pageContent{ padding: 18px; display:flex; flex-direction:column; gap:14px; }
+    #pageContent{
+      padding: 26px 20px 150px;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
 
     .card{
       background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 28px;
-      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 30px;
+      padding: 22px;
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
     }
 
     .head{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      margin-bottom: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 14px;
     }
+
     .title{
       font-family:"Space Grotesk", system-ui, sans-serif;
-      font-size: 18px; font-weight: 900; margin:0;
-      letter-spacing:-0.4px;
+      font-size: 20px;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: -0.4px;
     }
+
     .badge{
-      display:inline-flex; align-items:center; gap:8px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
       padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
-      font-size: 11px; font-weight: 900;
-      letter-spacing: 1px; text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
       color: rgba(255,255,255,0.85);
       white-space: nowrap;
     }
 
-    .row{
-      display:flex; justify-content:space-between; gap:12px;
-      padding: 12px 12px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      margin-top: 10px;
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
-    .k{ font-size:10.5px; font-weight:900; letter-spacing:2px; text-transform:uppercase; color: rgba(165,180,252,0.95); margin:0 0 6px 0; }
-    .v{ font-size:14px; font-weight:900; color: rgba(255,255,255,0.92); margin:0; text-align:right; word-break:break-word; }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap: 14px;
+      padding: 16px 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .cell{ min-width: 0; }
+    .k{
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(165,180,252,0.95);
+      margin: 0 0 7px 0;
+    }
+    .v{
+      font-size: 14px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.92);
+      margin: 0;
+      word-break: break-word;
+    }
+    .v.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12.5px; }
 
     .wallet{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-top: 12px;
-      padding: 14px;
-      border-radius: 22px;
-      background: rgba(99,102,241,0.10);
-      border: 1px solid rgba(99,102,241,0.25);
+      margin-top: 14px;
+      padding: 18px;
+      border-radius: 26px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.35);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
     }
-    .amt{ font-size: 22px; font-weight: 1000; letter-spacing:-0.5px; }
-    .unit{ font-size: 12px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-left: 6px; }
+    .amt{
+      font-size: 26px;
+      font-weight: 1000;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .amt span{ opacity:.9; font-size: 13px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-left: 6px; }
 
     .btn{
-      height: 46px; border-radius: 16px; border: 0; cursor:pointer;
-      font-weight: 1000; letter-spacing: 0.2px; padding: 0 14px;
+      height: 48px;
+      padding: 0 16px;
+      border-radius: 18px;
+      border: none;
+      cursor:pointer;
+      font-weight: 1000;
+      letter-spacing: 0.2px;
       user-select:none;
+      white-space: nowrap;
     }
     .btn:active{ transform: scale(0.98); }
+
     .btn-primary{
       background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 55%, #ec4899 100%);
-      color:#060412;
+      color:#050510;
     }
     .btn-ghost{
       background: rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.92);
       border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.92);
     }
-    .btn-danger-ghost{
-      background: rgba(255, 0, 90, 0.08);
-      color: rgba(255,255,255,0.85);
-      border: 1px solid rgba(255, 0, 90, 0.25);
+    .btn-danger{
+      background: rgba(255, 0, 90, 0.10);
+      border: 1px solid rgba(255, 0, 90, 0.30);
+      color: rgba(255,255,255,0.92);
     }
 
-    .list{ display:flex; flex-direction:column; gap:10px; margin-top: 12px; }
+    .note{
+      margin-top: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.4;
+    }
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
     .pill{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding: 12px 12px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.04);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding: 14px 14px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
     }
-    .pill .t{ font-size:13px; font-weight:1000; color: rgba(255,255,255,0.92); }
-    .pill .d{ font-size:11px; font-weight:800; color: rgba(255,255,255,0.60); margin-top:4px; }
-    .pill .r{ font-size:13px; font-weight:1000; color: rgba(255,255,255,0.92); opacity:.95; }
+    .pill .t{ font-size: 14px; font-weight: 1000; color: rgba(255,255,255,0.92); }
+    .pill .d{ margin-top: 4px; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.60); }
+    .pill .r{ font-size: 14px; font-weight: 1000; color: rgba(255,255,255,0.92); opacity:.95; white-space: nowrap; }
 
-    .note{ font-size:11px; font-weight:800; color: rgba(255,255,255,0.55); line-height:1.35; margin-top: 10px; }
-    .actions{ display:flex; flex-direction:column; gap: 10px; }
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
   </style>
 </head>
 
 <body>
   <div id="pageContent">
 
-    <!-- Kimlik -->
+    <!-- Kimlik & Cüzdan -->
     <div class="card">
       <div class="head">
         <h2 class="title">Profil</h2>
         <div class="badge" id="memberBadge">Üyelik: …</div>
       </div>
 
-      <div class="row">
-        <div>
-          <div class="k">ID</div>
-          <div class="v" id="pId">…</div>
+      <div class="grid">
+        <div class="row">
+          <div class="cell">
+            <div class="k">ID</div>
+            <div class="v mono" id="pId">…</div>
+          </div>
+          <div class="cell" style="text-align:right">
+            <div class="k">Ad Soyad</div>
+            <div class="v" id="pName">…</div>
+          </div>
         </div>
-        <div style="text-align:right">
-          <div class="k">Ad Soyad</div>
-          <div class="v" id="pName">…</div>
-        </div>
-      </div>
 
-      <div class="row">
-        <div>
-          <div class="k">E-Posta</div>
-          <div class="v" id="pEmail">…</div>
+        <div class="row">
+          <div class="cell">
+            <div class="k">E-Posta</div>
+            <div class="v" id="pEmail">…</div>
+          </div>
+          <div class="cell" style="text-align:right">
+            <div class="k">Kayıt</div>
+            <div class="v" id="createdAtVal">…</div>
+          </div>
         </div>
-        <div style="text-align:right">
-          <div class="k">Kayıt</div>
-          <div class="v" id="createdAtVal">…</div>
-        </div>
-      </div>
 
-      <div class="row">
-        <div>
-          <div class="k">Son Giriş</div>
-          <div class="v" id="lastLoginVal">…</div>
-        </div>
-        <div style="text-align:right">
-          <div class="k">Durum</div>
-          <div class="v">Aktif</div>
+        <div class="row">
+          <div class="cell">
+            <div class="k">Son Giriş</div>
+            <div class="v" id="lastLoginVal">…</div>
+          </div>
+          <div class="cell" style="text-align:right">
+            <div class="k">Durum</div>
+            <div class="v">Aktif</div>
+          </div>
         </div>
       </div>
 
       <div class="wallet">
         <div>
-          <div class="k" style="margin:0 0 6px 0;">Kalan Jeton</div>
-          <div class="amt"><span id="tokenVal">0</span><span class="unit">Jeton</span></div>
+          <div class="k" style="margin:0 0 8px 0;">Kalan Jeton</div>
+          <div class="amt"><span id="tokenVal">0</span><span>Jeton</span></div>
         </div>
         <button class="btn btn-primary" id="buyTokensBtn">Jeton Satın Al</button>
       </div>
@@ -165,9 +242,7 @@
       </div>
 
       <div class="list" id="levelsList"></div>
-      <div class="note" id="levelsEmptyNote" style="display:none;">
-        Henüz seviye sınavına katılmadınız.
-      </div>
+      <div class="note" id="levelsEmptyNote" style="display:none;">Henüz seviye sınavına katılmadınız.</div>
     </div>
 
     <!-- Offline -->
@@ -184,7 +259,7 @@
     <!-- Çıkış & Silme -->
     <div class="actions">
       <button class="btn btn-ghost" id="logoutBtn">Güvenli Çıkış</button>
-      <button class="btn btn-danger-ghost" id="deleteBtn">Hesabımı kalıcı olarak sil</button>
+      <button class="btn btn-danger" id="deleteBtn">Hesabımı kalıcı olarak sil</button>
       <div class="note">Kalıcı silme geri alınamaz. Onay sonrası hesabınız silinmek üzere işlenir.</div>
     </div>
 
@@ -195,10 +270,7 @@
     import { bootPage } from "/js/ui_guard.js";
     import { initProfilePage } from "/js/profile_page.js";
 
-    // Üst/alt bar shell’den
     mountShell();
-
-    // Üst bar kullanıcı ad + foto
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
     await initProfilePage({ setHeaderTokens });
