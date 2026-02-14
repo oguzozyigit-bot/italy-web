@@ -79,87 +79,58 @@
 
   <div id="toast"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-  <script>
-    (function(){
-      const SUPABASE_URL = "https://rkbwcmeqdwuewqeokfas.supabase.co";
-      const SUPABASE_ANON = "sb_publishable_Xh1B9xUhmHCV6A3ffgeIrg_yO6uTX0t";
-      const HOME = "/pages/home.html";
+  const SUPABASE_URL = "https://rkbwcmeqdwuewqeokfas.supabase.co";
+  const SUPABASE_ANON = "sb_publishable_Xh1B9xUhmHCV6A3ffgeIrg_yO6uTX0t";
+  const HOME = "/pages/home.html";
 
-      const box = document.getElementById("googleBtnContainer");
-      const toastEl = document.getElementById("toast");
+  const box = document.getElementById("googleBtnContainer");
+  const toastEl = document.getElementById("toast");
 
-      function toast(msg){
-        if(!toastEl) return;
-        toastEl.textContent = msg;
-        toastEl.classList.add("show");
-        clearTimeout(window.__to);
-        window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2200);
-      }
-      function showError(code, extra){
-        if(!box) return;
-        box.innerHTML = "<p style='color:#ff6b6b;font-size:12px;font-weight:900;margin:0;text-align:center;'>" +
-          "Sistem yüklenemedi (" + code + "). " + (extra ? extra : "") +
-          "</p>";
-      }
+  function toast(msg){
+    if(!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    setTimeout(()=>toastEl.classList.remove("show"),2000);
+  }
 
-      try{
-        if(!window.supabase){ showError("E00","(supabase global yok)"); return; }
-        if(!window.supabase.createClient){ showError("E01","(createClient yok)"); return; }
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-        const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-          auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
-        });
+  function renderButton(){
+    box.innerHTML =
+      `<button id="googleBtn"
+        style="width:100%;max-width:320px;height:44px;border-radius:10px;
+        border:1px solid rgba(255,255,255,0.12);
+        background:rgba(255,255,255,0.06);
+        color:#fff;font-size:15px;font-weight:900;">
+        Google ile Giriş Yap
+      </button>`;
 
-        // Buton çiz
-        if(!box){ return; }
-        box.innerHTML =
-          "<button id='googleBtn' type='button' " +
-          "style='width:100%;max-width:320px;height:44px;border-radius:10px;" +
-          "border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);" +
-          "color:#fff;font-size:15px;font-weight:900;cursor:pointer;'>" +
-          "Google ile Giriş Yap</button>";
+    document.getElementById("googleBtn").onclick = async () => {
+      toast("Google yönlendiriliyor...");
+      await client.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + HOME }
+      });
+    };
+  }
 
-        document.getElementById("googleBtn").onclick = async function(){
-          try{
-            toast("Google yönlendiriliyor...");
-            const redirectTo = window.location.origin + HOME;
-            const r = await client.auth.signInWithOAuth({ provider:"google", options:{ redirectTo } });
-            if(r && r.error){
-              console.error(r.error);
-              showError("E10", r.error.message || "OAuth error");
-            }
-          }catch(e){
-            console.error(e);
-            showError("E11", e && e.message ? e.message : "OAuth crash");
-          }
-        };
+  async function boot(){
+    renderButton();
 
-        // Session varsa home
-        client.auth.getSession().then(({data, error})=>{
-          if(error){
-            console.error(error);
-            // ana ekrana izin ver ama hatayı gösterme (buton kalsın)
-            return;
-          }
-          if(data && data.session){
-            window.location.replace(HOME);
-          }
-        }).catch(e=>{
-          console.error(e);
-          showError("E20", e && e.message ? e.message : "getSession crash");
-        });
+    const { data } = await client.auth.getSession();
+    if(data?.session){
+      window.location.replace(HOME);
+    }
 
-        client.auth.onAuthStateChange(function(_, session){
-          if(session) window.location.replace(HOME);
-        });
+    client.auth.onAuthStateChange((_event, session)=>{
+      if(session) window.location.replace(HOME);
+    });
+  }
 
-      }catch(e){
-        console.error(e);
-        showError("E99", e && e.message ? e.message : "crash");
-      }
-    })();
-  </script>
+  boot();
+</script>
 </body>
 </html>
