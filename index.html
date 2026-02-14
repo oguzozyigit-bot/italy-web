@@ -63,7 +63,6 @@
 
     .action-area { width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center; }
 
-    /* WEB: buton buraya render edilir */
     #googleBtnContainer { width: 100%; max-width: 320px; min-height: 44px; display: flex; justify-content: center; }
 
     .apple-btn {
@@ -149,10 +148,9 @@
 
   <div id="toast"></div>
 
-  <!-- ✅ Supabase UMD (module yok, patlamaz) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- ✅ Supabase UMD (stabil) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
-  <!-- ✅ Inline AUTH (tek dosya, buton kesin gelir) -->
   <script>
     (function () {
       const SUPABASE_URL = "https://rkbwcmeqdwuewqeokfas.supabase.co";
@@ -172,29 +170,26 @@
 
       function showError(msg){
         if(!box) return;
-        box.innerHTML = '<p style="color:#ff6b6b; font-size:12px; font-weight:900; margin:0; text-align:center;">' + msg + '</p>';
+        box.innerHTML = "<p style='color:#ff6b6b;font-size:12px;font-weight:900;margin:0;text-align:center;'>" + msg + "</p>";
       }
 
       if(!window.supabase || !window.supabase.createClient){
-        showError("Supabase yüklenemedi (cdn).");
+        showError("Supabase yüklenemedi (global yok).");
         return;
       }
 
       const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true
-        }
+        auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
       });
 
       function renderButton(){
         if(!box) return;
         box.innerHTML =
-          '<button id="googleBtn" type="button" ' +
-          'style="width:100%; max-width:320px; height:44px; border-radius:10px; ' +
-          'border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); ' +
-          'color:#fff; font-size:15px; font-weight:900; cursor:pointer;">Google ile Giriş Yap</button>';
+          "<button id='googleBtn' type='button' " +
+          "style='width:100%;max-width:320px;height:44px;border-radius:10px;" +
+          "border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);" +
+          "color:#fff;font-size:15px;font-weight:900;cursor:pointer;'>" +
+          "Google ile Giriş Yap</button>";
 
         document.getElementById("googleBtn").onclick = async function(){
           try{
@@ -206,7 +201,7 @@
             });
             if(error){
               console.error(error);
-              showError("Google giriş başlatılamadı: " + (error.message || error));
+              showError("Google giriş hatası: " + (error.message || error));
             }
           }catch(e){
             console.error(e);
@@ -221,15 +216,15 @@
 
           const { data, error } = await client.auth.getSession();
           if(error) console.error(error);
+
           if(data && data.session){
             window.location.replace(HOME);
             return;
           }
 
-          client.auth.onAuthStateChange(function(_event, session){
+          client.auth.onAuthStateChange(function(_, session){
             if(session) window.location.replace(HOME);
           });
-
         }catch(e){
           console.error(e);
           showError("Sistem yüklenemedi (boot).");
