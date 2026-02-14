@@ -1,7 +1,8 @@
 // FILE: /js/auth.js
 import { supabase } from "./supabase_client.js";
 
-const HOME = "/pages/home.html";
+// Sabitler: Projenin ana domainini kullanmak en güvenli yoldur.
+const HOME_URL = "https://italky.ai/pages/home.html";
 const box = document.getElementById("googleBtnContainer");
 const toastEl = document.getElementById("toast");
 
@@ -41,37 +42,54 @@ function renderBtn(){
 }
 
 /**
- * Sayfa Yüklendiğinde Çalışan Başlatıcı
+ * Sayfa Yüklendiğinde Çalışan Başlatıcı (Login Sayfası İçin)
  */
 async function boot(){
   try{
     renderBtn();
-    const { data, error } = await supabase.auth.getSession();
+    
+    // Mevcut bir oturum varsa doğrudan ana sayfaya yönlendir
+    const { data } = await supabase.auth.getSession();
     if(data?.session) {
-       window.location.replace(HOME);
+       window.location.replace(HOME_URL);
        return;
     }
 
     const btn = document.getElementById("googleBtn");
     if(btn) {
       btn.onclick = async () => {
-        toast("Google yönlendiriliyor...");
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: { redirectTo: window.location.origin + HOME }
-        });
-        if(error) showError("Giriş hatası: " + error.message);
+        try {
+          toast("Google yönlendiriliyor...");
+          
+          // Google ile giriş başlat
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: { 
+              redirectTo: HOME_URL // Supabase Redirect URLs listesiyle tam eşleşmeli
+            }
+          });
+          
+          if(error) {
+            console.error("Giriş hatası:", error.message);
+            showError("Giriş hatası: " + error.message);
+          }
+        } catch (e) {
+          showError("Bağlantı hatası oluştu.");
+        }
       };
     }
   }catch(e){
+    console.error("Boot error:", e);
     showError("Sistem yüklenemedi.");
   }
 }
 
+// Eğer sayfada login kutusu varsa başlatıcıyı çalıştır
 if(box) boot();
 
 /**
- * ui_guard.js Köprüsü - 400 Hatası İçin İyileştirildi
+ * 🚩 ui_guard.js İçin Auth State Köprüsü
+ * Bu fonksiyon export edilmek zorundadır.
  */
 export async function startAuthState(callback) {
   const handleAuth = async (session) => {
@@ -80,27 +98,33 @@ export async function startAuthState(callback) {
 
     if (user) {
       try {
-        // Cüzdan verisini çekmeyi dene
+        // Cüzdan verisini (tokens) çekmeyi dene
         const { data, error } = await supabase
           .from("profiles")
           .select("tokens")
           .eq("id", user.id)
-          .maybeSingle(); // single() yerine maybeSingle() 400 hatasını azaltır
+          .maybeSingle(); 
 
         if (error) {
-          console.warn("Profil çekilemedi (Muhtemelen yeni kullanıcı):", error.message);
+          console.warn("Profil sütunu veya satırı bulunamadı:", error.message);
         }
+        
+        // Eğer veri geldiyse cüzdanı güncelle, gelmediyse 0 göster
         wallet = data?.tokens || 0;
       } catch (e) {
-        console.error("Cüzdan hatası:", e);
+        console.error("Cüzdan verisi işlenemedi:", e);
       }
     }
+    
+    // ui_guard.js'e güncel durumu bildir
     callback({ user, wallet });
   };
 
+  // İlk yüklemede durumu kontrol et
   const { data: { session } } = await supabase.auth.getSession();
   await handleAuth(session);
 
+  // Oturum değişikliklerini (Login/Logout) dinle
   supabase.auth.onAuthStateChange(async (_event, session) => {
     await handleAuth(session);
   });
