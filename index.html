@@ -80,57 +80,96 @@
   <div id="toast"></div>
 
   <script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    // ✅ Mobilde en stabil ESM kaynağı
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-  const SUPABASE_URL = "https://rkbwcmeqdwuewqeokfas.supabase.co";
-  const SUPABASE_ANON = "sb_publishable_Xh1B9xUhmHCV6A3ffgeIrg_yO6uTX0t";
-  const HOME = "/pages/home.html";
+    const SUPABASE_URL  = "https://rkbwcmeqdwuewqeokfas.supabase.co";
+    const SUPABASE_KEY  = "sb_publishable_Xh1B9xUhmHCV6A3ffgeIrg_yO6uTX0t";
+    const HOME_PATH     = "/pages/home.html";
 
-  const box = document.getElementById("googleBtnContainer");
-  const toastEl = document.getElementById("toast");
+    const box = document.getElementById("googleBtnContainer");
+    const toastEl = document.getElementById("toast");
 
-  function toast(msg){
-    if(!toastEl) return;
-    toastEl.textContent = msg;
-    toastEl.classList.add("show");
-    setTimeout(()=>toastEl.classList.remove("show"),2000);
-  }
-
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON);
-
-  function renderButton(){
-    box.innerHTML =
-      `<button id="googleBtn"
-        style="width:100%;max-width:320px;height:44px;border-radius:10px;
-        border:1px solid rgba(255,255,255,0.12);
-        background:rgba(255,255,255,0.06);
-        color:#fff;font-size:15px;font-weight:900;">
-        Google ile Giriş Yap
-      </button>`;
-
-    document.getElementById("googleBtn").onclick = async () => {
-      toast("Google yönlendiriliyor...");
-      await client.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.origin + HOME }
-      });
-    };
-  }
-
-  async function boot(){
-    renderButton();
-
-    const { data } = await client.auth.getSession();
-    if(data?.session){
-      window.location.replace(HOME);
+    function toast(msg){
+      if(!toastEl) return;
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2200);
     }
 
-    client.auth.onAuthStateChange((_event, session)=>{
-      if(session) window.location.replace(HOME);
-    });
-  }
+    function showError(msg){
+      if(!box) return;
+      box.innerHTML = `<p style="color:#ff6b6b;font-size:12px;font-weight:900;margin:0;text-align:center;">${msg}</p>`;
+    }
 
-  boot();
-</script>
+    function renderButton(){
+      if(!box) return;
+      box.innerHTML = `
+        <button id="googleBtn"
+          style="width:100%;max-width:320px;height:44px;border-radius:10px;
+          border:1px solid rgba(255,255,255,0.12);
+          background:rgba(255,255,255,0.06);
+          color:#fff;font-size:15px;font-weight:900;cursor:pointer;"
+          type="button">
+          Google ile Giriş Yap
+        </button>`;
+    }
+
+    const client = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    async function boot(){
+      try{
+        renderButton();
+
+        // Session varsa home
+        const { data: sessData, error: sessErr } = await client.auth.getSession();
+        if(sessErr) console.error(sessErr);
+        if(sessData?.session){
+          window.location.replace(HOME_PATH);
+          return;
+        }
+
+        // Click -> OAuth
+        const btn = document.getElementById("googleBtn");
+        btn.onclick = async () => {
+          try{
+            toast("Google yönlendiriliyor...");
+            const redirectTo = window.location.origin + HOME_PATH;
+
+            const { error } = await client.auth.signInWithOAuth({
+              provider: "google",
+              options: { redirectTo }
+            });
+
+            if(error){
+              console.error(error);
+              showError("Google giriş hatası: " + (error.message || error));
+            }
+          }catch(e){
+            console.error(e);
+            showError("Google giriş başlatılamadı: " + (e?.message || e));
+          }
+        };
+
+        // Auth değişirse home
+        client.auth.onAuthStateChange((_event, session)=>{
+          if(session) window.location.replace(HOME_PATH);
+        });
+
+      }catch(e){
+        console.error(e);
+        showError("Sistem yüklenemedi: " + (e?.message || e));
+      }
+    }
+
+    boot();
+  </script>
 </body>
 </html>
