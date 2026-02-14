@@ -1,3 +1,4 @@
+<!-- FILE: /pages/login.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -26,15 +27,26 @@
     .hero-text{ margin-top:50px; }
     .hero-text h1{ font-size:26px; font-weight:700; margin-bottom:12px; }
     .hero-text p{ font-size:15px; color:var(--text-grey); line-height:1.5; }
-    .features-list{ margin-top:30px; padding:0; list-style:none; }
+    .features-list{ margin-top:30px; padding:0; list-style:none; text-align:left; display:inline-block; }
     .features-list li{ margin-bottom:14px; font-size:16px; font-weight:500; display:flex; align-items:center; gap:12px; }
     .features-list li::before{ content:"✦"; color:#6366f1; font-weight:900; }
-    .action-area{ width:100%; display:flex; flex-direction:column; gap:15px; align-items:center; }
-    #googleBtnContainer{ width:100%; max-width:320px; min-height:44px; display:flex; justify-content:center; }
-    .apple-btn{ width:100%; max-width:320px; height:44px; border-radius:10px; border:none; background:#000; color:#fff; font-size:15px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; }
-    .footer-links{ display:flex; justify-content:center; gap:15px; margin-top:30px; }
+
+    .action-area{ width:100%; display:flex; flex-direction:column; gap:14px; align-items:center; }
+    .google-btn{
+      width:100%; max-width:320px; height:46px; border-radius:12px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(0,0,0,0.35);
+      color:#fff; font-size:15px; font-weight:900;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      cursor:pointer; user-select:none;
+    }
+    .google-btn:active{ transform:scale(.99); }
+    .g-icon{ width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; }
+
+    .footer-links{ display:flex; justify-content:center; gap:15px; margin-top:30px; flex-wrap:wrap; }
     .footer-links a{ color:rgba(255,255,255,.4); text-decoration:none; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
     .copyright{ text-align:center; margin-top:15px; font-size:10px; color:rgba(255,255,255,.15); font-weight:700; letter-spacing:1px; }
+
     #toast{ position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-120px); background:rgba(10,10,18,.92); border:1px solid rgba(165,180,252,.35); padding:10px 14px; border-radius:999px; color:#fff; z-index:9999; font-weight:900; font-size:12px; transition:.25s; backdrop-filter:blur(12px); pointer-events:none; max-width:min(92vw,520px); text-align:center; }
     #toast.show{ transform:translateX(-50%) translateY(0); }
   </style>
@@ -63,8 +75,17 @@
 
     <div class="bottom-area">
       <div class="action-area">
-        <div id="googleBtnContainer"></div>
-        <button class="apple-btn" id="appleBtn" type="button"><span>Apple ile Giriş Yap</span></button>
+        <button class="google-btn" id="googleBtn" type="button">
+          <span class="g-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-1.5 3.6-5.5 3.6-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17.9 2.5 15.3 1.2 12 1.2 5.9 1.2 1 6.1 1 12s4.9 10.8 11 10.8c6.3 0 10.4-4.4 10.4-10.6 0-.7-.1-1.2-.2-1.7H12z"/>
+              <path fill="#34A853" d="M3.6 7.7l3.2 2.3C7.7 8 9.7 6.5 12 6.5c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17.9 2.5 15.3 1.2 12 1.2c-4.2 0-7.8 2.4-9.6 6.5z"/>
+              <path fill="#FBBC05" d="M12 22.8c3.2 0 5.9-1.1 7.9-2.9l-3.6-2.8c-1 .7-2.3 1.2-4.3 1.2-3.2 0-5.8-2.1-6.7-5l-3.4 2.6c1.8 3.5 5.4 5.9 10.1 5.9z"/>
+              <path fill="#4285F4" d="M22.2 12.2c0-.7-.1-1.2-.2-1.7H12v3.9h5.5c-.3 1.3-1.5 3.6-5.5 3.6-3.3 0-6-2.7-6-6 0-.6.1-1.1.2-1.6L2.8 10c-.6 1.2-.9 2.6-.9 4 0 5.9 4.9 10.8 11 10.8 6.3 0 10.4-4.4 10.4-10.6z"/>
+            </svg>
+          </span>
+          <span>Google ile Devam Et</span>
+        </button>
       </div>
 
       <div class="footer-links">
@@ -80,16 +101,11 @@
   <div id="toast"></div>
 
   <script type="module">
-    // DEBUG KODU: E00 (Deploy doğrulaması için)
-    console.log("Debug Code: E00 - italkyAI Booting...");
+    import { supabase } from "/js/supabase_client.js";
+    import { ensureAuthAndCacheUser, loginWithGoogle } from "/js/auth.js";
 
-    const SUPABASE_URL  = "https://rkbwcmeqdwuewqeokfas.supabase.co";
-    // ÖNEMLİ: Buradaki key 'anon' key olmalı, 'publishable' değilse hata verebilir.
-    const SUPABASE_KEY  = "sb_publishable_Xh1B9xUhmHCV6A3ffgeIrg_yO6uTX0t"; 
-    const HOME_PATH     = "/pages/home.html";
-
-    const box = document.getElementById("googleBtnContainer");
     const toastEl = document.getElementById("toast");
+    const HOME = "/pages/home.html";
 
     function toast(msg){
       if(!toastEl) return;
@@ -99,59 +115,30 @@
       window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2200);
     }
 
-    function showError(code, msg){
-      if(!box) return;
-      box.innerHTML = `<p style="color:#ff6b6b;font-size:12px;font-weight:900;margin:0;text-align:center;">
-        Sistem yüklenemedi (${code}). <br> <span style="font-weight:400">${msg || ""}</span>
-      </p>`;
-    }
-
-    async function boot(){
+    async function checkSession(){
       try{
-        // 1. Supabase Yükleme
-        let createClient;
-        try{
-          const sb = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
-          createClient = sb.createClient;
-        }catch(e){
-          showError("E_IMPORT", "CDN bağlantısı kurulamadı.");
-          return;
+        const { data: { session } } = await supabase.auth.getSession();
+        if(session){
+          toast("Oturum bulundu, devam ediliyor...");
+          await ensureAuthAndCacheUser();
+          location.replace(HOME);
         }
-
-        const client = createClient(SUPABASE_URL, SUPABASE_KEY, {
-          auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
-        });
-
-        // 2. Butonu Render Et
-        box.innerHTML = `
-          <button id="googleBtn" 
-            style="width:100%;max-width:320px;height:44px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#fff;font-size:15px;font-weight:900;cursor:pointer;">
-            Google ile Giriş Yap (E00)
-          </button>`;
-
-        // 3. Mevcut Session Kontrolü
-        const { data: { session } } = await client.auth.getSession();
-        if(session) {
-            window.location.replace(HOME_PATH);
-            return;
-        }
-
-        // 4. Click Event
-        document.getElementById("googleBtn").onclick = async () => {
-          toast("Google yönlendiriliyor...");
-          const { error } = await client.auth.signInWithOAuth({
-            provider: "google",
-            options: { redirectTo: window.location.origin + HOME_PATH }
-          });
-          if(error) showError("E_OAUTH", error.message);
-        };
-
       }catch(e){
-        showError("E_BOOT", e.message);
+        console.error(e);
       }
     }
 
-    boot();
-</script>
+    document.getElementById("googleBtn")?.addEventListener("click", async ()=>{
+      try{
+        toast("Google yönlendiriliyor...");
+        await loginWithGoogle();
+      }catch(e){
+        console.error(e);
+        toast(e?.message || "Giriş başlatılamadı.");
+      }
+    });
+
+    checkSession();
+  </script>
 </body>
 </html>
