@@ -1,13 +1,13 @@
 // FILE: /js/profile_page.js
 import { supabase } from "/js/supabase_client.js";
+import { STORAGE_KEY } from "/js/config.js";
 
 const $ = (id)=>document.getElementById(id);
 
-// Senin tablonda level kolonları şimdilik yok.
-// İleride ekleyince buraya eklersin.
 const LEVEL_FIELDS = [
-  // { field: "level_en", label: "English" },
-  // { field: "level_de", label: "Deutsch" },
+  { field: "level_jack",  label: "English • Jack" },
+  { field: "level_heidi", label: "Deutsch • Heidi" },
+  { field: "level_diego", label: "Español • Diego" },
 ];
 
 function fmtDateTime(iso){
@@ -27,23 +27,6 @@ function escapeHtml(s){
     .replaceAll("'","&#039;");
 }
 
-// 1 harf + 7 rakam (yan yana ardışık rakam yok)
-function generateMemberNo(){
-  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  const letter = letters[Math.floor(Math.random()*letters.length)];
-  const digits = [];
-  while(digits.length < 7){
-    const d = Math.floor(Math.random()*10);
-    if(digits.length){
-      const prev = digits[digits.length-1];
-      if(d === prev) continue;
-      if(Math.abs(d - prev) === 1) continue; // ardışık yok
-    }
-    digits.push(d);
-  }
-  return `${letter}${digits.join("")}`;
-}
-
 function pill(title, desc, right){
   const div = document.createElement("div");
   div.className = "pill";
@@ -57,72 +40,27 @@ function pill(title, desc, right){
   return div;
 }
 
-async function requireSession(){
+async function requireSessionOrRedirect(){
   const { data, error } = await supabase.auth.getSession();
   if(error) throw error;
-  const session = data?.session;
-  if(!session){
+  if(!data?.session){
     location.replace("/pages/login.html");
     return null;
   }
-  return session;
+  return data.session;
 }
 
-async function ensureProfile(){
-  // Öncelik: RPC varsa onu kullan (en güvenlisi)
-  const { data: p1, error: e1 } = await supabase.rpc("ensure_profile");
-  if(!e1 && p1) return p1;
-
-  // RPC yoksa fallback: select
-  const { data: { user } } = await supabase.auth.getUser();
-  if(!user) throw new Error("No user");
+async function fetchProfileEnsured(userId){
+  const { data: p, error: e } = await supabase.rpc("ensure_profile");
+  if(!e && p) return p;
 
   const { data: p2, error: e2 } = await supabase
     .from("profiles")
     .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
+    .eq("id", userId)
+    .single();
   if(e2) throw e2;
-  if(p2) {
-    // last_login güncelle
-    try{ await supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", user.id); }catch(_e){}
-    return p2;
-  }
-
-  // Son fallback: insert dene (RLS izin vermezse patlar)
-  const payload = {
-    id: user.id,
-    full_name: user.user_metadata?.full_name || user.user_metadata?.name || "",
-    email: user.email || "",
-    avatar_url: user.user_metadata?.picture || "",
-    tokens: 400,
-    last_login_at: new Date().toISOString()
-  };
-
-  const { data: p3, error: e3 } = await supabase
-    .from("profiles")
-    .insert(payload)
-    .select("*")
-    .single();
-
-  if(e3) throw e3;
-  return p3;
-}
-
-async function ensureMemberNoIfMissing(profile){
-  if(profile.member_no) return profile.member_no;
-
-  const candidate = generateMemberNo();
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({ member_no: candidate })
-    .eq("id", profile.id)
-    .select("member_no")
-    .single();
-
-  if(error) throw error;
-  return data?.member_no || candidate;
+  return p2;
 }
 
 function renderLevels(profile){
@@ -138,7 +76,6 @@ function renderLevels(profile){
     empty.style.display = "block";
     return;
   }
-
   empty.style.display = "none";
   for(const it of items){
     list.appendChild(pill(it.label, "Seviye tespit sonucu", String(it.value)));
@@ -151,25 +88,50 @@ function renderOffline(profile){
   list.innerHTML = "";
 
   const langs = Array.isArray(profile?.offline_langs) ? profile.offline_langs : [];
-
   if(langs.length === 0){
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
-
   for(const x of langs){
     list.appendChild(pill(String(x), "Offline paket indirildi", "Hazır"));
   }
 }
 
-async function buyTokens(){
-  alert("Jeton satın alma web sürümünde kapalı. APK’da Google Play üzerinden açılacak.");
+function nukeSupabaseAuthStorage(){
+  try{
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!k) continue;
+      // Supabase v2 token anahtarı genelde: sb-<projectref>-auth-token
+      if(k.startsWith("sb-") && k.includes("auth-token")) keys.push(k);
+    }
+    keys.forEach(k=>localStorage.removeItem(k));
+  }catch(_e){}
 }
 
-async function logout(){
-  await supabase.auth.signOut();
-  location.replace("/pages/login.html");
+async function safeLogoutHard(){
+  // 1) Supabase signOut (global)
+  try{
+    await supabase.auth.signOut({ scope: "global" });
+  }catch(_e){
+    // devam
+  }
+
+  // 2) bizim cache + NAC
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(_e){}
+  try{ localStorage.removeItem("NAC_ID"); }catch(_e){}
+
+  // 3) Supabase auth token’ı da sök
+  nukeSupabaseAuthStorage();
+
+  // 4) login
+  location.href = "/pages/login.html";
+}
+
+async function buyTokens(){
+  alert("Jeton satın alma web sürümünde kapalı. APK sürümünde Google Play ile açılacak.");
 }
 
 async function deleteAccountFlow(){
@@ -178,55 +140,41 @@ async function deleteAccountFlow(){
   const ok2 = confirm("Son kez: Bu işlem geri alınamaz. Devam edilsin mi?");
   if(!ok2) return;
 
-  // Kalıcı silme admin ister -> Edge Function gerekir
   try{
     const { error } = await supabase.functions.invoke("delete_account");
     if(error) throw error;
     alert("Hesap silme işlemi başlatıldı.");
-    location.replace("/pages/login.html");
+    await safeLogoutHard();
   }catch(e){
     alert("Kalıcı silme şu an aktif değil. Edge Function 'delete_account' kurulmalı.\n\nDetay: " + (e?.message || e));
   }
 }
 
 export async function initProfilePage({ setHeaderTokens } = {}){
-  const session = await requireSession();
+  const session = await requireSessionOrRedirect();
   if(!session) return;
 
   const user = session.user;
+  const profile = await fetchProfileEnsured(user.id);
 
-  const profile = await ensureProfile();
-  const memberNo = await ensureMemberNoIfMissing(profile);
+  $("pId").textContent = profile?.id || user.id;
+  $("pName").textContent = profile?.full_name || user.user_metadata?.full_name || user.user_metadata?.name || "Kullanıcı";
+  $("pEmail").textContent = profile?.email || user.email || "—";
+  $("memberBadge").textContent = `Üyelik: ${profile?.member_no || "—"}`;
 
-  // Profili taze çek (member_no yazıldıysa görünsün)
-  const { data: fresh, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-  if(error) throw error;
+  $("createdAtVal").textContent = fmtDateTime(profile?.created_at);
+  $("lastLoginVal").textContent = fmtDateTime(profile?.last_login_at);
 
-  // UI bind
-  $("pId").textContent = fresh.id || user.id;
-  $("pName").textContent = fresh.full_name || user.user_metadata?.full_name || user.user_metadata?.name || "Kullanıcı";
-  $("pEmail").textContent = fresh.email || user.email || "—";
-
-  $("memberBadge").textContent = `Üyelik: ${memberNo}`;
-
-  const tokens = Number(fresh.tokens ?? 0);
+  const tokens = Number(profile?.tokens ?? 0);
   $("tokenVal").textContent = String(tokens);
   if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
 
-  $("createdAtVal").textContent = fmtDateTime(fresh.created_at);
-  $("lastLoginVal").textContent = fmtDateTime(fresh.last_login_at);
+  renderLevels(profile);
+  renderOffline(profile);
 
-  renderLevels(fresh);
-  renderOffline(fresh);
-
-  // actions
-  $("buyTokensBtn").addEventListener("click", buyTokens);
-  $("goTeacherSelectBtn").addEventListener("click", ()=>location.href="/pages/teacher_select.html");
-  $("offlineDownloadBtn").addEventListener("click", ()=>location.href="/pages/offline.html");
-  $("logoutBtn").addEventListener("click", logout);
-  $("deleteBtn").addEventListener("click", deleteAccountFlow);
+  $("buyTokensBtn")?.addEventListener("click", buyTokens);
+  $("goTeacherSelectBtn")?.addEventListener("click", ()=>location.href="/pages/teacher_select.html");
+  $("offlineDownloadBtn")?.addEventListener("click", ()=>location.href="/pages/offline.html");
+  $("logoutBtn")?.addEventListener("click", safeLogoutHard);
+  $("deleteBtn")?.addEventListener("click", deleteAccountFlow);
 }
