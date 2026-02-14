@@ -5,157 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Akademi Giriş</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
-
   <style>
     #pageContent { height: 100%; overflow: hidden; }
     .wrap { height: 100%; padding: 10px 16px 20px; display: flex; flex-direction: column; }
-
-    .hero {
-      border-radius: 32px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: linear-gradient(165deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
-      backdrop-filter: blur(20px);
-      padding: 24px 20px;
-    }
-
+    .hero { border-radius: 32px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); padding: 24px 20px; }
     .topRow { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-    .flagBox {
-      width: 70px; height: 70px; border-radius: 24px;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2);
-    }
-    .flagBox span { font-size: 34px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }
-
-    .who { display: flex; flex-direction: column; gap: 2px; }
-    .role { font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; letter-spacing: 1.5px; }
-    .name { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
-
-    .title { font-size: 19px; font-weight: 800; line-height: 1.3; color: #fff; margin-bottom: 12px; }
-    .cost-badge { display: inline-block; padding: 6px 12px; border-radius: 10px; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; font-weight: 900; font-size: 13px; margin-bottom: 15px; }
-
-    .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .rule { border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); padding: 15px; text-align: center; }
-    .k { font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; }
-    .v { font-size: 20px; font-weight: 900; color: #fff; margin-top: 4px; }
-
-    .note { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.4); line-height: 1.6; }
-    .spacer { flex: 1; }
-
-    .btn-group { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-    .btn { height: 56px; border-radius: 18px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .flagBox { width: 70px; height: 70px; border-radius: 24px; display: flex; align-items: center; justify-content: center; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); }
+    .flagBox span { font-size: 34px; }
+    .who { display: flex; flex-direction: column; }
+    .role { font-size: 13px; font-weight: 800; color: #a5b4fc; text-transform: uppercase; }
+    .name { font-size: 24px; font-weight: 900; color: #fff; }
+    .cost-badge { display: inline-block; padding: 6px 12px; border-radius: 10px; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; font-weight: 900; margin: 15px 0; }
+    .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .rule { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 20px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+    .k { font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    .v { font-size: 20px; font-weight: 900; color: #fff; }
+    .btn { height: 56px; border-radius: 18px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; margin-top: auto; }
     .btn-main { background: #fff; color: #000; }
-    .btn-main:disabled { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); cursor: not-allowed; }
-    .btn-ghost { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
-    .btn:active:not(:disabled) { transform: scale(0.96); }
+    .btn-main:disabled { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); }
   </style>
 </head>
-
 <body>
   <main id="pageContent">
     <div class="wrap">
       <section class="hero">
         <div class="topRow">
           <div class="flagBox"><span id="flag">🏳️</span></div>
-          <div class="who">
-            <div class="role" id="role">DERS SEÇİMİ</div>
-            <div class="name" id="teacherName">Yükleniyor...</div>
-          </div>
+          <div class="who"><div class="role" id="role">DERS SEÇİMİ</div><div class="name" id="teacherName">...</div></div>
         </div>
-
-        <div class="title">Seviye tespit sınavı ile akademi yolculuğunu başlat.</div>
-        <div class="cost-badge">Sınav Ücreti: 200 Token</div>
-
+        <div class="cost-badge">Sınav Giriş: 200 Token</div>
         <div class="rules">
           <div class="rule"><div class="k">Soru</div><div class="v">50</div></div>
           <div class="rule"><div class="k">Süre</div><div class="v">40 dk</div></div>
         </div>
-
-        <div class="note">
-          • 10 Token = 4 TL | Dakika maliyeti 5 Token'dır.<br/>
-          • Sınav erken biterse, kalan süreniz iade edilir.<br/>
-          • Süre dolduğunda seviyeniz otomatik hesaplanır.
-        </div>
+        <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-top:15px;">• 10 Token = 4 TL | Dakika maliyeti 5 Token'dır.<br/>• Sınavı erken bitirirseniz, kalan sürenin tokenleri iade edilir.</p>
       </section>
-
-      <div class="spacer"></div>
-
-      <div class="btn-group">
-        <button class="btn btn-main" id="btnStart" disabled>Bakiye Kontrol Ediliyor...</button>
-        <button class="btn btn-ghost" id="btnBack">Geri Dön</button>
-      </div>
+      <button class="btn btn-main" id="btnStart" disabled>Bakiye Kontrol Ediliyor...</button>
     </div>
   </main>
-
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { bootPage } from "/js/ui_guard.js";
     import { supabase } from "/js/supabase_client.js";
 
-    const TEST_COST = 200; // Sınav giriş maliyeti
-
     mountShell({ scroll: "none" });
-    
-    // Sayfayı boot et ve cüzdanı takip et
-    bootPage({
-      protectedPage: true,
-      header: { nameId: "userName", picId: "userPic" },
-      wallet: { elId: "walletVal" } // Global cüzdan elementin varsa
-    });
+    bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    const TEACHERS = {
-      jack:  { flag: "🇬🇧", role: "English Teacher", name: "Jack" },
-      heidi: { flag: "🇩🇪", role: "Deutsch Lehrerin", name: "Heidi" },
-      claire:{ flag: "🇫🇷", role: "Prof de Français", name: "Claire" },
-      diego: { flag: "🇪🇸", role: "Profesor de Español", name: "Diego" },
-      marco: { flag: "🇮🇹", role: "Professore Italiano", name: "Marco" },
-      elena: { flag: "🇷🇺", role: "Учитель Русского", name: "Elena" },
-      kenji: { flag: "🇯🇵", role: "日本語の先生", name: "Kenji" },
-      mei:   { flag: "🇨🇳", role: "中文老师", name: "Mei-Ling" }
-    };
-
+    const TEACHERS = { jack:{flag:"🇬🇧", role:"English", name:"Jack"}, heidi:{flag:"🇩🇪", role:"Deutsch", name:"Heidi"}, claire:{flag:"🇫🇷", role:"Français", name:"Claire"}, diego:{flag:"🇪🇸", role:"Español", name:"Diego"}, marco:{flag:"🇮🇹", role:"Italiano", name:"Marco"}, elena:{flag:"🇷🇺", role:"Pусский", name:"Elena"}, kenji:{flag:"🇯🇵", role:"日本語", name:"Kenji"}, mei:{flag:"🇨🇳", role:"中文", name:"Mei-Ling"} };
     const sel = localStorage.getItem("italky_teacher_pref");
     const t = TEACHERS[sel];
+    if(t) { document.getElementById("flag").textContent = t.flag; document.getElementById("teacherName").textContent = t.name; }
 
-    if (!t) {
-      location.href = "/pages/teacher_select.html";
-    } else {
-      document.getElementById("flag").textContent = t.flag;
-      document.getElementById("role").textContent = t.role;
-      document.getElementById("teacherName").textContent = t.name;
-    }
-
-    // Bakiye ve Yetki Kontrolü
     async function checkWallet() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tokens')
-        .eq('id', user.id)
-        .single();
-
+      const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
       const btn = document.getElementById("btnStart");
-      const currentTokens = profile?.tokens || 0;
-
-      if (currentTokens >= TEST_COST) {
-        btn.disabled = false;
-        btn.textContent = "Sınavı Başlat (200 Token)";
-      } else {
-        btn.disabled = true;
-        btn.textContent = "Yetersiz Bakiye (Min: 200 TK)";
-        btn.style.color = "#ff6b6b";
-      }
+      if ((profile?.tokens || 0) >= 200) { btn.disabled = false; btn.textContent = "Sınavı Başlat (200 Token)"; }
+      else { btn.disabled = true; btn.textContent = "Yetersiz Bakiye (Min: 200 TK)"; }
     }
-
-    document.getElementById("btnStart").onclick = async () => {
-      // Sınav başladığında Token ön çekim veya flag işaretleme buraya gelebilir
-      location.href = "/pages/level_test.html";
-    };
-
-    document.getElementById("btnBack").onclick = () => location.href = "/pages/teacher_select.html";
-
-    // Kontrolü başlat
+    document.getElementById("btnStart").onclick = () => location.href = "/pages/level_test.html";
     checkWallet();
   </script>
 </body>
