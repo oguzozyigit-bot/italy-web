@@ -1,73 +1,71 @@
+<!-- FILE: /pages/home.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI - Premium Menü</title>
+  <title>italkyAI - Premium Experience</title>
   <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    /* HOME ÖZEL KART TASARIMLARI (DOKUNULMAZ) */
-    .grid-layout {
-      display: grid;
+    /* ✅ HOME ORTA İÇERİK: DOKUNULMAZ (Kartlar) */
+    .grid-layout{
+      display:grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap:14px;
     }
 
-    .premium-card {
-      position: relative;
+    .premium-card{
+      position:relative;
       background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
       border: 1px solid rgba(255,255,255,0.10);
       border-radius: 28px;
       padding: 20px 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
       transition: all .35s cubic-bezier(0.22, 1, 0.36, 1);
-      cursor: pointer;
-      overflow: hidden;
-      user-select: none;
+      cursor:pointer;
+      overflow:hidden;
+      user-select:none;
     }
+    .premium-card:active{ transform: scale(0.96); background: rgba(255,255,255,0.10); }
 
-    .premium-card:active { transform: scale(0.96); background: rgba(255,255,255,0.10); }
-
-    .neon-icon-wrap {
-      width: 56px; height: 50px;
-      border-radius: 18px;
-      display: flex; align-items: center; justify-content: center;
+    .neon-icon-wrap{
+      width:56px; height:50px;
+      border-radius:18px;
+      display:flex; align-items:center; justify-content:center;
       margin-bottom: 12px;
-      position: relative;
+      position:relative;
       background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.12);
     }
-
-    .premium-card svg {
-      width: 26px; height: 26px;
-      fill: none;
-      stroke-width: 2.4;
+    .premium-card svg{
+      width:26px; height:26px;
+      fill:none;
+      stroke-width:2.4;
       opacity: .98;
     }
 
-    /* Kart İkon Glow ve Renkleri */
-    .card-face svg { stroke:#4facfe; filter: drop-shadow(0 0 10px rgba(79,172,254,.55)); }
-    .card-voice svg { stroke:#f5576c; filter: drop-shadow(0 0 10px rgba(245,87,108,.55)); }
-    .card-text svg { stroke:#38f9d7; filter: drop-shadow(0 0 10px rgba(56,249,215,.50)); }
-    .card-chat svg { stroke:#fa709a; filter: drop-shadow(0 0 10px rgba(250,112,154,.45)); }
-    .card-photo svg { stroke:#667eea; filter: drop-shadow(0 0 10px rgba(118,75,162,.45)); }
-    .card-teacher svg { stroke:#00d2ff; filter: drop-shadow(0 0 10px rgba(0,210,255,.45)); }
-    .card-doc svg { stroke:#d57eeb; filter: drop-shadow(0 0 10px rgba(213,126,235,.45)); }
-    .card-game svg { stroke:#ff9a9e; filter: drop-shadow(0 0 10px rgba(255,154,158,.40)); }
+    .card-face svg{ stroke:#4facfe; filter: drop-shadow(0 0 10px rgba(79,172,254,.55)); }
+    .card-voice svg{ stroke:#f5576c; filter: drop-shadow(0 0 10px rgba(245,87,108,.55)); }
+    .card-text svg{ stroke:#38f9d7; filter: drop-shadow(0 0 10px rgba(56,249,215,.50)); }
+    .card-chat svg{ stroke:#fa709a; filter: drop-shadow(0 0 10px rgba(250,112,154,.45)); }
+    .card-photo svg{ stroke:#667eea; filter: drop-shadow(0 0 10px rgba(118,75,162,.45)); }
+    .card-teacher svg{ stroke:#00d2ff; filter: drop-shadow(0 0 10px rgba(0,210,255,.45)); }
+    .card-doc svg{ stroke:#d57eeb; filter: drop-shadow(0 0 10px rgba(213,126,235,.45)); }
+    .card-game svg{ stroke:#ff9a9e; filter: drop-shadow(0 0 10px rgba(255,154,158,.40)); }
 
-    .card-title { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
-    .card-desc { font-size: 10.5px; color: rgba(255,255,255,0.65); font-weight: 700; margin-top: 4px; text-align: center; }
+    .card-title{ font-size: 17px; font-weight:800; color:#fff; letter-spacing:-0.5px; }
+    .card-desc{ font-size: 10.5px; color: rgba(255,255,255,0.65); font-weight:700; margin-top:4px; text-align:center; }
   </style>
 </head>
 
 <body>
-
+  <!-- ✅ SADECE ORTA İÇERİK (Shell bunu giydirir) -->
   <div id="pageContent">
     <div class="grid-layout">
 
@@ -126,18 +124,18 @@
     import { mountShell } from "/js/ui_shell.js";
     import { bootPage } from "/js/ui_guard.js";
 
-    // ✅ 1. Shell'i Giydir (Header/Footer/Jeton Alanı)
+    // 1) Shell'i giydir (üst/alt bar + arka plan + main padding)
     mountShell();
 
-    // ✅ 2. Sayfa Bilgilerini ve Jetonları Senkron Et
+    // 2) Kullanıcı ad + foto (senin mevcut sistem)
     bootPage({
       protectedPage: true,
-      header: { nameId: "userName", picId: "userPic" }
+      header: { nameId:"userName", picId:"userPic" }
     });
 
-    // Kart Yönlendirmeleri
-    document.querySelectorAll(".premium-card[data-href]").forEach(card => {
-      card.addEventListener("click", () => location.href = card.getAttribute("data-href"));
+    // 3) Kart nav
+    document.querySelectorAll(".premium-card[data-href]").forEach(card=>{
+      card.addEventListener("click", ()=>location.href = card.getAttribute("data-href"));
     });
   </script>
 </body>
