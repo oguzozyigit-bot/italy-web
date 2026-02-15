@@ -5,7 +5,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Seviye Tespit</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
   <style>
     #pageContent { height: 100%; overflow: hidden; }
     .wrap { height: 100%; padding: 10px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
@@ -65,6 +69,7 @@
       line-height: 1.55;
     }
     .tips b{ color:#fff; }
+
     .mini{
       margin-top: 10px;
       font-size: 11px;
@@ -96,7 +101,7 @@
           <div class="flagBox"><span id="flag">🏁</span></div>
           <div class="who">
             <div class="role" id="role">Seviye Tespit</div>
-            <div class="name" id="teacherName">italky Academy</div>
+            <div class="name" id="langName">italky Academy</div>
           </div>
         </div>
 
@@ -109,14 +114,14 @@
 
         <div class="tips">
           <b>Bu sınav, italky Academy ders planınızı doğru kurmak için kritiktir.</b><br/>
-          Lütfen mümkünse <b>sessiz bir ortamda</b> sınava girmenizi tavsiye ederiz. Sınav sırasında <b>dış kanallardan destek</b> (çeviri, sözlük, birinden yardım almak vb.)
-          almak, gerçek seviyenizi gizler ve dil gelişiminizi <b>yavaşlatır</b>.<br/><br/>
-          <b>Öneri:</b> Testi tek başınıza, dikkatinizi bölmeden tamamlayın. Böylece sistem size en doğru seviyeyi verir ve dersler tam hedefe oturur.
+          Lütfen mümkünse <b>sessiz bir ortamda</b> sınava girin.<br/>
+          Sınav sırasında <b>dış destek</b> (çeviri, sözlük, birinden yardım almak vb.) almak gerçek seviyenizi gizler ve gelişiminizi <b>yavaşlatır</b>.<br/><br/>
+          <b>Öneri:</b> Testi tek başınıza, dikkatinizi bölmeden tamamlayın. Böylece sistem size en doğru seviyeyi verir.
         </div>
 
         <div class="mini">
-          • Sınav başlatıldığında hesabınızdan <b>40 Jeton</b> düşülür.<br/>
-          • Erken bitirirseniz, kalan süreye karşılık gelen iade sistemi (ileride) uygulanabilir.
+          • Sınava başladığınız anda hesabınızdan <b>40 Jeton</b> düşülür.<br/>
+          • Erken bitirirseniz kalan süreye göre iade işlemi yapılır (otomatik).
         </div>
       </section>
 
@@ -131,42 +136,35 @@
     import { supabase } from "/js/supabase_client.js";
 
     mountShell({ scroll: "none" });
-    bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
-
-    const TEACHERS = {
-      dora:{flag:"🇬🇧", role:"English", name:"Dora"},
-      ayda:{flag:"🇩🇪", role:"Deutsch", name:"Ayda"},
-      jale:{flag:"🇫🇷", role:"Français", name:"Jale"},
-      ozan:{flag:"🇪🇸", role:"Español", name:"Ozan"},
-      sencer:{flag:"🇮🇹", role:"Italiano", name:"Sencer"},
-      sungur:{flag:"🇷🇺", role:"Русский", name:"Sungur"},
-      huma:{flag:"🇯🇵", role:"日本語", name:"Hüma"},
-      umay:{flag:"🇨🇳", role:"中文", name:"Umay"}
-    };
-
-    const sel = (localStorage.getItem("italky_teacher_pref") || "").trim();
-    const t = TEACHERS[sel];
-
-    if(t){
-      document.getElementById("flag").textContent = t.flag;
-      document.getElementById("role").textContent = `Seviye Tespit • ${t.role}`;
-      document.getElementById("teacherName").textContent = `${t.name}`;
-    }else{
-      document.getElementById("role").textContent = "Seviye Tespit";
-      document.getElementById("teacherName").textContent = "italky Academy";
-    }
+    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
     const FEE = 40;
 
-    async function checkWallet() {
-      const btn = document.getElementById("btnStart");
+    const LANGS = {
+      dora:{flag:"🇬🇧", role:"English",   local:"English"},
+      ayda:{flag:"🇩🇪", role:"German",    local:"Deutsch"},
+      jale:{flag:"🇫🇷", role:"French",    local:"Français"},
+      ozan:{flag:"🇪🇸", role:"Spanish",   local:"Español"},
+      sencer:{flag:"🇮🇹", role:"Italian", local:"Italiano"},
+      sungur:{flag:"🇷🇺", role:"Russian", local:"Русский"},
+      huma:{flag:"🇯🇵", role:"Japanese",  local:"日本語 (Japanese)"},
+      umay:{flag:"🇨🇳", role:"Chinese",   local:"中文 (Chinese)"}
+    };
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if(!user){
-        btn.disabled = true;
-        btn.textContent = "Giriş gerekli";
-        return;
-      }
+    const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
+    if(!teacherId) location.href="/pages/teacher_select.html";
+
+    const lang = LANGS[teacherId];
+    if(lang){
+      document.getElementById("flag").textContent = lang.flag;
+      document.getElementById("role").textContent = `Seviye Tespit • ${lang.role}`;
+      document.getElementById("langName").textContent = lang.local;
+    }
+
+    async function checkWallet(){
+      const btn = document.getElementById("btnStart");
+      const { data:{ user } } = await supabase.auth.getUser();
+      if(!user){ btn.disabled=true; btn.textContent="Giriş gerekli"; return; }
 
       const { data: profile, error } = await supabase
         .from("profiles")
@@ -174,14 +172,9 @@
         .eq("id", user.id)
         .single();
 
-      if(error){
-        btn.disabled = true;
-        btn.textContent = "Bakiye okunamadı";
-        return;
-      }
+      if(error){ btn.disabled=true; btn.textContent="Bakiye okunamadı"; return; }
 
       const tokens = Number(profile?.tokens || 0);
-
       if(tokens >= FEE){
         btn.disabled = false;
         btn.textContent = `Sınavı Başlat (${FEE} Jeton)`;
@@ -191,10 +184,7 @@
       }
     }
 
-    document.getElementById("btnStart").onclick = () => {
-      location.href = "/pages/level_test.html";
-    };
-
+    document.getElementById("btnStart").onclick = ()=>location.href="/pages/level_test.html";
     checkWallet();
   </script>
 </body>
