@@ -43,6 +43,16 @@ function lineRow(label, value){
   return div;
 }
 
+function fmtDT(iso){
+  if(!iso) return "—";
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString("tr-TR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+  }catch{
+    return "—";
+  }
+}
+
 /* ✅ Üyelik no: 1 harf + 7 rakam; ardışık üçlü yok; üçlü tekrar yok */
 function randLetter(){
   const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -76,14 +86,14 @@ async function requireSessionOrRedirect(){
   const { data, error } = await supabase.auth.getSession();
   if(error) throw error;
   if(!data?.session){
-    location.replace("/index.html");
+    location.replace("/pages/login.html");
     return null;
   }
   return data.session;
 }
 
 async function fetchProfile(userId){
-  // varsa ensure_profile RPC
+  // varsa ensure_profile RPC (tokens=400 + last_login_at update için ideal)
   try{
     const { data: p, error: e } = await supabase.rpc("ensure_profile");
     if(!e && p) return p;
@@ -96,6 +106,15 @@ async function fetchProfile(userId){
     .single();
 
   if(error) throw error;
+
+  // last_login_at güncelle
+  try{
+    await supabase
+      .from("profiles")
+      .update({ last_login_at: new Date().toISOString() })
+      .eq("id", userId);
+  }catch{}
+
   return data;
 }
 
@@ -114,42 +133,38 @@ async function ensureMemberNo(profile){
   return data.member_no;
 }
 
+function getLevelsPairs(profile){
+  // 1) DB: profile.levels = { dora:"A2", umay:"A0" }
+  if(profile?.levels && typeof profile.levels === "object"){
+    const pairs = [];
+    for(const t of TEACHER_LABELS){
+      const v = profile.levels[t.id];
+      if(v) pairs.push([t.label, String(v)]);
+    }
+    return pairs;
+  }
+
+  // 2) local fallback: italky_profile.languages
+  try{
+    const lp = JSON.parse(localStorage.getItem("italky_profile") || "{}");
+    const langs = lp.languages || {};
+    const pairs = [];
+    for(const t of TEACHER_LABELS){
+      const st = langs[t.id];
+      if(st && st.level) pairs.push([t.label, String(st.level)]);
+    }
+    return pairs;
+  }catch{
+    return [];
+  }
+}
+
 function renderLevels(profile){
   const list = $("levelsList");
   const empty = $("levelsEmptyNote");
   list.innerHTML = "";
 
-  // ✅ Yeni sistem: profile.levels veya profile.languages gibi bir alanın varsa kullan.
-  // Senin DB’de şu an field’lar yoksa: localStorage italky_profile fallback.
-  let pairs = [];
-
-  // 1) DB: profile.levels = { dora:"A1", ayda:"A0" } gibi
-  if(profile && profile.levels && typeof profile.levels === "object"){
-    for(const t of TEACHER_LABELS){
-      const v = profile.levels[t.id];
-      if(v) pairs.push([t.label, v]);
-    }
-  }
-
-  // 2) Local fallback: italky_profile.languages
-  if(pairs.length === 0){
-    try{
-      const lp = JSON.parse(localStorage.getItem("italky_profile") || "{}");
-      const langs = lp.languages || {};
-      for(const t of TEACHER_LABELS){
-        const st = langs[t.id];
-        if(st && st.level) pairs.push([t.label, st.level]);
-      }
-    }catch{}
-  }
-
-  // 3) Legacy fallback: italky_level
-  if(pairs.length === 0){
-    const legacy = (localStorage.getItem("italky_level") || "").trim();
-    if(legacy){
-      pairs.push(["Seçili Dil", legacy]);
-    }
-  }
+  const pairs = getLevelsPairs(profile);
 
   if(pairs.length === 0){
     empty.style.display = "block";
@@ -161,7 +176,7 @@ function renderLevels(profile){
   empty.onclick = null;
 
   for(const [lang, lvl] of pairs){
-    list.appendChild(lineRow(`${lang}`, `${lvl}`));
+    list.appendChild(lineRow(`${lang}`, `${lvl}`)); // örn İngilizce — A2
   }
 }
 
@@ -170,7 +185,6 @@ function renderOffline(profile){
   const empty = $("offlineEmptyNote");
   list.innerHTML = "";
 
-  // DB: offline_langs array
   let packs = Array.isArray(profile?.offline_langs) ? profile.offline_langs : [];
 
   // fallback: localStorage italky_offline_langs
@@ -207,14 +221,21 @@ function nukeSupabaseAuthStorage(){
 async function safeLogoutHard(){
   try{ await supabase.auth.signOut({ scope:"global" }); }catch(_e){}
   try{ localStorage.removeItem(STORAGE_KEY); }catch(_e){}
+  try{ localStorage.removeItem("NAC_ID"); }catch(_e){}
   nukeSupabaseAuthStorage();
-  location.href = "/index.html";
+  location.href = "/pages/login.html";
 }
 
 async function buyTokens(){
   alert("Jeton satın alma web sürümünde kapalı. APK sürümünde Google Play ile açılacak.");
 }
 
+/**
+ * Kalıcı silme:
+ * - Edge Function: delete_account
+ * - ÖNEMLİ: 400 jeton abuse engeli için devices(nac_id) tablosunu SİLME!
+ *   Yani delete_account fonksiyonunda devices kaydı kalmalı (nac_id aynıysa yeniden bonus alamaz).
+ */
 async function deleteAccountFlow(){
   const ok1 = confirm("Hesabınızı KALICI olarak silmek istediğinize emin misiniz?");
   if(!ok1) return;
@@ -237,7 +258,6 @@ async function copyText(text){
     toast("Kopyalandı");
     return;
   }catch{}
-  // fallback
   try{
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -261,7 +281,7 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   const user = session.user;
   const profile = await fetchProfile(user.id);
 
-  // 1) Ad Soyad / Mail
+  // Ad Soyad / Mail
   $("pName").textContent =
     profile?.full_name ||
     user.user_metadata?.full_name ||
@@ -273,21 +293,22 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     user.email ||
     "—";
 
-  // 2) Üyelik No (yoksa üret)
+  // Üyelik No (yoksa üret)
   const memberNo = await ensureMemberNo(profile);
   $("memberNo").textContent = memberNo || "—";
-
   $("copyMemberBtn")?.addEventListener("click", ()=>copyText(memberNo));
 
-  // 3) Jeton
+  // Üyelik başlangıç + son login
+  $("createdAt").textContent = fmtDT(profile?.created_at);
+  $("lastLogin").textContent = fmtDT(profile?.last_login_at);
+
+  // Jeton
   const tokens = Number(profile?.tokens ?? 0);
   $("tokenVal").textContent = String(tokens);
   if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
 
-  // 4) Seviye
+  // Seviye + Offline
   renderLevels(profile);
-
-  // 5) Offline
   renderOffline(profile);
 
   // Buttons
