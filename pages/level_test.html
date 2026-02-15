@@ -6,24 +6,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>italkyAI • Seviye Sınavı</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
 <style>
   #pageContent { height: 100%; overflow: hidden; }
   .wrap { height: 100%; padding: 10px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+
   .topbar { display: flex; justify-content: space-between; gap:10px; }
-  .chip { padding: 8px 12px; border-radius: 99px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-weight: 900; color: #a5b4fc; font-size: 11px; white-space:nowrap; }
-  .card { flex: 1; border-radius: 32px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); padding: 18px; display: flex; flex-direction: column; overflow:hidden; }
+  .chip {
+    padding: 8px 12px; border-radius: 99px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-weight: 900;
+    color: #a5b4fc;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .card {
+    flex: 1;
+    border-radius: 32px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   .q-meta{ display:flex; justify-content:space-between; gap:10px; margin-top:4px; }
   .meta{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.55); }
-  .q-text { font-size: 18px; font-weight: 900; color: #fff; margin: 14px 0 14px; line-height: 1.3; }
-  .opt { width: 100%; padding: 14px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; font-weight: 800; margin-bottom: 10px; text-align: left; cursor: pointer; }
-  .opt.sel { background: #6366f1; border: 1px solid rgba(255,255,255,0.0); }
+
+  .q-text {
+    font-size: 18px;
+    font-weight: 1000;
+    color: #fff;
+    margin: 14px 0 14px;
+    line-height: 1.3;
+  }
+
+  .opt {
+    width: 100%;
+    padding: 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2);
+    color: #fff;
+    font-weight: 900;
+    margin-bottom: 10px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .opt.sel { background: #6366f1; border-color: rgba(255,255,255,0.0); }
+
   .nav { display: flex; gap: 10px; }
-  .btn { flex: 1; height: 50px; border-radius: 16px; font-weight: 1000; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: #fff; }
+  .btn {
+    flex: 1; height: 50px; border-radius: 16px;
+    font-weight: 1000; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+  }
   .btn:active{ transform:scale(.99); }
   .btn-primary { background:#fff; color:#000; border:none; }
-  .btn-danger { background: rgba(255,0,90,0.12); border: 1px solid rgba(255,0,90,0.25); }
   .btn-muted { opacity:.65; cursor:not-allowed; }
+
   .note { margin-top:10px; font-size: 12px; color: rgba(255,255,255,0.55); font-weight: 800; line-height: 1.5; }
+
   .toast{
     position: fixed; left:50%; top:18px; transform:translateX(-50%) translateY(-120px);
     background:rgba(10,10,18,.92); border:1px solid rgba(165,180,252,.35);
@@ -33,7 +82,6 @@
   }
   .toast.show{ transform:translateX(-50%) translateY(0); }
 
-  /* Result overlay */
   .overlay{
     position:fixed; inset:0; z-index:999999;
     display:none; align-items:center; justify-content:center;
@@ -50,10 +98,11 @@
   }
   .rTitle{ font-size:16px; font-weight:1000; color:#fff; margin: 4px 0 10px; }
   .rLevel{ font-size:28px; font-weight:1000; color:#a5b4fc; margin: 0 0 10px; letter-spacing:-0.5px; }
-  .rText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; }
+  .rText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; white-space:pre-wrap; }
   .rBtns{ display:flex; gap:10px; margin-top: 12px; }
 </style>
 </head>
+
 <body>
 <main id="pageContent">
   <div class="wrap">
@@ -70,15 +119,14 @@
       <button class="btn btn-primary" id="btnNext">İLERİ</button>
     </div>
 
-    <div class="note" id="footerNote">
-      Bu sınav italky Academy ders planınızı doğru kurmak için hazırlanmıştır. Lütfen dış destek almadan tamamlayın.
+    <div class="note">
+      Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.
     </div>
   </div>
 </main>
 
 <div class="toast" id="toast"></div>
 
-<!-- Result -->
 <div class="overlay" id="resultOverlay">
   <div class="resultCard">
     <div class="rTitle">Seviye Sonucu</div>
@@ -96,26 +144,8 @@
   import { bootPage } from "/js/ui_guard.js";
   import { supabase } from "/js/supabase_client.js";
 
-  /* ====== CONFIG ====== */
-  const ENTRY_FEE = 40;               // ✅ 40 Jeton peşin
-  const TOTAL_TIME = 40 * 60;         // 40 dk
-  const MAX_PASSES = 2;               // 1 tur + 1 tekrar
-  const REFUND_PER_MIN = 1;           // kalan dk × 1 Jeton
-
   mountShell({ scroll: "none" });
   bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
-
-  const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
-  if(!teacherId) location.href = "/pages/teacher_select.html";
-
-  // Dil chip
-  const LANGMAP = {
-    dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca",
-    sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince",
-    jack:"İngilizce", heidi:"Almanca", claire:"Fransızca", diego:"İspanyolca",
-    marco:"İtalyanca", elena:"Rusça", kenji:"Japonca", mei:"Çince"
-  };
-  document.getElementById("langChip").textContent = `${LANGMAP[teacherId] || "Dil"} • Seviye Sınavı`;
 
   const $ = (id)=>document.getElementById(id);
   function toast(msg){
@@ -126,10 +156,23 @@
     window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
   }
 
-  /* ====== QUESTION BANK (50) ====== */
-  // weights: A1=1, A2=2, B1=3, B2=4, C1=5
+  const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
+  if(!teacherId) location.href = "/pages/teacher_select.html";
+
+  const LANGMAP = {
+    dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca",
+    sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince",
+    jack:"İngilizce", heidi:"Almanca", claire:"Fransızca", diego:"İspanyolca",
+    marco:"İtalyanca", elena:"Rusça", kenji:"Japonca", mei:"Çince"
+  };
+  $("langChip").textContent = `${LANGMAP[teacherId] || "Dil"} • Seviye Sınavı`;
+
+  const ENTRY_FEE = 40;
+  const TOTAL_TIME = 40 * 60;
+  const MAX_PASSES = 2;
+
+  // ====== QUESTION BANK (50) ======
   const QUESTIONS = [
-    // A1 (10)
     {id:1,  lvl:"A1", w:1, q:"Choose the correct form: 'She ___ to the store yesterday.'", o:["go","goes","went","gone"], c:2},
     {id:2,  lvl:"A1", w:1, q:"Choose the correct article: 'I have ___ apple.'", o:["a","an","the","—"], c:1},
     {id:3,  lvl:"A1", w:1, q:"Choose the correct sentence.", o:["He are my friend.","He is my friend.","He am my friend.","He be my friend."], c:1},
@@ -141,7 +184,6 @@
     {id:9,  lvl:"A1", w:1, q:"Choose the correct pronoun: '___ am happy.'", o:["He","She","I","They"], c:2},
     {id:10, lvl:"A1", w:1, q:"Choose the correct word: 'I ___ a book now.'", o:["read","reads","am reading","reading"], c:2},
 
-    // A2 (10)
     {id:11, lvl:"A2", w:2, q:"Choose the correct form: 'If it rains, we ___ at home.'", o:["stay","stayed","will stay","staying"], c:2},
     {id:12, lvl:"A2", w:2, q:"Choose the correct comparative: 'This car is ___ than that one.'", o:["fast","faster","fastest","more fast"], c:1},
     {id:13, lvl:"A2", w:2, q:"Choose the correct past form: 'They ___ dinner at 8 pm.'", o:["eat","eats","ate","eaten"], c:2},
@@ -153,7 +195,6 @@
     {id:19, lvl:"A2", w:2, q:"Choose the correct word order.", o:["Always I am late.","I always am late.","I am always late.","I late always am."], c:2},
     {id:20, lvl:"A2", w:2, q:"Choose the correct form: 'She is good ___ math.'", o:["at","in","on","to"], c:0},
 
-    // B1 (10)
     {id:21, lvl:"B1", w:3, q:"Choose the correct form: 'I ___ here since 2020.'", o:["live","lived","have lived","am living"], c:2},
     {id:22, lvl:"B1", w:3, q:"Choose the correct passive: 'The car ___ yesterday.'", o:["stole","was stolen","is stolen","stolen"], c:1},
     {id:23, lvl:"B1", w:3, q:"Choose the correct form: 'I wish I ___ more time.'", o:["have","had","will have","am having"], c:1},
@@ -165,77 +206,55 @@
     {id:29, lvl:"B1", w:3, q:"Choose the correct word: 'He apologized ___ being late.'", o:["for","to","at","with"], c:0},
     {id:30, lvl:"B1", w:3, q:"Choose the correct conditional: 'If I had known, I ___ you.'", o:["call","called","would call","would have called"], c:3},
 
-    // B2 (10)
     {id:31, lvl:"B2", w:4, q:"Choose the correct form: 'Hardly ___ when the phone rang.'", o:["had I sat down","I had sat down","did I sat down","I sat down"], c:0},
     {id:32, lvl:"B2", w:4, q:"Choose the correct form: 'She suggested that he ___ earlier.'", o:["leave","leaves","left","leaving"], c:0},
     {id:33, lvl:"B2", w:4, q:"Choose the correct phrase: 'It’s high time you ___.'", o:["go","went","have gone","going"], c:1},
-    {id:34, lvl:"B2", w:4, q:"Choose the correct collocation: 'make' or 'do' → '___ research'", o:["make","do","take","get"], c:1},
+    {id:34, lvl:"B2", w:4, q:"Choose the correct collocation: '___ research'", o:["make","do","take","get"], c:1},
     {id:35, lvl:"B2", w:4, q:"Choose the correct form: 'He denied ___ the document.'", o:["to sign","sign","signed","signing"], c:3},
     {id:36, lvl:"B2", w:4, q:"Choose the correct sentence.", o:["Despite of the rain, we went out.","Despite the rain, we went out.","Although of the rain, we went out.","In spite the rain, we went out."], c:1},
-    {id:37, lvl:"B2", w:4, q:"Choose the correct reported speech: 'He said, \"I will help.\"' →", o:["He said he will help.","He said he would help.","He said he helps.","He said he helped."], c:1},
+    {id:37, lvl:"B2", w:4, q:"Choose the correct reported speech.", o:["He said he will help.","He said he would help.","He said he helps.","He said he helped."], c:1},
     {id:38, lvl:"B2", w:4, q:"Choose the correct word: 'The results were ___ surprising.'", o:["highly","high","strongly","deeply"], c:0},
     {id:39, lvl:"B2", w:4, q:"Choose the correct form: 'Not only ___, but she also sings.'", o:["she dances","does she dance","she does dance","dances she"], c:1},
     {id:40, lvl:"B2", w:4, q:"Choose the correct form: 'I’d rather you ___ me earlier.'", o:["tell","told","have told","telling"], c:1},
 
-    // C1 (10)
-    {id:41, lvl:"C1", w:5, q:"Choose the correct meaning: 'to make a bold claim' means to…", o:["say something expensive","say something risky/confident","say something quietly","say something unclear"], c:1},
-    {id:42, lvl:"C1", w:5, q:"Choose the correct form: 'Had it not been for your help, I ___.'", o:["fail","failed","would fail","would have failed"], c:3},
-    {id:43, lvl:"C1", w:5, q:"Choose the best option: 'The proposal was rejected ___ it lacked evidence.'", o:["owing to","despite","whereas","unless"], c:0},
-    {id:44, lvl:"C1", w:5, q:"Choose the correct word: 'This policy may ___ unintended consequences.'", o:["trigger","sparkle","flutter","wander"], c:0},
-    {id:45, lvl:"C1", w:5, q:"Choose the correct sentence.", o:["It is essential that he is informed.","It is essential that he be informed.","It is essential that he was informed.","It is essential that he being informed."], c:1},
-    {id:46, lvl:"C1", w:5, q:"Choose the best paraphrase: 'He was reluctant to comply.'", o:["He was eager to help.","He was unwilling to cooperate.","He was ready to agree.","He was excited to join."], c:1},
-    {id:47, lvl:"C1", w:5, q:"Choose the correct form: 'No sooner ___ than it started snowing.'", o:["had we left","we had left","did we left","we left"], c:0},
-    {id:48, lvl:"C1", w:5, q:"Choose the correct word: 'Her argument was ___ and convincing.'", o:["coherent","coastal","coarse","comic"], c:0},
-    {id:49, lvl:"C1", w:5, q:"Choose the best option: 'He spoke ___ the matter.'", o:["at length about","at length of","at lengths about","at long about"], c:0},
-    {id:50, lvl:"C1", w:5, q:"Choose the correct form: 'The report is said ___ next week.'", o:["to publish","to be published","publishing","published"], c:1},
+    {id:41, lvl:"C1", w:5, q:"Meaning: 'to make a bold claim' means to…", o:["say something expensive","say something risky/confident","say something quietly","say something unclear"], c:1},
+    {id:42, lvl:"C1", w:5, q:"Choose: 'Had it not been for your help, I ___.'", o:["fail","failed","would fail","would have failed"], c:3},
+    {id:43, lvl:"C1", w:5, q:"Choose: 'The proposal was rejected ___ it lacked evidence.'", o:["owing to","despite","whereas","unless"], c:0},
+    {id:44, lvl:"C1", w:5, q:"Choose: 'This policy may ___ unintended consequences.'", o:["trigger","sparkle","flutter","wander"], c:0},
+    {id:45, lvl:"C1", w:5, q:"Choose: 'It is essential that he ___ informed.'", o:["is","be","was","being"], c:1},
+    {id:46, lvl:"C1", w:5, q:"Paraphrase: 'He was reluctant to comply.'", o:["eager to help","unwilling to cooperate","ready to agree","excited to join"], c:1},
+    {id:47, lvl:"C1", w:5, q:"Choose: 'No sooner ___ than it started snowing.'", o:["had we left","we had left","did we left","we left"], c:0},
+    {id:48, lvl:"C1", w:5, q:"Choose: 'Her argument was ___ and convincing.'", o:["coherent","coastal","coarse","comic"], c:0},
+    {id:49, lvl:"C1", w:5, q:"Choose: 'He spoke ___ the matter.'", o:["at length about","at length of","at lengths about","at long about"], c:0},
+    {id:50, lvl:"C1", w:5, q:"Choose: 'The report is said ___ next week.'", o:["to publish","to be published","publishing","published"], c:1},
   ];
 
-  /* ====== STATE ====== */
+  // ====== STATE ======
   let idx = 0;
   let remaining = TOTAL_TIME;
   let timer = null;
 
-  // answers: null=unanswered, number=selected option
   const answers = Array(QUESTIONS.length).fill(null);
-
-  // passCount: kaç kez gösterildi
   const passCount = Array(QUESTIONS.length).fill(0);
-
-  // skipped: kullanıcı atladı mı?
   const skipped = Array(QUESTIONS.length).fill(false);
 
-  // charge guard (refresh double charge)
-  const GUARD_KEY = `italky_exam_guard_${teacherId}`;
-  const GUARD_MS = TOTAL_TIME * 1000; // 40 dk penceresi
+  let testId = null;
 
   function fmtTime(sec){
     const m = String(Math.floor(sec/60)).padStart(2,"0");
     const s = String(sec%60).padStart(2,"0");
     return `${m}:${s}`;
   }
-
-  function updateTimerChip(){
-    $("timerChip").textContent = fmtTime(remaining);
-  }
+  function updateTimer(){ $("timerChip").textContent = fmtTime(remaining); }
 
   function nextIndex(from){
-    // Öncelik: unanswered (answers=null) ve passCount < MAX_PASSES
     for(let i=from+1;i<QUESTIONS.length;i++){
       if(passCount[i] < MAX_PASSES && answers[i] === null) return i;
     }
-    // sonra skipped ama unanswered olanlar (ilk tur bitince)
     for(let i=0;i<QUESTIONS.length;i++){
       if(passCount[i] < MAX_PASSES && answers[i] === null) return i;
     }
-    // sonra skipped olup answered olanları tekrar sormayacağız.
     return -1;
-  }
-
-  function prevIndex(from){
-    for(let i=from-1;i>=0;i--){
-      return i;
-    }
-    return 0;
   }
 
   function render(){
@@ -243,12 +262,7 @@
     passCount[idx] = Math.min(MAX_PASSES, passCount[idx] + 1);
 
     const picked = answers[idx];
-
-    const status =
-      picked !== null ? "Cevaplandı" :
-      skipped[idx] ? "Atlandı" :
-      "Bekliyor";
-
+    const status = picked !== null ? "Cevaplandı" : (skipped[idx] ? "Atlandı" : "Bekliyor");
     const passInfo = `Tur: ${passCount[idx]}/${MAX_PASSES}`;
 
     $("qCard").innerHTML = `
@@ -256,17 +270,9 @@
         <div class="meta">Soru ${idx+1}/${QUESTIONS.length} • ${q.lvl}</div>
         <div class="meta">${status} • ${passInfo}</div>
       </div>
-
       <div class="q-text">${q.q}</div>
-
-      ${q.o.map((opt, i)=>`
-        <button class="opt ${picked===i?'sel':''}" data-i="${i}">${opt}</button>
-      `).join("")}
-
-      <div class="note">
-        İpucu: Bilmediğin soruyu <b>Atla</b>. Sınav sonunda atladıkların tekrar gelir. 
-        Her soru en fazla <b>2 tur</b> gösterilir.
-      </div>
+      ${q.o.map((opt, i)=>`<button class="opt ${picked===i?'sel':''}" data-i="${i}">${opt}</button>`).join("")}
+      <div class="note">Bilmediğin soruyu <b>Atla</b>. Süre varsa tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.</div>
     `;
 
     $("qCard").querySelectorAll(".opt").forEach(btn=>{
@@ -278,226 +284,115 @@
       });
     });
 
-    $("btnPrev").classList.toggle("btn-muted", idx===0);
-    $("btnPrev").disabled = (idx===0);
-
-    // İleri butonu: eğer sonraki soru yoksa “SINAVI TAMAMLA”
     const ni = nextIndex(idx);
     $("btnNext").textContent = (ni === -1) ? "SINAVI TAMAMLA" : "İLERİ";
   }
 
-  async function chargeEntryFeeOnce(){
-    // refresh double charge guard
-    const now = Date.now();
-    const raw = localStorage.getItem(GUARD_KEY);
-    if(raw){
-      try{
-        const g = JSON.parse(raw);
-        if(g?.charged && (now - Number(g.t||0)) < GUARD_MS){
-          return; // zaten düşülmüş
-        }
-      }catch{}
+  function scoreWeighted(){
+    let weighted = 0;
+    for(let i=0;i<QUESTIONS.length;i++){
+      if(answers[i] === QUESTIONS[i].c) weighted += QUESTIONS[i].w;
     }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if(!user) throw new Error("NO_USER");
-
-    // tokens kontrol + düş
-    const { data: profile, error: pe } = await supabase
-      .from("profiles")
-      .select("tokens")
-      .eq("id", user.id)
-      .single();
-
-    if(pe) throw pe;
-
-    const tokens = Number(profile?.tokens || 0);
-    if(tokens < ENTRY_FEE){
-      toast("Yetersiz bakiye");
-      location.href = "/pages/level_test_intro.html";
-      return;
-    }
-
-    const { error: ue } = await supabase
-      .from("profiles")
-      .update({ tokens: tokens - ENTRY_FEE })
-      .eq("id", user.id);
-
-    if(ue) throw ue;
-
-    localStorage.setItem(GUARD_KEY, JSON.stringify({ charged:true, t: now }));
+    return weighted;
   }
 
-  function startTimer(){
-    updateTimerChip();
-    timer = setInterval(()=>{
-      remaining--;
-      if(remaining < 0) remaining = 0;
-      updateTimerChip();
-      if(remaining === 0){
-        finishExam();
-      }
-    }, 1000);
-  }
-
-  function computeLevel(weightedScore){
-    // ağırlıklı skor aralığına göre seviye (pratik)
-    if(weightedScore >= 175) return "C1";
-    if(weightedScore >= 140) return "B2";
-    if(weightedScore >= 105) return "B1";
-    if(weightedScore >= 70)  return "A2";
+  function computeLevel(weighted){
+    if(weighted >= 175) return "C1";
+    if(weighted >= 140) return "B2";
+    if(weighted >= 105) return "B1";
+    if(weighted >= 70)  return "A2";
     return "A1";
   }
 
-  function hoursToNext(level){
-    // dersler max 15 dk, dakikada 2 jeton → pazarlama mesajı için saat hesapları
-    // (istersen bunu sonra tablolaştırırız)
-    const map = {
-      "A1": 6,
-      "A2": 10,
-      "B1": 16,
-      "B2": 24,
-      "C1": 0
-    };
-    return map[level] ?? 8;
-  }
+  async function startExam(){
+    const { data, error } = await supabase.rpc("start_level_test", { p_teacher_id: teacherId });
+    if(error){
+      if(String(error.message||"").includes("INSUFFICIENT_TOKENS")){
+        toast("Yetersiz bakiye");
+        location.href="/pages/level_test_intro.html";
+        return;
+      }
+      toast("Sınav başlatılamadı");
+      console.error(error);
+      location.href="/pages/level_test_intro.html";
+      return;
+    }
+    testId = data?.[0]?.test_id;
+    const left = data?.[0]?.tokens_left;
+    toast(`Sınav başladı • Jeton: ${left ?? "—"}`);
 
-  async function writeLevelToProfile(level){
-    const { data: { user } } = await supabase.auth.getUser();
-    if(!user) return;
+    updateTimer();
+    timer = setInterval(()=>{
+      remaining--;
+      if(remaining < 0) remaining = 0;
+      updateTimer();
+      if(remaining === 0) finishExam();
+    }, 1000);
 
-    // mevcut levels çek
-    const { data: profile, error: e1 } = await supabase
-      .from("profiles")
-      .select("levels")
-      .eq("id", user.id)
-      .single();
-
-    if(e1) return;
-
-    const levels = (profile?.levels && typeof profile.levels === "object") ? profile.levels : {};
-    levels[teacherId] = level;
-
-    await supabase
-      .from("profiles")
-      .update({ levels })
-      .eq("id", user.id);
-  }
-
-  async function refundRemaining(){
-    const minsLeft = Math.floor(remaining / 60);
-    const refund = minsLeft * REFUND_PER_MIN;
-
-    if(refund <= 0) return 0;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if(!user) return 0;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("tokens")
-      .eq("id", user.id)
-      .single();
-
-    const tokens = Number(profile?.tokens || 0);
-    await supabase
-      .from("profiles")
-      .update({ tokens: tokens + refund })
-      .eq("id", user.id);
-
-    return refund;
-  }
-
-  function doneAllQuestions(){
-    // tüm sorular cevaplandı mı? (atlanmış/boş kalmasın)
-    return answers.every(a => a !== null);
+    render();
   }
 
   async function finishExam(){
     if(timer) clearInterval(timer);
 
-    // skor
-    let weighted = 0;
-    for(let i=0;i<QUESTIONS.length;i++){
-      const picked = answers[i];
-      if(picked === QUESTIONS[i].c) weighted += QUESTIONS[i].w;
-    }
+    const weighted = scoreWeighted();
     const level = computeLevel(weighted);
 
-    // kayıt + iade
-    await writeLevelToProfile(level);
-    const refund = await refundRemaining();
+    // remaining_seconds server clamp eder
+    const { data, error } = await supabase.rpc("finish_level_test", {
+      p_test_id: testId,
+      p_result_level: level,
+      p_remaining_seconds: remaining
+    });
 
-    // guard temizle (bitince tekrar girerse yeniden ücret alınır)
-    try{ localStorage.removeItem(GUARD_KEY); }catch{}
+    if(error){
+      console.error(error);
+      toast("Sonuç kaydedilemedi");
+    }
 
-    // sonuç ekranı
-    const h = hoursToNext(level);
-    const langName = LANGMAP[teacherId] || "Bu Dil";
+    const refund = data?.[0]?.refund_tokens ?? 0;
+    const tokensLeft = data?.[0]?.tokens_left ?? null;
+
+    const langName = LANGMAP[teacherId] || "Dil";
     $("rLevel").textContent = `${langName} • ${level}`;
-
     $("rText").textContent =
-      `Tebrikler! Seviyeniz ${level}.\n\n` +
-      (level === "C1"
-        ? `Bu dilde ileri seviye yeterliliğe sahipsiniz. italky Academy ile akıcılığı korumak için haftalık pratik dersler öneririz.`
-        : `Önerimiz: 15 dakikalık derslerle başlayın. Yaklaşık ${h} saat ders ile bir üst seviyeye çıkmanızı birlikte başaralım.\n\n`) +
-      `Erken bitirme iadesi: ${refund} Jeton.\n\n` +
-      `Not: Dersler maksimum 15 dakikadır ve dakikada 2 Jeton ile ilerler.`;
+      `Tebrikler! Seviyeniz: ${level}\n\n` +
+      `İade: ${refund} Jeton\n` +
+      (tokensLeft!=null ? `Kalan Jeton: ${tokensLeft}\n\n` : "\n") +
+      `Önerimiz: 15 dakikalık derslerle başlayın.\n` +
+      `italky Academy, seviyenize göre ders planınızı birlikte oluşturur.`;
 
     $("resultOverlay").classList.add("show");
   }
 
-  function moveNextOrFinish(){
-    const ni = nextIndex(idx);
-
-    if(ni === -1){
-      // son tur bitti veya her soru 2 tur doldu
-      // tamamlamak için ya hepsi cevaplandı ya da kullanıcı bırakmak istiyor
-      if(!doneAllQuestions()){
-        toast("Boş sorular var • Atladıkların bitti. İstersen tamamla.");
-      }
-      finishExam();
-      return;
-    }
-    idx = ni;
-    render();
-  }
-
-  // Buttons
   $("btnPrev").onclick = ()=>{
-    idx = prevIndex(idx);
+    if(idx === 0) return;
+    idx = Math.max(0, idx-1);
     render();
   };
 
   $("btnSkip").onclick = ()=>{
     skipped[idx] = true;
-    answers[idx] = null; // bilerek boş bırak
-    moveNextOrFinish();
+    answers[idx] = null;
+    const ni = nextIndex(idx);
+    if(ni === -1) finishExam();
+    else { idx = ni; render(); }
   };
 
   $("btnNext").onclick = ()=>{
-    // cevap yoksa “atla” öner
-    if(answers[idx] === null){
-      toast("Cevap yok • İstersen Atla");
-    }
-    moveNextOrFinish();
+    const ni = nextIndex(idx);
+    if(ni === -1) finishExam();
+    else { idx = ni; render(); }
   };
 
-  // Result buttons
   $("rGoLessons").onclick = ()=>{
-    // dersler max 15 dk (senin kuralın)
     localStorage.setItem("italky_lesson_mins", "15");
-    // plan sayfasına
     location.href = "/pages/plan_select.html";
   };
-  $("rLater").onclick = ()=>{
-    location.href = "/pages/home.html";
-  };
+  $("rLater").onclick = ()=>location.href="/pages/home.html";
 
-  // Start
-  await chargeEntryFeeOnce();
-  render();
-  startTimer();
+  // GO
+  await startExam();
 </script>
 </body>
 </html>
