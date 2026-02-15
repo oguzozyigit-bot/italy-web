@@ -13,158 +13,31 @@
   <style>
     #pageContent{ height:100%; }
     .wrap{ height:100%; padding: 12px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
-
     .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .chip{
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      font-weight:1000;
-      font-size:12px;
-      color: rgba(255,255,255,0.86);
-      white-space:nowrap;
-    }
-
-    .card{
-      flex:1;
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-      padding: 14px 12px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .sub{
-      font-size:13px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      line-height:1.45;
-      margin-top:-4px;
-    }
-
-    .chat{
-      flex:1;
-      overflow:auto;
-      padding-right: 6px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
-    .bubble{
-      max-width: 92%;
-      border-radius: 18px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-    }
+    .chip{ padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.18); font-weight:1000; font-size:12px; color: rgba(255,255,255,0.86); white-space:nowrap; }
+    .card{ flex:1; border-radius: 28px; border: 1px solid rgba(255,255,255,0.10); background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); padding: 14px 12px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
+    .sub{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.45; margin-top:-4px; }
+    .chat{ flex:1; overflow:auto; padding-right: 6px; display:flex; flex-direction:column; gap:10px; }
+    .bubble{ max-width: 92%; border-radius: 18px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.18); }
     .me{ align-self:flex-end; background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.30); }
     .teacher{ align-self:flex-start; }
     .bTop{ font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px; }
     .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; }
-    .bTr{
-      margin-top:8px;
-      padding-top:8px;
-      border-top:1px solid rgba(255,255,255,0.10);
-      font-size:12px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      white-space:pre-wrap;
-    }
-
-    .task{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 12px 12px;
-    }
+    .bTr{ margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.10); font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); white-space:pre-wrap; }
+    .task{ border-radius: 22px; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.18); padding: 12px 12px; }
     .q{ font-weight:1000; font-size:13px; line-height:1.25; }
     .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.35; }
-    .inp{
-      margin-top:10px;
-      width:100%;
-      height:48px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:900;
-      font-size:14px;
-      padding: 0 12px;
-    }
-
+    .inp{ margin-top:10px; width:100%; height:48px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; font-weight:900; font-size:14px; padding: 0 12px; }
     .btnRow{ display:flex; gap:10px; }
-    .btn{
-      flex:1;
-      height:54px;
-      border-radius:22px;
-      border:none;
-      cursor:pointer;
-      font-weight:1000;
-      font-size:14px;
-      color:#fff;
-      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
-      box-shadow: 0 16px 44px rgba(79,70,229,.22);
-    }
+    .btn{ flex:1; height:54px; border-radius:22px; border:none; cursor:pointer; font-weight:1000; font-size:14px; color:#fff; background: linear-gradient(135deg, #A5B4FC, #4F46E5); box-shadow: 0 16px 44px rgba(79,70,229,.22); }
     .btn:active{ transform: scale(.99); }
-
-    .ghost{
-      flex:1;
-      height:54px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:1000;
-      font-size:13px;
-      cursor:pointer;
-    }
+    .ghost{ flex:1; height:54px; border-radius:22px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; font-weight:1000; font-size:13px; cursor:pointer; }
     .ghost:active{ transform: scale(.99); }
-
-    .toast{
-      position: fixed;
-      left:50%;
-      top:18px;
-      transform:translateX(-50%) translateY(-120px);
-      background:rgba(10,10,18,.92);
-      border:1px solid rgba(165,180,252,.35);
-      padding:10px 14px;
-      border-radius:999px;
-      color:#fff;
-      z-index:99999;
-      font-weight:900;
-      font-size:12px;
-      transition:.28s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width:min(92vw,520px);
-      text-align:center;
-    }
+    .toast{ position: fixed; left:50%; top:18px; transform:translateX(-50%) translateY(-120px); background:rgba(10,10,18,.92); border:1px solid rgba(165,180,252,.35); padding:10px 14px; border-radius:999px; color:#fff; z-index:99999; font-weight:900; font-size:12px; transition:.28s; backdrop-filter: blur(12px); pointer-events:none; max-width:min(92vw,520px); text-align:center; }
     .toast.show{ transform:translateX(-50%) translateY(0); }
-
-    /* Continue modal */
-    .overlay{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(10px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:999999;
-    }
+    .overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); display:none; align-items:center; justify-content:center; padding:16px; z-index:999999; }
     .overlay.show{ display:flex; }
-    .modal{
-      width:min(520px,100%);
-      border-radius:28px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(10,10,18,0.92);
-      padding:14px;
-    }
+    .modal{ width:min(520px,100%); border-radius:28px; border:1px solid rgba(255,255,255,0.12); background: rgba(10,10,18,0.92); padding:14px; }
     .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; }
     .mText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; margin: 0 6px; white-space:pre-wrap; }
     .mBtns{ display:flex; gap:10px; margin-top:12px; }
@@ -227,7 +100,7 @@
 
     const PLAN_MIN = 15;
     const RATE = 2;
-    const CHARGE = PLAN_MIN * RATE; // 30
+    const CHARGE = PLAN_MIN * RATE;
     const ACTIVE_KEY = "italky_active_course_session";
 
     function toast(msg){
@@ -241,11 +114,7 @@
     function addBubble({ who, text, tr, isMe=false }){
       const b = document.createElement("div");
       b.className = "bubble " + (isMe ? "me" : "teacher");
-      b.innerHTML = `
-        <div class="bTop"></div>
-        <div class="bTxt"></div>
-        ${tr ? `<div class="bTr"></div>` : ""}
-      `;
+      b.innerHTML = `<div class="bTop"></div><div class="bTxt"></div>${tr ? `<div class="bTr"></div>` : ""}`;
       b.querySelector(".bTop").textContent = who || "";
       b.querySelector(".bTxt").textContent = text || "";
       if(tr) b.querySelector(".bTr").textContent = tr || "";
@@ -262,14 +131,33 @@
     const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
     if(!teacherId) location.href="/pages/teacher_select.html";
 
-    // Dil etiketleri
     const LANGMAP = {
       dora:"English", ayda:"Deutsch", jale:"Français", ozan:"Español",
-      sencer:"Italiano", sungur:"Русский", huma:"日本語 (Japanese)", umay:"中文 (Chinese)",
+      sencer:"Italiano", sungur:"Русский", huma:"日本語", umay:"中文",
       jack:"English", heidi:"Deutsch", claire:"Français", diego:"Español",
-      marco:"Italiano", elena:"Русский", kenji:"日本語 (Japanese)", mei:"中文 (Chinese)"
+      marco:"Italiano", elena:"Русский", kenji:"日本語", mei:"中文"
     };
+
+    // ✅ Sabit öğretmenler + karakter
+    const COACH = {
+      dora:   { name:"Dora",   style:"disciplined", gender:"female", voice:"voice_2" },
+      ayda:   { name:"Ayda",   style:"friendly",    gender:"female", voice:"voice_1" },
+      jale:   { name:"Jale",   style:"expert",      gender:"female", voice:"voice_4" },
+      huma:   { name:"Hüma",   style:"cheerful",    gender:"female", voice:"voice_3" },
+      sencer: { name:"Sencer", style:"friendly",    gender:"male",   voice:"voice_1" },
+      ozan:   { name:"Ozan",   style:"cheerful",    gender:"male",   voice:"voice_2" },
+      sungur: { name:"Sungur", style:"disciplined", gender:"male",   voice:"voice_3" },
+      umay:   { name:"Umay",   style:"expert",      gender:"male",   voice:"voice_4" }
+    };
+
+    const coach = COACH[teacherId] || { name:"Dora", style:"friendly", gender:"female", voice:"voice_1" };
+
+    function styleTR(s){
+      return ({ friendly:"Samimi", cheerful:"Neşeli", disciplined:"Disiplinli", expert:"Uzman" }[s] || "Samimi");
+    }
+
     $("whoChip").textContent = `${LANGMAP[teacherId] || "Language"} • 15 dk`;
+    $("coachSub").textContent = `Öğretmenin: ${coach.name} • Tarz: ${styleTR(coach.style)}`;
 
     function getStudentName(){
       try{
@@ -281,47 +169,25 @@
       }
     }
 
-    // teacher prefs from DB
-    let teacherName = "Coach";
-    let teacherGender = "female";
-    let teacherStyle = "friendly";
-    let teacherVoice = "voice_1";
     let level = "A0";
 
-    async function loadProfilePrefs(){
+    async function loadLevelAndTokens(){
       const { data:{ session } } = await supabase.auth.getSession();
       if(!session){ location.href="/pages/login.html"; return; }
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("levels, teacher_prefs, tokens")
+        .select("levels, tokens")
         .eq("id", session.user.id)
         .single();
 
-      if(error){ console.warn(error); return; }
-
-      if(data?.tokens != null) setHeaderTokens(data.tokens);
-
-      // level
-      const lv = data?.levels?.[teacherId];
-      if(lv) level = String(lv);
-
-      // prefs
-      const pref = data?.teacher_prefs?.[teacherId];
-      if(pref?.teacher_name) teacherName = String(pref.teacher_name);
-      if(pref?.gender) teacherGender = String(pref.gender);
-      if(pref?.style) teacherStyle = String(pref.style);
-      if(pref?.voice) teacherVoice = String(pref.voice);
-
-      // küçük açıklama
-      const styleTR = {
-        friendly:"Samimi", cheerful:"Neşeli", disciplined:"Disiplinli", expert:"Uzman"
-      }[teacherStyle] || "Samimi";
-
-      $("coachSub").textContent = `Öğretmenin: ${teacherName} • Tarz: ${styleTR} • Ses: ${teacherVoice}`;
+      if(!error){
+        if(data?.tokens != null) setHeaderTokens(data.tokens);
+        const lv = data?.levels?.[teacherId];
+        if(lv) level = String(lv);
+      }
     }
 
-    // session state
     let remainingSec = PLAN_MIN * 60;
     let tick = null;
     let sessionId = null;
@@ -350,8 +216,7 @@
         if(data.status !== "active"){ localStorage.removeItem(ACTIVE_KEY); return false; }
 
         const startedAt = new Date(data.started_at).getTime();
-        const now = Date.now();
-        const elapsed = Math.max(0, (now - startedAt) / 1000);
+        const elapsed = Math.max(0, (Date.now() - startedAt) / 1000);
         const planSec = (Number(data.plan_minutes)||15) * 60;
         remainingSec = Math.max(0, Math.floor(planSec - elapsed));
 
@@ -401,23 +266,20 @@
       }, 1000);
     }
 
-    // teacher chat
     async function teacherReply(userText){
       const studentName = getStudentName();
 
       const { data, error } = await supabase.functions.invoke("italky_teacher_chat", {
         body: {
           teacher_id: teacherId,
-          teacher_name: teacherName,
+          teacher_name: coach.name,
           role: LANGMAP[teacherId] || "English",
           level,
           student_name: studentName,
           user_text: userText,
-
-          // ✅ yeni alanlar (Render endpoint prompt'a ekleyebilir)
-          coach_gender: teacherGender,
-          coach_style: teacherStyle,
-          coach_voice: teacherVoice
+          coach_gender: coach.gender,
+          coach_style: coach.style,
+          coach_voice: coach.voice
         }
       });
 
@@ -441,7 +303,7 @@
 
       try{
         const res = await teacherReply(txt);
-        addBubble({ who: `${teacherName}`, text: res?.teacher || "", tr: res?.tr || "" });
+        addBubble({ who: coach.name, text: res?.teacher || "", tr: res?.tr || "" });
         setTask(res?.task, res?.task_tr);
       }catch(e){
         console.error(e);
@@ -505,7 +367,6 @@
 
       const refund = Number(r?.refund_tokens || 0);
       const used = Number(r?.used_minutes ?? 15);
-
       const progress = await fetchProgressText();
 
       const txt =
@@ -541,8 +402,8 @@
       await startNewSession();
 
       addBubble({
-        who: `${teacherName}`,
-        text: `Hi ${getStudentName()}! Let's continue. Write one new sentence.`,
+        who: coach.name,
+        text: `Hello ${getStudentName()}! Let's continue. Write one new sentence.`,
         tr: `Merhaba ${getStudentName()}! Devam edelim. Yeni bir cümle yaz.`
       });
 
@@ -556,11 +417,12 @@
     });
 
     // ---- BOOT ----
-    await loadProfilePrefs();
+    await loadLevelAndTokens();
 
-    // teacher prefs yoksa build’e gönder
-    if(!teacherName || teacherName === "Coach"){
-      location.href="/pages/teacher_build.html";
+    // öğrenci adı yoksa profile’a
+    const nm = getStudentName();
+    if(!nm || nm.trim().length < 3){
+      location.href="/pages/profile.html";
     }
 
     const resumed = await tryResumeActive();
@@ -569,9 +431,9 @@
     }
 
     addBubble({
-      who: `${teacherName}`,
-      text: `Hello ${getStudentName()}! I am ${teacherName}. Let's start. Write one sentence about yourself.`,
-      tr: `Merhaba ${getStudentName()}! Ben ${teacherName}. Başlayalım. Kendin hakkında bir cümle yaz.`
+      who: coach.name,
+      text: `Hello ${getStudentName()}! I am ${coach.name}. Let's start. Write one sentence about yourself.`,
+      tr: `Merhaba ${getStudentName()}! Ben ${coach.name}. Başlayalım. Kendin hakkında bir cümle yaz.`
     });
 
     setTask("Write one sentence about yourself.", "Kendin hakkında bir cümle yaz.");
