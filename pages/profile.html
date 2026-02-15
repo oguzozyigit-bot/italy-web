@@ -11,116 +11,112 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
+    /* ✅ solda-sağda boşluk az, scroll footer üstünde biter */
     #pageContent{
-      padding: 26px 20px 150px;
+      padding: 16px 14px calc(var(--footerH, 92px) + 18px);
       display:flex;
       flex-direction:column;
-      gap:22px;
+      gap:12px;
     }
 
-    .card{
+    .panel{
       background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
       border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 30px;
-      padding: 22px;
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
+      border-radius: 26px;
+      padding: 14px 14px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
     .head{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom: 14px;
+      gap:10px;
+      margin-bottom: 10px;
     }
 
     .title{
       font-family:"Space Grotesk", system-ui, sans-serif;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 900;
       margin: 0;
-      letter-spacing: -0.4px;
+      letter-spacing: -0.3px;
     }
 
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.85);
-      white-space: nowrap;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .row{
+    /* ✅ tek satır satır alan */
+    .line{
       display:flex;
+      align-items:center;
       justify-content:space-between;
-      align-items:flex-start;
-      gap: 14px;
-      padding: 16px 16px;
-      border-radius: 22px;
+      gap:10px;
+      padding: 12px 12px;
+      border-radius: 18px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
     }
 
-    .cell{ min-width: 0; }
     .k{
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 900;
-      letter-spacing: 2px;
-      text-transform: uppercase;
       color: rgba(165,180,252,0.95);
-      margin: 0 0 7px 0;
+      letter-spacing: 1px;
     }
     .v{
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       color: rgba(255,255,255,0.92);
-      margin: 0;
+      text-align:right;
+      max-width: 64%;
       word-break: break-word;
     }
-    .v.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12.5px; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
+    /* Üyelik no satırında kopyala */
+    .copyWrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content:flex-end;
+      max-width: 64%;
+    }
+    .copyBtn{
+      width:38px; height:38px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      flex: 0 0 auto;
+    }
+    .copyBtn:active{ transform: scale(.98); }
+    .copyBtn svg{ width:18px; height:18px; stroke: rgba(255,255,255,0.85); stroke-width:2.2; fill:none; }
+
+    /* Jeton kartı */
     .wallet{
-      margin-top: 14px;
-      padding: 18px;
-      border-radius: 26px;
-      background: rgba(99,102,241,0.12);
-      border: 1px solid rgba(99,102,241,0.35);
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
+      gap:12px;
+      padding: 12px 12px;
+      border-radius: 20px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.35);
     }
-    .amt{
-      font-size: 26px;
+    .wallet .amt{
+      font-size: 20px;
       font-weight: 1000;
-      letter-spacing: -0.5px;
-      line-height: 1;
+      letter-spacing: -0.3px;
     }
-    .amt span{ opacity:.9; font-size: 13px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; margin-left: 6px; }
 
     .btn{
-      height: 48px;
-      padding: 0 16px;
-      border-radius: 18px;
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 16px;
       border: none;
       cursor:pointer;
       font-weight: 1000;
-      letter-spacing: 0.2px;
       user-select:none;
       white-space: nowrap;
     }
@@ -135,142 +131,149 @@
       border: 1px solid rgba(255,255,255,0.12);
       color: rgba(255,255,255,0.92);
     }
-    .btn-danger{
-      background: rgba(255, 0, 90, 0.10);
-      border: 1px solid rgba(255, 0, 90, 0.30);
+    .btn-safe{
+      background: rgba(0, 200, 120, 0.18);
+      border: 1px solid rgba(0, 200, 120, 0.35);
       color: rgba(255,255,255,0.92);
+    }
+    .btn-dangerText{
+      background: transparent;
+      border: 1px solid rgba(255, 0, 90, 0.30);
+      color: rgba(255, 90, 140, 0.95);
     }
 
     .note{
-      margin-top: 12px;
       font-size: 11px;
       font-weight: 800;
       color: rgba(255,255,255,0.55);
-      line-height: 1.4;
+      line-height: 1.35;
+      margin-top: 8px;
     }
 
     .list{
       display:flex;
       flex-direction:column;
-      gap: 12px;
-      margin-top: 12px;
+      gap: 10px;
+      margin-top: 10px;
     }
 
-    .pill{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      padding: 14px 14px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
+    .linkRow{
+      cursor:pointer;
     }
-    .pill .t{ font-size: 14px; font-weight: 1000; color: rgba(255,255,255,0.92); }
-    .pill .d{ margin-top: 4px; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.60); }
-    .pill .r{ font-size: 14px; font-weight: 1000; color: rgba(255,255,255,0.92); opacity:.95; white-space: nowrap; }
+    .linkRow:active{ transform: scale(.99); }
 
-    .actions{
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
+    .toast{
+      position: fixed;
+      left:50%;
+      top:18px;
+      transform: translateX(-50%) translateY(-120px);
+      background: rgba(10,10,18,.92);
+      border:1px solid rgba(165,180,252,.35);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color:#fff;
+      z-index:999999;
+      font-weight:900;
+      font-size:12px;
+      transition:.25s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw, 520px);
+      text-align:center;
     }
+    .toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 
 <body>
   <div id="pageContent">
 
-    <!-- Kimlik & Cüzdan -->
-    <div class="card">
+    <!-- ✅ Üst Başlık + Değişken Alanlar -->
+    <div class="panel">
       <div class="head">
         <h2 class="title">Profil</h2>
-        <div class="badge" id="memberBadge">Üyelik: …</div>
       </div>
 
-      <div class="grid">
-        <div class="row">
-          <div class="cell">
-            <div class="k">ID</div>
-            <div class="v mono" id="pId">…</div>
-          </div>
-          <div class="cell" style="text-align:right">
-            <div class="k">Ad Soyad</div>
-            <div class="v" id="pName">…</div>
+      <div class="list">
+        <div class="line">
+          <div class="k">Ad Soyad</div>
+          <div class="v" id="pName">—</div>
+        </div>
+
+        <div class="line">
+          <div class="k">Mail Adresi</div>
+          <div class="v" id="pEmail">—</div>
+        </div>
+
+        <div class="line">
+          <div class="k">Üyelik Numarası</div>
+          <div class="copyWrap">
+            <div class="v mono" id="memberNo">—</div>
+            <button class="copyBtn" id="copyMemberBtn" type="button" aria-label="Kopyala">
+              <svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="10" height="10" rx="2"/>
+                <path d="M7 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1"/>
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div class="row">
-          <div class="cell">
-            <div class="k">E-Posta</div>
-            <div class="v" id="pEmail">…</div>
+        <div class="wallet">
+          <div>
+            <div class="k" style="margin-bottom:6px;">Mevcut Jeton Adeti</div>
+            <div class="amt"><span id="tokenVal">0</span> Jeton</div>
           </div>
-          <div class="cell" style="text-align:right">
-            <div class="k">Kayıt</div>
-            <div class="v" id="createdAtVal">…</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="cell">
-            <div class="k">Son Giriş</div>
-            <div class="v" id="lastLoginVal">…</div>
-          </div>
-          <div class="cell" style="text-align:right">
-            <div class="k">Durum</div>
-            <div class="v">Aktif</div>
-          </div>
+          <button class="btn btn-primary" id="buyTokensBtn" type="button">Jeton Yükle</button>
         </div>
       </div>
-
-      <div class="wallet">
-        <div>
-          <div class="k" style="margin:0 0 8px 0;">Kalan Jeton</div>
-          <div class="amt"><span id="tokenVal">0</span><span>Jeton</span></div>
-        </div>
-        <button class="btn btn-primary" id="buyTokensBtn">Jeton Satın Al</button>
-      </div>
-
-      <div class="note">Kural: 1 Dakika = 1 Jeton • 1 Jeton = 2 TL</div>
     </div>
 
-    <!-- Seviye -->
-    <div class="card">
+    <!-- ✅ Dil Seviye Durumu -->
+    <div class="panel">
       <div class="head">
-        <h2 class="title">Seviye Durumu</h2>
-        <button class="btn btn-ghost" id="goTeacherSelectBtn">Ders / Sınav</button>
+        <h2 class="title">Dil Seviye Durumu</h2>
       </div>
 
       <div class="list" id="levelsList"></div>
-      <div class="note" id="levelsEmptyNote" style="display:none;">Henüz seviye sınavına katılmadınız.</div>
+
+      <div class="note linkRow" id="levelsEmptyNote" style="display:none;">
+        Henüz Seviye Sınavına Katılamadınız. Lütfen seviye sınavına katılın.
+      </div>
     </div>
 
-    <!-- Offline -->
-    <div class="card">
+    <!-- ✅ İndirilen Offline Paketler -->
+    <div class="panel">
       <div class="head">
-        <h2 class="title">Offline Paketler</h2>
-        <button class="btn btn-ghost" id="offlineDownloadBtn">Offline Dil Paketi İndir</button>
+        <h2 class="title">İndirilen Offline Paketler</h2>
       </div>
 
       <div class="list" id="offlineList"></div>
+
       <div class="note" id="offlineEmptyNote" style="display:none;">Henüz offline paket indirmediniz.</div>
+
+      <div style="margin-top:12px;">
+        <button class="btn btn-ghost" id="offlineDownloadBtn" type="button">Offline İçin Dil Paketi İndir</button>
+      </div>
     </div>
 
-    <!-- Çıkış & Silme -->
-    <div class="actions">
-      <button class="btn btn-ghost" id="logoutBtn">Güvenli Çıkış</button>
-      <button class="btn btn-danger" id="deleteBtn">Hesabımı kalıcı olarak sil</button>
-      <div class="note">Kalıcı silme geri alınamaz. Onay sonrası hesabınız silinmek üzere işlenir.</div>
+    <!-- ✅ Aksiyonlar -->
+    <div class="panel">
+      <div class="list">
+        <button class="btn btn-safe" id="logoutBtn" type="button">Güvenli Çıkış</button>
+        <button class="btn btn-dangerText" id="deleteBtn" type="button">Hesabımı Kalıcı Olarak Sil</button>
+      </div>
     </div>
 
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script type="module">
     import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
     import { bootPage } from "/js/ui_guard.js";
     import { initProfilePage } from "/js/profile_page.js";
 
-    mountShell();
+    mountShell(); // scroll açık (shell main-content)
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
     await initProfilePage({ setHeaderTokens });
