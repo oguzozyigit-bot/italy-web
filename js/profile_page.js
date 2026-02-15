@@ -3,8 +3,6 @@ import { STORAGE_KEY } from "/js/config.js";
 
 const $ = (id)=>document.getElementById(id);
 
-/* ---------------- HELPERS ---------------- */
-
 function toast(msg){
   const t = $("toast");
   if(!t) return;
@@ -18,37 +16,25 @@ function fmtDT(iso){
   if(!iso) return "—";
   try{
     const d = new Date(iso);
-    return d.toLocaleString("tr-TR", {
-      year:"numeric", month:"2-digit", day:"2-digit",
-      hour:"2-digit", minute:"2-digit"
-    });
-  }catch{
-    return "—";
-  }
+    return d.toLocaleString("tr-TR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+  }catch{ return "—"; }
 }
 
 function minutesToHM(mins){
   const m = Math.max(0, Number(mins)||0);
-  const h = Math.floor(m / 60);
-  const r = m % 60;
-  if(h <= 0) return `${r} dk`;
-  if(r === 0) return `${h} saat`;
+  const h = Math.floor(m/60);
+  const r = m%60;
+  if(h<=0) return `${r} dk`;
+  if(r===0) return `${h} saat`;
   return `${h} saat ${r} dk`;
 }
-
-/* ---------------- SESSION ---------------- */
 
 async function requireSession(){
   const { data:{ session }, error } = await supabase.auth.getSession();
   if(error) throw error;
-  if(!session){
-    location.href="/pages/login.html";
-    return null;
-  }
+  if(!session){ location.href="/pages/login.html"; return null; }
   return session;
 }
-
-/* ---------------- PROFILE ---------------- */
 
 async function getOrCreateProfile(user){
   try{
@@ -56,37 +42,25 @@ async function getOrCreateProfile(user){
     if(data) return data;
   }catch{}
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
   if(error) throw error;
   if(data) return data;
 
   const insert = {
-    id: user.id,
-    email: user.email,
-    full_name: user.user_metadata?.full_name || user.user_metadata?.name || "Kullanıcı",
-    tokens: 400,
-    created_at: new Date().toISOString(),
-    last_login_at: new Date().toISOString(),
-    levels: {},
-    study_minutes: {}
+    id:user.id,
+    email:user.email,
+    full_name:user.user_metadata?.full_name || user.user_metadata?.name || "",
+    tokens:400,
+    created_at:new Date().toISOString(),
+    last_login_at:new Date().toISOString(),
+    levels:{},
+    study_minutes:{}
   };
 
-  const { data: created, error: insErr } = await supabase
-    .from("profiles")
-    .insert(insert)
-    .select()
-    .single();
-
+  const { data: created, error: insErr } = await supabase.from("profiles").insert(insert).select().single();
   if(insErr) throw insErr;
   return created;
 }
-
-/* ---------------- MEMBER NO (SERVER) ---------------- */
 
 async function ensureMemberNoServer(){
   const { data, error } = await supabase.rpc("ensure_member_no");
@@ -94,34 +68,17 @@ async function ensureMemberNoServer(){
   return data;
 }
 
-/* ---------------- LEVEL REQUIREMENTS ---------------- */
-
 async function loadLevelRequirements(){
   try{
-    const { data, error } = await supabase
-      .from("level_requirements")
-      .select("level, minutes_required");
-
+    const { data, error } = await supabase.from("level_requirements").select("level, minutes_required");
     if(error) throw error;
-
     const map = {};
-    (data || []).forEach(r=>{
-      map[r.level] = Number(r.minutes_required||0);
-    });
+    (data||[]).forEach(r=>map[r.level]=Number(r.minutes_required||0));
     return map;
   }catch{
     return { A0:0, A1:360, A2:600, B1:960, B2:1440, C1:0 };
   }
 }
-
-function nextLevelOf(level){
-  const order = ["A0","A1","A2","B1","B2","C1"];
-  const i = order.indexOf(String(level||"A0"));
-  if(i < 0) return "A1";
-  return order[Math.min(order.length-1, i+1)];
-}
-
-/* ---------------- LEVEL RENDER ---------------- */
 
 const TEACHER_LABELS = [
   { id:"dora",   label:"İngilizce" },
@@ -131,24 +88,13 @@ const TEACHER_LABELS = [
   { id:"sencer", label:"İtalyanca" },
   { id:"sungur", label:"Rusça" },
   { id:"huma",   label:"Japonca" },
-  { id:"umay",   label:"Çince" },
-  { id:"jack",   label:"İngilizce" },
-  { id:"heidi",  label:"Almanca" },
-  { id:"claire", label:"Fransızca" },
-  { id:"diego",  label:"İspanyolca" },
-  { id:"marco",  label:"İtalyanca" },
-  { id:"elena",  label:"Rusça" },
-  { id:"kenji",  label:"Japonca" },
-  { id:"mei",    label:"Çince" }
+  { id:"umay",   label:"Çince" }
 ];
 
 function lineRow(label, value){
   const div = document.createElement("div");
-  div.className = "line";
-  div.innerHTML = `
-    <div class="k">${label}</div>
-    <div class="v">${value}</div>
-  `;
+  div.className="line";
+  div.innerHTML = `<div class="k">${label}</div><div class="v">${value}</div>`;
   return div;
 }
 
@@ -159,72 +105,53 @@ function renderLevels(profile, reqMap){
 
   list.innerHTML = "";
 
-  const levels = (profile?.levels && typeof profile.levels === "object")
-    ? profile.levels
-    : {};
+  const levels = (profile?.levels && typeof profile.levels === "object") ? profile.levels : {};
+  const study  = (profile?.study_minutes && typeof profile.study_minutes === "object") ? profile.study_minutes : {};
 
-  const study = (profile?.study_minutes && typeof profile.study_minutes === "object")
-    ? profile.study_minutes
-    : {};
-
-  let hasAny = false;
-
+  let hasAny=false;
   for(const t of TEACHER_LABELS){
     const lv = levels[t.id];
     if(!lv) continue;
+    hasAny=true;
 
-    hasAny = true;
-
-    const studiedMin = Number(study?.[t.id] || 0);
+    const studiedMin = Number(study?.[t.id]||0);
     const needMin = Number(reqMap?.[lv] ?? 0);
-    const remainingMin = Math.max(0, needMin - studiedMin);
+    const remainMin = Math.max(0, needMin - studiedMin);
 
-    const right =
-      `${lv} • ${minutesToHM(studiedMin)} • Kalan: ${minutesToHM(remainingMin)}`;
-
+    const right = `${lv} • ${minutesToHM(studiedMin)} • Kalan: ${minutesToHM(remainMin)}`;
     list.appendChild(lineRow(t.label, right));
   }
 
   if(!hasAny){
-    empty.style.display = "block";
-    empty.onclick = ()=>location.href="/pages/teacher_select.html";
-  } else {
-    empty.style.display = "none";
-    empty.onclick = null;
+    empty.style.display="block";
+    empty.onclick=()=>location.href="/pages/teacher_select.html";
+  }else{
+    empty.style.display="none";
+    empty.onclick=null;
   }
 }
-
-/* ---------------- OFFLINE ---------------- */
 
 function renderOffline(profile){
   const list = $("offlineList");
   const empty = $("offlineEmptyNote");
   if(!list || !empty) return;
 
-  list.innerHTML = "";
+  list.innerHTML="";
   const packs = Array.isArray(profile?.offline_langs) ? profile.offline_langs : [];
-
-  if(packs.length === 0){
-    empty.style.display = "block";
+  if(packs.length===0){
+    empty.style.display="block";
     return;
   }
-
-  empty.style.display = "none";
-  packs.forEach(p=>{
-    list.appendChild(lineRow(String(p), "Hazır"));
-  });
+  empty.style.display="none";
+  packs.forEach(p=>list.appendChild(lineRow(String(p),"Hazır")));
 }
-
-/* ---------------- LOGOUT ---------------- */
 
 function nukeAuthStorage(){
   try{
-    const keys = [];
+    const keys=[];
     for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if(k && k.startsWith("sb-") && k.includes("auth-token")){
-        keys.push(k);
-      }
+      const k=localStorage.key(i);
+      if(k && k.startsWith("sb-") && k.includes("auth-token")) keys.push(k);
     }
     keys.forEach(k=>localStorage.removeItem(k));
   }catch{}
@@ -238,17 +165,11 @@ async function safeLogout(){
   location.href="/pages/login.html";
 }
 
-/* ---------------- NAME UPDATE ---------------- */
-
 async function updateStudentName(userId, newName){
-  const clean = String(newName || "").trim().slice(0,32);
-  if(clean.length < 2) throw new Error("Ad en az 2 karakter olmalı.");
+  const clean = String(newName||"").trim().slice(0,32);
+  if(clean.length < 3) throw new Error("Ad en az 3 karakter olmalı.");
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({ full_name: clean })
-    .eq("id", userId);
-
+  const { error } = await supabase.from("profiles").update({ full_name: clean }).eq("id", userId);
   if(error) throw error;
 
   try{
@@ -262,7 +183,21 @@ async function updateStudentName(userId, newName){
   return clean;
 }
 
-/* ---------------- INIT ---------------- */
+function openNameModal(force=false){
+  const modal = $("nameModal");
+  modal?.classList.add("show");
+
+  // force modda dış tıklama kapansın diye flag
+  modal.dataset.force = force ? "1" : "0";
+  setTimeout(()=>$("nameInput")?.focus(), 50);
+}
+
+function closeNameModal(){
+  const modal = $("nameModal");
+  if(!modal) return;
+  if(modal.dataset.force === "1") return; // ✅ zorunluysa kapatma
+  modal.classList.remove("show");
+}
 
 export async function initProfilePage({ setHeaderTokens } = {}){
   const session = await requireSession();
@@ -272,13 +207,17 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   const profile = await getOrCreateProfile(user);
   const reqMap = await loadLevelRequirements();
 
-  $("pName").textContent =
-    profile.full_name ||
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
-    "Kullanıcı";
-
   $("pEmail").textContent = profile.email || user.email || "—";
+
+  // ✅ öğrenci adı zorunlu: 3 karakter
+  const name = (profile.full_name || "").trim();
+  $("pName").textContent = name || "—";
+
+  if(name.length < 3){
+    $("nameInput").value = "";
+    openNameModal(true);
+    toast("Lütfen adınızı girin");
+  }
 
   const memberNo = await ensureMemberNoServer();
   $("memberNo").textContent = memberNo || "—";
@@ -288,18 +227,14 @@ export async function initProfilePage({ setHeaderTokens } = {}){
 
   const tokens = Number(profile.tokens ?? 0);
   $("tokenVal").textContent = tokens;
-  if(typeof setHeaderTokens === "function"){
-    setHeaderTokens(tokens);
-  }
+  if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
 
   renderLevels(profile, reqMap);
   renderOffline(profile);
 
   $("logoutBtn")?.addEventListener("click", safeLogout);
 
-  $("buyTokensBtn")?.addEventListener("click", ()=>{
-    toast("Jeton satın alma yakında aktif.");
-  });
+  $("buyTokensBtn")?.addEventListener("click", ()=>toast("Jeton satın alma yakında aktif."));
 
   $("deleteBtn")?.addEventListener("click", async ()=>{
     const ok = confirm("Hesap silme talebi oluşturulsun mu? 30 gün içinde giriş yaparsanız iptal edilir.");
@@ -309,13 +244,11 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   });
 
   $("editNameBtn")?.addEventListener("click", ()=>{
-    $("nameModal")?.classList.add("show");
-    $("nameInput").value = $("pName").textContent;
+    $("nameInput").value = ($("pName").textContent || "").trim();
+    openNameModal(false);
   });
 
-  $("cancelNameBtn")?.addEventListener("click", ()=>{
-    $("nameModal")?.classList.remove("show");
-  });
+  $("cancelNameBtn")?.addEventListener("click", closeNameModal);
 
   $("saveNameBtn")?.addEventListener("click", async ()=>{
     try{
@@ -323,16 +256,18 @@ export async function initProfilePage({ setHeaderTokens } = {}){
       $("pName").textContent = saved;
       const headerName = document.getElementById("userName");
       if(headerName) headerName.textContent = saved;
-      toast("İsim güncellendi");
-      $("nameModal")?.classList.remove("show");
+
+      // force kapat
+      const modal = $("nameModal");
+      if(modal){ modal.dataset.force="0"; modal.classList.remove("show"); }
+
+      toast("İsim kaydedildi");
     }catch(e){
-      toast(e.message || "Güncellenemedi");
+      toast(e.message || "Kaydedilemedi");
     }
   });
 
   $("nameModal")?.addEventListener("click",(ev)=>{
-    if(ev.target.id === "nameModal"){
-      $("nameModal").classList.remove("show");
-    }
+    if(ev.target.id === "nameModal") closeNameModal();
   });
 }
