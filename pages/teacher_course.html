@@ -2,554 +2,157 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Ders</title>
-  <link rel="icon" href="data:," />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>italkyAI • Ders</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+#pageContent{height:100%;overflow:hidden;}
+.wrap{height:100%;padding:12px;display:flex;flex-direction:column;gap:12px;}
 
-  <style>
-    #pageContent{ height:100%; }
-    .wrap{
-      height:100%;
-      padding: 12px 12px 18px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+.top{display:flex;justify-content:space-between;}
+.chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);font-weight:900;font-size:12px;color:#a5b4fc;}
 
-    .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .chip{
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      font-weight:1000;
-      font-size:12px;
-      color: rgba(255,255,255,0.86);
-      white-space:nowrap;
-    }
+.card{flex:1;border-radius:28px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);backdrop-filter:blur(20px);padding:16px;display:flex;flex-direction:column;gap:12px;}
 
-    .card{
-      flex:1;
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-      padding: 14px 12px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+.chat{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;}
+.bubble{max-width:90%;padding:10px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);}
+.me{align-self:flex-end;background:rgba(99,102,241,.2);}
+.teacher{align-self:flex-start;}
+.bTop{font-size:12px;font-weight:900;margin-bottom:6px;}
+.bTxt{font-size:13px;font-weight:900;white-space:pre-wrap;}
+.bTr{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:rgba(255,255,255,.7);white-space:pre-wrap;}
 
-    .big{
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:-0.2px;
-      line-height:1.2;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-    }
-    .sub{
-      font-size:13px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      line-height:1.45;
-    }
+.task{padding:10px;border-radius:18px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.18);}
+.inp{width:100%;height:46px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;padding:0 10px;font-weight:900;}
 
-    .chat{
-      flex:1;
-      overflow:auto;
-      padding-right: 6px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+.btnRow{display:flex;gap:10px;}
+.btn{flex:1;height:50px;border-radius:18px;border:none;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#a5b4fc,#4f46e5);color:#fff;}
+.ghost{flex:1;height:50px;border-radius:18px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font-weight:900;}
 
-    .bubble{
-      max-width: 92%;
-      border-radius: 18px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-    }
-    .me{ align-self:flex-end; background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.30); }
-    .teacher{ align-self:flex-start; }
-    .bTop{ font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px; }
-    .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; }
-    .bTr{
-      margin-top:8px;
-      padding-top:8px;
-      border-top:1px solid rgba(255,255,255,0.10);
-      font-size:12px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      white-space:pre-wrap;
-    }
-
-    .task{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 12px 12px;
-    }
-    .q{ font-weight:1000; font-size:13px; line-height:1.25; }
-    .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.35; }
-    .inp{
-      margin-top:10px;
-      width:100%;
-      height:48px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:900;
-      font-size:14px;
-      padding: 0 12px;
-    }
-
-    .btnRow{ display:flex; gap:10px; }
-    .btn{
-      flex:1;
-      height:54px;
-      border-radius:22px;
-      border:none;
-      cursor:pointer;
-      font-weight:1000;
-      font-size:14px;
-      color:#fff;
-      background: linear-gradient(135deg, #A5B4FC, #4F46E5);
-      box-shadow: 0 16px 44px rgba(79,70,229,.22);
-    }
-    .btn:active{ transform: scale(.99); }
-
-    .ghost{
-      flex:1;
-      height:54px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:1000;
-      font-size:13px;
-      cursor:pointer;
-    }
-    .ghost:active{ transform: scale(.99); }
-
-    .toast{
-      position: fixed;
-      left:50%;
-      top:18px;
-      transform:translateX(-50%) translateY(-120px);
-      background:rgba(10,10,18,.92);
-      border:1px solid rgba(165,180,252,.35);
-      padding:10px 14px;
-      border-radius:999px;
-      color:#fff;
-      z-index:99999;
-      font-weight:900;
-      font-size:12px;
-      transition:.28s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width:min(92vw,520px);
-      text-align:center;
-    }
-    .toast.show{ transform:translateX(-50%) translateY(0); }
-
-    /* Continue modal */
-    .overlay{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(10px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:999999;
-    }
-    .overlay.show{ display:flex; }
-    .modal{
-      width:min(520px,100%);
-      border-radius:28px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(10,10,18,0.92);
-      padding:14px;
-    }
-    .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; }
-    .mText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; margin: 0 6px; white-space:pre-wrap; }
-    .mBtns{ display:flex; gap:10px; margin-top:12px; }
-  </style>
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px;z-index:999999;}
+.overlay.show{display:flex;}
+.modal{background:rgba(10,10,18,.95);border:1px solid rgba(255,255,255,.15);border-radius:28px;padding:16px;width:min(480px,100%);}
+.modal h3{margin:0 0 10px;font-weight:900;}
+.modal p{font-size:13px;font-weight:800;line-height:1.5;color:rgba(255,255,255,.8);}
+.modal .btnRow{margin-top:12px;}
+</style>
 </head>
 
 <body>
-  <main id="pageContent">
-    <div class="wrap">
-      <div class="top">
-        <div class="chip" id="whoChip">—</div>
-        <div class="chip" id="timerChip">15:00</div>
-      </div>
+<main id="pageContent">
+<div class="wrap">
+<div class="top">
+<div class="chip" id="whoChip">—</div>
+<div class="chip" id="timerChip">15:00</div>
+</div>
 
-      <section class="card">
-        <div class="big">
-          <span>Ders</span>
-          <span class="chip" id="engineChip">italky Academy</span>
-        </div>
-        <div class="sub">Öğretmen hedef dilde konuşur; altına Türkçe açıklamasını yazar.</div>
+<div class="card">
+<div class="chat" id="chat"></div>
 
-        <div class="chat" id="chat"></div>
+<div class="task">
+<input class="inp" id="answer" placeholder="Write one sentence..." />
+</div>
 
-        <div class="task">
-          <div class="q" id="qText">Write one sentence about yourself.</div>
-          <div class="qSub" id="qTr">Kendin hakkında bir cümle yaz.</div>
-          <input class="inp" id="answer" placeholder="Cevabını yaz..." />
-        </div>
+<div class="btnRow">
+<button class="btn" id="btnSend">Gönder</button>
+<button class="ghost" id="btnFinish">Dersi Bitir</button>
+<button class="ghost" id="btnExit">Çık</button>
+</div>
+</div>
+</div>
+</main>
 
-        <div class="btnRow">
-          <button class="btn" id="btnSend" type="button">Gönder</button>
-          <button class="ghost" id="btnFinish" type="button">Dersi Bitir</button>
-          <button class="ghost" id="btnExit" type="button">Çık</button>
-        </div>
-      </section>
-    </div>
-  </main>
+<div class="overlay" id="modal">
+<div class="modal">
+<h3>Ders Tamamlandı</h3>
+<p id="modalText">...</p>
+<div class="btnRow">
+<button class="btn" id="btnContinue">Devam Et (30 Jeton)</button>
+<button class="ghost" id="btnStop">Bugünlük Yeter</button>
+</div>
+</div>
+</div>
 
-  <div class="toast" id="toast"></div>
+<script type="module">
+import { mountShell,setHeaderTokens } from "/js/ui_shell.js";
+import { bootPage } from "/js/ui_guard.js";
+import { supabase } from "/js/supabase_client.js";
 
-  <div class="overlay" id="continueOverlay">
-    <div class="modal">
-      <div class="mTitle">Devam Edelim mi?</div>
-      <div class="mText" id="continueText">—</div>
-      <div class="mBtns">
-        <button class="btn" id="btnContinueYes" type="button">Evet, Devam</button>
-        <button class="ghost" id="btnContinueNo" type="button">Bugünlük Bu Kadar</button>
-      </div>
-    </div>
-  </div>
+mountShell({scroll:"none"});
+bootPage({protectedPage:true,header:{nameId:"userName",picId:"userPic"}});
 
-  <script type="module">
-    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
-    import { bootPage } from "/js/ui_guard.js";
-    import { supabase } from "/js/supabase_client.js";
-    import { STORAGE_KEY } from "/js/config.js";
+const PLAN_MIN=15;
+const RATE=2;
+const CHARGE=30;
 
-    mountShell({ scroll:"none" });
-    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+let sessionId=null;
+let remaining=PLAN_MIN*60;
+let timer=null;
+let teacherId=localStorage.getItem("italky_teacher_pref");
 
-    const $ = (id)=>document.getElementById(id);
-    const chat = $("chat");
+function fmt(sec){
+const m=String(Math.floor(sec/60)).padStart(2,"0");
+const s=String(sec%60).padStart(2,"0");
+return `${m}:${s}`;
+}
 
-    const PLAN_MIN = 15;
-    const RATE = 2;
-    const CHARGE = PLAN_MIN * RATE; // 30 jeton
-    const ACTIVE_KEY = "italky_active_course_session";
+async function startLesson(){
+const {data,error}=await supabase.rpc("start_course_15min",{p_teacher_id:teacherId});
+if(error){location.href="/pages/plan_select.html";return;}
+sessionId=data?.[0]?.session_id;
+remaining=PLAN_MIN*60;
+runTimer();
+}
 
-    function toast(msg){
-      const t = $("toast");
-      t.textContent = String(msg||"");
-      t.classList.add("show");
-      clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
-    }
+function runTimer(){
+document.getElementById("timerChip").textContent=fmt(remaining);
+timer=setInterval(()=>{
+remaining--;
+document.getElementById("timerChip").textContent=fmt(remaining);
+if(remaining<=0){clearInterval(timer);finishLesson(true);}
+},1000);
+}
 
-    function addBubble({ who, text, tr, isMe=false }){
-      const b = document.createElement("div");
-      b.className = "bubble " + (isMe ? "me" : "teacher");
-      b.innerHTML = `
-        <div class="bTop"></div>
-        <div class="bTxt"></div>
-        ${tr ? `<div class="bTr"></div>` : ""}
-      `;
-      b.querySelector(".bTop").textContent = who || "";
-      b.querySelector(".bTxt").textContent = text || "";
-      if(tr) b.querySelector(".bTr").textContent = tr || "";
-      chat.appendChild(b);
-      chat.scrollTop = chat.scrollHeight;
-    }
+async function finishLesson(auto=false){
+const {data}=await supabase.rpc("end_course_with_refund",{p_session_id:sessionId});
+await supabase.rpc("add_study_minutes",{p_teacher_id:teacherId,p_minutes:15});
 
-    function fmtTime(sec){
-      const m = String(Math.floor(sec/60)).padStart(2,"0");
-      const s = String(sec%60).padStart(2,"0");
-      return `${m}:${s}`;
-    }
+const refund=data?.[0]?.refund_tokens||0;
+const tokens=data?.[0]?.tokens_left||0;
+setHeaderTokens(tokens);
 
-    // teacher pref
-    const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
-    if(!teacherId) location.href="/pages/teacher_select.html";
+const {data:profile}=await supabase.from("profiles").select("levels,study_minutes").single();
+const level=profile?.levels?.[teacherId]||"A0";
+const studied=profile?.study_minutes?.[teacherId]||0;
 
-    const TEACHERS = {
-      dora:{flag:"🇬🇧", role:"English",  name:"Dora"},
-      ayda:{flag:"🇩🇪", role:"Deutsch",  name:"Ayda"},
-      jale:{flag:"🇫🇷", role:"Français", name:"Jale"},
-      ozan:{flag:"🇪🇸", role:"Español",  name:"Ozan"},
-      sencer:{flag:"🇮🇹", role:"Italiano",name:"Sencer"},
-      sungur:{flag:"🇷🇺", role:"Русский", name:"Sungur"},
-      huma:{flag:"🇯🇵", role:"日本語",    name:"Hüma"},
-      umay:{flag:"🇨🇳", role:"中文",      name:"Umay"},
-      jack:{flag:"🇬🇧", role:"English", name:"Jack"},
-      heidi:{flag:"🇩🇪", role:"Deutsch", name:"Heidi"},
-      claire:{flag:"🇫🇷", role:"Français", name:"Claire"},
-      diego:{flag:"🇪🇸", role:"Español", name:"Diego"},
-      marco:{flag:"🇮🇹", role:"Italiano", name:"Marco"},
-      elena:{flag:"🇷🇺", role:"Русский", name:"Elena"},
-      kenji:{flag:"🇯🇵", role:"日本語", name:"Kenji"},
-      mei:{flag:"🇨🇳", role:"中文", name:"Mei-Ling"},
-    };
-    const T = TEACHERS[teacherId] || {flag:"🌍", role:"English", name:"Teacher"};
-    $("whoChip").textContent = `${T.flag} ${T.role} • ${T.name}`;
+const {data:req}=await supabase.from("level_requirements").select("*").eq("level",level).single();
+const needed=req?.minutes_required||0;
+const remain=Math.max(0,needed-studied);
 
-    function getStudentName(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const c = raw ? JSON.parse(raw) : {};
-        return (c?.name || localStorage.getItem("italky_student_name") || "Student");
-      }catch{
-        return localStorage.getItem("italky_student_name") || "Student";
-      }
-    }
+document.getElementById("modalText").textContent=
+`Seviye: ${level}
+Toplam Çalışma: ${Math.floor(studied/60)} saat
+Bir Üst Seviyeye Kalan: ${Math.ceil(remain/60)} saat
 
-    // DB level
-    let level = "A0";
+İade: ${refund} Jeton`;
 
-    async function fetchLevel(){
-      try{
-        const { data:{ session } } = await supabase.auth.getSession();
-        if(!session) { location.href="/pages/login.html"; return; }
+document.getElementById("modal").classList.add("show");
+}
 
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("levels")
-          .eq("id", session.user.id)
-          .single();
+document.getElementById("btnSend").onclick=()=>{};
+document.getElementById("btnFinish").onclick=()=>{clearInterval(timer);finishLesson(false);};
+document.getElementById("btnExit").onclick=()=>location.href="/pages/home.html";
 
-        if(!error){
-          const v = data?.levels?.[teacherId];
-          if(v) level = String(v);
-        }
-      }catch{}
-    }
+document.getElementById("btnContinue").onclick=async()=>{
+document.getElementById("modal").classList.remove("show");
+await startLesson();
+};
 
-    // Session state
-    let remainingSec = PLAN_MIN * 60;
-    let tick = null;
-    let sessionId = null;
+document.getElementById("btnStop").onclick=()=>location.href="/pages/plan_select.html";
 
-    async function refreshHeaderTokens(){
-      try{
-        const { data:{ session } } = await supabase.auth.getSession();
-        if(!session) return;
-        const { data } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
-        if(data?.tokens != null) setHeaderTokens(data.tokens);
-      }catch{}
-    }
-
-    async function tryResumeActive(){
-      const cached = (localStorage.getItem(ACTIVE_KEY) || "").trim();
-      if(!cached) return false;
-
-      try{
-        const { data, error } = await supabase
-          .from("course_sessions")
-          .select("id,status,started_at,plan_minutes")
-          .eq("id", cached)
-          .maybeSingle();
-
-        if(error || !data?.id) { localStorage.removeItem(ACTIVE_KEY); return false; }
-        if(data.status !== "active") { localStorage.removeItem(ACTIVE_KEY); return false; }
-
-        // kalan süreyi server start_at ile hesapla
-        const startedAt = new Date(data.started_at).getTime();
-        const now = Date.now();
-        const elapsed = Math.max(0, (now - startedAt) / 1000);
-        const planSec = (Number(data.plan_minutes)||15) * 60;
-        remainingSec = Math.max(0, Math.floor(planSec - elapsed));
-
-        sessionId = data.id;
-        toast("Ders devam ediyor");
-        return true;
-      }catch{
-        localStorage.removeItem(ACTIVE_KEY);
-        return false;
-      }
-    }
-
-    async function startNewSession(){
-      const { data, error } = await supabase.rpc("start_course_15min", { p_teacher_id: teacherId });
-      if(error){
-        if(String(error.message||"").includes("INSUFFICIENT_TOKENS")){
-          toast("Yetersiz jeton");
-          location.href="/pages/plan_select.html";
-          return;
-        }
-        console.error(error);
-        toast("Ders başlatılamadı");
-        location.href="/pages/plan_select.html";
-        return;
-      }
-
-      sessionId = data?.[0]?.session_id || null;
-      localStorage.setItem(ACTIVE_KEY, sessionId || "");
-      remainingSec = PLAN_MIN * 60;
-
-      await refreshHeaderTokens();
-      toast(`Ders başladı • ${CHARGE} Jeton`);
-    }
-
-    function startTimer(){
-      $("timerChip").textContent = fmtTime(remainingSec);
-      if(tick) clearInterval(tick);
-
-      tick = setInterval(async ()=>{
-        remainingSec--;
-        if(remainingSec < 0) remainingSec = 0;
-        $("timerChip").textContent = fmtTime(remainingSec);
-
-        if(remainingSec === 0){
-          clearInterval(tick);
-          await endAndAskContinue(true);
-        }
-      }, 1000);
-    }
-
-    async function teacherReply(userText){
-      const studentName = getStudentName();
-
-      const { data, error } = await supabase.functions.invoke("italky_teacher_chat", {
-        body: {
-          teacher_id: teacherId,
-          teacher_name: T.name,
-          role: T.role,
-          level,
-          student_name: studentName,
-          user_text: userText
-        }
-      });
-
-      if(error) throw error;
-      return data; // {teacher,tr,task,task_tr}
-    }
-
-    function setTask(task, taskTr){
-      $("qText").textContent = task || "Write one more sentence, please.";
-      $("qTr").textContent = taskTr || "";
-      $("qTr").style.display = taskTr ? "block" : "none";
-    }
-
-    async function send(){
-      const input = $("answer");
-      const txt = (input.value || "").trim();
-      if(!txt) return;
-
-      addBubble({ who: getStudentName(), text: txt, isMe:true });
-      input.value = "";
-
-      try{
-        const res = await teacherReply(txt);
-        addBubble({ who: `${T.name} • ${T.role}`, text: res?.teacher || "", tr: res?.tr || "" });
-        setTask(res?.task, res?.task_tr);
-      }catch(e){
-        console.error(e);
-        toast("Öğretmen yanıt veremedi");
-      }
-    }
-
-    async function endSessionWithRefund(){
-      if(!sessionId) return { refund_tokens:0, tokens_left:null, used_minutes:15 };
-      try{
-        const { data, error } = await supabase.rpc("end_course_with_refund", { p_session_id: sessionId });
-        if(error) throw error;
-        const row = data?.[0] || {};
-        return row;
-      }catch(e){
-        console.warn(e);
-        return { refund_tokens:0, tokens_left:null, used_minutes:15 };
-      } finally {
-        try{ localStorage.removeItem(ACTIVE_KEY); }catch{}
-      }
-    }
-
-    async function endAndAskContinue(autoTimeUp=false){
-      // bitir -> iade
-      const r = await endSessionWithRefund();
-      await refreshHeaderTokens();
-
-      const refund = Number(r?.refund_tokens || 0);
-      const used = Number(r?.used_minutes ?? 15);
-
-      const txt =
-        (autoTimeUp ? "15 dakika tamamlandı.\n" : "Ders kapatıldı.\n") +
-        `Kullanılan süre: ${used} dk\n` +
-        `İade: ${refund} Jeton\n\n` +
-        `Devam edersek yeni 15 dk ders başlar ve 30 Jeton alınır.\nDevam edelim mi?`;
-
-      $("continueText").textContent = txt;
-      $("continueOverlay").classList.add("show");
-    }
-
-    async function finishNow(){
-      clearInterval(tick);
-      await endAndAskContinue(false);
-    }
-
-    async function exitNow(){
-      clearInterval(tick);
-      // çıkışta da iade kuralı çalışsın
-      await endSessionWithRefund();
-      await refreshHeaderTokens();
-      location.href="/pages/home.html";
-    }
-
-    $("btnSend").addEventListener("click", send);
-    $("answer").addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") send(); });
-
-    $("btnFinish").addEventListener("click", finishNow);
-    $("btnExit").addEventListener("click", exitNow);
-
-    $("btnContinueYes").addEventListener("click", async ()=>{
-      $("continueOverlay").classList.remove("show");
-      // yeni ders başlat
-      await startNewSession();
-      addBubble({
-        who: `${T.name} • ${T.role}`,
-        text: `Great! Let's continue. Write one new sentence.`,
-        tr: `Harika! Devam edelim. Yeni bir cümle yaz.`
-      });
-      setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
-      startTimer();
-    });
-
-    $("btnContinueNo").addEventListener("click", ()=>{
-      $("continueOverlay").classList.remove("show");
-      location.href="/pages/plan_select.html";
-    });
-
-    // ---- BOOT ----
-    await fetchLevel();
-
-    // session kontrol
-    const { data:{ session } } = await supabase.auth.getSession();
-    if(!session) location.href="/pages/login.html";
-
-    const resumed = await tryResumeActive();
-    if(!resumed){
-      await startNewSession();
-    }
-
-    // hoş geldin mesajı
-    addBubble({
-      who: `${T.name} • ${T.role}`,
-      text: `Hello ${getStudentName()}! Let's start. Write one sentence about yourself.`,
-      tr: `Merhaba ${getStudentName()}! Başlayalım. Kendin hakkında bir cümle yaz.`
-    });
-
-    setTask("Write one sentence about yourself.", "Kendin hakkında bir cümle yaz.");
-    startTimer();
-  </script>
+await startLesson();
+</script>
 </body>
 </html>
