@@ -36,7 +36,7 @@ function minutesToHM(mins){
   return `${h} saat ${r} dk`;
 }
 
-/* ------------- SESSION CONTROL ------------- */
+/* ---------------- SESSION ---------------- */
 
 async function requireSession(){
   const { data:{ session }, error } = await supabase.auth.getSession();
@@ -48,7 +48,7 @@ async function requireSession(){
   return session;
 }
 
-/* ------------- PROFILE FETCH ------------- */
+/* ---------------- PROFILE ---------------- */
 
 async function getOrCreateProfile(user){
   try{
@@ -86,7 +86,7 @@ async function getOrCreateProfile(user){
   return created;
 }
 
-/* -------- MEMBER NO SERVER GUARANTEE -------- */
+/* ---------------- MEMBER NO (SERVER) ---------------- */
 
 async function ensureMemberNoServer(){
   const { data, error } = await supabase.rpc("ensure_member_no");
@@ -94,10 +94,9 @@ async function ensureMemberNoServer(){
   return data;
 }
 
-/* ------------- LEVEL REQUIREMENTS ------------- */
+/* ---------------- LEVEL REQUIREMENTS ---------------- */
 
 async function loadLevelRequirements(){
-  // DB’den çek. Yoksa fallback map.
   try{
     const { data, error } = await supabase
       .from("level_requirements")
@@ -111,7 +110,6 @@ async function loadLevelRequirements(){
     });
     return map;
   }catch{
-    // fallback
     return { A0:0, A1:360, A2:600, B1:960, B2:1440, C1:0 };
   }
 }
@@ -123,7 +121,7 @@ function nextLevelOf(level){
   return order[Math.min(order.length-1, i+1)];
 }
 
-/* ------------- RENDER HELP ------------- */
+/* ---------------- LEVEL RENDER ---------------- */
 
 const TEACHER_LABELS = [
   { id:"dora",   label:"İngilizce" },
@@ -161,42 +159,42 @@ function renderLevels(profile, reqMap){
 
   list.innerHTML = "";
 
-  const levels = (profile?.levels && typeof profile.levels === "object") ? profile.levels : {};
-  const study = (profile?.study_minutes && typeof profile.study_minutes === "object") ? profile.study_minutes : {};
+  const levels = (profile?.levels && typeof profile.levels === "object")
+    ? profile.levels
+    : {};
 
-  const rows = [];
+  const study = (profile?.study_minutes && typeof profile.study_minutes === "object")
+    ? profile.study_minutes
+    : {};
+
+  let hasAny = false;
 
   for(const t of TEACHER_LABELS){
     const lv = levels[t.id];
     if(!lv) continue;
 
-    const studiedMin = Number(study?.[t.id] || 0);
+    hasAny = true;
 
-    const nextLv = nextLevelOf(lv);
-    const needMin = Number(reqMap?.[lv] ?? 0);         // bu seviyeyi tamamlamak için gerekli toplam
+    const studiedMin = Number(study?.[t.id] || 0);
+    const needMin = Number(reqMap?.[lv] ?? 0);
     const remainingMin = Math.max(0, needMin - studiedMin);
 
     const right =
       `${lv} • ${minutesToHM(studiedMin)} • Kalan: ${minutesToHM(remainingMin)}`;
 
-    rows.push([t.label, right]);
+    list.appendChild(lineRow(t.label, right));
   }
 
-  if(rows.length === 0){
+  if(!hasAny){
     empty.style.display = "block";
     empty.onclick = ()=>location.href="/pages/teacher_select.html";
-    return;
+  } else {
+    empty.style.display = "none";
+    empty.onclick = null;
   }
-
-  empty.style.display = "none";
-  empty.onclick = null;
-
-  rows.forEach(([lang, right])=>{
-    list.appendChild(lineRow(lang, right));
-  });
 }
 
-/* ------------- OFFLINE RENDER ------------- */
+/* ---------------- OFFLINE ---------------- */
 
 function renderOffline(profile){
   const list = $("offlineList");
@@ -217,7 +215,7 @@ function renderOffline(profile){
   });
 }
 
-/* ------------- LOGOUT ------------- */
+/* ---------------- LOGOUT ---------------- */
 
 function nukeAuthStorage(){
   try{
@@ -240,7 +238,7 @@ async function safeLogout(){
   location.href="/pages/login.html";
 }
 
-/* ------------- NAME UPDATE ------------- */
+/* ---------------- NAME UPDATE ---------------- */
 
 async function updateStudentName(userId, newName){
   const clean = String(newName || "").trim().slice(0,32);
@@ -264,7 +262,7 @@ async function updateStudentName(userId, newName){
   return clean;
 }
 
-/* ------------- INIT ------------- */
+/* ---------------- INIT ---------------- */
 
 export async function initProfilePage({ setHeaderTokens } = {}){
   const session = await requireSession();
@@ -290,7 +288,9 @@ export async function initProfilePage({ setHeaderTokens } = {}){
 
   const tokens = Number(profile.tokens ?? 0);
   $("tokenVal").textContent = tokens;
-  if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
+  if(typeof setHeaderTokens === "function"){
+    setHeaderTokens(tokens);
+  }
 
   renderLevels(profile, reqMap);
   renderOffline(profile);
