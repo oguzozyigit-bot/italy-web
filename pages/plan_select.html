@@ -1,131 +1,96 @@
 <!-- FILE: /pages/plan_select.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Sonuç</title>
-  <link rel="icon" href="data:," />
+  <title>italkyAI • Ders Planı</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    #pageContent{ height:100%; }
-
-    .wrap{
-      height:100%;
-      padding: 12px 12px 18px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
+    #pageContent{ height:100%; overflow:hidden; }
+    .wrap{ height:100%; padding: 10px 16px 20px; display:flex; flex-direction:column; gap:12px; }
 
     .hero{
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(20px);
       padding: 18px 16px;
     }
 
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
+    .topRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .title{
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-size:18px;
+      font-weight:1000;
+      margin:0;
+      letter-spacing:-0.3px;
+      color:#fff;
     }
-
-    .chip{
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.10);
+    .badge{
+      padding:8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
-      font-weight:1000;
-      font-size:12px;
       color: rgba(255,255,255,0.86);
-      white-space:nowrap;
-    }
-
-    .big{
-      margin-top:12px;
-      font-size:22px;
-      font-weight:1000;
-      letter-spacing:-0.5px;
-      line-height:1.1;
-    }
-
-    .sub{
-      margin-top:10px;
-      font-size:13px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      line-height:1.45;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      font-weight: 1000;
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     .card{
-      border-radius: 24px;
+      border-radius: 28px;
       border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 14px 12px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      padding: 16px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
-    .k{
-      font-size:11px;
-      font-weight:1000;
-      color: rgba(255,255,255,0.60);
-      text-transform:uppercase;
-      letter-spacing:1px;
-    }
-    .v{
-      margin-top:6px;
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:-0.3px;
-      line-height:1.1;
-    }
+
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .k{ font-size:12px; font-weight:900; color: rgba(165,180,252,0.95); letter-spacing:1px; text-transform:uppercase; }
+    .v{ font-size:14px; font-weight:1000; color:#fff; }
 
     .note{
-      margin-top:10px;
       font-size:12px;
-      font-weight:900;
-      color: rgba(255,255,255,0.66);
+      font-weight:800;
+      color: rgba(255,255,255,0.60);
       line-height:1.45;
+      margin-top: 6px;
     }
 
-    .spacer{ flex:1; }
-
     .btn{
-      height: 58px;
+      height: 54px;
       border-radius: 22px;
-      border: none;
+      border:none;
       cursor:pointer;
       font-weight:1000;
-      font-size:15px;
+      font-size:14px;
       color:#fff;
       background: linear-gradient(135deg, #A5B4FC, #4F46E5);
       box-shadow: 0 16px 44px rgba(79,70,229,.22);
+      margin-top:auto;
     }
-    .btn:active{ transform: scale(.98); }
+    .btn:active{ transform:scale(.99); }
 
     .ghost{
-      height: 52px;
+      height: 54px;
       border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.06);
       color:#fff;
       font-weight:1000;
       font-size:13px;
       cursor:pointer;
     }
-    .ghost:active{ transform: scale(.99); }
+    .ghost:active{ transform:scale(.99); }
+
+    .btnRow{ display:flex; gap:10px; margin-top:auto; }
   </style>
 </head>
 
@@ -134,104 +99,56 @@
     <div class="wrap">
 
       <section class="hero">
-        <div class="row">
-          <div class="chip" id="langChip">Dil: —</div>
-          <div class="chip" id="scoreChip">Skor: —</div>
+        <div class="topRow">
+          <h2 class="title">Ders Planı</h2>
+          <div class="badge">Dakika: 2 Jeton</div>
         </div>
-
-        <div class="big" id="levelLine">Seviyeniz: —</div>
-        <div class="sub" id="recLine">Önerilen günlük çalışma: —</div>
-
-        <div style="height:12px"></div>
-
-        <div class="grid">
-          <div class="card">
-            <div class="k">Bir üst seviye</div>
-            <div class="v" id="nextLevel">—</div>
-          </div>
-          <div class="card">
-            <div class="k">Gerekli çalışma</div>
-            <div class="v" id="hoursNeed">—</div>
-          </div>
-        </div>
-
         <div class="note">
-          • Bir üst seviyeye geçebilmek için ilgili seviyedeki dersleri tamamladıktan sonra <b>tekrar seviye tespit sınavı</b> yapılacaktır.<br/>
-          • Bu saatler “yaklaşık rehberli öğrenme” aralıklarıdır; kişiye göre değişebilir.
+          Dersler maksimum <b>15 dakika</b> sürer. Ders başında <b>30 Jeton</b> peşin alınır.
+          Ders erken biterse kalan süre iade edilir.
         </div>
       </section>
 
-      <div class="spacer"></div>
+      <section class="card">
+        <div class="row">
+          <div class="k">Süre</div>
+          <div class="v">15 Dakika</div>
+        </div>
+        <div class="row">
+          <div class="k">Ücret</div>
+          <div class="v">30 Jeton</div>
+        </div>
+        <div class="row">
+          <div class="k">Akış</div>
+          <div class="v">Ders bitince “Devam?”</div>
+        </div>
+      </section>
 
-      <!-- ✅ Butonda süre yazmıyoruz -->
-      <button class="btn" id="btnTrial" type="button">Deneme Dersine Katıl</button>
-      <button class="ghost" id="btnBack" type="button">Dil Seçimine Dön</button>
+      <div class="btnRow">
+        <button class="ghost" id="btnBack" type="button">Geri</button>
+        <button class="btn" id="btnStart" type="button">Dersi Başlat</button>
+      </div>
 
     </div>
   </main>
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
+    import { bootPage } from "/js/ui_guard.js";
+
     mountShell({ scroll:"none" });
+    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
-    // Storage keys
-    const KEY_TEACHER     = "italky_teacher_pref";
-    const KEY_LEVEL       = "italky_level";
-    const KEY_WEIGHTED    = "italky_level_weighted_score";
-    const KEY_RAW         = "italky_level_raw_correct";
-    const KEY_REC_MINS    = "italky_recommended_mins";
+    // öğretmen seçili mi?
+    const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
+    if(!teacherId) location.href = "/pages/teacher_select.html";
 
-    // Teacher registry (chip)
-    const TEACHERS = {
-      dora:{flag:"🇬🇧", role:"İngilizce"},
-      ayda:{flag:"🇩🇪", role:"Almanca"},
-      jale:{flag:"🇫🇷", role:"Fransızca"},
-      ozan:{flag:"🇪🇸", role:"İspanyolca"},
-      sencer:{flag:"🇮🇹", role:"İtalyanca"},
-      sungur:{flag:"🇷🇺", role:"Rusça"},
-      huma:{flag:"🇯🇵", role:"Japonca"},
-      umay:{flag:"🇨🇳", role:"Çince"},
+    document.getElementById("btnBack").onclick = ()=>history.back();
+
+    document.getElementById("btnStart").onclick = ()=>{
+      localStorage.setItem("italky_lesson_mins", "15"); // sabit
+      location.href = "/pages/teacher_course.html";
     };
-
-    const $ = (id)=>document.getElementById(id);
-
-    const teacher = (localStorage.getItem(KEY_TEACHER) || "").trim();
-    const tinfo = TEACHERS[teacher];
-    if(tinfo) $("langChip").textContent = `${tinfo.flag} Dil: ${tinfo.role}`;
-
-    const level = (localStorage.getItem(KEY_LEVEL) || "A0").trim();
-    const w = (localStorage.getItem(KEY_WEIGHTED) || "").trim();
-    const r = (localStorage.getItem(KEY_RAW) || "").trim();
-    const rec = (localStorage.getItem(KEY_REC_MINS) || "").trim();
-
-    $("levelLine").textContent = `Seviyeniz: ${level}`;
-    $("recLine").textContent = `Önerilen günlük çalışma: ${rec ? rec + " dk (hafta sonları hariç)" : "—"}`;
-    $("scoreChip").textContent = w ? `Skor: ${w}` : (r ? `Doğru: ${r}` : "Skor: —");
-
-    // ✅ Guided learning hours (rough ranges; pro look)
-    // Cambridge/British Council rough guide: A2 180–200, B1 350–400, B2 500–600, C1 700–800, C2 1000–1200
-    // (A1 için yaygın aralık: 100–150; Zero->A1 100–150)
-    const HOURS_TO_NEXT = {
-      A0: { next:"A1", hours:"100–150 saat" },
-      A1: { next:"A2", hours:"100–150 saat" },
-      A2: { next:"B1", hours:"150–220 saat" },  // (350–400) - (180–200)
-      B1: { next:"B2", hours:"100–250 saat" },  // (500–600) - (350–400)
-      B2: { next:"C1", hours:"100–300 saat" },  // (700–800) - (500–600)
-      C1: { next:"C2", hours:"200–500 saat" },  // (1000–1200) - (700–800)
-      C2: { next:"C2", hours:"—" },
-    };
-
-    const nx = HOURS_TO_NEXT[level] || HOURS_TO_NEXT["A0"];
-    $("nextLevel").textContent = nx.next === "C2" && level === "C2" ? "C2 (Maksimum)" : nx.next;
-    $("hoursNeed").textContent = (level === "C2") ? "Tebrikler 🎉" : nx.hours;
-
-    $("btnTrial").addEventListener("click", ()=>{
-      location.href = "/pages/trial_lesson.html";
-    });
-
-    $("btnBack").addEventListener("click", ()=>{
-      location.href = "/pages/teacher_select.html";
-    });
   </script>
 </body>
 </html>
