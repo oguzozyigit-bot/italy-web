@@ -27,6 +27,15 @@ function fmtDT(iso){
   }
 }
 
+function minutesToHM(mins){
+  const m = Math.max(0, Number(mins)||0);
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  if(h <= 0) return `${r} dk`;
+  if(r === 0) return `${h} saat`;
+  return `${h} saat ${r} dk`;
+}
+
 /* ------------- SESSION CONTROL ------------- */
 
 async function requireSession(){
@@ -54,7 +63,6 @@ async function getOrCreateProfile(user){
     .maybeSingle();
 
   if(error) throw error;
-
   if(data) return data;
 
   const insert = {
@@ -86,7 +94,36 @@ async function ensureMemberNoServer(){
   return data;
 }
 
-/* ------------- LEVEL RENDER ------------- */
+/* ------------- LEVEL REQUIREMENTS ------------- */
+
+async function loadLevelRequirements(){
+  // DB’den çek. Yoksa fallback map.
+  try{
+    const { data, error } = await supabase
+      .from("level_requirements")
+      .select("level, minutes_required");
+
+    if(error) throw error;
+
+    const map = {};
+    (data || []).forEach(r=>{
+      map[r.level] = Number(r.minutes_required||0);
+    });
+    return map;
+  }catch{
+    // fallback
+    return { A0:0, A1:360, A2:600, B1:960, B2:1440, C1:0 };
+  }
+}
+
+function nextLevelOf(level){
+  const order = ["A0","A1","A2","B1","B2","C1"];
+  const i = order.indexOf(String(level||"A0"));
+  if(i < 0) return "A1";
+  return order[Math.min(order.length-1, i+1)];
+}
+
+/* ------------- RENDER HELP ------------- */
 
 const TEACHER_LABELS = [
   { id:"dora",   label:"İngilizce" },
@@ -117,30 +154,45 @@ function lineRow(label, value){
   return div;
 }
 
-function renderLevels(profile){
+function renderLevels(profile, reqMap){
   const list = $("levelsList");
   const empty = $("levelsEmptyNote");
   if(!list || !empty) return;
 
   list.innerHTML = "";
 
-  const pairs = [];
-  if(profile?.levels && typeof profile.levels === "object"){
-    for(const t of TEACHER_LABELS){
-      const v = profile.levels[t.id];
-      if(v) pairs.push([t.label, String(v)]);
-    }
+  const levels = (profile?.levels && typeof profile.levels === "object") ? profile.levels : {};
+  const study = (profile?.study_minutes && typeof profile.study_minutes === "object") ? profile.study_minutes : {};
+
+  const rows = [];
+
+  for(const t of TEACHER_LABELS){
+    const lv = levels[t.id];
+    if(!lv) continue;
+
+    const studiedMin = Number(study?.[t.id] || 0);
+
+    const nextLv = nextLevelOf(lv);
+    const needMin = Number(reqMap?.[lv] ?? 0);         // bu seviyeyi tamamlamak için gerekli toplam
+    const remainingMin = Math.max(0, needMin - studiedMin);
+
+    const right =
+      `${lv} • ${minutesToHM(studiedMin)} • Kalan: ${minutesToHM(remainingMin)}`;
+
+    rows.push([t.label, right]);
   }
 
-  if(pairs.length === 0){
+  if(rows.length === 0){
     empty.style.display = "block";
     empty.onclick = ()=>location.href="/pages/teacher_select.html";
     return;
   }
 
   empty.style.display = "none";
-  pairs.forEach(([lang,lvl])=>{
-    list.appendChild(lineRow(lang, lvl));
+  empty.onclick = null;
+
+  rows.forEach(([lang, right])=>{
+    list.appendChild(lineRow(lang, right));
   });
 }
 
@@ -215,12 +267,12 @@ async function updateStudentName(userId, newName){
 /* ------------- INIT ------------- */
 
 export async function initProfilePage({ setHeaderTokens } = {}){
-
   const session = await requireSession();
   if(!session) return;
 
   const user = session.user;
   const profile = await getOrCreateProfile(user);
+  const reqMap = await loadLevelRequirements();
 
   $("pName").textContent =
     profile.full_name ||
@@ -238,11 +290,9 @@ export async function initProfilePage({ setHeaderTokens } = {}){
 
   const tokens = Number(profile.tokens ?? 0);
   $("tokenVal").textContent = tokens;
-  if(typeof setHeaderTokens === "function"){
-    setHeaderTokens(tokens);
-  }
+  if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
 
-  renderLevels(profile);
+  renderLevels(profile, reqMap);
   renderOffline(profile);
 
   $("logoutBtn")?.addEventListener("click", safeLogout);
