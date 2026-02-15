@@ -12,7 +12,7 @@ const HOME_HEADER_HTML = `
   <div class="user-plain" id="profileBtn" title="Profil">
     <div class="uMeta">
       <div class="uName" id="userName">Kullanıcı</div>
-      <div class="uJeton">Jeton: <span id="headerJeton">"-"</span></div>
+      <div class="uJeton">Jeton: <span id="headerJeton">-</span></div>
     </div>
     <div class="avatar"><img src="" id="userPic" alt=""></div>
   </div>
@@ -276,7 +276,7 @@ function safeSetImg(id, src){
 
 function hydrateFromCache(){
   // Şimdilik: Jeton 1000 default. Cache varsa override edebilir.
-  safeSetText("headerJeton", "1000");
+  safeSetText("headerJeton", "—");
 
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
