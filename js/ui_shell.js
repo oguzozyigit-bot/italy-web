@@ -12,7 +12,7 @@ const HOME_HEADER_HTML = `
   <div class="user-plain" id="profileBtn" title="Profil">
     <div class="uMeta">
       <div class="uName" id="userName">Kullanıcı</div>
-      <div class="uJeton">Jeton: <span id="headerJeton">1000</span></div>
+      <div class="uJeton">Jeton: <span id="headerJeton">"-"</span></div>
     </div>
     <div class="avatar"><img src="" id="userPic" alt=""></div>
   </div>
