@@ -6,20 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Ders</title>
   <link rel="icon" href="data:," />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     #pageContent{ height:100%; }
-    .wrap{ height:100%; padding: 12px 12px 18px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
+    .wrap{
+      height:100%;
+      padding: 12px 12px 18px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
 
     .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
     .chip{
-      padding:10px 12px; border-radius:999px;
+      padding:10px 12px;
+      border-radius:999px;
       border:1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
-      font-weight:1000; font-size:12px;
+      font-weight:1000;
+      font-size:12px;
       color: rgba(255,255,255,0.86);
       white-space:nowrap;
     }
@@ -36,8 +46,22 @@
       gap:12px;
     }
 
-    .big{ font-size:18px; font-weight:1000; letter-spacing:-0.2px; line-height:1.2; display:flex; justify-content:space-between; align-items:center; gap:10px;}
-    .sub{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.45; }
+    .big{
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-0.2px;
+      line-height:1.2;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .sub{
+      font-size:13px;
+      font-weight:900;
+      color: rgba(255,255,255,0.70);
+      line-height:1.45;
+    }
 
     .chat{
       flex:1;
@@ -47,6 +71,7 @@
       flex-direction:column;
       gap:10px;
     }
+
     .bubble{
       max-width: 92%;
       border-radius: 18px;
@@ -58,7 +83,15 @@
     .teacher{ align-self:flex-start; }
     .bTop{ font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px; }
     .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; }
-    .bTr{ margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.10); font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); white-space:pre-wrap; }
+    .bTr{
+      margin-top:8px;
+      padding-top:8px;
+      border-top:1px solid rgba(255,255,255,0.10);
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.70);
+      white-space:pre-wrap;
+    }
 
     .task{
       border-radius: 22px;
@@ -129,6 +162,29 @@
       text-align:center;
     }
     .toast.show{ transform:translateX(-50%) translateY(0); }
+
+    /* Continue modal */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:999999;
+    }
+    .overlay.show{ display:flex; }
+    .modal{
+      width:min(520px,100%);
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(10,10,18,0.92);
+      padding:14px;
+    }
+    .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; }
+    .mText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; margin: 0 6px; white-space:pre-wrap; }
+    .mBtns{ display:flex; gap:10px; margin-top:12px; }
   </style>
 </head>
 
@@ -137,7 +193,7 @@
     <div class="wrap">
       <div class="top">
         <div class="chip" id="whoChip">—</div>
-        <div class="chip" id="timerChip">--:--</div>
+        <div class="chip" id="timerChip">15:00</div>
       </div>
 
       <section class="card">
@@ -150,8 +206,8 @@
         <div class="chat" id="chat"></div>
 
         <div class="task">
-          <div class="q" id="qText">Hazır mısın? Hedef dilde 1 cümle yaz.</div>
-          <div class="qSub" id="qTr" style="display:none;"></div>
+          <div class="q" id="qText">Write one sentence about yourself.</div>
+          <div class="qSub" id="qTr">Kendin hakkında bir cümle yaz.</div>
           <input class="inp" id="answer" placeholder="Cevabını yaz..." />
         </div>
 
@@ -166,8 +222,19 @@
 
   <div class="toast" id="toast"></div>
 
+  <div class="overlay" id="continueOverlay">
+    <div class="modal">
+      <div class="mTitle">Devam Edelim mi?</div>
+      <div class="mText" id="continueText">—</div>
+      <div class="mBtns">
+        <button class="btn" id="btnContinueYes" type="button">Evet, Devam</button>
+        <button class="ghost" id="btnContinueNo" type="button">Bugünlük Bu Kadar</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
-    import { mountShell } from "/js/ui_shell.js";
+    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
     import { bootPage } from "/js/ui_guard.js";
     import { supabase } from "/js/supabase_client.js";
     import { STORAGE_KEY } from "/js/config.js";
@@ -177,6 +244,11 @@
 
     const $ = (id)=>document.getElementById(id);
     const chat = $("chat");
+
+    const PLAN_MIN = 15;
+    const RATE = 2;
+    const CHARGE = PLAN_MIN * RATE; // 30 jeton
+    const ACTIVE_KEY = "italky_active_course_session";
 
     function toast(msg){
       const t = $("toast");
@@ -201,19 +273,15 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
-    function fmt(s){
-      const m = String(Math.floor(s/60)).padStart(2,"0");
-      const ss = String(s%60).padStart(2,"0");
-      return `${m}:${ss}`;
+    function fmtTime(sec){
+      const m = String(Math.floor(sec/60)).padStart(2,"0");
+      const s = String(sec%60).padStart(2,"0");
+      return `${m}:${s}`;
     }
 
-    const ACTIVE_COURSE_KEY = "active_course_session_id";
-
-    // ---- prefs ----
+    // teacher pref
     const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
-    const minsStr   = (localStorage.getItem("italky_lesson_mins") || "").trim();
-    if(!teacherId) location.href = "/pages/teacher_select.html";
-    if(!minsStr) location.href = "/pages/plan_select.html";
+    if(!teacherId) location.href="/pages/teacher_select.html";
 
     const TEACHERS = {
       dora:{flag:"🇬🇧", role:"English",  name:"Dora"},
@@ -224,7 +292,6 @@
       sungur:{flag:"🇷🇺", role:"Русский", name:"Sungur"},
       huma:{flag:"🇯🇵", role:"日本語",    name:"Hüma"},
       umay:{flag:"🇨🇳", role:"中文",      name:"Umay"},
-      // eski id’ler
       jack:{flag:"🇬🇧", role:"English", name:"Jack"},
       heidi:{flag:"🇩🇪", role:"Deutsch", name:"Heidi"},
       claire:{flag:"🇫🇷", role:"Français", name:"Claire"},
@@ -234,9 +301,8 @@
       kenji:{flag:"🇯🇵", role:"日本語", name:"Kenji"},
       mei:{flag:"🇨🇳", role:"中文", name:"Mei-Ling"},
     };
-
-    const t = TEACHERS[teacherId] || {flag:"🌍", role:"English", name:"Teacher"};
-    $("whoChip").textContent = `${t.flag} ${t.role} • ${t.name}`;
+    const T = TEACHERS[teacherId] || {flag:"🌍", role:"English", name:"Teacher"};
+    $("whoChip").textContent = `${T.flag} ${T.role} • ${T.name}`;
 
     function getStudentName(){
       try{
@@ -248,90 +314,106 @@
       }
     }
 
-    // plan minutes
-    const mins = Math.max(1, Math.min(120, Number(minsStr) || 10));
-    let remaining = mins * 60;
-    let tick = null;
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if(!session) location.href="/pages/login.html";
-
-    let courseSessionId = null;
+    // DB level
     let level = "A0";
 
     async function fetchLevel(){
       try{
+        const { data:{ session } } = await supabase.auth.getSession();
+        if(!session) { location.href="/pages/login.html"; return; }
+
         const { data, error } = await supabase
           .from("profiles")
           .select("levels")
           .eq("id", session.user.id)
           .single();
-        if(error) return;
-        const lv = data?.levels?.[teacherId];
-        if(lv) level = String(lv);
+
+        if(!error){
+          const v = data?.levels?.[teacherId];
+          if(v) level = String(v);
+        }
       }catch{}
     }
 
-    async function reuseOrStartCourse(){
-      // ✅ refresh/double charge koruması
-      const cachedId = (localStorage.getItem(ACTIVE_COURSE_KEY) || "").trim();
-      if(cachedId){
-        // DB'de active mi bak
-        try{
-          const { data, error } = await supabase
-            .from("course_sessions")
-            .select("id,status")
-            .eq("id", cachedId)
-            .maybeSingle();
-          if(!error && data?.id && data?.status === "active"){
-            courseSessionId = cachedId;
-            toast("Ders devam ediyor");
-            return;
-          }
-        }catch{}
-        localStorage.removeItem(ACTIVE_COURSE_KEY);
-      }
+    // Session state
+    let remainingSec = PLAN_MIN * 60;
+    let tick = null;
+    let sessionId = null;
 
-      // ✅ yeni oturum + peşin jeton düş
+    async function refreshHeaderTokens(){
       try{
-        const { data, error } = await supabase.rpc("start_course_session", {
-          p_teacher_id: teacherId,
-          p_plan_minutes: mins
-        });
+        const { data:{ session } } = await supabase.auth.getSession();
+        if(!session) return;
+        const { data } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
+        if(data?.tokens != null) setHeaderTokens(data.tokens);
+      }catch{}
+    }
 
-        if(error){
-          if(String(error.message||"").includes("INSUFFICIENT_TOKENS")){
-            toast("Yetersiz jeton");
-            location.href="/pages/plan_select.html";
-            return;
-          }
-          throw error;
-        }
+    async function tryResumeActive(){
+      const cached = (localStorage.getItem(ACTIVE_KEY) || "").trim();
+      if(!cached) return false;
 
-        courseSessionId = data?.[0]?.session_id || null;
-        if(courseSessionId) localStorage.setItem(ACTIVE_COURSE_KEY, courseSessionId);
+      try{
+        const { data, error } = await supabase
+          .from("course_sessions")
+          .select("id,status,started_at,plan_minutes")
+          .eq("id", cached)
+          .maybeSingle();
 
-        const left = data?.[0]?.tokens_left;
-        if(left != null) toast(`Ders başladı • Jeton: ${left}`);
-      }catch(e){
-        console.error(e);
-        toast("Ders başlatılamadı");
-        location.href="/pages/plan_select.html";
+        if(error || !data?.id) { localStorage.removeItem(ACTIVE_KEY); return false; }
+        if(data.status !== "active") { localStorage.removeItem(ACTIVE_KEY); return false; }
+
+        // kalan süreyi server start_at ile hesapla
+        const startedAt = new Date(data.started_at).getTime();
+        const now = Date.now();
+        const elapsed = Math.max(0, (now - startedAt) / 1000);
+        const planSec = (Number(data.plan_minutes)||15) * 60;
+        remainingSec = Math.max(0, Math.floor(planSec - elapsed));
+
+        sessionId = data.id;
+        toast("Ders devam ediyor");
+        return true;
+      }catch{
+        localStorage.removeItem(ACTIVE_KEY);
+        return false;
       }
     }
 
-    function startTimer(){
-      $("timerChip").textContent = fmt(remaining);
-      tick = setInterval(async ()=>{
-        remaining--;
-        if(remaining <= 0){
-          remaining = 0;
-          $("timerChip").textContent = fmt(remaining);
-          clearInterval(tick);
-          await finishLesson(true);
+    async function startNewSession(){
+      const { data, error } = await supabase.rpc("start_course_15min", { p_teacher_id: teacherId });
+      if(error){
+        if(String(error.message||"").includes("INSUFFICIENT_TOKENS")){
+          toast("Yetersiz jeton");
+          location.href="/pages/plan_select.html";
           return;
         }
-        $("timerChip").textContent = fmt(remaining);
+        console.error(error);
+        toast("Ders başlatılamadı");
+        location.href="/pages/plan_select.html";
+        return;
+      }
+
+      sessionId = data?.[0]?.session_id || null;
+      localStorage.setItem(ACTIVE_KEY, sessionId || "");
+      remainingSec = PLAN_MIN * 60;
+
+      await refreshHeaderTokens();
+      toast(`Ders başladı • ${CHARGE} Jeton`);
+    }
+
+    function startTimer(){
+      $("timerChip").textContent = fmtTime(remainingSec);
+      if(tick) clearInterval(tick);
+
+      tick = setInterval(async ()=>{
+        remainingSec--;
+        if(remainingSec < 0) remainingSec = 0;
+        $("timerChip").textContent = fmtTime(remainingSec);
+
+        if(remainingSec === 0){
+          clearInterval(tick);
+          await endAndAskContinue(true);
+        }
       }, 1000);
     }
 
@@ -341,8 +423,8 @@
       const { data, error } = await supabase.functions.invoke("italky_teacher_chat", {
         body: {
           teacher_id: teacherId,
-          teacher_name: t.name,
-          role: t.role,
+          teacher_name: T.name,
+          role: T.role,
           level,
           student_name: studentName,
           user_text: userText
@@ -350,18 +432,13 @@
       });
 
       if(error) throw error;
-      return data; // {teacher, tr, task?, task_tr?}
+      return data; // {teacher,tr,task,task_tr}
     }
 
     function setTask(task, taskTr){
       $("qText").textContent = task || "Write one more sentence, please.";
-      if(taskTr){
-        $("qTr").style.display = "block";
-        $("qTr").textContent = taskTr;
-      }else{
-        $("qTr").style.display = "none";
-        $("qTr").textContent = "";
-      }
+      $("qTr").textContent = taskTr || "";
+      $("qTr").style.display = taskTr ? "block" : "none";
     }
 
     async function send(){
@@ -371,14 +448,10 @@
 
       addBubble({ who: getStudentName(), text: txt, isMe:true });
       input.value = "";
-      input.blur();
 
       try{
         const res = await teacherReply(txt);
-        const teacherText = res?.teacher || "";
-        const tr = res?.tr || "";
-        addBubble({ who: `${t.name} • ${t.role}`, text: teacherText, tr });
-
+        addBubble({ who: `${T.name} • ${T.role}`, text: res?.teacher || "", tr: res?.tr || "" });
         setTask(res?.task, res?.task_tr);
       }catch(e){
         console.error(e);
@@ -386,49 +459,91 @@
       }
     }
 
-    async function finishLesson(auto=false){
+    async function endSessionWithRefund(){
+      if(!sessionId) return { refund_tokens:0, tokens_left:null, used_minutes:15 };
       try{
-        if(courseSessionId){
-          await supabase.rpc("end_course_session", { p_session_id: courseSessionId, p_extra_minutes: 0 });
-        }
+        const { data, error } = await supabase.rpc("end_course_with_refund", { p_session_id: sessionId });
+        if(error) throw error;
+        const row = data?.[0] || {};
+        return row;
       }catch(e){
         console.warn(e);
+        return { refund_tokens:0, tokens_left:null, used_minutes:15 };
+      } finally {
+        try{ localStorage.removeItem(ACTIVE_KEY); }catch{}
       }
-
-      try{ localStorage.removeItem(ACTIVE_COURSE_KEY); }catch{}
-
-      toast(auto ? "Ders tamamlandı!" : "Ders bitirildi!");
-      setTimeout(()=> location.href="/pages/plan_select.html", 650);
     }
 
-    async function exitLesson(){
+    async function endAndAskContinue(autoTimeUp=false){
+      // bitir -> iade
+      const r = await endSessionWithRefund();
+      await refreshHeaderTokens();
+
+      const refund = Number(r?.refund_tokens || 0);
+      const used = Number(r?.used_minutes ?? 15);
+
+      const txt =
+        (autoTimeUp ? "15 dakika tamamlandı.\n" : "Ders kapatıldı.\n") +
+        `Kullanılan süre: ${used} dk\n` +
+        `İade: ${refund} Jeton\n\n` +
+        `Devam edersek yeni 15 dk ders başlar ve 30 Jeton alınır.\nDevam edelim mi?`;
+
+      $("continueText").textContent = txt;
+      $("continueOverlay").classList.add("show");
+    }
+
+    async function finishNow(){
       clearInterval(tick);
-      // çıkarken de session kapat (aktif kalmasın)
-      try{
-        if(courseSessionId){
-          await supabase.rpc("end_course_session", { p_session_id: courseSessionId, p_extra_minutes: 0 });
-        }
-      }catch{}
-      try{ localStorage.removeItem(ACTIVE_COURSE_KEY); }catch{}
+      await endAndAskContinue(false);
+    }
+
+    async function exitNow(){
+      clearInterval(tick);
+      // çıkışta da iade kuralı çalışsın
+      await endSessionWithRefund();
+      await refreshHeaderTokens();
       location.href="/pages/home.html";
     }
 
     $("btnSend").addEventListener("click", send);
     $("answer").addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") send(); });
 
-    $("btnFinish").addEventListener("click", async ()=>{
-      clearInterval(tick);
-      await finishLesson(false);
+    $("btnFinish").addEventListener("click", finishNow);
+    $("btnExit").addEventListener("click", exitNow);
+
+    $("btnContinueYes").addEventListener("click", async ()=>{
+      $("continueOverlay").classList.remove("show");
+      // yeni ders başlat
+      await startNewSession();
+      addBubble({
+        who: `${T.name} • ${T.role}`,
+        text: `Great! Let's continue. Write one new sentence.`,
+        tr: `Harika! Devam edelim. Yeni bir cümle yaz.`
+      });
+      setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
+      startTimer();
     });
 
-    $("btnExit").addEventListener("click", exitLesson);
+    $("btnContinueNo").addEventListener("click", ()=>{
+      $("continueOverlay").classList.remove("show");
+      location.href="/pages/plan_select.html";
+    });
 
-    // ---- boot ----
+    // ---- BOOT ----
     await fetchLevel();
-    await reuseOrStartCourse();
 
+    // session kontrol
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(!session) location.href="/pages/login.html";
+
+    const resumed = await tryResumeActive();
+    if(!resumed){
+      await startNewSession();
+    }
+
+    // hoş geldin mesajı
     addBubble({
-      who: `${t.name} • ${t.role}`,
+      who: `${T.name} • ${T.role}`,
       text: `Hello ${getStudentName()}! Let's start. Write one sentence about yourself.`,
       tr: `Merhaba ${getStudentName()}! Başlayalım. Kendin hakkında bir cümle yaz.`
     });
