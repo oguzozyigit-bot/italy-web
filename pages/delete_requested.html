@@ -1,0 +1,82 @@
+<!-- FILE: /pages/delete_requested.html -->
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>italkyAI • Silme Talebi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{ --bg:#020205; --card:rgba(8,8,12,.7); --txt:#fff; --muted:#9ca3af; }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
+    html,body{margin:0;width:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:Outfit,sans-serif;color:var(--txt)}
+    .wrap{max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column;justify-content:center;padding:18px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,0.12);border-radius:28px;padding:18px;backdrop-filter:blur(20px)}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .title{font-family:"Space Grotesk",sans-serif;font-size:18px;font-weight:900;margin:0}
+    .iconBtn{width:44px;height:44px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.18);cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .iconBtn:active{transform:scale(.98)}
+    .iconBtn svg{width:20px;height:20px;stroke:rgba(255,255,255,.9);stroke-width:2.2;fill:none}
+    .p{margin:0;color:rgba(255,255,255,.88);font-weight:800;line-height:1.55}
+    .muted{margin-top:10px;color:var(--muted);font-weight:800;line-height:1.5;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <h1 class="title">Hesap Silme Talebi</h1>
+        <!-- ÇIKIŞ İKONU -->
+        <button class="iconBtn" id="exitBtn" type="button" aria-label="Çıkış">
+          <svg viewBox="0 0 24 24">
+            <path d="M10 17l-1 0a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4h1"/>
+            <path d="M14 7l5 5-5 5"/>
+            <path d="M19 12H10"/>
+          </svg>
+        </button>
+      </div>
+
+      <p class="p">
+        Hesabınızın silinme talebi alınmıştır. 30 gün sonra hesabınız sistemden kalıcı olarak silinecektir.
+      </p>
+      <p class="p" style="margin-top:10px;">
+        Sisteme tekrar giriş yaparsanız hesap silme talebiniz iptal edilecektir.
+      </p>
+      <p class="p" style="margin-top:10px;">
+        Sizi tekrar aramızda görmek bizi mutlu edecektir.
+      </p>
+
+      <div class="muted">
+        Not: Bu sayfadan çıkış yapabilirsiniz. Tekrar giriş yapmanız, silme talebini otomatik iptal eder.
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { supabase } from "/js/supabase_client.js";
+    import { STORAGE_KEY } from "/js/config.js";
+
+    function nukeSupabaseAuthStorage(){
+      try{
+        const keys=[];
+        for(let i=0;i<localStorage.length;i++){
+          const k=localStorage.key(i);
+          if(k && k.startsWith("sb-") && k.includes("auth-token")) keys.push(k);
+        }
+        keys.forEach(k=>localStorage.removeItem(k));
+      }catch{}
+    }
+
+    document.getElementById("exitBtn")?.addEventListener("click", async ()=>{
+      try{ await supabase.auth.signOut({ scope:"global" }); }catch{}
+      try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+      try{ localStorage.removeItem("NAC_ID"); }catch{}
+      nukeSupabaseAuthStorage();
+      location.href = "/pages/login.html";
+    });
+  </script>
+</body>
+</html>
