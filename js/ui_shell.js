@@ -1,7 +1,7 @@
 /* FILE: /js/ui_shell.js */
 import { STORAGE_KEY } from "/js/config.js";
 
-/* ✅ HOME TASARIMI BİREBİR: ÜST BAR + JETON ALANI */
+/* ✅ ÜST BAR + JETON */
 const HOME_HEADER_HTML = `
 <header class="premium-header">
   <div class="brand-group" id="brandHome" title="Ana sayfa">
@@ -12,14 +12,14 @@ const HOME_HEADER_HTML = `
   <div class="user-plain" id="profileBtn" title="Profil">
     <div class="uMeta">
       <div class="uName" id="userName">Kullanıcı</div>
-      <div class="uJeton">Jeton: <span id="headerJeton">-</span></div>
+      <div class="uJeton">Jeton: <span id="headerJeton">—</span></div>
     </div>
     <div class="avatar"><img src="" id="userPic" alt=""></div>
   </div>
 </header>
 `;
 
-/* ✅ HOME TASARIMI BİREBİR: ALT BAR */
+/* ✅ ALT BAR */
 const HOME_FOOTER_HTML = `
 <footer class="premium-footer">
   <nav class="footer-nav">
@@ -32,7 +32,7 @@ const HOME_FOOTER_HTML = `
 </footer>
 `;
 
-/* ✅ HOME TASARIMI BİREBİR: SHELL CSS */
+/* ✅ SHELL CSS */
 const SHELL_CSS = `
 :root{
   --bg-void:#02000f;
@@ -51,7 +51,7 @@ html,body{
   margin:0; padding:0; width:100%; height:100%;
   overflow:hidden; position:fixed;
   font-family:'Outfit', sans-serif;
-  background-color: var(--bg-void);
+  background-color: var(--bg-void) !important;
   color: var(--text-main);
 }
 
@@ -189,7 +189,7 @@ html,body{
   display:block;
 }
 
-/* Main (HOME ile aynı padding mantığı) */
+/* Main */
 .main-content{
   flex:1;
   overflow-y:auto;
@@ -198,7 +198,7 @@ html,body{
 }
 .main-content::-webkit-scrollbar{ display:none; }
 
-/* Footer (HOME birebir) */
+/* Footer */
 .premium-footer{
   position: fixed;
   left: 50%;
@@ -275,7 +275,6 @@ function safeSetImg(id, src){
 }
 
 function hydrateFromCache(){
-  // Şimdilik: Jeton 1000 default. Cache varsa override edebilir.
   safeSetText("headerJeton", "—");
 
   try{
@@ -285,27 +284,39 @@ function hydrateFromCache(){
 
     if (u?.name) safeSetText("userName", u.name);
     if (u?.picture) safeSetImg("userPic", u.picture);
-
-    // Eğer cache'de token alanı varsa (ileride bağlayacağız)
     if (u?.tokens != null) safeSetText("headerJeton", String(u.tokens));
   }catch(_e){}
 }
 
-export function mountShell(){
+export function mountShell(options = {}){
   injectShellStyle();
 
-  if (document.getElementById("italkyAppShell")) return;
+  // background flash kill
+  try{ document.body.style.background = "var(--bg-void)"; }catch{}
+
+  // already mounted?
+  if (document.getElementById("italkyAppShell")) {
+    // sadece scroll modunu güncelle (bazı sayfalar scroll:none istiyor)
+    const main = document.getElementById("shellMain");
+    if (main && options?.scroll === "none") {
+      main.style.overflow = "hidden";
+      main.style.padding = "14px 20px 110px";
+    } else if (main) {
+      main.style.overflow = "";
+      main.style.padding = "";
+    }
+    hydrateFromCache();
+    return;
+  }
 
   const content = document.getElementById("pageContent");
   if(!content) return;
 
-  // Arka plan (body altında)
   const nebula = document.createElement("div");
   nebula.className = "nebula-bg";
   const stars = document.createElement("div");
   stars.className = "stars-field";
 
-  // Shell
   const shell = document.createElement("div");
   shell.className = "app-shell";
   shell.id = "italkyAppShell";
@@ -314,22 +325,23 @@ export function mountShell(){
   const main = shell.querySelector("#shellMain");
   main.appendChild(content);
 
-  // Body'yi sıfırla ve yeniden kur
-  document.body.innerHTML = "";
-  document.body.appendChild(nebula);
-  document.body.appendChild(stars);
-  document.body.appendChild(shell);
+  // scroll none mode
+  if (options?.scroll === "none") {
+    main.style.overflow = "hidden";
+    main.style.padding = "14px 20px 110px";
+  }
 
-  // Nav
+  // ✅ body'yi sıfırlamak yerine replaceChildren (flash azalır)
+  document.body.replaceChildren(nebula, stars, shell);
+
   document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
   document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
 
-  // Cache'den (varsa) doldur + jeton default
   hydrateFromCache();
 }
 
-/* İleride diğer sayfalardan jeton güncellemek istersen */
+/* Header jeton güncelle */
 export function setHeaderTokens(n){
-  const val = (n == null ? "0" : String(n));
+  const val = (n == null ? "—" : String(n));
   safeSetText("headerJeton", val);
 }
