@@ -6,58 +6,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>italkyAI • Seviye Sınavı</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
-
 <style>
   #pageContent { height: 100%; overflow: hidden; }
   .wrap { height: 100%; padding: 10px 16px 20px; display: flex; flex-direction: column; gap: 12px; }
   .topbar { display: flex; justify-content: space-between; gap:10px; }
   .chip { padding: 8px 12px; border-radius: 99px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); font-weight: 900; color: #a5b4fc; font-size: 11px; white-space:nowrap; }
-
   .card { flex: 1; border-radius: 32px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); padding: 18px; display: flex; flex-direction: column; overflow:hidden; }
   .q-meta{ display:flex; justify-content:space-between; gap:10px; margin-top:4px; }
   .meta{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.55); }
-
   .q-text { font-size: 18px; font-weight: 1000; color: #fff; margin: 14px 0 14px; line-height: 1.3; }
   .opt { width: 100%; padding: 14px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; font-weight: 900; margin-bottom: 10px; text-align: left; cursor: pointer; }
   .opt.sel { background: #6366f1; border-color: rgba(255,255,255,0.0); }
-
   .nav { display: flex; gap: 10px; }
   .btn { flex: 1; height: 50px; border-radius: 16px; font-weight: 1000; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: #fff; }
   .btn:active{ transform:scale(.99); }
   .btn-primary { background:#fff; color:#000; border:none; }
-
   .note { margin-top:10px; font-size: 12px; color: rgba(255,255,255,0.55); font-weight: 800; line-height: 1.5; }
-
-  .toast{
-    position: fixed; left:50%; top:18px; transform:translateX(-50%) translateY(-120px);
-    background:rgba(10,10,18,.92); border:1px solid rgba(165,180,252,.35);
-    padding:10px 14px; border-radius:999px; color:#fff; z-index:99999;
-    font-weight:900; font-size:12px; transition:.28s; backdrop-filter: blur(12px);
-    pointer-events:none; max-width:min(92vw,520px); text-align:center;
-  }
+  .toast{ position: fixed; left:50%; top:18px; transform:translateX(-50%) translateY(-120px); background:rgba(10,10,18,.92); border:1px solid rgba(165,180,252,.35); padding:10px 14px; border-radius:999px; color:#fff; z-index:99999; font-weight:900; font-size:12px; transition:.28s; backdrop-filter: blur(12px); pointer-events:none; max-width:min(92vw,520px); text-align:center;}
   .toast.show{ transform:translateX(-50%) translateY(0); }
-
-  .overlay{
-    position:fixed; inset:0; z-index:999999;
-    display:none; align-items:center; justify-content:center;
-    background: rgba(0,0,0,0.55); backdrop-filter: blur(10px);
-    padding: 16px;
-  }
+  .overlay{ position:fixed; inset:0; z-index:999999; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); padding: 16px; }
   .overlay.show{ display:flex; }
-  .resultCard{
-    width:min(520px, 100%);
-    border-radius: 28px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(10,10,18,0.92);
-    padding: 16px;
-  }
+  .resultCard{ width:min(520px, 100%); border-radius: 28px; border: 1px solid rgba(255,255,255,0.12); background: rgba(10,10,18,0.92); padding: 16px; }
   .rTitle{ font-size:16px; font-weight:1000; color:#fff; margin: 4px 0 10px; }
   .rLevel{ font-size:28px; font-weight:1000; color:#a5b4fc; margin: 0 0 10px; letter-spacing:-0.5px; }
   .rText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; white-space:pre-wrap; }
   .rBtns{ display:flex; gap:10px; margin-top: 12px; }
 </style>
 </head>
-
 <body>
 <main id="pageContent">
   <div class="wrap">
@@ -74,9 +49,7 @@
       <button class="btn btn-primary" id="btnNext">İLERİ</button>
     </div>
 
-    <div class="note">
-      Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.
-    </div>
+    <div class="note">Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.</div>
   </div>
 </main>
 
@@ -115,26 +88,39 @@
   if(!teacherId) location.href = "/pages/teacher_select.html";
 
   const LANGMAP = {
-    dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca",
-    sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince",
-    jack:"İngilizce", heidi:"Almanca", claire:"Fransızca", diego:"İspanyolca",
-    marco:"İtalyanca", elena:"Rusça", kenji:"Japonca", mei:"Çince"
+    dora:"İngilizce", jack:"İngilizce",
+    ayda:"Almanca", heidi:"Almanca",
+    jale:"Fransızca", claire:"Fransızca",
+    ozan:"İspanyolca", diego:"İspanyolca",
+    sencer:"İtalyanca", marco:"İtalyanca",
+    sungur:"Rusça", elena:"Rusça",
+    huma:"Japonca", kenji:"Japonca",
+    umay:"Çince", mei:"Çince"
   };
   $("langChip").textContent = `${LANGMAP[teacherId] || "Dil"} • Seviye Sınavı`;
+
+  // Bank seçimi
+  const BANKS = {
+    en: "https://italky-api.onrender.com/assets/tests/en_v1.json",
+    de: "https://italky-api.onrender.com/assets/tests/de_v1.json"
+  };
+  const teacherToBank = {
+    dora:"en", jack:"en",
+    ayda:"de", heidi:"de"
+  };
+  const bankKey = teacherToBank[teacherId] || "en";
+  const bankUrl = BANKS[bankKey];
 
   const TOTAL_TIME = 40 * 60;
   const MAX_PASSES = 2;
 
-  // ====== FETCH BANK ======
-  const bankUrl = "https://italky-api.onrender.com/assets/tests/en_v1.json";
-  const bank = await fetch(bankUrl, { cache: "no-store" }).then(r=>r.json());
+  const bank = await fetch(bankUrl, { cache:"no-store" }).then(r=>r.json());
   const QUESTIONS = Array.isArray(bank?.questions) ? bank.questions : [];
   if(QUESTIONS.length !== 50){
     toast("Soru bankası yüklenemedi");
     console.error("Bank bad:", bank);
   }
 
-  // ====== STATE ======
   let idx = 0;
   let remaining = TOTAL_TIME;
   let timer = null;
@@ -202,7 +188,6 @@
   }
 
   function computeLevel(weighted){
-    // Bu eşikler bankanın ağırlığına göre ayarlı (50 soruda max ~180-190)
     if(weighted >= 175) return "C1";
     if(weighted >= 140) return "B2";
     if(weighted >= 105) return "B1";
