@@ -6,36 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Ders</title>
   <link rel="icon" href="data:," />
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     #pageContent{ height:100%; }
+    .wrap{ height:100%; padding: 12px 12px 18px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
 
-    .wrap{
-      height:100%;
-      padding: 12px 12px 18px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
+    .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
     .chip{
-      padding:10px 12px;
-      border-radius:999px;
+      padding:10px 12px; border-radius:999px;
       border:1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
-      font-weight:1000;
-      font-size:12px;
+      font-weight:1000; font-size:12px;
       color: rgba(255,255,255,0.86);
       white-space:nowrap;
     }
@@ -45,37 +29,44 @@
       border-radius: 28px;
       border: 1px solid rgba(255,255,255,0.10);
       background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-      padding: 16px 14px;
+      padding: 14px 12px;
       overflow:hidden;
       display:flex;
       flex-direction:column;
       gap:12px;
     }
 
-    .big{
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:-0.2px;
-      line-height:1.2;
+    .big{ font-size:18px; font-weight:1000; letter-spacing:-0.2px; line-height:1.2; display:flex; justify-content:space-between; align-items:center; gap:10px;}
+    .sub{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.45; }
+
+    .chat{
+      flex:1;
+      overflow:auto;
+      padding-right: 6px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
-    .sub{
-      font-size:13px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      line-height:1.45;
+    .bubble{
+      max-width: 92%;
+      border-radius: 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
     }
+    .me{ align-self:flex-end; background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.30); }
+    .teacher{ align-self:flex-start; }
+    .bTop{ font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px; }
+    .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; }
+    .bTr{ margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.10); font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); white-space:pre-wrap; }
 
     .task{
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
-      padding: 14px 12px;
+      padding: 12px 12px;
     }
-    .q{
-      font-weight:1000;
-      font-size:14px;
-      line-height:1.25;
-    }
+    .q{ font-weight:1000; font-size:13px; line-height:1.25; }
     .inp{
       margin-top:10px;
       width:100%;
@@ -89,11 +80,7 @@
       padding: 0 12px;
     }
 
-    .btnRow{
-      display:flex;
-      gap:10px;
-      margin-top:auto;
-    }
+    .btnRow{ display:flex; gap:10px; }
     .btn{
       flex:1;
       height:54px;
@@ -153,16 +140,22 @@
       </div>
 
       <section class="card">
-        <div class="big">Ders</div>
-        <div class="sub">Ders bitmeden çıkarsanız ders baştan başlar.</div>
+        <div class="big">
+          <span>Ders</span>
+          <span class="chip" id="engineChip">italky Academy</span>
+        </div>
+        <div class="sub">Öğretmen hedef dilde konuşur; altına Türkçe açıklamasını yazar.</div>
+
+        <div class="chat" id="chat"></div>
 
         <div class="task">
-          <div class="q" id="qText">1) Kendini hedef dilde 1 cümle ile tanıt.</div>
+          <div class="q" id="qText">Hazır mısın? Hedef dilde 1 cümle yaz.</div>
           <input class="inp" id="answer" placeholder="Cevabını yaz..." />
         </div>
 
         <div class="btnRow">
-          <button class="btn" id="btnFinish" type="button">Dersi Bitir</button>
+          <button class="btn" id="btnSend" type="button">Gönder</button>
+          <button class="ghost" id="btnFinish" type="button">Dersi Bitir</button>
           <button class="ghost" id="btnExit" type="button">Çık</button>
         </div>
       </section>
@@ -173,9 +166,16 @@
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
+    import { bootPage } from "/js/ui_guard.js";
+    import { supabase } from "/js/supabase_client.js";
+    import { STORAGE_KEY } from "/js/config.js";
+
     mountShell({ scroll:"none" });
+    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
     const $ = (id)=>document.getElementById(id);
+    const chat = $("chat");
+
     function toast(msg){
       const t = $("toast");
       t.textContent = String(msg||"");
@@ -184,31 +184,19 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
-    const levelDone = (localStorage.getItem("italky_level_done") || "") === "1";
-    const plan = (localStorage.getItem("italky_plan_pref") || "").trim();
-    const minsStr = (localStorage.getItem("italky_lesson_mins") || "").trim();
-
-    if(!teacherId) location.href = "/pages/teacher_select.html";
-    if(!levelDone) location.href = "/pages/level_test_intro.html";
-    if(!plan || !minsStr) location.href = "/pages/course_signup.html";
-
-    const TEACHERS = {
-      dora:{flag:"🇬🇧", role:"İngilizce", name:"Dora"},
-      ayda:{flag:"🇩🇪", role:"Almanca", name:"Ayda"},
-      jale:{flag:"🇫🇷", role:"Fransızca", name:"Jale"},
-      ozan:{flag:"🇪🇸", role:"İspanyolca", name:"Ozan"},
-      sencer:{flag:"🇮🇹", role:"İtalyanca", name:"Sencer"},
-      sungur:{flag:"🇷🇺", role:"Rusça", name:"Sungur"},
-      huma:{flag:"🇯🇵", role:"Japonca", name:"Hüma"},
-      umay:{flag:"🇨🇳", role:"Çince", name:"Umay"},
-    };
-    const t = TEACHERS[teacherId] || {flag:"🌍", role:"Dil", name:"Öğretmen"};
-    $("whoChip").textContent = `${t.flag} ${t.role} • ${t.name}`;
-
-    const mins = Math.max(1, Math.min(60, Number(minsStr) || 10));
-    let remaining = mins * 60;
-    let tick = null;
+    function addBubble({ who, text, tr, isMe=false }){
+      const b = document.createElement("div");
+      b.className = "bubble " + (isMe ? "me" : "teacher");
+      b.innerHTML = `
+        <div class="bTop">${who}</div>
+        <div class="bTxt"></div>
+        ${tr ? `<div class="bTr"></div>` : ""}
+      `;
+      b.querySelector(".bTxt").textContent = text || "";
+      if(tr) b.querySelector(".bTr").textContent = tr || "";
+      chat.appendChild(b);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
     function fmt(s){
       const m = String(Math.floor(s/60)).padStart(2,"0");
@@ -216,41 +204,168 @@
       return `${m}:${ss}`;
     }
 
+    // ---- prefs ----
+    const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
+    const minsStr   = (localStorage.getItem("italky_lesson_mins") || "").trim();
+    if(!teacherId) location.href = "/pages/teacher_select.html";
+    if(!minsStr) location.href = "/pages/plan_select.html";
+
+    const TEACHERS = {
+      dora:{flag:"🇬🇧", role:"English",  name:"Dora"},
+      ayda:{flag:"🇩🇪", role:"Deutsch",  name:"Ayda"},
+      jale:{flag:"🇫🇷", role:"Français", name:"Jale"},
+      ozan:{flag:"🇪🇸", role:"Español",  name:"Ozan"},
+      sencer:{flag:"🇮🇹", role:"Italiano",name:"Sencer"},
+      sungur:{flag:"🇷🇺", role:"Русский", name:"Sungur"},
+      huma:{flag:"🇯🇵", role:"日本語",    name:"Hüma"},
+      umay:{flag:"🇨🇳", role:"中文",      name:"Umay"},
+      // eski id’ler
+      jack:{flag:"🇬🇧", role:"English", name:"Jack"},
+      heidi:{flag:"🇩🇪", role:"Deutsch", name:"Heidi"},
+      claire:{flag:"🇫🇷", role:"Français", name:"Claire"},
+      diego:{flag:"🇪🇸", role:"Español", name:"Diego"},
+      marco:{flag:"🇮🇹", role:"Italiano", name:"Marco"},
+      elena:{flag:"🇷🇺", role:"Русский", name:"Elena"},
+      kenji:{flag:"🇯🇵", role:"日本語", name:"Kenji"},
+      mei:{flag:"🇨🇳", role:"中文", name:"Mei-Ling"},
+    };
+    const t = TEACHERS[teacherId] || {flag:"🌍", role:"English", name:"Teacher"};
+    $("whoChip").textContent = `${t.flag} ${t.role} • ${t.name}`;
+
+    // student name from cache/profile
+    function getStudentName(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const c = raw ? JSON.parse(raw) : {};
+        return (c?.name || localStorage.getItem("italky_student_name") || "Student");
+      }catch{
+        return localStorage.getItem("italky_student_name") || "Student";
+      }
+    }
+
+    // plan minutes
+    const mins = Math.max(1, Math.min(120, Number(minsStr) || 10));
+    let remaining = mins * 60;
+    let tick = null;
+
+    // supabase session + start course
+    const { data: { session } } = await supabase.auth.getSession();
+    if(!session) location.href="/pages/login.html";
+
+    let courseSessionId = null;
+
+    async function startCourse(){
+      try{
+        const { data, error } = await supabase.rpc("start_course_session", {
+          p_teacher_id: teacherId,
+          p_plan_minutes: mins
+        });
+
+        if(error){
+          if(String(error.message||"").includes("INSUFFICIENT_TOKENS")){
+            toast("Yetersiz jeton");
+            location.href="/pages/plan_select.html";
+            return;
+          }
+          throw error;
+        }
+
+        courseSessionId = data?.[0]?.session_id || null;
+        const left = data?.[0]?.tokens_left;
+        if(left != null){
+          // header jeton güncellemek istersen setHeaderTokens ile yaparsın (shell'de var)
+          // şimdilik sadece toast
+          toast(`Ders başladı • Jeton: ${left}`);
+        }
+      }catch(e){
+        console.error(e);
+        toast("Ders başlatılamadı");
+        location.href="/pages/plan_select.html";
+      }
+    }
+
     function startTimer(){
       $("timerChip").textContent = fmt(remaining);
-      tick = setInterval(()=>{
+      tick = setInterval(async ()=>{
         remaining--;
         if(remaining <= 0){
           remaining = 0;
           $("timerChip").textContent = fmt(remaining);
           clearInterval(tick);
-          finishLesson(true);
+          await finishLesson(true);
           return;
         }
         $("timerChip").textContent = fmt(remaining);
       }, 1000);
     }
 
-    function incProgress(){
-      const PROFILE_KEY = "italky_profile";
-      const prof = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
-      prof.languages = prof.languages || {};
-      prof.languages[teacherId] = prof.languages[teacherId] || {};
-      const st = prof.languages[teacherId];
-      st.lesson_count = (st.lesson_count || 0) + 1;
-      st.last_lesson_at = new Date().toISOString();
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(prof));
+    async function teacherReply(userText){
+      const studentName = getStudentName();
+      const level = "A2"; // şimdilik; level_test bitince DB’den alacağız
+
+      const { data, error } = await supabase.functions.invoke("italky_teacher_chat", {
+        body: {
+          teacher_id: teacherId,
+          teacher_name: t.name,
+          role: t.role,
+          level,
+          student_name: studentName,
+          user_text: userText
+        }
+      });
+
+      if(error) throw error;
+      return data; // {teacher, tr, task?, task_tr?}
     }
 
-    function finishLesson(auto=false){
-      incProgress();
+    async function send(){
+      const input = $("answer");
+      const txt = (input.value || "").trim();
+      if(!txt) return;
+
+      addBubble({ who: getStudentName(), text: txt, isMe:true });
+      input.value = "";
+      input.blur();
+
+      try{
+        const res = await teacherReply(txt);
+        const teacherText = res?.teacher || "";
+        const tr = res?.tr || "";
+        addBubble({ who: `${t.name} • ${t.role}`, text: teacherText, tr });
+
+        // görev güncelle
+        if(res?.task){
+          $("qText").textContent = res.task;
+        }else{
+          $("qText").textContent = "Write one more sentence, please.";
+        }
+      }catch(e){
+        console.error(e);
+        toast("Öğretmen yanıt veremedi");
+      }
+    }
+
+    async function finishLesson(auto=false){
+      try{
+        // ekstra dakika yok şimdilik
+        if(courseSessionId){
+          await supabase.rpc("end_course_session", { p_session_id: courseSessionId, p_extra_minutes: 0 });
+        }
+      }catch(e){
+        console.warn(e);
+      }
       toast(auto ? "Ders tamamlandı!" : "Ders bitirildi!");
       setTimeout(()=> location.href="/pages/plan_select.html", 650);
     }
 
-    $("btnFinish").addEventListener("click", ()=>{
+    $("btnSend").addEventListener("click", send);
+    $("answer").addEventListener("keydown", (ev)=>{
+      if(ev.key === "Enter") send();
+    });
+
+    $("btnFinish").addEventListener("click", async ()=>{
       clearInterval(tick);
-      finishLesson(false);
+      await finishLesson(false);
     });
 
     $("btnExit").addEventListener("click", ()=>{
@@ -258,6 +373,13 @@
       location.href="/pages/home.html";
     });
 
+    // ---- boot ----
+    await startCourse();
+    addBubble({
+      who: `${t.name} • ${t.role}`,
+      text: `Hello ${getStudentName()}! Let's start. Write one sentence about yourself.`,
+      tr: `Merhaba ${getStudentName()}! Başlayalım. Kendin hakkında bir cümle yaz.`
+    });
     startTimer();
   </script>
 </body>
