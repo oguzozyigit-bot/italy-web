@@ -11,7 +11,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    /* ✅ solda-sağda boşluk az, scroll footer üstünde biter */
     #pageContent{
       padding: 16px 14px calc(var(--footerH, 92px) + 18px);
       display:flex;
@@ -44,7 +43,6 @@
       letter-spacing: -0.3px;
     }
 
-    /* ✅ tek satır satır alan */
     .line{
       display:flex;
       align-items:center;
@@ -61,6 +59,7 @@
       font-weight: 900;
       color: rgba(165,180,252,0.95);
       letter-spacing: 1px;
+      white-space: nowrap;
     }
     .v{
       font-size: 13px;
@@ -93,7 +92,6 @@
     .copyBtn:active{ transform: scale(.98); }
     .copyBtn svg{ width:18px; height:18px; stroke: rgba(255,255,255,0.85); stroke-width:2.2; fill:none; }
 
-    /* Jeton kartı */
     .wallet{
       display:flex;
       align-items:center;
@@ -162,6 +160,13 @@
     }
     .linkRow:active{ transform: scale(.99); }
 
+    /* “tıklayınız” vurgusu */
+    .tap{
+      color: rgba(165,180,252,0.95);
+      font-weight: 1000;
+      text-decoration: underline;
+    }
+
     .toast{
       position: fixed;
       left:50%;
@@ -188,7 +193,7 @@
 <body>
   <div id="pageContent">
 
-    <!-- ✅ Üst Başlık + Değişken Alanlar -->
+    <!-- PROFİL -->
     <div class="panel">
       <div class="head">
         <h2 class="title">Profil</h2>
@@ -206,16 +211,7 @@
         </div>
 
         <div class="line">
-          <div class="k">Üyelik Numarası</div>
-          <div class="line">
-  <div class="k">Üyelik Başlangıç</div>
-  <div class="v" id="createdAt">—</div>
-</div>
-
-<div class="line">
-  <div class="k">Son Giriş</div>
-  <div class="v" id="lastLogin">—</div>
-</div>
+          <div class="k">Üyelik Numaranız</div>
           <div class="copyWrap">
             <div class="v mono" id="memberNo">—</div>
             <button class="copyBtn" id="copyMemberBtn" type="button" aria-label="Kopyala">
@@ -225,6 +221,17 @@
               </svg>
             </button>
           </div>
+        </div>
+
+        <!-- ✅ Alt alta iki tarih -->
+        <div class="line">
+          <div class="k">Üyelik Başlangıç Tarihi</div>
+          <div class="v" id="createdAt">—</div>
+        </div>
+
+        <div class="line">
+          <div class="k">Son Giriş Tarihi</div>
+          <div class="v" id="lastLogin">—</div>
         </div>
 
         <div class="wallet">
@@ -237,7 +244,7 @@
       </div>
     </div>
 
-    <!-- ✅ Dil Seviye Durumu -->
+    <!-- DİL SEVİYE DURUMU -->
     <div class="panel">
       <div class="head">
         <h2 class="title">Dil Seviye Durumu</h2>
@@ -246,26 +253,28 @@
       <div class="list" id="levelsList"></div>
 
       <div class="note linkRow" id="levelsEmptyNote" style="display:none;">
-        Henüz Seviye Sınavına Katılamadınız. Lütfen seviye sınavına katılın.
+        Katıldığınız seviye tespit sınavı bulunmamaktadır. Lütfen seviye tespit sınavına katılmak için <span class="tap">tıklayınız</span>...
       </div>
     </div>
 
-    <!-- ✅ İndirilen Offline Paketler -->
+    <!-- OFFLINE DİL DOSYALARI -->
     <div class="panel">
       <div class="head">
-        <h2 class="title">İndirilen Offline Paketler</h2>
+        <h2 class="title">İndirilen Offline Dil Dosyaları</h2>
       </div>
 
       <div class="list" id="offlineList"></div>
 
-      <div class="note" id="offlineEmptyNote" style="display:none;">Henüz offline paket indirmediniz.</div>
+      <div class="note" id="offlineEmptyNote" style="display:none;">
+        İnternete bağlanmadan çeviri yapabiliceğiniz dil dosyasını henüz indirmediniz. Lütfen istediğiniz dil dosyalarını indiriniz.
+      </div>
 
       <div style="margin-top:12px;">
-        <button class="btn btn-ghost" id="offlineDownloadBtn" type="button">Offline İçin Dil Paketi İndir</button>
+        <button class="btn btn-ghost" id="offlineDownloadBtn" type="button">Offline Dil Paketi İndir</button>
       </div>
     </div>
 
-    <!-- ✅ Aksiyonlar -->
+    <!-- AKSİYONLAR -->
     <div class="panel">
       <div class="list">
         <button class="btn btn-safe" id="logoutBtn" type="button">Güvenli Çıkış</button>
@@ -282,7 +291,7 @@
     import { bootPage } from "/js/ui_guard.js";
     import { initProfilePage } from "/js/profile_page.js";
 
-    mountShell(); // scroll açık (shell main-content)
+    mountShell();
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
     await initProfilePage({ setHeaderTokens });
