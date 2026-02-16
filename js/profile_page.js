@@ -134,14 +134,12 @@ async function updateStudentName(userId, newName){
     const cached = raw ? JSON.parse(raw) : {};
     cached.name = clean;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cached));
-    localStorage.setItem("italky_student_name", clean);
   }catch{}
 
   return clean;
 }
 
 async function ensureProfile(user){
-  // 1) select
   const { data: p, error } = await supabase
     .from("profiles")
     .select("id,email,full_name,tokens,member_no,created_at,last_login_at,levels,offline_langs,study_minutes")
@@ -151,7 +149,6 @@ async function ensureProfile(user){
   if(error) throw error;
   if(p) return p;
 
-  // 2) insert if missing
   const insert = {
     id:user.id,
     email:user.email,
@@ -206,9 +203,7 @@ async function loadLevelRequirements(){
 function renderLevels(profile, reqMap){
   const list = $("levelsList");
   const empty = $("levelsEmptyNote");
-  if(!list || !empty) return;
-
-  list.innerHTML = "";
+  if(list) list.innerHTML = "";
 
   const levels = (profile?.levels && typeof profile.levels === "object") ? profile.levels : {};
   const study  = (profile?.study_minutes && typeof profile.study_minutes === "object") ? profile.study_minutes : {};
@@ -229,7 +224,7 @@ function renderLevels(profile, reqMap){
     const remainMin = Math.max(0, needMin - studiedMin);
 
     const right = `${lv} • ${minutesToHM(studiedMin)} • Kalan: ${minutesToHM(remainMin)}`;
-    list.appendChild(lineRow(label, right));
+    if(list) list.appendChild(lineRow(label, right));
   }
 
   safeShow("levelsEmptyNote", !hasAny);
@@ -259,22 +254,20 @@ export async function initProfilePage({ setHeaderTokens } = {}){
 
     const user = session.user;
 
-    // profile
     let profile = await ensureProfile(user);
 
-    // last login update (fail olsa da devam)
+    // last_login_at update (silent)
     try{
-      await supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", user.id);
+      await supabase.from("profiles")
+        .update({ last_login_at: new Date().toISOString() })
+        .eq("id", user.id);
     }catch{}
 
-    // member_no
     const memberNo = await ensureMemberNo(user.id, profile.member_no);
     profile.member_no = memberNo;
 
-    // requirements
     const reqMap = await loadLevelRequirements();
 
-    // render core
     safeText("pEmail", profile.email || user.email || "—");
     safeText("pName", (profile.full_name || "—"));
 
@@ -286,13 +279,13 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     safeText("tokenVal", String(tokens));
     if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
 
-    // enforce name
+    // enforce name (no pencil; only if empty)
     const nm = String(profile.full_name || "").trim();
     if(nm.length < 3){
       const inp = $("nameInput");
       if(inp) inp.value = "";
       openNameModal(true);
-      toast("Lütfen adınızı girin");
+      toast("Lütfen ad soyad girin");
     }
 
     renderLevels(profile, reqMap);
@@ -324,13 +317,6 @@ export async function initProfilePage({ setHeaderTokens } = {}){
       }
     };
 
-    const editBtn = $("editNameBtn");
-    if(editBtn) editBtn.onclick = ()=>{
-      const inp = $("nameInput");
-      if(inp) inp.value = String($("pName")?.textContent || "").trim();
-      openNameModal(false);
-    };
-
     const cancelBtn = $("cancelNameBtn");
     if(cancelBtn) cancelBtn.onclick = closeNameModal;
 
@@ -341,13 +327,13 @@ export async function initProfilePage({ setHeaderTokens } = {}){
         const saved = await updateStudentName(user.id, inp?.value || "");
         safeText("pName", saved);
 
-        // header name update
+        // header update
         const headerName = document.getElementById("userName");
         if(headerName) headerName.textContent = saved;
 
         const m = $("nameModal");
         if(m){ m.dataset.force="0"; m.classList.remove("show"); }
-        toast("İsim kaydedildi");
+        toast("Kaydedildi");
       }catch(e){
         toast(e?.message || "Kaydedilemedi");
       }
