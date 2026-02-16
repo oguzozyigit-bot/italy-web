@@ -1,4 +1,4 @@
-// FILE: /js/text_translate_page.js — FINAL (NO AUTO, default EN->TR, sheet fix)
+// FILE: /js/text_translate_page.js — FIX (no DOMContentLoaded dependency)
 import { apiPOST } from "/js/api.js";
 import { getSiteLang } from "/js/i18n.js";
 import { supabase } from "/js/supabase_client.js";
@@ -34,7 +34,7 @@ function sourceLabel(){ return ({ tr:"Kaynak Dil", en:"Source" }[UI_LANG] || "Ka
 function targetLabel(){ return ({ tr:"Hedef Dil", en:"Target" }[UI_LANG] || "Hedef Dil"); }
 function searchLabel(){ return ({ tr:"Ara…", en:"Search…" }[UI_LANG] || "Ara…"); }
 
-/* LANGS (NO AUTO) — Facetoface’e yakın genişlik */
+/* LANGS (NO AUTO) */
 const LANGS = [
   { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
   { code:"en", flag:"🇬🇧", bcp:"en-US" },
@@ -44,43 +44,17 @@ const LANGS = [
   { code:"es", flag:"🇪🇸", bcp:"es-ES" },
   { code:"pt", flag:"🇵🇹", bcp:"pt-PT" },
   { code:"ru", flag:"🇷🇺", bcp:"ru-RU" },
-  { code:"uk", flag:"🇺🇦", bcp:"uk-UA" },
-  { code:"bg", flag:"🇧🇬", bcp:"bg-BG" },
-  { code:"el", flag:"🇬🇷", bcp:"el-GR" },
-  { code:"ro", flag:"🇷🇴", bcp:"ro-RO" },
-  { code:"sr", flag:"🇷🇸", bcp:"sr-RS" },
-  { code:"hr", flag:"🇭🇷", bcp:"hr-HR" },
-  { code:"bs", flag:"🇧🇦", bcp:"bs-BA" },
-  { code:"sq", flag:"🇦🇱", bcp:"sq-AL" },
-  { code:"mk", flag:"🇲🇰", bcp:"mk-MK" },
-  { code:"az", flag:"🇦🇿", bcp:"az-AZ" },
-  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" },
-  { code:"hy", flag:"🇦🇲", bcp:"hy-AM" },
-  { code:"nl", flag:"🇳🇱", bcp:"nl-NL" },
-  { code:"sv", flag:"🇸🇪", bcp:"sv-SE" },
-  { code:"no", flag:"🇳🇴", bcp:"nb-NO" },
-  { code:"da", flag:"🇩🇰", bcp:"da-DK" },
-  { code:"fi", flag:"🇫🇮", bcp:"fi-FI" },
-  { code:"pl", flag:"🇵🇱", bcp:"pl-PL" },
-  { code:"cs", flag:"🇨🇿", bcp:"cs-CZ" },
-  { code:"sk", flag:"🇸🇰", bcp:"sk-SK" },
-  { code:"hu", flag:"🇭🇺", bcp:"hu-HU" },
-  { code:"sl", flag:"🇸🇮", bcp:"sl-SI" },
   { code:"ar", flag:"🇸🇦", bcp:"ar-SA" },
-  { code:"he", flag:"🇮🇱", bcp:"he-IL" },
   { code:"fa", flag:"🇮🇷", bcp:"fa-IR" },
-  { code:"ur", flag:"🇵🇰", bcp:"ur-PK" },
   { code:"hi", flag:"🇮🇳", bcp:"hi-IN" },
   { code:"bn", flag:"🇧🇩", bcp:"bn-BD" },
-  { code:"th", flag:"🇹🇭", bcp:"th-TH" },
-  { code:"vi", flag:"🇻🇳", bcp:"vi-VN" },
   { code:"id", flag:"🇮🇩", bcp:"id-ID" },
   { code:"ms", flag:"🇲🇾", bcp:"ms-MY" },
+  { code:"vi", flag:"🇻🇳", bcp:"vi-VN" },
+  { code:"th", flag:"🇹🇭", bcp:"th-TH" },
   { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
   { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
   { code:"ko", flag:"🇰🇷", bcp:"ko-KR" },
-  { code:"sw", flag:"🇰🇪", bcp:"sw-KE" },
-  { code:"am", flag:"🇪🇹", bcp:"am-ET" }
 ];
 
 function canonical(code){ return String(code||"").toLowerCase().split("-")[0]; }
@@ -126,7 +100,6 @@ async function waitForSession(graceMs=1600){
   const { data:{ session } } = await supabase.auth.getSession();
   return session || null;
 }
-
 async function ensureLogged(){
   const session = await waitForSession(1600);
   if(!session?.user){
@@ -137,10 +110,9 @@ async function ensureLogged(){
   return session.user;
 }
 
-/* State defaults (EN -> TR) */
+/* State defaults EN->TR */
 const SS_FROM = "italky_text_from_v2";
 const SS_TO   = "italky_text_to_v2";
-
 let fromLang = sessionStorage.getItem(SS_FROM) || "en";
 let toLang   = sessionStorage.getItem(SS_TO) || "tr";
 
@@ -148,28 +120,35 @@ function persist(){
   sessionStorage.setItem(SS_FROM, fromLang);
   sessionStorage.setItem(SS_TO, toLang);
 }
-
 function setLangUI(){
-  $("fromFlag") && ($("fromFlag").textContent = langFlag(fromLang));
-  $("fromLangTxt") && ($("fromLangTxt").textContent = langLabel(fromLang));
-
-  $("toFlag") && ($("toFlag").textContent = langFlag(toLang));
-  $("toLangTxt") && ($("toLangTxt").textContent = langLabel(toLang));
+  const fF = $("fromFlag"), fT = $("fromLangTxt"), tF = $("toFlag"), tT = $("toLangTxt");
+  if(fF) fF.textContent = langFlag(fromLang);
+  if(fT) fT.textContent = langLabel(fromLang);
+  if(tF) tF.textContent = langFlag(toLang);
+  if(tT) tT.textContent = langLabel(toLang);
 }
 
 /* Sheet */
 let sheetFor = "from";
 function openSheet(which){
   sheetFor = which;
-  $("langSheet")?.classList.add("show");
-  $("sheetTitle") && ($("sheetTitle").textContent = (which==="from") ? sourceLabel() : targetLabel());
-  $("sheetQuery") && ($("sheetQuery").placeholder = searchLabel());
-  if($("sheetQuery")) $("sheetQuery").value = "";
-  renderSheet("");
-  setTimeout(()=>{ try{ $("sheetQuery")?.focus(); }catch{} }, 0);
-}
-function closeSheet(){ $("langSheet")?.classList.remove("show"); }
+  const sh = $("langSheet");
+  if(!sh) return toast("Sheet yok");
+  sh.classList.add("show");
 
+  const st = $("sheetTitle");
+  const sq = $("sheetQuery");
+  if(st) st.textContent = (which==="from") ? sourceLabel() : targetLabel();
+  if(sq){
+    sq.placeholder = searchLabel();
+    sq.value = "";
+  }
+  renderSheet("");
+  setTimeout(()=>{ try{ sq?.focus(); }catch{} }, 0);
+}
+function closeSheet(){
+  $("langSheet")?.classList.remove("show");
+}
 function renderSheet(filter){
   const q = String(filter||"").toLowerCase().trim();
   const list = $("sheetList");
@@ -214,18 +193,20 @@ function speak(text, langCode){
   const t = String(text||"").trim();
   if(!t) return;
 
+  // APK bridge
   if(window.NativeTTS && typeof window.NativeTTS.speak === "function"){
     try{ window.NativeTTS.stop?.(); }catch{}
-    try{ window.NativeTTS.speak(t, String(langCode||"en")); return; }catch{}
+    try{ window.NativeTTS.speak(t, String(langCode||"en")); return; }catch(e){ console.warn(e); }
   }
 
+  // Web fallback
   if(!("speechSynthesis" in window)) return;
   try{
     const u = new SpeechSynthesisUtterance(t);
     u.lang = bcp(langCode);
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
-  }catch{}
+  }catch(e){ console.warn(e); }
 }
 
 /* STT */
@@ -257,8 +238,8 @@ function startSTT(){
     const tr = e.results?.[0]?.[0]?.transcript || "";
     const txt = String(tr||"").trim();
     if(!txt) return;
-
-    $("inText") && ($("inText").value = txt);
+    const inEl = $("inText");
+    if(inEl) inEl.value = txt;
     await doTranslate(true);
   };
   rec.onend = ()=>{
@@ -289,15 +270,16 @@ async function doTranslate(silent=false){
     if(!silent) toast(UI_LANG==="tr" ? "Metin yaz" : "Type text");
     return;
   }
-
-  $("outText") && ($("outText").textContent = (UI_LANG==="tr" ? "Çevriliyor…" : "Translating…"));
+  const outEl = $("outText");
+  if(outEl) outEl.textContent = (UI_LANG==="tr" ? "Çevriliyor…" : "Translating…");
 
   try{
     const out = await translateViaApi(text, fromLang, toLang);
-    $("outText") && ($("outText").textContent = out || "—");
-  }catch{
-    $("outText") && ($("outText").textContent = "—");
+    if(outEl) outEl.textContent = out || "—";
+  }catch(e){
+    if(outEl) outEl.textContent = "—";
     if(!silent) toast(UI_LANG==="tr" ? "Çeviri alınamadı" : "Translate failed");
+    console.warn(e);
   }
 }
 
@@ -307,14 +289,22 @@ function swapLang(){
   setLangUI();
 }
 
-/* Boot */
-document.addEventListener("DOMContentLoaded", async ()=>{
+/* ===== INIT (runs even if DOMContentLoaded already fired) ===== */
+async function init(){
+  // elementler gerçekten var mı?
+  if(!$("fromLangBtn") || !$("toLangBtn") || !$("sheetList")){
+    // shell yeni kuruyorsa 1 frame bekle
+    await new Promise(r=>setTimeout(r, 80));
+  }
+
+  UI_LANG = getSystemUILang();
+
   const u = await ensureLogged();
   if(!u) return;
 
-  UI_LANG = getSystemUILang();
   setLangUI();
 
+  // bind (id’ler yoksa patlamasın)
   $("fromLangBtn")?.addEventListener("click", ()=> openSheet("from"));
   $("toLangBtn")?.addEventListener("click", ()=> openSheet("to"));
   $("swapBtn")?.addEventListener("click", swapLang);
@@ -324,8 +314,8 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   $("sheetQuery")?.addEventListener("input", ()=> renderSheet($("sheetQuery")?.value));
 
   $("clearBtn")?.addEventListener("click", ()=>{
-    $("inText") && ($("inText").value = "");
-    $("outText") && ($("outText").textContent = "—");
+    const inEl = $("inText"); if(inEl) inEl.value = "";
+    const outEl = $("outText"); if(outEl) outEl.textContent = "—";
   });
 
   $("translateBtn")?.addEventListener("click", ()=> doTranslate(false));
@@ -342,4 +332,16 @@ document.addEventListener("DOMContentLoaded", async ()=>{
     if(!txt || txt==="—") return toast(UI_LANG==="tr" ? "Çeviri yok" : "No output");
     speak(txt, toLang);
   });
-});
+
+  // sheet ilk render (boş arama)
+  renderSheet("");
+
+  // debug: sheet button çalışıyor mu?
+  // toast("Text translate ready");
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
