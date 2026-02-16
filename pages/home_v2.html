@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Pro Hub</title>
+  <title>italkyAI • Global Hub</title>
   <style>
     :root {
+      /* italkyAI İkonik AI Gradient */
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
       --glow-online: #00ffcc;
       --glow-offline: #ff3366;
@@ -22,7 +23,7 @@
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    /* --- 1. ACADEMY: SPEKTRUM PRESTİJ --- */
+    /* --- 1. ACADEMY: AI GRADIENT TEXT & SPECTRUM --- */
     .academy-pro {
       background: rgba(255, 255, 255, 0.04);
       border-radius: 32px;
@@ -49,19 +50,25 @@
     .bar-6 { height: 18px; background: #4b0082; }
     .bar-7 { height: 12px; background: #8b00ff; }
 
-    .academy-text h2 { margin: 0; font-size: 19px; font-weight: 900; color: #fff; }
+    /* Academy Yazısı AI Gradient Boyama */
+    .academy-text h2 { 
+      margin: 0; font-size: 21px; font-weight: 900; 
+      background: var(--ai-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
     .academy-text p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
-    /* --- 2. FACETOFACE: ENERJİ ÇEKİRDEĞİ --- */
+    /* --- 2. FACETOFACE: CANLI ÇEKİRDEK --- */
     .portal-zone {
-      flex-shrink: 0; padding: 25px 0;
+      flex-shrink: 0; padding: 20px 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       cursor: pointer;
     }
-    .portal-zone:active .ai-core { transform: scale(0.92); }
 
     .neural-orb {
-      width: 150px; height: 150px; border-radius: 50%;
+      width: 145px; height: 145px; border-radius: 50%;
       position: relative; display: flex; align-items: center; justify-content: center;
     }
 
@@ -69,37 +76,36 @@
       position: absolute; inset: -4px; border-radius: 50%;
       padding: 2px; background: var(--ai-gradient);
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude; animation: rotateOrbit 10s linear infinite; /* Yavaşlatıldı */
+      mask-composite: exclude; animation: rotateOrbit 12s linear infinite;
     }
 
     .orbit-energy {
       position: absolute; inset: -12px; border-radius: 50%;
-      animation: rotateOrbit 6s linear infinite; /* Yavaşlatıldı */
+      animation: rotateOrbit 8s linear infinite;
     }
     .e-ball { position: absolute; width: 12px; height: 12px; border-radius: 50%; filter: blur(1px); }
     .ball-l { top: -6px; left: 50%; background: #1e3a8a; box-shadow: 0 0 15px #1e3a8a; }
     .ball-b { bottom: -6px; left: 50%; background: #801336; box-shadow: 0 0 15px #801336; }
 
     .ai-core {
-      width: 100px; height: 100px; background: #000; border-radius: 50%;
+      width: 95px; height: 95px; background: #000; border-radius: 50%;
       border: 2px solid transparent;
       background-image: linear-gradient(#000, #000), var(--ai-gradient);
       background-origin: border-box; background-clip: content-box, border-box;
       display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s;
       animation: aiBreathe 4s infinite ease-in-out; z-index: 10;
     }
 
-    .portal-info { text-align: center; margin-top: 20px; }
-    .portal-info h1 { margin: 0; font-size: 30px; font-weight: 900; letter-spacing: -1px; }
-    .portal-info p { margin: 3px 0 0; font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.4); }
+    .portal-info { text-align: center; margin-top: 15px; }
+    .portal-info h1 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+    .portal-info p { margin: 2px 0 0; font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.4); }
     .status-pill {
       display: inline-block; margin-top: 10px; padding: 4px 12px;
       background: rgba(255,255,255,0.06); border-radius: 100px;
       font-size: 10px; font-weight: 900; letter-spacing: 1px;
     }
 
-    /* --- 3. SMART GRID: TAM İSİMLER --- */
+    /* --- 3. SMART GRID: BUTTON FEEL & LINKS --- */
     .pro-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     }
@@ -110,7 +116,8 @@
       display: flex; align-items: center; gap: 12px;
       cursor: pointer; transition: transform 0.2s, background 0.2s;
     }
-    .pro-tile:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); }
+    /* Güçlendirilmiş Buton Hissi */
+    .pro-tile:active { transform: scale(0.94); background: rgba(255, 255, 255, 0.12); }
 
     .tile-icon {
       width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.06);
@@ -124,11 +131,10 @@
 
     .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
 
-    /* Animasyonlar */
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes aiBreathe {
       0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
-      50% { transform: scale(1.06); box-shadow: 0 0 35px rgba(99, 102, 241, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(99, 102, 241, 0.4); }
     }
 
     .is-online .status-pill { color: var(--glow-online); }
@@ -142,12 +148,8 @@
     
     <div class="academy-pro" id="btnAcademy" data-href="/pages/teacher_select.html">
       <div class="spectrum-logo">
-        <div class="bar bar-1"></div>
-        <div class="bar bar-2"></div>
-        <div class="bar bar-3"></div>
-        <div class="bar bar-4"></div>
-        <div class="bar bar-5"></div>
-        <div class="bar bar-6"></div>
+        <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
+        <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
         <div class="bar bar-7"></div>
       </div>
       <div class="academy-text">
@@ -179,14 +181,17 @@
         <div class="tile-icon ico-txt"></div>
         <label>Metinden<br>Çeviri</label>
       </div>
+
       <div class="pro-tile" id="tilePhoto" data-href="/pages/photo.html">
         <div class="tile-icon ico-cam"></div>
         <label>Fotoğraftan<br>Çeviri</label>
       </div>
+
       <div class="pro-tile" id="tileDoc" data-href="/pages/document.html">
         <div class="tile-icon ico-doc"></div>
         <label>Belgeden<br>Çeviri</label>
       </div>
+
       <div class="pro-tile" id="tileGame" data-href="/pages/game.html">
         <div class="tile-icon ico-fun"></div>
         <label>Eğlenerek<br>Öğren</label>
@@ -220,21 +225,33 @@
         pill.innerText = packs > 0 ? `● ${packs} PAKET YÜKLÜ` : "● İNTERNET GEREKLİ";
       }
 
+      // Bağlantıya göre butonları kilitleme
       const access = {
         tilePhoto: isOnline,
         tileDoc: isOnline,
         tileText: isOnline || packs > 0,
-        tileGame: true
+        tileGame: true,
+        btnAcademy: true,
+        btnFfStart: true
       };
 
       Object.entries(access).forEach(([id, ok]) => {
         const el = document.getElementById(id);
-        if(!ok) el.classList.add('locked'); else el.classList.remove('locked');
+        if(el) {
+          if(!ok) el.classList.add('locked'); else el.classList.remove('locked');
+        }
       });
     }
 
+    // Tıklama Olayları ve Link Kontrolü
     document.querySelectorAll("[data-href]").forEach(el => {
-      el.onclick = () => { if(!el.classList.contains('locked')) location.href = el.dataset.href; };
+      el.onclick = () => {
+        if(!el.classList.contains('locked')) {
+          const target = el.getAttribute('data-href');
+          console.log("Navigating to:", target);
+          location.href = target;
+        }
+      };
     });
 
     refreshHub();
