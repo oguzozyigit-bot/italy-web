@@ -1,3 +1,4 @@
+<!-- FILE: /pages/text_translate.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -11,149 +12,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg:#02000f;
-      --glass: rgba(255,255,255,0.06);
-      --glass2: rgba(0,0,0,0.22);
-      --bd: rgba(255,255,255,0.12);
-      --txt: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.55);
-
-      --ai1:#A5B4FC;
-      --ai2:#4F46E5;
-
-      --radius: 28px;
-      --pill: 999px;
-      --shadow: 0 26px 70px rgba(0,0,0,0.55);
-
-      --safeTop: env(safe-area-inset-top, 0px);
-      --safeBottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    html,body{
-      margin:0; padding:0; width:100%; height:100%;
-      background: var(--bg);
-      color: var(--txt);
-      font-family: Outfit, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      overflow:hidden;
-    }
-
-    /* background */
-    .nebula{
-      position: fixed; inset:-20%;
-      background:
-        radial-gradient(circle at 18% 20%, rgba(79,70,229,.40) 0%, transparent 45%),
-        radial-gradient(circle at 78% 78%, rgba(236,72,153,.20) 0%, transparent 50%),
-        radial-gradient(circle at 50% 55%, rgba(20,0,40,1) 0%, #02000f 70%);
-      filter: blur(55px);
-      opacity: .95;
-      pointer-events:none;
-    }
-    .stars{
-      position: fixed; inset:0;
-      background:url("https://www.transparenttextures.com/patterns/stardust.png");
-      opacity:.30;
-      pointer-events:none;
-    }
-
-    /* frame */
-    .frame{
-      position:relative;
-      width:100%;
-      max-width: 520px;
-      height:100%;
-      margin:0 auto;
-      padding: calc(14px + var(--safeTop)) 14px calc(92px + var(--safeBottom));
+    /* ✅ Sadece içerik; üst/alt bar UI Shell’den gelecek */
+    #pageContent{
+      height: 100%;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap: 12px;
+      overflow:hidden; /* shell main-content içinde */
     }
 
-    /* top strip (no bar) */
-    .top-strip{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .home-link{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border:1px solid var(--bd);
-      background: rgba(0,0,0,0.18);
-      color: rgba(255,255,255,0.92);
-      text-decoration:none;
-      font-weight: 900;
-      font-size: 12px;
-      user-select:none;
-      cursor:pointer;
-    }
-    .home-link:active{ transform: scale(.99); }
-    .home-link svg{ width:16px; height:16px; stroke:#fff; stroke-width:2.2; fill:none; opacity:.9; }
-
-    .user-mini{
-      display:flex; align-items:center; gap:10px;
-      padding: 10px 10px;
-      border-radius: 14px;
-      border:1px solid var(--bd);
-      background: rgba(0,0,0,0.18);
-      min-width: 0;
-    }
-    .user-mini .uText{
-      display:flex; flex-direction:column; align-items:flex-end; gap:2px;
-      min-width:0;
-    }
-    #userName{
-      font-weight: 1000;
-      font-size: 12px;
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-      max-width: 180px;
-    }
-    #userPlan{
-      font-weight: 900;
-      font-size: 10px;
-      color: rgba(165,180,252,0.95);
-      letter-spacing: .6px;
-      text-transform: uppercase;
-    }
-    #avatarBtn{
-      width: 36px; height:36px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.14);
-      overflow:hidden;
-      background: rgba(255,255,255,0.06);
-      display:flex; align-items:center; justify-content:center;
-      flex:0 0 auto;
-      text-decoration:none;
-      color:#fff;
-      font-weight:1000;
-    }
-    #avatarBtn img{ width:100%; height:100%; object-fit:cover; display:block; }
-    #avatarFallback{ opacity:.8; }
-
-    /* lang row */
-    .lang-row{
+    /* Dil barı */
+    .toolbar{
       display:flex;
       gap:10px;
       align-items:center;
+      flex: 0 0 auto;
     }
+
     .langBtn{
       flex:1;
-      height: 52px;
+      height: 50px;
       border-radius: 18px;
-      border:1px solid var(--bd);
-      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
       color:#fff;
       font-weight: 1000;
       font-size: 13px;
+      padding: 0 14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding: 0 14px;
       cursor:pointer;
       user-select:none;
     }
@@ -164,65 +52,80 @@
 
     #swapBtn{
       width: 56px;
-      height: 52px;
+      height: 50px;
       border-radius: 18px;
-      border:1px solid var(--bd);
-      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
       color:#fff;
       font-weight:1000;
       cursor:pointer;
+      user-select:none;
     }
     #swapBtn:active{ transform: scale(.99); }
 
-    /* cards */
-    .grid{
-      flex:1;
-      min-height:0;
-      display:grid;
-      grid-template-rows: 1fr auto 1fr;
+    /* Eski tat: üst bordo / alt lacivert paneller */
+    .pane{
+      flex: 1;
+      min-height: 0;
+      display:flex;
+      flex-direction:column;
       gap:12px;
+      overflow:hidden;
     }
 
-    .card{
-      border-radius: var(--radius);
+    .panel{
+      flex:1;
+      min-height:0;
+      border-radius: 28px;
       border: 1px solid rgba(255,255,255,0.12);
-      background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-      box-shadow: var(--shadow);
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      min-height:0;
+      background: rgba(0,0,0,0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
-    .cardHead{
+    .panel.top{
+      background: linear-gradient(180deg, rgba(88,12,31,0.90) 0%, rgba(26,2,8,0.92) 60%, rgba(2,0,10,0.92) 100%);
+    }
+    .panel.bottom{
+      background: linear-gradient(180deg, rgba(15,23,42,0.94) 0%, rgba(2,0,10,0.95) 100%);
+    }
+
+    .panelHead{
       padding: 10px 12px;
       display:flex;
       align-items:center;
       justify-content:flex-end;
       gap:10px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
+      flex: 0 0 auto;
     }
 
     .iconBtn{
       width:42px; height:42px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      display:flex; align-items:center; justify-content:center;
+      background: rgba(0,0,0,0.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
       cursor:pointer;
       user-select:none;
     }
     .iconBtn:active{ transform: scale(.99); }
     .iconBtn svg{ width:18px; height:18px; stroke:#fff; fill:none; stroke-width:2.2; opacity:.92; }
+
     .iconBtn.listening{
       border-color: rgba(79,70,229,0.75);
-      background: rgba(79,70,229,0.20);
+      background: rgba(79,70,229,0.22);
       box-shadow: 0 0 0 10px rgba(79,70,229,0.0);
       animation: pulse 1.25s infinite;
     }
     @keyframes pulse{
-      0%{ box-shadow: 0 0 0 0 rgba(79,70,229,0.30); }
+      0%{ box-shadow: 0 0 0 0 rgba(79,70,229,0.32); }
       70%{ box-shadow: 0 0 0 12px rgba(79,70,229,0.00); }
       100%{ box-shadow: 0 0 0 0 rgba(79,70,229,0.00); }
     }
@@ -258,20 +161,21 @@
       white-space: pre-wrap;
     }
 
-    /* actions */
     .actions{
       display:flex;
       gap:10px;
+      flex: 0 0 auto;
     }
     #clearBtn{
       flex:1;
       height: 50px;
       border-radius: 18px;
       border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.18);
       color:#fff;
       font-weight:1000;
       cursor:pointer;
+      user-select:none;
     }
     #clearBtn:active{ transform: scale(.99); }
 
@@ -283,59 +187,32 @@
       cursor:pointer;
       font-weight:1000;
       color:#050510;
-      background: linear-gradient(135deg, var(--ai1), var(--ai2));
+      background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 55%, #EC4899 100%);
       box-shadow: 0 16px 44px rgba(79,70,229,.22);
     }
     #translateBtn:active{ transform: scale(.99); }
 
-    /* bottom logo (no footer bar) */
-    .bottom-brand{
+    /* Toast */
+    #toast{
       position: fixed;
       left:50%;
-      bottom: calc(16px + var(--safeBottom));
-      transform: translateX(-50%);
-      z-index: 50;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      user-select:none;
-      pointer-events:auto;
-    }
-
-    .brand-pill{
-      padding: 12px 18px;
+      top:18px;
+      transform: translateX(-50%) translateY(-120px);
+      background: rgba(10,10,18,.92);
+      border:1px solid rgba(165,180,252,.35);
+      padding: 10px 14px;
       border-radius: 999px;
-      border:1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 22px 50px rgba(0,0,0,.55);
-      cursor:pointer;
-    }
-    .brand-pill .logo{
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing:-0.5px;
       color:#fff;
+      z-index:10000;
+      font-weight:900;
+      font-size:12px;
+      transition:.28s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw, 520px);
+      text-align:center;
     }
-    .brand-pill .ai{
-      background: linear-gradient(135deg, var(--ai1), var(--ai2));
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-
-    .pass-pill{
-      padding: 10px 12px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      font-weight: 1000;
-      font-size: 11px;
-      color: rgba(255,255,255,0.75);
-      letter-spacing:.4px;
-    }
+    #toast.show{ transform: translateX(-50%) translateY(0); }
 
     /* Sheet */
     .sheetBackdrop{
@@ -347,6 +224,7 @@
       padding: 16px;
     }
     .sheetBackdrop.show{ display:flex; }
+
     .sheet{
       width: 100%;
       max-width: 520px;
@@ -388,10 +266,7 @@
       cursor:pointer;
       font-weight:1000;
     }
-    #sheetList{
-      overflow-y:auto;
-      padding:10px;
-    }
+    #sheetList{ overflow-y:auto; padding:10px; }
     .sheetRow{
       padding: 12px;
       display:flex;
@@ -407,57 +282,14 @@
       border-bottom-color: transparent;
       margin-bottom: 8px;
     }
-
-    /* Toast */
-    #toast{
-      position: fixed;
-      left:50%;
-      top:18px;
-      transform: translateX(-50%) translateY(-120px);
-      background: rgba(10,10,18,.92);
-      border:1px solid rgba(165,180,252,.35);
-      padding: 10px 14px;
-      border-radius: 999px;
-      color:#fff;
-      z-index:10000;
-      font-weight:900;
-      font-size:12px;
-      transition:.28s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width:min(92vw, 520px);
-      text-align:center;
-    }
-    #toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 
 <body>
-  <div class="nebula"></div>
-  <div class="stars"></div>
 
-  <div class="frame">
+  <div id="pageContent">
 
-    <!-- no top bar: only mini strip -->
-    <div class="top-strip">
-      <a class="home-link" id="backBtn" href="/pages/home.html">
-        <svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg>
-        <span>Ana Sayfa</span>
-      </a>
-
-      <div class="user-mini">
-        <div class="uText">
-          <div id="userName">—</div>
-          <div id="userPlan">FREE</div>
-        </div>
-        <a id="avatarBtn" href="/pages/profile.html" aria-label="Profile">
-          <span id="avatarFallback">•</span>
-        </a>
-      </div>
-    </div>
-
-    <!-- languages -->
-    <div class="lang-row">
+    <div class="toolbar">
       <button class="langBtn" id="fromLangBtn" type="button">
         <span class="langLeft"><span id="fromFlag">✨</span> <span id="fromLangTxt">Dili Algıla</span></span>
         <span class="caret">▾</span>
@@ -471,11 +303,10 @@
       </button>
     </div>
 
-    <!-- main -->
-    <div class="grid">
-      <!-- INPUT -->
-      <div class="card">
-        <div class="cardHead">
+    <div class="pane">
+
+      <div class="panel top">
+        <div class="panelHead">
           <button class="iconBtn" id="micIn" type="button" aria-label="Mic">
             <svg viewBox="0 0 24 24">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
@@ -496,15 +327,13 @@
         </div>
       </div>
 
-      <!-- ACTIONS -->
       <div class="actions">
         <button id="clearBtn" type="button">Temizle</button>
         <button id="translateBtn" type="button">Çevir</button>
       </div>
 
-      <!-- OUTPUT -->
-      <div class="card">
-        <div class="cardHead">
+      <div class="panel bottom">
+        <div class="panelHead">
           <button class="iconBtn" id="speakOut" type="button" aria-label="Speak output">
             <svg viewBox="0 0 24 24">
               <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -515,15 +344,9 @@
         </div>
         <div class="outArea" id="outText">—</div>
       </div>
-    </div>
-  </div>
 
-  <!-- bottom centered brand -->
-  <div class="bottom-brand">
-    <div class="pass-pill">24 Saat</div>
-    <div class="brand-pill" id="brandHome" title="Ana Sayfa">
-      <span class="logo">italky<span class="ai">AI</span></span>
     </div>
+
   </div>
 
   <!-- Sheet -->
@@ -540,14 +363,15 @@
 
   <div id="toast"></div>
 
-  <script>
-    // logo + ana sayfa shortcut
-    const goHome = () => location.href = "/pages/home.html";
-    document.getElementById("brandHome")?.addEventListener("click", goHome);
-    document.getElementById("backBtn")?.addEventListener("click", (e)=>{ e.preventDefault(); goHome(); });
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { bootPage } from "/js/ui_guard.js";
+
+    // ✅ Shell giydir (üst/alt bar)
+    mountShell();
+    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
   </script>
 
-  <!-- mevcut JS’in çalışması için ID’ler birebir korundu -->
-  <script type="module" src="/js/text_translate_page.js?v=1001"></script>
+  <script type="module" src="/js/text_translate_page.js?v=2002"></script>
 </body>
 </html>
