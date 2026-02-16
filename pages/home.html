@@ -7,98 +7,88 @@
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --footer-safe: calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 20px);
+      --footer-h: 92px; /* Shell'den gelen alt bar yüksekliği */
     }
 
-    /* ✅ KATMAN ÇAKIŞMA FIX */
+    /* ✅ SCROLLSUZ TAM SIĞDIRMA */
     #pageContent {
-      height: 100%;
+      height: calc(100vh - var(--footer-h) - env(safe-area-inset-top) - 100px); /* Üst ve alt barı çıkar */
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      /* Alt katmanın altında kalmaması için tampon bölge */
-      padding: 10px 0 var(--footer-safe); 
+      justify-content: space-between; /* Elemanları ekrana yay */
+      padding: 5px 0 10px;
       box-sizing: border-box;
-      overflow-y: auto;
-      scrollbar-width: none;
+      overflow: hidden; /* Scroll yasak */
     }
-    #pageContent::-webkit-scrollbar { display: none; }
 
-    /* --- BARS (Academy & Meeting) --- */
-    .pro-bar {
+    /* 1. ACADEMY (Elegant & Compact) */
+    .academy-pro {
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 26px;
-      padding: 16px 20px;
+      border-radius: 22px;
+      padding: 12px 16px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex; align-items: center; gap: 16px;
+      display: flex; align-items: center; gap: 12px;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
       -webkit-tap-highlight-color: transparent;
     }
-    .pro-bar:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
+    .academy-pro:active { transform: scale(0.97); }
 
-    .bar-icon {
-      width: 44px; height: 44px; background: #000; border-radius: 14px;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
+    .spectrum-logo { gap: 2px; display: flex; align-items: center; flex-shrink: 0; }
+    .bar { width: 2.5px; border-radius: 10px; }
+    .bar-1 { height: 8px; background: #ff0000; }
+    .bar-2 { height: 12px; background: #ff7f00; }
+    .bar-3 { height: 16px; background: #ffff00; }
+    .bar-4 { height: 22px; background: #00ff00; }
+    .bar-5 { height: 16px; background: #0000ff; }
+    .bar-6 { height: 12px; background: #4b0082; }
+    .bar-7 { height: 8px; background: #8b00ff; }
 
-    .spectrum-logo { gap: 2.5px; display: flex; align-items: center; }
-    .bar { width: 3px; border-radius: 10px; }
-    .bar-1 { height: 10px; background: #ff0000; }
-    .bar-2 { height: 16px; background: #ff7f00; }
-    .bar-3 { height: 22px; background: #ffff00; }
-    .bar-4 { height: 30px; background: #00ff00; }
-    .bar-5 { height: 22px; background: #0000ff; }
-    .bar-6 { height: 16px; background: #4b0082; }
-    .bar-7 { height: 10px; background: #8b00ff; }
+    .academy-text h2 { margin: 0; font-size: 16px; font-weight: 900; color: #fff; }
+    .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .academy-text p { margin: 0; font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.4); }
 
-    .bar-text h2 { margin: 0; font-size: 17px; font-weight: 900; color: #fff; }
-    .bar-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .bar-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; }
-
-    /* --- PORTAL ZONE (COMFORT MODE) --- */
+    /* 2. FACETOFACE (Living Core) */
     .portal-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; padding: 15px 0;
-      -webkit-tap-highlight-color: transparent;
+      cursor: pointer; padding: 5px 0;
     }
     .neural-orb {
-      width: 130px; height: 130px; position: relative;
+      width: 100px; height: 100px; position: relative;
       display: flex; align-items: center; justify-content: center;
     }
     .ai-ring {
-      position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px;
+      position: absolute; inset: -3px; border-radius: 50%; padding: 2px;
       background: var(--ai-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude; animation: rotateOrbit 20s linear infinite;
+      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
     }
     .ai-core {
-      width: 90px; height: 90px; background: #000; border-radius: 50%;
+      width: 75px; height: 75px; background: #000; border-radius: 50%;
       background-image: linear-gradient(#000, #000), var(--ai-gradient);
       background-origin: border-box; background-clip: content-box, border-box;
       border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
       animation: aiBreathe 4s infinite ease-in-out;
     }
-    .portal-info h1 { margin: 12px 0 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+    .portal-info { text-align: center; margin-top: 10px; }
+    .portal-info h1 { margin: 0; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+    .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
-    /* --- PRO GRID --- */
+    /* 3. PRO GRID (Compact 2x3) */
     .pro-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
     }
     .pro-tile {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px; padding: 16px;
-      display: flex; align-items: center; gap: 12px;
-      cursor: pointer; transition: all 0.2s;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
+      border-radius: 20px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer;
     }
-    .pro-tile:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); }
+    .pro-tile:active { transform: scale(0.95); }
     
     .tile-icon {
-      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.06);
+      width: 32px; height: 32px; border-radius: 9px; background: rgba(255,255,255,0.05);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      font-size: 16px;
+      font-size: 14px;
     }
     .ico-txt::before { content: "Aa"; color: #34d399; font-weight: 900; }
     .ico-cam::before { content: "◎"; color: #60a5fa; font-weight: 900; }
@@ -107,12 +97,21 @@
     .ico-chat::before { content: "💬"; }
     .ico-teacher::before { content: "🎓"; }
 
-    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .pro-tile label { font-size: 11px; font-weight: 800; color: #fff; line-height: 1.1; }
     .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    /* ANIMATIONS */
+    /* 4. ONLINE MEETING (Compact Bar) */
+    .meeting-bar {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 22px;
+      padding: 12px 16px;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer;
+    }
+
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes aiBreathe { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 1; } }
+    @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 
   </style>
 </head>
@@ -120,15 +119,13 @@
 <body>
   <div id="pageContent">
 
-    <div class="pro-bar" data-nav="/pages/teacher_select.html">
-      <div class="bar-icon">
-        <div class="spectrum-logo">
-          <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
-          <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
-          <div class="bar bar-7"></div>
-        </div>
+    <div class="academy-pro" data-nav="/pages/teacher_select.html">
+      <div class="spectrum-logo">
+        <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
+        <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
+        <div class="bar bar-7"></div>
       </div>
-      <div class="bar-text">
+      <div class="academy-text">
         <h2>italky <span>Academy</span></h2>
         <p>YAPAY ZEKA İLE DİL EĞİTİMİ</p>
       </div>
@@ -138,7 +135,7 @@
       <div class="neural-orb">
         <div class="ai-ring"></div>
         <div class="ai-core">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
             <line x1="12" y1="19" x2="12" y2="23"/>
@@ -147,6 +144,7 @@
       </div>
       <div class="portal-info">
         <h1>FaceToFace</h1>
+        <p>Yüzyüze Anlık Çeviri</p>
       </div>
     </div>
 
@@ -177,16 +175,11 @@
       </div>
     </div>
 
-    <div class="pro-bar" data-nav="/pages/meeting.html">
-      <div class="bar-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5">
-          <path d="M15 10l5-5v14l-5-5"/>
-          <rect x="2" y="6" width="13" height="12" rx="2.5"/>
-        </svg>
-      </div>
-      <div class="bar-text">
-        <h2>Online Toplantı</h2>
-        <p>CANLI VE ANLIK ÇEVİRİ ODALARI</p>
+    <div class="meeting-bar" data-nav="/pages/meeting.html">
+      <div class="tile-icon" style="background: rgba(99, 102, 241, 0.1);">📹</div>
+      <div class="academy-text">
+        <h2 style="font-size: 15px;">Online Toplantı</h2>
+        <p>CANLI ÇEVİRİ ODALARI</p>
       </div>
     </div>
 
@@ -203,25 +196,11 @@
     if (cached?.tokens != null) setHeaderTokens(cached.tokens);
     bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    // Kesin Navigasyon
-    function navigate(url) {
-      if(url) window.location.assign(url);
-    }
-
     document.querySelectorAll("[data-nav]").forEach(el => {
       const url = el.getAttribute("data-nav");
-      
-      el.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigate(url);
-      });
-
-      el.addEventListener("touchend", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigate(url);
-      }, { passive: false });
+      const go = (e) => { e.preventDefault(); e.stopPropagation(); window.location.assign(url); };
+      el.onclick = go;
+      el.ontouchend = go;
     });
   </script>
 </body>
