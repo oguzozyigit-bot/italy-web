@@ -12,7 +12,6 @@ function safeShow(id, on){
   const el = $(id);
   if(el) el.style.display = on ? "block" : "none";
 }
-
 function toast(msg){
   const t = $("toast");
   if(!t) return;
@@ -21,7 +20,6 @@ function toast(msg){
   clearTimeout(window.__to);
   window.__to = setTimeout(()=>t.classList.remove("show"), 1800);
 }
-
 function fmtDT(iso){
   if(!iso) return "—";
   try{
@@ -29,7 +27,6 @@ function fmtDT(iso){
     return d.toLocaleString("tr-TR", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" });
   }catch{ return "—"; }
 }
-
 function minutesToHM(mins){
   const m = Math.max(0, Number(mins)||0);
   const h = Math.floor(m/60);
@@ -37,6 +34,24 @@ function minutesToHM(mins){
   if(h<=0) return `${r} dk`;
   if(r===0) return `${h} saat`;
   return `${h} saat ${r} dk`;
+}
+
+/* ✅ hitap adı türetme kuralı (teacher_course bunu kullanacak) */
+export function deriveStudentCallName(fullName){
+  const s = String(fullName || "").trim().replace(/\s+/g," ");
+  if(!s) return "Student";
+  const parts = s.split(" ");
+  if(parts.length === 1) return parts[0];
+  if(parts.length === 2) return parts[0]; // Oğuz Özyiğit -> Oğuz
+
+  // 3+ kelime: son kelime soyad. Eğer Özyiğit ise düş.
+  const last = parts[parts.length - 1];
+  const rest = parts.slice(0, -1);
+
+  if(last.toLowerCase() === "özyiğit" || last.toLowerCase() === "ozyigit"){
+    return rest.join(" "); // Huri Hüma Özyiğit -> Huri Hüma
+  }
+  return rest.join(" "); // Ali Veli Yılmaz -> Ali Veli
 }
 
 /* member_no generator */
@@ -102,43 +117,6 @@ async function copyText(text){
   }
 }
 
-function openNameModal(force=false){
-  const m = $("nameModal");
-  if(!m) return;
-  m.dataset.force = force ? "1" : "0";
-  m.classList.add("show");
-  const inp = $("nameInput");
-  if(inp) setTimeout(()=>inp.focus(), 60);
-}
-function closeNameModal(){
-  const m = $("nameModal");
-  if(!m) return;
-  if(m.dataset.force === "1") return;
-  m.classList.remove("show");
-}
-
-async function updateStudentName(userId, newName){
-  const clean = String(newName||"").trim().slice(0,32);
-  if(clean.length < 3) throw new Error("Ad en az 3 karakter olmalı.");
-
-  const { error } = await supabase
-    .from("profiles")
-    .update({ full_name: clean })
-    .eq("id", userId);
-
-  if(error) throw error;
-
-  // cache update
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const cached = raw ? JSON.parse(raw) : {};
-    cached.name = clean;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cached));
-  }catch{}
-
-  return clean;
-}
-
 async function ensureProfile(user){
   const { data: p, error } = await supabase
     .from("profiles")
@@ -149,10 +127,13 @@ async function ensureProfile(user){
   if(error) throw error;
   if(p) return p;
 
+  // insert if missing
+  const metaName = (user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
+
   const insert = {
     id:user.id,
     email:user.email,
-    full_name:user.user_metadata?.full_name || user.user_metadata?.name || "",
+    full_name: metaName,
     tokens:400,
     levels:{},
     offline_langs:[],
@@ -167,6 +148,25 @@ async function ensureProfile(user){
 
   if(insErr) throw insErr;
   return created;
+}
+
+async function ensureFullNameFromGoogle(userId, user, currentFullName){
+  const cur = String(currentFullName || "").trim();
+  if(cur.length >= 3) return cur;
+
+  const metaName = String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
+  if(metaName.length < 3) return cur;
+
+  try{
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ full_name: metaName.slice(0,32) })
+      .eq("id", userId)
+      .select("full_name")
+      .single();
+    if(!error && data?.full_name) return data.full_name;
+  }catch{}
+  return metaName.slice(0,32);
 }
 
 async function ensureMemberNo(userId, current){
@@ -256,6 +256,10 @@ export async function initProfilePage({ setHeaderTokens } = {}){
 
     let profile = await ensureProfile(user);
 
+    // full_name Google’dan otomatik
+    const fullName = await ensureFullNameFromGoogle(user.id, user, profile.full_name);
+    profile.full_name = fullName;
+
     // last_login_at update (silent)
     try{
       await supabase.from("profiles")
@@ -269,7 +273,7 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     const reqMap = await loadLevelRequirements();
 
     safeText("pEmail", profile.email || user.email || "—");
-    safeText("pName", (profile.full_name || "—"));
+    safeText("pName", profile.full_name || "—");
 
     safeText("memberNo", memberNo || "—");
     safeText("createdAt", fmtDT(profile.created_at));
@@ -278,15 +282,6 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     const tokens = Number(profile.tokens ?? 0);
     safeText("tokenVal", String(tokens));
     if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
-
-    // enforce name (no pencil; only if empty)
-    const nm = String(profile.full_name || "").trim();
-    if(nm.length < 3){
-      const inp = $("nameInput");
-      if(inp) inp.value = "";
-      openNameModal(true);
-      toast("Lütfen ad soyad girin");
-    }
 
     renderLevels(profile, reqMap);
     renderOffline(profile);
@@ -316,33 +311,6 @@ export async function initProfilePage({ setHeaderTokens } = {}){
         toast("Silme talebi kaydedilemedi");
       }
     };
-
-    const cancelBtn = $("cancelNameBtn");
-    if(cancelBtn) cancelBtn.onclick = closeNameModal;
-
-    const saveBtn = $("saveNameBtn");
-    if(saveBtn) saveBtn.onclick = async ()=>{
-      try{
-        const inp = $("nameInput");
-        const saved = await updateStudentName(user.id, inp?.value || "");
-        safeText("pName", saved);
-
-        // header update
-        const headerName = document.getElementById("userName");
-        if(headerName) headerName.textContent = saved;
-
-        const m = $("nameModal");
-        if(m){ m.dataset.force="0"; m.classList.remove("show"); }
-        toast("Kaydedildi");
-      }catch(e){
-        toast(e?.message || "Kaydedilemedi");
-      }
-    };
-
-    const modal = $("nameModal");
-    if(modal) modal.addEventListener("click",(ev)=>{
-      if(ev.target?.id === "nameModal") closeNameModal();
-    });
 
   }catch(e){
     console.error(e);
