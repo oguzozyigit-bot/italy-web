@@ -6,6 +6,10 @@ const HOME_REL = "/pages/home.html";
 const LOGIN_REL = "/pages/login.html";
 const CALLBACK_ABS = `${location.origin}/pages/auth_callback.html`;
 
+// ✅ Single-session local key
+const ACTIVE_SESSION_LOCAL_KEY = "ITALKY_ACTIVE_SESSION_KEY";
+let __singleWatcherStarted = false;
+
 /* -----------------------------
    NAC ID (Cihaz kilidi)
 ------------------------------ */
@@ -28,6 +32,82 @@ async function lockThisDevice(){
   const { error } = await supabase.rpc("lock_device", { p_nac_id: nacId });
   if(error) throw error;
   return nacId;
+}
+
+/* -----------------------------
+   Single Active Session (Kill others)
+------------------------------ */
+function newSessionKey(){
+  return (globalThis.crypto?.randomUUID?.() || `sess-${Date.now()}-${Math.floor(Math.random()*1e9)}`);
+}
+
+/**
+ * Bu cihaz “aktif oturum”u sahiplenir.
+ * Başka cihaz login olunca key değişir -> bu cihaz kapanır.
+ */
+async function claimActiveSession(userId){
+  const key = newSessionKey();
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      active_session_key: key,
+      active_session_updated_at: new Date().toISOString()
+    })
+    .eq("id", userId);
+
+  if(error) throw error;
+
+  try{ localStorage.setItem(ACTIVE_SESSION_LOCAL_KEY, key); }catch{}
+  return key;
+}
+
+/**
+ * 10 sn’de bir DB’deki key’i kontrol eder.
+ * Key değiştiyse -> logout + login
+ */
+function startSingleSessionWatcher(userId){
+  if(__singleWatcherStarted) return;
+  __singleWatcherStarted = true;
+
+  let myKey = "";
+  try{ myKey = localStorage.getItem(ACTIVE_SESSION_LOCAL_KEY) || ""; }catch{}
+
+  // key yoksa watcher yapma (claim başarısız olmuş olabilir)
+  if(!myKey){
+    __singleWatcherStarted = false;
+    return;
+  }
+
+  setInterval(async ()=>{
+    try{
+      // login sayfasında zorlamayalım
+      if(location.pathname === LOGIN_REL) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("active_session_key")
+        .eq("id", userId)
+        .single();
+
+      if(error) return;
+
+      const live = String(data?.active_session_key || "");
+      if(live && live !== myKey){
+        // başka yerde giriş yapıldı -> bu oturumu kapat
+        try{ await supabase.auth.signOut({ scope:"global" }); }catch{}
+        try{ localStorage.removeItem(STORAGE_KEY); }catch{}
+        try{ localStorage.removeItem(ACTIVE_SESSION_LOCAL_KEY); }catch{}
+        try{ localStorage.removeItem("NAC_ID"); }catch{}
+        try{
+          Object.keys(localStorage).forEach(k=>{ if(k.startsWith("sb-")) localStorage.removeItem(k); });
+        }catch{}
+
+        alert("Hesabınız başka bir cihaz/sekmede açıldığı için bu oturum kapatıldı.");
+        location.replace(LOGIN_REL);
+      }
+    }catch{}
+  }, 10000);
 }
 
 /* -----------------------------
@@ -70,18 +150,14 @@ export async function ensureAuthAndCacheUser(){
 
   const user = session.user;
 
-  // ✅ OAuth callback anında race olabiliyor: auth hazır değilse bekle
-  // (özellikle mobil webview)
-  // Burada kısa bekleme de güvenli:
-  // (session varsa yine de token refresh vs bitmemiş olabilir)
+  // deletion request varsa iptal
   try{ await supabase.rpc("cancel_account_deletion"); } catch(_) {}
 
   // 1) cihaz kilidi
   try{
     await lockThisDevice();
   }catch(e){
-    // başka hesaba bağlı cihaz: logout + login
-    try{ await supabase.auth.signOut(); }catch{}
+    try{ await supabase.auth.signOut({ scope:"global" }); }catch{}
     clearCachedUser();
     throw new Error(e?.message || "Cihaz kilidi alınamadı.");
   }
@@ -93,7 +169,6 @@ export async function ensureAuthAndCacheUser(){
     if(pErr) throw pErr;
     profile = p;
   }catch{
-    // fallback read
     const { data: p2, error: p2Err } = await supabase
       .from("profiles")
       .select("*")
@@ -103,7 +178,15 @@ export async function ensureAuthAndCacheUser(){
     profile = p2;
   }
 
-  // 3) cache
+  // ✅ 3) SINGLE SESSION: bu login'i aktif oturum yap
+  try{
+    await claimActiveSession(user.id);
+  }catch(e){
+    // Claim başarısızsa sistemi düşürme; ama diğer cihaz kapatma çalışmaz
+    console.warn("claimActiveSession error:", e);
+  }
+
+  // 4) cache
   const cached = buildCache(user, profile);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cached));
   return cached;
@@ -115,10 +198,7 @@ export async function ensureAuthAndCacheUser(){
 export async function loginWithGoogle(){
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: {
-      // ✅ HOME'a değil, callback'e dön
-      redirectTo: CALLBACK_ABS
-    }
+    options: { redirectTo: CALLBACK_ABS }
   });
   if(error) throw error;
 }
@@ -126,6 +206,8 @@ export async function loginWithGoogle(){
 export async function safeLogout(){
   try{ await supabase.auth.signOut({ scope:"global" }); }catch{}
   clearCachedUser();
+
+  try{ localStorage.removeItem(ACTIVE_SESSION_LOCAL_KEY); }catch{}
   // NAC_ID’yi silme: cihaz kilidi modelin var (istersen silersin)
   location.replace(LOGIN_REL);
 }
@@ -141,6 +223,10 @@ export async function startAuthState(callback) {
       try{
         const cached = await ensureAuthAndCacheUser();
         const wallet = Number(cached?.tokens ?? 0);
+
+        // ✅ Single-session watcher başlat
+        startSingleSessionWatcher(user.id);
+
         callback({ user, wallet });
         return;
       }catch(e){
