@@ -7,16 +7,20 @@
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --footer-h: 92px; 
+      --footer-h: 92px;
+
+      /* ✅ Long bar ölçüsü (dokunmadan sadece rezerv alan) */
+      --longH: 78px;
+      --longGap: 12px;
     }
 
     /* ✅ SABİT VE KAYMA YAPMAYAN DÜZEN */
     #pageContent {
-      height: calc(100vh - var(--footer-h) - env(safe-area-inset-top) - 65px); 
+      height: calc(100vh - var(--footer-h) - env(safe-area-inset-top) - 65px);
       display: flex;
       flex-direction: column;
-      justify-content: space-between; 
-      padding: 5px 0 0;
+      justify-content: space-between;
+      padding: 5px 0 calc(var(--longH) + var(--longGap));
       box-sizing: border-box;
       overflow: hidden;
     }
@@ -104,23 +108,29 @@
     .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
     .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    /* 4. ONLINE MEETING - GÜVENLİ BÖLGEYE SABİTLENDİ */
+    /* ✅ 4. ONLINE MEETING - sadece konum sabitleme */
     .long-bar {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(480px, calc(100vw - 28px));
+      bottom: calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + var(--longGap));
+      z-index: 100000; /* footer + overlay üstü garanti */
+
       background: rgba(255, 255, 255, 0.05);
       border-radius: 24px;
       padding: 16px 20px;
       border: 1px solid rgba(99, 102, 241, 0.3);
       display: flex; align-items: center; gap: 16px;
       cursor: pointer;
-      margin-bottom: 8px; /* Alt barın (shell) üstünde kalması için */
+      box-sizing: border-box;
     }
 
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes aiBreathe { 
-      0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); } 
-      50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(99, 102, 241, 0.4); } 
+    @keyframes aiBreathe {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
+      50% { transform: scale(1.08); box-shadow: 0 0 40px rgba(99, 102, 241, 0.4); }
     }
-
   </style>
 </head>
 
@@ -187,6 +197,7 @@
       </div>
     </div>
 
+    <!-- Bu eleman artık FIXED (alt bar üstünde kalır) -->
     <div class="long-bar" data-nav="/pages/meeting.html">
       <div class="tile-icon">📹</div>
       <div class="academy-text">
