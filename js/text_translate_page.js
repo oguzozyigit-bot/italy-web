@@ -1,19 +1,26 @@
-// /js/text_translate_page.js — FINAL+
-// ✅ Dil sayısı = facetoface kadar
-// ✅ Dil isimleri: profile'daki site diline göre (Intl.DisplayNames)
+// FILE: /js/text_translate_page.js — FINAL
+// ✅ Dil sayısı geniş (facetoface ruhu)
+// ✅ Dil isimleri: site diline göre (Intl.DisplayNames)
 // ✅ apiPOST ile translate + timeout
+// ✅ Redirect zıplaması bitti: Supabase session + grace period
+// ✅ login yolu: /pages/login.html (index değil)
 
 import { STORAGE_KEY } from "/js/config.js";
 import { apiPOST } from "/js/api.js";
 import { getSiteLang, applyI18n } from "/js/i18n.js";
+import { supabase } from "/js/supabase_client.js";
+import { ensureAuthAndCacheUser } from "/js/auth.js";
 
 const $ = (id) => document.getElementById(id);
 function safeJson(s, fb={}){ try{ return JSON.parse(s||""); }catch{ return fb; } }
 
+const LOGIN_PATH = "/pages/login.html";
+const HOME_PATH  = "/pages/home.html";
+
 function toast(msg){
   const el = $("toast");
   if(!el) return;
-  el.textContent = msg;
+  el.textContent = String(msg||"");
   el.classList.add("show");
   clearTimeout(window.__to);
   window.__to = setTimeout(()=> el.classList.remove("show"), 1800);
@@ -41,30 +48,29 @@ const AUTO_LABELS = {
   de: "Sprache erkennen",
   it: "Rileva lingua",
   fr: "Détecter la langue",
+  es: "Detectar idioma",
+  ru: "Определить язык"
 };
 
-function autoLabel(){
-  return AUTO_LABELS[UI_LANG] || AUTO_LABELS.tr;
-}
+function autoLabel(){ return AUTO_LABELS[UI_LANG] || AUTO_LABELS.tr; }
 function sourceLabel(){
-  const m = { tr:"Kaynak Dil", en:"Source", de:"Quelle", it:"Sorgente", fr:"Source" };
+  const m = { tr:"Kaynak Dil", en:"Source", de:"Quelle", it:"Sorgente", fr:"Source", es:"Origen", ru:"Источник" };
   return m[UI_LANG] || m.tr;
 }
 function targetLabel(){
-  const m = { tr:"Hedef Dil", en:"Target", de:"Ziel", it:"Destinazione", fr:"Cible" };
+  const m = { tr:"Hedef Dil", en:"Target", de:"Ziel", it:"Destinazione", fr:"Cible", es:"Destino", ru:"Цель" };
   return m[UI_LANG] || m.tr;
 }
 function searchLabel(){
-  const m = { tr:"Ara…", en:"Search…", de:"Suchen…", it:"Cerca…", fr:"Rechercher…" };
+  const m = { tr:"Ara…", en:"Search…", de:"Suchen…", it:"Cerca…", fr:"Rechercher…", es:"Buscar…", ru:"Поиск…" };
   return m[UI_LANG] || m.tr;
 }
 
 /* ===============================
-   LANG REGISTRY (same spirit as facetoface)
-   code + flag + bcp
+   LANG REGISTRY (wide)
    =============================== */
 const LANGS = [
-  { code:"auto", flag:"🌐", bcp:"" },
+  { code:"auto", flag:"✨", bcp:"" },
 
   { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
   { code:"en", flag:"🇬🇧", bcp:"en-US" },
@@ -76,7 +82,6 @@ const LANGS = [
   { code:"pt", flag:"🇵🇹", bcp:"pt-PT" },
   { code:"pt-br", flag:"🇧🇷", bcp:"pt-BR" },
 
-  // Travel / neighbors / common
   { code:"ru", flag:"🇷🇺", bcp:"ru-RU" },
   { code:"uk", flag:"🇺🇦", bcp:"uk-UA" },
   { code:"bg", flag:"🇧🇬", bcp:"bg-BG" },
@@ -88,7 +93,6 @@ const LANGS = [
   { code:"sq", flag:"🇦🇱", bcp:"sq-AL" },
   { code:"mk", flag:"🇲🇰", bcp:"mk-MK" },
 
-  // Caucasus / Central Asia
   { code:"az", flag:"🇦🇿", bcp:"az-AZ" },
   { code:"ka", flag:"🇬🇪", bcp:"ka-GE" },
   { code:"hy", flag:"🇦🇲", bcp:"hy-AM" },
@@ -97,7 +101,6 @@ const LANGS = [
   { code:"ky", flag:"🇰🇬", bcp:"ky-KG" },
   { code:"mn", flag:"🇲🇳", bcp:"mn-MN" },
 
-  // EU / Nordics
   { code:"nl", flag:"🇳🇱", bcp:"nl-NL" },
   { code:"sv", flag:"🇸🇪", bcp:"sv-SE" },
   { code:"no", flag:"🇳🇴", bcp:"nb-NO" },
@@ -109,14 +112,12 @@ const LANGS = [
   { code:"hu", flag:"🇭🇺", bcp:"hu-HU" },
   { code:"sl", flag:"🇸🇮", bcp:"sl-SI" },
 
-  // Middle East
   { code:"ar", flag:"🇸🇦", bcp:"ar-SA" },
   { code:"ar-eg", flag:"🇪🇬", bcp:"ar-EG" },
   { code:"he", flag:"🇮🇱", bcp:"he-IL" },
   { code:"fa", flag:"🇮🇷", bcp:"fa-IR" },
   { code:"ur", flag:"🇵🇰", bcp:"ur-PK" },
 
-  // South / SE Asia
   { code:"hi", flag:"🇮🇳", bcp:"hi-IN" },
   { code:"bn", flag:"🇧🇩", bcp:"bn-BD" },
   { code:"ta", flag:"🇮🇳", bcp:"ta-IN" },
@@ -127,27 +128,28 @@ const LANGS = [
   { code:"ms", flag:"🇲🇾", bcp:"ms-MY" },
   { code:"fil", flag:"🇵🇭", bcp:"fil-PH" },
 
-  // East Asia
   { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
   { code:"zh-tw", flag:"🇹🇼", bcp:"zh-TW" },
   { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
   { code:"ko", flag:"🇰🇷", bcp:"ko-KR" },
 
-  // Africa common
   { code:"sw", flag:"🇰🇪", bcp:"sw-KE" },
-  { code:"am", flag:"🇪🇹", bcp:"am-ET" },
+  { code:"am", flag:"🇪🇹", bcp:"am-ET" }
 ];
 
 function canonicalLangCode(code){
   const c = String(code||"").toLowerCase();
   return c.split("-")[0];
 }
-function langObj(code){ return LANGS.find(x=>x.code===code) || null; }
-function langFlag(code){ return (langObj(code)?.flag) || "🌐"; }
-function bcp(code){ return (langObj(code)?.bcp) || "en-US"; }
+function langObj(code){
+  const c = String(code||"").toLowerCase();
+  return LANGS.find(x=>x.code===c) || LANGS.find(x=>x.code===canonicalLangCode(c)) || null;
+}
+function langFlag(code){ return langObj(code)?.flag || "🌐"; }
+function bcp(code){ return langObj(code)?.bcp || "en-US"; }
 
 /* ===============================
-   DisplayNames (localized language names)
+   DisplayNames (localized names)
    =============================== */
 let _dn = null;
 function getDisplayNames(){
@@ -170,10 +172,11 @@ function langLabel(code){
   const dn = getDisplayNames();
   const base = canonicalLangCode(c);
 
-  // dn.of expects base language, works best with "en", "de" etc.
   if(dn){
-    const name = dn.of(base);
-    if(name) return name;
+    try{
+      const name = dn.of(base);
+      if(name) return name;
+    }catch{}
   }
   return c.toUpperCase();
 }
@@ -183,25 +186,39 @@ function chipLabel(code){
 }
 
 /* ===============================
-   Guard (email + terms only)
+   AUTH / GUARD (fix zıplama)
+   - Supabase session + 1.6sn grace
    =============================== */
-function termsKey(email=""){
-  return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`;
+async function waitForSession(graceMs = 1600){
+  const t0 = Date.now();
+  while(Date.now() - t0 < graceMs){
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(session?.user) return session;
+    await new Promise(r=>setTimeout(r, 120));
+  }
+  const { data:{ session } } = await supabase.auth.getSession();
+  return session || null;
 }
-function getUser(){ return safeJson(localStorage.getItem(STORAGE_KEY), {}); }
 
-function ensureLogged(){
-  const u = getUser();
-  if(!u || !u.email){ location.replace("/index.html"); return null; }
-  if(!localStorage.getItem(termsKey(u.email))){ location.replace("/index.html"); return null; }
-  return u;
+async function ensureLogged(){
+  const session = await waitForSession(1600);
+  if(!session?.user){
+    location.replace(LOGIN_PATH);
+    return null;
+  }
+  // cache/profil sync
+  try{ await ensureAuthAndCacheUser(); }catch{}
+  return session.user;
 }
 
 /* ===============================
-   Header fill
+   Header fill (cache)
    =============================== */
-function paintHeader(u){
-  const full = (u.fullname || u.name || u.display_name || u.email || "—").trim();
+function getUserCache(){ return safeJson(localStorage.getItem(STORAGE_KEY), {}); }
+
+function paintHeader(){
+  const u = getUserCache();
+  const full = (u.fullname || u.full_name || u.name || u.display_name || u.email || "—").trim();
   $("userName") && ($("userName").textContent = full);
   $("userPlan") && ($("userPlan").textContent = String(u.plan || "FREE").toUpperCase());
 
@@ -215,7 +232,6 @@ function paintHeader(u){
     }else if(fallback){
       fallback.textContent = (full && full[0]) ? full[0].toUpperCase() : "•";
     }
-    // avatara basınca profile
     avatarBtn.addEventListener("click", (e)=>{
       e.preventDefault();
       location.href = "/pages/profile.html";
@@ -226,14 +242,14 @@ function paintHeader(u){
 /* ===============================
    Persist (sessionStorage)
    =============================== */
-const SS_FROM = "italky_text_translate_from_v3";
-const SS_TO   = "italky_text_translate_to_v3";
-const SS_MANUAL_TO = "italky_text_translate_to_manual_v3";
+const SS_FROM = "italky_text_translate_from_v4";
+const SS_TO   = "italky_text_translate_to_v4";
+const SS_MANUAL_TO = "italky_text_translate_to_manual_v4";
 
 let fromLang = sessionStorage.getItem(SS_FROM) || "auto";
 let toLang   = sessionStorage.getItem(SS_TO) || "tr";
 let manualTo = (sessionStorage.getItem(SS_MANUAL_TO) || "0") === "1";
-let detectedFrom = null; // auto detection
+let detectedFrom = null;
 
 function persist(){
   sessionStorage.setItem(SS_FROM, fromLang);
@@ -248,7 +264,7 @@ function setLangUI(){
 
   $("fromLangTxt") && ($("fromLangTxt").textContent = fromShown);
   $("fromFlag") && ($("fromFlag").textContent =
-    fromLang==="auto" ? (detectedFrom ? langFlag(detectedFrom) : "🌐") : langFlag(fromLang)
+    fromLang==="auto" ? (detectedFrom ? langFlag(detectedFrom) : "✨") : langFlag(fromLang)
   );
 
   $("toLangTxt") && ($("toLangTxt").textContent = langLabel(toLang));
@@ -258,12 +274,12 @@ function setLangUI(){
 /* ===============================
    Sheet
    =============================== */
-let sheetFor = "from"; // from|to
+let sheetFor = "from";
 
 function openSheet(which){
   sheetFor = which;
-
   $("langSheet")?.classList.add("show");
+
   $("sheetTitle") && ($("sheetTitle").textContent = (which==="from") ? sourceLabel() : targetLabel());
   $("sheetQuery") && ($("sheetQuery").placeholder = searchLabel());
   if($("sheetQuery")) $("sheetQuery").value = "";
@@ -283,22 +299,20 @@ function renderSheet(filter){
   const items = LANGS.filter(l=>{
     if(sheetFor==="to" && l.code==="auto") return false;
     if(!q) return true;
-
     const label = langLabel(l.code).toLowerCase();
     const code = String(l.code).toLowerCase();
-    const hay = `${label} ${code}`; // localized label + code
-    return hay.includes(q);
+    return (`${label} ${code}`).includes(q);
   });
 
   list.innerHTML = items.map(l=>{
     const sel = (l.code === current) ? "selected" : "";
     return `
       <div class="sheetRow ${sel}" data-code="${l.code}">
-        <div class="left" style="display:flex;align-items:center;gap:10px;min-width:0;">
-          <div class="code" style="min-width:28px; text-align:center; font-size:18px;">${l.flag}</div>
-          <div class="name" style="font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${langLabel(l.code)}</div>
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          <div style="min-width:28px;text-align:center;font-size:18px;">${l.flag}</div>
+          <div style="font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${langLabel(l.code)}</div>
         </div>
-        <div class="code" style="opacity:.6;font-weight:900;color:#fff;">${String(l.code).toUpperCase()}</div>
+        <div style="opacity:.6;font-weight:900;color:#fff;">${String(l.code).toUpperCase()}</div>
       </div>
     `;
   }).join("");
@@ -311,7 +325,7 @@ function renderSheet(filter){
         detectedFrom = null;
       }else{
         toLang = code;
-        manualTo = true; // user locks target
+        manualTo = true;
       }
       persist();
       setLangUI();
@@ -322,20 +336,24 @@ function renderSheet(filter){
 }
 
 /* ===============================
-   Auto target rule
-   - detected TR => EN
-   - else => TR
-   - unless manualTo
+   Auto target rule (simple)
    =============================== */
 function applyAutoTargetRule(detected){
   if(manualTo) return;
   const d = String(detected||"").toLowerCase().trim();
   if(!d) return;
-
   detectedFrom = d;
   toLang = (d === "tr") ? "en" : "tr";
   persist();
   setLangUI();
+}
+
+function detectLightTR(text){
+  const tt = String(text||"").toLowerCase();
+  if(/[çğıöşü]/.test(tt)) return "tr";
+  const trHints = [" ve ", " bir ", " için ", " değil ", " merhaba", " selam", " nasılsın", " teşekkür"];
+  for(const h of trHints) if(tt.includes(h)) return "tr";
+  return "en";
 }
 
 /* ===============================
@@ -350,11 +368,18 @@ function updateCounts(){
 }
 
 /* ===============================
-   TTS
+   TTS (APK NativeTTS + Web fallback)
    =============================== */
 function speak(text, langCode){
   const tt = String(text||"").trim();
   if(!tt) return;
+
+  // APK bridge
+  if(window.NativeTTS && typeof window.NativeTTS.speak === "function"){
+    try{ window.NativeTTS.stop?.(); }catch{}
+    try{ window.NativeTTS.speak(tt, String(langCode||"en")); return; }catch{}
+  }
+
   if(!("speechSynthesis" in window)) { toast(UI_LANG==="tr" ? "Ses desteği yok" : "No TTS"); return; }
 
   try{
@@ -372,16 +397,9 @@ function speak(text, langCode){
    =============================== */
 let sttBusy = false;
 
-function detectLightTR(text){
-  const tt = String(text||"").toLowerCase();
-  if(/[çğıöşü]/.test(tt)) return "tr";
-  const trHints = [" ve ", " bir ", " için ", " değil ", " merhaba", " selam", " nasılsın", " teşekkür"];
-  for(const h of trHints) if(tt.includes(h)) return "tr";
-  return "en";
-}
-
 function startSTT(){
-  if(location.protocol !== "https:" && location.hostname !== "localhost"){
+  const isAndroid = navigator.userAgent.includes("Android");
+  if(location.protocol !== "https:" && location.hostname !== "localhost" && !isAndroid){
     toast(UI_LANG==="tr" ? "Mikrofon için HTTPS gerekli." : "HTTPS required for mic.");
     return;
   }
@@ -406,7 +424,7 @@ function startSTT(){
     const finalText = String(tr||"").trim();
     if(!finalText) return;
 
-    if($("inText")) $("inText").value = finalText;
+    $("inText") && ($("inText").value = finalText);
     updateCounts();
 
     if(fromLang === "auto"){
@@ -434,7 +452,6 @@ function startSTT(){
    =============================== */
 async function translateViaApi(text, source, target){
   const body = { text, source, target, from_lang: source, to_lang: target };
-
   const data = await apiPOST("/api/translate", body, { timeoutMs: 20000 });
 
   const out = String(
@@ -455,10 +472,10 @@ async function doTranslate(silent=false){
     return;
   }
 
-  if($("outText")) $("outText").textContent = (UI_LANG==="tr" ? "Çevriliyor…" : "Translating…");
+  $("outText") && ($("outText").textContent = (UI_LANG==="tr" ? "Çevriliyor…" : "Translating…"));
   updateCounts();
 
-  const src = (fromLang === "auto") ? "" : fromLang;
+  const src = (fromLang === "auto") ? "auto" : fromLang;
 
   try{
     const { out, detected } = await translateViaApi(text, src, toLang);
@@ -467,9 +484,9 @@ async function doTranslate(silent=false){
       applyAutoTargetRule(detected || detectLightTR(text));
     }
 
-    if($("outText")) $("outText").textContent = out || "—";
+    $("outText") && ($("outText").textContent = out || "—");
   }catch(e){
-    if($("outText")) $("outText").textContent = "—";
+    $("outText") && ($("outText").textContent = "—");
     if(!silent) toast(String(e?.message || (UI_LANG==="tr" ? "Çeviri alınamadı" : "Translate failed")));
   }
 
@@ -491,42 +508,25 @@ function swapLang(){
 }
 
 /* ===============================
-   UI lang refresh (profile changes)
-   =============================== */
-function refreshUILang(){
-  const now = getSystemUILang();
-  if(now === UI_LANG) return;
-  UI_LANG = now;
-
-  // Sheet placeholder/title
-  if($("sheetQuery")) $("sheetQuery").placeholder = searchLabel();
-  if($("sheetTitle")) $("sheetTitle").textContent = (sheetFor==="from") ? sourceLabel() : targetLabel();
-
-  // Buttons
-  setLangUI();
-  // If sheet open, rerender with localized names
-  if($("langSheet")?.classList.contains("show")) renderSheet($("sheetQuery")?.value || "");
-}
-
-/* ===============================
    Boot
    =============================== */
-document.addEventListener("DOMContentLoaded", ()=>{
-  const u = ensureLogged();
-  if(!u) return;
+document.addEventListener("DOMContentLoaded", async ()=>{
+  // ✅ auth (zıplamayı bitiren)
+  const user = await ensureLogged();
+  if(!user) return;
 
-  // apply i18n for any data-i18n used in HTML (safe)
+  // i18n safe
   try{ applyI18n(document); }catch{}
 
-  paintHeader(u);
+  paintHeader();
 
+  // Back/logo
   $("backBtn")?.addEventListener("click", (e)=>{
-    // link var ama safe olsun
     e?.preventDefault?.();
     if(history.length>1) history.back();
-    else location.href = "/pages/home.html";
+    else location.href = HOME_PATH;
   });
-  $("logoHome")?.addEventListener("click", ()=> location.href="/pages/home.html");
+  $("logoHome")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
   // init UI
   setLangUI();
@@ -542,8 +542,8 @@ document.addEventListener("DOMContentLoaded", ()=>{
   $("sheetQuery")?.addEventListener("input", ()=> renderSheet($("sheetQuery")?.value));
 
   $("clearBtn")?.addEventListener("click", ()=>{
-    if($("inText")) $("inText").value = "";
-    if($("outText")) $("outText").textContent = "—";
+    $("inText") && ($("inText").value = "");
+    $("outText") && ($("outText").textContent = "—");
     detectedFrom = null;
     persist();
     setLangUI();
@@ -568,10 +568,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
     speak(txt, toLang);
   });
 
-  // if profile language changes in another tab/page
-  window.addEventListener("storage", (e)=>{
-    if(e.key === "italky_site_lang_v1" || e.key === "italky_lang_ping"){
-      refreshUILang();
-    }
-  });
+  // sheet query placeholder (localized)
+  $("sheetQuery") && ($("sheetQuery").placeholder = searchLabel());
 });
