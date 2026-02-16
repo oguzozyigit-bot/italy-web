@@ -3,165 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Neural Home</title>
+  <title>italkyAI • Neural Hub</title>
   <style>
     :root {
-      --glow-bordo: #ff1e56;
-      --glow-cyan: #00f2ff;
-      --deep-void: #02000f;
+      --glow-active: #00ff88;
+      --glow-offline: #ff3e3e;
+      --glass: rgba(255, 255, 255, 0.02);
+      --border: rgba(255, 255, 255, 0.08);
     }
 
     #pageContent {
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: space-around;
-      padding: 10px 0;
-      perspective: 1200px;
+      gap: 24px;
+      padding: 10px 0 30px;
     }
 
-    /* --- NEURAL CORE (FaceToFace) --- */
-    .neural-core {
+    /* --- 1. PRESTIGE: ITALKY ACADEMY (EN ÜSTTE, EN PRESTİJLİ) --- */
+    .academy-premium {
       position: relative;
-      width: 100%;
-      height: 240px;
-      background: radial-gradient(circle at center, rgba(157, 27, 61, 0.2) 0%, transparent 70%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%);
+      border-radius: 30px;
+      padding: 25px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
       cursor: pointer;
     }
+    .academy-premium::after {
+      content: "PREMIUM"; position: absolute; top: -10px; right: 20px;
+      background: #f59e0b; color: #000; font-size: 9px; font-weight: 900;
+      padding: 2px 8px; border-radius: 4px; letter-spacing: 1px;
+    }
+    .academy-info h2 { margin: 0; font-size: 22px; font-weight: 900; background: linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .academy-info p { margin: 5px 0 0; font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 700; letter-spacing: 1px; }
 
-    .core-orb {
-      width: 140px; height: 140px;
-      background: #000;
+    /* --- 2. THE CORE: FACETOFACE (DİNAMİK DURUM) --- */
+    .core-portal {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, rgba(128, 19, 54, 0.15) 0%, transparent 80%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .orb-visual {
+      width: 160px; height: 160px;
       border-radius: 50%;
       position: relative;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 0 50px var(--glow-bordo), inset 0 0 30px var(--glow-bordo);
       display: flex; align-items: center; justify-content: center;
-      animation: orbPulse 4s infinite ease-in-out;
+      transition: all 0.5s ease;
     }
-
-    /* Özel Çizim AI İkonu (Neural Paths) */
-    .ai-symbol {
-      width: 60px; height: 60px;
-      position: relative;
+    /* Canlı Durum Halkası */
+    .status-ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 2px solid transparent;
+      box-shadow: 0 0 40px -10px var(--status-color);
+      transition: all 0.5s ease;
     }
-    .ai-symbol::before, .ai-symbol::after {
-      content: ""; position: absolute; border: 2px solid #fff; border-radius: 50%;
-      inset: 10%; animation: rotateSymbol 6s infinite linear;
-    }
-    .ai-symbol::after { inset: 25%; border-color: var(--glow-cyan); animation-direction: reverse; }
-
-    .core-label {
-      position: absolute; bottom: -40px; text-align: center;
-      width: 100%;
-    }
-    .core-label h2 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 20px var(--glow-bordo); }
-    .core-label span { font-size: 10px; font-weight: 800; color: var(--glow-cyan); letter-spacing: 4px; }
-
-    /* --- FLOATING MODULES GRID --- */
-    .modules-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      padding: 40px 10px 0;
-    }
-
-    .module-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .module-item:active { transform: scale(1.2) translateY(-10px); }
-
-    /* Özel CSS İkon Çizimleri */
-    .icon-blob {
-      width: 54px; height: 54px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.03);
+    .orb-inner {
+      width: 100px; height: 100px; background: #000; border-radius: 50%;
       border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
       display: flex; align-items: center; justify-content: center;
-      position: relative;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+      z-index: 2;
+    }
+    .status-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      position: absolute; top: 10px; right: 10px;
+      background: var(--status-color);
+      box-shadow: 0 0 15px var(--status-color);
     }
 
-    /* CSS ile Özel İkonlar (Hazır Değil) */
-    .draw-text::before { content: "Aあ"; font-weight: 900; color: #34d399; font-size: 20px; }
-    .draw-photo::before { content: ""; width: 20px; height: 16px; border: 2px solid #60a5fa; border-radius: 3px; position:relative; }
-    .draw-photo::after { content: ""; width: 6px; height: 6px; background: #60a5fa; border-radius: 50%; position:absolute; top: 18px; right: 18px; }
-    .draw-doc::before { content: ""; width: 14px; height: 18px; border: 2px solid #f472b6; border-top-right-radius: 6px; }
-    .draw-game::before { content: "🎮"; font-size: 24px; filter: drop-shadow(0 0 8px #fbbf24); }
-    .draw-chat::before { content: ""; width: 20px; height: 14px; border: 2px solid #818cf8; border-radius: 10px 10px 10px 0; }
-    .draw-academy::before { content: "it"; font-family: serif; font-style: italic; font-weight: 900; font-size: 24px; color: #fff; }
-
-    .module-item label { font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
-
-    /* Animasyonlar */
-    @keyframes orbPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--glow-bordo); }
-      50% { transform: scale(1.05); box-shadow: 0 0 70px var(--glow-bordo); }
+    /* --- 3. UTILITY GRID (MODÜLLER) --- */
+    .utility-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
     }
-    @keyframes rotateSymbol {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    .u-tool {
+      display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
+    }
+    .u-icon {
+      width: 60px; height: 60px; background: var(--glass);
+      border: 1px solid var(--border); border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; transition: all 0.3s;
+    }
+    .u-icon svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 1.5; opacity: 0.6; }
+    .u-tool label { font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+
+    /* Dinamik Sınıflar */
+    .is-online { --status-color: var(--glow-active); }
+    .is-offline { --status-color: var(--glow-offline); }
+
+    .status-text {
+      margin-top: 15px; font-size: 11px; font-weight: 800; text-align: center;
+      letter-spacing: 1px; color: var(--status-color);
     }
 
-    /* Offline/Kilit Durumu */
-    .locked { opacity: 0.2; filter: blur(2px); pointer-events: none; }
+    /* CSS Çizim İkonlar */
+    .ico-text::before { content: "Aa"; color: #fff; font-weight: 900; }
+    .ico-cam::before { content: "●"; color: #fff; font-size: 20px; }
+    .ico-doc::before { content: "≡"; color: #fff; font-size: 24px; }
+    .ico-game::before { content: "🎮"; font-size: 20px; }
+
   </style>
 </head>
 
-<body>
-  <div id="pageContent">
+<body class="is-online"> <div id="pageContent">
     
-    <div class="neural-core" id="btnFfStart" data-href="/pages/facetoface.html">
-      <div class="core-orb">
-        <div class="ai-symbol"></div>
+    <div class="academy-premium" id="btnAcademy" data-href="/pages/teacher_select.html">
+      <div class="academy-info">
+        <h2>italky Academy</h2>
+        <p>PERSONAL EDUCATION SYSTEM</p>
       </div>
-      <div class="core-label">
-        <span>INTERFACE ACTIVE</span>
-        <h2>FaceToFace</h2>
+      <div style="font-size: 24px; opacity: 0.2;">🎓</div>
+    </div>
+
+    <div class="core-portal" id="btnFfStart" data-href="/pages/facetoface.html">
+      <div class="orb-visual">
+        <div class="status-ring"></div>
+        <div class="orb-inner">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+        <div class="status-dot"></div>
+      </div>
+      <div class="hero-label" style="text-align:center; margin-top:20px;">
+        <h1 style="margin:0; font-size:28px; font-weight:900; letter-spacing:-1px;">FaceToFace</h1>
+        <div class="status-text" id="ffStatusText">FULL AI POWER ACTIVE</div>
       </div>
     </div>
 
-    <div class="modules-container">
-      
-      <div class="module-item" id="tileText" data-href="/pages/text_translate.html">
-        <div class="icon-blob draw-text"></div>
+    <div class="utility-row">
+      <div class="u-tool" id="tileText" data-href="/pages/text_translate.html">
+        <div class="u-icon ico-text"></div>
         <label>Metin</label>
       </div>
-
-      <div class="module-item" id="tileChat" data-href="/pages/teacher_select.html">
-        <div class="icon-blob draw-chat"></div>
-        <label>Sohbet</label>
-      </div>
-
-      <div class="module-item" id="tilePhoto" data-href="/pages/photo.html">
-        <div class="icon-blob draw-photo"></div>
+      <div class="u-tool" id="tilePhoto" data-href="/pages/photo.html">
+        <div class="u-icon ico-cam"></div>
         <label>Görsel</label>
       </div>
-
-      <div class="module-item" id="tileAcademy" data-href="/pages/teacher_select.html">
-        <div class="icon-blob draw-academy"></div>
-        <label>Academy</label>
-      </div>
-
-      <div class="module-item" id="tileDoc" data-href="/pages/document.html">
-        <div class="icon-blob draw-doc"></div>
+      <div class="u-tool" id="tileDoc" data-href="/pages/document.html">
+        <div class="u-icon ico-doc"></div>
         <label>Belge</label>
       </div>
-
-      <div class="module-item" id="tileGame" data-href="/pages/game.html">
-        <div class="icon-blob draw-game"></div>
+      <div class="u-tool" id="tileGame" data-href="/pages/game.html">
+        <div class="u-icon ico-game"></div>
         <label>Oyun</label>
       </div>
-
     </div>
 
   </div>
@@ -177,31 +164,46 @@
     if (cached?.tokens != null) setHeaderTokens(cached.tokens);
     bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    function handleState() {
+    function updateNeuralInterface() {
       const isOnline = navigator.onLine;
       const user = JSON.parse(localStorage.getItem('italky_user_v1') || '{}');
-      const hasOff = (user.offline_langs || []).length > 0;
+      const offCount = (user.offline_langs || []).length;
 
-      const logic = {
-        tileText: isOnline || hasOff,
-        tilePhoto: isOnline,
-        tileDoc: isOnline,
-        tileGame: true,
-        tileChat: isOnline,
-        tileAcademy: isOnline
-      };
+      // Body class update (Yeşil/Kırmızı geçişi)
+      document.body.className = isOnline ? 'is-online' : 'is-offline';
 
-      Object.entries(logic).forEach(([id, ok]) => {
+      // FaceToFace Statüsü
+      const ffText = document.getElementById('ffStatusText');
+      if (isOnline) {
+        ffText.innerText = "ONLINE: 40+ DİL AKTİF";
+      } else {
+        ffText.innerText = offCount > 0 ? `OFFLINE: ${offCount} PAKET HAZIR` : "İNTERNET GEREKLİ";
+      }
+
+      // Alt modüllerin durumları
+      const tools = ['tileText', 'tilePhoto', 'tileDoc', 'tileGame'];
+      tools.forEach(id => {
         const el = document.getElementById(id);
-        if(!ok) el.classList.add('locked'); else el.classList.remove('locked');
+        const icon = el.querySelector('.u-icon');
+        // Offline'da kısıtlılık hissi
+        if(!isOnline && id !== 'tileGame' && id !== 'tileText') {
+          icon.style.opacity = "0.2";
+          icon.style.filter = "grayscale(1)";
+        } else {
+          icon.style.opacity = "1";
+          icon.style.filter = "none";
+        }
       });
     }
 
     document.querySelectorAll("[data-href]").forEach(el => {
-      el.onclick = () => { if(!el.classList.contains('locked')) location.href = el.dataset.href; };
+      el.onclick = () => location.href = el.dataset.href;
     });
 
-    handleState();
+    // Anlık takip
+    updateNeuralInterface();
+    window.addEventListener('online', updateNeuralInterface);
+    window.addEventListener('offline', updateNeuralInterface);
   </script>
 </body>
 </html>
