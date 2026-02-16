@@ -3,116 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Pro Hub</title>
+  <title>italkyAI • Hub</title>
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --glow-online: #00ffcc;
-      --glow-offline: #ff3366;
+      --footer-safe: calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 20px);
     }
 
+    /* ✅ KATMAN ÇAKIŞMA FIX */
     #pageContent {
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      padding: 10px 0 calc(env(safe-area-inset-bottom) + 5px);
+      gap: 20px;
+      /* Alt katmanın altında kalmaması için tampon bölge */
+      padding: 10px 0 var(--footer-safe); 
       box-sizing: border-box;
-      gap: 12px;
-      overflow-y: auto; /* Yeni eklemelerle birlikte hafif bir taşma olursa akışı bozmaz */
+      overflow-y: auto;
       scrollbar-width: none;
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    /* --- BİLGİ ÇUBUKLARI (Academy & Meeting) --- */
+    /* --- BARS (Academy & Meeting) --- */
     .pro-bar {
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 24px;
-      padding: 12px 18px;
+      border-radius: 26px;
+      padding: 16px 20px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex; align-items: center; gap: 14px;
+      display: flex; align-items: center; gap: 16px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
       -webkit-tap-highlight-color: transparent;
     }
     .pro-bar:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
 
     .bar-icon {
-      width: 40px; height: 40px; background: #000; border-radius: 12px;
+      width: 44px; height: 44px; background: #000; border-radius: 14px;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
 
-    /* Academy Spektrum Logo */
-    .spectrum-logo { gap: 2px; display: flex; align-items: center; }
-    .bar { width: 2.5px; border-radius: 4px; }
-    .bar-1 { height: 8px; background: #ff0000; }
-    .bar-2 { height: 14px; background: #ff7f00; }
-    .bar-3 { height: 18px; background: #ffff00; }
-    .bar-4 { height: 24px; background: #00ff00; }
-    .bar-5 { height: 18px; background: #0000ff; }
-    .bar-6 { height: 14px; background: #4b0082; }
-    .bar-7 { height: 8px; background: #8b00ff; }
+    .spectrum-logo { gap: 2.5px; display: flex; align-items: center; }
+    .bar { width: 3px; border-radius: 10px; }
+    .bar-1 { height: 10px; background: #ff0000; }
+    .bar-2 { height: 16px; background: #ff7f00; }
+    .bar-3 { height: 22px; background: #ffff00; }
+    .bar-4 { height: 30px; background: #00ff00; }
+    .bar-5 { height: 22px; background: #0000ff; }
+    .bar-6 { height: 16px; background: #4b0082; }
+    .bar-7 { height: 10px; background: #8b00ff; }
 
-    .bar-text h2 { margin: 0; font-size: 16px; font-weight: 900; color: #fff; }
+    .bar-text h2 { margin: 0; font-size: 17px; font-weight: 900; color: #fff; }
     .bar-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .bar-text p { margin: 0; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); }
+    .bar-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; }
 
-    /* --- CENTER: FACETOFACE --- */
+    /* --- PORTAL ZONE (COMFORT MODE) --- */
     .portal-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; padding: 5px 0;
+      cursor: pointer; padding: 15px 0;
       -webkit-tap-highlight-color: transparent;
     }
     .neural-orb {
-      width: 110px; height: 110px; position: relative;
+      width: 130px; height: 130px; position: relative;
       display: flex; align-items: center; justify-content: center;
     }
     .ai-ring {
-      position: absolute; inset: -2px; border-radius: 50%; padding: 2px;
+      position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px;
       background: var(--ai-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
+      mask-composite: exclude; animation: rotateOrbit 20s linear infinite;
     }
     .ai-core {
-      width: 75px; height: 75px; background: #000; border-radius: 50%;
+      width: 90px; height: 90px; background: #000; border-radius: 50%;
       background-image: linear-gradient(#000, #000), var(--ai-gradient);
       background-origin: border-box; background-clip: content-box, border-box;
       border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
       animation: aiBreathe 4s infinite ease-in-out;
     }
-    .portal-info h1 { margin: 5px 0 0; font-size: 22px; font-weight: 900; color: #fff; }
+    .portal-info h1 { margin: 12px 0 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
 
-    /* --- GRID: TOOLS --- */
+    /* --- PRO GRID --- */
     .pro-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     }
     .pro-tile {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px; padding: 12px;
-      display: flex; align-items: center; gap: 10px;
+      border-radius: 24px; padding: 16px;
+      display: flex; align-items: center; gap: 12px;
       cursor: pointer; transition: all 0.2s;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
-    .pro-tile:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.1); }
+    .pro-tile:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); }
     
     .tile-icon {
-      width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.05);
+      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.06);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      font-weight: 900; font-size: 14px;
+      font-size: 16px;
     }
-    .ico-txt::before { content: "Aa"; color: #34d399; }
-    .ico-cam::before { content: "◎"; color: #60a5fa; }
-    .ico-doc::before { content: "≡"; color: #f472b6; }
+    .ico-txt::before { content: "Aa"; color: #34d399; font-weight: 900; }
+    .ico-cam::before { content: "◎"; color: #60a5fa; font-weight: 900; }
+    .ico-doc::before { content: "≡"; color: #f472b6; font-weight: 900; }
     .ico-fun::before { content: "🎯"; }
     .ico-chat::before { content: "💬"; }
-    .ico-teacher::before { content: "👨‍🏫"; }
+    .ico-teacher::before { content: "🎓"; }
 
-    .pro-tile label { font-size: 11px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
     .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    /* --- ANIMATIONS --- */
+    /* ANIMATIONS */
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes aiBreathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.04); opacity: 1; } }
+    @keyframes aiBreathe { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 1; } }
 
   </style>
 </head>
@@ -138,7 +138,7 @@
       <div class="neural-orb">
         <div class="ai-ring"></div>
         <div class="ai-core">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
             <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
             <line x1="12" y1="19" x2="12" y2="23"/>
@@ -179,9 +179,9 @@
 
     <div class="pro-bar" data-nav="/pages/meeting.html">
       <div class="bar-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5">
           <path d="M15 10l5-5v14l-5-5"/>
-          <rect x="2" y="6" width="13" height="12" rx="2"/>
+          <rect x="2" y="6" width="13" height="12" rx="2.5"/>
         </svg>
       </div>
       <div class="bar-text">
@@ -203,19 +203,25 @@
     if (cached?.tokens != null) setHeaderTokens(cached.tokens);
     bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    // Link Navigasyonu
+    // Kesin Navigasyon
+    function navigate(url) {
+      if(url) window.location.assign(url);
+    }
+
     document.querySelectorAll("[data-nav]").forEach(el => {
       const url = el.getAttribute("data-nav");
-      if(!url) return;
-
-      const navigate = (e) => {
+      
+      el.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        window.location.assign(url);
-      };
+        navigate(url);
+      });
 
-      el.addEventListener("touchend", navigate, { passive:false });
-      el.addEventListener("click", navigate);
+      el.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(url);
+      }, { passive: false });
     });
   </script>
 </body>
