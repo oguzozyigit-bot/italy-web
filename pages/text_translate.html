@@ -12,79 +12,76 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    /* ✅ Shell main-content içinde maksimum alan */
+    /* ✅ Shell içerik */
     #pageContent{
-      height: 100%;
+      height:100%;
       display:flex;
       flex-direction:column;
-      gap: 8px;              /* eski 12 -> 8 */
+      gap:8px;
       overflow:hidden;
     }
 
     .toolbar{
       display:flex;
-      gap:8px;               /* eski 10 -> 8 */
+      gap:8px;
       align-items:center;
-      flex: 0 0 auto;
+      flex:0 0 auto;
     }
 
     .langBtn{
       flex:1;
-      height: 46px;          /* eski 50 -> 46 */
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
+      height:46px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       color:#fff;
-      font-weight: 1000;
-      font-size: 13px;
-      padding: 0 12px;       /* biraz sıkı */
+      font-weight:1000;
+      font-size:13px;
+      padding:0 12px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       cursor:pointer;
       user-select:none;
     }
-    .langBtn:active{ transform: scale(.99); }
+    .langBtn:active{ transform:scale(.99); }
     .langLeft{ display:flex; align-items:center; gap:8px; min-width:0; }
     .langLeft span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .caret{ opacity:.75; font-weight:900; }
 
     #swapBtn{
-      width: 52px;           /* eski 56 -> 52 */
-      height: 46px;          /* eski 50 -> 46 */
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
+      width:52px;
+      height:46px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       color:#fff;
       font-weight:1000;
       cursor:pointer;
       user-select:none;
     }
-    #swapBtn:active{ transform: scale(.99); }
+    #swapBtn:active{ transform:scale(.99); }
 
     .pane{
-      flex: 1;
-      min-height: 0;
+      flex:1;
+      min-height:0;
       display:flex;
       flex-direction:column;
-      gap:8px;               /* eski 12 -> 8 */
+      gap:8px;
       overflow:hidden;
     }
 
     .panel{
       flex:1;
       min-height:0;
-      border-radius: 24px;   /* 28 -> 24 (daha “kompakt”) */
-      border: 1px solid rgba(255,255,255,0.12);
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,0.12);
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      background: rgba(0,0,0,0.12);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
-
-    /* üst bordo / alt lacivert */
     .panel.top{
       background: linear-gradient(180deg, rgba(88,12,31,0.92) 0%, rgba(26,2,8,0.94) 60%, rgba(2,0,10,0.94) 100%);
     }
@@ -93,20 +90,20 @@
     }
 
     .panelHead{
-      padding: 8px 10px;     /* 10/12 -> 8/10 */
+      padding:8px 10px;
       display:flex;
       align-items:center;
       justify-content:flex-end;
       gap:8px;
-      border-bottom: 1px solid rgba(255,255,255,0.10);
+      border-bottom:1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.16);
-      flex: 0 0 auto;
+      flex:0 0 auto;
     }
 
     .iconBtn{
-      width:40px; height:40px;   /* 42 -> 40 */
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.12);
+      width:40px; height:40px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       display:flex;
       align-items:center;
@@ -114,7 +111,7 @@
       cursor:pointer;
       user-select:none;
     }
-    .iconBtn:active{ transform: scale(.99); }
+    .iconBtn:active{ transform:scale(.99); }
     .iconBtn svg{ width:18px; height:18px; stroke:#fff; fill:none; stroke-width:2.2; opacity:.92; }
 
     .iconBtn.listening{
@@ -128,15 +125,14 @@
       100%{ box-shadow: 0 0 0 0 rgba(79,70,229,0.00); }
     }
 
-    .inArea{ flex:1; min-height:0; padding: 10px; } /* 12 -> 10 */
+    .inArea{ flex:1; min-height:0; padding:10px; }
     textarea{
-      width:100%;
-      height:100%;
+      width:100%; height:100%;
       border:none;
-      background: transparent;
+      background:transparent;
       color:#fff;
-      font-size: 16px;
-      font-weight: 700;
+      font-size:16px;
+      font-weight:700;
       resize:none;
       outline:none;
       line-height:1.35;
@@ -146,10 +142,10 @@
     .outArea{
       flex:1;
       min-height:0;
-      padding: 10px;
+      padding:10px;
       overflow:auto;
-      font-size: 16px;
-      font-weight: 800;
+      font-size:16px;
+      font-weight:800;
       line-height:1.35;
       color: rgba(255,255,255,0.93);
       white-space: pre-wrap;
@@ -158,12 +154,12 @@
     .actions{
       display:flex;
       gap:8px;
-      flex: 0 0 auto;
+      flex:0 0 auto;
     }
     #clearBtn{
       flex:1;
-      height: 46px;          /* 50 -> 46 */
-      border-radius: 16px;
+      height:46px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       color:#fff;
@@ -171,12 +167,12 @@
       cursor:pointer;
       user-select:none;
     }
-    #clearBtn:active{ transform: scale(.99); }
+    #clearBtn:active{ transform:scale(.99); }
 
     #translateBtn{
       flex:1.35;
-      height: 46px;          /* 50 -> 46 */
-      border-radius: 16px;
+      height:46px;
+      border-radius:16px;
       border:none;
       cursor:pointer;
       font-weight:1000;
@@ -184,77 +180,111 @@
       background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 55%, #EC4899 100%);
       box-shadow: 0 14px 34px rgba(79,70,229,.22);
     }
-    #translateBtn:active{ transform: scale(.99); }
+    #translateBtn:active{ transform:scale(.99); }
 
-    /* Sheet (z-index FIX: footer 9999 -> bunun üstü) */
-    #langSheet.sheetBackdrop{
-      position: fixed; inset: 0;
-      z-index: 200000;           /* ✅ FIX */
-      background: rgba(0,0,0,.60);
+    /* ✅ KİBAR SHEET (Facetoface gibi) */
+    #langSheet{
+      position: fixed;
+      inset: 0;
+      z-index: 300000; /* footer üstü */
       display:none;
-      align-items:flex-end;
+      align-items:center;
       justify-content:center;
-      padding: 16px;
+      padding: 18px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-    #langSheet.sheetBackdrop.show{ display:flex; }
+    #langSheet.show{ display:flex; }
 
     .sheet{
-      width: 100%;
-      max-width: 520px;
-      background: rgba(10,10,18,0.92);
-      border: 1px solid rgba(255,255,255,.14);
+      width:min(420px, 100%);
+      max-height: 70vh;
       border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.12);
       overflow:hidden;
-      max-height: 72vh;
+      background: radial-gradient(circle at 50% 40%, rgba(42,2,15,1) 0%, rgba(18,0,10,1) 58%, rgba(6,0,6,1) 100%);
+      box-shadow: 0 22px 60px rgba(0,0,0,0.80);
       display:flex;
       flex-direction:column;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
     }
+
     .sheetTop{
-      padding:12px;
+      padding: 12px 12px;
       display:flex;
-      justify-content:space-between;
       align-items:center;
-      border-bottom:1px solid rgba(255,255,255,.10);
+      justify-content:space-between;
       gap:10px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.18);
     }
-    #sheetTitle{ font-weight:1000; color:#fff; }
+
+    #sheetTitle{
+      font-weight:1000;
+      font-size:12px;
+      letter-spacing:.4px;
+      color: rgba(255,255,255,0.90);
+      white-space:nowrap;
+    }
+
     #sheetQuery{
       flex:1;
-      height: 40px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
+      height: 38px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
       color:#fff;
-      padding:0 12px;
       font-weight:900;
+      padding: 0 10px;
+      outline:none;
     }
+
     #sheetClose{
-      width:40px; height:40px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
       color:#fff;
       cursor:pointer;
       font-weight:1000;
     }
-    #sheetList{ overflow-y:auto; padding:10px; }
+    #sheetClose:active{ transform:scale(.98); }
+
+    #sheetList{
+      padding: 10px;
+      overflow:auto;
+      scrollbar-width:none;
+    }
+    #sheetList::-webkit-scrollbar{ display:none; }
+
     .sheetRow{
       padding: 12px;
+      border-radius: 16px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      border-bottom: 1px solid rgba(255,255,255,.06);
       cursor:pointer;
-      border-radius: 16px;
+      border:1px solid transparent;
+      user-select:none;
     }
-    .sheetRow:active{ transform: scale(.99); }
+    .sheetRow:hover{ background: rgba(255,255,255,0.04); }
     .sheetRow.selected{
-      background: rgba(79,70,229,.12);
-      border-bottom-color: transparent;
-      margin-bottom: 8px;
+      background: rgba(139,38,53,.10);
+      border-color: rgba(139,38,53,.24);
     }
+    .rowLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .rowFlag{ font-size:18px; }
+    .rowName{
+      font-weight:1000;
+      font-size:13px;
+      color:#fff;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 230px;
+    }
+    .rowCode{ font-size:12px; font-weight:1000; opacity:.7; }
 
     /* Toast */
     #toast{
@@ -267,7 +297,7 @@
       padding: 10px 14px;
       border-radius: 999px;
       color:#fff;
-      z-index: 200001;           /* ✅ sheet üstü */
+      z-index: 300001;
       font-weight:900;
       font-size:12px;
       transition:.28s;
@@ -281,7 +311,6 @@
 </head>
 
 <body>
-
   <div id="pageContent">
 
     <div class="toolbar">
@@ -341,13 +370,13 @@
       </div>
 
     </div>
-
   </div>
 
-  <div class="sheetBackdrop" id="langSheet">
-    <div class="sheet">
+  <!-- Kibar modal -->
+  <div id="langSheet" role="dialog" aria-label="Dil seçimi">
+    <div class="sheet" role="document">
       <div class="sheetTop">
-        <span id="sheetTitle">Dil Seç</span>
+        <div id="sheetTitle">Dil Seç</div>
         <input id="sheetQuery" placeholder="Ara…" />
         <button id="sheetClose" type="button">✕</button>
       </div>
@@ -360,11 +389,10 @@
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { bootPage } from "/js/ui_guard.js";
-
     mountShell();
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
   </script>
 
-  <script type="module" src="/js/text_translate_page.js?v=3001"></script>
+  <script type="module" src="/js/text_translate_page.js?v=4001"></script>
 </body>
 </html>
