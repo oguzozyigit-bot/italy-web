@@ -1,0 +1,393 @@
+<!-- FILE: /pages/home_v2.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Home</title>
+  <link rel="icon" href="data:," />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Shell giydirecek: sadece orta içerik */
+    #pageContent{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding: 2px 0; /* shell padding zaten var */
+    }
+
+    /* Durum çipi */
+    .statusRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.90);
+      font-weight:1000;
+      font-size:12px;
+      letter-spacing:.2px;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .chip small{ font-size:11px; opacity:.72; font-weight:900; }
+
+    /* HERO (FaceToFace) */
+    .hero{
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(79,70,229,0.35) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(236,72,153,0.16) 0%, transparent 55%),
+        linear-gradient(180deg, rgba(88,12,31,0.28) 0%, rgba(2,0,10,0.20) 100%);
+      box-shadow: 0 26px 70px rgba(0,0,0,0.55);
+      padding: 16px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .heroTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .heroTitle{
+      font-family:"Space Grotesk", system-ui, sans-serif;
+      font-size: 20px;
+      font-weight: 1000;
+      letter-spacing:-0.4px;
+      margin:0;
+      color:#fff;
+      line-height:1.1;
+    }
+    .heroSub{
+      margin:6px 0 0;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.72);
+      line-height:1.35;
+      max-width: 22em;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.90);
+      font-weight:1000;
+      font-size:11px;
+      white-space:nowrap;
+    }
+
+    .heroBtnRow{
+      display:flex;
+      gap:10px;
+      margin-top: 2px;
+    }
+    .btn{
+      height: 52px;
+      border-radius: 18px;
+      border: none;
+      cursor:pointer;
+      font-weight: 1000;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: scale(.99); }
+    .btnPrimary{
+      flex: 1.35;
+      background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 55%, #EC4899 100%);
+      color:#050510;
+      box-shadow: 0 16px 44px rgba(79,70,229,.22);
+      font-size:14px;
+    }
+    .btnGhost{
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.92);
+      font-size:13px;
+    }
+
+    /* Academy (belirgin) */
+    .academy{
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(circle at 15% 30%, rgba(165,180,252,0.22) 0%, transparent 55%),
+        linear-gradient(180deg, rgba(15,23,42,0.52) 0%, rgba(2,0,10,0.30) 100%);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.52);
+      padding: 14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .academy:active{ transform: scale(.99); }
+    .acLeft{ min-width:0; }
+    .acTitle{
+      margin:0;
+      font-size: 16px;
+      font-weight: 1000;
+      letter-spacing:-0.2px;
+      color:#fff;
+      line-height:1.15;
+    }
+    .acSub{
+      margin:6px 0 0;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.72);
+      line-height:1.35;
+    }
+    .acCta{
+      height:44px;
+      padding: 0 14px;
+      border-radius: 16px;
+      border:none;
+      background: rgba(255,255,255,0.90);
+      color:#050510;
+      font-weight:1000;
+      cursor:pointer;
+      flex: 0 0 auto;
+    }
+    .acCta:active{ transform: scale(.99); }
+
+    /* Tools grid (4) */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .tile{
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      cursor:pointer;
+      user-select:none;
+      min-height: 118px;
+    }
+    .tile:active{ transform: scale(.99); }
+    .tileTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .iconBox{
+      width:46px;
+      height:46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(255,255,255,0.06);
+    }
+    .iconBox svg{
+      width:22px;
+      height:22px;
+      stroke:#fff;
+      fill:none;
+      stroke-width:2.3;
+      opacity:.92;
+    }
+    .tileTitle{
+      margin:0;
+      font-size: 14px;
+      font-weight: 1000;
+      letter-spacing:-0.15px;
+      color:#fff;
+      line-height:1.2;
+    }
+    .tileSub{
+      margin:0;
+      font-size: 11.5px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.68);
+      line-height:1.35;
+    }
+
+    /* küçük rozet: offline/online/login */
+    .miniTag{
+      font-size: 10.5px;
+      font-weight: 1000;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.82);
+      white-space:nowrap;
+    }
+
+    .mutedLine{
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.50);
+      line-height:1.4;
+      text-align:center;
+      padding: 6px 2px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="pageContent">
+
+    <!-- status -->
+    <div class="statusRow">
+      <div class="chip" id="netChip">…</div>
+      <div class="chip"><span>Mod</span> <small id="modeChip">…</small></div>
+    </div>
+
+    <!-- hero: FaceToFace -->
+    <section class="hero">
+      <div class="heroTop">
+        <div>
+          <h2 class="heroTitle">🎙 FaceToFace</h2>
+          <p class="heroSub">Gerçek zamanlı konuşarak çeviri. Tek dokunuşla başla.</p>
+        </div>
+        <div class="badge" id="ffBadge">…</div>
+      </div>
+
+      <div class="heroBtnRow">
+        <button class="btn btnPrimary" id="btnFfStart" type="button">Başlat</button>
+        <button class="btn btnGhost" id="btnOfflinePacks" type="button">Offline Paketler</button>
+      </div>
+    </section>
+
+    <!-- academy: belirgin -->
+    <section class="academy" id="academyCard">
+      <div class="acLeft">
+        <h3 class="acTitle">🎓 italky Academy</h3>
+        <p class="acSub">Seviye tespit ile başla. 15 dk derslerle hızlı ilerle.</p>
+      </div>
+      <button class="acCta" id="btnAcademy">Derse Başla</button>
+    </section>
+
+    <!-- tools -->
+    <section class="grid">
+      <div class="tile" id="tileText">
+        <div class="tileTop">
+          <div class="iconBox">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+          </div>
+          <span class="miniTag" id="tagText">…</span>
+        </div>
+        <h4 class="tileTitle">Metinden Çeviri</h4>
+        <p class="tileSub">Kopyala-yapıştır, hızlı çeviri.</p>
+      </div>
+
+      <div class="tile" id="tilePhoto">
+        <div class="tileTop">
+          <div class="iconBox">
+            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <span class="miniTag" id="tagPhoto">…</span>
+        </div>
+        <h4 class="tileTitle">Foto Çeviri</h4>
+        <p class="tileSub">Görselden yazıyı çevir.</p>
+      </div>
+
+      <div class="tile" id="tileDoc">
+        <div class="tileTop">
+          <div class="iconBox">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <span class="miniTag" id="tagDoc">…</span>
+        </div>
+        <h4 class="tileTitle">Belge Çeviri</h4>
+        <p class="tileSub">PDF ve dosyalar.</p>
+      </div>
+
+      <div class="tile" id="tileGames">
+        <div class="tileTop">
+          <div class="iconBox">
+            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/></svg>
+          </div>
+          <span class="miniTag" id="tagGames">…</span>
+        </div>
+        <h4 class="tileTitle">Oyunlar</h4>
+        <p class="tileSub">Kelime paketleriyle offline da oynanır.</p>
+      </div>
+    </section>
+
+    <div class="mutedLine">Tek Home. Sistem online/offline durumuna göre otomatik uyum sağlar.</div>
+  </div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { bootPage } from "/js/ui_guard.js";
+
+    mountShell({ scroll:"auto" });
+    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+
+    // Links
+    const go = (p)=>location.href=p;
+
+    // FaceToFace
+    document.getElementById("btnFfStart")?.addEventListener("click", ()=> go("/pages/facetoface.html"));
+
+    // Academy entry (akışı bozma!)
+    document.getElementById("academyCard")?.addEventListener("click", ()=> go("/pages/teacher_select.html"));
+    document.getElementById("btnAcademy")?.addEventListener("click", (e)=>{ e.stopPropagation(); go("/pages/teacher_select.html"); });
+
+    // Tools
+    document.getElementById("tileText")?.addEventListener("click", ()=> go("/pages/text_translate.html"));
+    document.getElementById("tilePhoto")?.addEventListener("click", ()=> go("/pages/photo.html"));
+    document.getElementById("tileDoc")?.addEventListener("click", ()=> go("/pages/document.html"));
+    document.getElementById("tileGames")?.addEventListener("click", ()=> go("/pages/game.html"));
+
+    document.getElementById("btnOfflinePacks")?.addEventListener("click", ()=> go("/pages/offline.html"));
+
+    // Status logic (simple & stable)
+    function set(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
+
+    function refreshStatus(){
+      const online = navigator.onLine;
+      set("netChip", online ? "🌐 Online" : "⚡ Offline");
+      set("modeChip", online ? "Online" : "Offline");
+
+      // tags: offline-capable vs requires-internet
+      set("ffBadge", online ? "🌐 Canlı Mod" : "⚡ Offline Mod");
+
+      set("tagText", online ? "⚡ Offline" : "⚡ Offline");
+      set("tagGames", "⚡ Offline");
+
+      // photo/doc need internet now (you can change later)
+      set("tagPhoto", online ? "🌐 Online" : "🔒 İnternet");
+      set("tagDoc",   online ? "🌐 Online" : "🔒 İnternet");
+    }
+
+    refreshStatus();
+    window.addEventListener("online", refreshStatus);
+    window.addEventListener("offline", refreshStatus);
+  </script>
+</body>
+</html>
