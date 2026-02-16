@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Pro Hub</title>
+  <title>italkyAI • Hub</title>
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
@@ -11,139 +11,118 @@
       --glow-offline: #ff3366;
     }
 
+    /* Scrollu tamamen kapatıp içeriği sığdırıyoruz */
     #pageContent {
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      overflow-y: auto;
-      scrollbar-width: none;
-      padding: 5px 0 20px;
+      justify-content: space-between; /* Elemanları yay */
+      padding: 10px 0 15px;
+      box-sizing: border-box;
+      overflow: hidden;
     }
-    #pageContent::-webkit-scrollbar { display: none; }
 
-    /* --- 1. ACADEMY: İKİ RENKLİ BAŞLIK & SPECTRUM --- */
+    /* 1. ACADEMY (KÜÇÜLTÜLDÜ) */
     .academy-pro {
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 32px;
-      padding: 22px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 14px 18px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex; align-items: center; gap: 18px;
-      backdrop-filter: blur(20px);
+      display: flex; align-items: center; gap: 14px;
       cursor: pointer;
-      transition: transform 0.2s cubic-bezier(0.2, 1, 0.3, 1), background 0.2s;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .academy-pro:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.08); }
+    .academy-pro:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.1); }
 
     .spectrum-logo {
-      width: 55px; height: 55px; background: #000; border-radius: 16px;
+      width: 42px; height: 42px; background: #000; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      gap: 3px; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
+      gap: 2px; flex-shrink: 0;
     }
-    .bar { width: 3px; border-radius: 10px; }
-    .bar-1 { height: 12px; background: #ff0000; }
-    .bar-2 { height: 18px; background: #ff7f00; }
-    .bar-3 { height: 24px; background: #ffff00; }
-    .bar-4 { height: 32px; background: #00ff00; }
-    .bar-5 { height: 24px; background: #0000ff; }
-    .bar-6 { height: 18px; background: #4b0082; }
-    .bar-7 { height: 12px; background: #8b00ff; }
+    .bar { width: 2.5px; border-radius: 4px; }
+    .bar-1 { height: 8px; background: #ff0000; }
+    .bar-2 { height: 14px; background: #ff7f00; }
+    .bar-3 { height: 18px; background: #ffff00; }
+    .bar-4 { height: 24px; background: #00ff00; }
+    .bar-5 { height: 18px; background: #0000ff; }
+    .bar-6 { height: 14px; background: #4b0082; }
+    .bar-7 { height: 8px; background: #8b00ff; }
 
-    .academy-text h2 { margin: 0; font-size: 21px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
-    /* Sadece Academy Kısmı Renkli */
-    .academy-text h2 span { 
-      background: var(--ai-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .academy-text p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
+    .academy-text h2 { margin: 0; font-size: 17px; font-weight: 900; color: #fff; }
+    .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .academy-text p { margin: 0; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); }
 
-    /* --- 2. FACETOFACE: CANLI ÇEKİRDEK --- */
+    /* 2. FACETOFACE (DAHA KOMPAKT) */
     .portal-zone {
-      flex-shrink: 0; padding: 20px 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer;
+      cursor: pointer; padding: 10px 0;
+      -webkit-tap-highlight-color: transparent;
     }
-
     .neural-orb {
-      width: 145px; height: 145px; border-radius: 50%;
-      position: relative; display: flex; align-items: center; justify-content: center;
+      width: 120px; height: 120px; position: relative;
+      display: flex; align-items: center; justify-content: center;
     }
-
     .ai-ring {
-      position: absolute; inset: -4px; border-radius: 50%;
-      padding: 2px; background: var(--ai-gradient);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude; animation: rotateOrbit 12s linear infinite;
+      position: absolute; inset: -2px; border-radius: 50%; padding: 2px;
+      background: var(--ai-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
     }
-
-    .orbit-energy {
-      position: absolute; inset: -12px; border-radius: 50%;
-      animation: rotateOrbit 8s linear infinite;
-    }
-    .e-ball { position: absolute; width: 12px; height: 12px; border-radius: 50%; filter: blur(1px); }
-    .ball-l { top: -6px; left: 50%; background: #1e3a8a; box-shadow: 0 0 15px #1e3a8a; }
-    .ball-b { bottom: -6px; left: 50%; background: #801336; box-shadow: 0 0 15px #801336; }
+    .orbit-energy { position: absolute; inset: -8px; animation: rotateOrbit 10s linear infinite; }
+    .e-ball { position: absolute; width: 10px; height: 10px; border-radius: 50%; }
+    .ball-l { top: -5px; left: 50%; background: #1e3a8a; box-shadow: 0 0 10px #1e3a8a; }
+    .ball-b { bottom: -5px; left: 50%; background: #801336; box-shadow: 0 0 10px #801336; }
 
     .ai-core {
-      width: 95px; height: 95px; background: #000; border-radius: 50%;
-      border: 2px solid transparent;
+      width: 80px; height: 80px; background: #000; border-radius: 50%;
       background-image: linear-gradient(#000, #000), var(--ai-gradient);
       background-origin: border-box; background-clip: content-box, border-box;
-      display: flex; align-items: center; justify-content: center;
-      animation: aiBreathe 4s infinite ease-in-out; z-index: 10;
+      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
+      animation: aiBreathe 4s infinite ease-in-out;
     }
 
-    .portal-info { text-align: center; margin-top: 15px; }
-    .portal-info h1 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -1px; }
-    .portal-info p { margin: 2px 0 0; font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.4); }
-    .status-pill {
-      display: inline-block; margin-top: 10px; padding: 4px 12px;
-      background: rgba(255,255,255,0.06); border-radius: 100px;
-      font-size: 10px; font-weight: 900; letter-spacing: 1px;
-    }
+    .portal-info h1 { margin: 5px 0 0; font-size: 24px; font-weight: 900; }
+    .portal-info p { margin: 0; font-size: 12px; color: rgba(255,255,255,0.4); }
 
-    /* --- 3. PRO GRID: TOK BUTON HİSSİ --- */
+    /* 3. SMART GRID (SABİT 2x2) */
     .pro-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
     .pro-tile {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 28px; padding: 20px;
-      display: flex; align-items: center; gap: 12px;
-      cursor: pointer; transition: transform 0.2s, background 0.2s;
+      border-radius: 20px; padding: 14px;
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
     }
-    .pro-tile:active { transform: scale(0.94); background: rgba(255, 255, 255, 0.12); }
-
+    .pro-tile:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); }
     .tile-icon {
-      width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.06);
+      width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.05);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      font-weight: 900; font-size: 17px;
+      font-weight: 900; font-size: 14px;
     }
     .ico-txt::before { content: "Aa"; color: #34d399; }
     .ico-cam::before { content: "◎"; color: #60a5fa; }
     .ico-doc::before { content: "≡"; color: #f472b6; }
     .ico-fun::before { content: "🎯"; }
 
-    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .pro-tile label { font-size: 11px; font-weight: 800; color: #fff; line-height: 1.2; }
 
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes aiBreathe {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }
-      50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(99, 102, 241, 0.4); }
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.04); opacity: 1; }
     }
 
-    .is-online .status-pill { color: var(--glow-online); }
-    .is-offline .status-pill { color: var(--glow-offline); }
     .locked { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
   </style>
 </head>
 
-<body class="is-online">
+<body>
   <div id="pageContent">
     
-    <div class="academy-pro" data-href="/pages/teacher_select.html">
+    <div class="academy-pro" data-nav="/pages/teacher_select.html">
       <div class="spectrum-logo">
         <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
         <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
@@ -155,7 +134,7 @@
       </div>
     </div>
 
-    <div class="portal-zone" data-href="/pages/facetoface.html">
+    <div class="portal-zone" data-nav="/pages/facetoface.html">
       <div class="neural-orb">
         <div class="ai-ring"></div>
         <div class="orbit-energy">
@@ -163,33 +142,29 @@
           <div class="e-ball ball-b"></div>
         </div>
         <div class="ai-core">
-          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
         </div>
       </div>
-      <div class="portal-info">
+      <div class="portal-info" style="text-align:center">
         <h1>FaceToFace</h1>
         <p>Yüzyüze Anlık Çeviri</p>
-        <div class="status-pill" id="stPill">SİSTEM ÇEVRİMİÇİ</div>
       </div>
     </div>
 
     <div class="pro-grid">
-      <div class="pro-tile" data-href="/pages/text_translate.html">
+      <div class="pro-tile" data-nav="/pages/text_translate.html">
         <div class="tile-icon ico-txt"></div>
         <label>Metinden<br>Çeviri</label>
       </div>
-
-      <div class="pro-tile" data-href="/pages/photo.html">
+      <div class="pro-tile" data-nav="/pages/photo.html">
         <div class="tile-icon ico-cam"></div>
         <label>Fotoğraftan<br>Çeviri</label>
       </div>
-
-      <div class="pro-tile" data-href="/pages/document.html">
+      <div class="pro-tile" data-nav="/pages/document.html">
         <div class="tile-icon ico-doc"></div>
         <label>Belgeden<br>Çeviri</label>
       </div>
-
-      <div class="pro-tile" data-href="/pages/game.html">
+      <div class="pro-tile" data-nav="/pages/game.html">
         <div class="tile-icon ico-fun"></div>
         <label>Eğlenerek<br>Öğren</label>
       </div>
@@ -202,55 +177,48 @@
     import { bootPage } from "/js/ui_guard.js";
     import { ensureAuthAndCacheUser } from "/js/auth.js";
 
+    // Navigasyon barı (alt bar) buradan geliyor. 
+    // Eğer çift katman oluyorsa mountShell içinde bar:false denenebilir.
     mountShell({ scroll: "none" });
 
     const cached = await ensureAuthAndCacheUser();
     if (cached?.tokens != null) setHeaderTokens(cached.tokens);
     bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    function refreshHub() {
+    // TIKLAMA SORUNUNU ÇÖZEN KESİN ÇÖZÜM
+    function initNavigation() {
+      const navElements = document.querySelectorAll("[data-nav]");
+      navElements.forEach(el => {
+        // Hem click hem touchend ekliyoruz ki mobilde kaçmasın
+        const target = el.getAttribute('data-nav');
+        el.onclick = (e) => {
+          e.preventDefault();
+          if(!el.classList.contains('locked')) {
+            window.location.assign(target);
+          }
+        };
+      });
+    }
+
+    function checkStatus() {
       const isOnline = navigator.onLine;
       const user = JSON.parse(localStorage.getItem('italky_user_v1') || '{}');
       const packs = (user.offline_langs || []).length;
 
-      document.body.className = isOnline ? 'is-online' : 'is-offline';
-      const pill = document.getElementById('stPill');
-
-      if (isOnline) {
-        pill.innerText = "● 40+ DİL AKTİF";
-      } else {
-        pill.innerText = packs > 0 ? `● ${packs} PAKET YÜKLÜ` : "● İNTERNET GEREKLİ";
-      }
-
-      // Kısıtlama mantığı
-      document.querySelectorAll("[data-href]").forEach(el => {
-        const target = el.getAttribute('data-href');
-        let locked = false;
-        
-        if (!isOnline) {
-          if (target.includes('photo') || target.includes('document')) locked = true;
-          if (target.includes('text') && packs === 0) locked = true;
+      document.querySelectorAll("[data-nav]").forEach(el => {
+        const url = el.getAttribute('data-nav');
+        if (!isOnline && (url.includes('photo') || url.includes('document'))) {
+          el.classList.add('locked');
+        } else {
+          el.classList.remove('locked');
         }
-
-        if (locked) el.classList.add('locked');
-        else el.classList.remove('locked');
       });
     }
 
-    // Linkleri Çalıştıran Kısım
-    document.querySelectorAll("[data-href]").forEach(el => {
-      el.addEventListener('click', () => {
-        if (!el.classList.contains('locked')) {
-          const path = el.getAttribute('data-href');
-          console.log("Gidiliyor:", path);
-          location.href = path;
-        }
-      });
-    });
-
-    refreshHub();
-    window.addEventListener('online', refreshHub);
-    window.addEventListener('offline', refreshHub);
+    initNavigation();
+    checkStatus();
+    window.addEventListener('online', checkStatus);
+    window.addEventListener('offline', checkStatus);
   </script>
 </body>
 </html>
