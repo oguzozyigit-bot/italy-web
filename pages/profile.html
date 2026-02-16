@@ -12,7 +12,7 @@
 
   <style>
     #pageContent{
-      padding: 16px 14px calc(var(--footerH, 92px) + 18px);
+      padding: 16px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 22px);
       display:flex;
       flex-direction:column;
       gap:12px;
@@ -25,92 +25,63 @@
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
     }
-    .head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 10px; }
-    .title{
-      font-family:"Space Grotesk", system-ui, sans-serif;
-      font-size: 18px;
-      font-weight: 900;
-      margin: 0;
-      letter-spacing: -0.3px;
-    }
-    .list{ display:flex; flex-direction:column; gap: 10px; margin-top: 10px; }
+    .head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .title{font-family:"Space Grotesk",system-ui,sans-serif;font-size:18px;font-weight:900;margin:0;letter-spacing:-0.3px}
 
+    .list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
     .line{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding: 12px 12px; border-radius: 18px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:12px 12px;border-radius:18px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
     }
-    .k{
-      font-size: 12px; font-weight: 900;
-      color: rgba(165,180,252,0.95);
-      letter-spacing: 1px; white-space: nowrap;
-    }
-    .v{
-      font-size: 13px; font-weight: 900;
-      color: rgba(255,255,255,0.92);
-      text-align:right; max-width: 64%;
-      word-break: break-word;
-    }
-    .mono{ font-family: ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace; }
+    .k{font-size:12px;font-weight:900;color:rgba(165,180,252,0.95);letter-spacing:1px;white-space:nowrap}
+    .v{font-size:13px;font-weight:900;color:rgba(255,255,255,0.92);text-align:right;max-width:64%;word-break:break-word}
+    .mono{font-family: ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace;}
 
-    .copyWrap{ display:flex; align-items:center; gap:10px; justify-content:flex-end; max-width: 64%; }
+    .copyWrap{display:flex;align-items:center;gap:10px;justify-content:flex-end;max-width:64%}
     .iconBtn{
-      width:38px; height:38px; border-radius:14px;
+      width:38px;height:38px;border-radius:14px;
       border:1px solid rgba(255,255,255,0.12);
-      background:rgba(0,0,0,0.18);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer; user-select:none; flex:0 0 auto;
+      background: rgba(0,0,0,0.18);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;user-select:none;flex:0 0 auto;
     }
-    .iconBtn:active{ transform: scale(.98); }
-    .iconBtn svg{ width:18px; height:18px; stroke: rgba(255,255,255,0.85); stroke-width:2.2; fill:none; }
+    .iconBtn:active{transform:scale(.98)}
+    .iconBtn svg{width:18px;height:18px;stroke:rgba(255,255,255,0.85);stroke-width:2.2;fill:none}
 
     .wallet{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding: 12px 12px; border-radius: 20px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:12px 12px;border-radius:20px;
       background: rgba(99,102,241,0.12);
       border: 1px solid rgba(99,102,241,0.35);
     }
-    .wallet .amt{ font-size: 20px; font-weight: 1000; letter-spacing: -0.3px; }
+    .wallet .amt{font-size:20px;font-weight:1000;letter-spacing:-0.3px}
 
     .btn{
-      height: 44px; padding: 0 14px; border-radius: 16px;
-      border: none; cursor:pointer; font-weight: 1000; user-select:none; white-space: nowrap;
+      height:44px;padding:0 14px;border-radius:16px;border:none;
+      cursor:pointer;font-weight:1000;user-select:none;white-space:nowrap;
     }
-    .btn:active{ transform: scale(0.98); }
-    .btn-primary{ background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 55%, #ec4899 100%); color:#050510; }
-    .btn-ghost{ background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.92); }
-    .btn-safe{ background: rgba(0, 200, 120, 0.18); border: 1px solid rgba(0, 200, 120, 0.35); color: rgba(255,255,255,0.92); }
-    .btn-dangerText{ background: transparent; border: 1px solid rgba(255, 0, 90, 0.30); color: rgba(255, 90, 140, 0.95); }
+    .btn:active{transform:scale(.98)}
+    .btn-primary{background: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);color:#050510}
+    .btn-ghost{background: rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#fff}
+    .btn-safe{background: rgba(0,200,120,0.18);border:1px solid rgba(0,200,120,0.35);color:#fff}
+    .btn-dangerText{background:transparent;border:1px solid rgba(255,0,90,0.30);color: rgba(255,90,140,0.95)}
 
-    .note{
-      font-size: 11px; font-weight: 800;
-      color: rgba(255,255,255,0.55);
-      line-height: 1.35;
-      margin-top: 8px;
-    }
-    .tap{ color: rgba(165,180,252,0.95); font-weight: 1000; text-decoration: underline; cursor:pointer; }
+    .note{font-size:11px;font-weight:800;color:rgba(255,255,255,0.55);line-height:1.35;margin-top:8px}
+    .tap{color:rgba(165,180,252,0.95);font-weight:1000;text-decoration:underline;cursor:pointer}
 
     .toast{
       position: fixed; left:50%; top:18px;
-      transform: translateX(-50%) translateY(-120px);
+      transform:translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,.92);
       border:1px solid rgba(165,180,252,.35);
-      padding: 10px 14px;
-      border-radius: 999px;
-      color:#fff;
-      z-index:999999;
-      font-weight:900;
-      font-size:12px;
-      transition:.25s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width:min(92vw, 520px);
-      text-align:center;
+      padding:10px 14px;border-radius:999px;color:#fff;
+      z-index:999999;font-weight:900;font-size:12px;transition:.25s;
+      backdrop-filter: blur(12px);pointer-events:none;max-width:min(92vw,520px);text-align:center;
     }
-    .toast.show{ transform: translateX(-50%) translateY(0); }
+    .toast.show{ transform:translateX(-50%) translateY(0); }
 
-    /* Modal */
     .modal{
       position:fixed; inset:0; z-index:9999999;
       display:none; align-items:center; justify-content:center;
@@ -128,23 +99,16 @@
     }
     .modalTitle{
       font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight:900;
-      font-size:16px;
-      margin:6px 6px 10px;
+      font-weight:900;font-size:16px;margin:6px 6px 10px;
     }
     .input{
-      width:100%; height:46px;
-      border-radius: 16px;
+      width:100%;height:46px;border-radius:16px;
       border:1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.06);
-      color:#fff;
-      padding: 0 12px;
-      font-weight:900;
-      font-size:14px;
-      outline:none;
+      color:#fff;padding:0 12px;font-weight:900;font-size:14px;outline:none;
     }
-    .modalActions{ display:flex; gap:10px; margin-top:12px; }
-    .modalActions .btn{ width:100%; }
+    .modalActions{display:flex;gap:10px;margin-top:12px}
+    .modalActions .btn{width:100%}
   </style>
 </head>
 
@@ -160,10 +124,7 @@
           <div class="copyWrap">
             <div class="v" id="pName">—</div>
             <button class="iconBtn" id="editNameBtn" type="button" aria-label="Adı Düzenle">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 20h9"/>
-                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4 11.5-11.5z"/></svg>
             </button>
           </div>
         </div>
@@ -178,10 +139,7 @@
           <div class="copyWrap">
             <div class="v mono" id="memberNo">—</div>
             <button class="iconBtn" id="copyMemberBtn" type="button" aria-label="Kopyala">
-              <svg viewBox="0 0 24 24">
-                <rect x="9" y="9" width="10" height="10" rx="2"/>
-                <path d="M7 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1"/>
-              </svg>
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="10" height="10" rx="2"/><path d="M7 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1"/></svg>
             </button>
           </div>
         </div>
@@ -210,7 +168,7 @@
       <div class="head"><h2 class="title">Dil Seviye Durumu</h2></div>
       <div class="list" id="levelsList"></div>
       <div class="note" id="levelsEmptyNote" style="display:none;">
-        Katıldığınız Seviye Tespit Sınavı Bulunmamaktadır. Lütfen Seviye Tespit Sınavına Katılmak için <span class="tap" id="goLevel">tıklayınız</span>...
+        Katıldığınız Seviye Tespit Sınavı Bulunmamaktadır. <span class="tap" id="goLevel">Seviye sınavına git</span>
       </div>
     </div>
 
@@ -218,7 +176,7 @@
       <div class="head"><h2 class="title">İndirilen Offline Dil Dosyaları</h2></div>
       <div class="list" id="offlineList"></div>
       <div class="note" id="offlineEmptyNote" style="display:none;">
-        Henüz internete bağlanmadan çeviri yapabiliceke dil dosyası indirmediniz. Lütfen istediğiniz dil dosyalarını sıra ile indiriniz.
+        Henüz offline dil dosyası indirmediniz.
       </div>
       <div style="margin-top:12px;">
         <button class="btn btn-ghost" id="offlineDownloadBtn" type="button">Offline Dil Paketi İndir</button>
@@ -240,7 +198,7 @@
     <div class="modalCard">
       <div class="modalTitle">Adınızı Girin</div>
       <input class="input" id="nameInput" maxlength="32" placeholder="Örn: Oğuz" />
-      <div class="note">Bu isim derslerde sana hitap için kullanılır.</div>
+      <div class="note">En az 3 karakter.</div>
       <div class="modalActions">
         <button class="btn btn-ghost" id="cancelNameBtn" type="button">Vazgeç</button>
         <button class="btn btn-primary" id="saveNameBtn" type="button">Kaydet</button>
@@ -253,9 +211,8 @@
     import { bootPage } from "/js/ui_guard.js";
     import { initProfilePage } from "/js/profile_page.js";
 
-    mountShell(); 
+    mountShell();
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
-
     await initProfilePage({ setHeaderTokens });
   </script>
 </body>
