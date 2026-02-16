@@ -3,229 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI - Pro Home</title>
+  <title>italkyAI • Neural Home</title>
   <style>
     :root {
-      --glass: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --accent-bordo: #9d1b3d;
-      --accent-cyan: #22d3ee;
+      --glow-bordo: #ff1e56;
+      --glow-cyan: #00f2ff;
+      --deep-void: #02000f;
     }
 
     #pageContent {
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      padding-bottom: 20px;
-      perspective: 1000px;
+      justify-content: space-around;
+      padding: 10px 0;
+      perspective: 1200px;
     }
 
-    /* --- PREMIUM HERO: FaceToFace --- */
-    .hero-container {
+    /* --- NEURAL CORE (FaceToFace) --- */
+    .neural-core {
       position: relative;
-      background: linear-gradient(135deg, #1e0b11 0%, #7c1231 100%);
-      border-radius: 35px;
-      padding: 30px;
-      min-height: 200px;
+      width: 100%;
+      height: 240px;
+      background: radial-gradient(circle at center, rgba(157, 27, 61, 0.2) 0%, transparent 70%);
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255,255,255,0.05);
-      overflow: hidden;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
 
-    .hero-container::before {
-      content: ""; position: absolute; top: -20%; right: -10%; width: 250px; height: 250px;
-      background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
-      filter: blur(30px); animation: floating 6s infinite ease-in-out;
-    }
-
-    /* Pro İkon: FaceToFace */
-    .pro-icon-main {
-      position: absolute; top: 25px; right: 25px;
-      width: 90px; height: 90px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 28px;
-      display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(10px);
+    .core-orb {
+      width: 140px; height: 140px;
+      background: #000;
+      border-radius: 50%;
+      position: relative;
       border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-    }
-    .pro-icon-main svg { width: 45px; height: 45px; filter: drop-shadow(0 0 8px #22d3ee); }
-
-    .hero-title { font-size: 34px; font-weight: 900; letter-spacing: -1.5px; line-height: 1; }
-    .hero-sub { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-
-    /* --- FULL WIDTH STRIP: Academy --- */
-    .pro-strip {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(25px);
-      border-radius: 28px;
-      padding: 20px 24px;
-      display: flex; align-items: center; gap: 18px;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    }
-    .pro-strip:active { transform: scale(0.97); background: rgba(255,255,255,0.06); }
-    
-    .strip-icon {
-      width: 52px; height: 52px;
-      background: linear-gradient(135deg, #a855f7, #6366f1);
-      border-radius: 18px;
+      box-shadow: 0 0 50px var(--glow-bordo), inset 0 0 30px var(--glow-bordo);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+      animation: orbPulse 4s infinite ease-in-out;
     }
 
-    /* --- SMART GRID: Tools --- */
-    .pro-grid {
+    /* Özel Çizim AI İkonu (Neural Paths) */
+    .ai-symbol {
+      width: 60px; height: 60px;
+      position: relative;
+    }
+    .ai-symbol::before, .ai-symbol::after {
+      content: ""; position: absolute; border: 2px solid #fff; border-radius: 50%;
+      inset: 10%; animation: rotateSymbol 6s infinite linear;
+    }
+    .ai-symbol::after { inset: 25%; border-color: var(--glow-cyan); animation-direction: reverse; }
+
+    .core-label {
+      position: absolute; bottom: -40px; text-align: center;
+      width: 100%;
+    }
+    .core-label h2 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 20px var(--glow-bordo); }
+    .core-label span { font-size: 10px; font-weight: 800; color: var(--glow-cyan); letter-spacing: 4px; }
+
+    /* --- FLOATING MODULES GRID --- */
+    .modules-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 40px 10px 0;
     }
 
-    .pro-tile {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: 30px;
-      padding: 22px;
+    .module-item {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      align-items: center;
+      gap: 12px;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    .module-item:active { transform: scale(1.2) translateY(-10px); }
 
-    .tile-glow {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle at top left, rgba(255,255,255,0.05), transparent 70%);
-      pointer-events: none;
-    }
-
-    .tile-icon {
-      width: 48px; height: 48px;
-      border-radius: 16px;
+    /* Özel CSS İkon Çizimleri */
+    .icon-blob {
+      width: 54px; height: 54px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      transition: transform 0.3s;
-    }
-    
-    /* İkon Gradientleri */
-    .i-text { background: linear-gradient(135deg, #34d399, #10b981); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); }
-    .i-photo { background: linear-gradient(135deg, #60a5fa, #3b82f6); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2); }
-    .i-doc { background: linear-gradient(135deg, #f472b6, #db2777); box-shadow: 0 10px 20px rgba(219, 39, 119, 0.2); }
-    .i-game { background: linear-gradient(135deg, #fbbf24, #f59e0b); box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2); }
-    .i-chat { background: linear-gradient(135deg, #818cf8, #4f46e5); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2); }
-    .i-ai { background: linear-gradient(135deg, #2dd4bf, #0d9488); box-shadow: 0 10px 20px rgba(13, 148, 136, 0.2); }
-
-    .pro-tile h4 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
-    .pro-tile p { margin: 0; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; }
-
-    /* States */
-    .locked { opacity: 0.3; filter: saturate(0.5); pointer-events: none; }
-    .status-badge {
-      position: absolute; top: 15px; right: 20px;
-      font-size: 8px; font-weight: 900; padding: 2px 6px;
-      border-radius: 6px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3);
+      position: relative;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     }
 
-    @keyframes floating {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(-10px, 15px); }
+    /* CSS ile Özel İkonlar (Hazır Değil) */
+    .draw-text::before { content: "Aあ"; font-weight: 900; color: #34d399; font-size: 20px; }
+    .draw-photo::before { content: ""; width: 20px; height: 16px; border: 2px solid #60a5fa; border-radius: 3px; position:relative; }
+    .draw-photo::after { content: ""; width: 6px; height: 6px; background: #60a5fa; border-radius: 50%; position:absolute; top: 18px; right: 18px; }
+    .draw-doc::before { content: ""; width: 14px; height: 18px; border: 2px solid #f472b6; border-top-right-radius: 6px; }
+    .draw-game::before { content: "🎮"; font-size: 24px; filter: drop-shadow(0 0 8px #fbbf24); }
+    .draw-chat::before { content: ""; width: 20px; height: 14px; border: 2px solid #818cf8; border-radius: 10px 10px 10px 0; }
+    .draw-academy::before { content: "it"; font-family: serif; font-style: italic; font-weight: 900; font-size: 24px; color: #fff; }
+
+    .module-item label { font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Animasyonlar */
+    @keyframes orbPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--glow-bordo); }
+      50% { transform: scale(1.05); box-shadow: 0 0 70px var(--glow-bordo); }
     }
+    @keyframes rotateSymbol {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Offline/Kilit Durumu */
+    .locked { opacity: 0.2; filter: blur(2px); pointer-events: none; }
   </style>
 </head>
 
 <body>
   <div id="pageContent">
     
-    <div class="hero-container" id="btnFfStart" data-href="/pages/facetoface.html">
-      <div class="pro-icon-main">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg>
+    <div class="neural-core" id="btnFfStart" data-href="/pages/facetoface.html">
+      <div class="core-orb">
+        <div class="ai-symbol"></div>
       </div>
-      <div class="hero-info">
-        <div class="hero-sub">AI Real-Time Voice</div>
-        <div class="hero-title">FaceToFace</div>
-      </div>
-    </div>
-
-    <div class="pro-strip" id="btnAcademy" data-href="/pages/teacher_select.html">
-      <div class="strip-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-      </div>
-      <div class="strip-text">
-        <h4 style="margin:0; font-size:18px; font-weight:900;">italky Academy</h4>
-        <p style="margin:0; font-size:11px; color:rgba(255,255,255,0.4); font-weight:700;">PRO LEVEL EDUCATION AI</p>
+      <div class="core-label">
+        <span>INTERFACE ACTIVE</span>
+        <h2>FaceToFace</h2>
       </div>
     </div>
 
-    <div class="pro-grid">
+    <div class="modules-container">
       
-      <div class="pro-tile" id="tileText" data-href="/pages/text_translate.html">
-        <div class="tile-glow"></div>
-        <div class="tile-icon i-text">✍️</div>
-        <div>
-          <h4>Metin</h4>
-          <p>Smart Translate</p>
-        </div>
-        <div class="status-badge" id="stText">SYNCED</div>
+      <div class="module-item" id="tileText" data-href="/pages/text_translate.html">
+        <div class="icon-blob draw-text"></div>
+        <label>Metin</label>
       </div>
 
-      <div class="pro-tile" id="tileChat" data-href="/pages/teacher_select.html">
-        <div class="tile-glow"></div>
-        <div class="tile-icon i-chat">💬</div>
-        <div>
-          <h4>Sohbet AI</h4>
-          <p>Intelligence</p>
-        </div>
-        <div class="status-badge">AI CORE</div>
+      <div class="module-item" id="tileChat" data-href="/pages/teacher_select.html">
+        <div class="icon-blob draw-chat"></div>
+        <label>Sohbet</label>
       </div>
 
-      <div class="pro-tile" id="tilePhoto" data-href="/pages/photo.html">
-        <div class="tile-glow"></div>
-        <div class="tile-icon i-photo">📸</div>
-        <div>
-          <h4>Fotoğraf</h4>
-          <p>Vision Scan</p>
-        </div>
-        <div class="status-badge" id="stPhoto">ONLINE</div>
+      <div class="module-item" id="tilePhoto" data-href="/pages/photo.html">
+        <div class="icon-blob draw-photo"></div>
+        <label>Görsel</label>
       </div>
 
-      <div class="pro-tile" id="tileTeacher" data-href="/pages/teacher_select.html">
-        <div class="tile-glow"></div>
-        <div class="tile-icon i-ai">🎓</div>
-        <div>
-          <h4>Öğretmen AI</h4>
-          <p>Personal Coach</p>
-        </div>
-        <div class="status-badge">ACTIVE</div>
+      <div class="module-item" id="tileAcademy" data-href="/pages/teacher_select.html">
+        <div class="icon-blob draw-academy"></div>
+        <label>Academy</label>
       </div>
 
-      <div class="pro-tile" id="tileDoc" data-href="/pages/document.html">
-        <div class="tile-glow"></div>
-        <div class="tile-icon i-doc">📄</div>
-        <div>
-          <h4>Belge</h4>
-          <p>Doc Analyzer</p>
-        </div>
-        <div class="status-badge" id="stDoc">ONLINE</div>
+      <div class="module-item" id="tileDoc" data-href="/pages/document.html">
+        <div class="icon-blob draw-doc"></div>
+        <label>Belge</label>
       </div>
 
-      <div class="pro-tile" id="tileGame" data-href="/pages/game.html">
-        <div class="tile-glow"></div>
-        <div class="tile-icon i-game">🎮</div>
-        <div>
-          <h4>Oyunlar</h4>
-          <p>Daily Quest</p>
-        </div>
-        <div class="status-badge" id="stGame">LOCAL</div>
+      <div class="module-item" id="tileGame" data-href="/pages/game.html">
+        <div class="icon-blob draw-game"></div>
+        <label>Oyun</label>
       </div>
 
     </div>
+
   </div>
 
   <script type="module">
@@ -239,29 +177,31 @@
     if (cached?.tokens != null) setHeaderTokens(cached.tokens);
     bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    function checkLogic() {
+    function handleState() {
       const isOnline = navigator.onLine;
       const user = JSON.parse(localStorage.getItem('italky_user_v1') || '{}');
       const hasOff = (user.offline_langs || []).length > 0;
-      
-      const states = {
+
+      const logic = {
         tileText: isOnline || hasOff,
         tilePhoto: isOnline,
         tileDoc: isOnline,
-        tileGame: true // Oyunlar genelde local cache
+        tileGame: true,
+        tileChat: isOnline,
+        tileAcademy: isOnline
       };
 
-      Object.entries(states).forEach(([id, ok]) => {
+      Object.entries(logic).forEach(([id, ok]) => {
         const el = document.getElementById(id);
         if(!ok) el.classList.add('locked'); else el.classList.remove('locked');
       });
     }
 
-    document.querySelectorAll("[data-href]").forEach(btn => {
-      btn.onclick = () => { if(!btn.classList.contains('locked')) location.href = btn.dataset.href; };
+    document.querySelectorAll("[data-href]").forEach(el => {
+      el.onclick = () => { if(!el.classList.contains('locked')) location.href = el.dataset.href; };
     });
 
-    checkLogic();
+    handleState();
   </script>
 </body>
 </html>
