@@ -10,19 +10,15 @@
       --glow-online: #00ffcc;
       --glow-offline: #ff3366;
     }
-
-    /* Scrollu tamamen kapatıp içeriği sığdırıyoruz */
     #pageContent {
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* Elemanları yay */
+      justify-content: space-between;
       padding: 10px 0 15px;
       box-sizing: border-box;
       overflow: hidden;
     }
-
-    /* 1. ACADEMY (KÜÇÜLTÜLDÜ) */
     .academy-pro {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 24px;
@@ -53,7 +49,6 @@
     .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .academy-text p { margin: 0; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4); }
 
-    /* 2. FACETOFACE (DAHA KOMPAKT) */
     .portal-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       cursor: pointer; padding: 10px 0;
@@ -81,10 +76,9 @@
       animation: aiBreathe 4s infinite ease-in-out;
     }
 
-    .portal-info h1 { margin: 5px 0 0; font-size: 24px; font-weight: 900; }
+    .portal-info h1 { margin: 5px 0 0; font-size: 24px; font-weight: 900; color:#fff; }
     .portal-info p { margin: 0; font-size: 12px; color: rgba(255,255,255,0.4); }
 
-    /* 3. SMART GRID (SABİT 2x2) */
     .pro-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
@@ -95,6 +89,7 @@
       display: flex; align-items: center; gap: 10px;
       cursor: pointer; transition: all 0.2s;
       -webkit-tap-highlight-color: transparent;
+      user-select:none;
     }
     .pro-tile:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); }
     .tile-icon {
@@ -114,14 +109,12 @@
       0%, 100% { transform: scale(1); opacity: 0.8; }
       50% { transform: scale(1.04); opacity: 1; }
     }
-
-    .locked { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
   </style>
 </head>
 
 <body>
   <div id="pageContent">
-    
+
     <div class="academy-pro" data-nav="/pages/teacher_select.html">
       <div class="spectrum-logo">
         <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
@@ -142,7 +135,11 @@
           <div class="e-ball ball-b"></div>
         </div>
         <div class="ai-core">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+          </svg>
         </div>
       </div>
       <div class="portal-info" style="text-align:center">
@@ -177,48 +174,33 @@
     import { bootPage } from "/js/ui_guard.js";
     import { ensureAuthAndCacheUser } from "/js/auth.js";
 
-    // Navigasyon barı (alt bar) buradan geliyor. 
-    // Eğer çift katman oluyorsa mountShell içinde bar:false denenebilir.
     mountShell({ scroll: "none" });
 
-    const cached = await ensureAuthAndCacheUser();
+    // header/user
+    const cached = await ensureAuthAndCacheUser().catch(()=>null);
     if (cached?.tokens != null) setHeaderTokens(cached.tokens);
     bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    // TIKLAMA SORUNUNU ÇÖZEN KESİN ÇÖZÜM
-    function initNavigation() {
-      const navElements = document.querySelectorAll("[data-nav]");
-      navElements.forEach(el => {
-        // Hem click hem touchend ekliyoruz ki mobilde kaçmasın
-        const target = el.getAttribute('data-nav');
-        el.onclick = (e) => {
-          e.preventDefault();
-          if(!el.classList.contains('locked')) {
-            window.location.assign(target);
-          }
-        };
+    // ✅ Linkler (sadece)
+    function go(url){ window.location.assign(url); }
+
+    document.querySelectorAll("[data-nav]").forEach(el => {
+      const url = el.getAttribute("data-nav");
+      if(!url) return;
+
+      // Mobilde daha sağlam
+      el.addEventListener("touchend", (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        go(url);
+      }, { passive:false });
+
+      el.addEventListener("click", (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        go(url);
       });
-    }
-
-    function checkStatus() {
-      const isOnline = navigator.onLine;
-      const user = JSON.parse(localStorage.getItem('italky_user_v1') || '{}');
-      const packs = (user.offline_langs || []).length;
-
-      document.querySelectorAll("[data-nav]").forEach(el => {
-        const url = el.getAttribute('data-nav');
-        if (!isOnline && (url.includes('photo') || url.includes('document'))) {
-          el.classList.add('locked');
-        } else {
-          el.classList.remove('locked');
-        }
-      });
-    }
-
-    initNavigation();
-    checkStatus();
-    window.addEventListener('online', checkStatus);
-    window.addEventListener('offline', checkStatus);
+    });
   </script>
 </body>
 </html>
