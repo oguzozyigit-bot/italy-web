@@ -10,15 +10,18 @@
       --glow-online: #00ffcc;
       --glow-offline: #ff3366;
     }
+
+    /* ✅ ALT BAR + EXTRA LAYER FIX */
     #pageContent {
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 10px 0 15px;
+      padding: 12px 0 calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 70px);
       box-sizing: border-box;
       overflow: hidden;
     }
+
     .academy-pro {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 24px;
@@ -176,19 +179,17 @@
 
     mountShell({ scroll: "none" });
 
-    // header/user
     const cached = await ensureAuthAndCacheUser().catch(()=>null);
     if (cached?.tokens != null) setHeaderTokens(cached.tokens);
     bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    // ✅ Linkler (sadece)
+    // sadece linkler
     function go(url){ window.location.assign(url); }
 
     document.querySelectorAll("[data-nav]").forEach(el => {
       const url = el.getAttribute("data-nav");
       if(!url) return;
 
-      // Mobilde daha sağlam
       el.addEventListener("touchend", (e)=>{
         e.preventDefault();
         e.stopPropagation();
