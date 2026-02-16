@@ -10,8 +10,9 @@
       --footer-h: 92px; 
     }
 
+    /* ✅ SABİT VE KAYMA YAPMAYAN DÜZEN */
     #pageContent {
-      height: calc(100vh - var(--footer-h) - env(safe-area-inset-top) - 60px); 
+      height: calc(100vh - var(--footer-h) - env(safe-area-inset-top) - 65px); 
       display: flex;
       flex-direction: column;
       justify-content: space-between; 
@@ -20,6 +21,7 @@
       overflow: hidden;
     }
 
+    /* 1. ACADEMY */
     .academy-pro {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 26px;
@@ -28,7 +30,6 @@
       display: flex; align-items: center; gap: 16px;
       cursor: pointer;
     }
-
     .spectrum-logo { gap: 3px; display: flex; align-items: center; }
     .bar { width: 3px; border-radius: 10px; }
     .bar-1 { height: 10px; background: #ff0000; }
@@ -43,12 +44,13 @@
     .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
 
+    /* 2. FACETOFACE PORTAL */
     .portal-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; padding: 15px 0;
+      cursor: pointer; padding: 10px 0;
     }
     .neural-orb {
-      width: 125px; height: 125px; position: relative;
+      width: 120px; height: 120px; position: relative;
       display: flex; align-items: center; justify-content: center;
     }
     .ai-ring {
@@ -65,17 +67,18 @@
     .ball-b { bottom: -6px; left: 50%; transform: translateX(-50%); background: #801336; box-shadow: 0 0 15px #801336; }
 
     .ai-core {
-      width: 85px; height: 85px; background: #000; border-radius: 50%;
+      width: 80px; height: 80px; background: #000; border-radius: 50%;
       background-image: linear-gradient(#000, #000), var(--ai-gradient);
       background-origin: border-box; background-clip: content-box, border-box;
       border: 2.5px solid transparent; display: flex; align-items: center; justify-content: center;
       animation: aiBreathe 4s infinite ease-in-out;
       z-index: 10;
     }
-    .portal-info { text-align: center; margin-top: 15px; }
+    .portal-info { text-align: center; margin-top: 12px; }
     .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1.2px; }
     .portal-info p { margin: 2px 0 0; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
+    /* 3. GRID */
     .pro-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
@@ -86,8 +89,6 @@
       display: flex; align-items: center; gap: 12px;
       cursor: pointer;
     }
-    .pro-tile:active { transform: scale(0.95); }
-    
     .tile-icon {
       width: 38px; height: 38px; border-radius: 12px; background: rgba(255,255,255,0.06);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -103,13 +104,15 @@
     .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
     .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
+    /* 4. ONLINE MEETING - GÜVENLİ BÖLGEYE SABİTLENDİ */
     .long-bar {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 24px;
-      padding: 14px 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 20px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
       display: flex; align-items: center; gap: 16px;
       cursor: pointer;
+      margin-bottom: 8px; /* Alt barın (shell) üstünde kalması için */
     }
 
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -184,7 +187,7 @@
       </div>
     </div>
 
-    <div class="long-bar" data-nav="/pages/meeting.html" style="border-color: rgba(99, 102, 241, 0.3);">
+    <div class="long-bar" data-nav="/pages/meeting.html">
       <div class="tile-icon">📹</div>
       <div class="academy-text">
         <h2 style="font-size: 18px;">Online Toplantı</h2>
