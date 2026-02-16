@@ -32,7 +32,6 @@
     html,body{margin:0; width:100%; height:100%; background:var(--bg-void); color:var(--text); font-family:Outfit,sans-serif; overflow:hidden;}
     .container{position:relative; width:100%; height:100%; display:flex; flex-direction:column;}
 
-    /* PANELS */
     .half-screen{
       flex:1;
       position:relative;
@@ -81,7 +80,6 @@
     }
     .lang-trigger svg{width:14px; height:14px; opacity:.7}
 
-    /* POPOVER */
     .popover{
       position:absolute;
       left:50%;
@@ -141,7 +139,6 @@
     .top .popover{ top: calc(62px + var(--safe-top)); }
     .bottom .popover{ bottom: 120px; }
 
-    /* CHAT */
     .chat-body{
       flex:1;
       width:100%;
@@ -167,32 +164,12 @@
       word-break: break-word;
     }
     .bubble .txt{display:inline-block; max-width: 92%;}
-    .bubble.them .txt{
-      color: rgba(255,255,255,.42);
-      font-size: 16px;
-      font-weight: 450;
-      line-height:1.25;
-    }
-
-    .bubble.me .txt{
-      color: rgba(255,255,255,.78);
-      font-size: 16px;
-      font-weight: 650;
-      line-height:1.2;
-      letter-spacing:.1px;
-    }
-    .bubble.me.is-latest .txt{
-      color:#fff;
-      font-size:26px;
-      font-weight:950;
-      line-height:1.1;
-      letter-spacing:.2px;
-    }
+    .bubble.them .txt{ color: rgba(255,255,255,.42); font-size: 16px; font-weight: 450; line-height:1.25; }
+    .bubble.me .txt{ color: rgba(255,255,255,.78); font-size: 16px; font-weight: 650; line-height:1.2; letter-spacing:.1px; }
+    .bubble.me.is-latest .txt{ color:#fff; font-size:26px; font-weight:950; line-height:1.1; letter-spacing:.2px; }
 
     .bubble .spk{
-      width:34px;
-      height:34px;
-      border-radius:14px;
+      width:34px; height:34px; border-radius:14px;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.18);
       color:#fff;
@@ -207,7 +184,6 @@
     .bubble .spk svg{width:16px; height:16px;}
     .bubble .spk:active{transform:scale(.95);}
 
-    /* MIC */
     .mic-wrap{
       width:100%;
       display:flex;
@@ -217,7 +193,7 @@
       z-index: 60;
     }
 
-    /* ✅ Mic cluster: Ana Sayfa + Mic + Temizle (mavi mic yanına) */
+    /* ✅ ikon-only cluster */
     .mic-cluster{
       width:100%;
       display:flex;
@@ -225,25 +201,27 @@
       justify-content:center;
       gap:12px;
     }
+    /* ÜST panelde her şey ters; sadece bu cluster'ı geri çeviriyoruz */
+    .half-screen.top .mic-cluster{
+      transform: rotate(180deg);
+      transform-origin: center;
+    }
 
-    .miniBtn{
-      height:46px;
-      padding: 0 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.12);
+    .miniIconBtn{
+      width:56px;
+      height:56px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.18);
-      color:#fff;
-      font-weight: 1000;
-      font-size: 12px;
-      letter-spacing:.2px;
       display:flex;
       align-items:center;
-      gap:8px;
+      justify-content:center;
       cursor:pointer;
       user-select:none;
+      flex: 0 0 auto;
     }
-    .miniBtn:active{ transform: scale(.98); }
-    .miniBtn svg{ width:16px; height:16px; stroke:#fff; stroke-width:2.2; fill:none; opacity:.92; }
+    .miniIconBtn:active{ transform: scale(.98); }
+    .miniIconBtn svg{ width:22px; height:22px; stroke:#fff; stroke-width:2.2; fill:none; opacity:.92; }
 
     .btn-mic{
       width:78px;
@@ -291,7 +269,6 @@
     }
     .btn-mic:active{transform:scale(1.02);}
 
-    /* CENTER HUB */
     .center-hub{
       position:absolute;
       top:50%;
@@ -318,7 +295,6 @@
       cursor:pointer;
       position:relative;
       overflow:hidden;
-
       transition: transform .38s cubic-bezier(.22,1,.36,1);
       will-change: transform;
     }
@@ -357,20 +333,11 @@
     .logo-wave .bar:nth-child(5){animation-delay:.0s}
     @keyframes bounce{0%,100%{height:10px} 50%{height:40px}}
 
-    /* ✅ LOGO SHOW: nereye dönsün? */
-    #frameRoot.focus-top .logo-capsule{
-      transform: translateY(-18px) rotate(180deg);
-    }
-    #frameRoot.focus-bot .logo-capsule{
-      transform: translateY(18px) rotate(0deg);
-    }
-    /* hoparlör tarafı (çeviri balonu hangi tarafta çıktıysa) */
-    #frameRoot.spk-top .logo-capsule{
-      transform: translateY(-14px) rotate(180deg) scale(1.02);
-    }
-    #frameRoot.spk-bot .logo-capsule{
-      transform: translateY(14px) rotate(0deg) scale(1.02);
-    }
+    /* logo şov */
+    #frameRoot.focus-top .logo-capsule{ transform: translateY(-18px) rotate(180deg); }
+    #frameRoot.focus-bot .logo-capsule{ transform: translateY(18px) rotate(0deg); }
+    #frameRoot.spk-top .logo-capsule{ transform: translateY(-14px) rotate(180deg) scale(1.02); }
+    #frameRoot.spk-bot .logo-capsule{ transform: translateY(14px) rotate(0deg) scale(1.02); }
   </style>
 </head>
 
@@ -378,7 +345,6 @@
   <div class="container">
 
     <div class="half-screen top" id="topSection">
-
       <div class="top-top">
         <button class="lang-trigger" id="topLangBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -398,15 +364,13 @@
 
       <div class="chat-body" id="topBody"></div>
 
-      <!-- ✅ ACTIONS + MIC (mavi mic yanına) -->
       <div class="mic-wrap">
         <div class="mic-cluster">
-          <button class="miniBtn" id="homeMini" type="button" title="Ana sayfa">
+          <button class="miniIconBtn" id="homeMini" type="button" title="Ana Sayfa" aria-label="Ana Sayfa">
             <svg viewBox="0 0 24 24">
               <path d="M3 10.5L12 3l9 7.5"/>
               <path d="M5 10v10h14V10"/>
             </svg>
-            Ana Sayfa
           </button>
 
           <button class="btn-mic" id="topMic" title="Mikrofon">
@@ -417,8 +381,12 @@
             </svg>
           </button>
 
-          <button class="miniBtn" id="clearChat" type="button" title="Sohbeti temizle">
-            🧹 Temizle
+          <button class="miniIconBtn" id="clearChat" type="button" title="Temizle" aria-label="Temizle">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 6h18"/>
+              <path d="M8 6l1-2h6l1 2"/>
+              <path d="M7 6l1 14h8l1-14"/>
+            </svg>
           </button>
         </div>
       </div>
@@ -465,15 +433,15 @@
     </div>
   </div>
 
-  <script type="module" src="/js/facetoface_page.js"></script>
+  <!-- ✅ cache kır (ses geri gitmesin diye) -->
+  <script type="module" src="/js/facetoface_page.js?v=20260216_1"></script>
 
   <script>
-    // ✅ Ana sayfa navigasyonları
     const HOME = '/pages/home.html';
     document.getElementById('homeBtn')?.addEventListener('click', ()=> location.href = HOME);
     document.getElementById('homeMini')?.addEventListener('click', ()=> location.href = HOME);
 
-    // ✅ Logo şov: hangi mic dinliyorsa o tarafa, ses/çeviri hangi tarafa geldiyse oraya
+    // Logo şov: dinleyen taraf / konuşan taraf
     const root = document.getElementById('frameRoot');
     const topMic = document.getElementById('topMic');
     const botMic = document.getElementById('botMic');
@@ -485,7 +453,6 @@
       root.classList.add(cls);
     }
 
-    // Mic “listening” class’ını izleyerek taraf belirle
     const moMic = new MutationObserver(()=>{
       const topOn = topMic?.classList.contains('listening');
       const botOn = botMic?.classList.contains('listening');
@@ -498,20 +465,17 @@
         setFocus('focus-bot');
       }else{
         root.classList.remove('listening');
-        // listening bittiğinde son çeviri hangi tarafa geldiyse oraya dön (spk-* bunu zaten set edecek)
       }
     });
     if(topMic) moMic.observe(topMic, { attributes:true, attributeFilter:['class'] });
     if(botMic) moMic.observe(botMic, { attributes:true, attributeFilter:['class'] });
 
-    // Çeviri balonu (bubble.me) hangi tarafa eklenirse “hoparlör tarafı” orasıdır
     const moTop = new MutationObserver((mut)=>{
       for(const m of mut){
         for(const n of m.addedNodes){
           if(n && n.classList && n.classList.contains('bubble') && n.classList.contains('me')){
             root.classList.remove('focus-top','focus-bot');
             root.classList.add('spk-top');
-            // kısa süre sonra spk state’i normal focus’a bırakabilirsin
             setTimeout(()=>{ root.classList.remove('spk-top'); }, 900);
             return;
           }
@@ -533,12 +497,8 @@
     if(topBody) moTop.observe(topBody, { childList:true });
     if(botBody) moBot.observe(botBody, { childList:true });
 
-    // Temizle
-    document.getElementById('clearChat')?.addEventListener('click', ()=>{
-      // facetoface_page.js zaten clearChat() bağlıysa sorun olmaz; burada sadece UI tarafı
-      topBody && (topBody.innerHTML = '');
-      botBody && (botBody.innerHTML = '');
-    });
+    // Temizle: JS zaten bağlı, burada ekstra müdahale yok
+    // (Buton sadece var; handler facetoface_page.js'de)
   </script>
 </body>
 </html>
