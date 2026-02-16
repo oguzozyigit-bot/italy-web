@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Global Hub</title>
+  <title>italkyAI • Pro Hub</title>
   <style>
     :root {
-      /* italkyAI İkonik AI Gradient */
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
       --glow-online: #00ffcc;
       --glow-offline: #ff3366;
@@ -23,7 +22,7 @@
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    /* --- 1. ACADEMY: AI GRADIENT TEXT & SPECTRUM --- */
+    /* --- 1. ACADEMY: İKİ RENKLİ BAŞLIK & SPECTRUM --- */
     .academy-pro {
       background: rgba(255, 255, 255, 0.04);
       border-radius: 32px;
@@ -50,13 +49,12 @@
     .bar-6 { height: 18px; background: #4b0082; }
     .bar-7 { height: 12px; background: #8b00ff; }
 
-    /* Academy Yazısı AI Gradient Boyama */
-    .academy-text h2 { 
-      margin: 0; font-size: 21px; font-weight: 900; 
+    .academy-text h2 { margin: 0; font-size: 21px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
+    /* Sadece Academy Kısmı Renkli */
+    .academy-text h2 span { 
       background: var(--ai-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      letter-spacing: -0.5px;
     }
     .academy-text p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
@@ -105,7 +103,7 @@
       font-size: 10px; font-weight: 900; letter-spacing: 1px;
     }
 
-    /* --- 3. SMART GRID: BUTTON FEEL & LINKS --- */
+    /* --- 3. PRO GRID: TOK BUTON HİSSİ --- */
     .pro-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     }
@@ -116,7 +114,6 @@
       display: flex; align-items: center; gap: 12px;
       cursor: pointer; transition: transform 0.2s, background 0.2s;
     }
-    /* Güçlendirilmiş Buton Hissi */
     .pro-tile:active { transform: scale(0.94); background: rgba(255, 255, 255, 0.12); }
 
     .tile-icon {
@@ -146,19 +143,19 @@
 <body class="is-online">
   <div id="pageContent">
     
-    <div class="academy-pro" id="btnAcademy" data-href="/pages/teacher_select.html">
+    <div class="academy-pro" data-href="/pages/teacher_select.html">
       <div class="spectrum-logo">
         <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
         <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
         <div class="bar bar-7"></div>
       </div>
       <div class="academy-text">
-        <h2>italky Academy</h2>
+        <h2>italky <span>Academy</span></h2>
         <p>YAPAY ZEKA İLE DİL EĞİTİMİ</p>
       </div>
     </div>
 
-    <div class="portal-zone" id="btnFfStart" data-href="/pages/facetoface.html">
+    <div class="portal-zone" data-href="/pages/facetoface.html">
       <div class="neural-orb">
         <div class="ai-ring"></div>
         <div class="orbit-energy">
@@ -177,22 +174,22 @@
     </div>
 
     <div class="pro-grid">
-      <div class="pro-tile" id="tileText" data-href="/pages/text_translate.html">
+      <div class="pro-tile" data-href="/pages/text_translate.html">
         <div class="tile-icon ico-txt"></div>
         <label>Metinden<br>Çeviri</label>
       </div>
 
-      <div class="pro-tile" id="tilePhoto" data-href="/pages/photo.html">
+      <div class="pro-tile" data-href="/pages/photo.html">
         <div class="tile-icon ico-cam"></div>
         <label>Fotoğraftan<br>Çeviri</label>
       </div>
 
-      <div class="pro-tile" id="tileDoc" data-href="/pages/document.html">
+      <div class="pro-tile" data-href="/pages/document.html">
         <div class="tile-icon ico-doc"></div>
         <label>Belgeden<br>Çeviri</label>
       </div>
 
-      <div class="pro-tile" id="tileGame" data-href="/pages/game.html">
+      <div class="pro-tile" data-href="/pages/game.html">
         <div class="tile-icon ico-fun"></div>
         <label>Eğlenerek<br>Öğren</label>
       </div>
@@ -225,33 +222,30 @@
         pill.innerText = packs > 0 ? `● ${packs} PAKET YÜKLÜ` : "● İNTERNET GEREKLİ";
       }
 
-      // Bağlantıya göre butonları kilitleme
-      const access = {
-        tilePhoto: isOnline,
-        tileDoc: isOnline,
-        tileText: isOnline || packs > 0,
-        tileGame: true,
-        btnAcademy: true,
-        btnFfStart: true
-      };
-
-      Object.entries(access).forEach(([id, ok]) => {
-        const el = document.getElementById(id);
-        if(el) {
-          if(!ok) el.classList.add('locked'); else el.classList.remove('locked');
+      // Kısıtlama mantığı
+      document.querySelectorAll("[data-href]").forEach(el => {
+        const target = el.getAttribute('data-href');
+        let locked = false;
+        
+        if (!isOnline) {
+          if (target.includes('photo') || target.includes('document')) locked = true;
+          if (target.includes('text') && packs === 0) locked = true;
         }
+
+        if (locked) el.classList.add('locked');
+        else el.classList.remove('locked');
       });
     }
 
-    // Tıklama Olayları ve Link Kontrolü
+    // Linkleri Çalıştıran Kısım
     document.querySelectorAll("[data-href]").forEach(el => {
-      el.onclick = () => {
-        if(!el.classList.contains('locked')) {
-          const target = el.getAttribute('data-href');
-          console.log("Navigating to:", target);
-          location.href = target;
+      el.addEventListener('click', () => {
+        if (!el.classList.contains('locked')) {
+          const path = el.getAttribute('data-href');
+          console.log("Gidiliyor:", path);
+          location.href = path;
         }
-      };
+      });
     });
 
     refreshHub();
