@@ -1,520 +1,312 @@
-<!-- FILE: /pages/home_v2.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Home v2</title>
-  <link rel="icon" href="data:," />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-
   <style>
-    /* Shell giydiriyor: sadece içerik */
-    #pageContent{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      padding: 2px 0;
+    :root {
+      --bg-gradient: linear-gradient(135deg, #1a0b2e 0%, #090919 100%);
+      --accent-bordo: #801336;
+      --accent-blue: #1b264f;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-main: #ffffff;
+      --text-dim: #b0b0b0;
+      --accent-glow: 0 8px 32px 0 rgba(128, 19, 54, 0.3);
     }
 
-    /* Premium “mood” header */
-    .moodRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: rgba(255,255,255,0.92);
-      font-weight:1000;
-      font-size:12px;
-      letter-spacing:.2px;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .chip small{ font-size:11px; opacity:.72; font-weight:900; }
-
-    .pulseDot{
-      width:8px; height:8px; border-radius:99px;
-      background: rgba(255,255,255,0.35);
-      box-shadow: 0 0 0 0 rgba(255,255,255,0.0);
-      animation: dotPulse 1.4s infinite;
-    }
-    @keyframes dotPulse{
-      0%{ box-shadow:0 0 0 0 rgba(165,180,252,0.35); }
-      70%{ box-shadow:0 0 0 10px rgba(165,180,252,0.0); }
-      100%{ box-shadow:0 0 0 0 rgba(165,180,252,0.0); }
+    #pageContent {
+      width: 100%;
+      max-width: 500px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
     }
 
-    /* HERO */
-    .hero{
-      border-radius: 32px;
-      border: 1px solid rgba(255,255,255,0.12);
-      overflow:hidden;
-      background:
-        radial-gradient(circle at 18% 22%, rgba(88,12,31,0.55) 0%, transparent 52%),
-        radial-gradient(circle at 78% 78%, rgba(15,23,42,0.72) 0%, transparent 55%),
-        radial-gradient(circle at 55% 40%, rgba(79,70,229,0.30) 0%, transparent 55%),
-        linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.28) 100%);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.60);
-      padding: 16px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      position:relative;
+    /* Header Chips */
+    .status-bar {
+      display: flex;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
     }
 
-    .heroGlow{
-      position:absolute;
-      inset:-40%;
-      background:
-        radial-gradient(circle at 25% 25%, rgba(165,180,252,0.18) 0%, transparent 45%),
-        radial-gradient(circle at 80% 80%, rgba(236,72,153,0.10) 0%, transparent 55%);
-      filter: blur(50px);
-      pointer-events:none;
-      opacity:.95;
-      animation: floaty 10s infinite alternate ease-in-out;
-    }
-    @keyframes floaty{
-      from{ transform: translate3d(0,0,0) scale(1); }
-      to{ transform: translate3d(3%, -2%, 0) scale(1.05); }
-    }
-
-    .heroTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-      position:relative;
-      z-index:2;
-    }
-
-    .heroTitle{
-      font-family:"Space Grotesk", system-ui, sans-serif;
-      font-size: 22px;
-      font-weight: 1000;
-      letter-spacing:-0.6px;
-      margin:0;
-      color:#fff;
-      line-height:1.1;
-    }
-    .heroSub{
-      margin:6px 0 0;
-      font-size: 12px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.72);
-      line-height:1.35;
-      max-width: 24em;
-    }
-
-    .heroBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 9px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.20);
-      color: rgba(255,255,255,0.92);
-      font-weight:1000;
-      font-size:11px;
-      white-space:nowrap;
-    }
-
-    .heroActions{
-      display:flex;
-      gap:10px;
-      position:relative;
-      z-index:2;
-    }
-
-    .btn{
-      height: 54px;
+    .chip {
+      padding: 4px 12px;
       border-radius: 20px;
-      border:none;
-      cursor:pointer;
-      font-weight:1000;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:active{ transform: scale(.99); }
-
-    .btnPrimary{
-      flex: 1.35;
-      background: linear-gradient(135deg, #A5B4FC 0%, #4F46E5 55%, #EC4899 100%);
-      color:#050510;
-      box-shadow: 0 18px 50px rgba(79,70,229,.22);
-      font-size:14px;
-    }
-    .btnGhost{
-      flex: 1;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.20);
-      color: rgba(255,255,255,0.92);
-      font-size:13px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* Academy card (big, premium) */
-    .academy{
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.12);
-      overflow:hidden;
-      background:
-        radial-gradient(circle at 18% 35%, rgba(165,180,252,0.20) 0%, transparent 55%),
-        radial-gradient(circle at 82% 70%, rgba(236,72,153,0.10) 0%, transparent 60%),
-        linear-gradient(180deg, rgba(15,23,42,0.62) 0%, rgba(2,0,10,0.32) 100%);
-      box-shadow: 0 22px 70px rgba(0,0,0,0.55);
-      padding: 14px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      cursor:pointer;
-      user-select:none;
-      position:relative;
-    }
-    .academy:active{ transform: scale(.99); }
-
-    .acLeft{ min-width:0; position:relative; z-index:2; }
-    .acTitle{
-      margin:0;
-      font-size: 16px;
-      font-weight: 1000;
-      letter-spacing:-0.2px;
-      color:#fff;
-      line-height:1.15;
-    }
-    .acSub{
-      margin:6px 0 0;
-      font-size: 12px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.72);
-      line-height:1.35;
-    }
-    .acCta{
-      height:44px;
-      padding: 0 14px;
-      border-radius: 16px;
-      border:none;
-      background: rgba(255,255,255,0.92);
-      color:#050510;
-      font-weight:1000;
-      cursor:pointer;
-      flex: 0 0 auto;
-      position:relative;
-      z-index:2;
-    }
-    .acCta:active{ transform: scale(.99); }
-
-    .acPulse{
-      position:absolute;
-      inset:-40%;
-      background: radial-gradient(circle at 40% 40%, rgba(79,70,229,0.18) 0%, transparent 55%);
-      filter: blur(40px);
-      opacity:.85;
-      pointer-events:none;
-      animation: floaty 12s infinite alternate ease-in-out;
-    }
-
-    /* Tools grid */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-    .tile{
+    /* Hero Card: FaceToFace */
+    .hero-card {
+      position: relative;
+      background: linear-gradient(145deg, var(--accent-bordo), #2d0a15);
       border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      padding: 14px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      cursor:pointer;
-      user-select:none;
-      min-height: 120px;
-      position:relative;
-      overflow:hidden;
-    }
-    .tile:active{ transform: scale(.99); }
-
-    .tile.disabled{
-      opacity: .55;
-      filter: grayscale(.35);
+      padding: 24px;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--accent-glow);
+      overflow: hidden;
     }
 
-    .tileTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+    .hero-card::after {
+      content: '';
+      position: absolute;
+      top: -50%; right: -50%;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
     }
-    .iconBox{
-      width:48px;
-      height:48px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(255,255,255,0.06);
-    }
-    .iconBox svg{
-      width:22px;
-      height:22px;
-      stroke:#fff;
-      fill:none;
-      stroke-width:2.3;
-      opacity:.92;
-    }
-    .tileTitle{
-      margin:0;
+
+    .hero-content h2 { margin: 0; font-size: 24px; font-weight: 800; }
+    .hero-content p { margin: 4px 0 0; font-size: 13px; color: rgba(255,255,255,0.7); }
+
+    .hero-actions { display: flex; gap: 10px; margin-top: 16px; z-index: 1; }
+    
+    .btn-primary {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 14px;
+      font-weight: 700;
       font-size: 14px;
-      font-weight: 1000;
-      letter-spacing:-0.15px;
-      color:#fff;
-      line-height:1.2;
-    }
-    .tileSub{
-      margin:0;
-      font-size: 11.5px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.68);
-      line-height:1.35;
+      cursor: pointer;
     }
 
-    .miniTag{
-      font-size: 10.5px;
-      font-weight: 1000;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      color: rgba(255,255,255,0.82);
-      white-space:nowrap;
+    .btn-ghost {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 14px;
     }
 
-    .lockOverlay{
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 10px;
-      pointer-events:none;
-      background: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.30) 100%);
-    }
-    .tile.disabled .lockOverlay{ display:flex; }
-    .lockPill{
-      pointer-events:none;
-      padding: 8px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.30);
-      color: rgba(255,255,255,0.88);
-      font-weight:1000;
-      font-size: 11px;
-      white-space:nowrap;
+    /* Academy Card */
+    .academy-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
     }
 
-    .mutedLine{
-      font-size: 11px;
-      font-weight: 800;
-      color: rgba(255,255,255,0.50);
-      line-height:1.4;
-      text-align:center;
-      padding: 6px 2px 0;
+    .academy-info h3 { margin: 0; font-size: 16px; }
+    .academy-info p { margin: 2px 0 0; font-size: 12px; color: var(--text-dim); }
+
+    /* Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .tool-tile {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 16px;
+      border-radius: 18px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: transform 0.2s;
+    }
+
+    .tool-tile:active { transform: scale(0.97); }
+
+    .tool-tile h4 { margin: 8px 0 0; font-size: 14px; }
+    .tool-tile span { font-size: 11px; color: var(--text-dim); }
+
+    .tag-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* States & Lock */
+    .disabled { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
+    .lock-overlay { font-size: 10px; color: #ffbc00; font-weight: bold; }
+
+    .icon-box {
+      width: 32px; height: 32px;
+      background: linear-gradient(45deg, var(--accent-blue), transparent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
     }
   </style>
 </head>
-
 <body>
   <div id="pageContent">
-
-    <div class="moodRow">
-      <div class="chip" id="netChip"><span class="pulseDot"></span>…</div>
-      <div class="chip">Durum <small id="modeChip">…</small></div>
+    
+    <div class="status-bar">
+      <div id="netChip" class="chip">...</div>
+      <div id="modeChip" class="chip">...</div>
     </div>
 
-    <!-- Hero -->
-    <section class="hero">
-      <div class="heroGlow"></div>
-      <div class="heroTop">
-        <div>
-          <h2 class="heroTitle">🎙 FaceToFace</h2>
-          <p class="heroSub">Gerçek zamanlı konuşarak çeviri. Tek dokunuşla başla.</p>
-        </div>
-        <div class="heroBadge" id="ffBadge">…</div>
+    <div class="hero-card">
+      <div class="hero-content">
+        <div id="ffBadge" class="tag-badge" style="position:relative; top:0; right:0; display:inline-block; margin-bottom:8px;">...</div>
+        <h2>FaceToFace</h2>
+        <p>Yapay zeka ile karşılıklı konuşmaya başla.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="btnFfStart" class="btn-primary">Başlat</button>
+        <button id="btnOfflinePacks" class="btn-ghost">Çevrimdışı</button>
+      </div>
+    </div>
+
+    <div id="academyCard" class="academy-card">
+      <div class="academy-info">
+        <h3>italky Academy</h3>
+        <p>Eğitmenlerle seviyeni geliştir.</p>
+      </div>
+      <div id="btnAcademy" class="icon-box">→</div>
+    </div>
+
+    <div class="tools-grid">
+      <div id="tileText" class="tool-tile">
+        <div id="tagText" class="tag-badge"></div>
+        <div class="icon-box">✍️</div>
+        <h4>Metin</h4>
+        <span>Anlık çeviri yap.</span>
+        <div id="lockText" class="lock-overlay"></div>
       </div>
 
-      <div class="heroActions">
-        <button class="btn btnPrimary" id="btnFfStart" type="button">Başlat</button>
-        <button class="btn btnGhost" id="btnOfflinePacks" type="button">Offline Paketler</button>
-      </div>
-    </section>
-
-    <!-- Academy -->
-    <section class="academy" id="academyCard">
-      <div class="acPulse"></div>
-      <div class="acLeft">
-        <h3 class="acTitle">🎓 italky Academy</h3>
-        <p class="acSub">Seviye tespit ile başla. 15 dk derslerle hızlı ilerle.</p>
-      </div>
-      <button class="acCta" id="btnAcademy" type="button">Derse Başla</button>
-    </section>
-
-    <!-- Tools -->
-    <section class="grid">
-      <div class="tile" id="tileText">
-        <div class="tileTop">
-          <div class="iconBox">
-            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
-          </div>
-          <span class="miniTag" id="tagText">…</span>
-        </div>
-        <h4 class="tileTitle">Metinden Çeviri</h4>
-        <p class="tileSub">Kopyala-yapıştır, hızlı çeviri.</p>
-        <div class="lockOverlay"><div class="lockPill" id="lockText">—</div></div>
+      <div id="tilePhoto" class="tool-tile">
+        <div id="tagPhoto" class="tag-badge"></div>
+        <div class="icon-box">📸</div>
+        <h4>Fotoğraf</h4>
+        <span>Görseli sese çevir.</span>
+        <div id="lockPhoto" class="lock-overlay"></div>
       </div>
 
-      <div class="tile" id="tilePhoto">
-        <div class="tileTop">
-          <div class="iconBox">
-            <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </div>
-          <span class="miniTag" id="tagPhoto">…</span>
-        </div>
-        <h4 class="tileTitle">Foto Çeviri</h4>
-        <p class="tileSub">Görselden yazıyı çevir.</p>
-        <div class="lockOverlay"><div class="lockPill" id="lockPhoto">—</div></div>
+      <div id="tileDoc" class="tool-tile">
+        <div id="tagDoc" class="tag-badge"></div>
+        <div class="icon-box">📄</div>
+        <h4>Belge</h4>
+        <span>Dosyaları analiz et.</span>
+        <div id="lockDoc" class="lock-overlay"></div>
       </div>
 
-      <div class="tile" id="tileDoc">
-        <div class="tileTop">
-          <div class="iconBox">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          </div>
-          <span class="miniTag" id="tagDoc">…</span>
-        </div>
-        <h4 class="tileTitle">Belge Çeviri</h4>
-        <p class="tileSub">PDF ve dosyalar.</p>
-        <div class="lockOverlay"><div class="lockPill" id="lockDoc">—</div></div>
+      <div id="tileGames" class="tool-tile">
+        <div id="tagGames" class="tag-badge"></div>
+        <div class="icon-box">🎮</div>
+        <h4>Oyunlar</h4>
+        <span>Pratik yaparak öğren.</span>
+        <div id="lockGames" class="lock-overlay"></div>
       </div>
+    </div>
 
-      <div class="tile" id="tileGames">
-        <div class="tileTop">
-          <div class="iconBox">
-            <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4"/><circle cx="15" cy="11" r="1"/></svg>
-          </div>
-          <span class="miniTag" id="tagGames">…</span>
-        </div>
-        <h4 class="tileTitle">Oyunlar</h4>
-        <p class="tileSub">Kelime paketleriyle offline da oynanır.</p>
-        <div class="lockOverlay"><div class="lockPill" id="lockGames">—</div></div>
-      </div>
-    </section>
-
-    <div class="mutedLine">Tek Home • Sistem online/offline durumuna göre otomatik uyum sağlar.</div>
   </div>
 
-  <script type="module">
-    import { mountShell } from "/js/ui_shell.js";
-    import { bootPage } from "/js/ui_guard.js";
+  <script>
+    (function() {
+      // 1. Data & State Logic
+      const isOnline = navigator.onLine;
+      const userV1 = JSON.parse(localStorage.getItem('italky_user_v1') || '{}');
+      const offlineLangs = userV1.offline_langs || [];
+      const hasOfflinePack = offlineLangs.length > 0;
+      const hasGamePack = localStorage.getItem('italky_lang_pool_ready') === "1";
 
-    mountShell({ scroll:"auto" });
-    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+      // 2. UI Update Function
+      function updateUI() {
+        const netChip = document.getElementById('netChip');
+        const modeChip = document.getElementById('modeChip');
+        const ffBadge = document.getElementById('ffBadge');
 
-    const go = (p)=>location.href=p;
+        // Net & Mode Status
+        netChip.innerText = isOnline ? "🌐 Online" : "⚡ Offline";
+        modeChip.innerText = isOnline ? "Online" : "Offline";
 
-    // links
-    document.getElementById("btnFfStart")?.addEventListener("click", ()=> go("/pages/facetoface.html"));
-    document.getElementById("btnOfflinePacks")?.addEventListener("click", ()=> go("/pages/offline.html"));
+        // FaceToFace Badge
+        if (isOnline) {
+          ffBadge.innerText = "🌐 Canlı Mod";
+        } else {
+          ffBadge.innerText = hasOfflinePack ? "⚡ Offline Hazır" : "⚡ Paket Yok";
+        }
 
-    document.getElementById("academyCard")?.addEventListener("click", ()=> go("/pages/teacher_select.html"));
-    document.getElementById("btnAcademy")?.addEventListener("click", (e)=>{ e.stopPropagation(); go("/pages/teacher_select.html"); });
+        // Tool Tiles Logic
+        const tools = {
+          text: { id: 'tileText', tag: 'tagText', lock: 'lockText', available: isOnline || hasOfflinePack, lockMsg: "🔒 Paket İndir" },
+          photo: { id: 'tilePhoto', tag: 'tagPhoto', lock: 'lockPhoto', available: isOnline, lockMsg: "🔒 İnternet Gerekli" },
+          doc: { id: 'tileDoc', tag: 'tagDoc', lock: 'lockDoc', available: isOnline, lockMsg: "🔒 İnternet Gerekli" },
+          game: { id: 'tileGames', tag: 'tagGames', lock: 'lockGames', available: isOnline || hasGamePack, lockMsg: "🔒 Paket İndir" }
+        };
 
-    document.getElementById("tileText")?.addEventListener("click", ()=> go("/pages/text_translate.html"));
-    document.getElementById("tilePhoto")?.addEventListener("click", ()=> go("/pages/photo.html"));
-    document.getElementById("tileDoc")?.addEventListener("click", ()=> go("/pages/document.html"));
-    document.getElementById("tileGames")?.addEventListener("click", ()=> go("/pages/game.html"));
+        Object.keys(tools).forEach(key => {
+          const t = tools[key];
+          const el = document.getElementById(t.id);
+          const tag = document.getElementById(t.tag);
+          const lock = document.getElementById(t.lock);
 
-    // helpers
-    const set = (id, txt)=>{ const el=document.getElementById(id); if(el) el.textContent = txt; };
-    const setDis = (id, on)=>{ const el=document.getElementById(id); if(el) el.classList.toggle("disabled", !!on); };
-
-    // real online (lightweight) – optional ping (if you add /ping.txt)
-    async function checkRealOnline(){
-      if(!navigator.onLine) return false;
-      try{
-        const r = await fetch("/ping.txt", { method:"GET", cache:"no-store" });
-        return r.ok;
-      }catch{
-        return true; // fallback: assume online if navigator says so
+          if (t.available) {
+            el.classList.remove('disabled');
+            tag.innerText = isOnline ? "🌐 Online" : "⚡ Offline";
+            lock.innerText = "";
+          } else {
+            el.classList.add('disabled');
+            tag.innerText = "";
+            lock.innerText = t.lockMsg;
+          }
+        });
       }
-    }
 
-    function hasOfflineTranslatePack(){
-      try{
-        const u = JSON.parse(localStorage.getItem("italky_user_v1") || "{}");
-        return Array.isArray(u.offline_langs) && u.offline_langs.length > 0;
-      }catch{
-        return false;
-      }
-    }
+      // 3. Routing
+      const routes = {
+        'btnFfStart': '/pages/facetoface.html',
+        'btnOfflinePacks': '/pages/offline.html',
+        'academyCard': '/pages/teacher_select.html',
+        'tileText': '/pages/text_translate.html',
+        'tilePhoto': '/pages/photo.html',
+        'tileDoc': '/pages/document.html',
+        'tileGames': '/pages/game.html'
+      };
 
-    function hasGamePacks(){
-      // senin ileride bağlayacağın key; yoksa false
-      return localStorage.getItem("italky_lang_pool_ready") === "1";
-    }
+      Object.keys(routes).forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            window.location.href = routes[id];
+          });
+        }
+      });
 
-    async function refreshStatus(){
-      const online = await checkRealOnline();
-      const offPack = hasOfflineTranslatePack();
-      const gamePack = hasGamePacks();
-
-      set("netChip", online ? "🌐 Online" : "⚡ Offline");
-      set("modeChip", online ? "Online" : "Offline");
-
-      set("ffBadge", online ? "🌐 Canlı Mod" : (offPack ? "⚡ Offline Hazır" : "⚡ Offline (paket yok)"));
-
-      // Tags + locks
-      set("tagText", offPack ? "⚡ Offline" : (online ? "🌐 Online" : "🔒 Paket"));
-      set("tagGames", gamePack ? "⚡ Offline" : (online ? "🌐 Online" : "🔒 Paket"));
-
-      // photo/doc online for now
-      set("tagPhoto", online ? "🌐 Online" : "🔒 İnternet");
-      set("tagDoc",   online ? "🌐 Online" : "🔒 İnternet");
-
-      // Disable rules (visual only; click still goes, user sees message later if you want)
-      setDis("tilePhoto", !online);
-      setDis("tileDoc", !online);
-      setDis("tileGames", !online && !gamePack);
-      setDis("tileText", !online && !offPack);
-
-      set("lockPhoto", "İnternet gerekli");
-      set("lockDoc", "İnternet gerekli");
-      set("lockGames", !online && !gamePack ? "Paket indir" : "");
-      set("lockText", !online && !offPack ? "Paket indir" : "");
-    }
-
-    refreshStatus();
-    window.addEventListener("online", refreshStatus);
-    window.addEventListener("offline", refreshStatus);
+      // Init
+      updateUI();
+    })();
   </script>
 </body>
 </html>
