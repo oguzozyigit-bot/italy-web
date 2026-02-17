@@ -1,176 +1,226 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Fotoğraftan Çeviri</title>
-  
-  <style>
-    :root {
-      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --glass: rgba(255, 255, 255, 0.05);
-      --border: rgba(255, 255, 255, 0.1);
-      --top-h: 74px;
-      --bot-h: 80px;
-    }
+/* FILE: /js/ui_shell.js */
+import { STORAGE_KEY } from "/js/config.js";
 
-    /* ✅ TAM EKRAN VE SHELL UYUMU */
-    #pageContent {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: #030014;
-      overflow: hidden;
-    }
-
-    /* --- 1. ÜST BAR (HEADER) --- */
-    .neural-header {
-      height: var(--top-h);
-      padding-top: env(safe-area-inset-top);
-      display: flex; align-items: center; justify-content: space-between;
-      padding-left: 15px; padding-right: 15px;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      z-index: 100;
-    }
-    .back-btn {
-      width: 40px; height: 40px; border-radius: 12px;
-      border: 1px solid var(--border); background: var(--glass);
-      color: #fff; font-size: 18px; cursor: pointer;
-    }
-    .brand-mini { text-align: center; pointer-events: none; }
-    .brand-mini b { font-family: 'Space Grotesk', sans-serif; font-size: 20px; }
-    .user-profile { display: flex; align-items: center; gap: 10px; }
-    .user-profile img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #6366f1; }
-
-    /* --- 2. KAMERA VE ARAÇLAR (MAIN) --- */
-    .camera-stage {
-      flex: 1;
-      position: relative;
-      background: #000;
-      overflow: hidden;
-      display: flex; flex-direction: column;
-    }
-
-    /* Kamera Toolbar */
-    .cam-toolbar {
-      position: absolute; top: 15px; left: 10px; right: 10px;
-      z-index: 50; display: flex; gap: 8px;
-    }
-    .pill-btn {
-      flex: 1; height: 44px; border-radius: 14px; border: 1px solid var(--border);
-      background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
-      color: #fff; font-weight: 800; font-size: 12px;
-      display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
-    }
-    .action-btn {
-      padding: 0 12px; height: 44px; border-radius: 14px; border: none;
-      background: var(--ai-gradient); color: #000; font-weight: 1000; font-size: 11px;
-    }
-
-    video#cam { width: 100%; height: 100%; object-fit: cover; }
-    canvas#overlay { position: absolute; inset: 0; pointer-events: none; }
-
-    .scan-hint {
-      position: absolute; bottom: 20px; left: 20px; right: 20px;
-      background: rgba(0,0,0,0.6); padding: 12px; border-radius: 16px;
-      border: 1px solid var(--border); backdrop-filter: blur(10px);
-      font-size: 11px; font-weight: 700; color: #a5b4fc; text-align: center;
-    }
-
-    /* --- 3. ALT BAR (FOOTER) --- */
-    .neural-footer {
-      height: var(--bot-h);
-      padding-bottom: env(safe-area-inset-bottom);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border);
-      z-index: 100;
-    }
-    .footer-sig { font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.3); letter-spacing: 1px; }
-
-    /* Modal / Sheet */
-    .backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-      z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
-    }
-    .sheet { width: 100%; max-width: 400px; background: #050510; border-radius: 28px; border: 1px solid var(--border); overflow: hidden; }
-  </style>
-</head>
-
-<body>
-  <div id="pageContent">
-
-    <header class="neural-header">
-      <button class="back-btn" onclick="location.href='/pages/home.html'">←</button>
-      <div class="brand-mini">
-        <b>italky<span style="color:#6366f1">AI</span></b>
-        <div style="font-size:8px; letter-spacing:3px; opacity:0.5">BE FREE</div>
-      </div>
-      <div class="user-profile">
-        <div style="text-align:right">
-          <div id="userName" style="font-size:11px; font-weight:900">...</div>
-          <div style="font-size:9px; color:#34d399; font-weight:800">FREE PLAN</div>
-        </div>
-        <img id="userPic" src="">
-      </div>
-    </header>
-
-    <main class="camera-stage">
-      <div class="cam-toolbar">
-        <button class="pill-btn" id="toLangBtn">
-          <span id="toFlag">🇹🇷</span> <span id="toLangTxt">Türkçe</span> ▾
-        </button>
-        <button class="action-btn" id="speakBtn">SAY</button>
-        <button class="action-btn" id="scanBtn" style="background:#fff">SCAN</button>
-      </div>
-
-      <video id="cam" playsinline autoplay muted></video>
-      <canvas id="overlay"></canvas>
-
-      <div class="scan-hint">
-        Yazının üzerine <b>basılı tut</b> → Çeviriyi Gör<br>
-        (Dora sesi için SAY butonuna bas)
-      </div>
-    </main>
-
-    <footer class="neural-footer">
-      <div class="footer-sig">italkyAI BY OZYIGIT'S 2026</div>
-    </footer>
-
+/* ✅ ÜST BAR + JETON + PROFİL */
+const HOME_HEADER_HTML = `
+<header class="premium-header">
+  <div class="brand-group" id="brandHome" title="Ana sayfa">
+    <h1><span>italky</span><span class="ai">AI</span></h1>
+    <div class="brand-slogan">BE FREE</div>
   </div>
 
-  <div class="backdrop" id="langSheet">
-    <div class="sheet">
-      <div style="padding:15px; border-bottom:1px solid var(--border); font-weight:900; color:#fff">HEDEF DİL SEÇİN</div>
-      <div id="sheetList" style="max-height:300px; overflow-y:auto; padding:10px;"></div>
-      <button onclick="document.getElementById('langSheet').style.display='none'" style="width:100%; padding:15px; background:rgba(255,255,255,0.05); border:none; color:#ec4899; font-weight:900">KAPAT</button>
+  <div class="user-plain" id="profileBtn" title="Profil">
+    <div class="uMeta">
+      <div class="uName" id="userName">Kullanıcı</div>
+      <div class="uJeton">Jeton: <span id="headerJeton">—</span></div>
     </div>
+    <div class="avatar"><img src="" id="userPic" alt=""></div>
   </div>
+</header>
+`;
 
-  <script type="module">
-    import { supabase } from "/js/supabase_client.js";
+/* ✅ ALT BAR (PRESTİGE NAV) */
+const HOME_FOOTER_HTML = `
+<footer class="premium-footer">
+  <nav class="footer-nav">
+    <a href="/pages/about.html">Hakkımızda</a>
+    <a href="/pages/faq.html">SSS</a>
+    <a href="/pages/privacy.html">Gizlilik</a>
+    <a href="/pages/contact.html">İletişim</a>
+  </nav>
+  <div class="prestige-signature">italkyAI @ italkyAcedemia By Ozyigit's</div>
+</footer>
+`;
 
-    async function syncProfile() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const cached = JSON.parse(localStorage.getItem('italky_user_v1') || '{}');
-        document.getElementById('userName').textContent = cached.name?.split(' ')[0] || "User";
-        if(cached.picture) document.getElementById('userPic').src = cached.picture;
-      }
+/* ✅ SHELL CSS (NEBULA ENGINE) */
+const SHELL_CSS = `
+:root{
+  --bg-void:#02000f;
+  --text-main:#fff;
+  --text-muted: rgba(255,255,255,0.65);
+  --neon-glow: 0 0 20px rgba(99,102,241,0.45);
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --footerH: 92px;
+  --bar-bg: rgba(0,0,0,0.18);
+  --edgePad: 14px;
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+
+html,body{
+  margin:0; padding:0;
+  width:100%; height:100dvh;
+  overflow:hidden;
+  position:relative;
+  font-family:'Outfit', sans-serif;
+  background-color: var(--bg-void) !important;
+  color: var(--text-main);
+  touch-action: manipulation;
+}
+
+/* 🌌 Nebula Arka Plan Efektleri */
+.nebula-bg{
+  position:fixed; inset:-10%; width:120%; height:120%;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.38) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.28) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(30, 0, 60, 1) 0%, #02000f 100%);
+  filter: blur(60px);
+  z-index:0;
+  animation: nebulaPulse 15s infinite alternate ease-in-out;
+  pointer-events:none;
+}
+@keyframes nebulaPulse{
+  from{ transform: scale(1) rotate(0deg); }
+  to{ transform: scale(1.1) rotate(2deg); }
+}
+.stars-field{
+  position:fixed; inset:0;
+  background:url("https://www.transparenttextures.com/patterns/stardust.png");
+  opacity:0.38;
+  z-index:1;
+  pointer-events:none;
+}
+
+/* 📱 Ana Shell Konteynırı */
+.app-shell{
+  position:relative; z-index:10;
+  width:100%; max-width:480px;
+  height:100dvh;
+  margin:0 auto;
+  display:flex; flex-direction:column;
+  background: rgba(10,10,30,0.40);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+/* Header Tasarımı */
+.premium-header{
+  padding: calc(10px + env(safe-area-inset-top)) 18px 10px;
+  display:flex; align-items:flex-start; justify-content:space-between;
+  background: var(--bar-bg);
+  border-bottom-left-radius: 22px; border-bottom-right-radius: 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.brand-group h1{
+  font-family:'Space Grotesk', sans-serif; font-size: 30px; margin:0;
+  font-weight:700; letter-spacing:-1px; line-height: 1; display:flex; gap:2px;
+}
+.brand-group h1 .ai{
+  background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.brand-slogan{ font-size: 9px; font-weight: 900; letter-spacing: 3.6px; color: rgba(255,255,255,0.55); text-transform: uppercase; margin-top: 5px; }
+
+.user-plain{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+.uMeta{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.uName{ font-weight: 1000; font-size: 14px; color: rgba(255,255,255,0.92); max-width: 150px; overflow:hidden; text-overflow:ellipsis; }
+.uJeton{ font-size: 11px; font-weight: 900; color: rgba(165,180,252,0.92); letter-spacing: 1px; }
+.avatar{ width: 40px; height: 40px; border-radius: 999px; overflow:hidden; border: 2px solid rgba(99,102,241,0.65); background: rgba(255,255,255,0.1); }
+.avatar img{ width:100%; height:100%; object-fit:cover; }
+
+/* İçerik Alanı */
+.main-content{
+  flex:1; overflow-y:auto; -webkit-overflow-scrolling: touch;
+  padding: var(--edgePad) 20px calc(var(--footerH) + 20px);
+  scrollbar-width:none; position:relative; z-index: 5;
+}
+.main-content::-webkit-scrollbar{ display:none; }
+
+/* Footer Tasarımı */
+.premium-footer{
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: 0;
+  width: min(480px, 100%); height: calc(var(--footerH) + env(safe-area-inset-bottom));
+  z-index: 9999; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top-left-radius: 22px; border-top-right-radius: 22px;
+  background: var(--bar-bg); border-top: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+}
+.footer-nav{ display:flex; gap: 22px; justify-content:center; }
+.footer-nav a{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.45); text-decoration:none; text-transform: uppercase; }
+.prestige-signature{ font-size: 12px; font-weight: 900; letter-spacing: 1.5px; margin-top: 8px; background: linear-gradient(to right, #fff, #6366f1, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.8; }
+`;
+
+/* ✅ YARDIMCI FONKSİYONLAR */
+function injectShellStyle(){
+  if (document.getElementById("italkyShellStyle")) return;
+  const st = document.createElement("style");
+  st.id = "italkyShellStyle";
+  st.textContent = SHELL_CSS;
+  document.head.appendChild(st);
+}
+
+function safeSetText(id, val){
+  const el = document.getElementById(id);
+  if (el) el.textContent = val ?? "";
+}
+
+function safeSetImg(id, src){
+  const el = document.getElementById(id);
+  if (el && src) el.src = src;
+}
+
+export function hydrateFromCache(){
+  safeSetText("headerJeton", "—");
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const u = JSON.parse(raw);
+    if (u?.name) safeSetText("userName", u.name);
+    if (u?.picture) safeSetImg("userPic", u.picture);
+    if (u?.tokens != null) safeSetText("headerJeton", String(u.tokens));
+  }catch{}
+}
+
+/* ✅ ANA MOUNT FONKSİYONU */
+export function mountShell(options = {}){
+  injectShellStyle();
+  try{ document.body.style.background = "var(--bg-void)"; }catch{}
+
+  // Eğer zaten shell içindeysek tekrar kurma, sadece içeriği güncelle
+  if (document.getElementById("italkyAppShell")) {
+    const main = document.getElementById("shellMain");
+    if (main && options?.scroll === "none") {
+      main.style.overflow = "hidden";
+    } else if (main) {
+      main.style.overflow = "auto";
     }
+    hydrateFromCache();
+    return;
+  }
 
-    // Dil seçimi tetikleyici
-    document.getElementById('toLangBtn').onclick = () => {
-      document.getElementById('langSheet').style.display = 'flex';
-    };
+  const content = document.getElementById("pageContent");
+  if(!content) return;
 
-    syncProfile();
-  </script>
+  // Katmanları Oluştur
+  const nebula = document.createElement("div");
+  nebula.className = "nebula-bg";
+  const stars = document.createElement("div");
+  stars.className = "stars-field";
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script type="module" src="/js/photo_page.js?v=MAX"></script>
-</body>
-</html>
+  const shell = document.createElement("div");
+  shell.className = "app-shell";
+  shell.id = "italkyAppShell";
+  shell.innerHTML = HOME_HEADER_HTML + `<main class="main-content" id="shellMain"></main>` + HOME_FOOTER_HTML;
+
+  const main = shell.querySelector("#shellMain");
+  main.appendChild(content);
+
+  if (options?.scroll === "none") {
+    main.style.overflow = "hidden";
+  }
+
+  // Body'yi temizle ve Shell'i bas
+  document.body.replaceChildren(nebula, stars, shell);
+
+  // Navigasyon Eventleri
+  document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
+  document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
+
+  hydrateFromCache();
+}
+
+export function setHeaderTokens(n){
+  safeSetText("headerJeton", (n == null ? "—" : String(n)));
+}
