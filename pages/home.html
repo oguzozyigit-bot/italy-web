@@ -1,701 +1,224 @@
-<!-- FILE: /pages/login.html -->
-<!-- FILE: /pages/login.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Giriş</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-
+  <title>italkyAI • Final Pro Hub</title>
   <style>
-    :root{
-      --bg-void:#02000f;
-      --brand-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --signature-grad: linear-gradient(to right, #fff, #6366f1, #fff);
-      --accent:#6366f1;
+    :root {
+      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+      --footer-offset: 110px; 
     }
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
-    body{
-      background:var(--bg-void);
-      color:#fff;
-      font-family:'Outfit',sans-serif;
-      height:100dvh;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
+    #pageContent {
+      height: calc(100vh - 180px); 
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 5px 0 var(--footer-offset);
+      box-sizing: border-box;
+      gap: 8px;
+      overflow: hidden;
     }
 
-    .nebula{
-      position:fixed; inset:0;
-      background: radial-gradient(circle at 50% 50%, rgba(30, 0, 60, 1) 0%, #02000f 100%);
-      z-index:0;
+    /* --- 1. FACETOFACE --- */
+    .portal-zone {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; padding: 5px 0;
+      -webkit-tap-highlight-color: transparent;
     }
+    .neural-orb {
+      width: 115px; height: 115px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-ring {
+      position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px;
+      background: var(--ai-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
+    }
+    .orbit-energy {
+      position: absolute; inset: -12px; border-radius: 50%;
+      animation: rotateOrbit 8s linear infinite;
+    }
+    .e-ball { position: absolute; width: 11px; height: 11px; border-radius: 50%; filter: blur(1px); }
+    .ball-l { top: -5px; left: 50%; transform: translateX(-50%); background: #1e3a8a; box-shadow: 0 0 15px #1e3a8a; }
+    .ball-b { bottom: -5px; left: 50%; transform: translateX(-50%); background: #801336; box-shadow: 0 0 15px #801336; }
 
-    .main{
-      flex:1;
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding: 0 26px;
-      z-index:10;
-      margin-top: -18px;
+    .ai-core {
+      width: 85px; height: 85px; background: #000; border-radius: 50%;
+      background-image: linear-gradient(#000, #000), var(--ai-gradient);
+      background-origin: border-box; background-clip: content-box, border-box;
+      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
+      animation: aiBreathe 4s infinite ease-in-out;
+      z-index: 10;
     }
+    .portal-info { text-align: center; margin-top: 10px; }
+    .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+    .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
-    .brand-section{ text-align:center; margin-bottom: 8px; }
-    .brand-section h1{
-      font-size: 68px;
-      font-weight: 800;
-      letter-spacing: -4px;
-      line-height: 1;
+    /* --- 2. ACADEMY --- */
+    .academy-pro {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
     }
-    .brand-section h1 span.ai{
-      background:var(--brand-grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
+    .spectrum-logo { gap: 3.5px; display: flex; align-items: center; flex-shrink: 0; height: 32px; }
+    .bar { width: 3.5px; border-radius: 10px; animation: barMove 1.2s infinite ease-in-out; }
+    .bar-1 { height: 10px; background: #ff0000; animation-delay: 0.1s; }
+    .bar-2 { height: 18px; background: #ff7f00; animation-delay: 0.3s; }
+    .bar-3 { height: 26px; background: #ffff00; animation-delay: 0.5s; }
+    .bar-4 { height: 32px; background: #00ff00; animation-delay: 0.7s; }
+    .bar-5 { height: 26px; background: #0000ff; animation-delay: 0.5s; }
+    .bar-6 { height: 18px; background: #4b0082; animation-delay: 0.3s; }
+    .bar-7 { height: 10px; background: #8b00ff; animation-delay: 0.1s; }
 
-    .world-container{
-      position:relative;
-      width: 270px;
-      height: 270px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin-top: 4px;
-    }
-    .earth{
-      width: 190px;
-      height: 190px;
-      border-radius:50%;
-      background:url('https://upload.wikimedia.org/wikipedia/commons/2/22/Earth_Western_Hemisphere_transparent_background.png');
-      background-size:210% 100%;
-      box-shadow: inset -15px -15px 40px #000, 0 0 50px rgba(99, 102, 241, 0.30);
-      animation: rotateWorld 25s linear infinite;
-    }
-    .earth-light{
-      position:absolute;
-      width: 235px;
-      height: 235px;
-      border-radius:50%;
-      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
-      animation: breathe 4s infinite alternate ease-in-out;
-    }
-    @keyframes rotateWorld { from { background-position: 0 0; } to { background-position: 420px 0; } }
-    @keyframes breathe { from { transform: scale(1); opacity: .40; } to { transform: scale(1.1); opacity: .70; } }
+    .academy-text h2 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; }
+    .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
 
-    .typewriter-container{
-      height: 38px;
-      margin-top: 8px;
-      margin-bottom: 18px;
-      display:flex;
-      justify-content:center;
+    /* --- 3. GRID LAYOUT --- */
+    .pro-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
-    .typewriter{
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      color:#94a3b8;
-      border-right:2px solid var(--accent);
-      white-space:nowrap;
-      overflow:hidden;
-      width:0;
-      animation: typing 4s steps(50, end) infinite, blink .75s step-end infinite;
+    .pro-tile {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px; padding: 14px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
     }
-    @keyframes typing { 0%,10%{ width:0 } 70%,90%{ width:100% } 100%{ width:0 } }
-    @keyframes blink { from,to{ border-color:transparent } 50%{ border-color:var(--accent) } }
+    .pro-tile:active { transform: scale(0.96); }
+    .tile-icon {
+      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 17px;
+    }
+    .ico-txt::before { content: "Aa"; color: #34d399; font-weight: 900; }
+    .ico-cam::before { content: "◎"; color: #60a5fa; font-weight: 900; }
+    .ico-doc::before { content: "≡"; color: #f472b6; font-weight: 900; }
+    .ico-fun::before { content: "🎯"; }
+    .ico-chat::before { content: "💬"; }
+    .ico-teacher::before { content: "🎓"; }
 
-    .login-box{ width:100%; max-width: 320px; margin-bottom: 18px; z-index:20; }
-    .google-btn{
-      width:100%;
-      height:60px;
-      border:none;
-      border-radius: 40px;
-      background:#fff;
-      color:#000;
-      font-size: 16px;
-      font-weight: 900;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      cursor:pointer;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.40);
-      transition: .18s;
-      user-select:none;
-    }
-    .google-btn:active{ transform: scale(.97); }
-    .g-icon{ width:24px; height:24px; pointer-events:none; }
+    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    footer{
-      width:100%;
-      text-align:center;
-      z-index:20;
-      padding-bottom: calc(18px + env(safe-area-inset-bottom));
-      margin-top: -4px;
+    /* --- 4. MEETING BAR (Neural Conference Bağlantılı) --- */
+    .meeting-bar {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 16px 22px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .footer-nav{
-      display:flex;
-      justify-content:center;
-      gap: 18px;
-      flex-wrap:wrap;
-      margin-bottom: 10px;
-    }
-    .footer-nav a{
-      text-decoration:none;
-      color: rgba(255,255,255,0.40);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-    .academy-title{
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: 5px;
-      margin-bottom: 6px;
-      line-height:1;
-    }
-    .academy-title b{ font-weight:900; text-transform: lowercase; color:#fff; }
-    .academy-title span{
-      background:var(--brand-grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      text-transform: uppercase;
-    }
-    .prestige-signature{
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 1.2px;
-      background: var(--signature-grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      opacity:.82;
-    }
+    .meeting-bar:active { transform: scale(0.97); }
 
-    #toast{
-      position:fixed;
-      top: 18px;
-      left:50%;
-      transform:translateX(-50%) translateY(-120px);
-      background: rgba(10,10,18,0.95);
-      border: 1px solid var(--accent);
-      padding: 12px 18px;
-      border-radius: 999px;
-      color:#fff;
-      z-index:9999;
-      font-weight: 900;
-      font-size: 12px;
-      transition: .28s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width: min(92vw, 520px);
-      text-align:center;
-    }
-    #toast.show{ transform:translateX(-50%) translateY(0); }
+    @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes barMove { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
+
   </style>
 </head>
 
 <body>
-  <div class="nebula"></div>
+  <div id="pageContent">
 
-  <div class="main">
-    <div class="brand-section">
-      <h1>italky<span class="ai">AI</span></h1>
+    <div class="portal-zone" data-nav="/pages/facetoface.html">
+      <div class="neural-orb">
+        <div class="ai-ring"></div>
+        <div class="orbit-energy">
+          <div class="e-ball ball-l"></div>
+          <div class="e-ball ball-b"></div>
+        </div>
+        <div class="ai-core">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+          </svg>
+        </div>
+      </div>
+      <div class="portal-info">
+        <h1>FaceToFace</h1>
+        <p>Yüzyüze Anlık Çeviri</p>
+      </div>
     </div>
 
-    <div class="world-container">
-      <div class="earth-light"></div>
-      <div class="earth"></div>
+    <div class="academy-pro" data-nav="/pages/teacher_select.html">
+      <div class="spectrum-logo">
+        <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
+        <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
+        <div class="bar bar-7"></div>
+      </div>
+      <div class="academy-text">
+        <h2>italky <span>Academy</span></h2>
+        <p>YAPAY ZEKA İLE DİL EĞİTİMİ</p>
+      </div>
     </div>
 
-    <div class="typewriter-container">
-      <div class="typewriter" id="typewriter">Bağlanılıyor...</div>
+    <div class="pro-grid">
+      <div class="pro-tile" data-nav="/pages/text_translate.html">
+        <div class="tile-icon ico-txt"></div>
+        <label>Metinden<br>Çeviri</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/photo.html">
+        <div class="tile-icon ico-cam"></div>
+        <label>Fotoğraftan<br>Çeviri</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/document.html">
+        <div class="tile-icon ico-doc"></div>
+        <label>Belgeden<br>Çeviri</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/game.html">
+        <div class="tile-icon ico-fun"></div>
+        <label>Eğlenerek<br>Öğren</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/teacher_select.html">
+        <div class="tile-icon ico-chat"></div>
+        <label>Sohbet <span>AI</span></label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/teacher_select.html">
+        <div class="tile-icon ico-teacher"></div>
+        <label>Chat <span>AI</span></label>
+      </div>
     </div>
 
-    <div class="login-box">
-      <button class="google-btn" id="googleBtn" type="button">
-        <svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        <span>Google ile devam et</span>
-      </button>
+    <div class="meeting-bar" data-nav="/pages/meeting.html">
+      <div class="tile-icon">📹</div>
+      <div class="academy-text">
+        <h2 style="font-size: 17px;">Online Toplantı</h2>
+        <p>CANLI ÇEVİRİ ODALARI</p>
+      </div>
     </div>
+
   </div>
 
-  <footer>
-    <div class="footer-nav">
-      <a href="/pages/about.html">Hakkımızda</a>
-      <a href="/pages/faq.html">SSS</a>
-      <a href="/pages/privacy.html">Gizlilik</a>
-      <a href="/pages/contact.html">İletişim</a>
-    </div>
-    <div class="academy-title"><b>italky</b><span>ACADEMY</span></div>
-    <div class="prestige-signature">italkyAI @ italkyAcademy By Ozyigit's 2026</div>
-  </footer>
-
-  <div id="toast"></div>
-
   <script type="module">
-    import { supabase } from "/js/supabase_client.js";
-    import { ensureAuthAndCacheUser, loginWithGoogle } from "/js/auth.js";
+    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
+    import { bootPage } from "/js/ui_guard.js";
+    import { ensureAuthAndCacheUser } from "/js/auth.js";
 
-    const toastEl = document.getElementById("toast");
-    const HOME = "/pages/home.html";
+    mountShell({ scroll: "none" });
 
-    function toast(msg){
-      if(!toastEl) return;
-      toastEl.textContent = String(msg||"");
-      toastEl.classList.add("show");
-      clearTimeout(window.__to);
-      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2200);
-    }
+    const cached = await ensureAuthAndCacheUser().catch(()=>null);
+    if (cached?.tokens != null) setHeaderTokens(cached.tokens);
+    bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    function isNative(){
-      return !!(window.Native && typeof window.Native.startGoogleLogin === "function");
-    }
-
-    // ✅ Native login: Android burayı id_token ile çağıracak
-    window.onNativeLoginSuccess = async function(payload){
-      try{
-        const data = (typeof payload === "string") ? JSON.parse(payload) : payload;
-        const idToken = String(data?.id_token || data?.idToken || "").trim();
-        if(!idToken){
-          toast("Token yok, giriş tamamlanamadı.");
-          return;
-        }
-
-        toast("Oturum açılıyor...");
-
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: "google",
-          token: idToken
-        });
-
-        if(error){
-          console.error(error);
-          toast("Oturum açılamadı.");
-          return;
-        }
-
-        await ensureAuthAndCacheUser();
-        toast("Hoş geldin!");
-        setTimeout(()=>location.replace(HOME), 450);
-
-      }catch(e){
-        console.error(e);
-        toast("Giriş hatası");
-      }
-    };
-
-    // Google button
-    document.getElementById("googleBtn")?.addEventListener("click", async ()=>{
-      try{
-        if(isNative()){
-          toast("Güvenli giriş başlatılıyor…");
-          window.Native.startGoogleLogin();
-          return;
-        }
-        toast("Google yönlendiriliyor…");
-        await loginWithGoogle();
-      }catch(e){
-        console.error(e);
-        toast(e?.message || "Giriş başlatılamadı");
-      }
+    document.querySelectorAll("[data-nav]").forEach(el => {
+      const url = el.getAttribute("data-nav");
+      const go = (e) => { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        window.location.assign(url); 
+      };
+      el.onclick = go;
+      el.ontouchend = go;
     });
-
-    // Daktilo
-    const phrases = [
-      "Dünyayı sizin için küçülttük.",
-      "Dil bariyerlerini aştık.",
-      "Sınırları kaldırdık.",
-      "italkyAI ile özgürleşin.",
-      "Anında yüz yüze iletişim.",
-      "Profesyonel akademi deneyimi.",
-      "italkyAI: Konuşmaya başla.",
-      "Dünya artık çok daha yakın."
-    ];
-    let pi = 0;
-    const typeEl = document.getElementById("typewriter");
-    setInterval(()=>{
-      pi = (pi + 1) % phrases.length;
-      if(typeEl){
-        typeEl.style.animation = "none";
-        typeEl.offsetHeight;
-        typeEl.textContent = phrases[pi];
-        typeEl.style.animation = null;
-      }
-    }, 4000);
-
-    // Boot: session varsa home
-    (async function boot(){
-      try{
-        const { data:{ session } } = await supabase.auth.getSession();
-        if(session){
-          await ensureAuthAndCacheUser();
-          location.replace(HOME);
-        }
-      }catch(_e){}
-    })();
-  </script>
-</body>
-</html>!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Giriş</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-  <style>
-    :root{
-      --bg-void:#02000f;
-      --brand-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --signature-grad: linear-gradient(to right, #fff, #6366f1, #fff);
-      --accent:#6366f1;
-    }
-
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
-    body{
-      background:var(--bg-void);
-      color:#fff;
-      font-family:'Outfit',sans-serif;
-      height:100dvh;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .nebula{
-      position:fixed; inset:0;
-      background: radial-gradient(circle at 50% 50%, rgba(30, 0, 60, 1) 0%, #02000f 100%);
-      z-index:0;
-    }
-
-    .main{
-      flex:1;
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding: 0 26px;
-      z-index:10;
-      margin-top: -18px;
-    }
-
-    .brand-section{ text-align:center; margin-bottom: 8px; }
-    .brand-section h1{
-      font-size: 68px;
-      font-weight: 800;
-      letter-spacing: -4px;
-      line-height: 1;
-    }
-    .brand-section h1 span.ai{
-      background:var(--brand-grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-
-    .world-container{
-      position:relative;
-      width: 270px;
-      height: 270px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin-top: 4px;
-    }
-    .earth{
-      width: 190px;
-      height: 190px;
-      border-radius:50%;
-      background:url('https://upload.wikimedia.org/wikipedia/commons/2/22/Earth_Western_Hemisphere_transparent_background.png');
-      background-size:210% 100%;
-      box-shadow: inset -15px -15px 40px #000, 0 0 50px rgba(99, 102, 241, 0.30);
-      animation: rotateWorld 25s linear infinite;
-    }
-    .earth-light{
-      position:absolute;
-      width: 235px;
-      height: 235px;
-      border-radius:50%;
-      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
-      animation: breathe 4s infinite alternate ease-in-out;
-    }
-    @keyframes rotateWorld { from { background-position: 0 0; } to { background-position: 420px 0; } }
-    @keyframes breathe { from { transform: scale(1); opacity: .40; } to { transform: scale(1.1); opacity: .70; } }
-
-    .typewriter-container{
-      height: 38px;
-      margin-top: 8px;
-      margin-bottom: 18px;
-      display:flex;
-      justify-content:center;
-    }
-    .typewriter{
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      color:#94a3b8;
-      border-right:2px solid var(--accent);
-      white-space:nowrap;
-      overflow:hidden;
-      width:0;
-      animation: typing 4s steps(50, end) infinite, blink .75s step-end infinite;
-    }
-    @keyframes typing { 0%,10%{ width:0 } 70%,90%{ width:100% } 100%{ width:0 } }
-    @keyframes blink { from,to{ border-color:transparent } 50%{ border-color:var(--accent) } }
-
-    .login-box{ width:100%; max-width: 320px; margin-bottom: 18px; z-index:20; }
-    .google-btn{
-      width:100%;
-      height:60px;
-      border:none;
-      border-radius: 40px;
-      background:#fff;
-      color:#000;
-      font-size: 16px;
-      font-weight: 900;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:14px;
-      cursor:pointer;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.40);
-      transition: .18s;
-      user-select:none;
-    }
-    .google-btn:active{ transform: scale(.97); }
-    .g-icon{ width:24px; height:24px; pointer-events:none; }
-
-    footer{
-      width:100%;
-      text-align:center;
-      z-index:20;
-      padding-bottom: calc(18px + env(safe-area-inset-bottom));
-      margin-top: -4px;
-    }
-    .footer-nav{
-      display:flex;
-      justify-content:center;
-      gap: 18px;
-      flex-wrap:wrap;
-      margin-bottom: 10px;
-    }
-    .footer-nav a{
-      text-decoration:none;
-      color: rgba(255,255,255,0.40);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-    .academy-title{
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: 5px;
-      margin-bottom: 6px;
-      line-height:1;
-    }
-    .academy-title b{ font-weight:900; text-transform: lowercase; color:#fff; }
-    .academy-title span{
-      background:var(--brand-grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      text-transform: uppercase;
-    }
-    .prestige-signature{
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 1.2px;
-      background: var(--signature-grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      opacity:.82;
-    }
-
-    #toast{
-      position:fixed;
-      top: 18px;
-      left:50%;
-      transform:translateX(-50%) translateY(-120px);
-      background: rgba(10,10,18,0.95);
-      border: 1px solid var(--accent);
-      padding: 12px 18px;
-      border-radius: 999px;
-      color:#fff;
-      z-index:9999;
-      font-weight: 900;
-      font-size: 12px;
-      transition: .28s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width: min(92vw, 520px);
-      text-align:center;
-    }
-    #toast.show{ transform:translateX(-50%) translateY(0); }
-  </style>
-</head>
-
-<body>
-  <div class="nebula"></div>
-
-  <div class="main">
-    <div class="brand-section">
-      <h1>italky<span class="ai">AI</span></h1>
-    </div>
-
-    <div class="world-container">
-      <div class="earth-light"></div>
-      <div class="earth"></div>
-    </div>
-
-    <div class="typewriter-container">
-      <div class="typewriter" id="typewriter">Bağlanılıyor...</div>
-    </div>
-
-    <div class="login-box">
-      <button class="google-btn" id="googleBtn" type="button">
-        <svg class="g-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        <span>Google ile devam et</span>
-      </button>
-    </div>
-  </div>
-
-  <footer>
-    <div class="footer-nav">
-      <a href="/pages/about.html">Hakkımızda</a>
-      <a href="/pages/faq.html">SSS</a>
-      <a href="/pages/privacy.html">Gizlilik</a>
-      <a href="/pages/contact.html">İletişim</a>
-    </div>
-    <div class="academy-title"><b>italky</b><span>ACADEMY</span></div>
-    <div class="prestige-signature">italkyAI @ italkyAcademy By Ozyigit's 2026</div>
-  </footer>
-
-  <div id="toast"></div>
-
-  <script type="module">
-    import { supabase } from "/js/supabase_client.js";
-    import { ensureAuthAndCacheUser, loginWithGoogle } from "/js/auth.js";
-
-    const toastEl = document.getElementById("toast");
-    const HOME = "/pages/home.html";
-
-    function toast(msg){
-      if(!toastEl) return;
-      toastEl.textContent = String(msg||"");
-      toastEl.classList.add("show");
-      clearTimeout(window.__to);
-      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2200);
-    }
-
-    function isNative(){
-      return !!(window.Native && typeof window.Native.startGoogleLogin === "function");
-    }
-
-    // ✅ Native login: Android burayı id_token ile çağıracak
-    window.onNativeLoginSuccess = async function(payload){
-      try{
-        const data = (typeof payload === "string") ? JSON.parse(payload) : payload;
-        const idToken = String(data?.id_token || data?.idToken || "").trim();
-        if(!idToken){
-          toast("Token yok, giriş tamamlanamadı.");
-          return;
-        }
-
-        toast("Oturum açılıyor...");
-
-        const { error } = await supabase.auth.signInWithIdToken({
-          provider: "google",
-          token: idToken
-        });
-
-        if(error){
-          console.error(error);
-          toast("Oturum açılamadı.");
-          return;
-        }
-
-        await ensureAuthAndCacheUser();
-        toast("Hoş geldin!");
-        setTimeout(()=>location.replace(HOME), 450);
-
-      }catch(e){
-        console.error(e);
-        toast("Giriş hatası");
-      }
-    };
-
-    // Google button
-    document.getElementById("googleBtn")?.addEventListener("click", async ()=>{
-      try{
-        if(isNative()){
-          toast("Güvenli giriş başlatılıyor…");
-          window.Native.startGoogleLogin();
-          return;
-        }
-        toast("Google yönlendiriliyor…");
-        await loginWithGoogle();
-      }catch(e){
-        console.error(e);
-        toast(e?.message || "Giriş başlatılamadı");
-      }
-    });
-
-    // Daktilo
-    const phrases = [
-      "Dünyayı sizin için küçülttük.",
-      "Dil bariyerlerini aştık.",
-      "Sınırları kaldırdık.",
-      "italkyAI ile özgürleşin.",
-      "Anında yüz yüze iletişim.",
-      "Profesyonel akademi deneyimi.",
-      "italkyAI: Konuşmaya başla.",
-      "Dünya artık çok daha yakın."
-    ];
-    let pi = 0;
-    const typeEl = document.getElementById("typewriter");
-    setInterval(()=>{
-      pi = (pi + 1) % phrases.length;
-      if(typeEl){
-        typeEl.style.animation = "none";
-        typeEl.offsetHeight;
-        typeEl.textContent = phrases[pi];
-        typeEl.style.animation = null;
-      }
-    }, 4000);
-
-    // Boot: session varsa home
-    (async function boot(){
-      try{
-        const { data:{ session } } = await supabase.auth.getSession();
-        if(session){
-          await ensureAuthAndCacheUser();
-          location.replace(HOME);
-        }
-      }catch(_e){}
-    })();
   </script>
 </body>
 </html>
