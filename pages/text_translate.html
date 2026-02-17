@@ -3,162 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Neural Translate</title>
+  <title>italkyAI • Neural Engine</title>
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --glass: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --bordo-core: radial-gradient(circle at top, #580c1f 0%, #02000f 100%);
+      --indigo-core: radial-gradient(circle at bottom, #1e3a8a 0%, #02000f 100%);
     }
 
+    /* ✅ TAM EKRAN NEURAL YAPI */
     #pageContent {
-      height: 100%;
+      height: calc(100vh - 160px); /* Üst ve alt barı çıkarınca kalan net alan */
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+      padding: 5px 0 10px;
+      box-sizing: border-box;
       overflow: hidden;
-      padding-bottom: 20px;
     }
 
-    /* --- 1. TOOLBAR: NEURAL SELECTOR --- */
+    /* 1. SEÇİCİ TOOLBAR (NEON LINE) */
     .toolbar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      padding: 4px;
-      background: rgba(255,255,255,0.02);
-      border-radius: 20px;
-      border: 1px solid var(--glass-border);
+      display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+      background: rgba(255,255,255,0.03); border-radius: 20px;
+      padding: 6px; border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
     }
 
     .langBtn {
-      flex: 1; height: 50px; border-radius: 16px; border: none;
-      background: transparent; color: #fff; font-weight: 900; font-size: 14px;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      cursor: pointer; transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1);
+      flex: 1; height: 44px; border-radius: 14px; border: none;
+      background: transparent; color: #fff; font-weight: 900; font-size: 13px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; transition: 0.2s;
     }
-    .langBtn:active { transform: scale(0.95); background: rgba(255,255,255,0.05); }
+    .langBtn:active { transform: scale(0.96); background: rgba(255,255,255,0.05); }
 
     #swapBtn {
-      width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--glass-border);
-      background: #000; color: #fff; font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+      width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--ai-gradient);
+      background: #000; color: #fff; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); cursor: pointer;
     }
 
-    /* --- 2. THE QUANTUM PANELS --- */
-    .pane {
-      flex: 1; display: flex; flex-direction: column; gap: 12px; min-height: 0;
-    }
+    /* 2. ANA PANEL (QUANTUM FLOW) */
+    .pane { flex: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
 
-    /* Giriş Paneli: Bordo Derinlik */
     .panel {
-      flex: 1; border-radius: 32px; border: 1px solid var(--glass-border);
-      position: relative; overflow: hidden; display: flex; flex-direction: column;
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      flex: 1; border-radius: 28px; border: 1px solid rgba(255,255,255,0.1);
+      position: relative; display: flex; flex-direction: column; overflow: hidden;
+      backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
     }
-    .panel.top {
-      background: radial-gradient(circle at top left, rgba(88,12,31,0.2) 0%, rgba(0,0,0,0.4) 100%);
-    }
-    /* Çıkış Paneli: İndigo Derinlik */
-    .panel.bottom {
-      background: radial-gradient(circle at bottom right, rgba(30,58,138,0.2) 0%, rgba(0,0,0,0.4) 100%);
-    }
+    .panel.top { background: var(--bordo-core); box-shadow: inset 0 0 40px rgba(88,12,31,0.3); }
+    .panel.bottom { background: var(--indigo-core); box-shadow: inset 0 0 40px rgba(30,58,138,0.3); }
 
     .panelHead {
-      padding: 12px 16px; display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+      padding: 10px 14px; display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+      background: rgba(0,0,0,0.2);
     }
 
     .iconBtn {
-      width: 42px; height: 42px; border-radius: 14px; border: 1px solid var(--glass-border);
+      width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
       background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: 0.2s;
+      cursor: pointer;
     }
-    .iconBtn:active { transform: scale(0.9); }
-    .iconBtn svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 2.5; fill: none; }
+    .iconBtn svg { width: 18px; height: 18px; stroke: #fff; stroke-width: 2.5; fill: none; }
 
-    /* Giriş Alanı */
-    .inArea { flex: 1; padding: 0 20px 20px; }
+    /* Alanlar */
+    .inArea, .outArea { flex: 1; padding: 15px; overflow-y: auto; }
     textarea {
       width: 100%; height: 100%; border: none; background: transparent;
-      color: #fff; font-size: 18px; font-weight: 700; resize: none; outline: none;
+      color: #fff; font-size: 17px; font-weight: 700; resize: none; outline: none;
       line-height: 1.4; font-family: 'Outfit', sans-serif;
     }
-    textarea::placeholder { color: rgba(255,255,255,0.2); }
+    textarea::placeholder { color: rgba(255,255,255,0.25); }
 
-    /* Çıkış Alanı (Living Text) */
     .outArea {
-      flex: 1; padding: 0 20px 20px; overflow-y: auto;
       font-size: 18px; font-weight: 800; color: #fff; line-height: 1.4;
-      text-shadow: 0 0 20px rgba(255,255,255,0.1);
+      text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
     }
 
-    /* --- 3. NEURAL ACTION CENTER --- */
-    .actions {
-      display: flex; gap: 12px; padding: 0 4px;
-    }
+    /* 3. AKSİYON MERKEZİ */
+    .actions { display: flex; gap: 10px; flex-shrink: 0; }
     #clearBtn {
-      flex: 1; height: 54px; border-radius: 18px; border: 1px solid var(--glass-border);
-      background: rgba(255,255,255,0.03); color: #fff; font-weight: 900; cursor: pointer;
+      flex: 1; height: 50px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03); color: #fff; font-weight: 900;
     }
     #translateBtn {
-      flex: 2; height: 54px; border-radius: 18px; border: none;
-      background: var(--ai-gradient); color: #fff; font-weight: 900; font-size: 16px;
-      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4); cursor: pointer;
-      position: relative; overflow: hidden;
-    }
-    /* translateBtn Parlama Efekti */
-    #translateBtn::after {
-      content: ""; position: absolute; inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transform: translateX(-100%); animation: sweep 3s infinite;
+      flex: 2; height: 50px; border-radius: 16px; border: none;
+      background: var(--ai-gradient); color: #fff; font-weight: 1000;
+      letter-spacing: 1px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+      animation: breatheEffect 3s infinite;
     }
 
-    @keyframes sweep { 100% { transform: translateX(100%); } }
-
-    /* --- 4. THE 2050 LANGUAGE SHEET --- */
+    /* 4. MODAL FIX (NEURAL SHEET) */
     #langSheet {
-      position: fixed; inset: 0; z-index: 999999; display: none;
-      align-items: center; justify-content: center; padding: 20px;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
+      position: fixed; inset: 0; z-index: 999999; 
+      display: none; align-items: center; justify-content: center; padding: 20px;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
     }
-    #langSheet.show { display: flex; }
+    #langSheet.show { display: flex !important; }
 
     .sheet {
-      width: 100%; max-width: 400px; max-height: 80vh; border-radius: 32px;
-      background: #000; border: 1px solid var(--glass-border);
+      width: 100%; max-width: 380px; max-height: 75vh; border-radius: 32px;
+      background: #050510; border: 1px solid var(--ai-gradient);
       display: flex; flex-direction: column; overflow: hidden;
-      box-shadow: 0 0 100px rgba(99, 102, 241, 0.3);
+      animation: sheetPop 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.28);
     }
 
-    .sheetTop {
-      padding: 20px; background: rgba(255,255,255,0.03);
-      display: flex; flex-direction: column; gap: 15px;
-    }
+    .sheetTop { padding: 15px; background: rgba(255,255,255,0.03); display: flex; flex-direction: column; gap: 10px; }
     #sheetQuery {
-      height: 48px; border-radius: 16px; border: 1px solid var(--glass-border);
-      background: rgba(255,255,255,0.05); color: #fff; padding: 0 16px; font-weight: 700;
+      height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05); color: #fff; padding: 0 15px; font-weight: 700;
     }
 
-    #sheetList { flex: 1; overflow-y: auto; padding: 10px; scrollbar-width: none; }
-    #sheetList::-webkit-scrollbar { display: none; }
-
+    #sheetList { flex: 1; overflow-y: auto; padding: 10px; }
     .sheetRow {
-      padding: 16px; border-radius: 16px; display: flex; align-items: center; gap: 12px;
-      cursor: pointer; transition: 0.2s;
+      padding: 14px; border-radius: 14px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; border: 1px solid transparent;
     }
-    .sheetRow:active { background: rgba(255,255,255,0.1); }
-    .rowName { font-weight: 800; color: #fff; font-size: 15px; }
+    .sheetRow:active { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); }
+    .rowName { font-weight: 800; color: #fff; font-size: 14px; }
 
-    /* Mic Animasyonu */
-    .iconBtn.listening {
-      border-color: #ec4899; background: rgba(236, 72, 153, 0.2);
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(236,72,153,0.4); } 70% { box-shadow: 0 0 0 15px rgba(236,72,153,0); } 100% { box-shadow: 0 0 0 0 rgba(236,72,153,0); } }
-
-    @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes breatheEffect { 0%, 100% { opacity: 0.9; transform: scale(1); } 50% { opacity: 1; transform: scale(1.02); } }
+    @keyframes sheetPop { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
   </style>
 </head>
 
@@ -167,12 +133,12 @@
 
     <div class="toolbar">
       <button class="langBtn" id="fromLangBtn">
-        <span id="fromFlag">🇬🇧</span>
+        <span id="fromFlag" style="font-size: 20px;">🇬🇧</span>
         <span id="fromLangTxt">English</span>
       </button>
-      <button id="swapBtn">⇄</button>
+      <div id="swapBtn">⇄</div>
       <button class="langBtn" id="toLangBtn">
-        <span id="toFlag">🇹🇷</span>
+        <span id="toFlag" style="font-size: 20px;">🇹🇷</span>
         <span id="toLangTxt">Türkçe</span>
       </button>
     </div>
@@ -188,13 +154,13 @@
           </button>
         </div>
         <div class="inArea">
-          <textarea id="inText" placeholder="Zihnini buraya aktar..."></textarea>
+          <textarea id="inText" placeholder="İşlenmesi gereken veriyi girin..."></textarea>
         </div>
       </div>
 
       <div class="actions">
         <button id="clearBtn">TEMİZLE</button>
-        <button id="translateBtn">ÇEVİRİ ENGINE</button>
+        <button id="translateBtn">NEURAL ENGINE</button>
       </div>
 
       <div class="panel bottom">
@@ -211,22 +177,30 @@
   <div id="langSheet">
     <div class="sheet">
       <div class="sheetTop">
-        <div style="font-weight:900; color:rgba(255,255,255,0.5); font-size:12px; letter-spacing:1px;">NEURAL SELECTOR</div>
-        <input id="sheetQuery" placeholder="Dil ara..." />
+        <div style="font-weight:1000; color:rgba(255,255,255,0.4); font-size:11px; letter-spacing:2px;">CORE SELECTOR</div>
+        <input id="sheetQuery" placeholder="Algoritma ara..." autocomplete="off"/>
       </div>
       <div id="sheetList"></div>
-      <button id="sheetClose" style="padding:20px; background:none; border:none; color:#ec4899; font-weight:900; cursor:pointer;">KAPAT</button>
+      <button id="sheetClose" style="padding:15px; background:rgba(255,255,255,0.03); border:none; color:#ec4899; font-weight:1000; cursor:pointer;">KAPAT</button>
     </div>
   </div>
 
-  <div id="toast" style="position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); padding:10px 20px; border-radius:20px; color:#fff; display:none; z-index:9999;"></div>
+  <div id="toast"></div>
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { bootPage } from "/js/ui_guard.js";
-    mountShell();
+    mountShell({ scroll: "none" }); // Scroll'u tamamen kestik, her şey ekrana sığacak
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+
+    // PENCERE FIX: Sheet'in açılması için manuel tetikleyici
+    window.openSheet = () => document.getElementById('langSheet').classList.add('show');
+    window.closeSheet = () => document.getElementById('langSheet').classList.remove('show');
+    
+    document.getElementById('fromLangBtn').onclick = window.openSheet;
+    document.getElementById('toLangBtn').onclick = window.openSheet;
+    document.getElementById('sheetClose').onclick = window.closeSheet;
   </script>
-  <script type="module" src="/js/text_translate_page.js?v=5000"></script>
+  <script type="module" src="/js/text_translate_page.js?v=9999"></script>
 </body>
 </html>
