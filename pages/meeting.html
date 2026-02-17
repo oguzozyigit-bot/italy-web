@@ -3,166 +3,192 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Neural Conference</title>
+  <title>italkyAI • Global Meeting</title>
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
       --glass: rgba(255, 255, 255, 0.05);
-      --shell-safe: 170px; /* Alt bar koruma mesafesi */
+      --neon: #6366f1;
     }
 
-    /* Arka plan kalkanı (Tıklama engeli fix) */
-    .nebula-bg, .stars-field { pointer-events: none !important; }
-
-    #pageContent {
-      height: calc(100vh - var(--shell-safe));
-      display: flex; flex-direction: column; gap: 10px;
-      padding: 5px 0 10px; box-sizing: border-box; overflow: hidden;
-      position: relative; z-index: 10;
+    /* Üst ve Alt Barı Öldür, Arka Planı Canlandır */
+    body, html {
+      margin: 0; padding: 0; width: 100%; height: 100vh;
+      background: #02000f; font-family: 'Outfit', sans-serif;
+      overflow: hidden; color: #fff;
     }
 
-    /* 1. NEURAL CONTACTS (REHBER) */
-    .contacts-panel {
-      background: var(--glass); border-radius: 24px; padding: 12px;
-      border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
-      backdrop-filter: blur(20px);
+    .nebula {
+      position: fixed; inset: 0; z-index: -1;
+      background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #02000f 100%);
     }
-    .panel-tag { font-size: 10px; font-weight: 1000; color: rgba(255,255,255,0.4); letter-spacing: 2px; margin-bottom: 10px; }
+
+    /* ✅ TAM EKRAN CONTAINER */
+    #meetingHub {
+      height: 100vh;
+      display: flex; flex-direction: column;
+      padding: env(safe-area-inset-top) 15px env(safe-area-inset-bottom);
+      box-sizing: border-box;
+      gap: 15px;
+    }
+
+    /* 1. YÜZER ÜST PANEL (Floating Header) */
+    .floating-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 15px; background: rgba(255,255,255,0.03);
+      border-radius: 24px; border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px); margin-top: 10px;
+    }
+    .room-badge { display: flex; flex-direction: column; }
+    .room-badge b { font-size: 16px; letter-spacing: 1px; }
+    .room-badge span { font-size: 10px; color: #34d399; font-weight: 900; }
+
+    .my-mini-profile { display: flex; align-items: center; gap: 10px; }
+    .my-mini-profile img { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--neon); }
+
+    /* 2. NEURAL REHBER (PARTICIPANTS) */
+    .participants-zone {
+      display: flex; gap: 12px; overflow-x: auto; padding: 5px 0;
+      scrollbar-width: none;
+    }
+    .participants-zone::-webkit-scrollbar { display: none; }
+
+    .u-node {
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .u-circle {
+      width: 60px; height: 60px; border-radius: 20px;
+      background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; font-size: 24px;
+    }
+    .u-circle img { width: 100%; height: 100%; border-radius: 20px; object-fit: cover; }
+    .u-circle.active { border: 2px solid #34d399; box-shadow: 0 0 15px rgba(52, 211, 153, 0.3); }
+    .u-node span { font-size: 10px; font-weight: 800; opacity: 0.8; }
+
+    /* 3. ANA CHAT AKIŞI (GENİŞ ALAN) */
+    .neural-stream {
+      flex: 1; background: rgba(255,255,255,0.02); border-radius: 35px;
+      border: 1px solid rgba(255,255,255,0.05); padding: 20px;
+      display: flex; flex-direction: column; gap: 15px;
+      overflow-y: auto; scrollbar-width: none;
+    }
+    .neural-stream::-webkit-scrollbar { display: none; }
+
+    .bubble { max-width: 85%; padding: 15px; border-radius: 25px; line-height: 1.5; }
+    .bubble.in { background: rgba(255,255,255,0.06); align-self: flex-start; border-bottom-left-radius: 5px; }
+    .bubble.out { background: var(--ai-gradient); align-self: flex-end; border-bottom-right-radius: 5px; }
     
-    .h-scroll { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px; }
-    .h-scroll::-webkit-scrollbar { display: none; }
+    .sender { font-size: 11px; font-weight: 1000; color: #a5b4fc; margin-bottom: 5px; display: block; }
+    .orig { font-size: 15px; font-weight: 700; }
+    .trans { font-size: 13px; font-weight: 600; opacity: 0.7; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; font-style: italic; }
 
-    .contact-card { flex: 0 0 55px; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; pointer-events: auto !important; }
-    .avatar-frame {
-      width: 48px; height: 48px; border-radius: 16px; background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;
-      font-size: 20px; transition: 0.2s;
+    /* 4. YÜZER KONTROL PANELİ (Floating Controls) */
+    .floating-controls {
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 15px; background: rgba(0,0,0,0.6);
+      border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px); margin-bottom: 10px;
     }
-    .contact-card:active .avatar-frame { transform: scale(0.9); border-color: #6366f1; }
-    .contact-card span { font-size: 9px; font-weight: 800; color: #fff; width: 100%; text-align: center; overflow: hidden; }
 
-    .add-btn { flex: 0 0 48px; height: 48px; border-radius: 16px; border: 2px dashed rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; pointer-events: auto !important; }
-
-    /* 2. LIVE MEETING STATUS */
-    .room-info {
-      background: rgba(88, 12, 31, 0.15); border-radius: 18px; padding: 10px 15px;
-      border: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center;
+    .ctrl-icon {
+      width: 50px; height: 50px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: 0.3s;
     }
-    .room-id { font-weight: 900; color: #fff; font-size: 13px; }
-    .live-count { font-size: 10px; color: #34d399; font-weight: 900; display: flex; align-items: center; gap: 4px; }
-    .dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; animation: pulse 1s infinite; }
+    .ctrl-icon svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2.2; }
+    .ctrl-icon.warn { background: #580c1f; }
+    .ctrl-icon.add { background: var(--ai-gradient); color: #000; }
 
-    /* 3. NEURAL CHAT STREAM */
-    .chat-stream {
-      flex: 1; background: rgba(0,0,0,0.25); border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.03); overflow-y: auto;
-      padding: 15px; display: flex; flex-direction: column; gap: 12px;
-    }
-    .bubble { max-width: 85%; padding: 12px 15px; border-radius: 22px; position: relative; }
-    .bubble.remote { background: rgba(255,255,255,0.06); align-self: flex-start; border-bottom-left-radius: 4px; }
-    .bubble.me { background: var(--ai-gradient); align-self: flex-end; border-bottom-right-radius: 4px; }
-    
-    .user-name { font-size: 10px; font-weight: 1000; color: #a5b4fc; margin-bottom: 4px; display: block; }
-    .txt-orig { font-size: 14px; font-weight: 700; color: #fff; }
-    .txt-trans { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px; font-style: italic; }
-
-    /* 4. ACTIONS */
-    .controls { display: flex; justify-content: center; gap: 15px; padding: 10px 0; }
-    .c-btn {
-      width: 54px; height: 54px; border-radius: 50%; background: rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center;
-      cursor: pointer; pointer-events: auto !important; transition: 0.2s;
-    }
-    .c-btn.active { background: #580c1f; border-color: #ff3366; }
-    .c-btn svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 2.5; }
-    .c-exit { background: #fff; } .c-exit svg { stroke: #000; }
-
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   </style>
 </head>
 
 <body>
-  <div id="pageContent">
+  <div class="nebula"></div>
 
-    <div class="contacts-panel">
-      <div class="panel-tag">NEURAL CONTACTS</div>
-      <div class="h-scroll">
-        <div class="add-btn" id="addContactAction">+</div>
-        <div class="contact-card" onclick="inviteUser('Oğuz Özyiğit')">
-          <div class="avatar-frame">👑</div>
-          <span>Oğuz Ö.</span>
+  <div id="meetingHub">
+    
+    <div class="floating-header">
+      <div class="room-badge">
+        <b>HUB #OZY-2026</b>
+        <span>● 12 KATILIMCI AKTİF</span>
+      </div>
+      <div class="my-mini-profile">
+        <div style="text-align: right">
+          <div id="dispName" style="font-weight: 900; font-size: 14px;">...</div>
+          <div id="dispID" style="font-size: 10px; opacity: 0.5;">ID: —</div>
         </div>
-        <div class="contact-card" onclick="inviteUser('Selden Özyiğit')">
-          <div class="avatar-frame">👸</div>
-          <span>Selden Ö.</span>
-        </div>
-        <div class="contact-card" onclick="inviteUser('Hans Müller')">
-          <div class="avatar-frame">🇩🇪</div>
-          <span>Hans M.</span>
-        </div>
-        <div class="contact-card" onclick="inviteUser('Yuki Tanaka')">
-          <div class="avatar-frame">🇯🇵</div>
-          <span>Yuki T.</span>
-        </div>
+        <img src="" id="dispPic">
       </div>
     </div>
 
-    <div class="room-info">
-      <div class="room-id">HUB: #OZY-2026</div>
-      <div class="live-count"><div class="dot"></div> 3 KATILIMCI AKTİF</div>
+    <div class="participants-zone" id="pList">
+      <div class="u-node">
+        <div class="u-circle active"><img src="https://i.pravatar.cc/100?u=1"></div>
+        <span>Oğuz</span>
+      </div>
+      <div class="u-node">
+        <div class="u-circle"><img src="https://i.pravatar.cc/100?u=2"></div>
+        <span>Selden</span>
+      </div>
+      <div class="u-node">
+        <div class="u-circle"><img src="https://i.pravatar.cc/100?u=3"></div>
+        <span>Hans</span>
+      </div>
+      </div>
+
+    <div class="neural-stream" id="chatStream">
+      <div class="bubble in">
+        <span class="sender">HANS MÜLLER</span>
+        <div class="orig">Is the universal translation active?</div>
+        <div class="trans">Evrensel çeviri aktif mi?</div>
+      </div>
+      <div class="bubble out">
+        <div class="orig">Evet Hans, 2050 teknolojisi devrede.</div>
+        <div class="trans">Yes Hans, 2050 technology is in play.</div>
+      </div>
     </div>
 
-    <div class="chat-stream" id="chatStream">
-      <div class="bubble remote">
-        <span class="user-name">HANS MÜLLER</span>
-        <div class="txt-orig">Das System arbeitet unglaublich schnell!</div>
-        <div class="txt-trans">Sistem inanılmaz hızlı çalışıyor!</div>
-      </div>
-      
-      <div class="bubble me">
-        <div class="txt-orig">Kesinlikle Hans, 20 kişiyle bile stabiliz.</div>
-        <div class="txt-trans">Absolutely Hans, we are stable even with 20 people.</div>
-      </div>
-    </div>
-
-    <div class="controls">
-      <div class="c-btn" id="micToggle">
-        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-      </div>
-      <div class="c-btn" id="soundToggle">
-        <svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-      </div>
-      <div class="c-btn c-exit" onclick="location.href='/pages/home.html'">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </div>
+    <div class="floating-controls">
+      <div class="ctrl-icon" id="mic"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
+      <div class="ctrl-icon add" id="inviteBtn"><b style="font-size: 20px;">+</b></div>
+      <div class="ctrl-icon" id="sound"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
+      <div class="ctrl-icon warn" onclick="location.href='/pages/home.html'"><svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></div>
     </div>
 
   </div>
 
   <script type="module">
-    import { mountShell } from "/js/ui_shell.js";
-    import { bootPage } from "/js/ui_guard.js";
+    import { supabase } from "/js/supabase_client.js";
 
-    mountShell({ scroll: "none" }); 
-    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+    // ✅ PROFiL VERİLERİNİ ÇEK
+    async function loadIdentity() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-    // ✅ TIKLAMA GARANTİSİ (Delegation)
-    document.body.addEventListener('click', (e) => {
-      const target = e.target.closest('[id]');
-      if (!target) return;
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("full_name, member_no")
+        .eq("id", session.user.id)
+        .single();
 
-      if (target.id === 'addContactAction') {
-        const id = prompt("Eklenecek Üye Numarasını (ID) Girin:");
-        if(id) alert(id + " rehbere kaydedildi ve davet gönderildi.");
+      if (p) {
+        document.getElementById('dispName').textContent = p.full_name.split(' ')[0];
+        document.getElementById('dispID').textContent = "ID: " + p.member_no;
+        // LocalStorage'dan resmi çek (Shell'in önbelleği)
+        const cached = JSON.parse(localStorage.getItem('italky_user_v1') || '{}');
+        if(cached.picture) document.getElementById('dispPic').src = cached.picture;
       }
-      
-      if (target.id === 'micToggle' || target.id === 'soundToggle') {
-        target.classList.toggle('active');
-      }
-    });
+    }
 
-    window.inviteUser = (name) => alert(name + " odaya davet edildi!");
+    document.getElementById('inviteBtn').onclick = () => {
+      const id = prompt("Üye Numarasını Girin:");
+      if(id) alert(id + " davet edildi.");
+    };
 
+    document.getElementById('mic').onclick = function() { this.classList.toggle('warn'); };
+    
+    loadIdentity();
   </script>
 </body>
 </html>
