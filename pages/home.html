@@ -3,28 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Hub</title>
+  <title>italkyAI • Pro Hub</title>
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      /* Alt bar ve sistem tuşları için en güvenli, en yüksek tampon bölge */
-      --shell-safe-bottom: 180px; 
+      /* Alt bar korumasını bir tık daha yukarı (200px) taşıdık */
+      --shell-safe-bottom: 200px; 
     }
 
-    /* ✅ SCROLLSUZ VE TAM KORUMALI DÜZEN */
     #pageContent {
       height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between; 
-      /* Alt barın üzerine binmemesi için kesin boşluk */
       padding: 10px 0 var(--shell-safe-bottom); 
       box-sizing: border-box;
       gap: 10px;
       overflow: hidden;
     }
 
-    /* 1. FACETOFACE (DAHA BÜYÜK) */
+    /* 1. FACETOFACE */
     .portal-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       cursor: pointer; padding: 10px 0;
@@ -51,7 +49,7 @@
       width: 85px; height: 85px; background: #000; border-radius: 50%;
       background-image: linear-gradient(#000, #000), var(--ai-gradient);
       background-origin: border-box; background-clip: content-box, border-box;
-      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
+      border: 2.5px solid transparent; display: flex; align-items: center; justify-content: center;
       animation: aiBreathe 4s infinite ease-in-out;
       z-index: 10;
     }
@@ -59,7 +57,7 @@
     .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1.2px; }
     .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
-    /* 2. ACADEMY (EQUALIZER HAREKETLİ) */
+    /* 2. ACADEMY (EQUALIZER) */
     .academy-pro {
       background: rgba(255, 255, 255, 0.06);
       border-radius: 26px;
@@ -82,7 +80,7 @@
     .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
 
-    /* 3. GRID LAYOUT */
+    /* 3. GRID */
     .pro-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     }
@@ -108,11 +106,11 @@
     .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
     .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    /* 4. ONLINE MEETING (KARTLARA YAKLAŞTIRILDI) */
+    /* 4. ONLINE MEETING (GÜVENLİ & TEMİZ) */
     .meeting-bar {
       background: rgba(255, 255, 255, 0.06);
       border-radius: 26px;
-      padding: 16px 20px;
+      padding: 18px 24px;
       border: 1px solid rgba(99, 102, 241, 0.3);
       display: flex; align-items: center; gap: 16px;
       cursor: pointer;
@@ -190,8 +188,7 @@
     <div class="meeting-bar" data-nav="/pages/meeting.html">
       <div class="tile-icon">📹</div>
       <div class="academy-text">
-        <h2 style="font-size: 17px;">Online Toplantı</h2>
-        <p>CANLI ÇEVİRİ ODALARI</p>
+        <h2 style="font-size: 19px; margin-top: 2px;">Online Toplantı</h2>
       </div>
     </div>
 
