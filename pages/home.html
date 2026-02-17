@@ -7,24 +7,21 @@
   <style>
     :root {
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      /* Shell CSS'ten gelen footer yüksekliği + ekstra güvenlik marjı */
       --footer-offset: 110px; 
     }
 
     #pageContent {
-      /* Shell'in main-content alanı içinde tam sığdırma */
       height: calc(100vh - 180px); 
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      /* Alt barın üzerine binmesini engelleyen kritik boşluk */
       padding: 5px 0 var(--footer-offset);
       box-sizing: border-box;
       gap: 8px;
       overflow: hidden;
     }
 
-    /* --- 1. FACETOFACE (EN ÜSTTE) --- */
+    /* --- 1. FACETOFACE --- */
     .portal-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       cursor: pointer; padding: 5px 0;
@@ -59,7 +56,7 @@
     .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
     .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
-    /* --- 2. ACADEMY (HAREKETLİ LOGO) --- */
+    /* --- 2. ACADEMY --- */
     .academy-pro {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 24px;
@@ -109,7 +106,7 @@
     .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
     .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    /* --- 4. MEETING BAR (ALT BARIN ÜSTÜNDE) --- */
+    /* --- 4. MEETING BAR (Neural Conference Bağlantılı) --- */
     .meeting-bar {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 24px;
@@ -117,7 +114,9 @@
       border: 1px solid rgba(99, 102, 241, 0.3);
       display: flex; align-items: center; gap: 16px;
       cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
+    .meeting-bar:active { transform: scale(0.97); }
 
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
@@ -212,7 +211,11 @@
 
     document.querySelectorAll("[data-nav]").forEach(el => {
       const url = el.getAttribute("data-nav");
-      const go = (e) => { e.preventDefault(); e.stopPropagation(); window.location.assign(url); };
+      const go = (e) => { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        window.location.assign(url); 
+      };
       el.onclick = go;
       el.ontouchend = go;
     });
