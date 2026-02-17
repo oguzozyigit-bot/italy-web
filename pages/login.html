@@ -115,11 +115,15 @@
       window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2200);
     }
 
+    function isInAppWebView(){
+      // ✅ Android WebView bridge var mı?
+      return !!(window.Native && typeof window.Native.startGoogleLogin === "function");
+    }
+
     async function checkSession(){
       try{
         const { data: { session } } = await supabase.auth.getSession();
         if(session){
-          toast("Oturum bulundu, devam ediliyor...");
           await ensureAuthAndCacheUser();
           location.replace(HOME);
         }
@@ -130,8 +134,17 @@
 
     document.getElementById("googleBtn")?.addEventListener("click", async ()=>{
       try{
+        // ✅ APK/WebView ise: web oauth çağırma, native çalıştır
+        if(isInAppWebView()){
+          toast("Uygulama içi giriş açılıyor...");
+          window.Native.startGoogleLogin();
+          return;
+        }
+
+        // ✅ normal tarayıcı: supabase oauth
         toast("Google yönlendiriliyor...");
         await loginWithGoogle();
+
       }catch(e){
         console.error(e);
         toast(e?.message || "Giriş başlatılamadı.");
