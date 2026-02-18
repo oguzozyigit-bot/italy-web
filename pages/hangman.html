@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • NEURAL VOID</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
@@ -12,7 +13,12 @@
       --grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
       --red:#ff0033;
       --green:#00ff9d;
-      --dockH: 270px;
+
+      /* ✅ Dock daha kompakt: darağacı yukarı çıksın */
+      --dockH: 235px;
+
+      /* ui_shell varsa, JS bunu yükseltecek */
+      --shellLift: 0px;
     }
 
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
@@ -20,27 +26,48 @@
 
     .top{
       height: calc(100% - var(--dockH));
-      display:flex; flex-direction:column; gap:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
 
     .status{display:flex;justify-content:space-between;align-items:center}
-    .hearts{display:flex;align-items:center;gap:4px;flex-wrap:wrap;max-width:60vw}
+    .hearts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:62vw}
     .heart{font-size:22px;filter:drop-shadow(0 0 10px var(--red));transition:.2s}
-    .heart.lost{opacity:.12;filter:grayscale(1);transform:scale(.8)}
     .heartPlus{font-weight:900;opacity:.65;font-size:12px;letter-spacing:1px;margin-left:4px}
 
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    .title{font-family:"Space Grotesk";letter-spacing:12px;text-align:center;font-size:26px;opacity:.86}
+    /* ✅ HANGMAN yazısı yukarı */
+    .title{
+      font-family:"Space Grotesk";
+      letter-spacing:12px;
+      text-align:center;
+      font-size:24px;
+      opacity:.86;
+      margin-top:-2px;
+      transform: translateY(-6px);
+    }
 
-    .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-    .gallows{width:150px;height:170px;position:relative;border-bottom:4px solid #fff}
+    /* ✅ Darağacı yukarı */
+    .stage{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      padding-top:14px;
+      gap:10px;
+    }
+
+    .gallows{width:150px;height:170px;position:relative;border-bottom:4px solid #fff; transform: translateY(-6px);}
     .beam{position:absolute;background:#fff}
     .v{width:4px;height:100%;left:30px}
     .h{width:95px;height:4px;left:30px;top:0}
     .rope{position:absolute;width:2px;height:35px;left:125px;top:0;background:#999}
+
     .man{position:absolute;left:125px;top:35px;transform-origin:top center}
     .man.swing{animation:sway 1.2s infinite ease-in-out}
     @keyframes sway{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
@@ -68,11 +95,11 @@
       color:rgba(255,255,255,.55);
     }
 
-    /* ✅ fixed dock: ui_shell footer üstüne gelmesin */
+    /* ✅ Dock: daha aşağı, footer varsa JS ile yukarı alınacak */
     .dock{
       position:fixed;
       left:14px; right:14px;
-      bottom: calc(env(safe-area-inset-bottom) + 10px); /* JS ile footer kadar yükseltiyoruz */
+      bottom: calc(env(safe-area-inset-bottom) + 10px + var(--shellLift));
       height: var(--dockH);
       z-index: 9999;
       border-radius:22px;
@@ -81,7 +108,9 @@
       backdrop-filter: blur(10px);
       padding:12px;
       box-sizing:border-box;
-      display:flex;flex-direction:column;gap:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
 
     .matrix{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
@@ -89,11 +118,11 @@
     .slot.found{border-bottom-color:var(--green);text-shadow:0 0 10px var(--green)}
 
     .jokerRow{display:flex;justify-content:center;gap:12px}
-    .joker{width:50px;height:62px;border-radius:12px;border:1px solid #6366f1;background:rgba(99,102,241,.10);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
+    .joker{width:50px;height:58px;border-radius:12px;border:1px solid #6366f1;background:rgba(99,102,241,.10);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
     .joker.spent{opacity:.12;filter:grayscale(1);pointer-events:none}
 
     .kb{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .key{height:40px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:900}
+    .key{height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:900}
     .key.hit{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
     .key.miss{background:var(--red);opacity:.3}
 
@@ -160,11 +189,10 @@
           </div>
         </div>
 
-        <div class="q" id="hint">—</div>
+        <div class="q" id="hint">YÜKLENİYOR…</div>
       </div>
     </div>
 
-    <!-- ✅ ui_shell içinde görünür: sabit alt panel -->
     <div class="dock" id="dock">
       <div class="matrix" id="matrix"></div>
 
@@ -184,328 +212,307 @@
       <div class="mBonus" id="mBonus"></div>
       <button class="mBtn" id="mBtn">DEVAM</button>
     </div>
-
   </div>
 
-<script type="module">
-  import { mountShell } from "/js/ui_shell.js";
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { loadLangPool, pick, createUsedSet } from "/js/langpool.js";
 
-  // ✅ ui_shell’i aç
-  mountShell({ scroll: "none" });
+    mountShell({ scroll: "none" });
 
-  const $ = (id) => document.getElementById(id);
+    const $ = (id) => document.getElementById(id);
 
-  // ✅ ui_shell footer yüksekliği varsa dock’u yukarı al (footer üstüne binmesin)
-  const liftDockAboveShellFooter = () => {
-    const dock = $("dock");
-    const rootStyles = getComputedStyle(document.documentElement);
-    const footerH = parseFloat(rootStyles.getPropertyValue("--footerH")) || 92; // shell kullanıyorsa genelde var
-    dock.style.bottom = `calc(env(safe-area-inset-bottom) + ${footerH + 10}px)`;
-  };
-  setTimeout(liftDockAboveShellFooter, 0);
-  setTimeout(liftDockAboveShellFooter, 300);
+    // ✅ ui_shell footer lift: dock footer üstünde kalsın
+    const liftDock = () => {
+      const root = getComputedStyle(document.documentElement);
+      const footerH = parseFloat(root.getPropertyValue("--footerH")) || 92;
+      document.documentElement.style.setProperty("--shellLift", `${footerH + 10}px`);
+    };
+    setTimeout(liftDock, 0);
+    setTimeout(liftDock, 250);
 
-  // ✅ Demo pool (istersen sonra langpool'a bağlarız)
-  const POOLS = {
-    en: [
-      { w:"APPLE",  tr:"ELMA" },
-      { w:"ORANGE", tr:"PORTAKAL" },
-      { w:"BANANA", tr:"MUZ" },
-      { w:"MARKET", tr:"PAZAR / MARKET" },
-      { w:"FAMILY", tr:"AİLE" },
-      { w:"SCHOOL", tr:"OKUL" },
-      { w:"SILENCE", tr:"SESSİZLİK" }
-    ],
-    de: [
-      { w:"HAUS", tr:"EV" },
-      { w:"WASSER", tr:"SU" },
-      { w:"APFEL", tr:"ELMA" },
-      { w:"FREUND", tr:"ARKADAŞ" }
-    ],
-    fr: [
-      { w:"POMME", tr:"ELMA" },
-      { w:"MAISON", tr:"EV" },
-      { w:"FAMILLE", tr:"AİLE" }
-    ],
-    it: [
-      { w:"MELA", tr:"ELMA" },
-      { w:"CASA", tr:"EV" },
-      { w:"AMICO", tr:"ARKADAŞ" }
-    ],
-    es: [
-      { w:"MANZANA", tr:"ELMA" },
-      { w:"CASA", tr:"EV" },
-      { w:"FAMILIA", tr:"AİLE" }
-    ]
-  };
+    // State
+    let lang = "en";      // istersen shell profilinden alırsın
+    let diff = 3;         // şimdilik kolay
+    let lives = 3;
 
-  // oyun state
-  let lang = "en";
-  let diff = 3;         // 3 easy, 4 normal, 5 hard
-  let lives = 3;
+    let pool = null;
+    let target = null;
+    let guessed = new Set();
+    let mistakes = 0;
+    let jokersLeft = 3;
 
-  let target = null;
-  let guessed = new Set();
-  let mistakes = 0;
-  let jokersLeft = 3;
+    let score = 100;
+    let flawless = true;
+    let jokerUsed = false;
+    let lock = false;
 
-  let score = 100;
-  let flawless = true;
-  let jokerUsed = false;
+    const HS_KEY = "italky_hangman_high";
+    let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
+    $("bestVal").textContent = best;
 
-  let lock = false;
-
-  const HS_KEY = "italky_hangman_high";
-  let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
-  $("bestVal").textContent = best;
-
-  // UI (bu sayfada setup ekranı yok; istersen shell üstünden ayarları sonra bağlarız)
-  // Joker click
-  for(let i=0;i<3;i++){
-    $(`j${i}`).onclick = () => useJ(i);
-  }
-
-  $("mBtn").onclick = () => {
-    $("modal").classList.remove("on");
-    if(lives <= 0){ location.reload(); return; }
-    newRound();
-  };
-
-  function renderHearts(){
-    // ✅ CAN ARTTIKÇA GÖRÜNÜR: 7 kalbe kadar çiz, sonrası +N
-    const showMax = 7;
-    const shown = Math.min(lives, showMax);
-    const extra = Math.max(0, lives - showMax);
-
-    let html = "";
-    for(let i=0;i<shown;i++){
-      html += `<span class="heart">❤️</span>`;
-    }
-    if(extra > 0){
-      html += `<span class="heartPlus">+${extra}</span>`;
-    }
-    $("hearts").innerHTML = html;
-  }
-
-  function getLimit(){
-    if(diff === 3) return 7;
-    if(diff === 4) return 4;
-    return 3;
-  }
-
-  function resetMan(){
-    ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"].forEach(id => $(id).classList.remove("on"));
-    $("man").classList.remove("swing");
-  }
-
-  function updateMan(){
-    resetMan();
-    const m = mistakes;
-
-    if(diff === 3){
-      const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
-      seq.slice(0, Math.min(m, 6)).forEach(id => $(id).classList.add("on"));
-      return;
+    // Joker click
+    for(let i=0;i<3;i++){
+      $(`j${i}`).onclick = () => useJ(i);
     }
 
-    if(diff === 4){
+    $("mBtn").onclick = () => {
+      $("modal").classList.remove("on");
+      if(lives <= 0){ location.reload(); return; }
+      newRound();
+    };
+
+    function renderHearts(){
+      // ✅ can artınca gerçekten görünür (7’ye kadar çiz, sonrası +N)
+      const showMax = 7;
+      const shown = Math.min(lives, showMax);
+      const extra = Math.max(0, lives - showMax);
+
+      let html = "";
+      for(let i=0;i<shown;i++) html += `<span class="heart">❤️</span>`;
+      if(extra > 0) html += `<span class="heartPlus">+${extra}</span>`;
+      $("hearts").innerHTML = html;
+    }
+
+    function getLimit(){
+      // kolay/normal/zor: 7 / 4 / 3
+      if(diff === 3) return 7;
+      if(diff === 4) return 4;
+      return 3;
+    }
+
+    function resetMan(){
+      ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"].forEach(id => $(id).classList.remove("on"));
+      $("man").classList.remove("swing");
+    }
+
+    function updateMan(){
+      resetMan();
+      const m = mistakes;
+
+      if(diff === 3){
+        // easy: 7 limit ama 6 parça var; son hata “tamamlandı” gibi
+        const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
+        seq.slice(0, Math.min(m, 6)).forEach(id => $(id).classList.add("on"));
+        return;
+      }
+      if(diff === 4){
+        if(m>=1) $("p_head").classList.add("on");
+        if(m>=2) $("p_body").classList.add("on");
+        if(m>=3){ $("p_larm").classList.add("on"); $("p_rarm").classList.add("on"); }
+        if(m>=4){ $("p_lleg").classList.add("on"); $("p_rleg").classList.add("on"); }
+        return;
+      }
       if(m>=1) $("p_head").classList.add("on");
       if(m>=2) $("p_body").classList.add("on");
-      if(m>=3){ $("p_larm").classList.add("on"); $("p_rarm").classList.add("on"); }
-      if(m>=4){ $("p_lleg").classList.add("on"); $("p_rleg").classList.add("on"); }
-      return;
+      if(m>=3){ $("p_larm").classList.add("on"); $("p_rarm").classList.add("on"); $("p_lleg").classList.add("on"); $("p_rleg").classList.add("on"); }
     }
 
-    if(m>=1) $("p_head").classList.add("on");
-    if(m>=2) $("p_body").classList.add("on");
-    if(m>=3){ $("p_larm").classList.add("on"); $("p_rarm").classList.add("on"); $("p_lleg").classList.add("on"); $("p_rleg").classList.add("on"); }
-  }
-
-  function pickWord(){
-    const list = POOLS[lang] || POOLS.en;
-    return list[Math.floor(Math.random()*list.length)];
-  }
-
-  function applyPenalty(n){
-    score = Math.max(0, score - n);
-    $("scoreVal").textContent = score;
-  }
-
-  function renderWord(){
-    const w = target.w;
-    $("matrix").innerHTML = w.split("").map(ch=>{
-      const found = guessed.has(ch);
-      return `<div class="slot ${found ? "found":""}">${found ? ch : ""}</div>`;
-    }).join("");
-  }
-
-  function renderKeyboard(){
-    const w = target.w;
-    const uniq = [...new Set(w.split(""))];
-
-    // uniq + 10
-    const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-    const fillers = abc.filter(l => !uniq.includes(l)).sort(()=>0.5-Math.random()).slice(0,10);
-    const keys = [...uniq, ...fillers].sort(()=>0.5-Math.random());
-
-    $("kb").innerHTML = keys.map(k=>`<button class="key" data-k="${k}">${k}</button>`).join("");
-    $("kb").querySelectorAll(".key").forEach(btn=>{
-      btn.onclick = () => press(btn.dataset.k, btn);
-    });
-  }
-
-  function speakWord(){
-    try{
-      if(!("speechSynthesis" in window)) return;
-      const u = new SpeechSynthesisUtterance(target.w);
-      u.lang = ({en:"en-US",de:"de-DE",fr:"fr-FR",it:"it-IT",es:"es-ES"})[lang] || "en-US";
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
-    }catch(e){}
-  }
-
-  function fireworks(){
-    const fx = $("fx");
-    const cx = Math.round(window.innerWidth * (0.25 + Math.random()*0.5));
-    const cy = Math.round(window.innerHeight * (0.20 + Math.random()*0.25));
-    for(let i=0;i<18;i++){
-      const s = document.createElement("div");
-      s.className = "spark";
-      const ang = Math.random()*Math.PI*2;
-      const dist = 120 + Math.random()*180;
-      s.style.left = cx+"px";
-      s.style.top  = cy+"px";
-      s.style.setProperty("--dx", Math.round(Math.cos(ang)*dist)+"px");
-      s.style.setProperty("--dy", Math.round(Math.sin(ang)*dist)+"px");
-      fx.appendChild(s);
-      setTimeout(()=>s.remove(), 950);
+    function applyPenalty(n){
+      score = Math.max(0, score - n);
+      $("scoreVal").textContent = score;
     }
-  }
 
-  function showModal(title, color, bonus){
-    $("mTitle").textContent = title;
-    $("mTitle").style.color = color;
-    $("mWord").textContent = target.w;
-    $("mTr").textContent = `(${target.tr})`;
-    $("mBonus").textContent = bonus || "";
-    $("modal").classList.add("on");
-  }
+    function renderWord(){
+      const w = target.w.toUpperCase();
+      $("matrix").innerHTML = w.split("").map(ch=>{
+        const found = guessed.has(ch);
+        return `<div class="slot ${found ? "found":""}">${found ? ch : ""}</div>`;
+      }).join("");
+    }
 
-  function endRound(win){
-    lock = true;
+    function renderKeyboard(){
+      const w = target.w.toUpperCase();
+      const uniq = [...new Set(w.split(""))];
 
-    // doğruyu yaz + sesli oku
-    speakWord();
+      // uniq + 10
+      const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      const fillers = abc.filter(l => !uniq.includes(l)).sort(()=>0.5-Math.random()).slice(0,10);
+      const keys = [...uniq, ...fillers].sort(()=>0.5-Math.random());
 
-    if(win){
-      let bonus = "";
-      if(flawless && !jokerUsed){
-        lives++;
-        bonus = "KUSURSUZ: +1 CAN";
+      $("kb").innerHTML = keys.map(k=>`<button class="key" data-k="${k}">${k}</button>`).join("");
+      $("kb").querySelectorAll(".key").forEach(btn=>{
+        btn.onclick = () => press(btn.dataset.k, btn);
+      });
+    }
+
+    function speakWord(){
+      try{
+        if(!("speechSynthesis" in window)) return;
+        const u = new SpeechSynthesisUtterance(target.w);
+        u.lang = ({en:"en-US",de:"de-DE",fr:"fr-FR",it:"it-IT",es:"es-ES"})[lang] || "en-US";
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }catch(e){}
+    }
+
+    function fireworks(){
+      const fx = $("fx");
+      const cx = Math.round(window.innerWidth * (0.25 + Math.random()*0.5));
+      const cy = Math.round(window.innerHeight * (0.20 + Math.random()*0.25));
+      for(let i=0;i<18;i++){
+        const s = document.createElement("div");
+        s.className = "spark";
+        const ang = Math.random()*Math.PI*2;
+        const dist = 120 + Math.random()*180;
+        s.style.left = cx+"px";
+        s.style.top  = cy+"px";
+        s.style.setProperty("--dx", Math.round(Math.cos(ang)*dist)+"px");
+        s.style.setProperty("--dy", Math.round(Math.sin(ang)*dist)+"px");
+        fx.appendChild(s);
+        setTimeout(()=>s.remove(), 950);
+      }
+    }
+
+    function showModal(title, color, bonus){
+      $("mTitle").textContent = title;
+      $("mTitle").style.color = color;
+      $("mWord").textContent = target.w.toUpperCase();
+      $("mTr").textContent = `(${target.tr || "—"})`;
+      $("mBonus").textContent = bonus || "";
+      $("modal").classList.add("on");
+    }
+
+    function endRound(win){
+      lock = true;
+
+      // doğruyu yaz + sesli oku
+      speakWord();
+
+      if(win){
+        let bonus = "";
+        if(flawless && !jokerUsed){
+          lives++;
+          bonus = "KUSURSUZ: +1 CAN";
+        }
+
+        if(score > best){
+          best = score;
+          localStorage.setItem(HS_KEY, String(best));
+          $("bestVal").textContent = best;
+          fireworks();
+        }
+
+        renderHearts();
+        showModal("MİSYON BAŞARILI", getCss("--green"), bonus);
+        return;
       }
 
-      if(score > best){
-        best = score;
-        localStorage.setItem(HS_KEY, String(best));
-        $("bestVal").textContent = best;
-        fireworks();
-      }
-
+      lives--;
       renderHearts();
-      showModal("MİSYON BAŞARILI", getCss("--green"), bonus);
-      return;
+
+      const swingMs = (diff===3) ? 4000 : 5000;
+      $("man").classList.add("swing");
+
+      setTimeout(()=>{
+        $("man").classList.remove("swing");
+        if(lives <= 0){
+          showModal("GAME OVER", getCss("--red"), `SKOR: ${score} • REKOR: ${best}`);
+        }else{
+          showModal("DEŞİFRE EDİLEMEDİ", getCss("--red"), "-1 CAN");
+        }
+      }, swingMs);
     }
 
-    lives--;
-    renderHearts();
+    function press(letter, btn){
+      if(lock) return;
+      if(guessed.has(letter)) return;
 
-    const swingMs = (diff===3) ? 4000 : 5000;
-    $("man").classList.add("swing");
+      const w = target.w.toUpperCase();
+      if(w.includes(letter)){
+        guessed.add(letter);
+        btn.classList.add("hit");
+        renderWord();
 
-    setTimeout(()=>{
-      $("man").classList.remove("swing");
-      if(lives <= 0){
-        showModal("GAME OVER", getCss("--red"), `SKOR: ${score} • REKOR: ${best}`);
+        const allFound = w.split("").every(ch => guessed.has(ch));
+        if(allFound) endRound(true);
       }else{
-        showModal("DEŞİFRE EDİLEMEDİ", getCss("--red"), "-1 CAN");
+        flawless = false;
+        mistakes++;
+        btn.classList.add("miss");
+
+        // yanlış -10
+        applyPenalty(10);
+
+        updateMan();
+        if(mistakes >= getLimit()) endRound(false);
       }
-    }, swingMs);
-  }
+    }
 
-  function press(letter, btn){
-    if(lock) return;
-    if(guessed.has(letter)) return;
+    function useJ(i){
+      if(lock) return;
+      if(jokersLeft <= 0) return;
 
-    const w = target.w;
-    if(w.includes(letter)){
-      guessed.add(letter);
-      btn.classList.add("hit");
+      jokerUsed = true;
+      jokersLeft--;
+      $(`j${i}`).classList.add("spent");
+
+      // joker -10
+      applyPenalty(10);
+
+      // doğru bir harf aç
+      const w = target.w.toUpperCase();
+      const rem = w.split("").filter(ch => !guessed.has(ch));
+      if(rem.length){
+        const l = rem[0];
+        const btn = $("kb").querySelector(`.key[data-k="${l}"]`);
+        if(btn) press(l, btn);
+        else { guessed.add(l); renderWord(); }
+      }
+    }
+
+    function getCss(name){
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    async function loadRealPool(){
+      pool = await loadLangPool(lang);
+
+      if(!pool?.items?.length){
+        $("hint").textContent = `HAVUZ BOŞ: ${lang}.json (items yok)`;
+        return false;
+      }
+      return true;
+    }
+
+    function newRound(){
+      lock = false;
+      guessed = new Set();
+      mistakes = 0;
+      jokersLeft = 3;
+      flawless = true;
+      jokerUsed = false;
+
+      score = 100;
+      $("scoreVal").textContent = score;
+
+      resetMan();
+      for(let i=0;i<3;i++) $(`j${i}`).classList.remove("spent");
+
+      const usedSet = createUsedSet(`used_hangman_${lang}`);
+      const picked = pick(pool, 1, usedSet.used, usedSet.save, (x)=> (x?.w||"").length >= 3);
+      target = picked?.[0];
+
+      if(!target?.w){
+        $("hint").textContent = "KELİME SEÇİLEMEDİ (pick boş döndü)";
+        $("matrix").innerHTML = "";
+        $("kb").innerHTML = "";
+        return;
+      }
+
+      $("hint").textContent = target.tr || "—";
+      renderHearts();
       renderWord();
-
-      const allFound = w.split("").every(ch => guessed.has(ch));
-      if(allFound) endRound(true);
-    }else{
-      flawless = false;
-      mistakes++;
-      btn.classList.add("miss");
-      applyPenalty(10);       // yanlış -10
+      renderKeyboard();
       updateMan();
-
-      if(mistakes >= getLimit()){
-        endRound(false);
-      }
     }
-  }
 
-  function useJ(i){
-    if(lock) return;
-    if(jokersLeft <= 0) return;
-
-    jokerUsed = true;
-    jokersLeft--;
-
-    $(`j${i}`).classList.add("spent");
-    applyPenalty(10);        // joker -10
-
-    const rem = target.w.split("").filter(ch => !guessed.has(ch));
-    if(rem.length){
-      const l = rem[0];
-      const btn = $("kb").querySelector(`.key[data-k="${l}"]`);
-      if(btn) press(l, btn);
-      else { guessed.add(l); renderWord(); }
-    }
-  }
-
-  function getCss(name){
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  }
-
-  function newRound(){
-    lock = false;
-    guessed = new Set();
-    mistakes = 0;
-    jokersLeft = 3;
-    flawless = true;
-    jokerUsed = false;
-
-    score = 100;
-    $("scoreVal").textContent = score;
-
-    resetMan();
-    for(let i=0;i<3;i++) $(`j${i}`).classList.remove("spent");
-
-    target = pickWord();
-    $("hint").textContent = target.tr;
-
+    // INIT
     renderHearts();
-    renderWord();
-    renderKeyboard();
-    updateMan();
-  }
-
-  // init
-  renderHearts();
-  newRound();
-</script>
+    (async ()=>{
+      const ok = await loadRealPool();
+      if(ok) newRound();
+    })();
+  </script>
 </body>
 </html>
