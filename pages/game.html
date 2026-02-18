@@ -3,73 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Neural Games Hub</title>
+  <title>italkyAI • Prestige Games Hub</title>
   <style>
     :root {
       --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.1);
     }
 
     #pageContent {
-      height: calc(100vh - 180px);
+      height: calc(100vh - 185px);
       display: flex; flex-direction: column;
       overflow-y: auto; scrollbar-width: none;
-      padding: 10px 15px 100px;
-      mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+      padding: 10px 14px 100px;
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    /* ✅ GİRİFTLİ VE CANLI GRID (Boşluksuz Masonry) */
+    /* ✅ KİBAR VE GİRİFTLİ GRID */
     .neural-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      grid-auto-rows: minmax(140px, auto);
-      gap: 16px;
+      grid-auto-rows: minmax(110px, auto); /* Boyutlar kibarlaştırıldı */
+      gap: 12px;
     }
 
-    /* OYUN MODÜLLERİ - CANLI RENKLER VE DERİNLİK */
+    /* OYUN MODÜLLERİ - SLIM TASARIM */
     .game-module {
-      position: relative; border-radius: 35px; padding: 25px 15px;
+      position: relative; border-radius: 28px; padding: 18px 12px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       text-align: center; border: 1px solid var(--glass-border);
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       cursor: pointer; overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     }
 
-    /* Her Modül İçin Özel Canlı Renkler */
-    .m-hangman { background: linear-gradient(145deg, #581c87, #02000f); box-shadow: 0 0 20px rgba(168,85,247,0.3); }
-    .m-spy { background: linear-gradient(145deg, #1e3a8a, #02000f); box-shadow: 0 0 20px rgba(59,130,246,0.3); }
-    .m-cracker { background: linear-gradient(145deg, #854d0e, #02000f); box-shadow: 0 0 20px rgba(234,179,8,0.3); }
-    .m-sentence { background: linear-gradient(145deg, #831843, #02000f); box-shadow: 0 0 20px rgba(236,72,153,0.3); }
-    .m-duo { background: linear-gradient(145deg, #064e3b, #02000f); box-shadow: 0 0 20px rgba(16,185,129,0.3); }
-    .m-meteor { background: linear-gradient(145deg, #1e1b4b, #02000f); box-shadow: 0 0 20px rgba(99,102,241,0.3); }
-    .m-gap { grid-column: span 2; background: var(--ai-grad); color: #000 !important; flex-direction: row; justify-content: space-around; padding: 20px 40px; }
+    /* Pastel & Vivid Gradyanlar (Daha İnce Ayar) */
+    .m-hangman { background: linear-gradient(145deg, rgba(88,28,135,0.4), rgba(2,0,15,0.8)); }
+    .m-spy { background: linear-gradient(145deg, rgba(30,58,138,0.4), rgba(2,0,15,0.8)); }
+    .m-cracker { background: linear-gradient(145deg, rgba(133,77,14,0.4), rgba(2,0,15,0.8)); }
+    .m-sentence { background: linear-gradient(145deg, rgba(131,24,67,0.4), rgba(2,0,15,0.8)); }
+    .m-duo { background: linear-gradient(145deg, rgba(6,78,59,0.4), rgba(2,0,15,0.8)); }
+    .m-meteor { background: linear-gradient(145deg, rgba(30,27,75,0.4), rgba(2,0,15,0.8)); }
+    .m-gap { grid-column: span 2; background: rgba(99,102,241,0.15); flex-direction: row; justify-content: flex-start; padding: 15px 25px; gap: 20px; border: 1px solid rgba(99,102,241,0.3); }
 
-    /* Giriftli Yapı İçin Tall Modüller */
     .tall { grid-row: span 2; }
-    .game-module:active { transform: scale(0.92) rotate(2deg); filter: brightness(1.3); }
+    .game-module:active { transform: scale(0.96); filter: brightness(1.2); }
 
-    /* ✅ İKONLARDAKİ CANLI ANİMASYONLAR */
-    .icon-box { font-size: 45px; margin-bottom: 12px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.4)); }
-    .wide .icon-box { margin-bottom: 0; font-size: 55px; }
+    /* ✅ İKONLARDA KİBAR ANİMASYONLAR */
+    .icon-node { font-size: 32px; margin-bottom: 8px; position: relative; display: flex; align-items: center; justify-content: center; height: 45px; }
+    .wide .icon-node { margin-bottom: 0; }
 
-    /* Adam Asmaca Hareketli İkon */
-    .i-hang-node { border-left: 3px solid #fff; height: 40px; position: relative; animation: hangSwing 3s infinite ease-in-out; }
-    .i-hang-node::after { content: ""; position: absolute; bottom: -8px; left: -7px; width: 14px; height: 14px; background: #fff; border-radius: 50%; box-shadow: 0 0 20px #fff; }
+    /* Sallanan Adam Asmaca Düğümü (Kibar Sürüm) */
+    .i-hang { border-left: 2px solid #fff; height: 30px; animation: hangSwing 3s infinite ease-in-out; }
+    .i-hang::after { content: ""; position: absolute; bottom: -6px; left: -6px; width: 10px; height: 10px; background: #fbcfe8; border-radius: 50%; box-shadow: 0 0 10px #fbcfe8; }
 
-    /* Casus Kim Göz Kırpma */
-    .i-spy-eye { width: 50px; height: 28px; border: 3px solid #fff; border-radius: 50% 0; transform: rotate(-45deg); animation: eyeBlink 4s infinite; display: flex; align-items: center; justify-content: center; }
-    .i-spy-eye::after { content: ""; width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; box-shadow: 0 0 10px #fff; }
+    /* Casus Kim Gözü */
+    .i-eye { width: 38px; height: 22px; border: 2px solid #fff; border-radius: 50% 0; transform: rotate(-45deg); animation: eyeBlink 4s infinite; display: flex; align-items: center; justify-content: center; }
+    .i-eye::after { content: ""; width: 8px; height: 8px; background: #6366f1; border-radius: 50%; }
 
-    .g-name { font-size: 18px; font-weight: 1000; color: #fff; margin-bottom: 4px; letter-spacing: -0.5px; }
-    .m-gap .g-name, .m-gap .g-desc { color: #000; }
-    .g-desc { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.6); line-height: 1.3; }
+    /* Cümle Kurma Noktaları */
+    .i-dots { display: flex; gap: 5px; animation: bounce 2s infinite ease-in-out; }
+    .i-dots div { width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 8px #fff; }
+
+    .g-name { font-size: 14px; font-weight: 900; color: #fff; margin-bottom: 2px; }
+    .g-desc { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.5); line-height: 1.2; }
 
     /* ANİMASYONLAR */
-    @keyframes hangSwing { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
+    @keyframes hangSwing { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(15deg); } }
     @keyframes eyeBlink { 0%, 90%, 100% { transform: rotate(-45deg) scaleY(1); } 95% { transform: rotate(-45deg) scaleY(0.1); } }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
   </style>
 </head>
@@ -79,58 +80,55 @@
     <div class="neural-grid">
       
       <div class="game-module tall m-hangman" onclick="launchGame('hangman', '/pages/hangman', 5)">
-        <div class="icon-box"><div class="i-hang-node"></div></div>
+        <div class="icon-node"><div class="i-hang"></div></div>
         <div class="g-name">Adam Asmaca</div>
-        <div class="g-desc">Veri Hattı Deşifresi</div>
+        <div class="g-desc">Zor: 5+ Harf</div>
       </div>
 
       <div class="game-module m-spy" onclick="launchGame('spy', '/pages/spy', 4)">
-        <div class="icon-box"><div class="i-spy-eye"></div></div>
+        <div class="icon-node"><div class="i-eye"></div></div>
         <div class="g-name">Casus Kim?</div>
-        <div class="g-desc">Sızan Veriyi Yakala</div>
+        <div class="g-desc">Normal: 4+ Harf</div>
       </div>
 
       <div class="game-module m-cracker" onclick="launchGame('cracker', '/pages/cracker', 3)">
-        <div class="icon-box" style="animation: bounce 3s infinite;">🏆</div>
+        <div class="icon-node" style="animation: bounce 3s infinite;">🏆</div>
         <div class="g-name">Bilgi Yarışı</div>
-        <div class="g-desc">Global IQ Ligi</div>
+        <div class="g-desc">Kolay: 3+ Harf</div>
       </div>
 
       <div class="game-module tall m-sentence" onclick="launchGame('sentence', '/pages/sentence', 5)">
-        <div class="icon-box" style="display:flex; gap:8px; animation: bounce 2s infinite;">
-          <div style="width:12px; height:12px; background:#fff; border-radius:50%; box-shadow:0 0 15px #fff;"></div>
-          <div style="width:12px; height:12px; background:#fff; border-radius:50%; box-shadow:0 0 15px #fff;"></div>
-        </div>
+        <div class="icon-node"><div class="i-dots"><div></div><div></div></div></div>
         <div class="g-name">Cümle Kurma</div>
-        <div class="g-desc">Semantik Enerji Hattı</div>
+        <div class="g-desc">Zor: 5+ Harf</div>
       </div>
 
       <div class="game-module m-duo" onclick="launchGame('duo', '/pages/duo', 4)">
-        <div class="icon-box" style="animation: bounce 4s infinite;">🎤</div>
+        <div class="icon-node" style="animation: bounce 4s infinite;">🎤</div>
         <div class="g-name">Sesli Düello</div>
-        <div class="g-desc">Akustik Eşleşme</div>
+        <div class="g-desc">Normal: 4+ Harf</div>
       </div>
 
       <div class="game-module tall m-meteor" onclick="launchGame('meteor', '/pages/meteor', 5)">
-        <div class="icon-box" style="display:grid; grid-template-columns:1fr 1fr; gap:5px; animation: bounce 3s infinite alternate;">
-          <div style="width:20px; height:20px; background:#fff; border-radius:5px;"></div>
-          <div style="width:20px; height:20px; background:#fff; border-radius:5px;"></div>
+        <div class="icon-node" style="display:grid; grid-template-columns:1fr 1fr; gap:4px; animation: bounce 3s infinite alternate;">
+          <div style="width:14px; height:14px; background:#fff; border-radius:3px;"></div>
+          <div style="width:14px; height:14px; background:#fff; border-radius:3px;"></div>
         </div>
         <div class="g-name">Eşleştirme</div>
-        <div class="g-desc">Kuantum Hafıza</div>
+        <div class="g-desc">Zor: 5+ Harf</div>
       </div>
 
-      <div class="game-module m-hangman" style="background:linear-gradient(145deg, #9d174d, #02000f);" onclick="launchGame('neural_box', '/pages/neural_box', 4)">
-        <div class="icon-box" style="animation: bounce 5s infinite;">📦</div>
-        <div class="g-name">Neural Box</div>
-        <div class="g-desc">Gizli Veri Paketi</div>
+      <div class="game-module m-sentence" style="background:rgba(254, 205, 211, 0.2)" onclick="launchGame('glitch', '/pages/glitch', 3)">
+        <div class="icon-node" style="font-size:24px; font-weight:1000; color:#f87171;">!</div>
+        <div class="g-name">Glitch Hunter</div>
+        <div class="g-desc">Kolay: 3+ Harf</div>
       </div>
 
       <div class="game-module m-gap" onclick="launchGame('gap', '/pages/gap', 4)">
-        <div class="icon-box" style="animation: bounce 2s infinite;">🔍</div>
-        <div style="display:flex; flex-direction:column; gap:4px;">
+        <div class="icon-node" style="font-size:32px; animation: bounce 2s infinite;">🔍</div>
+        <div style="display:flex; flex-direction:column; align-items: flex-start;">
           <div class="g-name">Boşluk Doldur</div>
-          <div class="g-desc">Algoritma Tamamlama Protokolü</div>
+          <div class="g-desc">Algoritma: 4+ Harf • 24 Saat Serbest</div>
         </div>
       </div>
 
@@ -143,7 +141,6 @@
 
     mountShell({ scroll: "none" });
 
-    /* ✅ 24 SAATLİK LİSANS VE JETON MOTORU (ARKA PLANDA SESSİZ ÇALIŞIR) */
     window.launchGame = async (gameId, url, minLen) => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
