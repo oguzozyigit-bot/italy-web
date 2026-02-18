@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Pro Games Hub</title>
+  <title>italkyAI • Neural Games Hub</title>
   <style>
     :root {
       --p-lavender: #e9d5ff; --p-mint: #bbf7d0; --p-salmon: #fbcfe8; 
@@ -14,12 +14,17 @@
       height: calc(100vh - 180px); 
       display: flex; flex-direction: column;
       overflow-y: auto; scrollbar-width: none;
-      padding: 10px 10px 80px;
+      padding: 10px 10px 100px;
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    .neural-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .neural-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
 
+    /* KART TEMELİ */
     .game-module {
       position: relative; border-radius: 32px; padding: 25px 15px;
       display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -32,30 +37,30 @@
     .game-module.wide { grid-column: span 2; flex-direction: row; text-align: left; padding: 20px 30px; gap: 25px; }
 
     /* PASTEL ZEMİNLER */
-    .bg-l { background: rgba(233, 213, 255, 0.12); }
-    .bg-m { background: rgba(187, 247, 208, 0.12); }
-    .bg-s { background: rgba(251, 207, 232, 0.12); }
-    .bg-b { background: rgba(191, 219, 254, 0.12); }
-    .bg-y { background: rgba(254, 240, 138, 0.12); }
+    .bg-l { background: rgba(233, 213, 255, 0.15); } /* Lavender */
+    .bg-m { background: rgba(187, 247, 208, 0.15); } /* Mint */
+    .bg-s { background: rgba(251, 207, 232, 0.15); } /* Salmon */
+    .bg-b { background: rgba(191, 219, 254, 0.15); } /* Sky Blue */
+    .bg-y { background: rgba(254, 240, 138, 0.15); } /* Lemon */
+    .bg-r { background: rgba(254, 205, 211, 0.15); } /* Rose */
 
-    .icon-node { width: 65px; height: 65px; margin-bottom: 15px; position: relative; display: flex; align-items: center; justify-content: center; }
+    /* İKONLAR VE ANİMASYONLAR */
+    .icon-node { width: 60px; height: 60px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; position: relative; }
     .wide .icon-node { margin-bottom: 0; }
 
-    /* ANİMASYONLAR */
-    .i-hangman { border-left: 3px solid #fff; height: 40px; position: relative; animation: swing 3s infinite ease-in-out; }
-    .i-hangman::after { content: ""; position: absolute; bottom: -10px; left: -8px; width: 14px; height: 14px; border: 2px solid var(--p-salmon); border-radius: 50%; box-shadow: 0 0 10px var(--p-salmon); }
-    .i-hunt { width: 45px; height: 45px; border: 3px solid var(--p-sky); border-radius: 50%; animation: pulseCircle 2s infinite; }
-    .i-hunt::after { content: ""; position: absolute; width: 20px; height: 3px; background: #fff; transform: rotate(45deg); bottom: -5px; right: -5px; }
-    .i-sentence { display: flex; gap: 5px; }
-    .i-sentence div { width: 10px; height: 10px; background: var(--p-lavender); border-radius: 50%; animation: flow 1.5s infinite; }
-    
-    @keyframes swing { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(15deg); } }
-    @keyframes pulseCircle { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(191, 219, 254, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(191, 219, 254, 0); } 100% { transform: scale(1); } }
-    @keyframes flow { 0% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0.3; transform: translateY(0); } }
+    .i-swing { animation: swing 3s infinite ease-in-out; }
+    .i-pulse { animation: pulse 2s infinite ease-in-out; }
+    .i-flow { animation: flow 1.5s infinite linear; }
+    .i-rotate { animation: rotate 4s infinite linear; }
 
-    .g-name { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 5px; }
-    .g-desc { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); line-height: 1.3; }
-    .cost-tag { position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: 900; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 12px; color: #fef08a; }
+    @keyframes swing { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 1; } }
+    @keyframes flow { 0% { transform: translateY(0); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .g-name { font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .g-desc { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); line-height: 1.2; }
+    .token-tag { position: absolute; top: 12px; right: 12px; font-size: 8px; font-weight: 1000; background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 8px; color: #fef08a; border: 1px solid rgba(255,240,138,0.2); }
   </style>
 </head>
 
@@ -63,40 +68,82 @@
   <div id="pageContent">
     <div class="neural-grid">
       
-      <div class="game-module tall bg-s" onclick="launchGame('/pages/hangman', 'hard')">
-        <div class="cost-tag">1 JETON</div>
-        <div class="icon-node"><div class="i-hangman"></div></div>
+      <div class="game-module tall bg-s" onclick="play('/pages/hangman')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-swing"><div style="border-left:3px solid #fff; height:35px; position:relative;"><div style="position:absolute; bottom:-8px; left:-7px; width:12px; height:12px; border:2px solid var(--p-salmon); border-radius:50%;"></div></div></div>
         <div class="g-name">Adam Asmaca</div>
-        <div class="g-desc">Deşifre Seviyesi: 5+ Harf</div>
+        <div class="g-desc">Zor: 5+ Harf</div>
       </div>
 
-      <div class="game-module bg-b" onclick="launchGame('/pages/spy', 'normal')">
-        <div class="cost-tag">1 JETON</div>
-        <div class="icon-node"><div class="i-spy" style="width:40px; height:20px; border:2px solid #fff; border-radius:50% 0; transform:rotate(-45deg);"></div></div>
-        <div class="g-name">Casus Kim?</div>
-        <div class="g-desc">Analiz: 4+ Harf</div>
+      <div class="game-module bg-l" onclick="play('/pages/duo')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-flow"><svg width="30" height="30" viewBox="0 0 24 24" stroke="var(--p-lavender)" stroke-width="2.5" fill="none"><path d="M12 1v22M17 5v14M7 5v14"/></svg></div>
+        <div class="g-name">Sesli Düello</div>
+        <div class="g-desc">Normal: 4+ Harf</div>
       </div>
 
-      <div class="game-module bg-y" onclick="launchGame('/pages/cracker', 'easy')">
-        <div class="cost-tag">1 JETON</div>
-        <div class="icon-node"><svg width="35" height="35" viewBox="0 0 24 24" stroke="#fef08a" stroke-width="2" fill="none"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div>
+      <div class="game-module bg-y" onclick="play('/pages/cracker')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-pulse"><svg width="30" height="30" viewBox="0 0 24 24" stroke="var(--p-lemon)" stroke-width="2.5" fill="none"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16"/></svg></div>
         <div class="g-name">Bilgi Yarışı</div>
-        <div class="g-desc">Giriş: 3+ Harf</div>
+        <div class="g-desc">Kolay: 3+ Harf</div>
       </div>
 
-      <div class="game-module tall bg-l" onclick="launchGame('/pages/sentence', 'hard')">
-        <div class="cost-tag">1 JETON</div>
-        <div class="icon-node"><div class="i-sentence"><div></div><div></div><div></div></div></div>
+      <div class="game-module tall bg-b" onclick="play('/pages/sentence')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-flow" style="display:flex; gap:4px;"><div style="width:10px; height:10px; background:var(--p-sky); border-radius:50%;"></div><div style="width:10px; height:10px; background:var(--p-sky); border-radius:50%;"></div><div style="width:10px; height:10px; background:var(--p-sky); border-radius:50%;"></div></div>
         <div class="g-name">Cümle Kurma</div>
-        <div class="g-desc">Matris: 5+ Harf</div>
+        <div class="g-desc">Zor: 5+ Harf</div>
       </div>
 
-      <div class="game-module wide bg-m" onclick="launchGame('/pages/gap', 'normal')">
-        <div class="cost-tag">1 JETON</div>
-        <div class="icon-node"><div class="i-hunt"></div></div>
+      <div class="game-module bg-m" onclick="play('/pages/friend')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-pulse">🤝</div>
+        <div class="g-name">Neural Friend</div>
+        <div class="g-desc">Normal: 4+ Harf</div>
+      </div>
+
+      <div class="game-module bg-r" onclick="play('/pages/glitch')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node" style="font-size:30px; font-weight:900; color:#f87171; animation: jitter 0.2s infinite;">!</div>
+        <div class="g-name">Glitch Hunter</div>
+        <div class="g-desc">Kolay: 3+ Harf</div>
+      </div>
+
+      <div class="game-module tall bg-m" onclick="play('/pages/meteor')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node" style="display:grid; grid-template-columns:1fr 1fr; gap:5px; animation:rotate 4s infinite;"><div style="width:15px; height:15px; background:var(--p-mint); border-radius:4px;"></div><div style="width:15px; height:15px; background:var(--p-mint); border-radius:4px;"></div></div>
+        <div class="g-name">Eşleştirme</div>
+        <div class="g-desc">Zor: 5+ Harf</div>
+      </div>
+
+      <div class="game-module bg-b" onclick="play('/pages/neural')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-pulse">🧠</div>
+        <div class="g-name">Neural Core</div>
+        <div class="g-desc">Normal: 4+ Harf</div>
+      </div>
+
+      <div class="game-module bg-l" onclick="play('/pages/neural_box')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-rotate">📦</div>
+        <div class="g-name">Neural Box</div>
+        <div class="g-desc">Normal: 4+ Harf</div>
+      </div>
+
+      <div class="game-module bg-r" onclick="play('/pages/spy')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node"><div style="width:40px; height:20px; border:2px solid #fff; border-radius:50% 0; transform:rotate(-45deg); animation:pulse 2s infinite;"></div></div>
+        <div class="g-name">Casus Kim?</div>
+        <div class="g-desc">Kolay: 3+ Harf</div>
+      </div>
+
+      <div class="game-module wide bg-y" onclick="play('/pages/gap')">
+        <div class="token-tag">1 JETON</div>
+        <div class="icon-node i-rotate"><div style="width:40px; height:40px; border:3px solid var(--p-lemon); border-radius:50%; border-top-color:transparent;"></div></div>
         <div>
           <div class="g-name">Boşluk Doldur</div>
-          <div class="g-desc">Algoritma: 4+ Harf</div>
+          <div class="g-desc">Algoritma: 4+ Harf • Geniş Alan</div>
         </div>
       </div>
 
@@ -109,41 +156,17 @@
 
     mountShell({ scroll: "none" });
 
-    window.launchGame = async (url, difficulty) => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return location.href = "/pages/login.html";
+    window.play = async (url) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return location.href = "/pages/login.html";
 
-        // 1. Mevcut jetonu kontrol et
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("tokens")
-          .eq("id", session.user.id)
-          .single();
+      const { data: p } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
+      if (!p || p.tokens < 1) return alert("Yetersiz Jeton!");
 
-        if (!profile || profile.tokens < 1) {
-          alert("Yetersiz Jeton! Lütfen profilinizden jeton yükleyin.");
-          return;
-        }
-
-        // 2. Jetonu düş (Sadece girişte 1 kez)
-        const { data: updated, error } = await supabase
-          .from("profiles")
-          .update({ tokens: profile.tokens - 1 })
-          .eq("id", session.user.id)
-          .select("tokens")
-          .single();
-
-        if (error) throw error;
-
-        // UI Header Jetonunu güncelle
-        if (updated) setHeaderTokens(updated.tokens);
-
-        // 3. Oyuna zorluk parametresiyle git
-        location.href = `${url}?diff=${difficulty}&session=active`;
-        
-      } catch (err) {
-        console.error("Game Error:", err);
+      const { data: up } = await supabase.from("profiles").update({ tokens: p.tokens - 1 }).eq("id", session.user.id).select("tokens").single();
+      if (up) {
+        setHeaderTokens(up.tokens);
+        location.href = url + "?session=active";
       }
     };
   </script>
