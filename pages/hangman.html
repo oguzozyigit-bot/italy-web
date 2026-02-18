@@ -28,6 +28,7 @@
       display:flex;
       flex-direction:column;
       gap:10px;
+      position:relative; /* ✅ HUD'u absolute yapacağız */
     }
 
     /* ✅ HANGMAN en üst */
@@ -39,14 +40,21 @@
       opacity:.9;
       margin:0;
       padding-top:4px;
+      z-index:2;
     }
 
-    /* HUD: sol (kalp + joker alt alta), sağ (skor) */
+    /* ✅ HUD: akıştan çıkıyor (darağacı artık aşağı itilmez) */
     .hud{
+      position:absolute;
+      top:56px;            /* HANGMAN hemen altı */
+      left:0;
+      right:0;
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
       gap:12px;
+      z-index:3;
+      pointer-events:auto;
     }
 
     /* ✅ KALP + JOKER: jokerler KALPLERİN TAM ALTINDA */
@@ -76,13 +84,12 @@
       margin-left:4px
     }
 
-    /* ✅ Jokerler tek sütun, kalplerin altına */
     .jokerCol{
       display:flex;
       flex-direction:column;
       gap:10px;
       align-items:flex-start;
-      margin-top:0; /* tam altına */
+      margin-top:0;
     }
     .joker{
       width:44px;height:56px;border-radius:14px;
@@ -102,7 +109,7 @@
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    /* ✅ Darağacı daha yukarı */
+    /* ✅ Darağacı: HANGMAN yazısının HEMEN ALTINDA */
     .stage{
       flex:1;
       display:flex;
@@ -110,13 +117,14 @@
       align-items:center;
       justify-content:flex-start;
       gap:10px;
-      padding-top:0px;
-      margin-top:-6px;
+      padding-top:8px;
+      margin-top:0;
+      z-index:1;
     }
 
     .gallows{
       width:150px;height:170px;position:relative;border-bottom:4px solid #fff;
-      transform: translateY(-22px);
+      transform: translateY(0px); /* ✅ hemen altına */
     }
     .beam{position:absolute;background:#fff}
     .v{width:4px;height:100%;left:30px}
@@ -136,7 +144,7 @@
     .lleg{width:20px;height:3px;left:-21px;top:70px;transform:rotate(-45deg)}
     .rleg{width:20px;height:3px;left:1px;top:70px;transform:rotate(45deg)}
 
-    /* ✅ Soru: darağacının HEMEN ALTINDA */
+    /* ✅ Türkçe: darağacının HEMEN ALTINDA */
     .trBox{
       width:min(560px, 100%);
       padding:10px 12px;
@@ -149,7 +157,7 @@
       letter-spacing:1px;
       text-transform:uppercase;
       color:rgba(255,255,255,.72);
-      margin-top:-30px; /* darağacının hemen altına çek */
+      margin-top:-6px;
     }
 
     /* ALT DOCK: kelime çizgileri + klavye */
@@ -223,11 +231,10 @@
     <div class="top">
       <div class="title">HANGMAN</div>
 
+      <!-- HUD akıştan çıktı: darağacı artık title'ın hemen altına gelir -->
       <div class="hud">
-        <!-- ✅ Sol: kalpler, hemen altında jokerler -->
         <div class="leftHud">
           <div class="hearts" id="hearts"></div>
-
           <div class="jokerCol">
             <div class="joker" id="j0">🃏</div>
             <div class="joker" id="j1">🃏</div>
@@ -235,7 +242,6 @@
           </div>
         </div>
 
-        <!-- Sağ: skor -->
         <div class="score">
           <div class="best">REKOR: <span id="bestVal">0</span></div>
           <div class="val" id="scoreVal">100</div>
@@ -258,7 +264,6 @@
           </div>
         </div>
 
-        <!-- ✅ Soru burada -->
         <div class="trBox" id="trText">YÜKLENİYOR…</div>
       </div>
     </div>
@@ -344,7 +349,6 @@
     let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
     $("bestVal").textContent = best;
 
-    // Joker click
     for(let i=0;i<3;i++){
       $(`j${i}`).onclick = () => useJ(i);
     }
@@ -435,24 +439,6 @@
       }catch(e){}
     }
 
-    function fireworks(){
-      const fx = $("fx");
-      const cx = Math.round(window.innerWidth * (0.25 + Math.random()*0.5));
-      const cy = Math.round(window.innerHeight * (0.20 + Math.random()*0.25));
-      for(let i=0;i<18;i++){
-        const s = document.createElement("div");
-        s.className = "spark";
-        const ang = Math.random()*Math.PI*2;
-        const dist = 120 + Math.random()*180;
-        s.style.left = cx+"px";
-        s.style.top  = cy+"px";
-        s.style.setProperty("--dx", Math.round(Math.cos(ang)*dist)+"px");
-        s.style.setProperty("--dy", Math.round(Math.sin(ang)*dist)+"px");
-        fx.appendChild(s);
-        setTimeout(()=>s.remove(), 950);
-      }
-    }
-
     function getCss(name){
       return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     }
@@ -468,7 +454,6 @@
 
     function endRound(win){
       lock = true;
-
       speakWord();
 
       if(win){
@@ -476,13 +461,6 @@
         if(flawless && !jokerUsed){
           lives++;
           bonus = "KUSURSUZ: +1 CAN";
-        }
-
-        if(score > best){
-          best = score;
-          localStorage.setItem(HS_KEY, String(best));
-          $("bestVal").textContent = best;
-          fireworks();
         }
 
         renderHearts();
