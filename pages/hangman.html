@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • NEURAL VOID</title>
+  <title>italkyAI • HANGMAN</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
@@ -14,48 +14,58 @@
       --red:#ff0033;
       --green:#00ff9d;
 
-      /* Dock */
-      --dockH: 205px;
+      /* dock: kelime çizgileri + klavye */
+      --dockH: 220px;
       --shellLift: 0px;
     }
 
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
     #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
 
+    /* ÜST BLOK = başlık + kalp/joker + darağacı + Türkçe soru */
     .top{
       height: calc(100% - var(--dockH));
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:10px;
     }
 
-    /* Üst bar */
-    .status{
+    /* ✅ HANGMAN en üstte */
+    .title{
+      font-family:"Space Grotesk";
+      letter-spacing:14px;
+      text-align:center;
+      font-size:26px;
+      opacity:.9;
+      margin:0;
+      padding-top:4px;
+    }
+
+    /* Kalp + Joker alanı (başlığın hemen altında) */
+    .hud{
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
       gap:12px;
     }
 
-    /* Sol: Kalpler + jokerler dikey */
-    .leftStack{
+    .leftHud{
       display:flex;
-      flex-direction:column;
-      gap:10px;
+      flex-direction:row;
+      gap:12px;
       align-items:flex-start;
     }
 
     .hearts{
       display:flex;
-      align-items:center;
-      gap:6px;
       flex-wrap:wrap;
-      max-width:62vw;
+      gap:6px;
+      align-items:center;
+      max-width:46vw;
     }
     .heart{
       font-size:22px;
       filter:drop-shadow(0 0 10px var(--red));
-      transition:.2s
     }
     .heartPlus{
       font-weight:900;
@@ -65,7 +75,7 @@
       margin-left:4px
     }
 
-    /* Jokerler: kalplerin altına alt alta */
+    /* Jokerler alt alta, kalplerin yanında (sen öyle istiyordun önce) */
     .jokerCol{
       display:flex;
       flex-direction:column;
@@ -85,36 +95,25 @@
     .joker:active{transform:scale(.96)}
     .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
 
-    /* Sağ: skor */
+    /* Skor sağ üst */
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    /* HANGMAN daha yukarı */
-    .title{
-      font-family:"Space Grotesk";
-      letter-spacing:12px;
-      text-align:center;
-      font-size:24px;
-      opacity:.86;
-      margin-top:-6px;
-      transform: translateY(-10px);
-    }
-
-    /* ✅ Darağacı daha yukarı (son rötuş) */
+    /* ✅ Darağacı: kalplerin hemen altında */
     .stage{
       flex:1;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:flex-start;
-      padding-top:0px; /* <-- yukarı */
-      gap:8px;
+      gap:10px;
+      padding-top:0;
     }
 
     .gallows{
       width:150px;height:170px;position:relative;border-bottom:4px solid #fff;
-      transform: translateY(-32px); /* <-- daha yukarı */
+      transform: translateY(-4px);
     }
     .beam{position:absolute;background:#fff}
     .v{width:4px;height:100%;left:30px}
@@ -134,7 +133,7 @@
     .lleg{width:20px;height:3px;left:-21px;top:70px;transform:rotate(-45deg)}
     .rleg{width:20px;height:3px;left:1px;top:70px;transform:rotate(45deg)}
 
-    /* Türkçe anlam */
+    /* ✅ Türkçe Soru: darağacının hemen altında */
     .trBox{
       width:min(560px, 100%);
       padding:10px 12px;
@@ -146,11 +145,11 @@
       font-size:13px;
       letter-spacing:1px;
       text-transform:uppercase;
-      color:rgba(255,255,255,.70);
-      transform: translateY(-22px); /* darağacı yukarı çıkınca bunu da biraz yukarı aldım */
+      color:rgba(255,255,255,.72);
+      margin-top:-6px;
     }
 
-    /* Dock: sadece çizgiler + klavye */
+    /* ✅ ALT DOCK: kelime çizgileri + klavye */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -219,8 +218,10 @@
     <div class="fx" id="fx"></div>
 
     <div class="top">
-      <div class="status">
-        <div class="leftStack">
+      <div class="title">HANGMAN</div>
+
+      <div class="hud">
+        <div class="leftHud">
           <div class="hearts" id="hearts"></div>
 
           <div class="jokerCol">
@@ -235,8 +236,6 @@
           <div class="val" id="scoreVal">100</div>
         </div>
       </div>
-
-      <div class="title">HANGMAN</div>
 
       <div class="stage">
         <div class="gallows">
