@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • HANGMAN NEURAL VOID</title>
+  <title>italkyAI • NEURAL VOID</title>
   <style>
     :root {
       --void-bg: #010008;
@@ -11,78 +11,88 @@
       --neon-red: #ff0033;
       --neon-green: #00ff9d;
       --neon-blue: #00f3ff;
+      --glass: rgba(255, 255, 255, 0.05);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; background: var(--void-bg); color: #fff; font-family: 'Outfit', sans-serif; height: 100dvh; overflow: hidden; }
 
-    /* 🌌 GÖRSEL ŞOV: NEBULA & DEEP SPACE */
+    /* 🌌 KOZMİK ARKA PLAN */
     .nebula { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #010008 100%); z-index: -1; }
-    .stars { position: fixed; inset: 0; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.4; z-index: -1; pointer-events: none; }
+    .stars { position: fixed; inset: 0; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.3; z-index: -1; pointer-events: none; }
 
     .app-container { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; position: relative; z-index: 10; }
 
-    /* TOPBAR: CANLAR VE SKOR */
-    header { padding: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
-    .back-node { width: 42px; height: 42px; border-radius: 14px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); font-size: 20px; }
+    /* TOPBAR: CANLAR & PRESTİGE SKOR */
+    header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .back-node { width: 42px; height: 42px; border-radius: 14px; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; }
     
     .stats { text-align: right; }
-    .hearts { display: flex; gap: 5px; justify-content: flex-end; margin-bottom: 5px; }
-    .heart { font-size: 18px; filter: drop-shadow(0 0 5px var(--neon-red)); transition: 0.3s; }
-    .heart.lost { opacity: 0.2; filter: grayscale(1); }
-    .score-val { font-size: 24px; font-weight: 900; background: var(--ai-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .best-tag { font-size: 10px; font-weight: 800; opacity: 0.4; letter-spacing: 1px; }
-
-    /* 🏗️ DARAĞACI & SALLANAN SİBER KURBAN */
-    .visual-core { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .hangman-title { font-family: 'Space Grotesk'; font-size: 38px; font-weight: 900; letter-spacing: 10px; margin-bottom: 20px; text-shadow: 0 0 20px var(--neon-blue); }
+    .hearts { display: flex; gap: 6px; justify-content: flex-end; margin-bottom: 5px; }
+    .heart { font-size: 18px; filter: drop-shadow(0 0 8px var(--neon-red)); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .heart.lost { opacity: 0.1; filter: grayscale(1) blur(1px); transform: scale(0.8); }
     
-    .gallows { width: 160px; height: 180px; position: relative; border-bottom: 4px solid #fff; }
+    .score-box { display: flex; flex-direction: column; align-items: flex-end; }
+    .score-val { font-size: 28px; font-weight: 900; background: var(--ai-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
+    .best-tag { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); letter-spacing: 1.5px; margin-top: 4px; }
+
+    /* 🏗️ DARAĞACI & SALLANAN NEURAL KURBAN */
+    .visual-core { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .game-brand { font-family: 'Space Grotesk'; font-size: 32px; font-weight: 900; letter-spacing: 8px; margin-bottom: 15px; text-shadow: 0 0 20px var(--neon-blue); opacity: 0.8; }
+    
+    .gallows { width: 160px; height: 180px; position: relative; border-bottom: 4px solid #fff; border-radius: 2px; }
     .g-part { position: absolute; background: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3); display: none; }
     .g-part.fixed { display: block; }
     
     .p-up { width: 4px; height: 100%; left: 30px; }
     .p-top { width: 90px; height: 4px; left: 30px; top: 0; }
-    .p-rope { width: 2px; height: 25px; left: 120px; top: 0; background: #888; }
+    .p-rope { width: 2px; height: 25px; left: 120px; top: 0; background: #999; }
 
+    /* SALLANAN KURBAN */
     .hanging-man { position: absolute; left: 120px; top: 25px; transform-origin: top center; animation: neuralSwing 4s infinite ease-in-out; }
-    .m-part { position: absolute; background: #fff; box-shadow: 0 0 10px #fff; display: none; }
+    .m-part { position: absolute; background: #fff; box-shadow: 0 0 12px #fff; display: none; }
     .m-part.active { display: block; }
 
-    .p-head { width: 24px; height: 24px; border: 3px solid #fff; border-radius: 50%; left: -12px; top: 0; }
-    .p-body { width: 3px; height: 50px; left: -1.5px; top: 24px; }
-    .p-larm { width: 18px; height: 3px; left: -19px; top: 38px; transform: rotate(-30deg); }
-    .p-rarm { width: 18px; height: 3px; left: 1px; top: 38px; transform: rotate(30deg); }
-    .p-lleg { width: 18px; height: 3px; left: -19px; top: 74px; transform: rotate(-45deg); }
-    .p-rleg { width: 18px; height: 3px; left: 1px; top: 74px; transform: rotate(45deg); }
+    .p-head { width: 26px; height: 26px; border: 3px solid #fff; border-radius: 50%; left: -13px; top: 0; }
+    .p-body { width: 3px; height: 50px; left: -1.5px; top: 26px; }
+    .p-larm { width: 20px; height: 3px; left: -21px; top: 40px; transform: rotate(-30deg); }
+    .p-rarm { width: 20px; height: 3px; left: 1px; top: 40px; transform: rotate(30deg); }
+    .p-lleg { width: 20px; height: 3px; left: -21px; top: 76px; transform: rotate(-45deg); }
+    .p-rleg { width: 20px; height: 3px; left: 1px; top: 76px; transform: rotate(45deg); }
 
     /* WORD MATRIX */
-    .word-area { padding: 10px; text-align: center; min-height: 80px; }
-    .slot { width: 28px; height: 38px; border-bottom: 3px solid rgba(99,102,241,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; margin: 0 4px; }
-    .slot.filled { border-bottom-color: var(--neon-green); text-shadow: 0 0 15px var(--neon-green); }
+    .word-area { padding: 15px; text-align: center; min-height: 80px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .slot { width: 32px; height: 44px; border-bottom: 3px solid rgba(99,102,241,0.2); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; transition: 0.3s; }
+    .slot.filled { border-bottom-color: var(--neon-green); text-shadow: 0 0 15px var(--neon-green); color: #fff; }
 
     /* JOKER CARDS */
-    .joker-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; }
+    .joker-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
     .j-card { 
-      width: 50px; height: 70px; border-radius: 12px; border: 1px solid var(--neon-blue); 
-      background: rgba(0, 243, 255, 0.05); display: flex; align-items: center; justify-content: center; 
-      font-size: 24px; cursor: pointer; transition: 0.3s; box-shadow: 0 0 10px rgba(0,243,255,0.1);
+      width: 55px; height: 75px; border-radius: 14px; border: 1px solid var(--neon-blue); 
+      background: rgba(0, 243, 255, 0.03); display: flex; align-items: center; justify-content: center; 
+      font-size: 26px; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: inset 0 0 15px rgba(0,243,255,0.1);
     }
-    .j-card.used { opacity: 0.1; filter: grayscale(1); pointer-events: none; transform: translateY(10px); }
+    .j-card:active { transform: scale(0.9); }
+    .j-card.used { opacity: 0.05; filter: grayscale(1) blur(1px); pointer-events: none; transform: translateY(15px); }
 
-    /* KEYBOARD */
-    .kb { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 30px 30px 0 0; }
-    .key { height: 42px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; font-size: 14px; }
-    .key.hit { background: var(--neon-green); color: #000; box-shadow: 0 0 15px var(--neon-green); }
-    .key.miss { background: var(--neon-red); opacity: 0.3; }
+    /* NEURAL KEYBOARD */
+    .kb { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; padding: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(25px); border-radius: 35px 35px 0 0; border-top: 1px solid rgba(255,255,255,0.1); }
+    .key { height: 45px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.2s; }
+    .key.hit { background: var(--neon-green); color: #000; box-shadow: 0 0 20px var(--neon-green); border-color: transparent; pointer-events: none; }
+    .key.miss { background: var(--neon-red); color: #fff; box-shadow: 0 0 15px var(--neon-red); opacity: 0.4; border-color: transparent; pointer-events: none; }
 
-    /* MODAL */
-    .modal { position: fixed; inset: 0; background: rgba(1,0,8,0.98); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; text-align: center; }
-    .modal.active { display: flex; }
-    .modal h1 { font-size: 40px; font-weight: 900; margin-bottom: 10px; }
-    .big-btn { width: 100%; max-width: 280px; padding: 20px; border-radius: 20px; border: none; background: var(--ai-grad); color: #fff; font-weight: 900; font-size: 18px; cursor: pointer; margin-top: 30px; }
+    /* RESULT MODAL (Premium) */
+    .modal { position: fixed; inset: 0; background: rgba(1,0,8,0.98); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+    .modal.active { display: flex; animation: modalIn 0.5s var(--ease-premium); }
+    .modal h1 { font-size: 48px; font-weight: 1000; margin: 0; letter-spacing: -2px; }
+    .modal .word-reveal { font-size: 32px; color: var(--neon-blue); margin: 20px 0; font-weight: 900; letter-spacing: 2px; }
+    .modal .point-gain { font-size: 18px; font-weight: 800; color: var(--neon-green); margin-bottom: 30px; }
+    
+    .big-btn { width: 100%; max-width: 280px; padding: 22px; border-radius: 24px; border: none; background: var(--ai-grad); color: #fff; font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4); }
 
-    @keyframes neuralSwing { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+    @keyframes neuralSwing { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
+    @keyframes modalIn { from { opacity: 0; transform: scale(1.1); } to { opacity: 1; transform: scale(1); } }
   </style>
 </head>
 <body>
@@ -97,13 +107,15 @@
         <div class="hearts" id="heartBox">
           <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
         </div>
-        <div class="score-val" id="curScore">0</div>
-        <div class="best-tag">BEST: <span id="bestScore">0</span></div>
+        <div class="score-box">
+          <div class="score-val" id="curScore">100</div>
+          <div class="best-tag">BEST: <span id="bestScore">0</span></div>
+        </div>
       </div>
     </header>
 
     <div class="visual-core">
-      <div class="hangman-title">HANGMAN</div>
+      <div class="game-brand">HANGMAN</div>
       <div class="gallows">
         <div class="g-part fixed p-up"></div><div class="g-part fixed p-top"></div><div class="p-rope fixed"></div>
         <div class="hanging-man">
@@ -112,7 +124,7 @@
           <div class="m-part p-lleg" id="lleg"></div><div class="m-part p-rleg" id="rleg"></div>
         </div>
       </div>
-      <div id="trHint" style="margin-top:20px; font-weight:900; color:rgba(255,255,255,0.3); text-transform:uppercase; font-size:12px; letter-spacing:2px;"></div>
+      <div id="trHint" style="margin-top:20px; font-weight:1000; color:rgba(255,255,255,0.4); text-transform:uppercase; font-size:13px; letter-spacing:2px;"></div>
     </div>
 
     <div class="word-area" id="wordMatrix"></div>
@@ -127,11 +139,12 @@
   </div>
 
   <div class="modal" id="resultModal">
-    <h1 id="mTitle">BİLDİN!</h1>
-    <div id="mWord" style="font-size:32px; font-weight:900; color:var(--neon-blue); margin:15px 0;">APPLE</div>
-    <div id="mTr" style="opacity:0.6; font-style:italic;">(Elma)</div>
-    <div id="mBonus" style="margin-top:15px; font-weight:900; color:var(--neon-green); height:24px;"></div>
-    <button class="big-btn" onclick="nextRound()">DEVAM ET</button>
+    <h1 id="mTitle">DEŞİFRE EDİLDİ!</h1>
+    <div class="word-reveal" id="mWord">APPLE</div>
+    <div id="mTr" style="opacity:0.6; font-style:italic; font-size:18px;">(Elma)</div>
+    <div class="point-gain" id="mPoints">+50 PUAN</div>
+    <div id="mBonus" style="margin-bottom:20px; font-weight:900; color:var(--neon-green); text-shadow:0 0 10px var(--neon-green);"></div>
+    <button class="big-btn" onclick="nextRound()">DATA AKIŞINA DEVAM ET</button>
   </div>
 
   <script type="module">
@@ -139,11 +152,11 @@
     import { supabase } from "/js/supabase_client.js";
 
     let pool, target, guessed = [], mistakes = 0, jokersUsed = 0;
-    let score = 0, lives = 3, best = localStorage.getItem('italky_hangman_best') || 0;
+    let score = 100, lives = 3, best = localStorage.getItem('italky_hangman_best') || 0;
     let lang = 'en', diff = 'easy', isCleanRun = true;
 
     async function init() {
-      // 1 Jeton Düşme & 24 Saatlik Mühürleme
+      // ✅ 24 SAATLİK JETON SİSTEMİ
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return location.href = "/pages/login.html";
       
@@ -151,7 +164,7 @@
       const lastPaid = localStorage.getItem(sessionKey);
       if (!(lastPaid && (Date.now() - lastPaid) < 86400000)) {
         const { data: p } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
-        if (p?.tokens < 1) return alert("Jeton Gerekli!");
+        if (p?.tokens < 1) return alert("Galaktik erişim için 1 jeton gerekiyor!");
         await supabase.from("profiles").update({ tokens: p.tokens - 1 }).eq("id", session.user.id);
         localStorage.setItem(sessionKey, Date.now());
       }
@@ -163,7 +176,7 @@
 
     function nextRound() {
       document.getElementById('resultModal').classList.remove('active');
-      guessed = []; mistakes = 0; jokersUsed = 0; isCleanRun = true;
+      guessed = []; mistakes = 0; jokersUsed = 0; isCleanRun = true; score = 100;
       
       const minL = {easy:3, normal:4, hard:5}[diff] || 3;
       const usedSet = createUsedSet(`used_hangman_${lang}`);
@@ -199,7 +212,8 @@
         guessed.push(l); key.classList.add('hit'); renderWord();
         if(target.w.split('').every(c => guessed.includes(c.toUpperCase()))) finish(true);
       } else {
-        mistakes++; isCleanRun = false;
+        mistakes++; isCleanRun = false; score -= 10;
+        document.getElementById('curScore').innerText = Math.max(0, score);
         key.classList.add('miss'); updateVisuals();
         const limit = {easy:6, normal:4, hard:3}[diff] || 6;
         if(mistakes >= limit) finish(false);
@@ -208,8 +222,12 @@
 
     function updateVisuals() {
       document.querySelectorAll('.m-part').forEach(p => p.classList.remove('active'));
-      const seq = ['head','body','larm','rarm','lleg','rleg'];
-      seq.slice(0, mistakes).forEach(id => document.getElementById(id).classList.add('active'));
+      const seq = {
+        easy: [['head'],['body'],['larm'],['rarm'],['lleg'],['rleg']],
+        normal: [['head'],['body'],['larm','rarm'],['lleg','rleg']],
+        hard: [['head','body'],['larm','rarm'],['lleg','rleg']]
+      };
+      seq[diff].slice(0, mistakes).forEach(g => g.forEach(id => document.getElementById(id).classList.add('active')));
     }
 
     function updateHearts() {
@@ -218,32 +236,32 @@
     }
 
     function finish(win) {
+      const m = document.getElementById('resultModal');
       if(win) {
-        score += (target.w.length * 10);
-        let bonus = "";
+        let bonusStr = "";
         if(isCleanRun && jokersUsed === 0 && lives < 3) {
-          lives++; bonus = "MÜKEMMEL! +1 CAN KAZANDIN!";
+          lives++; bonusStr = "CORE RECOVERY! +1 CAN KAZANDIN!";
         }
-        showModal("BİLDİN!", win, bonus);
+        document.getElementById('mTitle').innerText = "VERİ KURTARILDI!";
+        document.getElementById('mTitle').style.color = "var(--neon-green)";
+        document.getElementById('mPoints').innerText = `+${score} PUAN SİSTEME EKLENDİ`;
+        document.getElementById('mBonus').innerText = bonusStr;
+        
         const u = new SpeechSynthesisUtterance(target.w); u.lang = 'en-US'; speechSynthesis.speak(u);
       } else {
         lives--;
+        document.getElementById('mTitle').innerText = "BAĞLANTI KOPTU!";
+        document.getElementById('mTitle').style.color = "var(--neon-red)";
+        document.getElementById('mPoints').innerText = `CRITICAL ERROR: -1 CAN`;
+        document.getElementById('mBonus').innerText = "";
         if(lives <= 0) {
-          if(score > best) localStorage.setItem('italky_hangman_best', score);
-          alert("BAĞLANTI KOPTU! Skorun: " + score); location.reload();
-        } else {
-          showModal("OLMADI!", win, "");
+           if(score > best) localStorage.setItem('italky_hangman_best', score);
+           alert("SİSTEM ÇÖKTÜ! Galaktik Skorun: " + score); location.reload();
+           return;
         }
       }
-    }
-
-    function showModal(title, win, bonus) {
-      const m = document.getElementById('resultModal');
-      document.getElementById('mTitle').innerText = title;
-      document.getElementById('mTitle').style.color = win ? 'var(--neon-green)' : 'var(--neon-red)';
       document.getElementById('mWord').innerText = target.w.toUpperCase();
       document.getElementById('mTr').innerText = `(${target.tr})`;
-      document.getElementById('mBonus').innerText = bonus;
       m.classList.add('active');
     }
 
