@@ -43,7 +43,7 @@
       z-index:2;
     }
 
-    /* HUD absolute: yalnızca konumlandırma */
+    /* HUD absolute */
     .hud{
       position:absolute;
       top:56px;
@@ -65,7 +65,7 @@
       gap:10px;
     }
 
-    /* ✅ 3'erli satır */
+    /* 3'erli satır */
     .hearts{
       display:grid;
       grid-template-columns: repeat(3, max-content);
@@ -80,7 +80,7 @@
       filter:drop-shadow(0 0 10px var(--red));
     }
 
-    /* SAĞ: skor */
+    /* SAĞ: skor + jokerler */
     .rightHud{
       display:flex;
       flex-direction:column;
@@ -92,7 +92,7 @@
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    /* ✅ Jokerler sağ tarafta, puanın hemen altında */
+    /* Jokerler sağ tarafta puanın altında */
     .jokerCol{
       display:flex;
       flex-direction:column;
@@ -224,10 +224,104 @@
       0%{transform:translate(0,0) scale(.6);opacity:1}
       100%{transform:translate(var(--dx),var(--dy)) scale(2.2);opacity:0}
     }
+
+    /* ✅ GİRİŞ: Dil + zorluk seçimi */
+    .setup{
+      position:fixed;
+      inset:0;
+      z-index:60000;
+      background:rgba(3,0,20,.98);
+      display:flex;
+      flex-direction:column;
+      padding:22px;
+      box-sizing:border-box;
+    }
+    .setupTitle{
+      font-family:"Space Grotesk";
+      font-size:34px;
+      font-weight:900;
+      text-align:center;
+      letter-spacing:-1px;
+      background:linear-gradient(to bottom,#fff,#6366f1);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      margin:6px 0 16px;
+    }
+    .setupTag{
+      font-size:11px;
+      font-weight:900;
+      opacity:.6;
+      letter-spacing:2px;
+      margin:10px 0 8px;
+    }
+    .langGrid{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:8px;
+    }
+    .diffGrid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-top:8px;
+    }
+    .pickCard{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
+      border-radius:14px;
+      padding:12px 0;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      font-weight:900;
+    }
+    .pickCard.active{
+      border-color:#6366f1;
+      background:rgba(99,102,241,.18);
+    }
+    .pickCard.diff.active{
+      border-color:var(--green);
+      background:rgba(0,255,157,.10);
+    }
+    .startBtn{
+      margin-top:auto;
+      width:100%;
+      padding:18px;
+      border-radius:18px;
+      border:none;
+      background:var(--grad);
+      color:#fff;
+      font-weight:900;
+      font-size:18px;
+      cursor:pointer;
+    }
   </style>
 </head>
 
 <body>
+  <!-- ✅ GİRİŞ EKRANI -->
+  <div class="setup" id="setup">
+    <div class="setupTitle">NEURAL VOID</div>
+
+    <div class="setupTag">DİL SEÇ</div>
+    <div class="langGrid" id="langGrid">
+      <div class="pickCard active" data-lang="en">🇬🇧<div style="font-size:10px;opacity:.75;margin-top:4px">EN</div></div>
+      <div class="pickCard" data-lang="de">🇩🇪<div style="font-size:10px;opacity:.75;margin-top:4px">DE</div></div>
+      <div class="pickCard" data-lang="fr">🇫🇷<div style="font-size:10px;opacity:.75;margin-top:4px">FR</div></div>
+      <div class="pickCard" data-lang="it">🇮🇹<div style="font-size:10px;opacity:.75;margin-top:4px">IT</div></div>
+      <div class="pickCard" data-lang="es">🇪🇸<div style="font-size:10px;opacity:.75;margin-top:4px">ES</div></div>
+    </div>
+
+    <div class="setupTag">ZORLUK</div>
+    <div class="diffGrid" id="diffGrid">
+      <div class="pickCard diff active" data-diff="3">KOLAY</div>
+      <div class="pickCard diff" data-diff="4">NORMAL</div>
+      <div class="pickCard diff" data-diff="5">ZOR</div>
+    </div>
+
+    <button class="startBtn" id="startBtn">OYUNA BAŞLA</button>
+  </div>
+
   <div id="pageContent">
     <div class="fx" id="fx"></div>
 
@@ -235,22 +329,20 @@
       <div class="title">HANGMAN</div>
 
       <div class="hud">
-        <!-- SOL: kalpler -->
         <div class="leftHud">
           <div class="hearts" id="hearts"></div>
         </div>
 
-        <!-- SAĞ: skor + jokerler -->
         <div class="rightHud">
           <div class="score">
             <div class="best">REKOR: <span id="bestVal">0</span></div>
             <div class="val" id="scoreVal">100</div>
           </div>
 
+          <!-- ✅ Joker 2 adet (1 kart eksildi) -->
           <div class="jokerCol">
             <div class="joker" id="j0">🃏</div>
             <div class="joker" id="j1">🃏</div>
-            <div class="joker" id="j2">🃏</div>
           </div>
         </div>
       </div>
@@ -341,13 +433,16 @@
     let diff = 3;
 
     let lives = 3;
-    const MAX_LIVES = 9; // ✅ max 9 can
+    const MAX_LIVES = 9;
 
     let pool = null;
     let target = null;
     let guessed = new Set();
     let mistakes = 0;
-    let jokersLeft = 3;
+
+    // ✅ joker 2
+    let jokersLeft = 2;
+    const MAX_JOKERS = 2;
 
     let score = 100;
     let flawless = true;
@@ -358,8 +453,31 @@
     let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
     $("bestVal").textContent = best;
 
-    // Joker click
-    for(let i=0;i<3;i++){
+    // ✅ Setup seçimleri
+    $("langGrid").addEventListener("click", (e) => {
+      const c = e.target.closest(".pickCard");
+      if(!c || !c.dataset.lang) return;
+      [...$("langGrid").querySelectorAll(".pickCard")].forEach(x=>x.classList.remove("active"));
+      c.classList.add("active");
+      lang = c.dataset.lang;
+    });
+
+    $("diffGrid").addEventListener("click", (e) => {
+      const c = e.target.closest(".pickCard.diff");
+      if(!c) return;
+      [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
+      c.classList.add("active");
+      diff = parseInt(c.dataset.diff, 10);
+    });
+
+    $("startBtn").onclick = async () => {
+      $("setup").style.display = "none";
+      await loadRealPool();
+      newRound();
+    };
+
+    // Joker click (2 adet)
+    for(let i=0;i<2;i++){
       $(`j${i}`).onclick = () => useJ(i);
     }
 
@@ -370,12 +488,9 @@
     };
 
     function renderHearts(){
-      // ✅ 3'erli satır, max 9
       const capped = Math.max(0, Math.min(lives, MAX_LIVES));
       let html = "";
-      for(let i=0;i<capped;i++){
-        html += `<span class="heart">❤️</span>`;
-      }
+      for(let i=0;i<capped;i++) html += `<span class="heart">❤️</span>`;
       $("hearts").innerHTML = html;
     }
 
@@ -467,7 +582,6 @@
 
       if(win){
         let bonus = "";
-        // ✅ Kusursuzsa +1 can, ama max 9'u geçme
         if(flawless && !jokerUsed && lives < MAX_LIVES){
           lives++;
           bonus = "KUSURSUZ: +1 CAN";
@@ -555,7 +669,7 @@
       lock = false;
       guessed = new Set();
       mistakes = 0;
-      jokersLeft = 3;
+      jokersLeft = MAX_JOKERS;
       flawless = true;
       jokerUsed = false;
 
@@ -563,7 +677,7 @@
       $("scoreVal").textContent = score;
 
       resetMan();
-      for(let i=0;i<3;i++) $(`j${i}`).classList.remove("spent");
+      for(let i=0;i<2;i++) $(`j${i}`).classList.remove("spent");
 
       const usedSet = createUsedSet(`used_hangman_${lang}`);
       const picked = pick(pool, 1, usedSet.used, usedSet.save, (x)=> (x?.w||"").length >= 3);
@@ -583,12 +697,6 @@
       renderKeyboard();
       updateMan();
     }
-
-    renderHearts();
-    (async ()=>{
-      const ok = await loadRealPool();
-      if(ok) newRound();
-    })();
   </script>
 </body>
 </html>
