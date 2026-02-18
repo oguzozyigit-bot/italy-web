@@ -14,10 +14,8 @@
       --red:#ff0033;
       --green:#00ff9d;
 
-      /* ✅ Dock daha kompakt: darağacı yukarı çıksın */
-      --dockH: 235px;
-
-      /* ui_shell varsa, JS bunu yükseltecek */
+      /* dock daha kompakt (joker üstte) */
+      --dockH: 215px;
       --shellLift: 0px;
     }
 
@@ -31,16 +29,39 @@
       gap:8px;
     }
 
-    .status{display:flex;justify-content:space-between;align-items:center}
+    /* Üst bar */
+    .status{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+    }
+    .leftStack{display:flex;flex-direction:column;gap:8px}
     .hearts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:62vw}
     .heart{font-size:22px;filter:drop-shadow(0 0 10px var(--red));transition:.2s}
     .heartPlus{font-weight:900;opacity:.65;font-size:12px;letter-spacing:1px;margin-left:4px}
+
+    /* ✅ Jokerler artık kalplerin altında tek tek */
+    .jokerStack{display:flex;gap:10px;align-items:center}
+    .joker{
+      width:44px;height:56px;border-radius:14px;
+      border:1px solid rgba(99,102,241,.55);
+      background:rgba(99,102,241,.10);
+      display:flex;align-items:center;justify-content:center;
+      font-size:22px;
+      cursor:pointer;
+      user-select:none;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      transition:.2s;
+    }
+    .joker:active{transform:scale(.96)}
+    .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
 
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    /* ✅ HANGMAN yazısı yukarı */
+    /* HANGMAN daha yukarı */
     .title{
       font-family:"Space Grotesk";
       letter-spacing:12px;
@@ -51,18 +72,18 @@
       transform: translateY(-6px);
     }
 
-    /* ✅ Darağacı yukarı */
+    /* Darağacı */
     .stage{
       flex:1;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:flex-start;
-      padding-top:14px;
+      padding-top:12px;
       gap:10px;
     }
 
-    .gallows{width:150px;height:170px;position:relative;border-bottom:4px solid #fff; transform: translateY(-6px);}
+    .gallows{width:150px;height:170px;position:relative;border-bottom:4px solid #fff; transform: translateY(-8px);}
     .beam{position:absolute;background:#fff}
     .v{width:4px;height:100%;left:30px}
     .h{width:95px;height:4px;left:30px;top:0}
@@ -95,7 +116,7 @@
       color:rgba(255,255,255,.55);
     }
 
-    /* ✅ Dock: daha aşağı, footer varsa JS ile yukarı alınacak */
+    /* ✅ Dock: artık sadece çizgiler + klavye */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -117,14 +138,15 @@
     .slot{width:28px;height:40px;border-bottom:3px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900}
     .slot.found{border-bottom-color:var(--green);text-shadow:0 0 10px var(--green)}
 
-    .jokerRow{display:flex;justify-content:center;gap:12px}
-    .joker{width:50px;height:58px;border-radius:12px;border:1px solid #6366f1;background:rgba(99,102,241,.10);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer}
-    .joker.spent{opacity:.12;filter:grayscale(1);pointer-events:none}
-
     .kb{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-    .key{height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;font-weight:900}
+    .key{
+      height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);color:#fff;font-weight:900;
+      transition:.12s;
+    }
+    .key:active{transform:scale(.98)}
     .key.hit{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
-    .key.miss{background:var(--red);opacity:.3}
+    .key.miss{background:var(--red);opacity:.30}
 
     /* Modal */
     .modal{
@@ -164,7 +186,17 @@
 
     <div class="top">
       <div class="status">
-        <div class="hearts" id="hearts"></div>
+        <div class="leftStack">
+          <div class="hearts" id="hearts"></div>
+
+          <!-- ✅ Jokerler burada -->
+          <div class="jokerStack">
+            <div class="joker" id="j0">🃏</div>
+            <div class="joker" id="j1">🃏</div>
+            <div class="joker" id="j2">🃏</div>
+          </div>
+        </div>
+
         <div class="score">
           <div class="best">REKOR: <span id="bestVal">0</span></div>
           <div class="val" id="scoreVal">100</div>
@@ -195,13 +227,6 @@
 
     <div class="dock" id="dock">
       <div class="matrix" id="matrix"></div>
-
-      <div class="jokerRow">
-        <div class="joker" id="j0">🃏</div>
-        <div class="joker" id="j1">🃏</div>
-        <div class="joker" id="j2">🃏</div>
-      </div>
-
       <div class="kb" id="kb"></div>
     </div>
 
@@ -222,7 +247,7 @@
 
     const $ = (id) => document.getElementById(id);
 
-    // ✅ ui_shell footer lift: dock footer üstünde kalsın
+    // ✅ ui_shell footer lift
     const liftDock = () => {
       const root = getComputedStyle(document.documentElement);
       const footerH = parseFloat(root.getPropertyValue("--footerH")) || 92;
@@ -231,9 +256,41 @@
     setTimeout(liftDock, 0);
     setTimeout(liftDock, 250);
 
-    // State
-    let lang = "en";      // istersen shell profilinden alırsın
-    let diff = 3;         // şimdilik kolay
+    // ---------- SES MOTORU (DOSYASIZ) ----------
+    let AC = null;
+    const audioOn = () => {
+      if(!AC){
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if(Ctx) AC = new Ctx();
+      }
+      if(AC && AC.state === "suspended") AC.resume().catch(()=>{});
+    };
+
+    const beep = (freq, dur=0.06, type="sine", gain=0.08) => {
+      if(!AC) return;
+      const t0 = AC.currentTime;
+      const o = AC.createOscillator();
+      const g = AC.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t0);
+
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+      o.connect(g); g.connect(AC.destination);
+      o.start(t0);
+      o.stop(t0 + dur + 0.02);
+    };
+
+    const sTap  = () => { audioOn(); beep(420, 0.035, "triangle", 0.05); };
+    const sHit  = () => { audioOn(); beep(740, 0.06, "sine", 0.08);  beep(980, 0.05, "sine", 0.05); };
+    const sMiss = () => { audioOn(); beep(190, 0.08, "square", 0.07); beep(140, 0.10, "square", 0.05); };
+    const sJok  = () => { audioOn(); beep(520, 0.06, "triangle", 0.07); beep(660, 0.06, "triangle", 0.06); };
+
+    // ---------- OYUN STATE ----------
+    let lang = "en";
+    let diff = 3;          // 3 easy, 4 normal, 5 hard
     let lives = 3;
 
     let pool = null;
@@ -251,7 +308,7 @@
     let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
     $("bestVal").textContent = best;
 
-    // Joker click
+    // Joker click (üstte)
     for(let i=0;i<3;i++){
       $(`j${i}`).onclick = () => useJ(i);
     }
@@ -263,7 +320,6 @@
     };
 
     function renderHearts(){
-      // ✅ can artınca gerçekten görünür (7’ye kadar çiz, sonrası +N)
       const showMax = 7;
       const shown = Math.min(lives, showMax);
       const extra = Math.max(0, lives - showMax);
@@ -275,7 +331,6 @@
     }
 
     function getLimit(){
-      // kolay/normal/zor: 7 / 4 / 3
       if(diff === 3) return 7;
       if(diff === 4) return 4;
       return 3;
@@ -291,7 +346,6 @@
       const m = mistakes;
 
       if(diff === 3){
-        // easy: 7 limit ama 6 parça var; son hata “tamamlandı” gibi
         const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
         seq.slice(0, Math.min(m, 6)).forEach(id => $(id).classList.add("on"));
         return;
@@ -364,6 +418,10 @@
       }
     }
 
+    function getCss(name){
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
     function showModal(title, color, bonus){
       $("mTitle").textContent = title;
       $("mTitle").style.color = color;
@@ -376,7 +434,7 @@
     function endRound(win){
       lock = true;
 
-      // doğruyu yaz + sesli oku
+      // ✅ sonunda doğru kelimeyi sesli oku
       speakWord();
 
       if(win){
@@ -418,12 +476,18 @@
       if(lock) return;
       if(guessed.has(letter)) return;
 
+      // ✅ tuş basma sesi her durumda
+      sTap();
+
       const w = target.w.toUpperCase();
       if(w.includes(letter)){
         guessed.add(letter);
         btn.classList.add("hit");
-        renderWord();
 
+        // ✅ doğru sesi
+        sHit();
+
+        renderWord();
         const allFound = w.split("").every(ch => guessed.has(ch));
         if(allFound) endRound(true);
       }else{
@@ -431,9 +495,10 @@
         mistakes++;
         btn.classList.add("miss");
 
-        // yanlış -10
-        applyPenalty(10);
+        // ✅ yanlış sesi
+        sMiss();
 
+        applyPenalty(10);
         updateMan();
         if(mistakes >= getLimit()) endRound(false);
       }
@@ -443,14 +508,14 @@
       if(lock) return;
       if(jokersLeft <= 0) return;
 
+      sJok();
+
       jokerUsed = true;
       jokersLeft--;
+
       $(`j${i}`).classList.add("spent");
+      applyPenalty(10); // joker -10
 
-      // joker -10
-      applyPenalty(10);
-
-      // doğru bir harf aç
       const w = target.w.toUpperCase();
       const rem = w.split("").filter(ch => !guessed.has(ch));
       if(rem.length){
@@ -461,13 +526,8 @@
       }
     }
 
-    function getCss(name){
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
-
     async function loadRealPool(){
       pool = await loadLangPool(lang);
-
       if(!pool?.items?.length){
         $("hint").textContent = `HAVUZ BOŞ: ${lang}.json (items yok)`;
         return false;
@@ -494,7 +554,7 @@
       target = picked?.[0];
 
       if(!target?.w){
-        $("hint").textContent = "KELİME SEÇİLEMEDİ (pick boş döndü)";
+        $("hint").textContent = "KELİME SEÇİLEMEDİ (pick boş)";
         $("matrix").innerHTML = "";
         $("kb").innerHTML = "";
         return;
