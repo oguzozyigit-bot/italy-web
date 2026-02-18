@@ -89,24 +89,6 @@
       margin-bottom: 10px;
     }
 
-    /* ✅ Dünya küresinin iki yanında AI */
-    .ai-side{
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      font-size: 64px;        /* büyük */
-      font-weight: 1000;
-      letter-spacing: 1px;
-      color:#fff;
-      text-shadow: 0 0 22px rgba(255,255,255,0.28);
-      opacity: .92;
-      user-select:none;
-      pointer-events:none;
-      z-index: 5; /* glow’un üstü, earth’ün altı */
-    }
-    .ai-side.left{ left: -6px; }
-    .ai-side.right{ right: -6px; }
-
     .earth-glow{
       position:absolute;
       inset: 12px;
@@ -127,9 +109,11 @@
       width: 210px;
       height: 210px;
       border-radius: 50%;
+      /* NASA Blue Marble texture (daha gerçekçi) */
       background-image: url("https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74518/world.topo.bathy.200412.3x5400x2700.jpg");
       background-size: cover;
       background-position: center;
+      /* gerçekçi gölge + parlama */
       box-shadow:
         inset -28px -28px 60px rgba(0,0,0,0.85),
         inset 10px 10px 28px rgba(255,255,255,0.05),
@@ -140,6 +124,26 @@
       overflow:hidden;
     }
 
+    /* ✅ AI yazıları DÜNYANIN İÇİNDE (iki taraf) */
+    .earth .ai-in{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      font-size: 44px;           /* büyük ama kibar */
+      font-weight: 1000;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.92);
+      text-shadow: 0 0 18px rgba(255,255,255,0.22);
+      z-index: 3;                /* earth::before üstüne */
+      pointer-events:none;
+      user-select:none;
+      mix-blend-mode: screen;
+      opacity: .9;
+    }
+    .earth .ai-in.left{ left: 18px; }
+    .earth .ai-in.right{ right: 18px; }
+
+    /* Bulut efekti gibi hafif parıltı katmanı (çok hafif) */
     .earth::before{
       content:"";
       position:absolute;
@@ -151,8 +155,10 @@
       mix-blend-mode: screen;
       opacity:.6;
       pointer-events:none;
+      z-index: 4;
     }
 
+    /* ✅ Ters dönme yok: rotateY */
     @keyframes rotateSphere{
       from{ transform: rotateY(0deg); }
       to{ transform: rotateY(360deg); }
@@ -171,13 +177,13 @@
     }
     .typewriter{
       font-family: 'JetBrains Mono', monospace;
-      font-size: 16px;
+      font-size: 16px;               /* ✅ daha büyük */
       color: rgba(255,255,255,.65);
       border-right:2px solid var(--accent);
       white-space: nowrap;
       overflow: hidden;
       width: 0;
-      animation: typing 5.6s steps(46, end) infinite, blink .85s step-end infinite;
+      animation: typing 5.6s steps(46, end) infinite, blink .85s step-end infinite; /* ✅ daha yavaş */
     }
     @keyframes typing { 0%,10%{ width:0 } 62%,86%{ width:100% } 100%{ width:0 } }
     @keyframes blink { from,to{ border-color:transparent } 50%{ border-color:var(--accent) } }
@@ -210,11 +216,12 @@
     .google-btn:active{ transform: scale(.97); }
     .g-icon{ width:24px; height:24px; pointer-events:none; }
 
+    /* ✅ Footer imzayı 0.5cm yukarı */
     footer{
       width:100%;
       text-align:center;
       z-index:20;
-      padding-bottom: calc(18px + var(--safeB) + 18px);
+      padding-bottom: calc(18px + var(--safeB) + 18px); /* ✅ ekstra yukarı */
       margin-top: -6px;
     }
     .footer-nav{
@@ -291,11 +298,11 @@
     <div class="world-container" aria-hidden="true">
       <div class="earth-glow"></div>
 
-      <!-- ✅ AI yazıları -->
-      <div class="ai-side left">AI</div>
-      <div class="ai-side right">AI</div>
-
-      <div class="earth"></div>
+      <!-- ✅ AI'ler artık DÜNYANIN İÇİNDE -->
+      <div class="earth">
+        <div class="ai-in left">AI</div>
+        <div class="ai-in right">AI</div>
+      </div>
     </div>
 
     <div class="typewriter-container">
@@ -337,6 +344,7 @@
 
     function toast(msg){
       if(!toastEl) return;
+      toastEl.textContent = String(msg||"");
       toastEl.textContent = String(msg||"");
       toastEl.classList.add("show");
       clearTimeout(window.__to);
