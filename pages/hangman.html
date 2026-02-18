@@ -7,47 +7,40 @@
   <style>
     :root {
       --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --neon-red: #ff0033;
-      --neon-green: #00ff9d;
+      --neon-red: #ff4757;
+      --neon-green: #2ed573;
     }
-
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; background: #010008; color: #fff; font-family: 'Outfit', sans-serif; height: 100dvh; overflow: hidden; }
 
+    /* 🌌 GÖRSEL ŞOV */
+    .nebula { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #010008 100%); z-index: -1; }
+    .stars { position: fixed; inset: 0; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.3; z-index: -1; }
+
     .app-container { width: 100%; max-width: 480px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; position: relative; z-index: 10; }
 
-    /* 🛠️ GİRİŞ PANELİ (Symmetry & Pro) */
+    /* 🛠️ GİRİŞ PANELİ */
     .setup-overlay { position: absolute; inset: 0; background: #010008; z-index: 2000; padding: 25px; display: flex; flex-direction: column; }
-    .brand-3d { font-family: 'Space Grotesk'; font-size: 42px; font-weight: 900; text-align: center; margin-bottom: 25px; background: var(--ai-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
-
+    .brand-3d { font-family: 'Space Grotesk'; font-size: 38px; font-weight: 900; text-align: center; margin-bottom: 25px; background: var(--ai-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
+    
     .grid-select { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
     .opt-card { background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 14px; padding: 12px 5px; text-align: center; cursor: pointer; transition: 0.3s; }
-    .opt-card.active { border-color: #6366f1; background: rgba(99, 102, 241, 0.2); transform: scale(1.05); }
-    .opt-card span { display: block; font-size: 20px; margin-bottom: 4px; }
-    .opt-card label { font-size: 10px; font-weight: 900; }
-
+    .opt-card.active { border-color: #6366f1; background: rgba(99, 102, 241, 0.2); }
     .diff-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .diff-card { background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 16px; padding: 15px 10px; text-align: center; cursor: pointer; }
-    .diff-card.active { border-color: var(--neon-green); background: rgba(0, 255, 157, 0.1); }
+    .diff-card.active { border-color: var(--neon-green); background: rgba(46, 213, 115, 0.1); }
+    .start-btn { width: 100%; padding: 20px; border-radius: 20px; border: none; background: var(--ai-grad); color: #fff; font-weight: 900; font-size: 18px; margin-top: 25px; cursor: pointer; }
 
-    .start-btn { width: 100%; padding: 20px; border-radius: 20px; border: none; background: var(--ai-grad); color: #fff; font-weight: 900; font-size: 18px; margin-top: 30px; cursor: pointer; }
-
-    /* 🏗️ DARAĞACI SABİT - ADAM SALLANAN */
+    /* 🏗️ DARAĞACI VE SALLANAN ADAM */
     .visual-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
     .gallows-fixed { width: 140px; height: 180px; position: relative; border-bottom: 4px solid #fff; }
-    .p-fixed { position: absolute; background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+    .p-fixed { position: absolute; background: #fff; }
     .f-up { width: 4px; height: 100%; left: 30px; }
-    .f-top { width: 80px; height: 4px; left: 30px; top: 0; }
-    .f-rope { width: 2px; height: 25px; left: 110px; top: 0; background: #aaa; }
+    .f-top { width: 85px; height: 4px; left: 30px; top: 0; }
+    .f-rope { width: 2px; height: 25px; left: 115px; top: 0; background: #888; }
 
-    /* ✅ SALLANAN ADAM (Neural Swing) */
-    .hanging-man {
-      position: absolute; left: 110px; top: 25px;
-      width: 0; height: 0;
-      transform-origin: top center;
-      animation: neuralSwing 4s infinite ease-in-out; /* Burası kilit nokta */
-    }
-    .g-part { position: absolute; background: #fff; box-shadow: 0 0 15px #fff; display: none; }
+    .hanging-man { position: absolute; left: 115px; top: 25px; width: 0; height: 0; transform-origin: top center; animation: neuralSwing 4s infinite ease-in-out; }
+    .g-part { position: absolute; background: #fff; box-shadow: 0 0 10px #fff; display: none; }
     .g-part.active { display: block; }
 
     .p-head { width: 24px; height: 24px; border: 3px solid #fff; border-radius: 50%; left: -12px; top: 0; }
@@ -58,19 +51,26 @@
     .p-rleg { width: 18px; height: 3px; left: 1px; top: 74px; transform: rotate(45deg); }
 
     .word-area { padding: 15px; text-align: center; }
-    .slot { width: 28px; height: 38px; border-bottom: 3px solid rgba(99,102,241,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; margin: 0 3px; }
-    .slot.filled { border-bottom-color: var(--neon-green); text-shadow: 0 0 15px var(--neon-green); }
+    .slot { width: 26px; height: 36px; border-bottom: 3px solid rgba(99,102,241,0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; margin: 0 3px; }
+    .slot.filled { border-bottom-color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
 
-    @keyframes neuralSwing { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+    .kb { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding: 15px; }
+    .key { height: 40px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; }
+    .key.hit { background: var(--neon-green); color: #000; box-shadow: 0 0 10px var(--neon-green); }
+    .key.miss { background: var(--neon-red); opacity: 0.3; }
+
+    @keyframes neuralSwing { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
   </style>
 </head>
 <body>
+
+  <div class="nebula"></div>
+  <div class="stars"></div>
 
   <div class="app-container">
     
     <div class="setup-overlay" id="setup">
       <div class="brand-3d">italkyAI<br>NEURAL VOID</div>
-      <div class="section-label">DİL VE PROTOKOL SEÇİMİ</div>
       <div class="grid-select" id="langGrid">
         <div class="opt-card active" data-val="en"><span>🇬🇧</span><label>EN</label></div>
         <div class="opt-card" data-val="de"><span>🇩🇪</span><label>DE</label></div>
@@ -84,16 +84,14 @@
         <div class="diff-card" data-val="hard"><b>ZOR</b></div>
       </div>
       <button class="start-btn" onclick="bootGame()">OYUNA BAŞLA</button>
-      <div id="rekorAlanı" style="margin-top:auto; font-size:11px; opacity:0.5; text-align:center;">
-        REKOR: <span id="bestS">0</span> | <span id="bestD">-</span>
+      <div id="highScore" style="margin-top:auto; text-align:center; font-size:12px; opacity:0.5;">
+        GALAKTİK REKOR: <span id="bestS">0</span> | <span id="bestD">-</span>
       </div>
     </div>
 
     <header style="padding: 15px; display: flex; justify-content: space-between;">
       <div onclick="location.href='/pages/game.html'" style="cursor:pointer; font-size:24px;">‹</div>
-      <div style="text-align:right">
-        PUAN: <b id="score" style="color:var(--neon-green)">100</b>
-      </div>
+      <div style="text-align:right">PUAN: <b id="scoreDisp" style="color:var(--neon-green)">100</b></div>
     </header>
 
     <div class="visual-zone">
@@ -105,19 +103,50 @@
           <div class="g-part p-lleg" id="lleg"></div><div class="g-part p-rleg" id="rleg"></div>
         </div>
       </div>
-      <div id="hint" style="margin-top:20px; font-weight:900; color:rgba(255,255,255,0.4); text-transform:uppercase; font-size:12px;"></div>
+      <div id="hintText" style="margin-top:20px; font-weight:900; color:rgba(255,255,255,0.4); text-transform:uppercase; font-size:12px;"></div>
     </div>
 
     <div class="word-area" id="wordMatrix"></div>
-    <div id="keyboard" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding: 15px;"></div>
+    <div id="keyboard" class="kb"></div>
 
   </div>
 
   <script type="module">
-    import { loadLangPool } from "/js/langpool.js";
+    import { loadLangPool, pick, createUsedSet } from "/js/langpool.js";
+    import { supabase } from "/js/supabase_client.js";
+
     let pool, target, guessed = [], mistakes = 0, score = 100, lang = 'en', diff = 'easy';
 
+    // UI & Setup
+    document.getElementById('langGrid').onclick = e => {
+      const c = e.target.closest('.opt-card'); if(!c) return;
+      document.querySelectorAll('#langGrid .opt-card').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active'); lang = c.dataset.val;
+    };
+    document.getElementById('diffGrid').onclick = e => {
+      const c = e.target.closest('.diff-card'); if(!c) return;
+      document.querySelectorAll('#diffGrid .diff-card').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active'); diff = c.dataset.val;
+    };
+
+    const bestData = JSON.parse(localStorage.getItem('italky_hangman_best') || '{"s":0,"d":"-"}');
+    document.getElementById('bestS').innerText = bestData.s;
+    document.getElementById('bestD').innerText = bestData.d;
+
     window.bootGame = async () => {
+      // 1. Jeton & 24 Saat Kontrolü
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return location.href = "/pages/login.html";
+      
+      const sessionKey = `italky_24h_hangman_${session.user.id}`;
+      const lastPaid = localStorage.getItem(sessionKey);
+      if (!(lastPaid && (Date.now() - lastPaid) < 86400000)) {
+        const { data: p } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
+        if (p?.tokens < 1) return alert("Jeton Gerekli!");
+        await supabase.from("profiles").update({ tokens: p.tokens - 1 }).eq("id", session.user.id);
+        localStorage.setItem(sessionKey, Date.now());
+      }
+
       pool = await loadLangPool(lang);
       document.getElementById('setup').style.display = 'none';
       newRound();
@@ -125,17 +154,22 @@
 
     function newRound() {
       guessed = []; mistakes = 0; score = 100;
-      const items = (pool.items || pool).filter(x => x.w.length >= 3);
-      target = items[Math.floor(Math.random() * items.length)];
+      const minL = {easy:3, normal:4, hard:5}[diff];
+      
+      // Senin langpool.js pick fonksiyonun
+      const usedSet = createUsedSet(`used_hangman_${lang}`);
+      const picked = pick(pool, 1, usedSet.used, usedSet.save, (x) => x.w.length >= minL);
+      target = picked[0];
+
       renderWord(); renderKB(); updateVis();
-      document.getElementById('score').innerText = score;
+      document.getElementById('scoreDisp').innerText = score;
     }
 
     function renderWord() {
       document.getElementById('wordMatrix').innerHTML = target.w.split('').map(l => 
         `<div class="slot ${guessed.includes(l.toUpperCase())?'filled':''}">${guessed.includes(l.toUpperCase())?l.toUpperCase():''}</div>`
       ).join('');
-      document.getElementById('hint').innerText = target.tr;
+      document.getElementById('hintText').innerText = target.tr;
     }
 
     function renderKB() {
@@ -144,22 +178,24 @@
       const fillers = abc.filter(l => !tLetters.includes(l)).sort(()=>0.5-Math.random()).slice(0, 13);
       const keys = [...tLetters, ...fillers].sort((a,b)=>a.localeCompare(b));
       document.getElementById('keyboard').innerHTML = keys.map(l => 
-        `<button style="height:42px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:#fff; font-weight:800;" id="k-${l}" onclick="makeG('${l}')">${l}</button>`
+        `<button class="key" id="k-${l}" onclick="makeGuess('${l}')">${l}</button>`
       ).join('');
     }
 
-    window.makeG = (l) => {
+    window.makeGuess = (l) => {
       if(guessed.includes(l)) return;
+      const key = document.getElementById(`k-${l}`);
       if(target.w.toUpperCase().includes(l)) {
-        guessed.push(l); renderWord();
+        guessed.push(l); key.classList.add('hit'); renderWord();
         if(target.w.split('').every(c => guessed.includes(c.toUpperCase()))) {
-           const u = new SpeechSynthesisUtterance(target.w); u.lang = 'en-US'; speechSynthesis.speak(u);
-           setTimeout(newRound, 2000);
+          const u = new SpeechSynthesisUtterance(target.w); u.lang = lang==='en'?'en-US':'tr-TR'; speechSynthesis.speak(u);
+          if(score > bestData.s) localStorage.setItem('italky_hangman_best', JSON.stringify({s:score, d:new Date().toLocaleDateString('tr-TR')}));
+          setTimeout(newRound, 2000);
         }
       } else {
-        mistakes++; score -= 10; // ✅ Yanlışta 10 puan düşüş
-        document.getElementById('score').innerText = Math.max(0, score);
-        updateVis();
+        mistakes++; score -= 10;
+        document.getElementById('scoreDisp').innerText = Math.max(0, score);
+        key.classList.add('miss'); updateVis();
         const limit = {easy:6, normal:4, hard:3}[diff];
         if(mistakes >= limit) { alert("BAĞLANTI KOPTU! Kelime: " + target.w.toUpperCase()); newRound(); }
       }
