@@ -3,35 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Zero-Scroll Hub</title>
+  <title>italkyAI • Symmetry Hub</title>
   <style>
     :root {
-      --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+      --p-lavender: rgba(233, 213, 255, 0.15);
+      --p-mint: rgba(187, 247, 208, 0.15);
+      --p-salmon: rgba(251, 207, 232, 0.15);
+      --p-sky: rgba(191, 219, 254, 0.15);
+      --p-lemon: rgba(254, 240, 138, 0.15);
     }
 
-    /* ✅ EKRANA TAM SIĞDIRMA */
     #pageContent {
-      height: calc(100vh - 185px); /* Header ve Footer'ı çıkarınca kalan net alan */
+      /* Üst ve alt barı tam hesaplayıp scroll'u öldürüyoruz */
+      height: calc(100vh - 180px);
       display: flex;
       flex-direction: column;
-      padding: 10px;
+      padding: 12px;
       box-sizing: border-box;
-      overflow: hidden; /* Scroll tamamen yasak */
+      overflow: hidden;
     }
 
     .neural-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(4, 1fr); /* Ekranı 4 ana satıra böldük */
-      gap: 10px;
+      /* 5 satırın her biri tam olarak eşit yükseklikte */
+      grid-template-rows: repeat(5, 1fr); 
+      gap: 12px;
       height: 100%;
     }
 
-    /* MODÜL TASARIMI (KİBAR VE ÖLÇEKLENEBİLİR) */
+    /* KİBAR VE EŞİT MODÜLLER */
     .game-module {
       position: relative;
-      border-radius: 24px;
-      padding: 10px;
+      border-radius: 26px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -39,35 +43,33 @@
       text-align: center;
       border: 1px solid rgba(255,255,255,0.1);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       transition: all 0.3s ease;
       cursor: pointer;
       overflow: hidden;
-      background: rgba(255,255,255,0.03);
     }
 
-    /* Giriftli Yapı */
+    /* Giriftli yapı ama yükseklikler eşitlenmiş */
     .tall { grid-row: span 2; }
-    .wide { grid-column: span 2; flex-direction: row !important; justify-content: space-around !important; padding: 0 30px !important; }
+    .wide { grid-column: span 2; flex-direction: row !important; gap: 20px !important; padding: 0 25px !important; }
 
-    /* PASTEL ZEMİNLER */
-    .bg-s { background: rgba(251, 207, 232, 0.12); }
-    .bg-b { background: rgba(191, 219, 254, 0.12); }
-    .bg-y { background: rgba(254, 240, 138, 0.12); }
-    .bg-l { background: rgba(233, 213, 255, 0.12); }
-    .bg-m { background: rgba(187, 247, 208, 0.12); }
+    .bg-s { background: var(--p-salmon); }
+    .bg-b { background: var(--p-sky); }
+    .bg-y { background: var(--p-lemon); }
+    .bg-l { background: var(--p-lavender); }
+    .bg-m { background: var(--p-mint); }
 
-    .game-module:active { transform: scale(0.96); }
+    .game-module:active { transform: scale(0.96); opacity: 0.8; }
 
-    /* İKONLAR (ÖLÇEKLİ) */
-    .icon-node { font-size: 28px; margin-bottom: 5px; height: 35px; display: flex; align-items: center; justify-content: center; }
-    .wide .icon-node { margin-bottom: 0; font-size: 32px; }
+    /* İKONLAR (Küçüldü ve Kibarlaştı) */
+    .icon-node { font-size: 24px; margin-bottom: 4px; height: 32px; display: flex; align-items: center; justify-content: center; }
+    .wide .icon-node { margin-bottom: 0; font-size: 30px; }
 
-    /* ANİMASYONLAR */
     .i-swing { animation: swing 3s infinite ease-in-out; }
     @keyframes swing { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
     @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 
-    .g-name { font-size: 13px; font-weight: 1000; color: #fff; margin-bottom: 2px; }
+    .g-name { font-size: 13px; font-weight: 1000; color: #fff; margin-bottom: 1px; letter-spacing: -0.3px; }
     .g-desc { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.5); }
 
   </style>
@@ -79,8 +81,8 @@
       
       <div class="game-module tall bg-s" onclick="launchGame('hangman', '/pages/hangman', 5)">
         <div class="icon-node i-swing">
-          <div style="border-left: 2px solid #fff; height: 25px; position: relative;">
-            <div style="position: absolute; bottom: -5px; left: -5px; width: 8px; height: 8px; background: #fbcfe8; border-radius: 50%;"></div>
+          <div style="border-left: 2px solid #fff; height: 22px; position: relative;">
+            <div style="position: absolute; bottom: -4px; left: -4px; width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fbcfe8;"></div>
           </div>
         </div>
         <div class="g-name">Adam Asmaca</div>
@@ -101,11 +103,11 @@
 
       <div class="game-module tall bg-l" onclick="launchGame('sentence', '/pages/sentence', 5)">
         <div class="icon-node" style="display:flex; gap:4px; animation: bounce 2s infinite;">
-          <div style="width:8px; height:8px; background:#fff; border-radius:50%;"></div>
-          <div style="width:8px; height:8px; background:#fff; border-radius:50%;"></div>
+          <div style="width:7px; height:7px; background:#fff; border-radius:50%;"></div>
+          <div style="width:7px; height:7px; background:#fff; border-radius:50%;"></div>
         </div>
         <div class="g-name">Cümle Kurma</div>
-        <div class="g-desc">Zor</div>
+        <div class="g-desc">Zor Seviye</div>
       </div>
 
       <div class="game-module bg-m" onclick="launchGame('duo', '/pages/duo', 4)">
@@ -120,11 +122,11 @@
         <div class="g-desc">Normal</div>
       </div>
 
-      <div class="game-module wide bg-y" onclick="launchGame('gap', '/pages/gap', 4)">
+      <div class="game-module wide bg-m" onclick="launchGame('gap', '/pages/gap', 4)">
         <div class="icon-node" style="animation: bounce 2s infinite;">🔍</div>
         <div style="display:flex; flex-direction:column; align-items:flex-start;">
           <div class="g-name">Boşluk Doldur</div>
-          <div class="g-desc">Algoritma Tamamlama</div>
+          <div class="g-desc">Algoritma Tamamlama Protokolü</div>
         </div>
       </div>
 
@@ -138,7 +140,6 @@
     mountShell({ scroll: "none" });
 
     window.launchGame = async (gameId, url, minLen) => {
-      // 24 Saatlik Jeton Mantığı Arka Planda Çalışır...
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return location.href = "/pages/login.html";
       
@@ -155,7 +156,7 @@
         localStorage.setItem(sessionKey, Date.now());
         location.href = `${url}?minLen=${minLen}&access=new`;
       } else {
-        alert("Jeton Gerekli!");
+        alert("Devam etmek için jeton gerekli!");
       }
     };
   </script>
