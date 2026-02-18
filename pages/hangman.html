@@ -14,7 +14,7 @@
       --red:#ff0033;
       --green:#00ff9d;
 
-      /* dock: kelime çizgileri + klavye */
+      /* alt panel */
       --dockH: 220px;
       --shellLift: 0px;
     }
@@ -22,7 +22,7 @@
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
     #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
 
-    /* ÜST BLOK = başlık + kalp/joker + darağacı + Türkçe soru */
+    /* ÜST BLOK */
     .top{
       height: calc(100% - var(--dockH));
       display:flex;
@@ -30,7 +30,7 @@
       gap:10px;
     }
 
-    /* ✅ HANGMAN en üstte */
+    /* ✅ HANGMAN en üst */
     .title{
       font-family:"Space Grotesk";
       letter-spacing:14px;
@@ -41,7 +41,7 @@
       padding-top:4px;
     }
 
-    /* Kalp + Joker alanı (başlığın hemen altında) */
+    /* HUD: sol (kalp + joker alt alta), sağ (skor) */
     .hud{
       display:flex;
       justify-content:space-between;
@@ -49,11 +49,12 @@
       gap:12px;
     }
 
+    /* ✅ KALP + JOKER: jokerler KALPLERİN TAM ALTINDA */
     .leftHud{
       display:flex;
-      flex-direction:row;
-      gap:12px;
+      flex-direction:column;
       align-items:flex-start;
+      gap:10px;
     }
 
     .hearts{
@@ -61,7 +62,7 @@
       flex-wrap:wrap;
       gap:6px;
       align-items:center;
-      max-width:46vw;
+      max-width:52vw;
     }
     .heart{
       font-size:22px;
@@ -75,12 +76,13 @@
       margin-left:4px
     }
 
-    /* Jokerler alt alta, kalplerin yanında (sen öyle istiyordun önce) */
+    /* ✅ Jokerler tek sütun, kalplerin altına */
     .jokerCol{
       display:flex;
       flex-direction:column;
       gap:10px;
       align-items:flex-start;
+      margin-top:0; /* tam altına */
     }
     .joker{
       width:44px;height:56px;border-radius:14px;
@@ -95,12 +97,12 @@
     .joker:active{transform:scale(.96)}
     .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
 
-    /* Skor sağ üst */
+    /* Sağ: skor */
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    /* ✅ Darağacı: kalplerin hemen altında */
+    /* ✅ Darağacı daha yukarı */
     .stage{
       flex:1;
       display:flex;
@@ -108,12 +110,13 @@
       align-items:center;
       justify-content:flex-start;
       gap:10px;
-      padding-top:0;
+      padding-top:0px;
+      margin-top:-6px;
     }
 
     .gallows{
       width:150px;height:170px;position:relative;border-bottom:4px solid #fff;
-      transform: translateY(-4px);
+      transform: translateY(-22px);
     }
     .beam{position:absolute;background:#fff}
     .v{width:4px;height:100%;left:30px}
@@ -133,7 +136,7 @@
     .lleg{width:20px;height:3px;left:-21px;top:70px;transform:rotate(-45deg)}
     .rleg{width:20px;height:3px;left:1px;top:70px;transform:rotate(45deg)}
 
-    /* ✅ Türkçe Soru: darağacının hemen altında */
+    /* ✅ Soru: darağacının HEMEN ALTINDA */
     .trBox{
       width:min(560px, 100%);
       padding:10px 12px;
@@ -146,10 +149,10 @@
       letter-spacing:1px;
       text-transform:uppercase;
       color:rgba(255,255,255,.72);
-      margin-top:-6px;
+      margin-top:-30px; /* darağacının hemen altına çek */
     }
 
-    /* ✅ ALT DOCK: kelime çizgileri + klavye */
+    /* ALT DOCK: kelime çizgileri + klavye */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -221,6 +224,7 @@
       <div class="title">HANGMAN</div>
 
       <div class="hud">
+        <!-- ✅ Sol: kalpler, hemen altında jokerler -->
         <div class="leftHud">
           <div class="hearts" id="hearts"></div>
 
@@ -231,6 +235,7 @@
           </div>
         </div>
 
+        <!-- Sağ: skor -->
         <div class="score">
           <div class="best">REKOR: <span id="bestVal">0</span></div>
           <div class="val" id="scoreVal">100</div>
@@ -253,6 +258,7 @@
           </div>
         </div>
 
+        <!-- ✅ Soru burada -->
         <div class="trBox" id="trText">YÜKLENİYOR…</div>
       </div>
     </div>
@@ -463,7 +469,6 @@
     function endRound(win){
       lock = true;
 
-      // sonunda kelimeyi sesli oku
       speakWord();
 
       if(win){
@@ -592,7 +597,6 @@
       updateMan();
     }
 
-    // INIT
     renderHearts();
     (async ()=>{
       const ok = await loadRealPool();
