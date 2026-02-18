@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Neural Games Hub</title>
+  <title>italkyAI • Pro Games Hub</title>
   <style>
     :root {
-      /* Pastel Zemin Tonları */
       --p-lavender: #e9d5ff; --p-mint: #bbf7d0; --p-salmon: #fbcfe8; 
       --p-sky: #bfdbfe; --p-lemon: #fef08a; --p-rose: #fecdd3;
     }
@@ -19,11 +18,8 @@
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    .neural-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
-    }
+    .neural-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 
-    /* KART TEMELİ */
     .game-module {
       position: relative; border-radius: 32px; padding: 25px 15px;
       display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -36,54 +32,30 @@
     .game-module.wide { grid-column: span 2; flex-direction: row; text-align: left; padding: 20px 30px; gap: 25px; }
 
     /* PASTEL ZEMİNLER */
-    .bg-l { background: rgba(233, 213, 255, 0.12); } /* Lavender */
-    .bg-m { background: rgba(187, 247, 208, 0.12); } /* Mint */
-    .bg-s { background: rgba(251, 207, 232, 0.12); } /* Salmon */
-    .bg-b { background: rgba(191, 219, 254, 0.12); } /* Sky Blue */
-    .bg-y { background: rgba(254, 240, 138, 0.12); } /* Lemon */
+    .bg-l { background: rgba(233, 213, 255, 0.12); }
+    .bg-m { background: rgba(187, 247, 208, 0.12); }
+    .bg-s { background: rgba(251, 207, 232, 0.12); }
+    .bg-b { background: rgba(191, 219, 254, 0.12); }
+    .bg-y { background: rgba(254, 240, 138, 0.12); }
 
-    /* İKON ALANI */
     .icon-node { width: 65px; height: 65px; margin-bottom: 15px; position: relative; display: flex; align-items: center; justify-content: center; }
     .wide .icon-node { margin-bottom: 0; }
 
-    /* --- ÖZEL ANİMASYONLU İKONLAR --- */
-
-    /* 1. Adam Asmaca: Veri Hattından Sarkan Düğüm */
+    /* ANİMASYONLAR */
     .i-hangman { border-left: 3px solid #fff; height: 40px; position: relative; animation: swing 3s infinite ease-in-out; }
     .i-hangman::after { content: ""; position: absolute; bottom: -10px; left: -8px; width: 14px; height: 14px; border: 2px solid var(--p-salmon); border-radius: 50%; box-shadow: 0 0 10px var(--p-salmon); }
-
-    /* 2. Kelime Avı: Dönen Arama Merceği */
     .i-hunt { width: 45px; height: 45px; border: 3px solid var(--p-sky); border-radius: 50%; animation: pulseCircle 2s infinite; }
     .i-hunt::after { content: ""; position: absolute; width: 20px; height: 3px; background: #fff; transform: rotate(45deg); bottom: -5px; right: -5px; }
-
-    /* 3. Cümle Kurma: Akan Enerji Noktaları */
     .i-sentence { display: flex; gap: 5px; }
     .i-sentence div { width: 10px; height: 10px; background: var(--p-lavender); border-radius: 50%; animation: flow 1.5s infinite; }
-    .i-sentence div:nth-child(2) { animation-delay: 0.2s; }
-    .i-sentence div:nth-child(3) { animation-delay: 0.4s; }
-
-    /* 4. Casus Kim: Takip Eden Göz */
-    .i-spy { width: 45px; height: 25px; border: 3px solid #fff; border-radius: 50% 0; transform: rotate(-45deg); }
-    .i-spy::after { content: ""; width: 10px; height: 10px; background: var(--p-sky); border-radius: 50%; animation: eyeMove 4s infinite; }
-
-    /* 5. Glitch Hunter: Titreyen Uyarı */
-    .i-glitch { font-size: 30px; font-weight: 900; color: #f87171; animation: jitter 0.2s infinite; }
-
-    /* 6. Eşleştirme: Yer Değiştiren Kareler */
-    .i-match { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-    .i-match div { width: 15px; height: 15px; background: var(--p-mint); border-radius: 4px; animation: swap 2s infinite; }
-
-    /* --- ANİMASYON KEYFRAMES --- */
+    
     @keyframes swing { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(15deg); } }
     @keyframes pulseCircle { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(191, 219, 254, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(191, 219, 254, 0); } 100% { transform: scale(1); } }
     @keyframes flow { 0% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-10px); } 100% { opacity: 0.3; transform: translateY(0); } }
-    @keyframes eyeMove { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(5px, -5px); } 75% { transform: translate(-5px, 5px); } }
-    @keyframes jitter { 0% { transform: translate(0); } 50% { transform: translate(2px, -2px); } 100% { transform: translate(-2px, 2px); } }
-    @keyframes swap { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.7) rotate(90deg); } }
 
     .g-name { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 5px; }
     .g-desc { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); line-height: 1.3; }
-
+    .cost-tag { position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: 900; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 12px; color: #fef08a; }
   </style>
 </head>
 
@@ -91,73 +63,40 @@
   <div id="pageContent">
     <div class="neural-grid">
       
-      <div class="game-module tall bg-s" onclick="location.href='/pages/hangman'">
+      <div class="game-module tall bg-s" onclick="launchGame('/pages/hangman', 'hard')">
+        <div class="cost-tag">1 JETON</div>
         <div class="icon-node"><div class="i-hangman"></div></div>
         <div class="g-name">Adam Asmaca</div>
-        <div class="g-desc">Sallanan veri düğümlerini çöz, kelimeyi kurtar.</div>
+        <div class="g-desc">Deşifre Seviyesi: 5+ Harf</div>
       </div>
 
-      <div class="game-module bg-b" onclick="location.href='/pages/spy'">
-        <div class="icon-node"><div class="i-spy"></div></div>
+      <div class="game-module bg-b" onclick="launchGame('/pages/spy', 'normal')">
+        <div class="cost-tag">1 JETON</div>
+        <div class="icon-node"><div class="i-spy" style="width:40px; height:20px; border:2px solid #fff; border-radius:50% 0; transform:rotate(-45deg);"></div></div>
         <div class="g-name">Casus Kim?</div>
-        <div class="g-desc">Seni izleyen gözü bul, casusu deşifre et.</div>
+        <div class="g-desc">Analiz: 4+ Harf</div>
       </div>
 
-      <div class="game-module bg-y" onclick="location.href='/pages/cracker'">
-        <div class="icon-node">
-          <svg width="35" height="35" viewBox="0 0 24 24" stroke="#fef08a" stroke-width="2.5" fill="none" style="animation: swing 3s infinite;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg>
-        </div>
+      <div class="game-module bg-y" onclick="launchGame('/pages/cracker', 'easy')">
+        <div class="cost-tag">1 JETON</div>
+        <div class="icon-node"><svg width="35" height="35" viewBox="0 0 24 24" stroke="#fef08a" stroke-width="2" fill="none"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div>
         <div class="g-name">Bilgi Yarışı</div>
-        <div class="g-desc">Global ligde zekanı kanıtla.</div>
+        <div class="g-desc">Giriş: 3+ Harf</div>
       </div>
 
-      <div class="game-module tall bg-l" onclick="location.href='/pages/sentence'">
+      <div class="game-module tall bg-l" onclick="launchGame('/pages/sentence', 'hard')">
+        <div class="cost-tag">1 JETON</div>
         <div class="icon-node"><div class="i-sentence"><div></div><div></div><div></div></div></div>
         <div class="g-name">Cümle Kurma</div>
-        <div class="g-desc">Akan kelime enerjisini doğru sıraya diz.</div>
+        <div class="g-desc">Matris: 5+ Harf</div>
       </div>
 
-      <div class="game-module bg-m" style="background:rgba(254, 205, 211, 0.12)" onclick="location.href='/pages/glitch'">
-        <div class="icon-node"><div class="i-glitch">!</div></div>
-        <div class="g-name">Glitch Hunter</div>
-        <div class="g-desc">Sistemdeki parazitleri temizle.</div>
-      </div>
-
-      <div class="game-module bg-l" onclick="location.href='/pages/duo'">
-        <div class="icon-node">
-          <svg width="32" height="32" viewBox="0 0 24 24" stroke="#e9d5ff" stroke-width="2.5" fill="none" style="animation: flow 2s infinite;"><path d="M12 1v22M17 5v14M7 5v14M22 9v6M2 9v6"/></svg>
-        </div>
-        <div class="g-name">Sesli Düello</div>
-        <div class="g-desc">Akustik sinyalleri yakala.</div>
-      </div>
-
-      <div class="game-module tall bg-m" onclick="location.href='/pages/meteor'">
-        <div class="icon-node"><div class="i-match"><div></div><div></div><div></div><div></div></div></div>
-        <div class="g-name">Eşleştirme</div>
-        <div class="g-desc">Kuantum hafıza hücrelerini eşle.</div>
-      </div>
-
-      <div class="game-module bg-b" onclick="location.href='/pages/neural_box'">
-        <div class="icon-node" style="animation: swap 4s infinite;">
-          <svg width="35" height="35" viewBox="0 0 24 24" stroke="#bfdbfe" stroke-width="2.5" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        </div>
-        <div class="g-name">Neural Box</div>
-        <div class="g-desc">Gizli kutudaki veriyi çıkar.</div>
-      </div>
-
-      <div class="game-module bg-y" onclick="location.href='/pages/neural'">
-        <div class="icon-node" style="animation: pulseCircle 3s infinite;">
-           <svg width="35" height="35" viewBox="0 0 24 24" stroke="#fef08a" stroke-width="2.2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><circle cx="12" cy="12" r="3"/></svg>
-        </div>
-        <div class="g-name">Neural Core</div>
-        <div class="g-desc">Zihnini AI ile mühürle.</div>
-      </div>
-
-      <div class="game-module wide bg-m" onclick="location.href='/pages/gap'">
+      <div class="game-module wide bg-m" onclick="launchGame('/pages/gap', 'normal')">
+        <div class="cost-tag">1 JETON</div>
         <div class="icon-node"><div class="i-hunt"></div></div>
         <div>
           <div class="g-name">Boşluk Doldur</div>
-          <div class="g-desc">Eksik algoritmaları yerleştir, sağda boşluk kalsın.</div>
+          <div class="g-desc">Algoritma: 4+ Harf</div>
         </div>
       </div>
 
@@ -165,9 +104,48 @@
   </div>
 
   <script type="module">
-    import { mountShell, hydrateFromCache } from "/js/ui_shell.js";
-    mountShell({ scroll: "none" }); 
-    hydrateFromCache();
+    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
+    import { supabase } from "/js/supabase_client.js";
+
+    mountShell({ scroll: "none" });
+
+    window.launchGame = async (url, difficulty) => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return location.href = "/pages/login.html";
+
+        // 1. Mevcut jetonu kontrol et
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("tokens")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!profile || profile.tokens < 1) {
+          alert("Yetersiz Jeton! Lütfen profilinizden jeton yükleyin.");
+          return;
+        }
+
+        // 2. Jetonu düş (Sadece girişte 1 kez)
+        const { data: updated, error } = await supabase
+          .from("profiles")
+          .update({ tokens: profile.tokens - 1 })
+          .eq("id", session.user.id)
+          .select("tokens")
+          .single();
+
+        if (error) throw error;
+
+        // UI Header Jetonunu güncelle
+        if (updated) setHeaderTokens(updated.tokens);
+
+        // 3. Oyuna zorluk parametresiyle git
+        location.href = `${url}?diff=${difficulty}&session=active`;
+        
+      } catch (err) {
+        console.error("Game Error:", err);
+      }
+    };
   </script>
 </body>
 </html>
