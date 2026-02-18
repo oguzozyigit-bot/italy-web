@@ -21,9 +21,6 @@
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
     #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
 
-    /* ✅ Setup açıkken oyunu tamamen gizle (otomatik geçti hissi biter) */
-    body.setupOpen #pageContent{display:none}
-
     /* ÜST BLOK */
     .top{
       height: calc(100% - var(--dockH));
@@ -57,13 +54,13 @@
       pointer-events:auto;
     }
 
+    /* SOL: kalpler (3’erli satır) */
     .leftHud{
       display:flex;
       flex-direction:column;
       align-items:flex-start;
       gap:10px;
     }
-
     .hearts{
       display:grid;
       grid-template-columns: repeat(3, max-content);
@@ -78,18 +75,17 @@
       filter:drop-shadow(0 0 10px var(--red));
     }
 
+    /* SAĞ: skor + joker */
     .rightHud{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
       gap:10px;
     }
-
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    /* Jokerler sağ tarafta puanın altında (2 adet) */
     .jokerCol{
       display:flex;
       flex-direction:column;
@@ -109,6 +105,7 @@
     .joker:active{transform:scale(.96)}
     .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
 
+    /* Darağacı */
     .stage{
       flex:1;
       display:flex;
@@ -157,6 +154,7 @@
       margin-top:-6px;
     }
 
+    /* ALT DOCK */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -188,6 +186,7 @@
     .key.hit{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
     .key.miss{background:var(--red);opacity:0.30}
 
+    /* Modal */
     .modal{
       position:fixed; inset:0;
       background:rgba(1,0,8,.98);
@@ -206,7 +205,7 @@
     .mBonus{height:22px;font-weight:900;color:var(--green);margin-bottom:16px}
     .mBtn{width:100%;max-width:280px;padding:18px;border-radius:18px;border:none;background:var(--grad);color:#fff;font-weight:900;font-size:18px;cursor:pointer}
 
-    /* ✅ SETUP */
+    /* ✅ SETUP (eklediğim tek şey) */
     .setup{
       position:fixed; inset:0;
       z-index:60000;
@@ -272,7 +271,8 @@
   </style>
 </head>
 
-<body class="setupOpen">
+<body>
+  <!-- ✅ Setup -->
   <div class="setup" id="setup">
     <div class="setupTitle">NEURAL VOID</div>
 
@@ -353,29 +353,14 @@
   </div>
 
   <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { loadLangPool, pick, createUsedSet } from "/js/langpool.js";
+
+    mountShell({ scroll: "none" });
+
     const $ = (id) => document.getElementById(id);
 
-    // ✅ Dinamik import + hata yakalama: import patlarsa module durmaz
-    let mountShell = null, loadLangPool = null, pick = null, createUsedSet = null;
-
-    try{
-      ({ mountShell } = await import("/js/ui_shell.js"));
-    }catch(e){
-      $("setupMsg").textContent = "ui_shell yüklenemedi.\n" + String(e);
-    }
-
-    try{
-      ({ loadLangPool, pick, createUsedSet } = await import("/js/langpool.js"));
-    }catch(e){
-      $("setupMsg").textContent = ($("setupMsg").textContent ? $("setupMsg").textContent + "\n\n" : "") +
-        "langpool yüklenemedi.\n" + String(e);
-    }
-
-    if(mountShell){
-      try{ mountShell({ scroll: "none" }); }catch{}
-    }
-
-    // footer lift (varsa)
+    // footer lift
     const liftDock = () => {
       const root = getComputedStyle(document.documentElement);
       const footerH = parseFloat(root.getPropertyValue("--footerH")) || 92;
@@ -384,7 +369,7 @@
     setTimeout(liftDock, 0);
     setTimeout(liftDock, 250);
 
-    // Ses
+    // SES (basit)
     let AC = null;
     const audioOn = () => {
       if(!AC){
@@ -412,7 +397,7 @@
     const sMiss = () => { audioOn(); beep(190, 0.08, "square", 0.07); beep(140, 0.10, "square", 0.05); };
     const sJok  = () => { audioOn(); beep(520, 0.06, "triangle", 0.07); beep(660, 0.06, "triangle", 0.06); };
 
-    // STATE
+    // STATE (motor aynı)
     let lang = "en";
     let diff = 3;
 
@@ -433,7 +418,7 @@
     let jokerUsed = false;
     let lock = false;
 
-    // seçim
+    // seçim handlerları
     $("langGrid").addEventListener("click", (e) => {
       const c = e.target.closest(".pickCard");
       if(!c || !c.dataset.lang) return;
@@ -450,7 +435,7 @@
       diff = parseInt(c.dataset.diff, 10);
     });
 
-    // joker click (2)
+    // Joker click (2)
     for(let i=0;i<2;i++){
       $(`j${i}`).onclick = () => useJ(i);
     }
@@ -564,7 +549,6 @@
 
       const swingMs = (diff===3) ? 4000 : 5000;
       $("man").classList.add("swing");
-
       setTimeout(()=>{
         $("man").classList.remove("swing");
         if(lives <= 0){
@@ -620,31 +604,22 @@
       }
     }
 
-    async function loadRealPool(){
-      if(!loadLangPool || !pick || !createUsedSet) return false;
-      pool = await loadLangPool(lang);
-      return !!pool?.items?.length;
-    }
-
-    $("startBtn").onclick = async () => {
+    async function startGame(){
       $("setupMsg").textContent = "Yükleniyor…";
+      pool = await loadLangPool(lang);
 
-      const ok = await loadRealPool();
-      if(!ok){
-        $("setupMsg").textContent =
-          "Havuz yüklenemedi.\n" +
-          `Dil: ${lang}\n` +
-          "Kontrol: /js/langpool.js ve LANGPOOL_BASE";
+      if(!pool?.items?.length){
+        $("setupMsg").textContent = `Havuz boş / yok: ${lang}.json\nLANGPOOL_BASE kontrol et.`;
         return;
       }
 
+      // setup kapanır, oyun başlar
       $("setup").style.display = "none";
-      document.body.classList.remove("setupOpen");
       $("setupMsg").textContent = "";
 
       renderHearts();
       newRound();
-    };
+    }
 
     function newRound(){
       lock = false;
@@ -675,7 +650,13 @@
       renderWord();
       renderKeyboard();
       updateMan();
-    };
+    }
+
+    // Start butonu
+    $("startBtn").onclick = startGame;
+
+    // ilk ekranda kalpler default
+    renderHearts();
   </script>
 </body>
 </html>
