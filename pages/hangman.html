@@ -21,8 +21,8 @@
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
     #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
 
-    /* setup açıkken oyunu kilitle */
-    body.setupOpen #pageContent{filter: blur(8px); opacity:.55; pointer-events:none; user-select:none}
+    /* ✅ Setup açıkken oyunu tamamen gizle (otomatik geçti hissi biter) */
+    body.setupOpen #pageContent{display:none}
 
     /* ÜST BLOK */
     .top{
@@ -84,10 +84,12 @@
       align-items:flex-end;
       gap:10px;
     }
+
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
+    /* Jokerler sağ tarafta puanın altında (2 adet) */
     .jokerCol{
       display:flex;
       flex-direction:column;
@@ -265,6 +267,7 @@
       font-size:12px;
       opacity:.7;
       min-height:18px;
+      white-space:pre-wrap;
     }
   </style>
 </head>
@@ -350,13 +353,29 @@
   </div>
 
   <script type="module">
-    import { mountShell } from "/js/ui_shell.js";
-    import { loadLangPool, pick, createUsedSet } from "/js/langpool.js";
-
-    mountShell({ scroll: "none" });
-
     const $ = (id) => document.getElementById(id);
 
+    // ✅ Dinamik import + hata yakalama: import patlarsa module durmaz
+    let mountShell = null, loadLangPool = null, pick = null, createUsedSet = null;
+
+    try{
+      ({ mountShell } = await import("/js/ui_shell.js"));
+    }catch(e){
+      $("setupMsg").textContent = "ui_shell yüklenemedi.\n" + String(e);
+    }
+
+    try{
+      ({ loadLangPool, pick, createUsedSet } = await import("/js/langpool.js"));
+    }catch(e){
+      $("setupMsg").textContent = ($("setupMsg").textContent ? $("setupMsg").textContent + "\n\n" : "") +
+        "langpool yüklenemedi.\n" + String(e);
+    }
+
+    if(mountShell){
+      try{ mountShell({ scroll: "none" }); }catch{}
+    }
+
+    // footer lift (varsa)
     const liftDock = () => {
       const root = getComputedStyle(document.documentElement);
       const footerH = parseFloat(root.getPropertyValue("--footerH")) || 92;
@@ -365,7 +384,7 @@
     setTimeout(liftDock, 0);
     setTimeout(liftDock, 250);
 
-    // Ses (basit)
+    // Ses
     let AC = null;
     const audioOn = () => {
       if(!AC){
@@ -381,11 +400,9 @@
       const g = AC.createGain();
       o.type = type;
       o.frequency.setValueAtTime(freq, t0);
-
       g.gain.setValueAtTime(0.0001, t0);
       g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
       g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-
       o.connect(g); g.connect(AC.destination);
       o.start(t0);
       o.stop(t0 + dur + 0.02);
@@ -416,7 +433,7 @@
     let jokerUsed = false;
     let lock = false;
 
-    // Setup seçimleri
+    // seçim
     $("langGrid").addEventListener("click", (e) => {
       const c = e.target.closest(".pickCard");
       if(!c || !c.dataset.lang) return;
@@ -433,7 +450,7 @@
       diff = parseInt(c.dataset.diff, 10);
     });
 
-    // Joker click (2)
+    // joker click (2)
     for(let i=0;i<2;i++){
       $(`j${i}`).onclick = () => useJ(i);
     }
@@ -441,29 +458,6 @@
     $("mBtn").onclick = () => {
       $("modal").classList.remove("on");
       if(lives <= 0){ location.reload(); return; }
-      newRound();
-    };
-
-    async function loadRealPool(){
-      pool = await loadLangPool(lang);
-      return !!pool?.items?.length;
-    }
-
-    $("startBtn").onclick = async () => {
-      $("setupMsg").textContent = "Yükleniyor…";
-
-      const ok = await loadRealPool();
-      if(!ok){
-        $("setupMsg").textContent = `Havuz bulunamadı: ${lang}.json`;
-        return; // ✅ setup kapanmaz
-      }
-
-      // ✅ Havuz geldiyse oyunu başlat
-      $("setup").style.display = "none";
-      document.body.classList.remove("setupOpen");
-      $("setupMsg").textContent = "";
-
-      renderHearts();
       newRound();
     };
 
@@ -488,7 +482,6 @@
     function updateMan(){
       resetMan();
       const m = mistakes;
-
       if(diff === 3){
         const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
         seq.slice(0, Math.min(m, 6)).forEach(id => $(id).classList.add("on"));
@@ -522,7 +515,6 @@
     function renderKeyboard(){
       const w = target.w.toUpperCase();
       const uniq = [...new Set(w.split(""))];
-
       const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
       const fillers = abc.filter(l => !uniq.includes(l)).sort(()=>0.5-Math.random()).slice(0,10);
       const keys = [...uniq, ...fillers].sort(()=>0.5-Math.random());
@@ -594,7 +586,6 @@
         guessed.add(letter);
         btn.classList.add("hit");
         sHit();
-
         renderWord();
         if(w.split("").every(ch => guessed.has(ch))) endRound(true);
       }else{
@@ -602,7 +593,6 @@
         mistakes++;
         btn.classList.add("miss");
         sMiss();
-
         applyPenalty(10);
         updateMan();
         if(mistakes >= getLimit()) endRound(false);
@@ -618,7 +608,6 @@
       jokerUsed = true;
       jokersLeft--;
       $(`j${i}`).classList.add("spent");
-
       applyPenalty(10);
 
       const w = target.w.toUpperCase();
@@ -630,6 +619,32 @@
         else { guessed.add(l); renderWord(); }
       }
     }
+
+    async function loadRealPool(){
+      if(!loadLangPool || !pick || !createUsedSet) return false;
+      pool = await loadLangPool(lang);
+      return !!pool?.items?.length;
+    }
+
+    $("startBtn").onclick = async () => {
+      $("setupMsg").textContent = "Yükleniyor…";
+
+      const ok = await loadRealPool();
+      if(!ok){
+        $("setupMsg").textContent =
+          "Havuz yüklenemedi.\n" +
+          `Dil: ${lang}\n` +
+          "Kontrol: /js/langpool.js ve LANGPOOL_BASE";
+        return;
+      }
+
+      $("setup").style.display = "none";
+      document.body.classList.remove("setupOpen");
+      $("setupMsg").textContent = "";
+
+      renderHearts();
+      newRound();
+    };
 
     function newRound(){
       lock = false;
@@ -660,7 +675,7 @@
       renderWord();
       renderKeyboard();
       updateMan();
-    }
+    };
   </script>
 </body>
 </html>
