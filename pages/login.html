@@ -87,7 +87,7 @@
       justify-content:center;
       margin-top: 6px;
       margin-bottom: 10px;
-      perspective: 900px; /* ✅ 3D yüzler için */
+      perspective: 900px;
     }
 
     .earth-glow{
@@ -110,11 +110,9 @@
       width: 210px;
       height: 210px;
       border-radius: 50%;
-      /* NASA Blue Marble texture (daha gerçekçi) */
       background-image: url("https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74518/world.topo.bathy.200412.3x5400x2700.jpg");
       background-size: cover;
       background-position: center;
-      /* gerçekçi gölge + parlama */
       box-shadow:
         inset -28px -28px 60px rgba(0,0,0,0.85),
         inset 10px 10px 28px rgba(255,255,255,0.05),
@@ -125,7 +123,7 @@
       overflow:hidden;
     }
 
-    /* Bulut efekti gibi hafif parıltı katmanı (çok hafif) */
+    /* Bulut efekti gibi hafif parıltı katmanı */
     .earth::before{
       content:"";
       position:absolute;
@@ -140,13 +138,12 @@
       z-index: 6;
     }
 
-    /* ✅ Ters dönme yok: rotateY */
     @keyframes rotateSphere{
       from{ transform: rotateY(0deg); }
       to{ transform: rotateY(360deg); }
     }
 
-    /* ✅ Tek damga: ön yüz AI, arka yüz ITALKY (ayna düzeltilmiş) */
+    /* ✅ Damga: Ön yüzde ITALKY, arka yüzde de ITALKY (ayna düzeltilmiş) */
     .ai-stamp{
       position:absolute;
       inset:0;
@@ -154,25 +151,24 @@
       align-items:center;
       justify-content:center;
       font-weight: 1000;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
       color: rgba(255,255,255,0.92);
       text-shadow: 0 0 18px rgba(255,255,255,0.22);
       mix-blend-mode: screen;
-      opacity: .9;
+      opacity: .92;
       pointer-events:none;
       user-select:none;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
     .ai-front{
-      font-size: 52px;
+      font-size: 50px;              /* büyük */
       transform: translateZ(1px);
       z-index: 4;
     }
     .ai-back{
-      font-size: 38px;                /* ITALKY sığsın */
-      letter-spacing: 2px;
-      transform: rotateY(180deg) translateZ(1px) scaleX(-1); /* ✅ IA sorunu bitti */
+      font-size: 50px;              /* aynı büyüklük */
+      transform: rotateY(180deg) translateZ(1px) scaleX(-1); /* ✅ ters IA olmaz */
       z-index: 3;
     }
 
@@ -228,7 +224,6 @@
     .google-btn:active{ transform: scale(.97); }
     .g-icon{ width:24px; height:24px; pointer-events:none; }
 
-    /* ✅ Footer imzayı 0.5cm yukarı */
     footer{
       width:100%;
       text-align:center;
@@ -311,7 +306,7 @@
       <div class="earth-glow"></div>
 
       <div class="earth">
-        <div class="ai-stamp ai-front">AI</div>
+        <div class="ai-stamp ai-front">ITALKY</div>
         <div class="ai-stamp ai-back">ITALKY</div>
       </div>
     </div>
