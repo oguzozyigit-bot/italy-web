@@ -89,6 +89,24 @@
       margin-bottom: 10px;
     }
 
+    /* ✅ Dünya küresinin iki yanında AI */
+    .ai-side{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      font-size: 64px;        /* büyük */
+      font-weight: 1000;
+      letter-spacing: 1px;
+      color:#fff;
+      text-shadow: 0 0 22px rgba(255,255,255,0.28);
+      opacity: .92;
+      user-select:none;
+      pointer-events:none;
+      z-index: 5; /* glow’un üstü, earth’ün altı */
+    }
+    .ai-side.left{ left: -6px; }
+    .ai-side.right{ right: -6px; }
+
     .earth-glow{
       position:absolute;
       inset: 12px;
@@ -109,11 +127,9 @@
       width: 210px;
       height: 210px;
       border-radius: 50%;
-      /* NASA Blue Marble texture (daha gerçekçi) */
       background-image: url("https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74518/world.topo.bathy.200412.3x5400x2700.jpg");
       background-size: cover;
       background-position: center;
-      /* gerçekçi gölge + parlama */
       box-shadow:
         inset -28px -28px 60px rgba(0,0,0,0.85),
         inset 10px 10px 28px rgba(255,255,255,0.05),
@@ -124,7 +140,6 @@
       overflow:hidden;
     }
 
-    /* Bulut efekti gibi hafif parıltı katmanı (çok hafif) */
     .earth::before{
       content:"";
       position:absolute;
@@ -138,7 +153,6 @@
       pointer-events:none;
     }
 
-    /* ✅ Ters dönme yok: rotateY */
     @keyframes rotateSphere{
       from{ transform: rotateY(0deg); }
       to{ transform: rotateY(360deg); }
@@ -157,13 +171,13 @@
     }
     .typewriter{
       font-family: 'JetBrains Mono', monospace;
-      font-size: 16px;               /* ✅ daha büyük */
+      font-size: 16px;
       color: rgba(255,255,255,.65);
       border-right:2px solid var(--accent);
       white-space: nowrap;
       overflow: hidden;
       width: 0;
-      animation: typing 5.6s steps(46, end) infinite, blink .85s step-end infinite; /* ✅ daha yavaş */
+      animation: typing 5.6s steps(46, end) infinite, blink .85s step-end infinite;
     }
     @keyframes typing { 0%,10%{ width:0 } 62%,86%{ width:100% } 100%{ width:0 } }
     @keyframes blink { from,to{ border-color:transparent } 50%{ border-color:var(--accent) } }
@@ -196,12 +210,11 @@
     .google-btn:active{ transform: scale(.97); }
     .g-icon{ width:24px; height:24px; pointer-events:none; }
 
-    /* ✅ Footer imzayı 0.5cm yukarı */
     footer{
       width:100%;
       text-align:center;
       z-index:20;
-      padding-bottom: calc(18px + var(--safeB) + 18px); /* ✅ ekstra yukarı */
+      padding-bottom: calc(18px + var(--safeB) + 18px);
       margin-top: -6px;
     }
     .footer-nav{
@@ -277,6 +290,11 @@
 
     <div class="world-container" aria-hidden="true">
       <div class="earth-glow"></div>
+
+      <!-- ✅ AI yazıları -->
+      <div class="ai-side left">AI</div>
+      <div class="ai-side right">AI</div>
+
       <div class="earth"></div>
     </div>
 
@@ -329,12 +347,10 @@
       return !!(window.Native && typeof window.Native.startGoogleLogin === "function");
     }
 
-    // ✅ Eğer login sayfasına OAuth parametresiyle dönülürse callback’e gönder (loop biter)
     if (location.search.includes("code=") || location.hash.includes("access_token=")) {
       location.replace("/pages/auth_callback.html" + location.search + location.hash);
     }
 
-    // ✅ Native login success: Android id_token ile çağırır
     window.onNativeLoginSuccess = async function(payload){
       try{
         const data = (typeof payload === "string") ? JSON.parse(payload) : payload;
@@ -367,7 +383,6 @@
       }
     };
 
-    // Google button
     document.getElementById("googleBtn")?.addEventListener("click", async ()=>{
       try{
         if(isNative()){
@@ -383,7 +398,6 @@
       }
     });
 
-    // ✅ Daktilo cümleleri: daha premium + daha “açılış sayfan” tadında
     const phrases = [
       "Dil bariyerlerini görünmez yapıyoruz…",
       "italky Academy ile seviyeni netleştir…",
@@ -405,7 +419,6 @@
       }
     }, 5600);
 
-    // Boot: session varsa home
     (async function boot(){
       try{
         const { data:{ session } } = await supabase.auth.getSession();
