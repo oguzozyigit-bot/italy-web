@@ -21,7 +21,7 @@
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
     #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
 
-    /* ✅ Seçim yapılmadan oyun görünmez */
+    /* ✅ Setup açıkken oyun görünmez (seçimsiz geçme biter) */
     body.setupOpen #pageContent{display:none}
 
     /* ÜST BLOK */
@@ -47,15 +47,23 @@
     .hud{
       position:absolute;
       top:56px;
-      left:0; right:0;
+      left:0;
+      right:0;
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
       gap:12px;
       z-index:3;
+      pointer-events:auto;
     }
 
-    /* SOL: kalpler 3x3 */
+    .leftHud{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:10px;
+    }
+
     .hearts{
       display:grid;
       grid-template-columns: repeat(3, max-content);
@@ -65,26 +73,37 @@
       justify-items:start;
       max-width:52vw;
     }
-    .heart{font-size:22px;filter:drop-shadow(0 0 10px var(--red));}
+    .heart{
+      font-size:22px;
+      filter:drop-shadow(0 0 10px var(--red));
+    }
 
-    /* SAĞ: skor + joker (2 adet) */
     .rightHud{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
       gap:10px;
     }
+
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    .jokerCol{display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+    .jokerCol{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-end;
+    }
     .joker{
       width:44px;height:56px;border-radius:14px;
       border:1px solid rgba(99,102,241,.55);
       background:rgba(99,102,241,.10);
       display:flex;align-items:center;justify-content:center;
-      font-size:22px;cursor:pointer;user-select:none;transition:.2s;
+      font-size:22px;
+      cursor:pointer;
+      user-select:none;
+      transition:.2s;
     }
     .joker:active{transform:scale(.96)}
     .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
@@ -101,7 +120,10 @@
       z-index:1;
     }
 
-    .gallows{width:150px;height:170px;position:relative;border-bottom:4px solid #fff;}
+    .gallows{
+      width:150px;height:170px;position:relative;border-bottom:4px solid #fff;
+      transform: translateY(0px);
+    }
     .beam{position:absolute;background:#fff}
     .v{width:4px;height:100%;left:30px}
     .h{width:95px;height:4px;left:30px;top:0}
@@ -135,7 +157,7 @@
       margin-top:-6px;
     }
 
-    /* ALT DOCK: çizgi + klavye */
+    /* ALT DOCK */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -167,7 +189,26 @@
     .key.hit{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
     .key.miss{background:var(--red);opacity:0.30}
 
-    /* SETUP */
+    /* Modal */
+    .modal{
+      position:fixed; inset:0;
+      background:rgba(1,0,8,.98);
+      z-index:30000;
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:34px;
+      text-align:center;
+    }
+    .modal.on{display:flex}
+    .mTitle{font-size:38px;font-weight:900;margin:0}
+    .mWord{font-size:32px;font-weight:900;color:#60a5fa;margin:14px 0}
+    .mTr{opacity:.65;font-style:italic;margin-bottom:12px}
+    .mBonus{height:22px;font-weight:900;color:var(--green);margin-bottom:16px}
+    .mBtn{width:100%;max-width:280px;padding:18px;border-radius:18px;border:none;background:var(--grad);color:#fff;font-weight:900;font-size:18px;cursor:pointer}
+
+    /* ✅ SETUP (dil + zorluk) */
     .setup{
       position:fixed; inset:0;
       z-index:60000;
@@ -182,6 +223,7 @@
       font-size:34px;
       font-weight:900;
       text-align:center;
+      letter-spacing:-1px;
       background:linear-gradient(to bottom,#fff,#6366f1);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
@@ -229,30 +271,11 @@
       min-height:18px;
       white-space:pre-wrap;
     }
-
-    /* MODAL */
-    .modal{
-      position:fixed; inset:0;
-      background:rgba(1,0,8,.98);
-      z-index:30000;
-      display:none;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      padding:34px;
-      text-align:center;
-    }
-    .modal.on{display:flex}
-    .mTitle{font-size:38px;font-weight:900;margin:0}
-    .mWord{font-size:32px;font-weight:900;color:#60a5fa;margin:14px 0}
-    .mTr{opacity:.65;font-style:italic;margin-bottom:12px}
-    .mBonus{height:22px;font-weight:900;color:var(--green);margin-bottom:16px}
-    .mBtn{width:100%;max-width:280px;padding:18px;border-radius:18px;border:none;background:var(--grad);color:#fff;font-weight:900;font-size:18px;cursor:pointer}
   </style>
 </head>
 
 <body class="setupOpen">
-  <!-- SETUP -->
+  <!-- ✅ GİRİŞ: Dil + zorluk -->
   <div class="setup" id="setup">
     <div class="setupTitle">NEURAL VOID</div>
 
@@ -276,13 +299,17 @@
     <div class="setupMsg" id="setupMsg"></div>
   </div>
 
-  <!-- GAME -->
+  <!-- OYUN -->
   <div id="pageContent">
+    <div class="fx" id="fx"></div>
+
     <div class="top">
       <div class="title">HANGMAN</div>
 
       <div class="hud">
-        <div class="hearts" id="hearts"></div>
+        <div class="leftHud">
+          <div class="hearts" id="hearts"></div>
+        </div>
 
         <div class="rightHud">
           <div class="score">
@@ -290,6 +317,7 @@
             <div class="val" id="scoreVal">100</div>
           </div>
 
+          <!-- ✅ Joker 2 adet -->
           <div class="jokerCol">
             <div class="joker" id="j0">🃏</div>
             <div class="joker" id="j1">🃏</div>
@@ -302,6 +330,7 @@
           <div class="beam v"></div>
           <div class="beam h"></div>
           <div class="rope"></div>
+
           <div class="man" id="man">
             <div class="organ head" id="p_head"></div>
             <div class="organ body" id="p_body"></div>
@@ -316,7 +345,7 @@
       </div>
     </div>
 
-    <div class="dock">
+    <div class="dock" id="dock">
       <div class="matrix" id="matrix"></div>
       <div class="kb" id="kb"></div>
     </div>
@@ -330,102 +359,57 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { loadLangPool, pick, createUsedSet } from "/js/langpool.js";
+
+    mountShell({ scroll: "none" });
+
     const $ = (id) => document.getElementById(id);
 
-    // ui_shell loader (non-module)
-    function loadScript(src){
-      return new Promise((res, rej)=>{
-        const s = document.createElement("script");
-        s.src = src;
-        s.onload = () => res(true);
-        s.onerror = () => rej(new Error("Script load fail: " + src));
-        document.head.appendChild(s);
-      });
-    }
+    // ui_shell footer lift
+    const liftDock = () => {
+      const root = getComputedStyle(document.documentElement);
+      const footerH = parseFloat(root.getPropertyValue("--footerH")) || 92;
+      document.documentElement.style.setProperty("--shellLift", `${footerH + 10}px`);
+    };
+    setTimeout(liftDock, 0);
+    setTimeout(liftDock, 250);
 
-    // read LANGPOOL_BASE from /js/config.js
-    async function readLangpoolBase(){
-      if (window.LANGPOOL_BASE) return String(window.LANGPOOL_BASE);
-      const r = await fetch("/js/config.js", { cache:"no-store" });
-      const t = await r.text();
-      const m = t.match(/LANGPOOL_BASE\s*=\s*["']([^"']+)["']/);
-      return (m && m[1]) ? m[1] : "";
-    }
-
-    // sanitize + pick (langpool.js logic inline)
-    const norm = (s) =>
-      String(s || "")
-        .toLowerCase()
-        .trim()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[.,!?]/g, "");
-
-    function sanitize(data){
-      const items = Array.isArray(data?.items) ? data.items : [];
-      const seen = new Set();
-      const out = [];
-      for(const it of items){
-        const w = String(it?.w || "").trim();
-        const tr = String(it?.tr || "").trim();
-        if(!w || !tr) continue;
-        const k = norm(w);
-        if(seen.has(k)) continue;
-        seen.add(k);
-        out.push({ w, tr });
+    // --- SES ---
+    let AC = null;
+    const audioOn = () => {
+      if(!AC){
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if(Ctx) AC = new Ctx();
       }
-      return { lang: String(data?.lang||""), version: data?.version||1, items: out };
-    }
+      if(AC && AC.state === "suspended") AC.resume().catch(()=>{});
+    };
+    const beep = (freq, dur=0.06, type="sine", gain=0.08) => {
+      if(!AC) return;
+      const t0 = AC.currentTime;
+      const o = AC.createOscillator();
+      const g = AC.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(AC.destination);
+      o.start(t0);
+      o.stop(t0 + dur + 0.02);
+    };
+    const sTap  = () => { audioOn(); beep(420, 0.035, "triangle", 0.05); };
+    const sHit  = () => { audioOn(); beep(740, 0.06, "sine", 0.08);  beep(980, 0.05, "sine", 0.05); };
+    const sMiss = () => { audioOn(); beep(190, 0.08, "square", 0.07); beep(140, 0.10, "square", 0.05); };
+    const sJok  = () => { audioOn(); beep(520, 0.06, "triangle", 0.07); beep(660, 0.06, "triangle", 0.06); };
 
-    async function loadLangPoolDirect(lang, base){
-      const L = String(lang||"").trim().toLowerCase();
-      const url = `${base}/${encodeURIComponent(L)}.json`;
-      const r = await fetch(url, { cache:"no-store" });
-      if(!r.ok) return { lang:L, version:1, items:[] };
-      return sanitize(await r.json());
-    }
-
-    function createUsedSet(storageKey){
-      let used = new Set();
-      try{
-        const raw = localStorage.getItem(storageKey);
-        const arr = JSON.parse(raw || "[]");
-        if(Array.isArray(arr)) used = new Set(arr);
-      }catch{}
-      const save = () => { try{ localStorage.setItem(storageKey, JSON.stringify([...used])); }catch{} };
-      return { used, save };
-    }
-
-    function shuffle(arr){
-      const a=[...arr];
-      for(let i=a.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [a[i],a[j]]=[a[j],a[i]];
-      }
-      return a;
-    }
-
-    function pick(pool, count, usedSet, saveUsed, filterFn){
-      const items = Array.isArray(pool?.items)? pool.items : [];
-      if(!items.length) return [];
-      const candidates = items.filter(x => x?.w && !usedSet.has(norm(x.w)) && (!filterFn || filterFn(x)));
-      if(candidates.length < count) usedSet.clear();
-
-      const fresh = items.filter(x => x?.w && !usedSet.has(norm(x.w)) && (!filterFn || filterFn(x)));
-      const chosen = shuffle(fresh).slice(0,count);
-      chosen.forEach(x=>usedSet.add(norm(x.w)));
-      if(saveUsed) saveUsed();
-      return chosen;
-    }
-
-    // GAME STATE
-    let LANGPOOL_BASE = "";
-    let pool = null;
-    let target = null;
-
+    // --- STATE ---
     let lang = "en";
     let diff = 3;
+
+    let pool = null;
+    let target = null;
 
     let lives = 3;
     const MAX_LIVES = 9;
@@ -445,28 +429,32 @@
     let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
     $("bestVal").textContent = best;
 
-    // setup selection
-    $("langGrid").addEventListener("click", (e)=>{
-      const c=e.target.closest(".pickCard");
+    // Setup seçimleri
+    $("langGrid").addEventListener("click", (e) => {
+      const c = e.target.closest(".pickCard");
       if(!c || !c.dataset.lang) return;
       [...$("langGrid").querySelectorAll(".pickCard")].forEach(x=>x.classList.remove("active"));
       c.classList.add("active");
       lang = c.dataset.lang;
     });
 
-    $("diffGrid").addEventListener("click", (e)=>{
-      const c=e.target.closest(".pickCard.diff");
+    $("diffGrid").addEventListener("click", (e) => {
+      const c = e.target.closest(".pickCard.diff");
       if(!c) return;
       [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
       c.classList.add("active");
-      diff = parseInt(c.dataset.diff,10);
+      diff = parseInt(c.dataset.diff, 10);
     });
 
-    function getLimit(){
-      if(diff===3) return 7; // easy
-      if(diff===4) return 4; // normal
-      return 3;              // hard
-    }
+    // Joker click (2)
+    $("j0").onclick = () => useJ(0);
+    $("j1").onclick = () => useJ(1);
+
+    $("mBtn").onclick = () => {
+      $("modal").classList.remove("on");
+      if(lives <= 0){ location.reload(); return; }
+      newRound();
+    };
 
     function renderHearts(){
       const capped = Math.max(0, Math.min(lives, MAX_LIVES));
@@ -475,14 +463,17 @@
       $("hearts").innerHTML = html;
     }
 
+    function getLimit(){
+      if(diff === 3) return 7;
+      if(diff === 4) return 4;
+      return 3;
+    }
+
     function setScore(v){
       score = Math.max(0, v);
       $("scoreVal").textContent = score;
     }
-
-    function applyPenalty(n){
-      setScore(score - n);
-    }
+    function applyPenalty(n){ setScore(score - n); }
 
     function resetMan(){
       ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"].forEach(id => $(id).classList.remove("on"));
@@ -494,7 +485,6 @@
       const m = mistakes;
 
       if(diff === 3){
-        // easy: 7 limit, 6 parça + son hata tamam sayılır
         const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
         seq.slice(0, Math.min(m, 6)).forEach(id => $(id).classList.add("on"));
         return;
@@ -551,24 +541,11 @@
       $("modal").classList.add("on");
     }
 
-    function hideModal(){
-      $("modal").classList.remove("on");
-    }
-
-    $("mBtn").onclick = () => {
-      hideModal();
-      if(lives <= 0){ location.reload(); return; }
-      newRound();
-    };
-
     function endRound(win){
       lock = true;
-
-      // kelimeyi sesli oku
       speakWord();
 
       if(win){
-        // highscore
         if(score > best){
           best = score;
           localStorage.setItem(HS_KEY, String(best));
@@ -605,26 +582,26 @@
       if(lock) return;
       if(guessed.has(letter)) return;
 
+      sTap();
+
       const w = target.w.toUpperCase();
       if(w.includes(letter)){
         guessed.add(letter);
         btn.classList.add("hit");
+        sHit();
         renderWord();
 
-        // tamam mı?
-        if(w.split("").every(ch => guessed.has(ch))){
-          endRound(true);
-        }
+        if(w.split("").every(ch => guessed.has(ch))) endRound(true);
       }else{
         btn.classList.add("miss");
+        sMiss();
+
         flawless = false;
         mistakes++;
-        applyPenalty(10); // yanlış -10
+        applyPenalty(10);
         updateMan();
 
-        if(mistakes >= getLimit()){
-          endRound(false);
-        }
+        if(mistakes >= getLimit()) endRound(false);
       }
     }
 
@@ -632,10 +609,12 @@
       if(lock) return;
       if(jokersLeft <= 0) return;
 
+      sJok();
+
       jokerUsed = true;
       jokersLeft--;
       (i===0?$("j0"):$("j1")).classList.add("spent");
-      applyPenalty(10); // joker -10
+      applyPenalty(10);
 
       const w = target.w.toUpperCase();
       const rem = w.split("").filter(ch => !guessed.has(ch));
@@ -646,9 +625,6 @@
         else { guessed.add(l); renderWord(); }
       }
     }
-
-    $("j0").onclick = ()=>useJ(0);
-    $("j1").onclick = ()=>useJ(1);
 
     function newRound(){
       lock = false;
@@ -662,7 +638,6 @@
       $("j1").classList.remove("spent");
 
       setScore(100);
-
       resetMan();
 
       const usedSet = createUsedSet(`used_hangman_${lang}`);
@@ -670,13 +645,13 @@
       target = picked?.[0];
 
       if(!target?.w){
-        $("trText").textContent = "KELİME BULUNAMADI";
+        $("trText").textContent = "KELİME SEÇİLEMEDİ";
         $("matrix").innerHTML = "";
         $("kb").innerHTML = "";
         return;
       }
 
-      $("trText").textContent = (target.tr || "—").trim() || "—";
+      $("trText").textContent = (target.tr || "—").toString().trim() || "—";
 
       renderHearts();
       renderWord();
@@ -684,70 +659,24 @@
       updateMan();
     }
 
-    // START: ui_shell + pool load + enter
-    $("startBtn").addEventListener("click", async (e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-
+    // ✅ START: sadece burada havuz yüklenir ve oyun başlar
+    $("startBtn").onclick = async () => {
       $("setupMsg").textContent = "Yükleniyor…";
+      pool = await loadLangPool(lang);
 
-      // try ui_shell
-      try{
-        await loadScript("/js/ui_shell.js");
-        if(typeof window.mountShell === "function"){
-          window.mountShell({ scroll: "none" });
-        }
-      }catch{}
-
-      // footer lift (ui shell varsa)
-      try{
-        const root = getComputedStyle(document.documentElement);
-        const footerH = parseFloat(root.getPropertyValue("--footerH")) || 0;
-        document.documentElement.style.setProperty("--shellLift", footerH ? `${footerH + 10}px` : "0px");
-      }catch{}
-
-      // pool
-      try{
-        LANGPOOL_BASE = await readLangpoolBase();
-        if(!LANGPOOL_BASE){
-          $("setupMsg").textContent = "LANGPOOL_BASE bulunamadı (/js/config.js).";
-          return;
-        }
-        pool = await loadLangPoolDirect(lang, LANGPOOL_BASE);
-        if(!pool?.items?.length){
-          $("setupMsg").textContent = `Havuz boş: ${LANGPOOL_BASE}/${lang}.json`;
-          return;
-        }
-      }catch(err){
-        $("setupMsg").textContent = "Havuz yükleme hatası:\n" + String(err);
+      if(!pool?.items?.length){
+        $("setupMsg").textContent = `Havuz boş/yok: ${lang}.json`;
         return;
       }
 
-      // close setup + start game
       $("setup").style.display = "none";
       document.body.classList.remove("setupOpen");
       $("setupMsg").textContent = "";
 
       newRound();
-    });
+    };
 
-    // Setup selection
-    $("langGrid").addEventListener("click", (e)=>{
-      const c = e.target.closest(".pickCard");
-      if(!c || !c.dataset.lang) return;
-      [...$("langGrid").querySelectorAll(".pickCard")].forEach(x=>x.classList.remove("active"));
-      c.classList.add("active");
-      lang = c.dataset.lang;
-    });
-    $("diffGrid").addEventListener("click", (e)=>{
-      const c = e.target.closest(".pickCard.diff");
-      if(!c) return;
-      [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
-      c.classList.add("active");
-      diff = parseInt(c.dataset.diff,10);
-    });
-
-    // initial
+    // ilk durumda kalpler boş kalmasın
     renderHearts();
   </script>
 </body>
