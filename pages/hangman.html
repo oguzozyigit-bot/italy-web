@@ -14,7 +14,6 @@
       --red:#ff0033;
       --green:#00ff9d;
 
-      /* alt panel */
       --dockH: 220px;
       --shellLift: 0px;
     }
@@ -22,16 +21,18 @@
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
     #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
 
+    /* setup açıkken oyunu kilitle */
+    body.setupOpen #pageContent{filter: blur(8px); opacity:.55; pointer-events:none; user-select:none}
+
     /* ÜST BLOK */
     .top{
       height: calc(100% - var(--dockH));
       display:flex;
       flex-direction:column;
       gap:10px;
-      position:relative; /* HUD absolute */
+      position:relative;
     }
 
-    /* HANGMAN en üst */
     .title{
       font-family:"Space Grotesk";
       letter-spacing:14px;
@@ -43,7 +44,6 @@
       z-index:2;
     }
 
-    /* HUD absolute */
     .hud{
       position:absolute;
       top:56px;
@@ -57,7 +57,6 @@
       pointer-events:auto;
     }
 
-    /* SOL: sadece kalpler (3'erli satır) */
     .leftHud{
       display:flex;
       flex-direction:column;
@@ -65,7 +64,6 @@
       gap:10px;
     }
 
-    /* 3'erli satır */
     .hearts{
       display:grid;
       grid-template-columns: repeat(3, max-content);
@@ -80,19 +78,16 @@
       filter:drop-shadow(0 0 10px var(--red));
     }
 
-    /* SAĞ: skor + jokerler */
     .rightHud{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
       gap:10px;
     }
-
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    /* Jokerler sağ tarafta puanın altında */
     .jokerCol{
       display:flex;
       flex-direction:column;
@@ -112,7 +107,6 @@
     .joker:active{transform:scale(.96)}
     .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
 
-    /* Darağacı */
     .stage{
       flex:1;
       display:flex;
@@ -121,7 +115,6 @@
       justify-content:flex-start;
       gap:10px;
       padding-top:8px;
-      margin-top:0;
       z-index:1;
     }
 
@@ -147,7 +140,6 @@
     .lleg{width:20px;height:3px;left:-21px;top:70px;transform:rotate(-45deg)}
     .rleg{width:20px;height:3px;left:1px;top:70px;transform:rotate(45deg)}
 
-    /* Türkçe: darağacının altında */
     .trBox{
       width:min(560px, 100%);
       padding:10px 12px;
@@ -163,7 +155,6 @@
       margin-top:-6px;
     }
 
-    /* ALT DOCK */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -195,7 +186,6 @@
     .key.hit{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
     .key.miss{background:var(--red);opacity:0.30}
 
-    /* Modal */
     .modal{
       position:fixed; inset:0;
       background:rgba(1,0,8,.98);
@@ -214,21 +204,9 @@
     .mBonus{height:22px;font-weight:900;color:var(--green);margin-bottom:16px}
     .mBtn{width:100%;max-width:280px;padding:18px;border-radius:18px;border:none;background:var(--grad);color:#fff;font-weight:900;font-size:18px;cursor:pointer}
 
-    /* fireworks */
-    .fx{position:fixed;inset:0;pointer-events:none;z-index:40000;overflow:hidden}
-    .spark{position:absolute;width:8px;height:8px;border-radius:50%;
-      background:radial-gradient(circle,#fff 0%, rgba(255,255,255,0) 70%);
-      animation:pop 900ms ease-out forwards;
-    }
-    @keyframes pop{
-      0%{transform:translate(0,0) scale(.6);opacity:1}
-      100%{transform:translate(var(--dx),var(--dy)) scale(2.2);opacity:0}
-    }
-
-    /* ✅ GİRİŞ: Dil + zorluk seçimi */
+    /* ✅ SETUP */
     .setup{
-      position:fixed;
-      inset:0;
+      position:fixed; inset:0;
       z-index:60000;
       background:rgba(3,0,20,.98);
       display:flex;
@@ -254,17 +232,8 @@
       letter-spacing:2px;
       margin:10px 0 8px;
     }
-    .langGrid{
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:8px;
-    }
-    .diffGrid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:8px;
-    }
+    .langGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .diffGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
     .pickCard{
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.05);
@@ -275,14 +244,8 @@
       user-select:none;
       font-weight:900;
     }
-    .pickCard.active{
-      border-color:#6366f1;
-      background:rgba(99,102,241,.18);
-    }
-    .pickCard.diff.active{
-      border-color:var(--green);
-      background:rgba(0,255,157,.10);
-    }
+    .pickCard.active{border-color:#6366f1;background:rgba(99,102,241,.18)}
+    .pickCard.diff.active{border-color:var(--green);background:rgba(0,255,157,.10)}
     .startBtn{
       margin-top:auto;
       width:100%;
@@ -295,11 +258,18 @@
       font-size:18px;
       cursor:pointer;
     }
+    .setupMsg{
+      margin-top:12px;
+      text-align:center;
+      font-weight:900;
+      font-size:12px;
+      opacity:.7;
+      min-height:18px;
+    }
   </style>
 </head>
 
-<body>
-  <!-- ✅ GİRİŞ EKRANI -->
+<body class="setupOpen">
   <div class="setup" id="setup">
     <div class="setupTitle">NEURAL VOID</div>
 
@@ -320,11 +290,10 @@
     </div>
 
     <button class="startBtn" id="startBtn">OYUNA BAŞLA</button>
+    <div class="setupMsg" id="setupMsg"></div>
   </div>
 
   <div id="pageContent">
-    <div class="fx" id="fx"></div>
-
     <div class="top">
       <div class="title">HANGMAN</div>
 
@@ -339,7 +308,6 @@
             <div class="val" id="scoreVal">100</div>
           </div>
 
-          <!-- ✅ Joker 2 adet (1 kart eksildi) -->
           <div class="jokerCol">
             <div class="joker" id="j0">🃏</div>
             <div class="joker" id="j1">🃏</div>
@@ -363,7 +331,7 @@
           </div>
         </div>
 
-        <div class="trBox" id="trText">YÜKLENİYOR…</div>
+        <div class="trBox" id="trText">—</div>
       </div>
     </div>
 
@@ -389,7 +357,6 @@
 
     const $ = (id) => document.getElementById(id);
 
-    // ui_shell footer lift
     const liftDock = () => {
       const root = getComputedStyle(document.documentElement);
       const footerH = parseFloat(root.getPropertyValue("--footerH")) || 92;
@@ -398,7 +365,7 @@
     setTimeout(liftDock, 0);
     setTimeout(liftDock, 250);
 
-    // ---------- SES MOTORU ----------
+    // Ses (basit)
     let AC = null;
     const audioOn = () => {
       if(!AC){
@@ -428,19 +395,19 @@
     const sMiss = () => { audioOn(); beep(190, 0.08, "square", 0.07); beep(140, 0.10, "square", 0.05); };
     const sJok  = () => { audioOn(); beep(520, 0.06, "triangle", 0.07); beep(660, 0.06, "triangle", 0.06); };
 
-    // ---------- OYUN STATE ----------
+    // STATE
     let lang = "en";
     let diff = 3;
+
+    let pool = null;
+    let target = null;
 
     let lives = 3;
     const MAX_LIVES = 9;
 
-    let pool = null;
-    let target = null;
     let guessed = new Set();
     let mistakes = 0;
 
-    // ✅ joker 2
     let jokersLeft = 2;
     const MAX_JOKERS = 2;
 
@@ -449,11 +416,7 @@
     let jokerUsed = false;
     let lock = false;
 
-    const HS_KEY = "italky_hangman_high";
-    let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
-    $("bestVal").textContent = best;
-
-    // ✅ Setup seçimleri
+    // Setup seçimleri
     $("langGrid").addEventListener("click", (e) => {
       const c = e.target.closest(".pickCard");
       if(!c || !c.dataset.lang) return;
@@ -470,13 +433,7 @@
       diff = parseInt(c.dataset.diff, 10);
     });
 
-    $("startBtn").onclick = async () => {
-      $("setup").style.display = "none";
-      await loadRealPool();
-      newRound();
-    };
-
-    // Joker click (2 adet)
+    // Joker click (2)
     for(let i=0;i<2;i++){
       $(`j${i}`).onclick = () => useJ(i);
     }
@@ -484,6 +441,29 @@
     $("mBtn").onclick = () => {
       $("modal").classList.remove("on");
       if(lives <= 0){ location.reload(); return; }
+      newRound();
+    };
+
+    async function loadRealPool(){
+      pool = await loadLangPool(lang);
+      return !!pool?.items?.length;
+    }
+
+    $("startBtn").onclick = async () => {
+      $("setupMsg").textContent = "Yükleniyor…";
+
+      const ok = await loadRealPool();
+      if(!ok){
+        $("setupMsg").textContent = `Havuz bulunamadı: ${lang}.json`;
+        return; // ✅ setup kapanmaz
+      }
+
+      // ✅ Havuz geldiyse oyunu başlat
+      $("setup").style.display = "none";
+      document.body.classList.remove("setupOpen");
+      $("setupMsg").textContent = "";
+
+      renderHearts();
       newRound();
     };
 
@@ -563,10 +543,6 @@
       }catch(e){}
     }
 
-    function getCss(name){
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
-
     function showModal(title, color, bonus){
       $("mTitle").textContent = title;
       $("mTitle").style.color = color;
@@ -587,7 +563,7 @@
           bonus = "KUSURSUZ: +1 CAN";
         }
         renderHearts();
-        showModal("MİSYON BAŞARILI", getCss("--green"), bonus);
+        showModal("MİSYON BAŞARILI", "#00ff9d", bonus);
         return;
       }
 
@@ -600,9 +576,9 @@
       setTimeout(()=>{
         $("man").classList.remove("swing");
         if(lives <= 0){
-          showModal("GAME OVER", getCss("--red"), `SKOR: ${score} • REKOR: ${best}`);
+          showModal("GAME OVER", "#ff0033", `SKOR: ${score}`);
         }else{
-          showModal("DEŞİFRE EDİLEMEDİ", getCss("--red"), "-1 CAN");
+          showModal("DEŞİFRE EDİLEMEDİ", "#ff0033", "-1 CAN");
         }
       }, swingMs);
     }
@@ -620,8 +596,7 @@
         sHit();
 
         renderWord();
-        const allFound = w.split("").every(ch => guessed.has(ch));
-        if(allFound) endRound(true);
+        if(w.split("").every(ch => guessed.has(ch))) endRound(true);
       }else{
         flawless = false;
         mistakes++;
@@ -656,15 +631,6 @@
       }
     }
 
-    async function loadRealPool(){
-      pool = await loadLangPool(lang);
-      if(!pool?.items?.length){
-        $("trText").textContent = `HAVUZ BOŞ: ${lang}.json`;
-        return false;
-      }
-      return true;
-    }
-
     function newRound(){
       lock = false;
       guessed = new Set();
@@ -684,15 +650,13 @@
       target = picked?.[0];
 
       if(!target?.w){
-        $("trText").textContent = "KELİME SEÇİLEMEDİ (pick boş)";
+        $("trText").textContent = "KELİME SEÇİLEMEDİ";
         $("matrix").innerHTML = "";
         $("kb").innerHTML = "";
         return;
       }
 
       $("trText").textContent = (target.tr || "—").toString().trim() || "—";
-
-      renderHearts();
       renderWord();
       renderKeyboard();
       updateMan();
