@@ -1,491 +1,301 @@
-// FILE: /js/facetoface_page.js
-import { getSiteLang } from "/js/i18n.js";
-import { supabase } from "/js/supabase_client.js";
-import { ensureAuthAndCacheUser } from "/js/auth.js";
-import { setHeaderTokens } from "/js/ui_shell.js";
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>italkyAI • Neural Nitro v3</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
-const $ = (id) => document.getElementById(id);
-
-const API_BASE = "https://italky-api.onrender.com";
-const LOGIN_PATH = "/pages/login.html";
-const HOME_PATH  = "/pages/home.html";
-const PROFILE_PATH = "/pages/profile.html";
-
-/* ===============================
-   AUTH
-=============================== */
-async function requireLogin(){
-  const { data:{ session } } = await supabase.auth.getSession();
-  if(!session?.user){
-    location.replace(LOGIN_PATH);
-    return false;
-  }
-  try{ await ensureAuthAndCacheUser(); }catch{}
-  return true;
-}
-
-function getSystemUILang(){
-  try{
-    const l = String(getSiteLang?.() || "").toLowerCase().trim();
-    if(l) return l;
-  }catch{}
-  try{
-    const l2 = String(localStorage.getItem("italky_site_lang_v1") || "").toLowerCase().trim();
-    if(l2) return l2;
-  }catch{}
-  return "tr";
-}
-let UI_LANG = getSystemUILang();
-
-/* ===============================
-   LANGS
-=============================== */
-const LANGS = [
-  { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
-  { code:"en", flag:"🇬🇧", bcp:"en-US" },
-  { code:"de", flag:"🇩🇪", bcp:"de-DE" },
-  { code:"fr", flag:"🇫🇷", bcp:"fr-FR" },
-  { code:"it", flag:"🇮🇹", bcp:"it-IT" },
-  { code:"es", flag:"🇪🇸", bcp:"es-ES" },
-  { code:"pt", flag:"🇵🇹", bcp:"pt-PT" },
-  { code:"pt-br", flag:"🇧🇷", bcp:"pt-BR" },
-  { code:"nl", flag:"🇳🇱", bcp:"nl-NL" },
-  { code:"sv", flag:"🇸🇪", bcp:"sv-SE" },
-  { code:"no", flag:"🇳🇴", bcp:"nb-NO" },
-  { code:"da", flag:"🇩🇰", bcp:"da-DK" },
-  { code:"fi", flag:"🇫🇮", bcp:"fi-FI" },
-  { code:"pl", flag:"🇵🇱", bcp:"pl-PL" },
-  { code:"cs", flag:"🇨🇿", bcp:"cs-CZ" },
-  { code:"sk", flag:"🇸🇰", bcp:"sk-SK" },
-  { code:"hu", flag:"🇭🇺", bcp:"hu-HU" },
-  { code:"ro", flag:"🇷🇴", bcp:"ro-RO" },
-  { code:"bg", flag:"🇧🇬", bcp:"bg-BG" },
-  { code:"el", flag:"🇬🇷", bcp:"el-GR" },
-  { code:"uk", flag:"🇺🇦", bcp:"uk-UA" },
-  { code:"ru", flag:"🇷🇺", bcp:"ru-RU" },
-  { code:"az", flag:"🇦🇿", bcp:"az-AZ" },
-  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" },
-  { code:"hy", flag:"🇦🇲", bcp:"hy-AM" },
-  { code:"ar", flag:"🇸🇦", bcp:"ar-SA" },
-  { code:"he", flag:"🇮🇱", bcp:"he-IL" },
-  { code:"fa", flag:"🇮🇷", bcp:"fa-IR" },
-  { code:"ur", flag:"🇵🇰", bcp:"ur-PK" },
-  { code:"hi", flag:"🇮🇳", bcp:"hi-IN" },
-  { code:"bn", flag:"🇧🇩", bcp:"bn-BD" },
-  { code:"id", flag:"🇮🇩", bcp:"id-ID" },
-  { code:"ms", flag:"🇲🇾", bcp:"ms-MY" },
-  { code:"vi", flag:"🇻🇳", bcp:"vi-VN" },
-  { code:"th", flag:"🇹🇭", bcp:"th-TH" },
-  { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
-  { code:"zh-tw", flag:"🇹🇼", bcp:"zh-TW" },
-  { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
-  { code:"ko", flag:"🇰🇷", bcp:"ko-KR" }
-];
-
-const TR_FALLBACK = {
-  tr:"Türkçe", en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", es:"İspanyolca",
-  pt:"Portekizce", nl:"Hollandaca", sv:"İsveççe", no:"Norveççe", da:"Danca", fi:"Fince",
-  pl:"Lehçe", cs:"Çekçe", sk:"Slovakça", hu:"Macarca", ro:"Romence", bg:"Bulgarca",
-  el:"Yunanca", uk:"Ukraynaca", ru:"Rusça", az:"Azerbaycanca", ka:"Gürcüce", hy:"Ermenice",
-  ar:"Arapça", he:"İbranice", fa:"Farsça", ur:"Urduca", hi:"Hintçe", bn:"Bengalce",
-  id:"Endonezce", ms:"Malayca", vi:"Vietnamca", th:"Tayca", zh:"Çince", ja:"Japonca", ko:"Korece"
-};
-
-let _dn = null;
-function getDisplayNames(){
-  if(_dn && _dn.__lang === UI_LANG) return _dn;
-  _dn = null;
-  try{
-    const dn = new Intl.DisplayNames([UI_LANG], { type:"language" });
-    dn.__lang = UI_LANG;
-    _dn = dn;
-  }catch{ _dn = null; }
-  return _dn;
-}
-
-function canonicalLangCode(code){
-  const c = String(code||"").toLowerCase();
-  return c.split("-")[0];
-}
-function normalizeApiLang(code){
-  return canonicalLangCode(code);
-}
-function langObj(code){
-  const c = String(code||"").toLowerCase();
-  return LANGS.find(x=>x.code===c) || LANGS.find(x=>x.code===canonicalLangCode(c));
-}
-function langFlag(code){ return langObj(code)?.flag || "🌐"; }
-function bcp(code){ return langObj(code)?.bcp || "en-US"; }
-
-function langLabel(code){
-  const baseCode = canonicalLangCode(code);
-  const dn = getDisplayNames();
-  if(dn){
-    try{ const name = dn.of(baseCode); if(name) return name; }catch{}
-  }
-  if(UI_LANG === "tr" && TR_FALLBACK[baseCode]) return TR_FALLBACK[baseCode];
-  return String(code||"").toUpperCase();
-}
-
-/* ===============================
-   STATE
-=============================== */
-let topLang = "en";
-let botLang = "tr";
-
-/* ===============================
-   FACE2FACE TOKEN SESSION
-=============================== */
-let sessionGranted = false;
-async function ensureFacetofaceSession(){
-  if(sessionGranted) return true;
-  try{
-    const { data, error } = await supabase.rpc("start_facetoface_session");
-    if(error){
-      const msg = String(error.message||"");
-      if(msg.includes("INSUFFICIENT_TOKENS")){
-        alert("Jeton yetersiz. Devam etmek için jeton yükleyin.");
-        location.href = PROFILE_PATH;
-        return false;
-      }
-      alert("FaceToFace oturumu başlatılamadı.");
-      return false;
+  <style>
+    :root {
+      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+      --bg-dark: #050508;
+      --border-alpha: rgba(255, 255, 255, 0.15);
     }
-    const row = data?.[0] || {};
-    if(row?.tokens_left != null) setHeaderTokens(row.tokens_left);
-    sessionGranted = true;
-    return true;
-  }catch{
-    alert("FaceToFace oturumu başlatılamadı.");
-    return false;
-  }
-}
 
-/* ===============================
-   TTS (Android WebView)
-=============================== */
-function speak(text, langCode){
-  const t = String(text||"").trim();
-  if(!t) return;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    html, body { margin: 0; width: 100%; height: 100%; background: var(--bg-dark); color: #fff; font-family: 'Outfit', sans-serif; overflow: hidden; }
 
-  // APK NativeTTS
-  if(window.NativeTTS && typeof window.NativeTTS.speak === "function"){
-    try{ window.NativeTTS.stop?.(); }catch{}
-    setTimeout(()=>{
-      try{ window.NativeTTS.speak(t, String(langCode||"en")); }catch(e){
-        console.warn("NativeTTS.speak failed:", e);
-      }
-    }, 220);
-    return;
-  }
+    .container { display: flex; flex-direction: column; height: 100dvh; width: 100%; position: relative; }
 
-  // Web fallback
-  if(!window.speechSynthesis) return;
-  try{ window.speechSynthesis.cancel(); }catch{}
-
-  const u = new SpeechSynthesisUtterance(t);
-  u.lang = bcp(langCode);
-  u.volume=1; u.rate=1; u.pitch=1;
-
-  try{
-    const voices = window.speechSynthesis.getVoices() || [];
-    if(voices.length){
-      const base = canonicalLangCode(langCode);
-      u.voice = voices.find(v=>String(v.lang||"").toLowerCase().startsWith(base)) || voices[0];
+    /* PANELLER */
+    .half-screen {
+      flex: 1; position: relative; display: flex; flex-direction: column;
+      align-items: center; justify-content: space-between;
+      padding: calc(15px + env(safe-area-inset-top)) 15px;
+      overflow: hidden;
     }
-  }catch{}
-  setTimeout(()=>{ try{ window.speechSynthesis.speak(u); }catch{} }, 60);
-}
+    .half-screen.top { transform: rotate(180deg); background: linear-gradient(180deg, rgba(128, 19, 54, 0.15) 0%, var(--bg-dark) 100%); }
+    .half-screen.bottom { background: linear-gradient(180deg, rgba(30, 58, 138, 0.15) 0%, var(--bg-dark) 100%); }
 
-/* ===============================
-   UI helpers
-=============================== */
-function closeAllPop(){
-  $("pop-top")?.classList.remove("show");
-  $("pop-bot")?.classList.remove("show");
-}
+    /* ✅ MERKEZ HUB & ORİJİNAL LOGO */
+    .center-hub { height: 100px; position: relative; z-index: 500; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); }
+    
+    .orb-container {
+      position: relative; width: 100px; height: 100px;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
 
-function setLangButtonTexts(){
-  const topBtn = $("topLangBtn");
-  const botBtn = $("botLangBtn");
-  if(topBtn) topBtn.textContent = `${langFlag(topLang)} ${langLabel(topLang).toUpperCase()} ⌵`;
-  if(botBtn) botBtn.textContent = `${langFlag(botLang)} ${langLabel(botLang).toUpperCase()} ⌵`;
-}
+    .energy-orbit { position: absolute; inset: -4px; border-radius: 50%; animation: rotateOrbit 5s linear infinite; }
+    .e-ball { position: absolute; width: 10px; height: 10px; border-radius: 50%; filter: blur(1.5px); }
+    .ball-1 { top: -5px; left: 50%; transform: translateX(-50%); background: #6366f1; box-shadow: 0 0 15px #6366f1; }
+    .ball-2 { bottom: -5px; left: 50%; transform: translateX(-50%); background: #ec4899; box-shadow: 0 0 15px #ec4899; }
 
-function renderPop(side){
-  const list = $(side==="top" ? "list-top" : "list-bot");
-  if(!list) return;
-  const sel = (side==="top") ? topLang : botLang;
+    .ai-core {
+      width: 80px; height: 80px; background: #000; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border-alpha); z-index: 10;
+      overflow: hidden;
+    }
+    .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+    .logo-ai { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-  list.innerHTML = LANGS.map(l=>{
-    const active = l.code === sel ? "active" : "";
-    return `
-      <div class="pop-item ${active}" data-code="${l.code}">
-        <div class="pop-left">
-          <div class="pop-flag">${l.flag}</div>
-          <div class="pop-name">${langLabel(l.code)}</div>
-        </div>
-        <div class="pop-code">${String(l.code).toUpperCase()}</div>
+    /* ✅ EKOLAYZER */
+    .eq-wrap { display: flex; align-items: center; gap: 3px; height: 20px; position: absolute; opacity: 0; transition: 0.3s; z-index: 20; }
+    #frameRoot.listening .eq-wrap { opacity: 1; }
+    #frameRoot.listening .logo-text { opacity: 0; }
+    .eq-bar { width: 3px; background: var(--ai-gradient); border-radius: 10px; animation: eqAnim 0.7s infinite ease-in-out; }
+
+    /* NAV BUTTONS */
+    .nav-btn {
+      position: absolute; padding: 10px 18px; border-radius: 100px;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border-alpha);
+      color: #fff; font-size: 10px; font-weight: 900; cursor: pointer;
+      backdrop-filter: blur(15px); z-index: 600;
+      user-select:none;
+    }
+    .btn-home { left: 15px; }
+    .btn-clear { right: 15px; }
+
+    /* ✅ SCROLLABLE CHAT BODY */
+    .chat-body {
+      flex: 1; width: 100%; display: flex; flex-direction: column;
+      gap: 25px; overflow-y: auto; scrollbar-width: none;
+      padding: 20px 0; mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    }
+    .chat-body::-webkit-scrollbar { display: none; }
+
+    .bubble { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; width: 100%; }
+
+    /* ✅ Metin + hoparlör aynı satır (burası yeni) */
+    .txt-row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      width:100%;
+    }
+    .bubble .txt { font-size: 32px; font-weight: 200; line-height: 1.1; color: #fff; max-width: 82%; }
+
+    /* ✅ HOPARLÖR İKONU */
+    .spk-icon { 
+      width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); 
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+      border: 1px solid var(--border-alpha);
+      flex:0 0 auto;
+    }
+    .spk-icon:active{ transform: scale(.98); }
+    .spk-icon svg { width: 20px; fill: #fff; }
+
+    /* DİL SEÇİCİ */
+    .lang-trigger {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border-alpha);
+      padding: 10px 20px; border-radius: 100px; color: #fff; font-size: 12px; font-weight: 800;
+      cursor:pointer;
+      user-select:none;
+      z-index:600;
+    }
+
+    /* ✅ POPOVERS */
+    .popover {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 350px; height: 350px;
+      background: #0a0a0f; border: 1px solid var(--border-alpha); border-radius: 25px;
+      display: none; flex-direction: column; z-index: 1000; overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+    }
+    .popover.show { display: flex; }
+    .half-screen.top .popover { top: 60px; transform: translateX(-50%) rotate(180deg); }
+    .half-screen.bottom .popover { bottom: 60px; }
+
+    .pop-head { padding: 15px; border-bottom: 1px solid var(--border-alpha); display: flex; justify-content: space-between; align-items: center; }
+    .pop-head b{ font-weight:900; letter-spacing:.3px; }
+    .pop-list { flex: 1; overflow-y: auto; padding: 10px; }
+
+    /* ✅ Liste satırı (burası yeni) */
+    .pop-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      cursor:pointer;
+      user-select:none;
+      margin-bottom:10px;
+    }
+    .pop-item:active{ transform:scale(.995); }
+    .pop-item.active{
+      border-color: rgba(165,180,252,0.35);
+      background: rgba(99,102,241,0.10);
+    }
+    .pop-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .pop-flag{ font-size:18px; }
+    .pop-name{
+      font-weight:900;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 220px;
+    }
+    .pop-code{
+      font-weight:900;
+      font-size:12px;
+      opacity:.75;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+      flex:0 0 auto;
+    }
+
+    /* MIC */
+    .btn-mic {
+      width: 80px; height: 80px; border-radius: 50%; background: #000;
+      display: flex; align-items: center; justify-content: center;
+      border: 3px solid transparent; background-image: linear-gradient(#000, #000), var(--ai-gradient);
+      background-origin: border-box; background-clip: content-box, border-box;
+      cursor: pointer;
+      user-select:none;
+    }
+    .btn-mic.listening { animation: breathe 2s infinite ease-in-out; }
+
+    @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes eqAnim { 0%, 100% { height: 5px; } 50% { height: 25px; } }
+    @keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(99,102,241,0.4); } }
+
+    #frameRoot.to-top .orb-container { transform: rotate(180deg); }
+    #frameRoot.to-bot .orb-container { transform: rotate(0deg); }
+  </style>
+</head>
+
+<body id="frameRoot" class="to-bot">
+  <div class="container">
+
+    <div class="half-screen top" id="topSection">
+      <button class="lang-trigger" id="topLangBtn">🇬🇧 ENGLISH ⌵</button>
+      
+      <div class="popover" id="pop-top">
+        <div class="pop-head"><b>DİL SEÇİN</b><span id="close-top" style="cursor:pointer">✕</span></div>
+        <div class="pop-list" id="list-top"></div>
       </div>
-    `;
-  }).join("");
 
-  list.querySelectorAll(".pop-item").forEach(item=>{
-    item.addEventListener("click",(e)=>{
-      e.preventDefault();
-      e.stopPropagation();
-      const code = item.getAttribute("data-code") || "en";
-      if(side==="top") topLang = code; else botLang = code;
+      <div class="chat-body" id="topBody"></div>
 
-      setLangButtonTexts();
-      stopAll(); // dil değişince mic reset
-      closeAllPop();
-    });
-  });
-}
+      <div class="mic-wrap">
+        <div class="btn-mic" id="topMic">
+          <svg width="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1"/><path d="M12 19v3"/></svg>
+        </div>
+      </div>
+    </div>
 
-function addBubble(side, kind, text, langForSpeak){
-  const wrap = (side==="top") ? $("topBody") : $("botBody");
-  if(!wrap) return;
+    <div class="center-hub">
+      <div class="nav-btn btn-home" onclick="location.href='/pages/home.html'">HOME</div>
+      
+      <div class="orb-container" id="homeBtn">
+        <div class="energy-orbit">
+          <div class="e-ball ball-1"></div>
+          <div class="e-ball ball-2"></div>
+        </div>
+        <div class="ai-core">
+          <div class="eq-wrap">
+            <div class="eq-bar" style="animation-delay:0s"></div>
+            <div class="eq-bar" style="animation-delay:0.2s"></div>
+            <div class="eq-bar" style="animation-delay:0.4s"></div>
+          </div>
+          <span class="logo-text">italky<span class="logo-ai">AI</span></span>
+        </div>
+      </div>
 
-  const bubble = document.createElement("div");
-  bubble.className = `bubble ${kind}`;
+      <div class="nav-btn btn-clear" id="clearBtn">CLEAR</div>
+    </div>
 
-  // ✅ Metin + hoparlör aynı satır
-  const row = document.createElement("div");
-  row.className = "txt-row";
+    <div class="half-screen bottom" id="botSection">
+      <button class="lang-trigger" id="botLangBtn">🇹🇷 TÜRKÇE ⌵</button>
 
-  const txt = document.createElement("span");
-  txt.className = "txt";
-  txt.textContent = String(text||"").trim() || "—";
-  row.appendChild(txt);
+      <div class="popover" id="pop-bot">
+        <div class="pop-head"><b>DİL SEÇİN</b><span id="close-bot" style="cursor:pointer">✕</span></div>
+        <div class="pop-list" id="list-bot"></div>
+      </div>
 
-  // ✅ Hoparlör sadece çeviri (me) için
-  if(kind === "me"){
-    const spk = document.createElement("div");
-    spk.className = "spk-icon";
-    spk.innerHTML = `
-      <svg viewBox="0 0 24 24">
-        <path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89 1 5 3.77 5 6.71s-2.11 5.71-5 6.71v2.06c4.01-1.07 7-4.71 7-8.77s-2.99-7.7-7-8.77z"></path>
-      </svg>
-    `;
-    spk.addEventListener("click",(e)=>{
-      e.preventDefault(); e.stopPropagation();
-      speak(txt.textContent, langForSpeak);
-    });
-    row.appendChild(spk);
-  }
+      <div class="chat-body" id="botBody"></div>
 
-  bubble.appendChild(row);
-  wrap.appendChild(bubble);
+      <div class="mic-wrap">
+        <div class="btn-mic" id="botMic">
+          <svg width="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1"/><path d="M12 19v3"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
-}
+  <script type="module" src="/js/facetoface_page.js?v=20260219_FINAL"></script>
 
-/* ===============================
-   Translate
-=============================== */
-async function translateViaApi(text, source, target){
-  const t = String(text||"").trim();
-  if(!t) return t;
+  <script>
+    const root = document.getElementById('frameRoot');
+    const topMic = document.getElementById('topMic');
+    const botMic = document.getElementById('botMic');
 
-  const src = normalizeApiLang(source);
-  const dst = normalizeApiLang(target);
-  if(src === dst) return t;
+    // ✅ Popover Aç/Kapat
+    const bindPop = (btn, pop, cls) => {
+      document.getElementById(btn).onclick = (e) => { e.stopPropagation(); document.getElementById(pop).classList.add('show'); };
+      document.getElementById(cls).onclick = (e) => { e.stopPropagation(); document.getElementById(pop).classList.remove('show'); };
+    };
+    bindPop('topLangBtn', 'pop-top', 'close-top');
+    bindPop('botLangBtn', 'pop-bot', 'close-bot');
 
-  const ctrl = new AbortController();
-  const to = setTimeout(()=>ctrl.abort(), 25000);
-  try{
-    // ✅ Bizim API bu body’yi kabul ediyor:
-    const body = { text:t, from_lang:src, to_lang:dst, source:src, target:dst };
-    const r = await fetch(`${API_BASE}/api/translate`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(body),
-      signal: ctrl.signal
-    });
-
-    if(!r.ok){
-      const errTxt = await r.text().catch(()=> "");
-      console.warn("translate HTTP", r.status, errTxt);
-      return null;
-    }
-
-    const data = await r.json().catch(()=>({}));
-    const out = String(data?.translated||data?.translation||data?.text||"").trim();
-    return out || null;
-  }catch(e){
-    console.warn("translateViaApi failed:", e);
-    return null;
-  }finally{
-    clearTimeout(to);
-  }
-}
-
-/* ===============================
-   STT
-=============================== */
-let active = null, recTop = null, recBot = null;
-let pending = null;
-
-function setMicUI(which, on){
-  const btn = (which==="top") ? $("topMic") : $("botMic");
-  btn?.classList.toggle("listening", !!on);
-  const anyOn = !!on || !!recTop || !!recBot;
-  $("frameRoot")?.classList.toggle("listening", anyOn);
-}
-
-function stopAll(){
-  try{ recTop?.stop?.(); }catch{}
-  try{ recBot?.stop?.(); }catch{}
-  recTop=null; recBot=null; active=null;
-  setMicUI("top", false);
-  setMicUI("bot", false);
-  try{ window.speechSynthesis?.cancel?.(); }catch{}
-  try{ window.NativeTTS?.stop?.(); }catch{}
-}
-
-function buildRecognizer(langCode){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR) return null;
-  const rec = new SR();
-  rec.lang = bcp(langCode);
-  rec.interimResults = false;
-  rec.continuous = false;
-  rec.maxAlternatives = 1;
-  return rec;
-}
-
-async function start(which){
-  const ok = await ensureFacetofaceSession();
-  if(!ok) return;
-
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){
-    alert("Bu cihaz SpeechRecognition desteklemiyor.");
-    return;
-  }
-
-  if(active && active !== which) stopAll();
-
-  const src = (which==="top") ? topLang : botLang;
-  const dst = (which==="top") ? botLang : topLang;
-
-  const rec = buildRecognizer(src);
-  if(!rec){
-    alert("Mikrofon başlatılamadı.");
-    return;
-  }
-
-  active = which;
-  setMicUI(which, true);
-
-  rec.onresult = (e)=>{
-    const t = e.results?.[0]?.[0]?.transcript || "";
-    const finalText = String(t||"").trim();
-    if(!finalText) return;
-
-    addBubble(which, "them", finalText, src);
-    pending = { which, finalText, src, dst };
-    try{ rec.stop(); }catch{}
-  };
-
-  rec.onerror = (err)=>{
-    console.error("STT Error:", err);
-    stopAll();
-  };
-
-  rec.onend = async ()=>{
-    if(active === which) active = null;
-    setMicUI(which, false);
-
-    const p = pending;
-    if(p && p.which === which){
-      pending = null;
-
-      const other = (which==="top") ? "bot" : "top";
-      const translated = await translateViaApi(p.finalText, p.src, p.dst);
-      const speakLang = normalizeApiLang(p.dst);
-
-      if(!translated){
-        addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", speakLang);
-        return;
+    // dışarı tıklayınca kapat
+    document.addEventListener('click', (e)=>{
+      if(!document.getElementById('pop-top')?.contains(e.target) && !e.target.closest('#topLangBtn')) {
+        document.getElementById('pop-top')?.classList.remove('show');
       }
+      if(!document.getElementById('pop-bot')?.contains(e.target) && !e.target.closest('#botLangBtn')) {
+        document.getElementById('pop-bot')?.classList.remove('show');
+      }
+    }, {capture:true});
 
-      addBubble(other, "me", translated, speakLang);
+    document.getElementById('clearBtn').onclick = () => {
+      document.getElementById('topBody').innerHTML = '';
+      document.getElementById('botBody').innerHTML = '';
+      try{ window.speechSynthesis?.cancel?.(); }catch{}
+      try{ window.NativeTTS?.stop?.(); }catch{}
+    };
 
-      // ✅ otomatik ses
-      setTimeout(()=> speak(translated, speakLang), 120);
-    }
-  };
+    // ✅ Logo Dönüş ve Ekolayzer Mantığı
+    let side = 'bot';
+    const obs = new MutationObserver(() => {
+      const isTop = topMic.classList.contains('listening');
+      const isBot = botMic.classList.contains('listening');
+      if (isTop) { root.className = 'to-top listening'; side = 'top'; }
+      else if (isBot) { root.className = 'to-bot listening'; side = 'bot'; }
+      else { root.className = 'to-' + side; }
+    });
+    obs.observe(topMic, { attributes: true });
+    obs.observe(botMic, { attributes: true });
 
-  if(which==="top") recTop = rec; else recBot = rec;
-
-  try{ rec.start(); }catch(e){
-    console.warn("rec.start failed:", e);
-    stopAll();
-  }
-}
-
-/* ===============================
-   Bindings
-=============================== */
-function bindUI(){
-  // mic
-  $("topMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    closeAllPop();
-    if(active==="top") stopAll(); else start("top");
-  });
-  $("botMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    closeAllPop();
-    if(active==="bot") stopAll(); else start("bot");
-  });
-
-  // lang btn -> pop
-  $("topLangBtn")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    const pop = $("pop-top");
-    if(!pop) return;
-    const willShow = !pop.classList.contains("show");
-    closeAllPop();
-    if(willShow){
-      pop.classList.add("show");
-      renderPop("top");
-    }
-  });
-
-  $("botLangBtn")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    const pop = $("pop-bot");
-    if(!pop) return;
-    const willShow = !pop.classList.contains("show");
-    closeAllPop();
-    if(willShow){
-      pop.classList.add("show");
-      renderPop("bot");
-    }
-  });
-
-  // clear
-  $("clearBtn")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    stopAll();
-    $("topBody") && ($("topBody").innerHTML="");
-    $("botBody") && ($("botBody").innerHTML="");
-  });
-
-  // logo -> home (isteğe bağlı)
-  $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
-}
-
-document.addEventListener("DOMContentLoaded", async ()=>{
-  if(!(await requireLogin())) return;
-
-  setLangButtonTexts();
-  bindUI();
-
-  // voice preload (web)
-  try{ window.speechSynthesis?.getVoices?.(); }catch{}
-});
+    // ✅ Scroll Otomatik Aşağı Kaydırma
+    const autoScroll = (el) => { el.scrollTop = el.scrollHeight; };
+    new MutationObserver(() => autoScroll(document.getElementById('topBody'))).observe(document.getElementById('topBody'), {childList:true});
+    new MutationObserver(() => autoScroll(document.getElementById('botBody'))).observe(document.getElementById('botBody'), {childList:true});
+  </script>
+</body>
+</html>
