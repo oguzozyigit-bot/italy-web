@@ -15,7 +15,7 @@
       --green:#00ff9d;
 
       --dockH: 220px;
-      --shellLift: 0px;
+      --shellLift: 0px; /* ui_shell footer yüksekliği kadar yukarı kalkar */
     }
 
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
@@ -39,6 +39,7 @@
       margin:0;
       padding-top:4px;
       z-index:2;
+      user-select:none;
     }
 
     .hud{
@@ -55,12 +56,7 @@
     }
 
     /* SOL: kalpler (3x3) */
-    .leftHud{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      gap:10px;
-    }
+    .leftHud{display:flex;flex-direction:column;align-items:flex-start;gap:10px;}
     .hearts{
       display:grid;
       grid-template-columns: repeat(3, max-content);
@@ -73,14 +69,10 @@
     .heart{font-size:22px;filter:drop-shadow(0 0 10px var(--red));}
 
     /* SAĞ: skor + joker (2) */
-    .rightHud{
-      display:flex;
-      flex-direction:column;
-      align-items:flex-end;
-      gap:10px;
-    }
+    .rightHud{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
     .score{text-align:right;line-height:1.15}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
+    .score .total{font-size:10px;font-weight:900;opacity:.7;letter-spacing:1px;margin-top:4px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
     .jokerCol{display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
@@ -138,6 +130,7 @@
       text-transform:uppercase;
       color:rgba(255,255,255,.72);
       margin-top:-6px;
+      user-select:none;
     }
 
     /* ALT DOCK */
@@ -185,11 +178,24 @@
       text-align:center;
     }
     .modal.on{display:flex}
-    .mTitle{font-size:38px;font-weight:900;margin:0}
-    .mWord{font-size:32px;font-weight:900;color:#60a5fa;margin:14px 0}
-    .mTr{opacity:.65;font-style:italic;margin-bottom:12px}
-    .mBonus{height:22px;font-weight:900;color:var(--green);margin-bottom:16px}
-    .mBtn{width:100%;max-width:280px;padding:18px;border-radius:18px;border:none;background:var(--grad);color:#fff;font-weight:900;font-size:18px;cursor:pointer}
+    .mTitle{font-size:34px;font-weight:900;margin:0}
+    .mWord{font-size:30px;font-weight:900;color:#60a5fa;margin:14px 0}
+    .mTr{opacity:.65;font-style:italic;margin-bottom:10px}
+    .mMeta{opacity:.6;font-weight:900;font-size:12px;margin-bottom:14px}
+    .mBonus{min-height:22px;font-weight:900;color:var(--green);margin-bottom:16px}
+    .mBtnRow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;max-width:520px}
+    .mBtn{
+      flex:1 1 180px;
+      padding:16px;
+      border-radius:18px;
+      border:none;
+      background:var(--grad);
+      color:#fff;
+      font-weight:900;
+      font-size:16px;
+      cursor:pointer
+    }
+    .mBtn.secondary{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
 
     /* ✅ SETUP overlay artık pageContent içinde (shell içinde) */
     .setup{
@@ -210,6 +216,7 @@
       letter-spacing:2px;
       margin:6px 0 16px;
       opacity:.95;
+      user-select:none;
     }
     .setupTag{
       font-size:11px;
@@ -217,6 +224,7 @@
       opacity:.6;
       letter-spacing:2px;
       margin:10px 0 8px;
+      user-select:none;
     }
     .langGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
     .diffGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
@@ -229,7 +237,9 @@
       cursor:pointer;
       user-select:none;
       font-weight:900;
+      transition:.14s;
     }
+    .pickCard:active{transform:scale(.98)}
     .pickCard.active{border-color:#6366f1;background:rgba(99,102,241,.18)}
     .pickCard.diff.active{border-color:var(--green);background:rgba(0,255,157,.10)}
     .startBtn{
@@ -253,13 +263,34 @@
       min-height:18px;
       white-space:pre-wrap;
     }
+
+    /* SCOREBOARD */
+    .board{
+      width:min(520px, 100%);
+      margin-top:10px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      background:rgba(255,255,255,.05);
+      padding:12px;
+      box-sizing:border-box;
+      text-align:left;
+    }
+    .board h3{margin:0 0 10px;font-size:12px;letter-spacing:1px;opacity:.75}
+    .row{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px;border-radius:14px;background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.08);
+      margin-bottom:8px;
+      font-weight:900;
+    }
+    .row small{opacity:.65;font-weight:800}
   </style>
 </head>
 
 <body>
   <div id="pageContent">
 
-    <!-- ✅ Setup overlay (shell içinde) -->
+    <!-- ✅ Setup -->
     <div class="setup" id="setup">
       <div class="setupTitle">HANGMAN</div>
 
@@ -274,9 +305,9 @@
 
       <div class="setupTag">ZORLUK</div>
       <div class="diffGrid" id="diffGrid">
-        <div class="pickCard diff active" data-diff="3">KOLAY</div>
-        <div class="pickCard diff" data-diff="4">NORMAL</div>
-        <div class="pickCard diff" data-diff="5">ZOR</div>
+        <div class="pickCard diff active" data-diff="easy">KOLAY</div>
+        <div class="pickCard diff" data-diff="normal">NORMAL</div>
+        <div class="pickCard diff" data-diff="hard">ZOR</div>
       </div>
 
       <button class="startBtn" id="startBtn">OYUNA BAŞLA</button>
@@ -295,10 +326,10 @@
         <div class="rightHud">
           <div class="score">
             <div class="best">REKOR: <span id="bestVal">0</span></div>
-            <div class="val" id="scoreVal">100</div>
+            <div class="val" id="scoreVal">0</div>
+            <div class="total">TOPLAM: <span id="totalVal">0</span></div>
           </div>
 
-          <!-- ✅ Joker 2 -->
           <div class="jokerCol">
             <div class="joker" id="j0">🃏</div>
             <div class="joker" id="j1">🃏</div>
@@ -331,12 +362,26 @@
       <div class="kb" id="kb"></div>
     </div>
 
+    <!-- RESULT / SCOREBOARD -->
     <div class="modal" id="modal">
-      <h1 class="mTitle" id="mTitle">MİSYON</h1>
+      <h1 class="mTitle" id="mTitle">SONUÇ</h1>
       <div class="mWord" id="mWord">—</div>
       <div class="mTr" id="mTr">(—)</div>
+      <div class="mMeta" id="mMeta">—</div>
       <div class="mBonus" id="mBonus"></div>
-      <button class="mBtn" id="mBtn">DEVAM</button>
+
+      <div class="board" id="board" style="display:none">
+        <h3>SKOR TABLOSU</h3>
+        <div class="row"><div>Bu Oyun</div><div><span id="bRun">0</span></div></div>
+        <div class="row"><div>Toplam Skor</div><div><span id="bTotal">0</span></div></div>
+        <div class="row"><div>Rekor</div><div><span id="bBest">0</span></div></div>
+        <div class="row"><div><small>İpucu</small></div><div><small>Joker kullanmadan kusursuz bitir → +1 Can</small></div></div>
+      </div>
+
+      <div class="mBtnRow">
+        <button class="mBtn" id="mBtnNext">DEVAM</button>
+        <button class="mBtn secondary" id="mBtnAgain">TEKRAR OYNA</button>
+      </div>
     </div>
 
   </div>
@@ -428,18 +473,34 @@
       return chosen;
     }
 
+    // --- PREMIUM SCORE STORAGE ---
+    const BEST_KEY  = "italky_hangman_best";
+    const TOTAL_KEY = "italky_hangman_total";
+
+    let best  = parseInt(localStorage.getItem(BEST_KEY)  || "0", 10);
+    let total = parseInt(localStorage.getItem(TOTAL_KEY) || "0", 10);
+
+    function saveScores(){
+      try{ localStorage.setItem(BEST_KEY, String(best)); }catch{}
+      try{ localStorage.setItem(TOTAL_KEY, String(total)); }catch{}
+      $("bestVal").textContent = best;
+      $("totalVal").textContent = total;
+    }
+
     // --- STATE ---
     let LANGPOOL_BASE = "";
     let pool = null;
     let target = null;
 
     let lang = "en";
-    let diff = 3;
+    let diff = "easy"; // easy|normal|hard
 
     let lives = 3;
     const MAX_LIVES = 9;
 
-    let score = 100;
+    let runScore = 0;   // bu oyun boyunca biriken (her bilmede eklenir)
+    let roundScore = 100;
+
     let guessed = new Set();
     let mistakes = 0;
 
@@ -450,9 +511,8 @@
     let jokerUsed = false;
     let lock = false;
 
-    const HS_KEY = "italky_hangman_high";
-    let best = parseInt(localStorage.getItem(HS_KEY) || "0", 10);
-    $("bestVal").textContent = best;
+    saveScores();
+    $("scoreVal").textContent = runScore;
 
     // selection
     $("langGrid").addEventListener("click", (e)=>{
@@ -465,16 +525,17 @@
 
     $("diffGrid").addEventListener("click", (e)=>{
       const c=e.target.closest(".pickCard.diff");
-      if(!c) return;
+      if(!c || !c.dataset.diff) return;
       [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
       c.classList.add("active");
-      diff = parseInt(c.dataset.diff,10);
+      diff = c.dataset.diff;
     });
 
     function getLimit(){
-      if(diff===3) return 7;
-      if(diff===4) return 4;
-      return 3;
+      // ✅ İSTEDİĞİN: Kolay 6, Normal 4, Zor 2
+      if(diff==="easy") return 6;
+      if(diff==="normal") return 4;
+      return 2;
     }
 
     function renderHearts(){
@@ -484,11 +545,20 @@
       $("hearts").innerHTML = html;
     }
 
-    function setScore(v){
-      score = Math.max(0, v);
-      $("scoreVal").textContent = score;
+    function setRunScore(v){
+      runScore = Math.max(0, v);
+      $("scoreVal").textContent = runScore;
     }
-    function applyPenalty(n){ setScore(score - n); }
+    function addRunScore(v){
+      setRunScore(runScore + Math.max(0, v));
+    }
+
+    function setRoundScore(v){
+      roundScore = Math.max(0, v);
+    }
+    function applyPenalty(n){
+      setRoundScore(roundScore - n);
+    }
 
     function resetMan(){
       ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"].forEach(id => $(id).classList.remove("on"));
@@ -499,21 +569,27 @@
       resetMan();
       const m = mistakes;
 
-      if(diff === 3){
-        const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
+      // Parça sayısı sabit; limit diff'e göre değişiyor.
+      // Görsel olarak yine 6 parça çiziyoruz; limit 2 ise 2 adımda tamamı açılır.
+      const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
+      const limit = getLimit();
+
+      if(limit >= 6){
         seq.slice(0, Math.min(m, 6)).forEach(id => $(id).classList.add("on"));
         return;
       }
-      if(diff === 4){
+
+      if(limit === 4){
         if(m>=1) $("p_head").classList.add("on");
         if(m>=2) $("p_body").classList.add("on");
         if(m>=3){ $("p_larm").classList.add("on"); $("p_rarm").classList.add("on"); }
         if(m>=4){ $("p_lleg").classList.add("on"); $("p_rleg").classList.add("on"); }
         return;
       }
-      if(m>=1) $("p_head").classList.add("on");
-      if(m>=2) $("p_body").classList.add("on");
-      if(m>=3){ $("p_larm").classList.add("on"); $("p_rarm").classList.add("on"); $("p_lleg").classList.add("on"); $("p_rleg").classList.add("on"); }
+
+      // limit === 2
+      if(m>=1){ $("p_head").classList.add("on"); $("p_body").classList.add("on"); }
+      if(m>=2){ $("p_larm").classList.add("on"); $("p_rarm").classList.add("on"); $("p_lleg").classList.add("on"); $("p_rleg").classList.add("on"); }
     }
 
     function renderWord(){
@@ -547,52 +623,108 @@
       }catch(e){}
     }
 
-    function showModal(title, color, bonus){
+    function openModal({title, color, bonus, meta, showBoard=false}){
       $("mTitle").textContent = title;
       $("mTitle").style.color = color;
-      $("mWord").textContent = target.w.toUpperCase();
-      $("mTr").textContent = `(${target.tr || "—"})`;
+      $("mWord").textContent = target?.w ? target.w.toUpperCase() : "—";
+      $("mTr").textContent = `(${(target?.tr || "—")})`;
       $("mBonus").textContent = bonus || "";
+      $("mMeta").textContent = meta || "—";
+
+      $("board").style.display = showBoard ? "block" : "none";
+      if(showBoard){
+        $("bRun").textContent = runScore;
+        $("bTotal").textContent = total;
+        $("bBest").textContent = best;
+      }
+
       $("modal").classList.add("on");
     }
 
-    $("mBtn").onclick = () => {
+    function closeModal(){
       $("modal").classList.remove("on");
+    }
+
+    $("mBtnNext").onclick = () => {
+      closeModal();
       if(lives <= 0){ location.reload(); return; }
       newRound();
+    };
+
+    $("mBtnAgain").onclick = () => {
+      // aynı sayfada yeni oyun: skor sıfırla, canları sıfırdan başlat
+      closeModal();
+      lives = 3;
+      runScore = 0;
+      $("scoreVal").textContent = runScore;
+      renderHearts();
+      $("setup").style.display = "flex";
     };
 
     function endRound(win){
       lock = true;
       speakWord();
 
+      const limit = getLimit();
+      const msgDiff = (diff==="easy"?"KOLAY":"NORMAL") + (diff==="hard"?"":"");
+      const diffLabel = (diff==="easy") ? "KOLAY" : (diff==="normal" ? "NORMAL" : "ZOR");
+
       if(win){
-        if(score > best){
-          best = score;
-          localStorage.setItem(HS_KEY, String(best));
-          $("bestVal").textContent = best;
+        // ✅ roundScore’u total runScore’a ekle
+        addRunScore(roundScore);
+
+        // rekor güncelle
+        if(runScore > best){
+          best = runScore;
+          saveScores();
         }
+
+        // kusursuz bonus can
         let bonus = "";
         if(flawless && !jokerUsed && lives < MAX_LIVES){
           lives++;
           bonus = "KUSURSUZ: +1 CAN";
         }
         renderHearts();
-        showModal("MİSYON BAŞARILI", "#00ff9d", bonus);
+
+        openModal({
+          title: "MİSYON BAŞARILI",
+          color: "#00ff9d",
+          bonus,
+          meta: `ZORLUK: ${diffLabel} • HATA HAKKI: ${limit} • ROUND: +${roundScore} • TOPLAM: ${runScore}`
+        });
         return;
       }
 
+      // lose
       lives--;
       renderHearts();
       $("man").classList.add("swing");
 
-      const swingMs = (diff===3) ? 4000 : 5000;
+      const swingMs = 1600 + (limit * 450);
       setTimeout(()=>{
         $("man").classList.remove("swing");
+
         if(lives <= 0){
-          showModal("GAME OVER", "#ff0033", `SKOR: ${score} • REKOR: ${best}`);
+          // ✅ oyun bitti: total’a ekle + scoreboard
+          total += runScore;
+          if(runScore > best) best = runScore;
+          saveScores();
+
+          openModal({
+            title: "GAME OVER",
+            color: "#ff0033",
+            bonus: `BU OYUN: ${runScore} • TOPLAM: ${total} • REKOR: ${best}`,
+            meta: `ZORLUK: ${diffLabel} • HATA HAKKI: ${limit}`,
+            showBoard: true
+          });
         }else{
-          showModal("DEŞİFRE EDİLEMEDİ", "#ff0033", "-1 CAN");
+          openModal({
+            title: "DEŞİFRE EDİLEMEDİ",
+            color: "#ff0033",
+            bonus: "-1 CAN",
+            meta: `ZORLUK: ${diffLabel} • HATA HAKKI: ${limit} • ROUND: ${roundScore}`
+          });
         }
       }, swingMs);
     }
@@ -650,7 +782,7 @@
       $("j0").classList.remove("spent");
       $("j1").classList.remove("spent");
 
-      setScore(100);
+      setRoundScore(100);
       resetMan();
 
       const usedSet = createUsedSet(`used_hangman_${lang}`);
@@ -683,10 +815,9 @@
         }
       }catch{}
 
-      // 2) footer lift
+      // 2) footer lift (dock alttan taşmasın)
       try{
-        const root = getComputedStyle(document.documentElement);
-        const footerH = parseFloat(root.getPropertyValue("--footerH")) || 0;
+        const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footerH")) || 0;
         document.documentElement.style.setProperty("--shellLift", footerH ? `${footerH + 10}px` : "0px");
       }catch{}
 
@@ -707,7 +838,11 @@
         return;
       }
 
-      // 4) enter
+      // 4) new game session
+      runScore = 0;
+      $("scoreVal").textContent = runScore;
+
+      // 5) enter
       $("setup").style.display = "none";
       $("setupMsg").textContent = "";
       newRound();
