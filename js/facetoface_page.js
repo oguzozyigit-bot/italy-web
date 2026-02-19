@@ -6,7 +6,7 @@ import { setHeaderTokens } from "/js/ui_shell.js";
 
 const $ = (id)=>document.getElementById(id);
 
-const API_BASE = "https://italky-api.onrender.com";
+const API_BASE = "https://lt-italky-1.onrender.com";";
 const LOGIN_PATH = "/pages/login.html";
 const HOME_PATH  = "/pages/home.html";
 const PROFILE_PATH = "/pages/profile.html";
@@ -325,27 +325,29 @@ async function translateViaApi(text, source, target){
   const dst = normalizeApiLang(target);
   if(src === dst) return t;
 
-  const ctrl = new AbortController();
-  const to = setTimeout(()=>ctrl.abort(), 25000);
   try{
-    const body = { text:t, source:src, target:dst, from_lang:src, to_lang:dst };
-    const r = await fetch(`${API_BASE}/api/translate`,{
+    const r = await fetch(`${API_BASE}/translate`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(body),
-      signal: ctrl.signal
+      body: JSON.stringify({
+        q: t,
+        source: src,
+        target: dst,
+        format: "text"
+      })
     });
 
-    if(!r.ok) return null;
+    if(!r.ok){
+      console.warn("LibreTranslate error:", r.status);
+      return null;
+    }
 
     const data = await r.json().catch(()=>({}));
-    const out = String(data?.translated||data?.translation||data?.text||"").trim();
-    return out || null;
+    return String(data?.translatedText || "").trim() || null;
+
   }catch(e){
-    console.warn("translateViaApi failed:", e);
+    console.warn("LibreTranslate failed:", e);
     return null;
-  }finally{
-    clearTimeout(to);
   }
 }
 
