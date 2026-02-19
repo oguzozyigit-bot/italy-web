@@ -1,3 +1,4 @@
+<!-- FILE: /pages/facetoface.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -26,9 +27,6 @@
 
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-
-      --padX: 18px;
-      --padY: 16px;
     }
 
     *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none;}
@@ -43,15 +41,14 @@
       flex-direction:column;
       align-items:center;
       justify-content:space-between;
-      padding: calc(var(--padY) + var(--safe-top)) var(--padX) calc(var(--padY) + var(--safe-bottom));
+      padding: calc(16px + var(--safe-top)) 18px calc(16px + var(--safe-bottom));
       gap:14px;
       overflow:hidden;
     }
 
     .half-screen.top{
       background: linear-gradient(to bottom, #1a0208, var(--brand-burgundy));
-      transform: rotate(180deg); /* ✅ tasarım aynen */
-      transform-origin:center;
+      transform: rotate(180deg);
       --mic-accent: var(--mic-navy);
     }
     .half-screen.bottom{
@@ -83,9 +80,8 @@
       gap:8px;
       backdrop-filter: blur(10px);
       user-select:none;
-      touch-action: manipulation;
     }
-    .lang-trigger svg{width:14px; height:14px; opacity:.7; pointer-events:none;}
+    .lang-trigger svg{width:14px; height:14px; opacity:.7}
 
     /* POPOVER */
     .popover{
@@ -100,9 +96,8 @@
       box-shadow: 0 22px 46px rgba(0,0,0,.80);
       display:none;
       flex-direction:column;
-      z-index: 999;
+      z-index: 2000;
       overflow:hidden;
-      pointer-events:auto;
     }
     .popover.show{display:flex;}
     .pop-head{padding:12px; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between;}
@@ -113,7 +108,6 @@
       background: rgba(0,0,0,.18);
       color:#fff; cursor:pointer;
       display:flex; align-items:center; justify-content:center;
-      touch-action: manipulation;
     }
     .pop-close:active{transform:scale(.96);}
 
@@ -129,7 +123,6 @@
       cursor:pointer;
       border:1px solid transparent;
       user-select:none;
-      touch-action: manipulation;
     }
     .pop-item:hover{background: rgba(255,255,255,.04);}
     .pop-item.active{
@@ -142,7 +135,7 @@
     .pop-name{font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:190px;}
     .pop-code{font-size:12px; font-weight:900; opacity:.7; text-transform:uppercase;}
 
-    .top .popover{ top: calc(62px + var(--safe-top)); }     /* top panel içinde “görünen alt çizgiye” yakın görünür */
+    .top .popover{ top: calc(62px + var(--safe-top)); }
     .bottom .popover{ bottom: 120px; }
 
     /* CHAT */
@@ -205,7 +198,6 @@
       cursor:pointer;
       flex: 0 0 auto;
       margin-top: 4px;
-      touch-action: manipulation;
     }
     .bubble.me .spk{display:flex;}
     .bubble .spk svg{width:16px; height:16px;}
@@ -234,7 +226,7 @@
       box-shadow: 0 14px 30px rgba(0,0,0,.65);
       transition: transform .18s, border-color .18s, box-shadow .18s;
       position:relative;
-      touch-action: manipulation;
+      user-select:none;
     }
     .btn-mic svg{
       width:34px; height:34px;
@@ -242,7 +234,6 @@
       fill:none;
       stroke-width:2;
       stroke-linecap:round; stroke-linejoin:round;
-      pointer-events:none;
     }
 
     @keyframes recPulse{
@@ -307,7 +298,6 @@
       -webkit-backdrop-filter: blur(10px);
       line-height: 1;
       white-space: nowrap;
-      touch-action: manipulation;
     }
     .hub-link:active{ transform: scale(.98); }
     .hub-link.home{ color: rgba(165,180,252,.95); }
@@ -329,7 +319,6 @@
 
       transition: transform .38s cubic-bezier(.22,1,.36,1);
       will-change: transform;
-      touch-action: manipulation;
     }
     .logo-text{
       font-family:"Space Grotesk",sans-serif;
@@ -338,7 +327,6 @@
       color:#fff;
       position:relative;
       z-index:2;
-      pointer-events:none;
     }
     .logo-ai{background:var(--ai-grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent;}
 
@@ -372,35 +360,15 @@
     #frameRoot.spk-top .logo-capsule{ transform: translateY(-14px) rotate(180deg) scale(1.02); }
     #frameRoot.spk-bot .logo-capsule{ transform: translateY(14px) rotate(0deg) scale(1.02); }
 
-    /* ✅ ŞEFFAF HIT AREA’lar: transform bug’ını bypass eder */
-    .hit{
-      position:absolute;
-      left:50%;
-      transform: translateX(-50%);
-      width: 96px;
-      height: 96px;
-      border:0;
-      background: transparent;
-      padding:0;
-      margin:0;
-      z-index: 1000;
-      cursor: pointer;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .hit:active{ transform: translateX(-50%) scale(0.99); }
-
-    /* Top panel görünürde mic EN ÜSTTE -> topSection içinde BOTTOM (çünkü 180 dönük) */
-    #topMicHit{
-      bottom: calc(var(--padY) + var(--safe-bottom) + 0px);
-    }
-
-    /* Top panel görünürde dil butonu ORTA ÇİZGİYE yakın -> topSection içinde TOP (çünkü 180 dönük) */
-    #topLangHit{
-      top: calc(var(--padY) + var(--safe-top) + 2px);
-      width: 240px;
-      height: 54px;
-      border-radius: 999px;
+    /* =========================================================
+       ✅ ANDROID WEBVIEW CLICK FIX (ROTATE BUG)
+       Top panel ters; tıklanabilir katmanları tekrar düz çevir
+       ========================================================= */
+    .half-screen.top .top-top,
+    .half-screen.top .chat-body,
+    .half-screen.top .mic-wrap,
+    .half-screen.top .popover{
+      transform: rotate(180deg);
     }
   </style>
 </head>
@@ -410,12 +378,8 @@
 
     <div class="half-screen top" id="topSection">
 
-      <!-- ✅ HIT AREAS (transform DIŞI, kesin basılır) -->
-      <button class="hit" id="topMicHit" aria-label="Üst mikrofon"></button>
-      <button class="hit" id="topLangHit" aria-label="Üst dil seç"></button>
-
       <div class="top-top">
-        <button class="lang-trigger" id="topLangBtn">
+        <button class="lang-trigger" id="topLangBtn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
           </svg>
@@ -426,7 +390,7 @@
       <div class="popover" id="pop-top" role="dialog" aria-label="Üst dil seçimi">
         <div class="pop-head">
           <div class="pop-title">ÜST DİL</div>
-          <button class="pop-close" id="close-top" aria-label="Kapat">✕</button>
+          <button class="pop-close" id="close-top" type="button" aria-label="Kapat">✕</button>
         </div>
         <div class="pop-list" id="list-top"></div>
       </div>
@@ -434,7 +398,7 @@
       <div class="chat-body" id="topBody"></div>
 
       <div class="mic-wrap">
-        <button class="btn-mic" id="topMic" title="Mikrofon">
+        <button class="btn-mic" id="topMic" type="button" title="Mikrofon">
           <svg viewBox="0 0 24 24">
             <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
             <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
@@ -461,7 +425,7 @@
 
     <div class="half-screen bottom" id="botSection">
       <div class="bottom-top">
-        <button class="lang-trigger" id="botLangBtn">
+        <button class="lang-trigger" id="botLangBtn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
           </svg>
@@ -472,7 +436,7 @@
       <div class="popover" id="pop-bot" role="dialog" aria-label="Alt dil seçimi">
         <div class="pop-head">
           <div class="pop-title">ALT DİL</div>
-          <button class="pop-close" id="close-bot" aria-label="Kapat">✕</button>
+          <button class="pop-close" id="close-bot" type="button" aria-label="Kapat">✕</button>
         </div>
         <div class="pop-list" id="list-bot"></div>
       </div>
@@ -480,7 +444,7 @@
       <div class="chat-body" id="botBody"></div>
 
       <div class="mic-wrap">
-        <button class="btn-mic" id="botMic" title="Mikrofon">
+        <button class="btn-mic" id="botMic" type="button" title="Mikrofon">
           <svg viewBox="0 0 24 24">
             <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
             <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
@@ -491,8 +455,8 @@
     </div>
   </div>
 
-  <!-- JS -->
-  <script type="module" src="/js/facetoface_page.js?v=20260219_hitfix"></script>
+  <!-- ✅ JS -->
+  <script type="module" src="/js/facetoface_page.js?v=20260219_fix1"></script>
 
   <script>
     const HOME = '/pages/home.html';
@@ -502,22 +466,9 @@
     const topBody = document.getElementById('topBody');
     const botBody = document.getElementById('botBody');
 
-    // ✅ HIT alanları gerçek butona forward eder (Android transform bug fix)
-    document.getElementById('topMicHit')?.addEventListener('click', (e)=>{
-      e.preventDefault(); e.stopPropagation();
-      topMic?.click();
-    }, { passive:false });
-
-    document.getElementById('topLangHit')?.addEventListener('click', (e)=>{
-      e.preventDefault(); e.stopPropagation();
-      document.getElementById('topLangBtn')?.click();
-    }, { passive:false });
-
-    // ✅ Home navigasyon
     document.getElementById('homeBtn')?.addEventListener('click', ()=> location.href = HOME);
     document.getElementById('homeLink')?.addEventListener('click', ()=> location.href = HOME);
 
-    // ✅ Temizle
     function doClear(){
       try{ topBody.innerHTML=''; }catch{}
       try{ botBody.innerHTML=''; }catch{}
@@ -526,8 +477,7 @@
     }
     document.getElementById('clearLink')?.addEventListener('click', doClear);
 
-    // ✅ Logo şov state: hoparlör tarafını KORU
-    let lastSpeaker = "bot"; // default
+    let lastSpeaker = "bot";
 
     function applySpeaker(){
       root.classList.remove('focus-top','focus-bot');
