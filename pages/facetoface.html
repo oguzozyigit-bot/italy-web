@@ -26,6 +26,9 @@
 
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+      --padX: 18px;
+      --padY: 16px;
     }
 
     *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none;}
@@ -40,36 +43,20 @@
       flex-direction:column;
       align-items:center;
       justify-content:space-between;
-      overflow:hidden;
+      padding: calc(var(--padY) + var(--safe-top)) var(--padX) calc(var(--padY) + var(--safe-bottom));
       gap:14px;
-      padding:0; /* ✅ padding topFlip & bottom’a verilecek */
+      overflow:hidden;
     }
 
-    /* ✅ TOP: dış kapsayıcı DÜZ (dokunma bozulmasın) */
     .half-screen.top{
       background: linear-gradient(to bottom, #1a0208, var(--brand-burgundy));
+      transform: rotate(180deg); /* ✅ tasarım aynen */
+      transform-origin:center;
       --mic-accent: var(--mic-navy);
     }
-
-    /* ✅ TOP içeriği 180 döndür (görüntü ters, dokunma normal) */
-    .topFlip{
-      flex:1;
-      width:100%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:space-between;
-      padding: calc(16px + var(--safe-top)) 18px calc(16px + var(--safe-bottom));
-      gap:14px;
-      transform: rotate(180deg);
-      transform-origin:center;
-    }
-
     .half-screen.bottom{
       background: linear-gradient(to bottom, var(--brand-lacivert), #02000a);
       --mic-accent: var(--icon-bordo);
-      padding: calc(16px + var(--safe-top)) 18px calc(16px + var(--safe-bottom));
-      gap:14px;
     }
 
     .top-top, .bottom-top{
@@ -79,7 +66,6 @@
       justify-content:center;
       z-index:110;
       padding-top: 6px;
-      pointer-events:auto;
     }
 
     .lang-trigger{
@@ -97,7 +83,6 @@
       gap:8px;
       backdrop-filter: blur(10px);
       user-select:none;
-      pointer-events:auto;
       touch-action: manipulation;
     }
     .lang-trigger svg{width:14px; height:14px; opacity:.7; pointer-events:none;}
@@ -128,7 +113,7 @@
       background: rgba(0,0,0,.18);
       color:#fff; cursor:pointer;
       display:flex; align-items:center; justify-content:center;
-      pointer-events:auto;
+      touch-action: manipulation;
     }
     .pop-close:active{transform:scale(.96);}
 
@@ -144,7 +129,6 @@
       cursor:pointer;
       border:1px solid transparent;
       user-select:none;
-      pointer-events:auto;
       touch-action: manipulation;
     }
     .pop-item:hover{background: rgba(255,255,255,.04);}
@@ -158,7 +142,7 @@
     .pop-name{font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:190px;}
     .pop-code{font-size:12px; font-weight:900; opacity:.7; text-transform:uppercase;}
 
-    .top .popover{ top: calc(62px + var(--safe-top)); }
+    .top .popover{ top: calc(62px + var(--safe-top)); }     /* top panel içinde “görünen alt çizgiye” yakın görünür */
     .bottom .popover{ bottom: 120px; }
 
     /* CHAT */
@@ -174,7 +158,6 @@
       scrollbar-width:none;
       padding: 6px 0;
       z-index: 50;
-      pointer-events:auto;
     }
     .chat-body::-webkit-scrollbar{display:none}
 
@@ -186,7 +169,6 @@
       gap:10px;
       text-align:center;
       word-break: break-word;
-      pointer-events:auto;
     }
     .bubble .txt{display:inline-block; max-width: 92%;}
     .bubble.them .txt{
@@ -223,11 +205,10 @@
       cursor:pointer;
       flex: 0 0 auto;
       margin-top: 4px;
-      pointer-events:auto;
       touch-action: manipulation;
     }
     .bubble.me .spk{display:flex;}
-    .bubble .spk svg{width:16px; height:16px; pointer-events:none;}
+    .bubble .spk svg{width:16px; height:16px;}
     .bubble .spk:active{transform:scale(.95);}
 
     /* MIC */
@@ -238,7 +219,6 @@
       justify-content:center;
       padding-bottom: 4px;
       z-index: 60;
-      pointer-events:auto;
     }
 
     .btn-mic{
@@ -254,8 +234,7 @@
       box-shadow: 0 14px 30px rgba(0,0,0,.65);
       transition: transform .18s, border-color .18s, box-shadow .18s;
       position:relative;
-      pointer-events:auto;
-      touch-action: manipulation; /* ✅ Android click fix */
+      touch-action: manipulation;
     }
     .btn-mic svg{
       width:34px; height:34px;
@@ -328,7 +307,6 @@
       -webkit-backdrop-filter: blur(10px);
       line-height: 1;
       white-space: nowrap;
-      pointer-events:auto;
       touch-action: manipulation;
     }
     .hub-link:active{ transform: scale(.98); }
@@ -348,6 +326,7 @@
       cursor:pointer;
       position:relative;
       overflow:hidden;
+
       transition: transform .38s cubic-bezier(.22,1,.36,1);
       will-change: transform;
       touch-action: manipulation;
@@ -392,6 +371,37 @@
     #frameRoot.focus-bot .logo-capsule{ transform: translateY(18px) rotate(0deg); }
     #frameRoot.spk-top .logo-capsule{ transform: translateY(-14px) rotate(180deg) scale(1.02); }
     #frameRoot.spk-bot .logo-capsule{ transform: translateY(14px) rotate(0deg) scale(1.02); }
+
+    /* ✅ ŞEFFAF HIT AREA’lar: transform bug’ını bypass eder */
+    .hit{
+      position:absolute;
+      left:50%;
+      transform: translateX(-50%);
+      width: 96px;
+      height: 96px;
+      border:0;
+      background: transparent;
+      padding:0;
+      margin:0;
+      z-index: 1000;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hit:active{ transform: translateX(-50%) scale(0.99); }
+
+    /* Top panel görünürde mic EN ÜSTTE -> topSection içinde BOTTOM (çünkü 180 dönük) */
+    #topMicHit{
+      bottom: calc(var(--padY) + var(--safe-bottom) + 0px);
+    }
+
+    /* Top panel görünürde dil butonu ORTA ÇİZGİYE yakın -> topSection içinde TOP (çünkü 180 dönük) */
+    #topLangHit{
+      top: calc(var(--padY) + var(--safe-top) + 2px);
+      width: 240px;
+      height: 54px;
+      border-radius: 999px;
+    }
   </style>
 </head>
 
@@ -399,38 +409,38 @@
   <div class="container">
 
     <div class="half-screen top" id="topSection">
-      <!-- ✅ üstte sadece içerik ters -->
-      <div class="topFlip">
 
-        <div class="top-top">
-          <button class="lang-trigger" id="topLangBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
-            </svg>
-            <span id="topLangTxt">🇬🇧 İngilizce</span>
-          </button>
+      <!-- ✅ HIT AREAS (transform DIŞI, kesin basılır) -->
+      <button class="hit" id="topMicHit" aria-label="Üst mikrofon"></button>
+      <button class="hit" id="topLangHit" aria-label="Üst dil seç"></button>
+
+      <div class="top-top">
+        <button class="lang-trigger" id="topLangBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20"/>
+          </svg>
+          <span id="topLangTxt">🇬🇧 İngilizce</span>
+        </button>
+      </div>
+
+      <div class="popover" id="pop-top" role="dialog" aria-label="Üst dil seçimi">
+        <div class="pop-head">
+          <div class="pop-title">ÜST DİL</div>
+          <button class="pop-close" id="close-top" aria-label="Kapat">✕</button>
         </div>
+        <div class="pop-list" id="list-top"></div>
+      </div>
 
-        <div class="popover" id="pop-top" role="dialog" aria-label="Üst dil seçimi">
-          <div class="pop-head">
-            <div class="pop-title">ÜST DİL</div>
-            <button class="pop-close" id="close-top" aria-label="Kapat">✕</button>
-          </div>
-          <div class="pop-list" id="list-top"></div>
-        </div>
+      <div class="chat-body" id="topBody"></div>
 
-        <div class="chat-body" id="topBody"></div>
-
-        <div class="mic-wrap">
-          <button class="btn-mic" id="topMic" title="Mikrofon">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-              <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
-              <path d="M12 19v3"/>
-            </svg>
-          </button>
-        </div>
-
+      <div class="mic-wrap">
+        <button class="btn-mic" id="topMic" title="Mikrofon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+            <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
+            <path d="M12 19v3"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -481,8 +491,8 @@
     </div>
   </div>
 
-  <!-- ✅ Cache kırma -->
-  <script type="module" src="/js/facetoface_page.js?v=20260219_fixTap"></script>
+  <!-- JS -->
+  <script type="module" src="/js/facetoface_page.js?v=20260219_hitfix"></script>
 
   <script>
     const HOME = '/pages/home.html';
@@ -492,9 +502,22 @@
     const topBody = document.getElementById('topBody');
     const botBody = document.getElementById('botBody');
 
+    // ✅ HIT alanları gerçek butona forward eder (Android transform bug fix)
+    document.getElementById('topMicHit')?.addEventListener('click', (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      topMic?.click();
+    }, { passive:false });
+
+    document.getElementById('topLangHit')?.addEventListener('click', (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      document.getElementById('topLangBtn')?.click();
+    }, { passive:false });
+
+    // ✅ Home navigasyon
     document.getElementById('homeBtn')?.addEventListener('click', ()=> location.href = HOME);
     document.getElementById('homeLink')?.addEventListener('click', ()=> location.href = HOME);
 
+    // ✅ Temizle
     function doClear(){
       try{ topBody.innerHTML=''; }catch{}
       try{ botBody.innerHTML=''; }catch{}
@@ -503,7 +526,9 @@
     }
     document.getElementById('clearLink')?.addEventListener('click', doClear);
 
-    let lastSpeaker = "bot";
+    // ✅ Logo şov state: hoparlör tarafını KORU
+    let lastSpeaker = "bot"; // default
+
     function applySpeaker(){
       root.classList.remove('focus-top','focus-bot');
       root.classList.toggle('spk-top', lastSpeaker === "top");
