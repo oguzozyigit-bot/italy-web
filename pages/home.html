@@ -1,247 +1,224 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • Neural Nitro 3000</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Final Pro Hub</title>
   <style>
     :root {
-      --bg-dark: #050508; /* Home sayfasındaki o derin koyu zemin */
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --glass: rgba(255, 255, 255, 0.05);
-      --border: rgba(255, 255, 255, 0.1);
+      --footer-offset: 110px; 
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    html, body { 
-      margin: 0; width: 100%; height: 100%; 
-      background: var(--bg-dark); color: #fff; 
-      font-family: 'Outfit', sans-serif; overflow: hidden; 
+    #pageContent {
+      height: calc(100vh - 180px); 
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 5px 0 var(--footer-offset);
+      box-sizing: border-box;
+      gap: 8px;
+      overflow: hidden;
     }
 
-    .container { display: flex; flex-direction: column; height: 100dvh; width: 100%; position: relative; }
-
-    /* PANELLER */
-    .half-screen {
-      flex: 1; position: relative; display: flex; flex-direction: column;
-      align-items: center; justify-content: space-between;
-      padding: calc(20px + env(safe-area-inset-top)) 20px;
-      z-index: 10;
-    }
-
-    .half-screen.top { 
-      transform: rotate(180deg); 
-      background: linear-gradient(180deg, rgba(165, 180, 252, 0.05) 0%, transparent 100%);
-    }
-
-    /* MERKEZ HUB & NEURAL ORB */
-    .center-hub {
-      height: 120px; position: relative; z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .neural-orb-wrap {
-      position: relative; width: 100px; height: 100px;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .ai-ring {
-      position: absolute; inset: -5px; border-radius: 50%; padding: 2px;
-      background: var(--ai-gradient);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude; animation: rotateOrbit 10s linear infinite;
-    }
-
-    .orbit-energy {
-      position: absolute; inset: -15px; border-radius: 50%;
-      animation: rotateOrbit 6s linear infinite reverse;
-    }
-    .e-ball { position: absolute; width: 8px; height: 8px; border-radius: 50%; filter: blur(1px); }
-    .ball-1 { top: -4px; left: 50%; background: #6366f1; box-shadow: 0 0 15px #6366f1; }
-    .ball-2 { bottom: -4px; left: 50%; background: #ec4899; box-shadow: 0 0 15px #ec4899; }
-
-    .ai-core-logo {
-      width: 70px; height: 70px; background: #000; border-radius: 50%;
+    /* --- 1. FACETOFACE --- */
+    .portal-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      border: 1px solid rgba(255,255,255,0.2); z-index: 10;
-      box-shadow: inset 0 0 20px rgba(99, 102, 241, 0.2);
+      cursor: pointer; padding: 5px 0;
+      -webkit-tap-highlight-color: transparent;
     }
-    .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
-    .logo-ai { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-    /* NAV BUTONLARI */
-    .nav-btn {
-      position: absolute; padding: 10px 18px; border-radius: 100px;
-      background: var(--glass); border: 1px solid var(--border);
-      color: rgba(255,255,255,0.6); font-size: 10px; font-weight: 900;
-      text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
-      backdrop-filter: blur(10px); z-index: 110;
+    .neural-orb {
+      width: 115px; height: 115px; position: relative;
+      display: flex; align-items: center; justify-content: center;
     }
-    .btn-home { left: 20px; }
-    .btn-clear { right: 20px; }
+    .ai-ring {
+      position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px;
+      background: var(--ai-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
+    }
+    .orbit-energy {
+      position: absolute; inset: -12px; border-radius: 50%;
+      animation: rotateOrbit 8s linear infinite;
+    }
+    .e-ball { position: absolute; width: 11px; height: 11px; border-radius: 50%; filter: blur(1px); }
+    .ball-l { top: -5px; left: 50%; transform: translateX(-50%); background: #1e3a8a; box-shadow: 0 0 15px #1e3a8a; }
+    .ball-b { bottom: -5px; left: 50%; transform: translateX(-50%); background: #801336; box-shadow: 0 0 15px #801336; }
 
-    /* MİKROFONLAR */
-    .btn-mic {
-      width: 75px; height: 75px; border-radius: 50%;
-      background: #000; display: flex; align-items: center; justify-content: center;
-      position: relative; cursor: pointer; border: 2px solid transparent;
+    .ai-core {
+      width: 85px; height: 85px; background: #000; border-radius: 50%;
       background-image: linear-gradient(#000, #000), var(--ai-gradient);
       background-origin: border-box; background-clip: content-box, border-box;
-      transition: 0.3s;
+      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
+      animation: aiBreathe 4s infinite ease-in-out;
+      z-index: 10;
     }
-    .btn-mic.listening { animation: aiBreathe 2s infinite ease-in-out; }
-    .btn-mic svg { width: 30px; stroke: #fff; }
+    .portal-info { text-align: center; margin-top: 10px; }
+    .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+    .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
-    /* CHAT & SPEAKER */
-    .chat-body { flex: 1; width: 100%; display: flex; flex-direction: column; justify-content: center; gap: 20px; overflow: hidden; }
-    .bubble { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .bubble.me.is-latest .txt { font-size: 32px; font-weight: 200; text-align: center; color: #fff; }
-    
-    .spk-btn {
-      width: 40px; height: 40px; border-radius: 50%; background: var(--glass);
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
-      border: 1px solid var(--border);
+    /* --- 2. ACADEMY --- */
+    .academy-pro {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
     }
+    .spectrum-logo { gap: 3.5px; display: flex; align-items: center; flex-shrink: 0; height: 32px; }
+    .bar { width: 3.5px; border-radius: 10px; animation: barMove 1.2s infinite ease-in-out; }
+    .bar-1 { height: 10px; background: #ff0000; animation-delay: 0.1s; }
+    .bar-2 { height: 18px; background: #ff7f00; animation-delay: 0.3s; }
+    .bar-3 { height: 26px; background: #ffff00; animation-delay: 0.5s; }
+    .bar-4 { height: 32px; background: #00ff00; animation-delay: 0.7s; }
+    .bar-5 { height: 26px; background: #0000ff; animation-delay: 0.5s; }
+    .bar-6 { height: 18px; background: #4b0082; animation-delay: 0.3s; }
+    .bar-7 { height: 10px; background: #8b00ff; animation-delay: 0.1s; }
 
-    /* DİL SEÇİCİ */
-    .lang-trigger {
-      padding: 10px 20px; border-radius: 100px; background: var(--glass);
-      border: 1px solid var(--border); font-size: 12px; font-weight: 600;
-      display: flex; align-items: center; gap: 8px;
+    .academy-text h2 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; }
+    .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
+
+    /* --- 3. GRID LAYOUT --- */
+    .pro-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     }
-
-    /* POPOVERS (DİL SEÇİMİ) */
-    .popover {
-      position: absolute; left: 50%; transform: translateX(-50%);
-      width: 90%; max-width: 380px; height: 350px;
-      background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(30px);
-      border: 1px solid var(--border); border-radius: 24px;
-      display: none; flex-direction: column; z-index: 500;
+    .pro-tile {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px; padding: 14px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
     }
-    .popover.show { display: flex; }
-    .half-screen.top .popover { top: 80px; transform: translateX(-50%) rotate(180deg); }
-    .half-screen.bottom .popover { bottom: 80px; }
+    .pro-tile:active { transform: scale(0.96); }
+    .tile-icon {
+      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 17px;
+    }
+    .ico-txt::before { content: "Aa"; color: #34d399; font-weight: 900; }
+    .ico-cam::before { content: "◎"; color: #60a5fa; font-weight: 900; }
+    .ico-doc::before { content: "≡"; color: #f472b6; font-weight: 900; }
+    .ico-fun::before { content: "🎯"; }
+    .ico-chat::before { content: "💬"; }
+    .ico-teacher::before { content: "🎓"; }
 
-    /* ANİMASYONLAR */
+    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    /* --- 4. MEETING BAR (Neural Conference Bağlantılı) --- */
+    .meeting-bar {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 16px 22px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .meeting-bar:active { transform: scale(0.97); }
+
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes aiBreathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); } 50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(99, 102, 241, 0.4); } }
+    @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes barMove { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
 
-    /* YÖNLENDİRME SINIFLARI */
-    #frameRoot.to-top .neural-orb-wrap { transform: rotate(180deg); }
-    #frameRoot.to-bot .neural-orb-wrap { transform: rotate(0deg); }
   </style>
 </head>
 
-<body id="frameRoot" class="to-bot">
-  <div class="container">
+<body>
+  <div id="pageContent">
 
-    <div class="half-screen top" id="topSection">
-      <button class="lang-trigger" id="topLangBtn">🇬🇧 ENGLISH ⌵</button>
-      
-      <div class="popover" id="pop-top">
-        <div style="padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
-          <span style="font-weight:900; font-size:12px;">SELECT LANGUAGE</span>
-          <span id="close-top" style="cursor:pointer">✕</span>
-        </div>
-        <div class="pop-list" id="list-top" style="overflow-y:auto; padding:10px;"></div>
-      </div>
-
-      <div class="chat-body" id="topBody"></div>
-
-      <div class="mic-wrap">
-        <div class="btn-mic" id="topMic">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1"/><path d="M12 19v3"/></svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="center-hub">
-      <div class="nav-btn btn-home" onclick="location.href='/pages/home.html'">Anasayfa</div>
-      
-      <div class="neural-orb-wrap" id="mainOrb">
+    <div class="portal-zone" data-nav="/pages/facetoface.html">
+      <div class="neural-orb">
         <div class="ai-ring"></div>
         <div class="orbit-energy">
-          <div class="e-ball ball-1"></div>
-          <div class="e-ball ball-2"></div>
+          <div class="e-ball ball-l"></div>
+          <div class="e-ball ball-b"></div>
         </div>
-        <div class="ai-core-logo">
-          <span class="logo-text">italky<span class="logo-ai">AI</span></span>
+        <div class="ai-core">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+          </svg>
         </div>
       </div>
-
-      <div class="nav-btn btn-clear" id="clearBtn">Temizle</div>
+      <div class="portal-info">
+        <h1>FaceToFace</h1>
+        <p>Yüzyüze Anlık Çeviri</p>
+      </div>
     </div>
 
-    <div class="half-screen bottom" id="botSection">
-      <button class="lang-trigger" id="botLangBtn">🇹🇷 TÜRKÇE ⌵</button>
-
-      <div class="popover" id="pop-bot">
-        <div style="padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between;">
-          <span style="font-weight:900; font-size:12px;">DİL SEÇİNİZ</span>
-          <span id="close-bot" style="cursor:pointer">✕</span>
-        </div>
-        <div class="pop-list" id="list-bot" style="overflow-y:auto; padding:10px;"></div>
+    <div class="academy-pro" data-nav="/pages/teacher_select.html">
+      <div class="spectrum-logo">
+        <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
+        <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
+        <div class="bar bar-7"></div>
       </div>
+      <div class="academy-text">
+        <h2>italky <span>Academy</span></h2>
+        <p>YAPAY ZEKA İLE DİL EĞİTİMİ</p>
+      </div>
+    </div>
 
-      <div class="chat-body" id="botBody"></div>
+    <div class="pro-grid">
+      <div class="pro-tile" data-nav="/pages/text_translate.html">
+        <div class="tile-icon ico-txt"></div>
+        <label>Metinden<br>Çeviri</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/photo.html">
+        <div class="tile-icon ico-cam"></div>
+        <label>Fotoğraftan<br>Çeviri</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/document.html">
+        <div class="tile-icon ico-doc"></div>
+        <label>Belgeden<br>Çeviri</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/game.html">
+        <div class="tile-icon ico-fun"></div>
+        <label>Eğlenerek<br>Öğren</label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/teacher_select.html">
+        <div class="tile-icon ico-chat"></div>
+        <label>Sohbet <span>AI</span></label>
+      </div>
+      <div class="pro-tile" data-nav="/pages/teacher_select.html">
+        <div class="tile-icon ico-teacher"></div>
+        <label>Chat <span>AI</span></label>
+      </div>
+    </div>
 
-      <div class="mic-wrap">
-        <div class="btn-mic" id="botMic">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 11v1a7 7 0 0 1-14 0v-1"/><path d="M12 19v3"/></svg>
-        </div>
+    <div class="meeting-bar" data-nav="/pages/meeting.html">
+      <div class="tile-icon">📹</div>
+      <div class="academy-text">
+        <h2 style="font-size: 17px;">Online Toplantı</h2>
+        <p>CANLI ÇEVİRİ ODALARI</p>
       </div>
     </div>
 
   </div>
 
-  <script type="module" src="/js/facetoface_page.js?v=20260219_FINAL"></script>
+  <script type="module">
+    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
+    import { bootPage } from "/js/ui_guard.js";
+    import { ensureAuthAndCacheUser } from "/js/auth.js";
 
-  <script>
-    const root = document.getElementById('frameRoot');
-    const topMic = document.getElementById('topMic');
-    const botMic = document.getElementById('botMic');
-    const topBody = document.getElementById('topBody');
-    const botBody = document.getElementById('botBody');
+    mountShell({ scroll: "none" });
 
-    // Temizle Butonu
-    document.getElementById('clearBtn').onclick = () => {
-      topBody.innerHTML = '';
-      botBody.innerHTML = '';
-      window.speechSynthesis?.cancel?.();
-    };
+    const cached = await ensureAuthAndCacheUser().catch(()=>null);
+    if (cached?.tokens != null) setHeaderTokens(cached.tokens);
+    bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
 
-    // Dil Pencereleri Aç/Kapat
-    const togglePop = (btn, pop, close) => {
-      document.getElementById(btn).onclick = () => document.getElementById(pop).classList.add('show');
-      document.getElementById(close).onclick = () => document.getElementById(pop).classList.remove('show');
-    };
-    togglePop('topLangBtn', 'pop-top', 'close-top');
-    togglePop('botLangBtn', 'pop-bot', 'close-bot');
-
-    // Dinamik Yön ve Logo Dönüş Mantığı
-    const observer = new MutationObserver(() => {
-      const isTopActive = topMic.classList.contains('listening');
-      const isBotActive = botMic.classList.contains('listening');
-
-      if (isTopActive) {
-        root.className = 'to-top'; 
-      } else if (isBotActive) {
-        root.className = 'to-bot';
-      }
-      // Çeviri tamamlanınca (JS motorundan gelen 'me' bubble kontrolü)
-      // JS motoru 'me' (çeviri sonucu) eklediğinde yön otomatik değişecektir.
+    document.querySelectorAll("[data-nav]").forEach(el => {
+      const url = el.getAttribute("data-nav");
+      const go = (e) => { 
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        window.location.assign(url); 
+      };
+      el.onclick = go;
+      el.ontouchend = go;
     });
-
-    observer.observe(topMic, { attributes: true });
-    observer.observe(botMic, { attributes: true });
-
-    // JS Motoruna Entegre Hoparlör İkonu Ekleme (Örnek Fonksiyon)
-    // Motor her bubble oluşturduğunda içine <div class="spk-btn">🔊</div> ekleyecektir.
   </script>
 </body>
 </html>
