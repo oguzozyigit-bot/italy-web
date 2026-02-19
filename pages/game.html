@@ -4,130 +4,441 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Symmetry Hub</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --p-lavender: rgba(233, 213, 255, 0.15);
-      --p-mint: rgba(187, 247, 208, 0.15);
-      --p-salmon: rgba(251, 207, 232, 0.15);
-      --p-sky: rgba(191, 219, 254, 0.15);
-      --p-lemon: rgba(254, 240, 138, 0.15);
+    :root{
+      --bg:#030014;
+      --glass: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.12);
+      --text:#fff;
+      --muted: rgba(255,255,255,0.56);
+
+      /* kart cam renkleri */
+      --p-lavender: rgba(233, 213, 255, 0.14);
+      --p-mint: rgba(187, 247, 208, 0.13);
+      --p-salmon: rgba(251, 207, 232, 0.13);
+      --p-sky: rgba(191, 219, 254, 0.13);
+      --p-lemon: rgba(254, 240, 138, 0.12);
+
+      /* neon vurgular */
+      --c-pink: #ff4fd8;
+      --c-purple: #a855f7;
+      --c-indigo: #6366f1;
+      --c-cyan: #22d3ee;
+      --c-lime: #a3e635;
+      --c-amber:#fbbf24;
+
+      --ease: cubic-bezier(.22,1,.36,1);
     }
 
-    #pageContent {
-      /* Üst ve alt barı tam hesaplayıp scroll'u öldürüyoruz */
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    html,body{
+      margin:0; width:100%; height:100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Outfit, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      overflow:hidden;
+    }
+
+    /* Shell üst/alt bar varsa taşmasın diye */
+    #pageContent{
       height: calc(100vh - 180px);
-      display: flex;
-      flex-direction: column;
       padding: 12px;
-      box-sizing: border-box;
-      overflow: hidden;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
     }
 
-    .neural-grid {
-      display: grid;
+    /* arka plan nebula + grid */
+    .bg{
+      position:fixed; inset:0; z-index:-1;
+      background:
+        radial-gradient(800px 520px at 18% 20%, rgba(99,102,241,0.18), transparent 55%),
+        radial-gradient(700px 520px at 78% 30%, rgba(255,79,216,0.14), transparent 60%),
+        radial-gradient(700px 520px at 50% 86%, rgba(34,211,238,0.12), transparent 58%),
+        radial-gradient(circle at 50% 50%, #07002a 0%, #030014 55%, #020013 100%);
+      overflow:hidden;
+    }
+    .bg::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      opacity: .25;
+      mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,1), rgba(0,0,0,0.1) 62%, rgba(0,0,0,0) 78%);
+    }
+
+    .neural-grid{
+      height:100%;
+      display:grid;
       grid-template-columns: repeat(2, 1fr);
-      /* 5 satırın her biri tam olarak eşit yükseklikte */
-      grid-template-rows: repeat(5, 1fr); 
+      grid-template-rows: repeat(5, 1fr);
       gap: 12px;
-      height: 100%;
     }
 
-    /* KİBAR VE EŞİT MODÜLLER */
-    .game-module {
-      position: relative;
+    /* kart */
+    .game-module{
+      --accent: var(--c-indigo);
+      position:relative;
       border-radius: 26px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow:hidden;
+
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+
+      cursor:pointer;
+      user-select:none;
+
+      transform: translateZ(0);
+      transition: transform .22s var(--ease), border-color .22s var(--ease), box-shadow .22s var(--ease), filter .22s var(--ease);
     }
 
-    /* Giriftli yapı ama yükseklikler eşitlenmiş */
-    .tall { grid-row: span 2; }
-    .wide { grid-column: span 2; flex-direction: row !important; gap: 20px !important; padding: 0 25px !important; }
+    /* “ışık” parlaması */
+    .game-module::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(420px 220px at 50% 30%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 60%);
+      opacity:.55;
+      filter: blur(10px);
+      pointer-events:none;
+      transform: translateY(8px);
+      transition: opacity .22s var(--ease), transform .22s var(--ease);
+    }
 
-    .bg-s { background: var(--p-salmon); }
-    .bg-b { background: var(--p-sky); }
-    .bg-y { background: var(--p-lemon); }
-    .bg-l { background: var(--p-lavender); }
-    .bg-m { background: var(--p-mint); }
+    /* üstten geçen highlight */
+    .game-module::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.18) 35%, transparent 70%);
+      opacity: .0;
+      transform: translateX(-40%) translateY(-10%) rotate(8deg);
+      transition: opacity .22s var(--ease), transform .45s var(--ease);
+      pointer-events:none;
+    }
 
-    .game-module:active { transform: scale(0.96); opacity: 0.8; }
+    .game-module:active{
+      transform: scale(0.97);
+      filter: saturate(1.05);
+    }
+    .game-module:hover{
+      border-color: color-mix(in srgb, var(--accent) 55%, rgba(255,255,255,0.16));
+      box-shadow: 0 18px 46px rgba(0,0,0,0.55);
+    }
+    .game-module:hover::before{ opacity:.9; transform: translateY(0); }
+    .game-module:hover::after{ opacity:.22; transform: translateX(40%) translateY(-10%) rotate(8deg); }
 
-    /* İKONLAR (Küçüldü ve Kibarlaştı) */
-    .icon-node { font-size: 24px; margin-bottom: 4px; height: 32px; display: flex; align-items: center; justify-content: center; }
-    .wide .icon-node { margin-bottom: 0; font-size: 30px; }
+    /* grid span */
+    .tall{ grid-row: span 2; }
+    .wide{
+      grid-column: span 2;
+      flex-direction: row !important;
+      gap: 18px !important;
+      padding: 0 22px !important;
+      justify-content:flex-start !important;
+      text-align:left !important;
+    }
 
-    .i-swing { animation: swing 3s infinite ease-in-out; }
-    @keyframes swing { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(10deg); } }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    /* renk sınıfları */
+    .bg-s{ background: var(--p-salmon); }
+    .bg-b{ background: var(--p-sky); }
+    .bg-y{ background: var(--p-lemon); }
+    .bg-l{ background: var(--p-lavender); }
+    .bg-m{ background: var(--p-mint); }
 
-    .g-name { font-size: 13px; font-weight: 1000; color: #fff; margin-bottom: 1px; letter-spacing: -0.3px; }
-    .g-desc { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.5); }
+    /* ikon kapsülü */
+    .icon-wrap{
+      width: 54px; height: 54px;
+      border-radius: 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+      position:relative;
+      overflow:hidden;
+    }
+    .wide .icon-wrap{ width: 62px; height:62px; border-radius: 20px; }
 
+    .icon-wrap::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        radial-gradient(60% 60% at 30% 30%, rgba(255,255,255,0.14), transparent 60%),
+        radial-gradient(60% 60% at 70% 70%, color-mix(in srgb, var(--accent) 40%, transparent), transparent 62%);
+      opacity:.75;
+      pointer-events:none;
+      filter: blur(0.2px);
+    }
+
+    /* svg ikonlar */
+    .icon{
+      width: 28px; height: 28px;
+      display:block;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35));
+      animation: floaty 3.8s ease-in-out infinite;
+    }
+    .wide .icon{ width: 34px; height:34px; }
+
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-4px); }
+    }
+
+    /* minik “pulse” */
+    .pulse{
+      position:absolute;
+      inset:-40%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent) 35%, transparent), transparent 60%);
+      opacity:.0;
+      pointer-events:none;
+      animation: pulseGlow 2.8s ease-in-out infinite;
+    }
+    @keyframes pulseGlow{
+      0%,100%{ opacity:.08; transform: scale(0.95); }
+      50%{ opacity:.22; transform: scale(1.05); }
+    }
+
+    .g-name{
+      font-size: 13px;
+      font-weight: 1000;
+      letter-spacing: -0.25px;
+      margin-top: 8px;
+      line-height: 1.05;
+    }
+    .g-desc{
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: .2px;
+      margin-top: 3px;
+    }
+    .wide .g-name{ margin-top:0; font-size: 14px; }
+    .wide .g-desc{ font-size: 10px; }
+
+    /* küçük “badge” */
+    .badge{
+      position:absolute;
+      top: 12px;
+      right: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: 10px;
+      font-weight: 1000;
+      letter-spacing: .3px;
+      color: rgba(255,255,255,0.86);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .badge b{
+      background: linear-gradient(135deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* küçük “spark” noktalar */
+    .sparks{
+      position:absolute; inset:0;
+      pointer-events:none;
+      opacity:.65;
+      mix-blend-mode: screen;
+    }
+
+    @media (max-height: 740px){
+      #pageContent{ height: calc(100vh - 168px); }
+      .icon-wrap{ width: 50px; height:50px; border-radius: 16px; }
+      .icon{ width: 26px; height:26px; }
+      .g-name{ font-size: 12.5px; }
+      .g-desc{ font-size: 9.5px; }
+    }
   </style>
 </head>
 
 <body>
+  <div class="bg"></div>
+
   <div id="pageContent">
     <div class="neural-grid">
-      
-      <div class="game-module tall bg-s" onclick="launchGame('hangman', '/pages/hangman', 5)">
-        <div class="icon-node i-swing">
-          <div style="border-left: 2px solid #fff; height: 22px; position: relative;">
-            <div style="position: absolute; bottom: -4px; left: -4px; width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 0 10px #fbcfe8;"></div>
-          </div>
+
+      <!-- Adam Asmaca -->
+      <div class="game-module tall bg-s" style="--accent: var(--c-pink);" onclick="launchGame('hangman', '/pages/hangman', 5)">
+        <div class="pulse"></div>
+        <svg class="sparks" viewBox="0 0 100 100" aria-hidden="true">
+          <circle cx="18" cy="26" r="1.6" fill="rgba(255,255,255,0.35)"/><circle cx="86" cy="18" r="1.2" fill="rgba(255,255,255,0.22)"/>
+          <circle cx="74" cy="72" r="1.4" fill="rgba(255,255,255,0.28)"/><circle cx="26" cy="82" r="1.1" fill="rgba(255,255,255,0.18)"/>
+        </svg>
+        <div class="badge"><b>ZOR</b></div>
+        <div class="icon-wrap">
+          <!-- özel ikon: “gallows” -->
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6 21h12" stroke="rgba(255,255,255,0.85)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M7.5 21V4.8c0-.8.6-1.4 1.4-1.4H15" stroke="rgba(255,255,255,0.85)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M15 3.4v4.2" stroke="rgba(255,255,255,0.85)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M15 7.6c0 1.2-.9 2.2-2.2 2.2s-2.2-1-2.2-2.2.9-2.2 2.2-2.2 2.2 1 2.2 2.2Z"
+                  fill="none" stroke="url(#g1)" stroke-width="2.2"/>
+            <defs>
+              <linearGradient id="g1" x1="8" y1="6" x2="18" y2="14">
+                <stop stop-color="#fff"/>
+                <stop offset="1" stop-color="var(--c-pink)"/>
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
         <div class="g-name">Adam Asmaca</div>
         <div class="g-desc">Zor Seviye</div>
       </div>
 
-      <div class="game-module bg-b" onclick="launchGame('spy', '/pages/spy', 4)">
-        <div class="icon-node" style="animation: bounce 3s infinite;">👁️‍🗨️</div>
+      <!-- Casus Kim -->
+      <div class="game-module bg-b" style="--accent: var(--c-cyan);" onclick="launchGame('spy', '/pages/spy', 4)">
+        <div class="pulse"></div>
+        <div class="badge"><b>NORMAL</b></div>
+        <div class="icon-wrap">
+          <!-- özel ikon: eye -->
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M2.5 12s3.6-6.6 9.5-6.6S21.5 12 21.5 12s-3.6 6.6-9.5 6.6S2.5 12 2.5 12Z"
+                  stroke="rgba(255,255,255,0.86)" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z" fill="url(#g2)"/>
+            <defs>
+              <linearGradient id="g2" x1="9" y1="9" x2="16" y2="16">
+                <stop stop-color="var(--c-cyan)"/>
+                <stop offset="1" stop-color="var(--c-indigo)"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
         <div class="g-name">Casus Kim?</div>
         <div class="g-desc">Normal</div>
       </div>
 
-      <div class="game-module bg-y" onclick="launchGame('cracker', '/pages/cracker', 3)">
-        <div class="icon-node" style="animation: swing 2s infinite;">🏆</div>
+      <!-- Bilgi Yarışı -->
+      <div class="game-module bg-y" style="--accent: var(--c-amber);" onclick="launchGame('cracker', '/pages/cracker', 3)">
+        <div class="pulse"></div>
+        <div class="badge"><b>KOLAY</b></div>
+        <div class="icon-wrap">
+          <!-- özel ikon: trophy -->
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M8 4h8v3.6c0 3-1.8 5.6-4 5.6s-4-2.6-4-5.6V4Z"
+                  stroke="rgba(255,255,255,0.86)" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M7.8 7H5.2c0 3 1.6 4.8 3.6 5.2" stroke="rgba(255,255,255,0.86)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M16.2 7h2.6c0 3-1.6 4.8-3.6 5.2" stroke="rgba(255,255,255,0.86)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M10 16h4" stroke="rgba(255,255,255,0.86)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M9 20h6" stroke="url(#g3)" stroke-width="2.4" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="g3" x1="8" y1="20" x2="16" y2="20">
+                <stop stop-color="#fff"/>
+                <stop offset="1" stop-color="var(--c-amber)"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
         <div class="g-name">Bilgi Yarışı</div>
         <div class="g-desc">Kolay</div>
       </div>
 
-      <div class="game-module tall bg-l" onclick="launchGame('sentence', '/pages/sentence', 5)">
-        <div class="icon-node" style="display:flex; gap:4px; animation: bounce 2s infinite;">
-          <div style="width:7px; height:7px; background:#fff; border-radius:50%;"></div>
-          <div style="width:7px; height:7px; background:#fff; border-radius:50%;"></div>
+      <!-- Cümle Kurma -->
+      <div class="game-module tall bg-l" style="--accent: var(--c-purple);" onclick="launchGame('sentence', '/pages/sentence', 5)">
+        <div class="pulse"></div>
+        <div class="badge"><b>ZOR</b></div>
+        <div class="icon-wrap">
+          <!-- özel ikon: blocks -->
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M6.2 8.2h6.2v6.2H6.2V8.2Z" stroke="rgba(255,255,255,0.86)" stroke-width="2.2" />
+            <path d="M11.6 3.6h6.2v6.2h-6.2V3.6Z" stroke="rgba(255,255,255,0.86)" stroke-width="2.2" />
+            <path d="M11.6 14.2h6.2v6.2h-6.2v-6.2Z" stroke="url(#g4)" stroke-width="2.2" />
+            <defs>
+              <linearGradient id="g4" x1="11" y1="14" x2="18" y2="21">
+                <stop stop-color="var(--c-purple)"/>
+                <stop offset="1" stop-color="var(--c-indigo)"/>
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
         <div class="g-name">Cümle Kurma</div>
         <div class="g-desc">Zor Seviye</div>
       </div>
 
-      <div class="game-module bg-m" onclick="launchGame('duo', '/pages/duo', 4)">
-        <div class="icon-node" style="animation: bounce 4s infinite;">🎤</div>
+      <!-- Sesli Düello -->
+      <div class="game-module bg-m" style="--accent: var(--c-lime);" onclick="launchGame('duo', '/pages/duo', 4)">
+        <div class="pulse"></div>
+        <div class="badge"><b>NORMAL</b></div>
+        <div class="icon-wrap">
+          <!-- özel ikon: mic -->
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2.5a3.2 3.2 0 0 0-3.2 3.2v6.2a3.2 3.2 0 1 0 6.4 0V5.7A3.2 3.2 0 0 0 12 2.5Z"
+                  stroke="rgba(255,255,255,0.86)" stroke-width="2.2"/>
+            <path d="M19 11.5v.8a7 7 0 0 1-14 0v-.8" stroke="rgba(255,255,255,0.86)" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M12 19.2v2.3" stroke="url(#g5)" stroke-width="2.4" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="g5" x1="10" y1="19" x2="14" y2="22">
+                <stop stop-color="var(--c-lime)"/>
+                <stop offset="1" stop-color="var(--c-cyan)"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
         <div class="g-name">Sesli Düello</div>
         <div class="g-desc">Normal</div>
       </div>
 
-      <div class="game-module bg-b" onclick="launchGame('meteor', '/pages/meteor', 4)">
-        <div class="icon-node" style="animation: swing 4s infinite;">🧩</div>
+      <!-- Eşleştirme -->
+      <div class="game-module bg-b" style="--accent: var(--c-indigo);" onclick="launchGame('meteor', '/pages/meteor', 4)">
+        <div class="pulse"></div>
+        <div class="badge"><b>NORMAL</b></div>
+        <div class="icon-wrap">
+          <!-- özel ikon: puzzle -->
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M9 4h3.2a1.8 1.8 0 1 1 3.6 0H19v5.2a1.8 1.8 0 1 1 0 3.6V18h-5.2a1.8 1.8 0 1 1-3.6 0H9V12.8a1.8 1.8 0 1 1 0-3.6V4Z"
+                  stroke="rgba(255,255,255,0.86)" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M10.2 12h3.6" stroke="url(#g6)" stroke-width="2.2" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="g6" x1="10" y1="12" x2="14" y2="12">
+                <stop stop-color="#fff"/>
+                <stop offset="1" stop-color="var(--c-indigo)"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
         <div class="g-name">Eşleştirme</div>
         <div class="g-desc">Normal</div>
       </div>
 
-      <div class="game-module wide bg-m" onclick="launchGame('gap', '/pages/gap', 4)">
-        <div class="icon-node" style="animation: bounce 2s infinite;">🔍</div>
+      <!-- Boşluk Doldur -->
+      <div class="game-module wide bg-m" style="--accent: var(--c-cyan);" onclick="launchGame('gap', '/pages/gap', 4)">
+        <div class="pulse"></div>
+        <div class="icon-wrap">
+          <!-- özel ikon: magnifier -->
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+                  stroke="rgba(255,255,255,0.86)" stroke-width="2.2"/>
+            <path d="M16.2 16.2 21 21" stroke="url(#g7)" stroke-width="2.4" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="g7" x1="16" y1="16" x2="21" y2="21">
+                <stop stop-color="var(--c-cyan)"/>
+                <stop offset="1" stop-color="var(--c-indigo)"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
         <div style="display:flex; flex-direction:column; align-items:flex-start;">
           <div class="g-name">Boşluk Doldur</div>
           <div class="g-desc">Algoritma Tamamlama Protokolü</div>
         </div>
+        <div class="badge"><b>ODAK</b></div>
       </div>
 
     </div>
@@ -137,23 +448,42 @@
     import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
+    // Shell’in scroll’ını kapat
     mountShell({ scroll: "none" });
+
+    // İstersen burada token header’ını güncelle (varsa)
+    (async ()=>{
+      try{
+        const { data:{ session } } = await supabase.auth.getSession();
+        if(!session?.user) return;
+        const { data:p } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
+        if(p?.tokens != null) setHeaderTokens(p.tokens);
+      }catch{}
+    })();
 
     window.launchGame = async (gameId, url, minLen) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return location.href = "/pages/login.html";
-      
+
       const sessionKey = `italky_24h_${gameId}_${session.user.id}`;
       const lastPaid = localStorage.getItem(sessionKey);
-      if (lastPaid && (Date.now() - lastPaid) < 86400000) {
+
+      if (lastPaid && (Date.now() - Number(lastPaid)) < 86400000) {
         location.href = `${url}?minLen=${minLen}&access=granted`;
         return;
       }
 
-      const { data: p } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
-      if (p?.tokens > 0) {
-        await supabase.from("profiles").update({ tokens: p.tokens - 1 }).eq("id", session.user.id);
-        localStorage.setItem(sessionKey, Date.now());
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("tokens")
+        .eq("id", session.user.id)
+        .single();
+
+      if ((p?.tokens ?? 0) > 0) {
+        const next = (p.tokens - 1);
+        await supabase.from("profiles").update({ tokens: next }).eq("id", session.user.id);
+        try{ setHeaderTokens(next); }catch{}
+        localStorage.setItem(sessionKey, String(Date.now()));
         location.href = `${url}?minLen=${minLen}&access=new`;
       } else {
         alert("Devam etmek için jeton gerekli!");
