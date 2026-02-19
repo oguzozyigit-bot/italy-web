@@ -1,3 +1,4 @@
+<!-- FILE: /pages/text_translate.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -12,70 +13,139 @@
     /* ✅ KRİTİK: Arka plan katmanlarının tıklamayı engellemesini önle */
     .nebula-bg, .stars-field { pointer-events: none !important; }
 
-    #pageContent {
-      height: calc(100vh - 180px); 
-      display: flex; flex-direction: column; gap: 10px;
-      padding: 5px 0 20px; box-sizing: border-box; overflow: hidden;
-      position: relative; z-index: 10;
+    /* ✅ Sayfa alanı: shell ile uyumlu, ama tıklama engellemez */
+    #pageContent{
+      height: calc(100vh - 180px);
+      display:flex; flex-direction:column; gap:10px;
+      padding:5px 0 20px; box-sizing:border-box; overflow:hidden;
+      position:relative; z-index:10;
+      pointer-events:auto;
     }
 
     /* --- ARAÇ ÇUBUĞU --- */
     .toolbar {
-      display: flex; gap: 8px; align-items: center; 
-      background: rgba(255,255,255,0.05); border-radius: 20px;
-      padding: 8px; border: 1px solid rgba(255,255,255,0.1);
+      display:flex; gap:8px; align-items:center;
+      background: rgba(255,255,255,0.05); border-radius:20px;
+      padding:8px; border:1px solid rgba(255,255,255,0.1);
+      pointer-events:auto;
     }
     .langBtn {
-      flex: 1; height: 48px; border-radius: 14px; border: none;
-      background: rgba(255,255,255,0.05); color: #fff; font-weight: 1000;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      pointer-events: auto !important; cursor: pointer;
+      flex:1; height:48px; border-radius:14px; border:none;
+      background: rgba(255,255,255,0.05); color:#fff; font-weight:1000;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      pointer-events:auto !important; cursor:pointer;
+      position:relative; z-index:20;
     }
     #swapBtn {
-      width: 44px; height: 44px; border-radius: 50%; border: 1px solid #6366f1;
-      background: #000; color: #fff; display: flex; align-items: center; justify-content: center;
-      pointer-events: auto !important; cursor: pointer;
+      width:44px; height:44px; border-radius:50%; border:1px solid #6366f1;
+      background:#000; color:#fff; display:flex; align-items:center; justify-content:center;
+      pointer-events:auto !important; cursor:pointer;
+      position:relative; z-index:20;
     }
 
     /* --- QUANTUM PANELLER --- */
-    .panel {
-      flex: 1; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
-      display: flex; flex-direction: column; overflow: hidden;
+    .panel{
+      flex:1; border-radius:30px; border:1px solid rgba(255,255,255,0.1);
+      display:flex; flex-direction:column; overflow:hidden;
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      position:relative;
     }
     .panel.top { background: radial-gradient(circle at top, #580c1f 0%, #02000f 100%); }
     .panel.bottom { background: radial-gradient(circle at bottom, #1e3a8a 0%, #02000f 100%); }
 
-    .iconBtn { 
-      width: 42px; height: 42px; border-radius: 12px; background: rgba(0,0,0,0.5); 
-      border: 1px solid rgba(255,255,255,0.1); pointer-events: auto !important; cursor: pointer;
+    .iconBtn{
+      width:42px; height:42px; border-radius:12px; background: rgba(0,0,0,0.5);
+      border:1px solid rgba(255,255,255,0.1); pointer-events:auto !important; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .iconBtn svg{ width:22px; height:22px; }
+
+    textarea{
+      width:100%; height:100%; border:none; background:transparent;
+      color:#fff; padding:15px; font-size:18px; font-weight:700; outline:none;
+      pointer-events:auto !important;
+      resize:none;
     }
 
-    textarea { 
-      width: 100%; height: 100%; border: none; background: transparent; 
-      color: #fff; padding: 15px; font-size: 18px; font-weight: 700; outline: none;
-      pointer-events: auto !important;
+    /* --- OUTPUT AREA --- */
+    .outArea{
+      flex:1;
+      padding: 14px 15px 16px;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.35;
+      color:#fff;
+      overflow:auto;
+      word-break: break-word;
     }
 
     /* --- AKSİYONLAR --- */
-    .actions { display: flex; gap: 10px; }
-    #clearBtn, #translateBtn { 
-      border-radius: 18px; font-weight: 1000; pointer-events: auto !important; cursor: pointer; 
+    .actions{ display:flex; gap:10px; pointer-events:auto; }
+    #clearBtn, #translateBtn{
+      border-radius:18px; font-weight:1000; pointer-events:auto !important; cursor:pointer;
     }
-    #clearBtn { flex: 1; height: 54px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; }
-    #translateBtn { flex: 2; height: 54px; border: none; background: var(--ai-gradient); color: #fff; }
+    #clearBtn{ flex:1; height:54px; border:1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color:#fff; }
+    #translateBtn{ flex:2; height:54px; border:none; background: var(--ai-gradient); color:#fff; }
 
     /* --- AÇILIR PENCERE (EN ÜST KATMAN) --- */
-    #langSheet {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.95); backdrop-filter: blur(30px);
-      z-index: 2000000 !important; /* Her şeyin üstünde */
-      display: none; align-items: center; justify-content: center;
+    #langSheet{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(30px);
+      z-index: 2147483647 !important;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      pointer-events:auto !important;
     }
-    #langSheet.active { display: flex !important; }
-    .sheet { width: 90%; max-width: 400px; max-height: 80vh; background: #050510; border-radius: 35px; border: 1px solid rgba(255,255,255,0.2); }
-    #sheetClose { width: 100%; padding: 20px; background: #580c1f; color: #fff; font-weight: 1000; border: none; cursor: pointer; pointer-events: auto !important; }
+    #langSheet.active{ display:flex !important; }
 
+    .sheet{
+      width:90%;
+      max-width:400px;
+      max-height:80vh;
+      background:#050510;
+      border-radius:35px;
+      border:1px solid rgba(255,255,255,0.2);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      pointer-events:auto !important;
+    }
+
+    #sheetClose{
+      width:100%;
+      padding:20px;
+      background:#580c1f;
+      color:#fff;
+      font-weight:1000;
+      border:none;
+      cursor:pointer;
+      pointer-events:auto !important;
+    }
+
+    .sheetRow{
+      padding:12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      cursor:pointer;
+      user-select:none;
+    }
+    .sheetRow:active{ transform: scale(.99); }
+    .sheetLeft{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .sheetFlag{ font-size:18px; }
+    .sheetName{ font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sheetCode{ font-weight:900; font-size:12px; opacity:.65; text-transform:uppercase; }
+
+    /* ✅ Shell üst katmanlarının click yutmasını kes */
+    .app-shell, .app-header, .app-footer { pointer-events:none !important; }
+    .app-shell * { pointer-events:none !important; }
+    /* ✅ Bizim sayfa içerikleri click alacak */
+    #pageContent, #pageContent * { pointer-events:auto !important; }
+    #langSheet, #langSheet * { pointer-events:auto !important; }
   </style>
 </head>
 
@@ -86,7 +156,9 @@
         <span id="fromFlag" style="font-size: 24px;">🇬🇧</span>
         <span id="fromLangTxt">EN</span>
       </button>
-      <div id="swapBtn">⇄</div>
+
+      <button id="swapBtn" type="button" aria-label="Swap">⇄</button>
+
       <button class="langBtn" id="toLangBtn" type="button">
         <span id="toFlag" style="font-size: 24px;">🇹🇷</span>
         <span id="toLangTxt">TR</span>
@@ -96,66 +168,87 @@
     <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
       <div class="panel top">
         <div style="padding:10px; display:flex; justify-content:flex-end; gap:10px; background:rgba(0,0,0,0.2);">
-          <button class="iconBtn" id="micIn"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
-          <button class="iconBtn" id="speakIn"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
+          <button class="iconBtn" id="micIn" type="button" aria-label="Mic">
+            <svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+            </svg>
+          </button>
+
+          <button class="iconBtn" id="speakIn" type="button" aria-label="Speak input">
+            <svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2">
+              <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </button>
         </div>
+
         <textarea id="inText" placeholder="Zihnini aktar..."></textarea>
       </div>
 
       <div class="actions">
-        <button id="clearBtn">TEMİZLE</button>
-        <button id="translateBtn">NEURAL ENGINE</button>
+        <button id="clearBtn" type="button">TEMİZLE</button>
+        <button id="translateBtn" type="button">NEURAL ENGINE</button>
       </div>
 
       <div class="panel bottom">
         <div style="padding:10px; display:flex; justify-content:flex-end; background:rgba(0,0,0,0.2);">
-          <button class="iconBtn" id="speakOut"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></button>
+          <button class="iconBtn" id="speakOut" type="button" aria-label="Speak output">
+            <svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="2">
+              <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </button>
         </div>
         <div class="outArea" id="outText">—</div>
       </div>
     </div>
   </div>
 
-  <div id="langSheet">
-    <div class="sheet">
+  <!-- LANG SHEET -->
+  <div id="langSheet" role="dialog" aria-modal="true" aria-label="Dil seçimi">
+    <div class="sheet" id="sheetBox">
       <div style="padding:20px; border-bottom:1px solid rgba(255,255,255,0.1);">
-        <input id="sheetQuery" placeholder="Dil ara..." style="width:100%; height:44px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0 12px; pointer-events: auto !important;" />
+        <input id="sheetQuery" placeholder="Dil ara..."
+          style="width:100%; height:44px; border-radius:12px; background:rgba(255,255,255,0.05);
+          border:1px solid rgba(255,255,255,0.1); color:#fff; padding:0 12px;" />
       </div>
       <div id="sheetList" style="flex:1; overflow:auto; padding:10px;"></div>
-      <button id="sheetClose">KAPAT</button>
+      <button id="sheetClose" type="button">KAPAT</button>
     </div>
   </div>
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { bootPage } from "/js/ui_guard.js";
-    
-    // Shell'i kur
-    mountShell({ scroll: "none" }); 
+
+    mountShell({ scroll: "none" });
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
-    // ✅ TIKLAMA GARANTİSİ (Delegation)
-    const sheet = document.getElementById('langSheet');
-    
-    // Body üzerinden tıklamaları yakala (Elemanlar taşınsa bile çalışır)
-    document.body.addEventListener('click', (e) => {
-      const target = e.target.closest('[id]');
-      if (!target) return;
+    // ✅ Sheet aç/kapa: garantili (svg içi tıklamalar dahil)
+    const sheet = document.getElementById("langSheet");
+    const sheetBox = document.getElementById("sheetBox");
+    const closeBtn = document.getElementById("sheetClose");
 
-      const id = target.id;
-      if (id === 'fromLangBtn' || id === 'toLangBtn') {
-        sheet.classList.add('active');
-      } else if (id === 'sheetClose' || target === sheet) {
-        sheet.classList.remove('active');
-      }
+    window.__OPEN_LANG_SHEET__ = function(){
+      sheet.classList.add("active");
+      // input'a odak
+      setTimeout(()=>document.getElementById("sheetQuery")?.focus(), 50);
+    };
+    window.__CLOSE_LANG_SHEET__ = function(){
+      sheet.classList.remove("active");
+    };
+
+    // dışa tıklayınca kapan
+    sheet.addEventListener("click", (e)=>{
+      if(!sheetBox.contains(e.target)) window.__CLOSE_LANG_SHEET__();
     });
-
-    // CSS Force: Arka planı arkaya it
-    const style = document.createElement('style');
-    style.innerHTML = '.nebula-bg, .stars-field { pointer-events: none !important; z-index: 0 !important; } .app-shell { z-index: 10 !important; }';
-    document.head.appendChild(style);
-
+    closeBtn.addEventListener("click", window.__CLOSE_LANG_SHEET__);
   </script>
-  <script type="module" src="/js/text_translate_page.js?v=ULTRA"></script>
+
+  <script type="module" src="/js/text_translate_page.js?v=ULTRA_20260220"></script>
 </body>
 </html>
