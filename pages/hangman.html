@@ -15,11 +15,13 @@
       --green:#00ff9d;
 
       --dockH: 220px;
-      --shellLift: 0px; /* ui_shell footer yüksekliği kadar yukarı kalkar */
+      --shellLift: 0px; /* ui_shell footer yüksekliği kadar yukarı kalkacak */
     }
 
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
-    #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
+
+    /* ✅ ui_shell içine taşınacağı için sayfa kendi içinde tam yüksekliği kullanır */
+    #pageContent{height:100%; padding:14px; box-sizing:border-box; position:relative; overflow:hidden}
 
     /* ÜST BLOK */
     .top{
@@ -133,7 +135,7 @@
       user-select:none;
     }
 
-    /* ALT DOCK */
+    /* ✅ ALT DOCK: footer’ın üstünde kalır */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -197,7 +199,7 @@
     }
     .mBtn.secondary{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
 
-    /* ✅ SETUP overlay artık pageContent içinde (shell içinde) */
+    /* ✅ SETUP overlay */
     .setup{
       position:absolute;
       inset:0;
@@ -319,9 +321,7 @@
       <div class="title">HANGMAN</div>
 
       <div class="hud">
-        <div class="leftHud">
-          <div class="hearts" id="hearts"></div>
-        </div>
+        <div class="leftHud"><div class="hearts" id="hearts"></div></div>
 
         <div class="rightHud">
           <div class="score">
@@ -388,6 +388,56 @@
 
   <script>
     const $ = (id) => document.getElementById(id);
+
+    /* ===========================
+       ✅ PREMIUM: SES GERİBİLDİRİM (doğru/yanlış)
+       - WebAudio beep (dosya yok)
+       =========================== */
+    let __ac = null;
+    function beep(freq=440, ms=90, vol=0.08){
+      try{
+        __ac = __ac || new (window.AudioContext || window.webkitAudioContext)();
+        const ac = __ac;
+        const o = ac.createOscillator();
+        const g = ac.createGain();
+        o.type = "sine";
+        o.frequency.value = freq;
+        g.gain.value = vol;
+        o.connect(g);
+        g.connect(ac.destination);
+
+        const now = ac.currentTime;
+        g.gain.setValueAtTime(vol, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + ms/1000);
+
+        o.start();
+        o.stop(now + ms/1000);
+      }catch(_e){}
+    }
+
+    /* ===========================
+       ✅ TTS: NativeTTS varsa onu kullan
+       =========================== */
+    function speakText(text, langCode){
+      const t = String(text||"").trim();
+      if(!t) return;
+
+      // APK native
+      if(window.NativeTTS && typeof window.NativeTTS.speak === "function"){
+        try{ window.NativeTTS.stop?.(); }catch{}
+        setTimeout(()=>{ try{ window.NativeTTS.speak(t, String(langCode||"en")); }catch(_e){} }, 220);
+        return;
+      }
+
+      // web fallback
+      try{
+        if(!("speechSynthesis" in window)) return;
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = ({en:"en-US",de:"de-DE",fr:"fr-FR",it:"it-IT",es:"es-ES",tr:"tr-TR"})[langCode] || "en-US";
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      }catch(_e){}
+    }
 
     // ui_shell loader
     function loadScript(src){
@@ -498,7 +548,7 @@
     let lives = 3;
     const MAX_LIVES = 9;
 
-    let runScore = 0;   // bu oyun boyunca biriken (her bilmede eklenir)
+    let runScore = 0;   // her bilmede toplanır
     let roundScore = 100;
 
     let guessed = new Set();
@@ -553,12 +603,8 @@
       setRunScore(runScore + Math.max(0, v));
     }
 
-    function setRoundScore(v){
-      roundScore = Math.max(0, v);
-    }
-    function applyPenalty(n){
-      setRoundScore(roundScore - n);
-    }
+    function setRoundScore(v){ roundScore = Math.max(0, v); }
+    function applyPenalty(n){ setRoundScore(roundScore - n); }
 
     function resetMan(){
       ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"].forEach(id => $(id).classList.remove("on"));
@@ -568,13 +614,10 @@
     function updateMan(){
       resetMan();
       const m = mistakes;
-
-      // Parça sayısı sabit; limit diff'e göre değişiyor.
-      // Görsel olarak yine 6 parça çiziyoruz; limit 2 ise 2 adımda tamamı açılır.
-      const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
       const limit = getLimit();
 
       if(limit >= 6){
+        const seq = ["p_head","p_body","p_larm","p_rarm","p_lleg","p_rleg"];
         seq.slice(0, Math.min(m, 6)).forEach(id => $(id).classList.add("on"));
         return;
       }
@@ -613,16 +656,6 @@
       });
     }
 
-    function speakWord(){
-      try{
-        if(!("speechSynthesis" in window)) return;
-        const u = new SpeechSynthesisUtterance(target.w);
-        u.lang = ({en:"en-US",de:"de-DE",fr:"fr-FR",it:"it-IT",es:"es-ES"})[lang] || "en-US";
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-      }catch(e){}
-    }
-
     function openModal({title, color, bonus, meta, showBoard=false}){
       $("mTitle").textContent = title;
       $("mTitle").style.color = color;
@@ -637,13 +670,9 @@
         $("bTotal").textContent = total;
         $("bBest").textContent = best;
       }
-
       $("modal").classList.add("on");
     }
-
-    function closeModal(){
-      $("modal").classList.remove("on");
-    }
+    function closeModal(){ $("modal").classList.remove("on"); }
 
     $("mBtnNext").onclick = () => {
       closeModal();
@@ -652,7 +681,6 @@
     };
 
     $("mBtnAgain").onclick = () => {
-      // aynı sayfada yeni oyun: skor sıfırla, canları sıfırdan başlat
       closeModal();
       lives = 3;
       runScore = 0;
@@ -663,21 +691,22 @@
 
     function endRound(win){
       lock = true;
-      speakWord();
+
+      // ✅ oyun bitince kelimeyi seslendir
+      if(target?.w) speakText(target.w, lang);
 
       const limit = getLimit();
-      const msgDiff = (diff==="easy"?"KOLAY":"NORMAL") + (diff==="hard"?"":"");
       const diffLabel = (diff==="easy") ? "KOLAY" : (diff==="normal" ? "NORMAL" : "ZOR");
 
       if(win){
-        // ✅ roundScore’u total runScore’a ekle
+        // ✅ roundScore’u toplam runScore’a ekle
         addRunScore(roundScore);
 
-        // rekor güncelle
-        if(runScore > best){
-          best = runScore;
-          saveScores();
-        }
+        // ✅ doğru bitiş sesi
+        beep(1046, 140, 0.10);
+
+        // rekor
+        if(runScore > best){ best = runScore; saveScores(); }
 
         // kusursuz bonus can
         let bonus = "";
@@ -696,7 +725,9 @@
         return;
       }
 
-      // lose
+      // ✅ yanlış bitiş sesi
+      beep(140, 180, 0.12);
+
       lives--;
       renderHearts();
       $("man").classList.add("swing");
@@ -706,7 +737,6 @@
         $("man").classList.remove("swing");
 
         if(lives <= 0){
-          // ✅ oyun bitti: total’a ekle + scoreboard
           total += runScore;
           if(runScore > best) best = runScore;
           saveScores();
@@ -735,11 +765,17 @@
 
       const w = target.w.toUpperCase();
       if(w.includes(letter)){
+        // ✅ doğru harf sesi
+        beep(880, 90, 0.09);
+
         guessed.add(letter);
         btn.classList.add("hit");
         renderWord();
         if(w.split("").every(ch => guessed.has(ch))) endRound(true);
       }else{
+        // ✅ yanlış harf sesi
+        beep(220, 120, 0.12);
+
         btn.classList.add("miss");
         flawless = false;
         mistakes++;
@@ -752,6 +788,9 @@
     function useJ(i){
       if(lock) return;
       if(jokersLeft <= 0) return;
+
+      // joker sesi
+      beep(520, 90, 0.08);
 
       jokerUsed = true;
       jokersLeft--;
@@ -803,25 +842,24 @@
       updateMan();
     }
 
-    // START: shell + pool + enter
+    // START
     $("startBtn").addEventListener("click", async ()=>{
       $("setupMsg").textContent = "Yükleniyor…";
 
-      // 1) ui_shell
+      // ✅ ui_shell (üst/alt bar sabit) + scroll kapalı
       try{
-        await loadScript("/js/ui_shell.js");
-        if(typeof window.mountShell === "function"){
-          window.mountShell({ scroll: "none" });
-        }
-      }catch{}
+        // ui_shell ES module olduğu için script tag ile yüklemek yerine dinamik import kullanıyoruz:
+        const mod = await import("/js/ui_shell.js");
+        if(mod?.mountShell) mod.mountShell({ scroll:"none" });
 
-      // 2) footer lift (dock alttan taşmasın)
-      try{
-        const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footerH")) || 0;
-        document.documentElement.style.setProperty("--shellLift", footerH ? `${footerH + 10}px` : "0px");
-      }catch{}
+        // footer yüksekliğini al -> dock'u yukarı kaldır
+        try{
+          const footerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--footerH")) || 0;
+          document.documentElement.style.setProperty("--shellLift", footerH ? `${footerH + 10}px` : "0px");
+        }catch{}
+      }catch(_e){}
 
-      // 3) pool
+      // pool
       try{
         LANGPOOL_BASE = await readLangpoolBase();
         if(!LANGPOOL_BASE){
@@ -838,11 +876,10 @@
         return;
       }
 
-      // 4) new game session
+      // new game session
       runScore = 0;
       $("scoreVal").textContent = runScore;
 
-      // 5) enter
       $("setup").style.display = "none";
       $("setupMsg").textContent = "";
       newRound();
