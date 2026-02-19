@@ -91,35 +91,38 @@ const TR_FALLBACK = {
   id:"Endonezce", ms:"Malayca", vi:"Vietnamca", th:"Tayca", zh:"Çince", ja:"Japonca", ko:"Korece"
 };
 
-let _dn=null;
+let _dn = null;
 function getDisplayNames(){
-  if(_dn && _dn.__lang===UI_LANG) return _dn;
-  _dn=null;
+  if(_dn && _dn.__lang === UI_LANG) return _dn;
+  _dn = null;
   try{
     const dn = new Intl.DisplayNames([UI_LANG], { type:"language" });
-    dn.__lang=UI_LANG;
-    _dn=dn;
-  }catch{ _dn=null; }
+    dn.__lang = UI_LANG;
+    _dn = dn;
+  }catch{ _dn = null; }
   return _dn;
 }
+
 function canonicalLangCode(code){
-  const c=String(code||"").toLowerCase();
+  const c = String(code||"").toLowerCase();
   return c.split("-")[0];
 }
-function normalizeApiLang(code){
-  return canonicalLangCode(code);
-}
+function normalizeApiLang(code){ return canonicalLangCode(code); }
+
 function langObj(code){
-  const c=String(code||"").toLowerCase();
+  const c = String(code||"").toLowerCase();
   return LANGS.find(x=>x.code===c) || LANGS.find(x=>x.code===canonicalLangCode(c));
 }
 function langFlag(code){ return langObj(code)?.flag || "🌐"; }
 function bcp(code){ return langObj(code)?.bcp || "en-US"; }
+
 function langLabel(code){
-  const base=canonicalLangCode(code);
-  const dn=getDisplayNames();
-  if(dn){ try{ const name=dn.of(base); if(name) return name; }catch{} }
-  if(UI_LANG==="tr" && TR_FALLBACK[base]) return TR_FALLBACK[base];
+  const baseCode = canonicalLangCode(code);
+  const dn = getDisplayNames();
+  if(dn){
+    try{ const name = dn.of(baseCode); if(name) return name; }catch{}
+  }
+  if(UI_LANG === "tr" && TR_FALLBACK[baseCode]) return TR_FALLBACK[baseCode];
   return String(code||"").toUpperCase();
 }
 function labelChip(code){ return `${langFlag(code)} ${langLabel(code)}`; }
@@ -127,131 +130,96 @@ function labelChip(code){ return `${langFlag(code)} ${langLabel(code)}`; }
 /* ===============================
    STATE
 =============================== */
-let topLang="en";
-let botLang="tr";
+let topLang = "en";
+let botLang = "tr";
 
 /* ===============================
-   FACE2FACE TOKEN SESSION
+   TOKEN SESSION
 =============================== */
-let sessionGranted=false;
+let sessionGranted = false;
 async function ensureFacetofaceSession(){
   if(sessionGranted) return true;
   try{
     const { data, error } = await supabase.rpc("start_facetoface_session");
     if(error){
-      const msg=String(error.message||"");
+      const msg = String(error.message||"");
       if(msg.includes("INSUFFICIENT_TOKENS")){
         alert("Jeton yetersiz. Devam etmek için jeton yükleyin.");
         location.href = PROFILE_PATH;
         return false;
       }
       alert("FaceToFace oturumu başlatılamadı.");
+      console.error(error);
       return false;
     }
-    const row=data?.[0]||{};
-    if(row?.tokens_left!=null) setHeaderTokens(row.tokens_left);
-    sessionGranted=true;
+    const row = data?.[0] || {};
+    if(row?.tokens_left != null) setHeaderTokens(row.tokens_left);
+    sessionGranted = true;
     return true;
-  }catch{
+  }catch(e){
+    console.error(e);
     alert("FaceToFace oturumu başlatılamadı.");
     return false;
   }
 }
 
 /* ===============================
-   TTS ✅
+   TTS (Android WebView safe)
 =============================== */
 function speak(text, langCode){
-  const t=String(text||"").trim();
+  const t = String(text||"").trim();
   if(!t) return;
 
-  if(window.NativeTTS && typeof window.NativeTTS.speak==="function"){
+  if(window.NativeTTS && typeof window.NativeTTS.speak === "function"){
     try{ window.NativeTTS.stop?.(); }catch{}
     setTimeout(()=>{
-      try{ window.NativeTTS.speak(t, String(langCode||"en")); }catch(e){
-        console.warn("NativeTTS.speak failed:", e);
-      }
+      try{ window.NativeTTS.speak(t, String(langCode||"en")); }catch(e){ console.warn(e); }
     }, 220);
     return;
   }
 
   if(!window.speechSynthesis) return;
   try{ window.speechSynthesis.cancel(); }catch{}
-  const u=new SpeechSynthesisUtterance(t);
-  u.lang=bcp(langCode);
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = bcp(langCode);
   u.volume=1; u.rate=1; u.pitch=1;
-  try{
-    const voices=window.speechSynthesis.getVoices()||[];
-    if(voices.length){
-      const base=canonicalLangCode(langCode);
-      u.voice=voices.find(v=>String(v.lang||"").toLowerCase().startsWith(base)) || voices[0];
-    }
-  }catch{}
   setTimeout(()=>{ try{ window.speechSynthesis.speak(u); }catch{} }, 60);
 }
 
 /* ===============================
    UI
 =============================== */
-function markLatestTranslation(side){
-  const wrap=(side==="top") ? $("topBody") : $("botBody");
-  if(!wrap) return;
-  wrap.querySelectorAll(".bubble.me.is-latest").forEach(el=>el.classList.remove("is-latest"));
-  const allMe=wrap.querySelectorAll(".bubble.me");
-  const last=allMe[allMe.length-1];
-  if(last) last.classList.add("is-latest");
-}
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
 }
-let active=null;
 
-/* ✅ Native STT callbacks */
-window.__nativeSttReady = function(which){
-  // istersen UI işareti
-};
-window.__nativeSttError = function(which, err){
-  console.warn("NativeSTT error", which, err);
-  stopAll();
-};
-window.__nativeSttResult = async function(which, finalText){
-  const txt=String(finalText||"").trim();
-  if(!txt) { stopAll(); return; }
+function markLatestTranslation(side){
+  const wrap = (side === "top") ? $("topBody") : $("botBody");
+  if(!wrap) return;
+  wrap.querySelectorAll(".bubble.me.is-latest").forEach(el=>el.classList.remove("is-latest"));
+  const allMe = wrap.querySelectorAll(".bubble.me");
+  const last = allMe[allMe.length-1];
+  if(last) last.classList.add("is-latest");
+}
 
-  const src = (which==="top") ? topLang : botLang;
-  const dst = (which==="top") ? botLang : topLang;
-
-  addBubble(which, "them", txt, src);
-
-  const other = (which==="top") ? "bot" : "top";
-  const translated = await translateViaApi(txt, src, dst);
-  const speakLang = normalizeApiLang(dst);
-
-  if(!translated){
-    addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", speakLang);
-    stopAll();
-    return;
-  }
-
-  addBubble(other, "me", translated, speakLang);
-  setTimeout(()=> speak(translated, speakLang), 120);
-  stopAll();
-};
+let active=null, recTop=null, recBot=null;
 
 function setMicUI(which, on){
-  const btn=(which==="top") ? $("topMic") : $("botMic");
+  const btn = (which==="top") ? $("topMic") : $("botMic");
   btn?.classList.toggle("listening", !!on);
-  $("frameRoot")?.classList.toggle("listening", !!on || active);
+  const anyOn = !!on || !!recTop || !!recBot;
+  $("frameRoot")?.classList.toggle("listening", anyOn);
 }
 
 function stopAll(){
-  active=null;
-  setMicUI("top", false);
-  setMicUI("bot", false);
+  try{ recTop?.stop?.(); }catch{}
+  try{ recBot?.stop?.(); }catch{}
+  recTop=null; recBot=null; active=null;
+  setMicUI("top", false); setMicUI("bot", false);
+  $("frameRoot")?.classList.remove("listening");
   try{ window.speechSynthesis?.cancel?.(); }catch{}
   try{ window.NativeTTS?.stop?.(); }catch{}
-  try{ window.NativeSTT?.stop?.(); }catch{}
 }
 
 function clearChat(){
@@ -261,22 +229,22 @@ function clearChat(){
 }
 
 function addBubble(side, kind, text, langForSpeak){
-  const wrap=(side==="top") ? $("topBody") : $("botBody");
+  const wrap = (side==="top") ? $("topBody") : $("botBody");
   if(!wrap) return;
 
-  const row=document.createElement("div");
-  row.className=`bubble ${kind}`;
+  const row = document.createElement("div");
+  row.className = `bubble ${kind}`;
 
-  const txt=document.createElement("span");
+  const txt = document.createElement("span");
   txt.className="txt";
-  txt.textContent=String(text||"").trim() || "—";
+  txt.textContent = String(text||"").trim() || "—";
   row.appendChild(txt);
 
   if(kind==="me"){
-    const spk=document.createElement("button");
+    const spk = document.createElement("button");
     spk.className="spk";
     spk.type="button";
-    spk.innerHTML=`
+    spk.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
         <path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
       </svg>`;
@@ -293,12 +261,12 @@ function addBubble(side, kind, text, langForSpeak){
 }
 
 /* ===============================
-   Popover
+   POPOVER
 =============================== */
 function renderPop(side){
-  const list=$(side==="top" ? "list-top" : "list-bot");
+  const list = $(side==="top" ? "list-top":"list-bot");
   if(!list) return;
-  const sel=(side==="top") ? topLang : botLang;
+  const sel = (side==="top") ? topLang : botLang;
 
   list.innerHTML = LANGS.map(l=>`
     <div class="pop-item ${l.code===sel?"active":""}" data-code="${l.code}">
@@ -311,18 +279,20 @@ function renderPop(side){
 
   list.querySelectorAll(".pop-item").forEach(item=>{
     item.addEventListener("click", ()=>{
-      const code=item.getAttribute("data-code") || "en";
+      const code = item.getAttribute("data-code") || "en";
       if(side==="top") topLang=code; else botLang=code;
-      const tTxt = (side==="top") ? $("topLangTxt") : $("botLangTxt");
+      const tTxt = side==="top" ? $("topLangTxt") : $("botLangTxt");
       if(tTxt) tTxt.textContent = labelChip(code);
-      stopAll(); closeAllPop();
+      stopAll();
+      closeAllPop();
     });
   });
 }
+
 function togglePop(side){
-  const pop=$(side==="top" ? "pop-top" : "pop-bot");
+  const pop = $(side==="top" ? "pop-top":"pop-bot");
   if(!pop) return;
-  const willShow=!pop.classList.contains("show");
+  const willShow = !pop.classList.contains("show");
   closeAllPop();
   if(!willShow) return;
   pop.classList.add("show");
@@ -333,27 +303,35 @@ function togglePop(side){
    TRANSLATE
 =============================== */
 async function translateViaApi(text, source, target){
-  const t=String(text||"").trim();
+  const t = String(text||"").trim();
   if(!t) return t;
 
-  const src=normalizeApiLang(source);
-  const dst=normalizeApiLang(target);
-  if(src===dst) return t;
+  const src = normalizeApiLang(source);
+  const dst = normalizeApiLang(target);
+  if(src === dst) return t;
 
-  const ctrl=new AbortController();
-  const to=setTimeout(()=>ctrl.abort(), 25000);
+  const ctrl = new AbortController();
+  const to = setTimeout(()=>ctrl.abort(), 25000);
+
   try{
-    const body={ text:t, source:src, target:dst, from_lang:src, to_lang:dst };
-    const r=await fetch(`${API_BASE}/api/translate`,{
+    const body = { text:t, source:src, target:dst, from_lang:src, to_lang:dst };
+    const r = await fetch(`${API_BASE}/api/translate`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(body),
       signal: ctrl.signal
     });
-    if(!r.ok) return null;
-    const data=await r.json().catch(()=>({}));
-    const out=String(data?.translated||data?.translation||data?.text||"").trim();
+
+    if(!r.ok){
+      const err = await r.text().catch(()=> "");
+      console.warn("translate HTTP", r.status, err);
+      return null;
+    }
+
+    const data = await r.json().catch(()=>({}));
+    const out = String(data?.translated||data?.translation||data?.text||"").trim();
     return out || null;
+
   }catch(e){
     console.warn("translateViaApi failed:", e);
     return null;
@@ -363,74 +341,129 @@ async function translateViaApi(text, source, target){
 }
 
 /* ===============================
-   STT START (NativeSTT first)
+   STT
 =============================== */
+function buildRecognizer(langCode){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const rec = new SR();
+  rec.lang = bcp(langCode);
+  rec.interimResults=false;
+  rec.continuous=false;
+  rec.maxAlternatives=1;
+  return rec;
+}
+
+let pending = null;
+
 async function start(which){
   const ok = await ensureFacetofaceSession();
   if(!ok) return;
 
-  // ✅ APK: NativeSTT varsa onu kullan
-  if(window.NativeSTT && typeof window.NativeSTT.start === "function"){
-    if(active && active!==which) stopAll();
-    active = which;
-    setMicUI(which, true);
-
-    const src = (which==="top") ? topLang : botLang;
-    const b = bcp(src); // bcp tag gönderiyoruz
-    try{
-      window.NativeSTT.start(which, b);
-    }catch(e){
-      console.warn("NativeSTT.start failed", e);
-      stopAll();
-    }
-    return;
-  }
-
-  // ✅ Web: SpeechRecognition varsa kullan (tarayıcı)
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){
-    alert("Bu cihazda Mikrofon (STT) desteklenmiyor.");
+    alert("Bu cihaz SpeechRecognition desteklemiyor. APK için NativeSTT eklemek gerekir.");
     return;
   }
 
-  // Web fallback (istersen sonra)
-  alert("Web STT burada devre dışı (APK için NativeSTT kullan).");
+  if(active && active!==which) stopAll();
+
+  const src = (which==="top") ? topLang : botLang;
+  const dst = (which==="top") ? botLang : topLang;
+
+  const rec = buildRecognizer(src);
+  if(!rec){ alert("Mikrofon başlatılamadı."); return; }
+
+  active = which;
+  setMicUI(which, true);
+
+  rec.onresult = (e)=>{
+    const t = e.results?.[0]?.[0]?.transcript || "";
+    const finalText = String(t||"").trim();
+    if(!finalText) return;
+
+    addBubble(which, "them", finalText, src);
+
+    pending = { which, finalText, src, dst };
+    try{ rec.stop(); }catch{}
+  };
+
+  rec.onerror = (err)=>{ console.error("STT Error:", err); stopAll(); };
+
+  rec.onend = async ()=>{
+    if(active===which) active=null;
+    setMicUI(which,false);
+    if(!active) $("frameRoot")?.classList.remove("listening");
+
+    const p = pending;
+    if(p && p.which === which){
+      pending = null;
+
+      const other = (which==="top") ? "bot" : "top";
+      const translated = await translateViaApi(p.finalText, p.src, p.dst);
+
+      const speakLang = normalizeApiLang(p.dst);
+
+      if(!translated){
+        addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", speakLang);
+        return;
+      }
+
+      addBubble(other, "me", translated, speakLang);
+      setTimeout(()=> speak(translated, speakLang), 120);
+    }
+  };
+
+  if(which==="top") recTop=rec; else recBot=rec;
+  try{ rec.start(); }catch{ stopAll(); }
 }
 
 /* ===============================
-   Bindings
+   BINDINGS (Android-safe)
 =============================== */
-function bindNav(){
-  $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
-  $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
-  $("clearLink")?.addEventListener("click", ()=> clearChat());
-}
-function bindLangButtons(){
-  $("topLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePop("top"); });
-  $("botLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePop("bot"); });
-  $("close-top")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
-  $("close-bot")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
-}
-function bindMicButtons(){
-  $("topMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); closeAllPop();
-    if(active==="top") stopAll(); else start("top");
-  });
-  $("botMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); closeAllPop();
-    if(active==="bot") stopAll(); else start("bot");
+function bindClick(el, fn){
+  if(!el) return;
+  el.addEventListener("pointerup", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    fn();
+  }, { passive:false });
+  el.addEventListener("click", (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    fn();
   });
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
   if(!(await requireLogin())) return;
 
-  $("topLangTxt") && ($("topLangTxt").textContent = labelChip(topLang));
-  $("botLangTxt") && ($("botLangTxt").textContent = labelChip(botLang));
+  const topLangTxt = $("topLangTxt");
+  const botLangTxt = $("botLangTxt");
 
-  bindNav(); bindLangButtons(); bindMicButtons();
+  if(topLangTxt) topLangTxt.textContent = labelChip(topLang);
+  if(botLangTxt) botLangTxt.textContent = labelChip(botLang);
 
-  document.addEventListener("click",(e)=>{
-    if(!$("pop-top")?.contains(e.target) && !$("pop-bot")?.contains(e.target) && !e.target.closest(".lang-trigger")) closeAllPop();
-  },{capture:true});
+  // nav
+  bindClick($("homeBtn"), ()=>location.href = HOME_PATH);
+  bindClick($("homeLink"), ()=>location.href = HOME_PATH);
+  bindClick($("clearLink"), clearChat);
+
+  // popover open/close
+  bindClick($("topLangBtn"), ()=>togglePop("top"));
+  bindClick($("botLangBtn"), ()=>togglePop("bot"));
+  bindClick($("close-top"), closeAllPop);
+  bindClick($("close-bot"), closeAllPop);
+
+  // mic
+  bindClick($("topMic"), ()=> (active==="top" ? stopAll() : start("top")));
+  bindClick($("botMic"), ()=> (active==="bot" ? stopAll() : start("bot")));
+
+  // outside click close
+  document.addEventListener("pointerdown",(e)=>{
+    const pt = $("pop-top");
+    const pb = $("pop-bot");
+    const isInside = (pt && pt.contains(e.target)) || (pb && pb.contains(e.target)) || !!e.target.closest(".lang-trigger");
+    if(!isInside) closeAllPop();
+  }, { capture:true });
 });
