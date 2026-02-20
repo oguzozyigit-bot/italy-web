@@ -22,7 +22,6 @@
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
     #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
 
-    /* ÜST BLOK */
     .top{
       height: calc(100% - var(--dockH));
       display:flex;
@@ -55,7 +54,6 @@
       pointer-events:auto;
     }
 
-    /* SOL: kalpler */
     .leftHud{
       display:flex;
       flex-direction:column;
@@ -73,7 +71,6 @@
     }
     .heart{font-size:22px;filter:drop-shadow(0 0 10px var(--red));}
 
-    /* SAĞ: skor + joker (2) */
     .rightHud{
       display:flex;
       flex-direction:column;
@@ -84,18 +81,31 @@
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
     .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    .jokerCol{display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
+    /* ✅ Jokerler: tıklama garanti */
+    .jokerCol{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-end;
+      position:relative;
+      z-index: 9999;            /* ✅ üstte */
+      pointer-events:auto;
+    }
     .joker{
       width:44px;height:56px;border-radius:14px;
       border:1px solid rgba(99,102,241,.55);
       background:rgba(99,102,241,.10);
       display:flex;align-items:center;justify-content:center;
-      font-size:22px;cursor:pointer;user-select:none;transition:.2s;
+      font-size:22px;
+      cursor:pointer;
+      user-select:none;
+      transition:.2s;
+      pointer-events:auto;      /* ✅ */
+      touch-action: manipulation;
     }
     .joker:active{transform:scale(.96)}
     .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
 
-    /* Darağacı */
     .stage{
       flex:1;
       display:flex;
@@ -141,7 +151,6 @@
       margin-top:-6px;
     }
 
-    /* ALT DOCK */
     .dock{
       position:fixed;
       left:14px; right:14px;
@@ -169,12 +178,12 @@
       background:rgba(255,255,255,.06);color:#fff;font-weight:900;
       transition:.12s;
       cursor:pointer;
+      touch-action: manipulation;
     }
     .key:active{transform:scale(.98)}
     .key.hit{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
     .key.miss{background:var(--red);opacity:0.30}
 
-    /* MODAL */
     .modal{
       position:fixed; inset:0;
       background:rgba(1,0,8,.98);
@@ -211,7 +220,6 @@
       cursor:pointer
     }
 
-    /* SETUP overlay */
     .setup{
       position:absolute;
       inset:0;
@@ -317,8 +325,8 @@
           </div>
 
           <div class="jokerCol">
-            <div class="joker" id="j0">🃏</div>
-            <div class="joker" id="j1">🃏</div>
+            <div class="joker" id="j0" role="button" aria-label="Joker 1">🃏</div>
+            <div class="joker" id="j1" role="button" aria-label="Joker 2">🃏</div>
           </div>
         </div>
       </div>
@@ -358,7 +366,6 @@
 
   </div>
 
-  <!-- ✅ Tek JS -->
-  <script type="module" src="/js/hangman_page.js?v=1"></script>
+  <script type="module" src="/js/hangman_page.js?v=4"></script>
 </body>
 </html>
