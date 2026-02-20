@@ -6,134 +6,137 @@ import { ensureAuthAndCacheUser } from "/js/auth.js";
 const $ = (id)=>document.getElementById(id);
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const COST_PER_GAME = 1;
 
 function toast(msg){
   const t = $("toast");
   if(!t) return;
-  t.textContent = String(msg||"");
+  t.textContent = String(msg || "");
   t.classList.add("show");
   clearTimeout(window.__to);
   window.__to = setTimeout(()=>t.classList.remove("show"), 1800);
 }
 
 function passKey(gameId, userId){
-  return `italky_gamepass_${gameId}_${userId}`;
+  return `italky_24h_${String(gameId).trim()}_${String(userId).trim()}`;
 }
 
-function now(){ return Date.now(); }
-
-function hasValidPass(gameId, userId){
-  try{
-    const raw = localStorage.getItem(passKey(gameId, userId));
-    const ts = Number(raw || 0);
-    if(!ts) return false;
-    return (now() - ts) < DAY_MS;
-  }catch{
-    return false;
-  }
+function isPassActive(gameId, userId){
+  const raw = localStorage.getItem(passKey(gameId, userId));
+  const ts = Number(raw || 0);
+  if(!ts) return false;
+  return (Date.now() - ts) < DAY_MS;
 }
 
-function setPass(gameId, userId){
-  try{ localStorage.setItem(passKey(gameId, userId), String(now())); }catch{}
+function setPassNow(gameId, userId){
+  localStorage.setItem(passKey(gameId, userId), String(Date.now()));
 }
 
-function paintPasses(userId){
-  document.querySelectorAll("[data-pass]").forEach(el=>{
-    const gid = el.getAttribute("data-pass");
-    if(!gid) return;
-    const ok = hasValidPass(gid, userId);
-    // PASS varsa daha parlak göster
-    el.style.opacity = ok ? "1" : "0.55";
-    el.textContent = ok ? "24h PASS ✓" : "24h PASS";
+function setDot(gameId, on){
+  const g = String(gameId || "").trim();
+  if(!g) return;
+  const dot = document.querySelector(`.statusDot[data-dot="${g}"]`);
+  if(!dot) return;
+  dot.classList.toggle("on", !!on);
+}
+
+function refreshDots(userId){
+  document.querySelectorAll(".game-module[data-game]").forEach(card=>{
+    const g = String(card.getAttribute("data-game") || "").trim();
+    if(!g) return;
+    setDot(g, isPassActive(g, userId));
   });
 }
 
-async function getTokens(userId){
+async function loadTokens(userId){
   const { data, error } = await supabase.from("profiles").select("tokens").eq("id", userId).single();
   if(error) throw error;
   return Number(data?.tokens ?? 0);
 }
 
-async function spendToken(userId, currentTokens){
-  const newTokens = Math.max(0, Number(currentTokens||0) - COST_PER_GAME);
-  const { error } = await supabase.from("profiles").update({ tokens: newTokens }).eq("id", userId);
+async function setTokens(userId, newVal){
+  const { error } = await supabase.from("profiles").update({ tokens: newVal }).eq("id", userId);
   if(error) throw error;
-  return newTokens;
 }
 
-async function launchGame(gameId, url){
+async function init(){
+  mountShell({ scroll:"none" });
+
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session?.user){
     location.href = "/pages/login.html";
     return;
   }
 
+  const cached = await ensureAuthAndCacheUser().catch(()=>null);
+  if(cached?.tokens != null) setHeaderTokens(cached.tokens);
+
   const userId = session.user.id;
 
-  // 24h geçerliyse direk gir
-  if(hasValidPass(gameId, userId)){
-    location.href = url;
-    return;
-  }
-
-  // Token kontrol + düş
-  let tokens = 0;
+  let tokens = null;
   try{
-    tokens = await getTokens(userId);
-  }catch(e){
-    console.error(e);
-    toast("Jeton okunamadı");
-    return;
+    tokens = await loadTokens(userId);
+    $("tokenBadge").textContent = `Jeton: ${tokens}`;
+    setHeaderTokens(tokens);
+  }catch{
+    $("tokenBadge").textContent = "Jeton: —";
   }
 
-  if(tokens < COST_PER_GAME){
-    toast("Devam etmek için jeton gerekli!");
-    // istersen profile’a yönlendir:
-    // location.href="/pages/profile.html";
-    return;
-  }
+  // ✅ ilk durum
+  refreshDots(userId);
 
-  try{
-    const left = await spendToken(userId, tokens);
-    setHeaderTokens(left);
-    $("tokenBadge") && ($("tokenBadge").textContent = `Jeton: ${left}`);
-    setPass(gameId, userId);
-    paintPasses(userId);
-    toast("24 saatlik erişim açıldı ✓");
-    setTimeout(()=> location.href = url, 250);
-  }catch(e){
-    console.error(e);
-    toast("Jeton düşülemedi");
-  }
-}
+  // ✅ görünür olunca tekrar kontrol et (geri dönünce vs)
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.visibilityState === "visible"){
+      refreshDots(userId);
+    }
+  });
 
-(async function boot(){
-  mountShell({ scroll:"none" });
+  // ✅ 30 sn’de bir refresh (sadece dot için)
+  setInterval(()=>refreshDots(userId), 30000);
 
-  // login guard
-  const { data:{ session } } = await supabase.auth.getSession();
-  if(!session?.user){
-    location.replace("/pages/login.html");
-    return;
-  }
-
-  // cache + header jeton
-  const cached = await ensureAuthAndCacheUser().catch(()=>null);
-  const tokens = Number(cached?.tokens ?? 0);
-  setHeaderTokens(tokens);
-  $("tokenBadge") && ($("tokenBadge").textContent = `Jeton: ${tokens}`);
-
-  // PASS yazıları
-  paintPasses(session.user.id);
-
-  // click bind
+  // click handlers
   document.querySelectorAll(".game-module[data-game][data-url]").forEach(card=>{
-    card.addEventListener("click", ()=>{
-      const gid = card.getAttribute("data-game");
-      const url = card.getAttribute("data-url");
-      if(!gid || !url) return;
-      launchGame(gid, url);
+    card.addEventListener("click", async ()=>{
+      const gameId = String(card.getAttribute("data-game") || "").trim();
+      const url = String(card.getAttribute("data-url") || "").trim();
+      if(!gameId || !url) return;
+
+      // pass varsa direkt gir
+      if(isPassActive(gameId, userId)){
+        refreshDots(userId);
+        location.href = url;
+        return;
+      }
+
+      // pass yoksa 1 jeton düş
+      try{
+        if(tokens == null) tokens = await loadTokens(userId);
+
+        if(tokens <= 0){
+          toast("Devam etmek için jeton gerekli.");
+          return;
+        }
+
+        const newTokens = tokens - 1;
+        await setTokens(userId, newTokens);
+        tokens = newTokens;
+
+        $("tokenBadge").textContent = `Jeton: ${tokens}`;
+        setHeaderTokens(tokens);
+
+        // ✅ pass yaz + dot YEŞİL yap
+        setPassNow(gameId, userId);
+        setDot(gameId, true);
+
+        toast("24 saatlik giriş hakkı aktif.");
+        setTimeout(()=>location.href = url, 250);
+
+      }catch(e){
+        console.error(e);
+        toast("Jeton düşülemedi.");
+      }
     });
   });
-})();
+}
+
+init();
