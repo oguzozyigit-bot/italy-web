@@ -116,23 +116,33 @@
     .bg-l{ background: var(--p-lav); }
     .bg-m{ background: var(--p-mint); }
 
-    /* ✅ 24h durum ikonu (yazı yok) */
+    /* ✅ 24h durum ikonu (büyük + parlak) */
     .statusDot{
       position:absolute;
       top: 10px;
       left: 10px;
-      width: 12px;
-      height: 12px;
+      width: 16px;
+      height: 16px;
       border-radius: 999px;
-      border: 2px solid rgba(255,255,255,0.35);
+      border: 2px solid rgba(255,255,255,0.55);
       background: var(--bad);
-      box-shadow: 0 0 0 6px rgba(239,68,68,0.10);
+      box-shadow:
+        0 0 0 7px rgba(239,68,68,0.14),
+        0 0 18px rgba(239,68,68,0.55);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      transform: translateZ(0);
     }
     .statusDot.on{
       background: var(--good);
-      box-shadow: 0 0 0 6px rgba(34,197,94,0.10);
+      box-shadow:
+        0 0 0 7px rgba(34,197,94,0.14),
+        0 0 18px rgba(34,197,94,0.55);
+      animation: dotPulse 1.6s ease-in-out infinite;
+    }
+    @keyframes dotPulse{
+      0%,100%{ transform: scale(1); }
+      50%{ transform: scale(1.08); }
     }
 
     /* Daha renkli ikon kapsülleri */
@@ -160,11 +170,6 @@
 
     .g-name{ font-size: 13px; font-weight: 1000; color: #fff; margin-bottom: 2px; letter-spacing: -0.3px; }
     .g-desc{ font-size: 9.8px; font-weight: 800; color: rgba(255,255,255,0.58); }
-
-    .disabled{
-      opacity: .35;
-      filter: grayscale(1);
-    }
 
     /* Toast */
     .toast{
@@ -202,7 +207,6 @@
     </div>
 
     <div class="neural-grid">
-      <!-- Hangman -->
       <div class="game-module tall bg-s" data-game="hangman" data-url="/pages/hangman.html">
         <div class="statusDot" data-dot="hangman"></div>
         <div class="icon-node ico-hang">⛓️</div>
@@ -259,6 +263,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <script type="module" src="/js/games_menu.js?v=2"></script>
+  <script type="module" src="/js/games_menu.js?v=3"></script>
 </body>
 </html>
