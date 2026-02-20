@@ -17,11 +17,14 @@
 
       --dockH: 220px;
       --shellLift: 0px; /* ui_shell footer yüksekliğine göre JS set edecek */
+      --safeB: env(safe-area-inset-bottom, 0px);
     }
 
     html,body{margin:0;height:100%;background:var(--bg);color:#fff;font-family:Outfit,system-ui;overflow:hidden}
-    #pageContent{height:100dvh;padding:14px;box-sizing:border-box;position:relative}
+    /* ✅ shell içine girince 100% çalışsın diye 100dvh değil 100% */
+    #pageContent{height:100%;padding:14px;box-sizing:border-box;position:relative}
 
+    /* ÜST BLOK */
     .top{
       height: calc(100% - var(--dockH));
       display:flex;
@@ -54,6 +57,7 @@
       pointer-events:auto;
     }
 
+    /* SOL: kalpler */
     .leftHud{
       display:flex;
       flex-direction:column;
@@ -71,41 +75,38 @@
     }
     .heart{font-size:22px;filter:drop-shadow(0 0 10px var(--red));}
 
+    /* SAĞ: skor */
     .rightHud{
       display:flex;
       flex-direction:column;
       align-items:flex-end;
       gap:10px;
+      min-width: 120px;
     }
-    .score{text-align:right;line-height:1.15}
+    .score{text-align:right;line-height:1.08}
     .score .best{font-size:9px;font-weight:900;opacity:.55;letter-spacing:1px}
-    .score .val{font-size:26px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-
-    /* ✅ Jokerler: tıklama garanti */
-    .jokerCol{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      align-items:flex-end;
-      position:relative;
-      z-index: 9999;            /* ✅ üstte */
-      pointer-events:auto;
+    .score .round{font-size:10px;font-weight:1000;opacity:.7;letter-spacing:.6px;margin-top:4px}
+    .score .val{
+      font-size:26px;
+      font-weight:900;
+      background:var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent
     }
+
+    /* Joker (2) */
+    .jokerCol{display:flex;flex-direction:column;gap:10px;align-items:flex-end;}
     .joker{
       width:44px;height:56px;border-radius:14px;
       border:1px solid rgba(99,102,241,.55);
       background:rgba(99,102,241,.10);
       display:flex;align-items:center;justify-content:center;
-      font-size:22px;
-      cursor:pointer;
-      user-select:none;
-      transition:.2s;
-      pointer-events:auto;      /* ✅ */
-      touch-action: manipulation;
+      font-size:22px;cursor:pointer;user-select:none;transition:.2s;
     }
     .joker:active{transform:scale(.96)}
     .joker.spent{opacity:.14;filter:grayscale(1);pointer-events:none;transform:none}
 
+    /* Darağacı */
     .stage{
       flex:1;
       display:flex;
@@ -151,10 +152,11 @@
       margin-top:-6px;
     }
 
+    /* ALT DOCK */
     .dock{
       position:fixed;
       left:14px; right:14px;
-      bottom: calc(env(safe-area-inset-bottom) + 10px + var(--shellLift));
+      bottom: calc(var(--safeB) + 10px + var(--shellLift));
       height: var(--dockH);
       z-index: 9999;
       border-radius:22px;
@@ -178,12 +180,12 @@
       background:rgba(255,255,255,.06);color:#fff;font-weight:900;
       transition:.12s;
       cursor:pointer;
-      touch-action: manipulation;
     }
     .key:active{transform:scale(.98)}
     .key.hit{background:var(--green);color:#000;box-shadow:0 0 15px var(--green)}
     .key.miss{background:var(--red);opacity:0.30}
 
+    /* MODAL */
     .modal{
       position:fixed; inset:0;
       background:rgba(1,0,8,.98);
@@ -220,15 +222,17 @@
       cursor:pointer
     }
 
+    /* ✅ SETUP overlay: FIXED + buton her zaman görünür */
     .setup{
-      position:absolute;
+      position:fixed; /* ✅ absolute değil */
       inset:0;
       z-index:60000;
       background:rgba(3,0,20,.98);
       display:flex;
       flex-direction:column;
-      padding:22px;
+      padding: 18px 18px calc(18px + var(--safeB));
       box-sizing:border-box;
+      overflow:hidden;
     }
     .setupTitle{
       font-family:"Space Grotesk";
@@ -236,7 +240,7 @@
       font-weight:900;
       text-align:center;
       letter-spacing:2px;
-      margin:6px 0 16px;
+      margin:6px 0 12px;
       opacity:.95;
     }
     .setupTag{
@@ -260,8 +264,11 @@
     }
     .pickCard.active{border-color:#6366f1;background:rgba(99,102,241,.18)}
     .pickCard.diff.active{border-color:var(--green);background:rgba(0,255,157,.10)}
+
     .startBtn{
-      margin-top:auto;
+      position: sticky;      /* ✅ asla kaybolmaz */
+      bottom: 0;
+      margin-top: 14px;
       width:100%;
       padding:18px;
       border-radius:18px;
@@ -271,9 +278,11 @@
       font-weight:900;
       font-size:18px;
       cursor:pointer;
+      z-index: 5;
     }
+
     .setupMsg{
-      margin-top:12px;
+      margin-top:10px;
       text-align:center;
       font-weight:900;
       font-size:12px;
@@ -287,6 +296,7 @@
 <body>
   <div id="pageContent">
 
+    <!-- Setup -->
     <div class="setup" id="setup">
       <div class="setupTitle">HANGMAN</div>
 
@@ -310,6 +320,7 @@
       <div class="setupMsg" id="setupMsg"></div>
     </div>
 
+    <!-- GAME -->
     <div class="top">
       <div class="title">HANGMAN</div>
 
@@ -320,13 +331,14 @@
 
         <div class="rightHud">
           <div class="score">
-            <div class="best">REKOR: <span id="bestVal">0</span></div>
+            <div class="best">EN YÜKSEK SKOR: <span id="bestVal">0</span></div>
+            <div class="round">KELİME PUANI: <span id="roundVal">100</span></div>
             <div class="val" id="scoreVal">0</div>
           </div>
 
           <div class="jokerCol">
-            <div class="joker" id="j0" role="button" aria-label="Joker 1">🃏</div>
-            <div class="joker" id="j1" role="button" aria-label="Joker 2">🃏</div>
+            <div class="joker" id="j0">🃏</div>
+            <div class="joker" id="j1">🃏</div>
           </div>
         </div>
       </div>
@@ -366,6 +378,6 @@
 
   </div>
 
-  <script type="module" src="/js/hangman_page.js?v=4"></script>
+  <script type="module" src="/js/hangman_page.js?v=2"></script>
 </body>
 </html>
