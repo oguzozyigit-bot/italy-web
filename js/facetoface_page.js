@@ -4,6 +4,20 @@ import { supabase } from "/js/supabase_client.js";
 import { ensureAuthAndCacheUser } from "/js/auth.js";
 import { setHeaderTokens } from "/js/ui_shell.js";
 
+/* ===============================
+   ✅ CANONICAL HOST FIX
+   www.italky.ai -> italky.ai (tek origin, tek session)
+================================ */
+(function enforceCanonicalHost(){
+  try{
+    const h = String(location.hostname || "").toLowerCase().trim();
+    if(h === "www.italky.ai"){
+      const to = "https://italky.ai" + location.pathname + location.search + location.hash;
+      location.replace(to);
+    }
+  }catch{}
+})();
+
 const $ = (id)=>document.getElementById(id);
 
 const API_BASE = "https://italky-api.onrender.com";
@@ -118,12 +132,54 @@ let botLang = "tr";
 
 /* ===============================
    TOKEN SESSION
+   ✅ Array/Object uyumlu + NOT_AUTHENTICATED retry
 ================================ */
 let sessionGranted = false;
+
+function unwrapRow(data){
+  // Supabase RPC bazen: [{...}] bazen: {...} dönebilir
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && typeof data === "object") return data;
+  return null;
+}
+
+async function waitForSession(maxMs=6000){
+  const start = Date.now();
+  while(Date.now()-start < maxMs){
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(session?.user) return session;
+    await new Promise(r=>setTimeout(r, 250));
+  }
+  return null;
+}
+
 async function ensureFacetofaceSession(){
   if(sessionGranted) return true;
+
+  // 1) kesin session var mı?
+  const s0 = await supabase.auth.getSession().catch(()=>({data:{session:null}}));
+  if(!s0?.data?.session?.user){
+    // www/italky karışıklığı olmasın diye zaten en başta canonical yaptık.
+    location.replace(LOGIN_PATH);
+    return false;
+  }
+
+  // 2) RPC çağır
   try{
-    const { data, error } = await supabase.rpc("start_facetoface_session");
+    let { data, error } = await supabase.rpc("start_facetoface_session");
+
+    // NOT_AUTHENTICATED gelirse: 1 kez bekle + tekrar dene
+    if(error && String(error.message||"").includes("NOT_AUTHENTICATED")){
+      const s = await waitForSession(6000);
+      if(!s){
+        location.replace(LOGIN_PATH);
+        return false;
+      }
+      const retry = await supabase.rpc("start_facetoface_session");
+      data = retry.data;
+      error = retry.error;
+    }
+
     if(error){
       const msg = String(error.message||"");
       if(msg.includes("INSUFFICIENT_TOKENS")){
@@ -131,14 +187,19 @@ async function ensureFacetofaceSession(){
         location.href = PROFILE_PATH;
         return false;
       }
+      console.warn("start_facetoface_session error:", error);
       alert("FaceToFace oturumu başlatılamadı.");
       return false;
     }
-    const row = data?.[0] || {};
+
+    const row = unwrapRow(data) || {};
     if(row?.tokens_left != null) setHeaderTokens(row.tokens_left);
+
     sessionGranted = true;
     return true;
-  }catch{
+
+  }catch(e){
+    console.warn("start_facetoface_session catch:", e);
     alert("FaceToFace oturumu başlatılamadı.");
     return false;
   }
@@ -169,12 +230,10 @@ function speakRaw(text, langCode, onDone){
   const t = String(text||"").trim();
   if(!t) { onDone?.(); return; }
 
-  // ✅ APK NativeTTS
   if(window.NativeTTS && typeof window.NativeTTS.speak === "function"){
     try{ window.NativeTTS.stop?.(); }catch{}
     setTimeout(()=>{
       try{ window.NativeTTS.speak(t, String(langCode||"en")); }catch(e){ console.warn(e); }
-      // NativeTTS onDone event yok -> süre tahmini
       const ms = Math.min(7000, Math.max(1200, t.length * 60));
       clearTimeout(speakTimer);
       speakTimer = setTimeout(()=>onDone?.(), ms);
@@ -182,7 +241,6 @@ function speakRaw(text, langCode, onDone){
     return;
   }
 
-  // Web fallback
   if(!window.speechSynthesis){ onDone?.(); return; }
   try{ window.speechSynthesis.cancel(); }catch{}
 
@@ -197,7 +255,6 @@ function speakRaw(text, langCode, onDone){
 function speakWithUI(side, text, langCode){
   setRootClasses({to: side, listening: false, speaking: true});
   speakRaw(text, langCode, ()=>{
-    // konuşma bitti -> speaking kapat, yön aynı kalsın
     setRootClasses({to: side, listening: false, speaking: false});
   });
 }
@@ -269,11 +326,9 @@ function addBubble(side, kind, text, langForSpeak){
   bubble.appendChild(txt);
 
   if(kind === "me"){
-    // eski latest küçülsün
     wrap.querySelectorAll(".bubble.me.is-latest").forEach(x=>x.classList.remove("is-latest"));
     bubble.classList.add("is-latest");
 
-    // hoparlör metnin bitiminde
     const spk = document.createElement("button");
     spk.className = "spk-icon";
     spk.type = "button";
@@ -369,7 +424,6 @@ function stopAll(){
   try{ window.NativeTTS?.stop?.(); }catch{}
   try{ window.speechSynthesis?.cancel?.(); }catch{}
   clearTimeout(speakTimer);
-  // root state: en son hoparlör tarafı
   setRootClasses({to:lastSpeakerSide, listening:false, speaking:false});
 }
 
@@ -397,7 +451,6 @@ async function start(which){
   active = which;
   setMicUI(which, true);
 
-  // ✅ mic aktifken: eq + logo mic tarafına döner
   setRootClasses({to: (which==="top"?"top":"bot"), listening:true, speaking:false});
 
   rec.onresult = (e)=>{
@@ -436,11 +489,9 @@ async function start(which){
 
       addBubble(other, "me", translated, speakLang);
 
-      // ✅ çeviri sonrası ses hangi taraftan gelecekse logo oraya dönsün ve orada kalsın
       lastSpeakerSide = other;
       setRootClasses({to:other, listening:false, speaking:true});
 
-      // ✅ otomatik ses + bitince speaking kapanır
       speakRaw(translated, speakLang, ()=>{
         setRootClasses({to:other, listening:false, speaking:false});
       });
@@ -458,25 +509,21 @@ async function start(which){
    BINDINGS
 ================================ */
 function bindUI(){
-  // Home (logo + button)
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
-  // Clear
   $("clearBtn")?.addEventListener("click", ()=>{
     stopAll();
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
   });
 
-  // Popover open/close
   $("topLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("top"); });
   $("botLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("bot"); });
 
   $("close-top")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
   $("close-bot")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); });
 
-  // Dışarı tıkla -> kapat
   document.addEventListener("click",(e)=>{
     const pt = $("pop-top");
     const pb = $("pop-bot");
@@ -485,7 +532,6 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // Mic
   $("topMic")?.addEventListener("click",(e)=>{
     e.preventDefault(); e.stopPropagation(); closeAllPop();
     if(active==="top") stopAll(); else start("top");
@@ -506,6 +552,5 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
   try{ window.speechSynthesis?.getVoices?.(); }catch{}
 
-  // başlangıç
   setRootClasses({to:"bot", listening:false, speaking:false});
 });
