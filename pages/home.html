@@ -1,224 +1,239 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Final Pro Hub</title>
-  <style>
-    :root {
-      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --footer-offset: 110px; 
-    }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Final Pro Hub</title>
+  <style>
+    :root {
+      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+      --footer-offset: 110px; 
+      --bg-void: #02000f;
+    }
 
-    #pageContent {
-      height: calc(100vh - 180px); 
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 5px 0 var(--footer-offset);
-      box-sizing: border-box;
-      gap: 8px;
-      overflow: hidden;
-    }
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      background-color: var(--bg-void);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      color: #fff;
+    }
 
-    /* --- 1. FACETOFACE --- */
-    .portal-zone {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; padding: 5px 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .neural-orb {
-      width: 115px; height: 115px; position: relative;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .ai-ring {
-      position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px;
-      background: var(--ai-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
-    }
-    .orbit-energy {
-      position: absolute; inset: -12px; border-radius: 50%;
-      animation: rotateOrbit 8s linear infinite;
-    }
-    .e-ball { position: absolute; width: 11px; height: 11px; border-radius: 50%; filter: blur(1px); }
-    .ball-l { top: -5px; left: 50%; transform: translateX(-50%); background: #1e3a8a; box-shadow: 0 0 15px #1e3a8a; }
-    .ball-b { bottom: -5px; left: 50%; transform: translateX(-50%); background: #801336; box-shadow: 0 0 15px #801336; }
+    .app-viewport {
+      width: 100%;
+      max-width: 430px; 
+      height: 100dvh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: rgba(10, 10, 30, 0.4);
+      backdrop-filter: blur(30px);
+      border-left: 1px solid rgba(255,255,255,0.1);
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
 
-    .ai-core {
-      width: 85px; height: 85px; background: #000; border-radius: 50%;
-      background-image: linear-gradient(#000, #000), var(--ai-gradient);
-      background-origin: border-box; background-clip: content-box, border-box;
-      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
-      animation: aiBreathe 4s infinite ease-in-out;
-      z-index: 10;
-    }
-    .portal-info { text-align: center; margin-top: 10px; }
-    .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
-    .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
+    /* Premium Header */
+    .premium-header {
+      padding: calc(45px + env(safe-area-inset-top)) 18px 15px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.2);
+    }
+    .brand-group h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px; margin: 0; font-weight: 700; line-height: 1; display: flex; gap: 2px;
+    }
+    .brand-group h1 span { color: #fff; }
+    .brand-group h1 .ai {
+      background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .brand-slogan { font-size: 8px; font-weight: 900; letter-spacing: 3px; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-top: 5px; }
 
-    /* --- 2. ACADEMY --- */
-    .academy-pro {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 24px;
-      padding: 14px 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex; align-items: center; gap: 16px;
-      cursor: pointer;
-    }
-    .spectrum-logo { gap: 3.5px; display: flex; align-items: center; flex-shrink: 0; height: 32px; }
-    .bar { width: 3.5px; border-radius: 10px; animation: barMove 1.2s infinite ease-in-out; }
-    .bar-1 { height: 10px; background: #ff0000; animation-delay: 0.1s; }
-    .bar-2 { height: 18px; background: #ff7f00; animation-delay: 0.3s; }
-    .bar-3 { height: 26px; background: #ffff00; animation-delay: 0.5s; }
-    .bar-4 { height: 32px; background: #00ff00; animation-delay: 0.7s; }
-    .bar-5 { height: 26px; background: #0000ff; animation-delay: 0.5s; }
-    .bar-6 { height: 18px; background: #4b0082; animation-delay: 0.3s; }
-    .bar-7 { height: 10px; background: #8b00ff; animation-delay: 0.1s; }
+    .user-plain { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .uMeta { display: flex; flex-direction: column; align-items: flex-end; }
+    .uName { font-weight: 900; font-size: 13px; }
+    .uJeton { font-size: 10px; font-weight: 900; color: #a5b4fc; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #6366f1; background: #111; }
 
-    .academy-text h2 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; }
-    .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
+    /* --- GÖNDERDİĞİN CSS BAŞLANGICI --- */
+    #pageContent {
+      height: calc(100vh - 180px); 
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 5px 0 var(--footer-offset);
+      box-sizing: border-box;
+      gap: 8px;
+      overflow: hidden;
+    }
 
-    /* --- 3. GRID LAYOUT --- */
-    .pro-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    }
-    .pro-tile {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 22px; padding: 14px;
-      display: flex; align-items: center; gap: 12px;
-      cursor: pointer;
-    }
-    .pro-tile:active { transform: scale(0.96); }
-    .tile-icon {
-      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.06);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-      font-size: 17px;
-    }
-    .ico-txt::before { content: "Aa"; color: #34d399; font-weight: 900; }
-    .ico-cam::before { content: "◎"; color: #60a5fa; font-weight: 900; }
-    .ico-doc::before { content: "≡"; color: #f472b6; font-weight: 900; }
-    .ico-fun::before { content: "🎯"; }
-    .ico-chat::before { content: "💬"; }
-    .ico-teacher::before { content: "🎓"; }
+    .portal-zone {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; padding: 5px 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .neural-orb {
+      width: 115px; height: 115px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-ring {
+      position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px;
+      background: var(--ai-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
+    }
+    .orbit-energy {
+      position: absolute; inset: -12px; border-radius: 50%;
+      animation: rotateOrbit 8s linear infinite;
+    }
+    .e-ball { position: absolute; width: 11px; height: 11px; border-radius: 50%; filter: blur(1px); }
+    .ball-l { top: -5px; left: 50%; transform: translateX(-50%); background: #1e3a8a; box-shadow: 0 0 15px #1e3a8a; }
+    .ball-b { bottom: -5px; left: 50%; transform: translateX(-50%); background: #801336; box-shadow: 0 0 15px #801336; }
 
-    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
-    .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ai-core {
+      width: 85px; height: 85px; background: #000; border-radius: 50%;
+      background-image: linear-gradient(#000, #000), var(--ai-gradient);
+      background-origin: border-box; background-clip: content-box, border-box;
+      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
+      animation: aiBreathe 4s infinite ease-in-out;
+      z-index: 10;
+    }
+    .portal-info { text-align: center; margin-top: 10px; }
+    .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+    .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
 
-    /* --- 4. MEETING BAR (Neural Conference Bağlantılı) --- */
-    .meeting-bar {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 24px;
-      padding: 16px 22px;
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      display: flex; align-items: center; gap: 16px;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .meeting-bar:active { transform: scale(0.97); }
+    .academy-pro {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
+    }
+    .spectrum-logo { gap: 3.5px; display: flex; align-items: center; flex-shrink: 0; height: 32px; }
+    .bar { width: 3.5px; border-radius: 10px; animation: barMove 1.2s infinite ease-in-out; }
+    .bar-1 { height: 10px; background: #ff0000; animation-delay: 0.1s; }
+    .bar-2 { height: 18px; background: #ff7f00; animation-delay: 0.3s; }
+    .bar-3 { height: 26px; background: #ffff00; animation-delay: 0.5s; }
+    .bar-4 { height: 32px; background: #00ff00; animation-delay: 0.7s; }
+    .bar-5 { height: 26px; background: #0000ff; animation-delay: 0.5s; }
+    .bar-6 { height: 18px; background: #4b0082; animation-delay: 0.3s; }
+    .bar-7 { height: 10px; background: #8b00ff; animation-delay: 0.1s; }
 
-    @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-    @keyframes barMove { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
+    .academy-text h2 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; }
+    .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
 
-  </style>
+    .pro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pro-tile {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px; padding: 14px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
+    }
+    .pro-tile:active { transform: scale(0.96); }
+    .tile-icon {
+      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 17px;
+    }
+    .ico-txt::before { content: "Aa"; color: #34d399; font-weight: 900; }
+    .ico-cam::before { content: "◎"; color: #60a5fa; font-weight: 900; }
+    .ico-doc::before { content: "≡"; color: #f472b6; font-weight: 900; }
+    .ico-fun::before { content: "🎯"; }
+    .ico-chat::before { content: "💬"; }
+    .ico-teacher::before { content: "🎓"; }
+
+    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; }
+    .pro-tile label span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .meeting-bar {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 16px 22px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
+    }
+    .meeting-bar:active { transform: scale(0.97); }
+
+    @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes barMove { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
+    /* --- GÖNDERDİĞİN CSS SONU --- */
+
+    .signature-footer {
+      position: absolute; bottom: 0; width: 100%; height: var(--footer-offset);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .signature-footer .sig { font-size: 11px; font-weight: 900; background: linear-gradient(to right, #fff, #6366f1, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.7; }
+  </style>
 </head>
-
 <body>
-  <div id="pageContent">
+  <div class="app-viewport">
+    <header class="premium-header">
+      <div class="brand-group">
+        <h1><span>italky</span><span class="ai">AI</span></h1>
+        <div class="brand-slogan">BE FREE</div>
+      </div>
+      <div class="user-plain">
+        <div class="uMeta">
+          <div class="uName">Oğuz Özyiğit</div>
+          <div class="uJeton">Jeton: 328</div>
+        </div>
+        <div class="avatar"></div>
+      </div>
+    </header>
 
-    <div class="portal-zone" data-nav="/pages/facetoface.html">
-      <div class="neural-orb">
-        <div class="ai-ring"></div>
-        <div class="orbit-energy">
-          <div class="e-ball ball-l"></div>
-          <div class="e-ball ball-b"></div>
-        </div>
-        <div class="ai-core">
-          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-          </svg>
-        </div>
-      </div>
-      <div class="portal-info">
-        <h1>FaceToFace</h1>
-        <p>Yüzyüze Anlık Çeviri</p>
-      </div>
-    </div>
+    <div id="pageContent">
+      <div class="portal-zone" data-nav="/pages/facetoface.html">
+        <div class="neural-orb">
+          <div class="ai-ring"></div>
+          <div class="orbit-energy">
+            <div class="e-ball ball-l"></div>
+            <div class="e-ball ball-b"></div>
+          </div>
+          <div class="ai-core">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          </div>
+        </div>
+        <div class="portal-info"><h1>FaceToFace</h1><p>Yüzyüze Anlık Çeviri</p></div>
+      </div>
 
-    <div class="academy-pro" data-nav="/pages/teacher_select.html">
-      <div class="spectrum-logo">
-        <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
-        <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div>
-        <div class="bar bar-7"></div>
-      </div>
-      <div class="academy-text">
-        <h2>italky <span>Academy</span></h2>
-        <p>YAPAY ZEKA İLE DİL EĞİTİMİ</p>
-      </div>
-    </div>
+      <div class="academy-pro" data-nav="/pages/teacher_select.html">
+        <div class="spectrum-logo"><div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div><div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div><div class="bar bar-7"></div></div>
+        <div class="academy-text"><h2>italky <span>Academy</span></h2><p>YAPAY ZEKA İLE DİL EĞİTİMİ</p></div>
+      </div>
 
-    <div class="pro-grid">
-      <div class="pro-tile" data-nav="/pages/text_translate.html">
-        <div class="tile-icon ico-txt"></div>
-        <label>Metinden<br>Çeviri</label>
-      </div>
-      <div class="pro-tile" data-nav="/pages/photo.html">
-        <div class="tile-icon ico-cam"></div>
-        <label>Fotoğraftan<br>Çeviri</label>
-      </div>
-      <div class="pro-tile" data-nav="/pages/document.html">
-        <div class="tile-icon ico-doc"></div>
-        <label>Belgeden<br>Çeviri</label>
-      </div>
-      <div class="pro-tile" data-nav="/pages/game.html">
-        <div class="tile-icon ico-fun"></div>
-        <label>Eğlenerek<br>Öğren</label>
-      </div>
-      <div class="pro-tile" data-nav="/pages/teacher_select.html">
-        <div class="tile-icon ico-chat"></div>
-        <label>Sohbet <span>AI</span></label>
-      </div>
-      <div class="pro-tile" data-nav="/pages/teacher_select.html">
-        <div class="tile-icon ico-teacher"></div>
-        <label>Chat <span>AI</span></label>
-      </div>
-    </div>
+      <div class="pro-grid">
+        <div class="pro-tile" data-nav="/pages/text_translate.html"><div class="tile-icon ico-txt"></div><label>Metinden<br>Çeviri</label></div>
+        <div class="pro-tile" data-nav="/pages/photo.html"><div class="tile-icon ico-cam"></div><label>Fotoğraftan<br>Çeviri</label></div>
+        <div class="pro-tile" data-nav="/pages/document.html"><div class="tile-icon ico-doc"></div><label>Belgeden<br>Çeviri</label></div>
+        <div class="pro-tile" data-nav="/pages/game.html"><div class="tile-icon ico-fun"></div><label>Eğlenerek<br>Öğren</label></div>
+        <div class="pro-tile" data-nav="/pages/teacher_select.html"><div class="tile-icon ico-chat"></div><label>Sohbet <span>AI</span></label></div>
+        <div class="pro-tile" data-nav="/pages/teacher_select.html"><div class="tile-icon ico-teacher"></div><label>Chat <span>AI</span></label></div>
+      </div>
 
-    <div class="meeting-bar" data-nav="/pages/meeting.html">
-      <div class="tile-icon">📹</div>
-      <div class="academy-text">
-        <h2 style="font-size: 17px;">Online Toplantı</h2>
-        <p>CANLI ÇEVİRİ ODALARI</p>
-      </div>
-    </div>
+      <div class="meeting-bar" data-nav="/pages/meeting.html"><div class="tile-icon">📹</div><div class="academy-text"><h2>Online Toplantı</h2><p>CANLI ÇEVİRİ ODALARI</p></div></div>
+    </div>
 
-  </div>
+    <footer class="signature-footer">
+      <div class="sig">italkyAI @ italkyAcedemia By Ozyigit's</div>
+    </footer>
+  </div>
 
-  <script type="module">
-    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
-    import { bootPage } from "/js/ui_guard.js";
-    import { ensureAuthAndCacheUser } from "/js/auth.js";
-
-    mountShell({ scroll: "none" });
-
-    const cached = await ensureAuthAndCacheUser().catch(()=>null);
-    if (cached?.tokens != null) setHeaderTokens(cached.tokens);
-    bootPage({ protectedPage: true, header: { nameId: "userName", picId: "userPic" } });
-
-    document.querySelectorAll("[data-nav]").forEach(el => {
-      const url = el.getAttribute("data-nav");
-      const go = (e) => { 
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        window.location.assign(url); 
-      };
-      el.onclick = go;
-      el.ontouchend = go;
-    });
-  </script>
+  <script>
+    document.querySelectorAll("[data-nav]").forEach(el => {
+      el.onclick = (e) => {
+        e.preventDefault();
+        const url = el.getAttribute("data-nav");
+        window.location.href = url;
+      };
+    });
+  </script>
 </body>
 </html>
