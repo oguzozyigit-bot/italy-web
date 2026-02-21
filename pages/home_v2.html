@@ -12,10 +12,10 @@
     :root{
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
       --bg-void:#02000f;
-      --headerH: 112px; /* JS ölçer */
-      --card: rgba(255,255,255,0.05);
-      --line: rgba(255,255,255,0.10);
+      --card: rgba(255,255,255,0.06);
+      --line: rgba(255,255,255,0.12);
       --muted: rgba(255,255,255,0.72);
+      --headerH: 120px; /* JS ölçer */
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -34,17 +34,17 @@
     .nebula{
       position:fixed; inset:0; z-index:-2;
       background:
-        radial-gradient(circle at 50% 16%, rgba(99,102,241,0.22) 0%, transparent 55%),
-        radial-gradient(circle at 20% 70%, rgba(236,72,153,0.14) 0%, transparent 55%),
-        radial-gradient(circle at 80% 75%, rgba(165,180,252,0.10) 0%, transparent 55%),
-        linear-gradient(180deg, #05051a 0%, #02000f 45%, #02000f 100%);
+        radial-gradient(circle at 50% 16%, rgba(99,102,241,0.24) 0%, transparent 58%),
+        radial-gradient(circle at 15% 78%, rgba(236,72,153,0.18) 0%, transparent 62%),
+        radial-gradient(circle at 85% 75%, rgba(165,180,252,0.12) 0%, transparent 60%),
+        linear-gradient(180deg, #070724 0%, #02000f 50%, #02000f 100%);
     }
     .stars{
       position:fixed; inset:0; z-index:-1; pointer-events:none;
       background:
-        radial-gradient(circle, rgba(255,255,255,0.12) 0 1px, transparent 2px) 0 0/240px 240px,
-        radial-gradient(circle, rgba(255,255,255,0.10) 0 1px, transparent 2px) 0 0/300px 300px,
-        radial-gradient(circle, rgba(255,255,255,0.08) 0 1px, transparent 2px) 0 0/200px 200px;
+        radial-gradient(circle, rgba(255,255,255,0.12) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle, rgba(255,255,255,0.10) 0 1px, transparent 2px) 0 0/280px 280px,
+        radial-gradient(circle, rgba(255,255,255,0.08) 0 1px, transparent 2px) 0 0/190px 190px;
       opacity:.55;
       mix-blend-mode:screen;
     }
@@ -53,8 +53,8 @@
     .header-nav{
       position:fixed; top:0; left:0; right:0;
       z-index:1000;
-      padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
-      background: rgba(0,0,0,0.68);
+      padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+      background: rgba(0,0,0,0.70);
       backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--line);
       display:flex;
@@ -64,12 +64,12 @@
     }
 
     .nav-inner{
-      width:100%;
-      max-width: 1100px; /* desktop */
+      width: 100%;
+      max-width: 1180px; /* desktop */
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
     }
 
     .brand-box{ user-select:none; }
@@ -91,7 +91,7 @@
       font-size: 8px;
       font-weight: 900;
       letter-spacing: 3px;
-      opacity:.6;
+      opacity:.65;
     }
 
     .btn-pill{
@@ -106,7 +106,7 @@
       text-decoration:none;
       font-size: 11px;
       white-space:nowrap;
-      border: none;
+      border:none;
       cursor:pointer;
       user-select:none;
     }
@@ -117,12 +117,12 @@
 
     .nav-links-scroll{
       width:100%;
-      max-width:1100px;
+      max-width:1180px;
       display:flex;
       gap:10px;
       overflow-x:auto;
-      padding-bottom: 2px;
       scrollbar-width:none;
+      padding-bottom: 2px;
     }
     .nav-links-scroll::-webkit-scrollbar{ display:none; }
     .nav-links-scroll a{
@@ -130,7 +130,7 @@
       text-decoration:none;
       font-size: 10px;
       font-weight: 900;
-      color: rgba(255,255,255,0.78);
+      color: rgba(255,255,255,0.82);
       padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
@@ -138,27 +138,26 @@
       text-transform: uppercase;
       white-space:nowrap;
     }
-    .nav-links-scroll a:active{ transform: scale(.98); }
 
-    /* PAGE */
+    /* ✅ PAGE — MOBİLDE FULL WIDTH */
     .master-container{
       width: 100%;
-      max-width: 1100px; /* desktop */
+      max-width: 1180px; /* desktop */
       margin: 0 auto;
-      padding: calc(var(--headerH) + 20px) 14px 70px;
+      padding: calc(var(--headerH) + 18px) 12px 76px;
     }
 
     /* HERO */
     .hero{
       text-align:center;
-      padding: 14px 0 10px;
+      padding: 12px 0 10px;
     }
     .hero h2{
       margin:0;
-      font-size: clamp(26px, 6.2vw, 54px);
+      font-size: clamp(30px, 7.6vw, 64px);
       font-weight: 1000;
-      letter-spacing: -0.8px;
-      line-height:1.05;
+      letter-spacing: -1px;
+      line-height:1.03;
       text-transform: uppercase;
     }
     .hero .grad{
@@ -168,11 +167,11 @@
     }
     .hero p{
       margin: 10px auto 0;
-      max-width: 820px;
+      max-width: 860px;
       font-size: 13px;
       font-weight: 700;
       color: var(--muted);
-      line-height: 1.5;
+      line-height: 1.55;
     }
     .hero-cta{
       margin-top: 14px;
@@ -182,17 +181,16 @@
       flex-wrap:wrap;
     }
 
-    /* PHONE PREVIEW — ✅ MOBİLDE BÜYÜK */
+    /* ✅ PHONE PREVIEW — MOBİLDE DEV */
     .phone-wrapper{
       margin: 18px auto 0;
-      width: min(92vw, 420px);   /* ✅ mobilde ekranı doldurur */
-      aspect-ratio: 9 / 18.5;
-      max-height: min(76vh, 780px); /* ✅ kısa ekran koruma */
+      width: min(96vw, 520px);       /* ✅ daha büyük */
+      height: min(72vh, 860px);      /* ✅ ekranı doldurur */
       background:#000;
-      border-radius: 42px;
+      border-radius: 44px;
       border: 8px solid rgba(255,255,255,0.10);
       overflow:hidden;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.70), 0 0 20px rgba(99,102,241,0.18);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.72), 0 0 22px rgba(99,102,241,0.18);
     }
 
     .app-root{ height:100%; display:flex; flex-direction:column; background:#02000f; }
@@ -333,7 +331,7 @@
       line-height: 1.15;
     }
 
-    /* MODULES (boşluk kalmasın diye gerçek içerik) */
+    /* EXTRA CONTENT (boşluğu bitirir) */
     .section{
       margin-top: 22px;
       border-top: 1px solid rgba(255,255,255,0.08);
@@ -377,7 +375,6 @@
       line-height: 1.45;
     }
 
-    /* Bottom CTA */
     .download{
       margin-top: 26px;
       padding: 16px;
@@ -394,26 +391,13 @@
       flex-wrap:wrap;
     }
 
-    /* Floating */
-    .floating-btns{
-      position: fixed;
-      right: 10px;
-      bottom: calc(18px + env(safe-area-inset-bottom));
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      z-index:2000;
+    /* ✅ MOBİLDE DAHA AZ “boş” his: section araları sıkı */
+    @media (max-width: 520px){
+      .master-container{ padding-left: 10px; padding-right: 10px; }
+      .phone-wrapper{ width: 96vw; height: 70vh; }
+      .nav-links-scroll a{ font-size: 9px; padding: 7px 10px; }
+      .btn-pill{ font-size: 10px; padding: 9px 12px; }
     }
-    .f-btn{
-      width: 38px; height: 38px;
-      border-radius: 50%;
-      border:none;
-      background: rgba(255,255,255,0.92);
-      color:#000;
-      font-weight: 1000;
-      cursor:pointer;
-    }
-    .f-btn:active{ transform: scale(.97); }
   </style>
 </head>
 
@@ -446,11 +430,6 @@
     </div>
   </nav>
 
-  <div class="floating-btns">
-    <button class="f-btn" type="button" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
-    <button class="f-btn" type="button" onclick="window.scrollBy({top: window.innerHeight*0.85, behavior:'smooth'})">↓</button>
-  </div>
-
   <main class="master-container">
     <section class="hero">
       <h2>Sadece Çeviri Değil<br><span class="grad">Bir Akademi</span></h2>
@@ -464,7 +443,7 @@
         <a class="btn-pill ghost" href="#moduller">MODÜLLERİ GÖR</a>
       </div>
 
-      <!-- Telefon preview -->
+      <!-- ✅ Telefon preview -->
       <div class="phone-wrapper" id="face">
         <div class="app-root">
           <header class="app-top">
@@ -527,7 +506,7 @@
               </div>
             </div>
 
-            <div style="height:6px"></div>
+            <div style="height:8px"></div>
           </div>
 
           <footer style="padding:10px; text-align:center; font-size:9px; opacity:0.35; border-top:1px solid rgba(255,255,255,0.05);">
@@ -537,7 +516,6 @@
       </div>
     </section>
 
-    <!-- ✅ Bu bölüm “boşluk” problemini bitiriyor -->
     <section class="section" id="modul-aciklama">
       <h3>Uygulama ile ne kazanırsın?</h3>
       <p>
@@ -546,30 +524,12 @@
       </p>
 
       <div class="mini-grid">
-        <div class="mini-card">
-          <b>FaceToFace</b>
-          <span>İki kişi farklı dil konuşur. Uygulama çevirir + seslendirir. Göz teması bozulmaz, iletişim akar.</span>
-        </div>
-        <div class="mini-card">
-          <b>italky Academy</b>
-          <span>Seviyeni görür, kısa AI derslerle pratik yaptırır. “Bugün 10 dakika” bile olsa ilerleme sağlar.</span>
-        </div>
-        <div class="mini-card">
-          <b>Online Toplantı</b>
-          <span>2 kişi de olur 20 kişi de. Herkes kendi dilinde konuşur; herkes aynı toplantıyı anlar.</span>
-        </div>
-        <div class="mini-card">
-          <b>Metin / Fotoğraf / Belge</b>
-          <span>Mesaj, menü, PDF… “anlamadan geçme” dönemini bitirir. Hızlı, okunur, net.</span>
-        </div>
-        <div class="mini-card">
-          <b>Oyunlar</b>
-          <span>Kelimeyi ezberletmez; tekrar ettirir. Eğlenerek öğrenme için “bağımlılık” mekanizması.</span>
-        </div>
-        <div class="mini-card">
-          <b>Sohbet AI</b>
-          <span>Pratik ortağın gibi. Günlük konuşma, dertleşme, rol-play, özgüven. Yargı yok.</span>
-        </div>
+        <div class="mini-card"><b>FaceToFace</b><span>İki kişi farklı dil konuşur. Uygulama çevirir + seslendirir. Göz teması bozulmaz, iletişim akar.</span></div>
+        <div class="mini-card"><b>italky Academy</b><span>Seviyeni görür, kısa AI derslerle pratik yaptırır. “Bugün 10 dakika” bile olsa ilerleme sağlar.</span></div>
+        <div class="mini-card"><b>Online Toplantı</b><span>2 kişi de olur 20 kişi de. Herkes kendi dilinde konuşur; herkes aynı toplantıyı anlar.</span></div>
+        <div class="mini-card"><b>Metin / Fotoğraf / Belge</b><span>Mesaj, menü, PDF… “anlamadan geçme” dönemini bitirir. Hızlı, okunur, net.</span></div>
+        <div class="mini-card"><b>Oyunlar</b><span>Kelimeyi ezberletmez; tekrar ettirir. Eğlenerek öğrenme için “bağımlılık” mekanizması.</span></div>
+        <div class="mini-card"><b>Sohbet AI</b><span>Pratik ortağın gibi. Günlük konuşma, dertleşme, rol-play, özgüven. Yargı yok.</span></div>
       </div>
     </section>
 
@@ -586,13 +546,13 @@
   </main>
 
   <script>
-    // header yüksekliğini ölç, içerik padding-top’u doğru olsun
+    // header yüksekliğini ölç -> içerik üstten doğru başlasın
     (function(){
       const header = document.getElementById("headerNav");
       if(!header) return;
 
       const apply = ()=>{
-        const h = header.getBoundingClientRect().height || 112;
+        const h = header.getBoundingClientRect().height || 120;
         document.documentElement.style.setProperty("--headerH", Math.ceil(h) + "px");
       };
 
