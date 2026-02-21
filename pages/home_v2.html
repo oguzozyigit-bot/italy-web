@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>italkyAI • 3000 VISION</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/pages/site_2050.css?v=3000_X">
   <style>
     :root {
       --neon-blue: #00f2ff;
       --neon-purple: #bc13fe;
-      --glass: rgba(255, 255, 255, 0.03);
+      --glass: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.1);
     }
 
@@ -19,122 +19,103 @@
       background: #020205;
       color: #fff;
       overflow-x: hidden;
-      perspective: 1000px;
+      margin: 0;
+      padding-bottom: 80px; /* Tab Bar için boşluk */
     }
 
-    /* Animasyonlu Arka Plan */
-    .bg-3000 {
+    /* Kuantum Arka Plan */
+    .quantum-bg {
       position: fixed; inset: 0; z-index: -1;
       background: radial-gradient(circle at 50% 50%, #0a0a20 0%, #020205 100%);
     }
     .orb {
-      position: absolute; width: 400px; height: 400px;
-      border-radius: 50%; filter: blur(100px);
-      animation: float 20s infinite alternate; opacity: 0.3;
+      position: absolute; width: 300px; height: 300px;
+      border-radius: 50%; filter: blur(80px);
+      animation: drift 15s infinite alternate ease-in-out; opacity: 0.2;
     }
-    @keyframes float {
-      0% { transform: translate(-10%, -10%) scale(1); background: var(--neon-blue); }
-      100% { transform: translate(20%, 30%) scale(1.2); background: var(--neon-purple); }
-    }
-
-    /* Fütüristik Header */
-    .topbar {
-      backdrop-filter: blur(25px);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 15px 0;
-    }
-    .brand-line {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700; font-size: 24px; letter-spacing: -1px;
-    }
-    .brand-ai {
-      background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 20px rgba(188, 19, 254, 0.5);
+    @keyframes drift {
+      from { transform: translate(-10%, -10%); background: var(--neon-blue); }
+      to { transform: translate(20%, 20%); background: var(--neon-purple); }
     }
 
     /* Hero Bölümü */
     .hero-title {
-      font-size: clamp(32px, 8vw, 64px);
-      font-weight: 900; line-height: 0.9;
-      text-transform: uppercase; margin-bottom: 20px;
+      font-size: clamp(34px, 10vw, 72px);
+      line-height: 0.9; font-weight: 900;
+      margin-bottom: 20px;
     }
     .grad {
-      background: linear-gradient(to bottom, #fff, rgba(255,255,255,0.4));
+      background: linear-gradient(90deg, #fff, var(--neon-blue));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
 
-    /* 3D Kart Yapısı */
+    /* Modül Kartları */
     .cards {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px; padding: 20px 0;
+      gap: 16px; margin-top: 40px;
     }
     .card {
       background: var(--glass);
       border: 1px solid var(--glass-border);
-      border-radius: 30px; padding: 30px;
-      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      position: relative; overflow: hidden;
+      border-radius: 28px; padding: 24px;
       text-decoration: none; color: inherit;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative; overflow: hidden;
+      backdrop-filter: blur(10px);
     }
     .card:hover {
-      background: rgba(255,255,255,0.06);
-      transform: translateY(-10px) rotateX(5deg);
+      transform: translateY(-10px) scale(1.02);
       border-color: var(--neon-blue);
-      box-shadow: 0 20px 40px rgba(0, 242, 255, 0.1);
+      box-shadow: 0 15px 40px rgba(0, 242, 255, 0.15);
+      background: rgba(255, 255, 255, 0.07);
     }
-    .card::before {
-      content: ""; position: absolute; top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      transition: 0.5s;
-    }
-    .card:hover::before { left: 100%; }
 
-    .icon {
-      width: 50px; height: 50px; border-radius: 15px;
+    /* İkon Stilleri */
+    .icon-box {
+      width: 52px; height: 52px; border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 20px; border: 1px solid var(--glass-border);
-      background: rgba(0,0,0,0.3);
+      margin-bottom: 20px; background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--glass-border);
+      box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
     }
-    .icon svg { width: 24px; color: var(--neon-blue); }
+    .icon-box svg { width: 28px; height: 28px; stroke: var(--neon-blue); stroke-width: 1.5; fill: none; }
 
-    /* Mobil Alt Tab Bar */
-    .mobile-tab-bar {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: 70px; background: rgba(2, 2, 5, 0.8);
-      backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border);
-      display: none; justify-content: space-around; align-items: center;
-      z-index: 9999; padding-bottom: env(safe-area-inset-bottom);
+    /* Mobil Alt Tab Bar (Cebindeki Navigasyon) */
+    .tab-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
+      background: rgba(5, 5, 15, 0.8); backdrop-filter: blur(25px);
+      border-top: 1px solid var(--glass-border);
+      display: flex; justify-content: space-around; align-items: center;
+      z-index: 10000; padding-bottom: env(safe-area-inset-bottom);
     }
+    .tab-link {
+      display: flex; flex-direction: column; align-items: center;
+      color: rgba(255,255,255,0.4); text-decoration: none; font-size: 10px; font-weight: 700;
+    }
+    .tab-link.active { color: var(--neon-blue); }
+    .tab-link svg { width: 24px; height: 24px; margin-bottom: 4px; }
 
+    /* Cep Telefonu Uyarlamaları (Mobile Grid) */
     @media (max-width: 768px) {
-      .mobile-tab-bar { display: flex; }
-      .nav { display: none; } /* Üst menüyü mobilde gizle, tab bar kullan */
-      .hero-grid { text-align: center; }
-      .cards { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .card { padding: 15px; min-height: 200px; }
-      .card h3 { font-size: 14px; }
-      .card p { font-size: 11px; opacity: 0.6; }
-    }
-
-    /* Glow Butonlar */
-    .btn {
-      padding: 16px 32px; border-radius: 99px; font-weight: 700;
-      transition: 0.3s; display: inline-flex; align-items: center; gap: 10px;
-    }
-    .btn.primary {
-      background: #fff; color: #000;
-    }
-    .btn.primary:hover {
-      box-shadow: 0 0 30px #fff; transform: scale(1.05);
+      .hero-grid { text-align: center; padding-top: 40px; }
+      .nav { display: none; } /* Üst menü mobilde gizlenir, tab bar kullanılır */
+      .cards { grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 10px; }
+      .card { padding: 20px 15px; min-height: 190px; }
+      .card h3 { font-size: 14px; margin: 10px 0 5px; }
+      .card p { font-size: 11px; opacity: 0.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+      .icon-box { width: 40px; height: 40px; }
+      .icon-box svg { width: 20px; height: 20px; }
+      .tag { font-size: 8px; padding: 2px 8px; }
+      .hero-cta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .btn { padding: 14px 10px; font-size: 12px; }
     }
   </style>
 </head>
 <body>
-  <div class="bg-3000">
-    <div class="orb" style="top: 10%; left: 10%;"></div>
-    <div class="orb" style="bottom: 20%; right: 10%; animation-delay: -5s;"></div>
+
+  <div class="quantum-bg">
+    <div class="orb" style="top:10%; left:5%"></div>
+    <div class="orb" style="bottom:15%; right:5%; animation-delay:-5s"></div>
   </div>
 
   <div class="shell">
@@ -146,29 +127,22 @@
         </a>
         <nav class="nav">
           <a class="navlink" href="/pages/module_facetoface.html">FaceToFace</a>
-          <a class="navlink" href="/pages/module_meeting.html">Global Meeting</a>
           <a class="navlink" href="/pages/module_academy.html">Academy</a>
-          <button class="langbtn navlink" id="langBtn">🌐 GLOBAL</button>
+          <a class="navlink primary" href="/pages/module_meeting.html">Global Meeting</a>
         </nav>
       </div>
     </header>
 
     <main class="page">
-      <section class="hero section">
+      <section class="hero section" style="border:none">
         <div class="hero-grid">
           <div>
-            <div class="kicker">Beyin dalgalarıyla değil, italkyAI ile konuş.</div>
-            <h1 class="hero-title">
-              SINIRSIZ <span class="grad">İLETİŞİM</span><br>
-              ZAMANSIZ <span class="grad">ÖZGÜRLÜK</span>
-            </h1>
-            <p class="hero-desc" style="max-width: 600px; font-size: 18px; opacity: 0.7;">
-              italkyAI, evrensel dil bariyerini yıkan bir kuantum köprüsüdür. 
-              Toplantılardan akademiye, anlık çeviriden AI dostluğuna kadar her şey tek bir akışta.
-            </p>
-            <div class="hero-cta" style="margin-top: 40px;">
-              <a class="btn primary" href="#modules">SİSTEMİ BAŞLAT</a>
-              <a class="btn ghost" href="/pages/module_pricing.html">Şeffaf Veriler</a>
+            <div class="kicker">Gece gündüz, her dilde özgürsün.</div>
+            <h1 class="hero-title">CEBİNDEKİ<br><span class="grad">EVRENSEL ZEKA</span></h1>
+            <p class="hero-desc">italkyAI; çeviri, öğrenme ve profesyonel iletişimi nöral bir ağda birleştirir. Uygulamayı aç, dünya seni duysun.</p>
+            <div class="hero-cta" style="margin-top:30px">
+              <a class="btn primary" href="#modules">SİSTEMİ AÇ</a>
+              <a class="btn ghost" href="/pages/module_pricing.html">NET KURALLAR</a>
             </div>
           </div>
         </div>
@@ -177,72 +151,84 @@
       <section class="section" id="modules">
         <h2 class="h2">NÖRAL MODÜLLER</h2>
         <div class="cards">
+          
           <a class="card" href="/pages/module_facetoface.html">
-            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
             <h3>FaceToFace AI</h3>
-            <p>Karşılıklı konuşmada dil bariyeri biter. O konuşur, italky senin dilinde seslendirir.</p>
-          </a>
-
-          <a class="card" href="/pages/module_meeting.html">
-            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 10l5 5-5 5"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg></div>
-            <h3>Online Toplantı</h3>
-            <p>20 kişi, 20 farklı dil. Herkes kendi dilinde duyar. Global iş dünyasının yeni standartı.</p>
+            <p>Karşılıklı konuşmada eşzamanlı çeviri ve doğal seslendirme.</p>
+            <span class="tag">Flagship</span>
           </a>
 
           <a class="card" href="/pages/module_academy.html">
-            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
             <h3>italky Academy</h3>
-            <p>Kişiselleştirilmiş AI müfredatı. Seviyeni belirle ve hedefe yönelik öğrenmeye başla.</p>
+            <p>Seviyene göre şekillenen AI destekli kişisel müfredat.</p>
+            <span class="tag">Learning</span>
+          </a>
+
+          <a class="card" href="/pages/module_meeting.html">
+            <div class="icon-box"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+            <h3>Global Meeting</h3>
+            <p>20 kişi, 20 farklı dil. Herkes kendi ana dilinde anlar.</p>
+            <span class="tag">Business</span>
           </a>
 
           <a class="card" href="/pages/module_chat.html">
-            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
             <h3>Sohbet AI</h3>
-            <p>Yalnız hissetme. 7/24 konuşabileceğin, dertleşebileceğin ve pratik yapabileceğin AI dostun.</p>
+            <p>7/24 dertleşebileceğin ve pratik yapabileceğin dijital dost.</p>
+            <span class="tag">Social</span>
           </a>
 
           <a class="card" href="/pages/module_photo.html">
-            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
-            <h3>Görsel Analiz</h3>
-            <p>Gördüğün her metni anında çevir. Menü, tabela veya bir antik yazıt...</p>
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+            <h3>Foto Çeviri</h3>
+            <p>Gördüğün her şeyi çek ve saniyeler içinde kendi dilinde oku.</p>
+            <span class="tag">Travel</span>
           </a>
 
-          <a class="card" href="/pages/module_games.html">
-            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4"/></svg></div>
-            <h3>Oyun Merkezi</h3>
-            <p>Eğlenerek öğrenmek bir seçenek değil, sonuçtur. Dil kaslarını oyunlarla güçlendir.</p>
+          <a class="card" href="/pages/module_speaking.html">
+            <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
+            <h3>Konuşkan AI</h3>
+            <p>Akıcılık simülasyonu ile konuşma kaslarını güçlendir.</p>
+            <span class="tag">Fluency</span>
           </a>
+
         </div>
       </section>
     </main>
 
-    <nav class="mobile-tab-bar">
-      <a href="/pages/home_v2.html" class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
-      <a href="/pages/module_facetoface.html" class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></a>
-      <a href="/pages/module_academy.html" class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></a>
-      <a href="/pages/module_contact.html" class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+    <nav class="tab-bar">
+      <a href="/pages/home_v2.html" class="tab-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>Keşfet</span>
+      </a>
+      <a href="/pages/module_facetoface.html" class="tab-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+        <span>Konuş</span>
+      </a>
+      <a href="/pages/module_academy.html" class="tab-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Akademi</span>
+      </a>
+      <a href="/pages/module_contact.html" class="tab-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profil</span>
+      </a>
     </nav>
 
-    <footer class="bottombar" style="margin-top: 100px; padding-bottom: 100px; opacity: 0.5;">
-      <div class="bottombar-inner" style="text-align: center;">
-        <p>italkyAI • 3000 VISION • By Ozyigit’s</p>
-        <div class="bottom-links" style="justify-content: center; margin-top: 10px;">
-          <a href="/pages/module_about.html">Vizyon</a>
-          <a href="/pages/module_privacy.html">Veri Etiği</a>
-          <a href="/pages/module_faq.html">Destek</a>
-        </div>
-      </div>
+    <footer class="bottombar" style="margin-top:50px; opacity:0.3; text-align:center">
+      <div class="bottom-sign">italkyAI • 3000 VISION • 2026</div>
     </footer>
+
   </div>
 
   <script type="module">
-    // Arka plan orb hareketi için ufak bir mouse-track eklenebilir
+    // Mouse hareketiyle arka planı hafif oynat (3D hissi)
     document.addEventListener('mousemove', (e) => {
-      const x = e.clientX / window.innerWidth;
-      const y = e.clientY / window.innerHeight;
-      document.querySelectorAll('.orb').forEach(orb => {
-        orb.style.transform = `translate(${x * 50}px, ${y * 50}px)`;
-      });
+      const moveX = (e.clientX - window.innerWidth / 2) * 0.02;
+      const moveY = (e.clientY - window.innerHeight / 2) * 0.02;
+      document.querySelector('.quantum-bg').style.transform = `translate(${moveX}px, ${moveY}px)`;
     });
   </script>
 </body>
