@@ -4,180 +4,1061 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI | Cebindeki Global Dünya</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --bg: #05050a;
-      --primary: #6366f1;
-      --secondary: #ec4899;
-      --accent: #8b5cf6;
-      --text: #ffffff;
-      --muted: #94a3b8;
-      --glass: rgba(255, 255, 255, 0.03);
-      --border: rgba(255, 255, 255, 0.1);
+    :root{
+      --bg:#020617;
+      --panel: rgba(255,255,255,.04);
+      --panel2: rgba(0,0,0,.22);
+      --bd: rgba(255,255,255,.10);
+
+      --txt:#fff;
+      --muted:#94a3b8;
+      --muted2: rgba(255,255,255,.65);
+
+      --p:#6366f1;
+      --s:#ec4899;
+      --a:#8b5cf6;
+
       --grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 45%, #ec4899 100%);
+      --grad2: linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%);
+      --shadow: 0 30px 90px rgba(0,0,0,.55);
+
+      --wrap: min(1200px, calc(100vw - 28px));
+      --topH: 88px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; scroll-behavior: smooth; }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    html,body{ margin:0; padding:0; width:100%; background:var(--bg); color:var(--txt); font-family:Outfit,system-ui,sans-serif; overflow-x:hidden; }
+    a{ color:inherit; text-decoration:none; }
+    button{ font-family:inherit; }
 
-    /* --- HEADER --- */
-    header {
-      position: sticky; top: 0; z-index: 9999;
-      height: 80px; padding: 0 5%;
-      background: rgba(5, 5, 10, 0.8); backdrop-filter: blur(15px);
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--border);
+    /* Background */
+    .bg{
+      position:fixed; inset:-15%;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(99,102,241,.35) 0%, transparent 45%),
+        radial-gradient(circle at 82% 68%, rgba(236,72,153,.22) 0%, transparent 45%),
+        radial-gradient(circle at 55% 55%, rgba(30, 0, 60, 1) 0%, #020617 100%);
+      filter: blur(60px);
+      z-index:-3;
+      pointer-events:none;
     }
-    .brand { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
-    .brand span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    
-    .nav-btn { background: #fff; color: #000; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 800; font-size: 13px; }
-
-    /* --- HERO --- */
-    .hero {
-      height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
-      text-align: center; padding: 0 10%; background: radial-gradient(circle at center, #1e1b4b 0%, #05050a 80%);
+    .stars{
+      position:fixed; inset:0;
+      background:url("https://www.transparenttextures.com/patterns/stardust.png");
+      opacity:.32;
+      z-index:-2;
+      pointer-events:none;
     }
-    .hero h1 { font-size: clamp(40px, 7vw, 90px); font-weight: 800; line-height: 1; margin-bottom: 20px; letter-spacing: -3px; }
-    .hero h1 span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero p { font-size: 22px; color: var(--muted); max-width: 800px; margin-bottom: 40px; font-weight: 400; }
 
-    /* --- MODÜL SECTİONLARI (GÖRSEL ODAKLI) --- */
-    .section { padding: 100px 10%; display: flex; align-items: center; gap: 60px; border-bottom: 1px solid var(--border); }
-    .section:nth-child(even) { flex-direction: row-reverse; background: rgba(255,255,255,0.01); }
-    
-    .f-text { flex: 1; }
-    .f-text span { color: var(--secondary); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 14px; }
-    .f-text h2 { font-size: 48px; font-weight: 800; margin: 15px 0; line-height: 1.1; }
-    .f-text p { font-size: 18px; color: var(--muted); margin-bottom: 25px; }
-    
-    .f-image { flex: 1.2; border-radius: 40px; overflow: hidden; border: 1px solid var(--border); position: relative; }
-    .f-image img { width: 100%; height: 500px; object-fit: cover; transition: 0.5s; }
-    .f-image:hover img { transform: scale(1.05); }
-
-    /* --- JETON TABLOSU (PREMIUM MENÜ) --- */
-    .pricing-table { padding: 100px 10%; text-align: center; }
-    .pricing-table h2 { font-size: 50px; font-weight: 800; margin-bottom: 50px; }
-    .pricing-table h2 span { color: var(--primary); }
-    
-    .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .price-item {
-      background: var(--glass); border: 1px solid var(--border); padding: 35px; border-radius: 30px;
-      text-align: left; transition: 0.3s;
+    /* Sticky header */
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      height: calc(var(--topH) + env(safe-area-inset-top));
+      padding: calc(12px + env(safe-area-inset-top)) 14px 10px;
+      background: rgba(0,0,0,.48);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.10);
     }
-    .price-item:hover { border-color: var(--primary); background: rgba(255,255,255,0.05); transform: translateY(-5px); }
-    .price-item h3 { font-size: 20px; margin-bottom: 10px; }
-    .price-item p { color: var(--muted); font-size: 14px; margin-bottom: 20px; height: 40px; }
-    .price-item .cost { font-size: 16px; font-weight: 800; color: var(--accent); border-top: 1px solid var(--border); padding-top: 15px; }
-
-    /* --- OFFLINE BANNER --- */
-    .offline-banner {
-      margin: 100px 10%; padding: 80px; background: linear-gradient(135deg, #6366f1, #ec4899);
-      border-radius: 50px; text-align: center; position: relative; overflow: hidden;
+    .headWrap{
+      width: var(--wrap);
+      margin: 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
     }
-    .offline-banner h2 { font-size: 44px; font-weight: 800; margin-bottom: 15px; }
-    .offline-banner .badge { background: #000; padding: 15px 30px; border-radius: 20px; font-weight: 800; display: inline-block; margin-top: 20px; }
+    .brand{
+      flex:0 0 auto;
+      user-select:none;
+      cursor:pointer;
+      line-height:1;
+    }
+    .brand .t{
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      display:flex;
+      gap: 4px;
+      align-items:flex-end;
+      white-space:nowrap;
+    }
+    .brand .ai{
+      background: var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter: drop-shadow(0 0 10px rgba(99,102,241,.35));
+    }
+    .brand .s{
+      margin-top: 4px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.55);
+      white-space:nowrap;
+      max-width: 220px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-    footer { padding: 60px 10%; text-align: center; border-top: 1px solid var(--border); opacity: 0.5; font-size: 13px; }
+    .nav{
+      flex: 1;
+      display:flex;
+      gap: 10px;
+      overflow:auto;
+      padding: 6px 2px;
+      scrollbar-width:none;
+    }
+    .nav::-webkit-scrollbar{ display:none; }
+    .chip{
+      flex: 0 0 auto;
+      height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.88);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+      transition: .18s;
+    }
+    .chip:active{ transform: scale(.98); }
+    .chip.active{
+      background: rgba(99,102,241,.18);
+      border-color: rgba(165,180,252,.35);
+      box-shadow: 0 12px 26px rgba(79,70,229,.18);
+    }
+
+    .topCta{
+      flex: 0 0 auto;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      white-space:nowrap;
+    }
+    .pill{
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,.82);
+    }
+    .downloadBtn{
+      height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border:none;
+      background:#fff;
+      color:#000;
+      font-weight: 1000;
+      font-size: 12px;
+      cursor:pointer;
+    }
+    .downloadBtn:active{ transform: scale(.98); }
+
+    main{
+      width: var(--wrap);
+      margin: 0 auto;
+      padding: 22px 0 100px;
+    }
+    section{ padding: 26px 0; scroll-margin-top: calc(var(--topH) + 22px); }
+
+    /* HERO */
+    .hero{
+      border-radius: 44px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero::before{
+      content:"";
+      position:absolute; inset:-30%;
+      background:
+        radial-gradient(circle at 25% 35%, rgba(99,102,241,.22) 0%, transparent 55%),
+        radial-gradient(circle at 78% 65%, rgba(236,72,153,.18) 0%, transparent 55%);
+      filter: blur(10px);
+      pointer-events:none;
+    }
+    .heroIn{
+      position:relative;
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      padding: 18px;
+    }
+    .heroLeft{
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding: 18px;
+    }
+    .badgeLine{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom: 12px;
+    }
+    .miniBadge{
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      font-weight: 1000;
+      color: rgba(255,255,255,.86);
+    }
+    .miniBadge strong{
+      background: var(--grad2);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .h1{
+      margin: 0 0 10px;
+      font-size: clamp(30px, 4.5vw, 56px);
+      line-height: 1.02;
+      letter-spacing: -1px;
+      font-weight: 1000;
+    }
+    .h1 span{
+      background: var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .lead{
+      margin: 0 0 14px;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.55;
+      color: rgba(255,255,255,.72);
+      max-width: 70ch;
+    }
+    .heroBtns{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .btn{
+      height: 46px;
+      padding: 0 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color:#fff;
+      font-weight: 1000;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btnPrimary{ border:none; background: var(--grad); box-shadow: 0 18px 50px rgba(79,70,229,.22); }
+    .btnWhite{ border:none; background:#fff; color:#000; }
+
+    .tokenBar{
+      margin-top: 12px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+    .tokenBar b{ background: var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .tokenBar .t1{ font-weight: 1000; }
+    .tokenBar .t2{ font-weight: 900; color: rgba(255,255,255,.75); font-size: 12px; }
+
+    .heroRight{
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      min-height: 360px;
+      display:flex;
+      flex-direction:column;
+    }
+    .heroImg{ position:relative; flex:1; background:#000; }
+    .heroImg img{ width:100%; height:100%; object-fit:cover; display:block; filter: saturate(1.05) contrast(1.05); }
+    .heroImg::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(99,102,241,.22), transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(236,72,153,.18), transparent 58%),
+        linear-gradient(to bottom, rgba(0,0,0,.25), rgba(0,0,0,.55));
+      pointer-events:none;
+    }
+    .heroRightFoot{
+      padding: 14px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.28);
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .heroRightFoot .k{
+      font-size: 11px;
+      font-weight: 1000;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.65);
+    }
+    .heroRightFoot .v{
+      font-size: 13px;
+      font-weight: 900;
+      color: rgba(255,255,255,.85);
+      line-height: 1.35;
+    }
+
+    /* Banner stack */
+    .stack{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .banner{
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+      box-shadow: 0 20px 55px rgba(0,0,0,.45);
+      cursor:pointer;
+      position:relative;
+      min-height: 280px;
+    }
+    .banner img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .banner::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 30% 35%, rgba(99,102,241,.18), transparent 55%),
+        radial-gradient(circle at 75% 70%, rgba(236,72,153,.14), transparent 58%),
+        linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.70));
+      pointer-events:none;
+    }
+    .bTxt{
+      position:absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      z-index: 2;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .kicker{
+      font-size: 11px;
+      font-weight: 1000;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.70);
+    }
+    .bTitle{
+      margin:0;
+      font-size: 22px;
+      font-weight: 1000;
+      letter-spacing: -.5px;
+      line-height: 1.08;
+    }
+    .bTitle .ai{
+      background: var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .bDesc{
+      margin:0;
+      font-size: 13px;
+      font-weight: 900;
+      color: rgba(255,255,255,.75);
+      line-height: 1.45;
+      max-width: 72ch;
+    }
+    .bPill{
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      font-size: 12px;
+      font-weight: 1000;
+      color: rgba(165,180,252,.95);
+    }
+
+    /* Cards */
+    .secTitle{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-bottom: 12px;
+    }
+    .secTitle h2{
+      margin:0;
+      font-size: 22px;
+      font-weight: 1000;
+      letter-spacing: -.3px;
+    }
+    .secTitle p{
+      margin: 6px 0 0;
+      color: rgba(255,255,255,.65);
+      font-weight: 800;
+      font-size: 13px;
+      max-width: 80ch;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .card{
+      grid-column: span 6;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      box-shadow: 0 20px 55px rgba(0,0,0,.45);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-height: 210px;
+    }
+    .cardTop{
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.18);
+    }
+    .cardTop h3{ margin:0; font-size: 15px; font-weight: 1000; }
+    .tag{
+      font-size: 10px;
+      font-weight: 1000;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.65);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      white-space:nowrap;
+    }
+    .cardBody{
+      padding: 14px 16px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      flex:1;
+    }
+    .cardBody p{
+      margin:0;
+      font-size: 13px;
+      font-weight: 800;
+      color: rgba(255,255,255,.72);
+      line-height: 1.55;
+    }
+    .priceTag{
+      margin-top:auto;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 9px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(165,180,252,.25);
+      background: rgba(99,102,241,.14);
+      color: rgba(165,180,252,.95);
+      font-weight: 1000;
+      font-size: 12px;
+      width: fit-content;
+    }
+
+    /* Pricing */
+    .pricing{
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .pricingTop{
+      padding: 16px;
+      background: rgba(0,0,0,.22);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+    .pricingTop h2{
+      margin:0;
+      font-size: clamp(22px, 4vw, 44px);
+      font-weight: 1000;
+      letter-spacing: -.7px;
+      line-height:1;
+    }
+    .pricingTop h2 span{
+      background: var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .pricingTop .sub{
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,.70);
+    }
+    .priceGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+    .pItem{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.22);
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      min-height: 90px;
+    }
+    .pItem .t{ font-weight: 1000; font-size: 13px; }
+    .pItem .d{ font-weight: 900; font-size: 12px; color: rgba(255,255,255,.68); line-height:1.4; }
+    .pItem .c{ margin-top:auto; font-weight: 1000; font-size: 12px; color: rgba(165,180,252,.92); }
+    .bigToken{
+      margin: 14px;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.30);
+      padding: 14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+    .bigToken .big{
+      font-size: 22px;
+      font-weight: 1000;
+      letter-spacing: -.3px;
+    }
+    .bigToken .big span{
+      background: var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .bigToken .sm{
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,.70);
+    }
+
+    /* Offline */
+    .offline{
+      border-radius: 40px;
+      background: linear-gradient(135deg, rgba(99,102,241,.95), rgba(236,72,153,.92));
+      padding: 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.18);
+      overflow:hidden;
+      position:relative;
+    }
+    .offline h2{
+      margin:0 0 8px;
+      font-size: clamp(22px, 3.6vw, 44px);
+      font-weight: 1000;
+      letter-spacing:-.6px;
+      line-height:1.08;
+    }
+    .offline p{
+      margin:0 0 14px;
+      font-size: 14px;
+      font-weight: 900;
+      color: rgba(255,255,255,.92);
+      line-height:1.45;
+      max-width: 90ch;
+    }
+    .offline .big{
+      display:inline-block;
+      background:#000;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 18px;
+      padding: 12px 16px;
+      font-weight: 1000;
+      letter-spacing: -.2px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+
+    /* FAQ */
+    .faq{
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .qa{
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      cursor:pointer;
+      user-select:none;
+    }
+    .qa:first-child{ border-top:none; }
+    .q{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      font-weight: 1000;
+    }
+    .a{
+      display:none;
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      color: rgba(255,255,255,.70);
+      line-height:1.55;
+    }
+    .qa.open .a{ display:block; }
+    .caret{
+      width: 26px; height: 26px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: .18s;
+      flex: 0 0 auto;
+    }
+    .qa.open .caret{ transform: rotate(180deg); }
+
+    /* Footer */
+    footer{
+      margin-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      padding: 24px 0 40px;
+      color: rgba(255,255,255,.60);
+    }
+    .footWrap{
+      width: var(--wrap);
+      margin: 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+    .links{ display:flex; gap:16px; flex-wrap:wrap; }
+    .links a{
+      color: rgba(255,255,255,.55);
+      font-weight: 900;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .sig{
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      background: linear-gradient(to right, #fff, #6366f1, #fff);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      opacity:.9;
+    }
+
+    @media (max-width: 980px){
+      .heroIn{ grid-template-columns: 1fr; }
+      .stack{ grid-template-columns: 1fr; }
+      .card{ grid-column: span 12; }
+      .priceGrid{ grid-template-columns: 1fr; }
+      .pill{ display:none; }
+      header{ padding-left: 10px; padding-right: 10px; }
+    }
   </style>
 </head>
+
 <body>
+  <div class="bg"></div>
+  <div class="stars"></div>
 
-<header>
-  <div class="brand">italky<span>AI</span></div>
-  <a href="#" class="nav-btn">UYGULAMAYI İNDİR</a>
-</header>
+  <header>
+    <div class="headWrap">
+      <div class="brand" data-scroll="#home" title="Anasayfa">
+        <div class="t">italky <span class="ai">AI</span></div>
+        <div class="s">ABONELİK YOK • KULLANDIKÇA ÖDE</div>
+      </div>
 
-<section class="hero">
-  <h1><span>Cebindeki</span> Öğretmen.<br><span>Cebindeki</span> Tercüman.</h1>
-  <p>italkyAI; konuşmayı, okumayı ve öğrenmeyi tek uygulamada birleştirir. Abonelik yok, sabit ücret yok. Sadece özgürlük var.</p>
-  <div style="font-size: 24px; font-weight: 800;">1 Jeton = 2 TL</div>
-</section>
+      <div class="nav" id="navChips">
+        <button class="chip active" data-scroll="#home">Anasayfa</button>
+        <button class="chip" data-scroll="#facetoface">FaceToFace</button>
+        <button class="chip" data-scroll="#academy">italky Academy</button>
+        <button class="chip" data-scroll="#modules">Modüller</button>
+        <button class="chip" data-scroll="#pricing">Fiyatlar</button>
+        <button class="chip" data-scroll="#offline">Offline</button>
+        <button class="chip" data-scroll="#faq">SSS</button>
+      </div>
 
-<section class="section">
-  <div class="f-text">
-    <span>AMİRAL GEMİSİ</span>
-    <h2>FaceToFace: <br>Konuş, Herkes Anlasın</h2>
-    <p>Telefonu masaya bırakın, göz temasını kesmeyin. Siz Türkçe söyleyin, italkyAI saniyeler içinde karşı tarafın dilinde seslendirsin. Turist gibi değil, yerli gibi yaşayın.</p>
-    <div style="font-weight: 800; color: var(--primary);">2 JETON / 24 DAKİKA</div>
-  </div>
-  <div class="f-image">
-    <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1200" alt="FaceToFace">
-  </div>
-</section>
-
-<section class="section">
-  <div class="f-text">
-    <span>EĞİTİM DEVRİMİ</span>
-    <h2>italky Academy: <br>Seviyeni Belirle, Devleş</h2>
-    <p>Önce Seviye Tespit Sınavı ile nerede olduğunu gör. Sonra AI öğretmeninin senin için hazırladığı özel derslere başla. 7/24 aktif, yorulmayan bir hoca cebinde.</p>
-    <div style="font-weight: 800; color: var(--primary);">SEVİYE: 10 JETON | DERS: 15 JETON</div>
-  </div>
-  <div class="f-image">
-    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200" alt="italky Academy">
-  </div>
-</section>
-
-<section class="section">
-  <div class="f-text">
-    <span>PROFESYONEL</span>
-    <h2>Online Toplantı: <br>Sınırları Kaldır</h2>
-    <p>İster 2 kişi, ister 20 kişi. Toplantı modunu aç, herkes kendi dilinde konuşsun, herkes anlasın. Dil bariyeri artık iş bariyeri değil.</p>
-    <div style="font-weight: 800; color: var(--primary);">20 JETON / 60 DAKİKA</div>
-  </div>
-  <div class="f-image">
-    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200" alt="Online Meeting">
-  </div>
-</section>
-
-<section class="pricing-table">
-  <h2>Tüm Özellikler <span>Tek Bir Jetonla</span></h2>
-  <div class="price-grid">
-    <div class="price-item">
-      <h3>Metinden Çeviri</h3>
-      <p>Mesajlar ve belgeler için hızlı çözüm.</p>
-      <div class="cost">1 Jeton / 24 Saat</div>
+      <div class="topCta">
+        <div class="pill">1 Jeton = 2 TL</div>
+        <button class="downloadBtn" id="downloadTop">Uygulamayı İndir</button>
+      </div>
     </div>
-    <div class="price-item">
-      <h3>Fotoğraftan Çeviri</h3>
-      <p>Menü, tabela, kitap... Çek ve oku.</p>
-      <div class="cost">1 Jeton / 24 Saat</div>
-    </div>
-    <div class="price-item">
-      <h3>Belgeden Çeviri</h3>
-      <p>PDF ve dosyalar için profesyonel çeviri.</p>
-      <div class="cost">1 Jeton / 24 Saat</div>
-    </div>
-    <div class="price-item">
-      <h3>Oyun Dünyası</h3>
-      <p>Eğlenerek öğren, kelime avına çık.</p>
-      <div class="cost">1 Jeton / 24 Saat</div>
-    </div>
-    <div class="price-item">
-      <h3>Sohbet & Chat AI</h3>
-      <p>Dertleş, pratik yap, fikir al.</p>
-      <div class="cost">10 Jeton / 60 Dakika</div>
-    </div>
-    <div class="price-item">
-      <h3>Seviye Tespit</h3>
-      <p>Zayıf noktalarını AI ile analiz et.</p>
-      <div class="cost">10 Jeton</div>
-    </div>
-  </div>
-</section>
+  </header>
 
-<div class="offline-banner">
-  <h2>İnternetin Bitse de Sohbetin Bitmesin</h2>
-  <p>Offline Dil Paketi ile 365 gün boyunca internete ihtiyaç duymadan FaceToFace kullan.</p>
-  <div class="badge">100 JETON / 365 GÜN</div>
-</div>
+  <main>
+    <!-- HERO -->
+    <section id="home">
+      <div class="hero">
+        <div class="heroIn">
+          <div class="heroLeft">
+            <div class="badgeLine">
+              <div class="miniBadge">✅ <strong>Abonelik yok</strong></div>
+              <div class="miniBadge">✅ Kullan — Bitir</div>
+              <div class="miniBadge">✅ Hepsi tek uygulama</div>
+            </div>
 
-<footer>
-  italkyAI @ italkyAcademy • By Ozyigit's • 2026 <br>
-  Abonelik yok. Jeton al, dünyayı konuştur.
-</footer>
+            <h1 class="h1">
+              Cebinizdeki <span>Öğretmen</span>.<br>
+              Cebinizdeki <span>Tercüman</span>.
+            </h1>
 
+            <p class="lead">
+              italkyAI; konuşmayı, okumayı ve öğrenmeyi tek uygulamada birleştirir.
+              Sabit ücret yok. Dil bariyeri yok. Sadece ihtiyacın olduğunda, ihtiyacın kadar.
+            </p>
+
+            <div class="heroBtns">
+              <button class="btn btnWhite" id="btnPlay">Google Play</button>
+              <button class="btn btnPrimary" id="btnApp">App Store</button>
+              <button class="btn" data-scroll="#pricing">Fiyatlandırma</button>
+            </div>
+
+            <div class="tokenBar">
+              <div>
+                <div class="t1">Sistem basit: <b>1 Jeton = 2 TL</b></div>
+                <div class="t2">Abonelik yok. Kullandığın kadar öde.</div>
+              </div>
+              <div class="t2"><b>Slogan:</b> “Dil öğrenme, dünyayı yaşa.”</div>
+            </div>
+          </div>
+
+          <div class="heroRight">
+            <div class="heroImg">
+              <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=70" alt="FaceToFace" />
+            </div>
+            <div class="heroRightFoot">
+              <div class="k">Hedef</div>
+              <div class="v">“Ben bunu kesin indiririm.” dedirten netlik: abonelik yok, tek uygulama.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BIG BANNERS -->
+      <div class="stack">
+        <div class="banner" data-scroll="#facetoface">
+          <img src="https://images.unsplash.com/photo-1522071901873-411886a10004?auto=format&fit=crop&w=1600&q=70" alt="FaceToFace sohbet" />
+          <div class="bTxt">
+            <div class="kicker">AMİRAL GEMİSİ</div>
+            <div class="bTitle">FaceToFace: <span class="ai">Konuş, herkes anlasın</span></div>
+            <div class="bDesc">Telefon masada. Göz teması bozulmadan çeviri. Turist gibi değil, yerli gibi.</div>
+            <div class="bPill">2 Jeton / 24 dk</div>
+          </div>
+        </div>
+
+        <div class="banner" data-scroll="#modules">
+          <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=70" alt="Fotoğraf çeviri menü" />
+          <div class="bTxt">
+            <div class="kicker">GÖR — ANLA</div>
+            <div class="bTitle">Fotoğraf: <span class="ai">Menüyü çevir, rahat et</span></div>
+            <div class="bDesc">Menü, tabela, kitap… Çek, seç, çevir. Bir dokunuşla kendi dilinde oku.</div>
+            <div class="bPill">1 Jeton / 24 saat</div>
+          </div>
+        </div>
+
+        <div class="banner" data-scroll="#modules">
+          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=70" alt="Online toplantı" />
+          <div class="bTxt">
+            <div class="kicker">HERKESE AÇIK</div>
+            <div class="bTitle">Online Toplantı: <span class="ai">2 kişi de olur 20 kişi de</span></div>
+            <div class="bDesc">Sen konuş, herkes anlasın. Dil bariyeri artık iş bariyeri değil.</div>
+            <div class="bPill">20 Jeton / 60 dk</div>
+          </div>
+        </div>
+
+        <div class="banner" data-scroll="#academy">
+          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=70" alt="Academy çalışma" />
+          <div class="bTxt">
+            <div class="kicker">EĞİTİM DEVRİMİ</div>
+            <div class="bTitle">italky Academy: <span class="ai">Seviyeni belirle, devleş</span></div>
+            <div class="bDesc">Seviye tespit → analiz → kişisel plan → 15 dakikalık dersler.</div>
+            <div class="bPill">10 Jeton + 15 Jeton</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FACETOFACE -->
+    <section id="facetoface">
+      <div class="secTitle">
+        <div>
+          <h2>FaceToFace AI</h2>
+          <p>Karşılıklı konuşma akışını bozmaz. Telefonu masaya koy — italkyAI aradaki dili kaldırır.</p>
+        </div>
+        <button class="btn btnPrimary" data-scroll="#pricing">2 Jeton / 24 dk</button>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="cardTop"><h3>Gerçek hayat modu</h3><div class="tag">PRATİK</div></div>
+          <div class="cardBody">
+            <p>Garsonla sipariş, yol tarifi, otel konuşması, kısa iş görüşmesi… Anında anlaş.</p>
+            <div class="priceTag">FaceToFace = 2 Jeton • 24 dakika kullanım</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardTop"><h3>Kontrol sende</h3><div class="tag">ABONELİK YOK</div></div>
+          <div class="cardBody">
+            <p>Kullanmadığın ayın parasını ödeme. Sabit ücret yok. Jeton var, kontrol var.</p>
+            <div class="priceTag">1 Jeton = 2 TL</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACADEMY -->
+    <section id="academy">
+      <div class="secTitle">
+        <div>
+          <h2>italky Academy</h2>
+          <p>AI öğretmen: önce seviyeni bulur, sonra en hızlı ilerleme yolunu çıkarır. Kurs değil, net ilerleme.</p>
+        </div>
+        <button class="btn" data-scroll="#pricing">Seviye: 10 • Ders: 15</button>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="cardTop"><h3>Seviye Tespit Sınavı</h3><div class="tag">BAŞLANGIÇ</div></div>
+          <div class="cardBody">
+            <p>Test sadece puan vermez; zayıf alanlarını gösterir ve ders planını başlatır.</p>
+            <div class="priceTag">Seviye Tespit: 10 Jeton</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="cardTop"><h3>AI Ders</h3><div class="tag">15 DK</div></div>
+          <div class="cardBody">
+            <p>7/24 hazır. İnsan stresinden uzak. Kısa, odak, etkili pratik.</p>
+            <div class="priceTag">Ders: 15 Jeton</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULES -->
+    <section id="modules">
+      <div class="secTitle">
+        <div>
+          <h2>Tüm Modüller</h2>
+          <p>Çeviri + eğitim + eğlence + toplantı… Hepsi tek uygulamada.</p>
+        </div>
+        <button class="btn btnWhite" data-scroll="#pricing">Fiyat Tablosu</button>
+      </div>
+
+      <div class="grid">
+        <div class="card"><div class="cardTop"><h3>Metinden Çeviri</h3><div class="tag">HIZLI</div></div><div class="cardBody"><p>Mesaj, mail, uzun metin… hızlı ve anlaşılır çeviri.</p><div class="priceTag">1 Jeton / 24 Saat</div></div></div>
+        <div class="card"><div class="cardTop"><h3>Belgeden Çeviri</h3><div class="tag">PDF</div></div><div class="cardBody"><p>PDF / dosya içeriklerini hızlı anla. Okumadım dönemi biter.</p><div class="priceTag">1 Jeton / 24 Saat</div></div></div>
+        <div class="card"><div class="cardTop"><h3>Fotoğraftan Çeviri</h3><div class="tag">KAMERA</div></div><div class="cardBody"><p>Menü, tabela, kitap sayfası… çek ve oku.</p><div class="priceTag">1 Jeton / 24 Saat</div></div></div>
+        <div class="card"><div class="cardTop"><h3>Eğlenerek Öğren</h3><div class="tag">OYUN</div></div><div class="cardBody"><p>Kelime oyunlarıyla öğrenme “sıkıcı” olmaktan çıkar.</p><div class="priceTag">1 Jeton / 24 Saat</div></div></div>
+        <div class="card"><div class="cardTop"><h3>Chat AI</h3><div class="tag">ASİSTAN</div></div><div class="cardBody"><p>Fikir al, metin düzenle, pratik yap. Günlük akıllı yardımcı.</p><div class="priceTag">5 Jeton / 60 Dakika</div></div></div>
+        <div class="card"><div class="cardTop"><h3>Sohbet AI</h3><div class="tag">DOST</div></div><div class="cardBody"><p>Dertleş, pratik yap, sohbet et. (İstersen konuşkan mod)</p><div class="priceTag">10 Jeton / 60 Dakika</div></div></div>
+        <div class="card"><div class="cardTop"><h3>Konuşkan AI</h3><div class="tag">KONUŞMA</div></div><div class="cardBody"><p>Konuşma odaklı pratik. Hata düzeltme + doğal öneri.</p><div class="priceTag">10 Jeton / 60 Dakika</div></div></div>
+        <div class="card"><div class="cardTop"><h3>Online Toplantı</h3><div class="tag">AÇIK</div></div><div class="cardBody"><p>Herkese açık oda: ister 2 kişi ister 20 kişi. Sen konuş, herkes anlasın.</p><div class="priceTag">20 Jeton / 60 Dakika</div></div></div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing">
+      <div class="pricing">
+        <div class="pricingTop">
+          <div>
+            <h2><span>Fiyatlandırma</span></h2>
+            <div class="sub">Abonelik yok • Jeton al, kullan • Şeffaf sistem</div>
+          </div>
+          <button class="downloadBtn" id="downloadPricing">Uygulamayı İndir</button>
+        </div>
+
+        <div class="bigToken">
+          <div class="big"><span>1 Jeton = 2 TL</span></div>
+          <div class="sm">Kullan & bitir. Sabit ücret yok.</div>
+        </div>
+
+        <div class="priceGrid">
+          <div class="pItem"><div class="t">FaceToFace</div><div class="d">Karşılıklı anlık sesli sohbet</div><div class="c">2 Jeton / 24 Dakika kullanım</div></div>
+          <div class="pItem"><div class="t">Metinden Çeviri</div><div class="d">Metin çeviri</div><div class="c">1 Jeton / 24 Saat kullanım</div></div>
+          <div class="pItem"><div class="t">Belgeden Çeviri</div><div class="d">PDF / dosya</div><div class="c">1 Jeton / 24 Saat kullanım</div></div>
+          <div class="pItem"><div class="t">Fotoğraftan Çeviri</div><div class="d">Menü / tabela / kitap</div><div class="c">1 Jeton / 24 Saat kullanım</div></div>
+          <div class="pItem"><div class="t">Oyun</div><div class="d">Eğlenerek öğren</div><div class="c">1 Jeton / 24 Saat kullanım</div></div>
+          <div class="pItem"><div class="t">Seviye Tespit Sınavı</div><div class="d">Başlangıç analizi</div><div class="c">10 Jeton</div></div>
+          <div class="pItem"><div class="t">Ders</div><div class="d">AI öğretmenle birebir</div><div class="c">15 Jeton</div></div>
+          <div class="pItem"><div class="t">Chat AI</div><div class="d">Akıllı asistan</div><div class="c">5 Jeton / 60 Dakika</div></div>
+          <div class="pItem"><div class="t">Sohbet AI</div><div class="d">Akıllı dost</div><div class="c">10 Jeton / 60 Dakika</div></div>
+          <div class="pItem"><div class="t">Konuşkan AI</div><div class="d">Konuşma odaklı pratik</div><div class="c">10 Jeton / 60 Dakika</div></div>
+          <div class="pItem"><div class="t">Online Toplantı</div><div class="d">Herkese açık oda</div><div class="c">20 Jeton / 60 Dakika</div></div>
+          <div class="pItem"><div class="t">Offline Dil Paketi</div><div class="d">FaceToFace + Metin</div><div class="c">100 Jeton / 365 Gün kullanım</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OFFLINE -->
+    <section id="offline">
+      <div class="offline">
+        <h2>İnternetin Bitse de Sohbetin Bitmesin</h2>
+        <p>
+          Offline Dil Paketi ile <b>365 gün</b> boyunca internete ihtiyaç duymadan
+          <b>FaceToFace</b> ve <b>Metinden Çeviri</b> kullan.
+        </p>
+        <div class="big">100 Jeton / 365 Gün • (FaceToFace + Metin)</div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="secTitle">
+        <div>
+          <h2>SSS</h2>
+          <p>Abonelik yok; net. İşte insanların en çok sorduğu kısım.</p>
+        </div>
+      </div>
+
+      <div class="faq">
+        <div class="qa open">
+          <div class="q">Abonelik var mı? <span class="caret">⌄</span></div>
+          <div class="a">Hayır. Abonelik yok. Jeton alırsın, kullandığın kadar ödersin.</div>
+        </div>
+        <div class="qa">
+          <div class="q">Toplantı kaç kişi? <span class="caret">⌄</span></div>
+          <div class="a">Herkese açık: ister 2 kişi ister 20 kişi. Amaç herkesin konuşup herkesin anlaması.</div>
+        </div>
+        <div class="qa">
+          <div class="q">Offline paket ne işe yarar? <span class="caret">⌄</span></div>
+          <div class="a">İnternet yokken FaceToFace + Metinden Çeviri için 365 gün kullanım sağlar.</div>
+        </div>
+        <div class="qa">
+          <div class="q">Bu tek uygulama mı? <span class="caret">⌄</span></div>
+          <div class="a">Evet. Çeviri, Academy, oyun, sohbet ve toplantı tek ekosistemde.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAST CTA -->
+    <section>
+      <div class="offline">
+        <h2>Bugün indir. Yarın “keşke” deme.</h2>
+        <p>
+          italkyAI: <b>Abonelik yok.</b> Dil bariyerlerini kaldırmak için tasarlandı.
+          Konuş, oku, öğren — hepsi tek yerde.
+        </p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn btnWhite" id="downloadBottom">Google Play</button>
+          <button class="btn btnPrimary" id="downloadBottom2">App Store</button>
+          <button class="btn" data-scroll="#pricing">Fiyatlandırma</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footWrap">
+      <div class="links">
+        <a href="#faq" data-scroll="#faq">SSS</a>
+        <a href="/pages/about.html">Hakkımızda</a>
+        <a href="/pages/privacy.html">Gizlilik</a>
+        <a href="/pages/contact.html">İletişim</a>
+      </div>
+      <div class="sig">italkyAI @ italkyAcademy • By Ozyigit’s • 2026</div>
+    </div>
+  </footer>
+
+  <script>
+    function scrollToSel(sel){
+      const el = document.querySelector(sel);
+      if(!el) return;
+      el.scrollIntoView({ behavior:"smooth", block:"start" });
+    }
+
+    document.querySelectorAll("[data-scroll]").forEach(el=>{
+      el.addEventListener("click", (e)=>{
+        e.preventDefault();
+        const sel = el.getAttribute("data-scroll");
+        if(sel) scrollToSel(sel);
+      });
+    });
+    document.querySelector(".brand")?.addEventListener("click", ()=> scrollToSel("#home"));
+
+    // Active chip highlight
+    const chips = Array.from(document.querySelectorAll(".chip[data-scroll]"));
+    const targets = chips.map(c => document.querySelector(c.getAttribute("data-scroll"))).filter(Boolean);
+    const mapSelToChip = new Map();
+    chips.forEach(c=> mapSelToChip.set(c.getAttribute("data-scroll"), c));
+
+    const io = new IntersectionObserver((entries)=>{
+      const vis = entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+      if(!vis) return;
+      const sel = "#" + vis.target.id;
+      chips.forEach(c=>c.classList.remove("active"));
+      const hit = mapSelToChip.get(sel);
+      if(hit) hit.classList.add("active");
+    }, { threshold:[0.35,0.55] });
+    targets.forEach(t=> io.observe(t));
+
+    // FAQ toggle
+    document.querySelectorAll(".qa").forEach(row=>{
+      row.addEventListener("click", ()=> row.classList.toggle("open"));
+    });
+
+    // Download placeholder (linkleri sonra koyarsın)
+    function download(){
+      alert("İndirme linkleri buraya bağlanacak (Google Play / App Store).");
+    }
+    ["downloadTop","downloadPricing","btnPlay","btnApp","downloadBottom","downloadBottom2"].forEach(id=>{
+      document.getElementById(id)?.addEventListener("click", download);
+    });
+
+    // Banner click -> scroll
+    document.querySelectorAll(".banner[data-scroll]").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        const sel = b.getAttribute("data-scroll");
+        if(sel) scrollToSel(sel);
+      });
+    });
+  </script>
 </body>
 </html>
