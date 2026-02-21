@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>italkyAI • Sadece Çeviri Değil</title>
+  <title>italkyAI • BE FREE</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -12,22 +12,23 @@
     :root{
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
       --bg-void:#02000f;
-      --card: rgba(255,255,255,0.06);
       --line: rgba(255,255,255,0.12);
-      --muted: rgba(255,255,255,0.72);
-      --headerH: 120px; /* JS ölçer */
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(255,255,255,0.04);
+      --muted: rgba(255,255,255,0.70);
+
+      --topH: 72px;
+      --botH: 74px;
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html,body{
       margin:0; padding:0;
-      width:100%;
-      min-height:100dvh;
+      width:100%; height:100%;
       background: var(--bg-void);
       color:#fff;
       font-family: Outfit, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      overflow-x:hidden;
-      scroll-behavior:smooth;
+      overflow:hidden; /* ✅ sadece ortadaki içerik görünür */
     }
 
     /* BG */
@@ -42,158 +43,154 @@
     .stars{
       position:fixed; inset:0; z-index:-1; pointer-events:none;
       background:
-        radial-gradient(circle, rgba(255,255,255,0.12) 0 1px, transparent 2px) 0 0/220px 220px,
-        radial-gradient(circle, rgba(255,255,255,0.10) 0 1px, transparent 2px) 0 0/280px 280px,
-        radial-gradient(circle, rgba(255,255,255,0.08) 0 1px, transparent 2px) 0 0/190px 190px;
+        radial-gradient(circle, rgba(255,255,255,0.10) 0 1px, transparent 2px) 0 0/220px 220px,
+        radial-gradient(circle, rgba(255,255,255,0.08) 0 1px, transparent 2px) 0 0/280px 280px,
+        radial-gradient(circle, rgba(255,255,255,0.06) 0 1px, transparent 2px) 0 0/190px 190px;
       opacity:.55;
       mix-blend-mode:screen;
     }
 
-    /* HEADER */
-    .header-nav{
+    /* LAYOUT */
+    .shell{
+      height:100dvh;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    /* TOPBAR */
+    .topbar{
       position:fixed; top:0; left:0; right:0;
       z-index:1000;
-      padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
-      background: rgba(0,0,0,0.70);
+      height: calc(var(--topH) + env(safe-area-inset-top));
+      padding-top: env(safe-area-inset-top);
+      background: rgba(0,0,0,0.62);
       backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--line);
       display:flex;
-      flex-direction:column;
       align-items:center;
-      gap:10px;
     }
-
-    .nav-inner{
-      width: 100%;
-      max-width: 1180px; /* desktop */
+    .topbar-inner{
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 0 12px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
+      gap: 10px;
+      height: var(--topH);
     }
 
-    .brand-box{ user-select:none; }
-    .brand-box h1{
-      margin:0;
-      font-family:"Space Grotesk", Outfit, system-ui, sans-serif;
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      user-select:none;
+      cursor:pointer;
+      text-decoration:none;
+      color:#fff;
+    }
+    .brand-line{
+      display:flex;
+      gap:4px;
+      align-items:flex-end;
+      font-family:"Space Grotesk", Outfit, sans-serif;
       font-size: 20px;
       font-weight: 800;
       line-height:1;
       letter-spacing:-0.4px;
     }
-    .brand-box h1 .ai{
+    .brand-ai{
       background: var(--ai-gradient);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
+      filter: drop-shadow(0 0 10px rgba(99,102,241,0.35));
     }
     .brand-sub{
-      margin-top:3px;
       font-size: 8px;
       font-weight: 900;
       letter-spacing: 3px;
       opacity:.65;
     }
 
-    .btn-pill{
-      display:inline-flex;
+    .right-actions{
+      display:flex;
       align-items:center;
-      justify-content:center;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: var(--ai-gradient);
-      color:#fff;
-      font-weight: 900;
-      text-decoration:none;
-      font-size: 11px;
-      white-space:nowrap;
-      border:none;
-      cursor:pointer;
-      user-select:none;
-    }
-    .btn-pill.ghost{
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
+      gap:10px;
     }
 
-    .nav-links-scroll{
-      width:100%;
-      max-width:1180px;
-      display:flex;
-      gap:10px;
-      overflow-x:auto;
-      scrollbar-width:none;
-      padding-bottom: 2px;
-    }
-    .nav-links-scroll::-webkit-scrollbar{ display:none; }
-    .nav-links-scroll a{
-      flex: 0 0 auto;
-      text-decoration:none;
-      font-size: 10px;
+    .slogan{
+      display:none;
       font-weight: 900;
-      color: rgba(255,255,255,0.82);
+      font-size: 11px;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,0.78);
       padding: 8px 12px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      text-transform: uppercase;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
       white-space:nowrap;
+      user-select:none;
     }
-
-    /* ✅ PAGE — MOBİLDE FULL WIDTH */
-    .master-container{
-      width: 100%;
-      max-width: 1180px; /* desktop */
-      margin: 0 auto;
-      padding: calc(var(--headerH) + 18px) 12px 76px;
+    @media (min-width: 820px){
+      .slogan{ display:inline-flex; }
     }
-
-    /* HERO */
-    .hero{
-      text-align:center;
-      padding: 12px 0 10px;
-    }
-    .hero h2{
-      margin:0;
-      font-size: clamp(30px, 7.6vw, 64px);
-      font-weight: 1000;
-      letter-spacing: -1px;
-      line-height:1.03;
-      text-transform: uppercase;
-    }
-    .hero .grad{
+    .slogan b{
       background: var(--ai-gradient);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-    .hero p{
-      margin: 10px auto 0;
-      max-width: 860px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-    .hero-cta{
-      margin-top: 14px;
+
+    .iconbtn{
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      cursor:pointer;
       display:flex;
-      gap:10px;
+      align-items:center;
       justify-content:center;
-      flex-wrap:wrap;
+      user-select:none;
+    }
+    .iconbtn:active{ transform: scale(.98); }
+    .hamburger{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      width:18px;
+    }
+    .hamburger span{
+      height:2px; width:18px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 99px;
+      display:block;
     }
 
-    /* ✅ PHONE PREVIEW — MOBİLDE DEV */
-    .phone-wrapper{
-      margin: 18px auto 0;
-      width: min(96vw, 520px);       /* ✅ daha büyük */
-      height: min(72vh, 860px);      /* ✅ ekranı doldurur */
+    /* CENTER AREA (ONLY PHONE) */
+    .center{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding-top: calc(var(--topH) + env(safe-area-inset-top));
+      padding-bottom: calc(var(--botH) + env(safe-area-inset-bottom));
+    }
+
+    /* PHONE */
+    .phone{
+      width: min(96vw, 520px);
+      height: min(72vh, 860px);
       background:#000;
       border-radius: 44px;
       border: 8px solid rgba(255,255,255,0.10);
       overflow:hidden;
       box-shadow: 0 30px 90px rgba(0,0,0,0.72), 0 0 22px rgba(99,102,241,0.18);
+      position:relative;
     }
 
     .app-root{ height:100%; display:flex; flex-direction:column; background:#02000f; }
+
     .app-top{
       padding: 24px 12px 10px;
       display:flex;
@@ -221,11 +218,11 @@
       letter-spacing: 3px;
       opacity:.6;
     }
-
     .app-user{
       display:flex;
       align-items:center;
       gap:8px;
+      user-select:none;
     }
     .app-user span{
       font-size: 10px;
@@ -251,7 +248,8 @@
     }
     .app-scroll::-webkit-scrollbar{ display:none; }
 
-    .hub-orb-zone{ display:flex; flex-direction:column; align-items:center; padding: 6px 0 0; }
+    /* ORB */
+    .hub-orb-zone{ display:flex; flex-direction:column; align-items:center; padding: 6px 0 0; cursor:pointer; user-select:none; }
     .orb-ring{ width: 94px; height: 94px; position:relative; display:flex; align-items:center; justify-content:center; }
     .orb-glow{
       position:absolute; inset:-3px;
@@ -271,7 +269,6 @@
       display:flex; align-items:center; justify-content:center;
       box-shadow: 0 0 18px rgba(99,102,241,0.22);
     }
-
     .app-title{
       margin-top: 8px;
       text-align:center;
@@ -289,6 +286,7 @@
       opacity:.6;
     }
 
+    /* Academy bar */
     .academy-line{
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
@@ -297,17 +295,20 @@
       display:flex;
       align-items:center;
       gap: 10px;
+      cursor:pointer;
+      user-select:none;
     }
     .spectrum-dots{ display:flex; gap:3px; align-items:flex-end; height: 16px; }
     .s-dot{ width: 3px; border-radius: 10px; animation: sAnim 1s infinite alternate; }
     @keyframes sAnim{ from{ height:4px } to{ height:16px } }
 
+    /* Grid tiles (links) */
     .hub-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
-    .grid-tile{
+    .tile{
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.07);
       border-radius: 16px;
@@ -315,7 +316,12 @@
       display:flex;
       align-items:center;
       gap:10px;
+      cursor:pointer;
+      user-select:none;
+      text-decoration:none;
+      color:#fff;
     }
+    .tile:active{ transform: scale(.99); }
     .tile-ico{
       width: 30px; height: 30px;
       border-radius: 10px;
@@ -325,78 +331,176 @@
       font-size: 12px;
       flex:0 0 auto;
     }
-    .grid-tile label{
+    .tile label{
       font-size: 10px;
       font-weight: 900;
       line-height: 1.15;
     }
 
-    /* EXTRA CONTENT (boşluğu bitirir) */
-    .section{
-      margin-top: 22px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding-top: 18px;
+    .meet-line{
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(99,102,241,0.22);
+      border-radius: 18px;
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      cursor:pointer;
+      user-select:none;
     }
-    .section h3{
-      margin:0;
-      font-size: 18px;
+
+    /* BOTTOM BAR */
+    .bottombar{
+      position:fixed; left:0; right:0; bottom:0;
+      z-index:1000;
+      height: calc(var(--botH) + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      background: rgba(0,0,0,0.62);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+    }
+    .bottombar-inner{
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .store-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .store{
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.08);
+      color:#fff;
       font-weight: 1000;
-      letter-spacing:-0.3px;
+      font-size: 12px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
     }
-    .section p{
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      line-height: 1.55;
+    .store.primary{
+      border:none;
+      background: var(--ai-gradient);
     }
-    .mini-grid{
-      margin-top: 12px;
+    .store.white{
+      background:#fff;
+      color:#000;
+      border:none;
+    }
+    .mini-sign{
+      font-size: 10px;
+      font-weight: 900;
+      opacity:.6;
+      white-space:nowrap;
+    }
+
+    /* MENU SHEET */
+    .sheet{
+      position:fixed; inset:0;
+      z-index:99999;
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      background: rgba(0,0,0,0.62);
+      backdrop-filter: blur(12px);
+      padding: 14px;
+    }
+    .sheet.show{ display:flex; }
+    .sheet-card{
+      width: min(520px, 98vw);
+      max-height: 82vh;
+      background: rgba(10,10,22,0.92);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 26px;
+      overflow:hidden;
+      box-shadow: 0 30px 120px rgba(0,0,0,0.65);
+      display:flex;
+      flex-direction:column;
+    }
+    .sheet-top{
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .sheet-top b{
+      font-weight: 1000;
+      letter-spacing: .2px;
+    }
+    .sheet-top button{
+      width: 42px; height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight: 1000;
+      cursor:pointer;
+    }
+    .sheet-body{
+      padding: 12px;
+      overflow:auto;
+      scrollbar-width:none;
+    }
+    .sheet-body::-webkit-scrollbar{ display:none; }
+
+    .sheet-grid{
       display:grid;
       grid-template-columns: 1fr;
       gap: 10px;
     }
-    .mini-card{
-      background: var(--card);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 18px;
+    .sheet-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
       padding: 12px;
-    }
-    .mini-card b{
-      display:block;
-      font-size: 13px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      text-decoration:none;
+      color:#fff;
       font-weight: 1000;
-      margin-bottom: 4px;
+      font-size: 13px;
     }
-    .mini-card span{
-      display:block;
+    .sheet-link span{
+      opacity:.7;
+      font-weight: 900;
       font-size: 12px;
-      color: rgba(255,255,255,0.72);
-      line-height: 1.45;
     }
 
-    .download{
-      margin-top: 26px;
-      padding: 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.04);
-      text-align:center;
-    }
-    .store-row{
+    .sheet-actions{
       margin-top: 12px;
       display:flex;
-      gap:10px;
-      justify-content:center;
+      gap: 10px;
       flex-wrap:wrap;
     }
+    .sheet-actions a{
+      flex: 1 1 auto;
+      min-width: 140px;
+    }
 
-    /* ✅ MOBİLDE DAHA AZ “boş” his: section araları sıkı */
+    /* small */
     @media (max-width: 520px){
-      .master-container{ padding-left: 10px; padding-right: 10px; }
-      .phone-wrapper{ width: 96vw; height: 70vh; }
-      .nav-links-scroll a{ font-size: 9px; padding: 7px 10px; }
-      .btn-pill{ font-size: 10px; padding: 9px 12px; }
+      .phone{ height: 74vh; width: 96vw; }
+      .store{ height: 42px; padding: 0 12px; font-size: 11px; }
+      .mini-sign{ display:none; }
     }
   </style>
 </head>
@@ -405,161 +509,200 @@
   <div class="nebula"></div>
   <div class="stars"></div>
 
-  <nav class="header-nav" id="headerNav">
-    <div class="nav-inner">
-      <div class="brand-box">
-        <h1>italky<span class="ai">AI</span></h1>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/pages/home_v2.html" aria-label="italkyAI">
+        <div class="brand-line">italky<span class="brand-ai">AI</span></div>
         <div class="brand-sub">BE FREE</div>
-      </div>
+      </a>
 
-      <div style="display:flex; gap:10px; align-items:center;">
-        <a class="btn-pill ghost" href="/pages/login.html">GİRİŞ</a>
-        <a class="btn-pill" href="#indir">İNDİR</a>
+      <div class="right-actions">
+        <div class="slogan">Dünya senin dilinde. <b>Tek dokunuş.</b></div>
+        <button class="iconbtn" id="menuBtn" type="button" aria-label="Menu">
+          <div class="hamburger" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+        </button>
       </div>
     </div>
+  </header>
 
-    <div class="nav-links-scroll">
-      <a href="#face">FaceToFace</a>
-      <a href="#acad">Academy</a>
-      <a href="#text">Metin</a>
-      <a href="#photo">Fotoğraf</a>
-      <a href="#doc">Belge</a>
-      <a href="#game">Oyun</a>
-      <a href="#chat">Sohbet AI</a>
-      <a href="#meet">Toplantı</a>
-    </div>
-  </nav>
+  <!-- CENTER -->
+  <div class="center">
+    <div class="phone" aria-label="italkyAI preview">
+      <div class="app-root">
 
-  <main class="master-container">
-    <section class="hero">
-      <h2>Sadece Çeviri Değil<br><span class="grad">Bir Akademi</span></h2>
-      <p>
-        italkyAI ile hem iletişim kur, hem öğren.
-        Konuşma, metin, fotoğraf, belge, oyun ve toplantı — tek ekosistem.
-      </p>
+        <header class="app-top">
+          <div class="app-brand">
+            <h1>italky<span class="ai">AI</span></h1>
+            <div class="sub">BE FREE</div>
+          </div>
+          <div class="app-user">
+            <span>Jeton: 328</span>
+            <div class="app-avatar"></div>
+          </div>
+        </header>
 
-      <div class="hero-cta">
-        <a class="btn-pill" href="/pages/login.html">SİSTEME GİRİŞ YAP</a>
-        <a class="btn-pill ghost" href="#moduller">MODÜLLERİ GÖR</a>
-      </div>
-
-      <!-- ✅ Telefon preview -->
-      <div class="phone-wrapper" id="face">
-        <div class="app-root">
-          <header class="app-top">
-            <div class="app-brand">
-              <h1>italky<span class="ai">AI</span></h1>
-              <div class="sub">BE FREE</div>
-            </div>
-            <div class="app-user">
-              <span>Jeton: 328</span>
-              <div class="app-avatar"></div>
-            </div>
-          </header>
-
-          <div class="app-scroll">
-            <div class="hub-orb-zone">
-              <div class="orb-ring">
-                <div class="orb-glow"></div>
-                <div class="orb-inner">
-                  <svg width="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                    <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
-                    <line x1="12" y1="19" x2="12" y2="23"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="app-title">
-                <h3>FaceToFace</h3>
-                <p>Yüzyüze Anlık Çeviri</p>
+        <div class="app-scroll">
+          <!-- FaceToFace -->
+          <div class="hub-orb-zone" data-go="/pages/module_facetoface.html">
+            <div class="orb-ring">
+              <div class="orb-glow"></div>
+              <div class="orb-inner">
+                <svg width="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                </svg>
               </div>
             </div>
-
-            <div class="academy-line" id="acad">
-              <div class="spectrum-dots">
-                <div class="s-dot" style="background:#ff0000; animation-delay:0.1s"></div>
-                <div class="s-dot" style="background:#ff7f00; animation-delay:0.3s"></div>
-                <div class="s-dot" style="background:#00ff00; animation-delay:0.5s"></div>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:1000;line-height:1">
-                  italky <span style="background:var(--ai-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Academy</span>
-                </div>
-                <div style="font-size:9px;font-weight:800;opacity:.55;margin-top:2px">YAPAY ZEKA İLE DİL EĞİTİMİ</div>
-              </div>
+            <div class="app-title">
+              <h3>FaceToFace</h3>
+              <p>Yüzyüze Anlık Çeviri</p>
             </div>
-
-            <div class="hub-grid" id="moduller">
-              <div class="grid-tile" id="text"><div class="tile-ico" style="color:#34d399">Aa</div><label>Metinden<br>Çeviri</label></div>
-              <div class="grid-tile" id="photo"><div class="tile-ico" style="color:#60a5fa">◎</div><label>Fotoğraftan<br>Çeviri</label></div>
-              <div class="grid-tile" id="doc"><div class="tile-ico" style="color:#f472b6">≡</div><label>Belgeden<br>Çeviri</label></div>
-              <div class="grid-tile" id="game"><div class="tile-ico">🎯</div><label>Eğlenerek<br>Öğren</label></div>
-              <div class="grid-tile" id="chat"><div class="tile-ico">💬</div><label>Sohbet <span style="background:var(--ai-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">AI</span></label></div>
-              <div class="grid-tile"><div class="tile-ico">🎓</div><label>Chat <span style="background:var(--ai-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">AI</span></label></div>
-            </div>
-
-            <div class="academy-line" id="meet" style="border-color: rgba(99,102,241,0.22);">
-              <div style="font-size:16px;">📹</div>
-              <div>
-                <div style="font-size:12px;font-weight:1000;line-height:1">Online Toplantı</div>
-                <div style="font-size:9px;font-weight:800;opacity:.55;margin-top:2px">CANLI ÇEVİRİ ODALARI</div>
-              </div>
-            </div>
-
-            <div style="height:8px"></div>
           </div>
 
-          <footer style="padding:10px; text-align:center; font-size:9px; opacity:0.35; border-top:1px solid rgba(255,255,255,0.05);">
-            italkyAI @ italkyAcademy By Ozyigit's
-          </footer>
+          <!-- Academy -->
+          <div class="academy-line" data-go="/pages/module_academy.html">
+            <div class="spectrum-dots" aria-hidden="true">
+              <div class="s-dot" style="background:#ff0000; animation-delay:0.1s"></div>
+              <div class="s-dot" style="background:#ff7f00; animation-delay:0.3s"></div>
+              <div class="s-dot" style="background:#00ff00; animation-delay:0.5s"></div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:1000;line-height:1">
+                italky <span style="background:var(--ai-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Academy</span>
+              </div>
+              <div style="font-size:9px;font-weight:800;opacity:.55;margin-top:2px">YAPAY ZEKA İLE DİL EĞİTİMİ</div>
+            </div>
+          </div>
+
+          <!-- Tiles (modules) -->
+          <div class="hub-grid">
+            <a class="tile" href="/pages/module_text.html">
+              <div class="tile-ico" style="color:#34d399">Aa</div>
+              <label>Metinden<br>Çeviri</label>
+            </a>
+
+            <a class="tile" href="/pages/module_photo.html">
+              <div class="tile-ico" style="color:#60a5fa">◎</div>
+              <label>Fotoğraftan<br>Çeviri</label>
+            </a>
+
+            <a class="tile" href="/pages/module_document.html">
+              <div class="tile-ico" style="color:#f472b6">≡</div>
+              <label>Belgeden<br>Çeviri</label>
+            </a>
+
+            <a class="tile" href="/pages/module_games.html">
+              <div class="tile-ico">🎯</div>
+              <label>Eğlenerek<br>Öğren</label>
+            </a>
+
+            <a class="tile" href="/pages/module_chat.html">
+              <div class="tile-ico">💬</div>
+              <label>Sohbet <span style="background:var(--ai-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">AI</span></label>
+            </a>
+
+            <a class="tile" href="/pages/module_speaking.html">
+              <div class="tile-ico">🎓</div>
+              <label>Konuşkan <span style="background:var(--ai-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">AI</span></label>
+            </a>
+          </div>
+
+          <!-- Meeting -->
+          <div class="meet-line" data-go="/pages/module_meeting.html">
+            <div style="font-size:16px;">📹</div>
+            <div>
+              <div style="font-size:12px;font-weight:1000;line-height:1">Online Toplantı</div>
+              <div style="font-size:9px;font-weight:800;opacity:.55;margin-top:2px">CANLI ÇEVİRİ ODALARI</div>
+            </div>
+          </div>
+
+          <div style="height:6px"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <footer class="bottombar">
+    <div class="bottombar-inner">
+      <div class="store-row">
+        <a class="store white" href="#" id="appStoreBtn">APP STORE</a>
+        <a class="store primary" href="#" id="playStoreBtn">PLAY STORE</a>
+      </div>
+      <div class="mini-sign">italkyAI • BE FREE • 2026</div>
+    </div>
+  </footer>
+
+  <!-- MENU SHEET -->
+  <div class="sheet" id="menuSheet" aria-hidden="true">
+    <div class="sheet-card">
+      <div class="sheet-top">
+        <b>Menü</b>
+        <button id="menuClose" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="sheet-body">
+        <div class="sheet-grid">
+          <a class="sheet-link" href="/pages/module_facetoface.html">FaceToFace <span>anlık konuşma</span></a>
+          <a class="sheet-link" href="/pages/module_academy.html">italky Academy <span>AI ders</span></a>
+          <a class="sheet-link" href="/pages/module_text.html">Metinden Çeviri <span>yazı</span></a>
+          <a class="sheet-link" href="/pages/module_photo.html">Fotoğraftan Çeviri <span>kamera</span></a>
+          <a class="sheet-link" href="/pages/module_document.html">Belgeden Çeviri <span>PDF</span></a>
+          <a class="sheet-link" href="/pages/module_games.html">Eğlenerek Öğren <span>oyun</span></a>
+          <a class="sheet-link" href="/pages/module_chat.html">Sohbet AI <span>pratik</span></a>
+          <a class="sheet-link" href="/pages/module_speaking.html">Konuşkan AI <span>akıcı konuş</span></a>
+          <a class="sheet-link" href="/pages/module_meeting.html">Online Toplantı <span>çok dilli</span></a>
+          <a class="sheet-link" href="/pages/login.html">Giriş <span>uygulama</span></a>
+        </div>
+
+        <div class="sheet-actions">
+          <a class="store white" href="#" id="appStoreBtn2">APP STORE</a>
+          <a class="store primary" href="#" id="playStoreBtn2">PLAY STORE</a>
         </div>
       </div>
-    </section>
-
-    <section class="section" id="modul-aciklama">
-      <h3>Uygulama ile ne kazanırsın?</h3>
-      <p>
-        italkyAI, “dil bilmek zorunda değilsin” rahatlığı verir. İster seyahatte, ister işte, ister öğrenirken…
-        aynı ekosistemde ilerlersin.
-      </p>
-
-      <div class="mini-grid">
-        <div class="mini-card"><b>FaceToFace</b><span>İki kişi farklı dil konuşur. Uygulama çevirir + seslendirir. Göz teması bozulmaz, iletişim akar.</span></div>
-        <div class="mini-card"><b>italky Academy</b><span>Seviyeni görür, kısa AI derslerle pratik yaptırır. “Bugün 10 dakika” bile olsa ilerleme sağlar.</span></div>
-        <div class="mini-card"><b>Online Toplantı</b><span>2 kişi de olur 20 kişi de. Herkes kendi dilinde konuşur; herkes aynı toplantıyı anlar.</span></div>
-        <div class="mini-card"><b>Metin / Fotoğraf / Belge</b><span>Mesaj, menü, PDF… “anlamadan geçme” dönemini bitirir. Hızlı, okunur, net.</span></div>
-        <div class="mini-card"><b>Oyunlar</b><span>Kelimeyi ezberletmez; tekrar ettirir. Eğlenerek öğrenme için “bağımlılık” mekanizması.</span></div>
-        <div class="mini-card"><b>Sohbet AI</b><span>Pratik ortağın gibi. Günlük konuşma, dertleşme, rol-play, özgüven. Yargı yok.</span></div>
-      </div>
-    </section>
-
-    <section class="download" id="indir">
-      <h3 style="margin:0;font-size:18px;font-weight:1000;">Özgürlüğü indir</h3>
-      <p style="margin:8px 0 0;color:var(--muted);font-size:13px;font-weight:700;">
-        Android ve iOS’ta aynı deneyim. Mağaza linklerini sen bağlayacaksın.
-      </p>
-      <div class="store-row">
-        <a href="#" class="btn-pill" style="background:#fff;color:#000;">APP STORE</a>
-        <a href="#" class="btn-pill">PLAY STORE</a>
-      </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
   <script>
-    // header yüksekliğini ölç -> içerik üstten doğru başlasın
-    (function(){
-      const header = document.getElementById("headerNav");
-      if(!header) return;
+    // ✅ menu open/close
+    const menuBtn = document.getElementById("menuBtn");
+    const sheet = document.getElementById("menuSheet");
+    const closeBtn = document.getElementById("menuClose");
 
-      const apply = ()=>{
-        const h = header.getBoundingClientRect().height || 120;
-        document.documentElement.style.setProperty("--headerH", Math.ceil(h) + "px");
-      };
+    function openMenu(){ sheet.classList.add("show"); sheet.setAttribute("aria-hidden","false"); }
+    function closeMenu(){ sheet.classList.remove("show"); sheet.setAttribute("aria-hidden","true"); }
 
-      apply();
-      window.addEventListener("resize", apply);
-      window.addEventListener("orientationchange", apply);
-    })();
+    menuBtn?.addEventListener("click", openMenu);
+    closeBtn?.addEventListener("click", closeMenu);
+    sheet?.addEventListener("click", (e)=>{ if(e.target === sheet) closeMenu(); });
+
+    // ✅ phone blocks navigation (div)
+    document.querySelectorAll("[data-go]").forEach(el=>{
+      const url = el.getAttribute("data-go");
+      const go = (e)=>{ e.preventDefault(); e.stopPropagation(); if(url) location.href = url; };
+      el.addEventListener("click", go);
+      el.addEventListener("touchend", go, { passive:false });
+    });
+
+    // ✅ Store links placeholders (sen mağaza linklerini buraya bağlayacaksın)
+    function bindStore(id, url){
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.addEventListener("click", (e)=>{
+        if(!url || url === "#"){ e.preventDefault(); return; }
+        e.preventDefault();
+        location.href = url;
+      });
+    }
+    bindStore("appStoreBtn", "#");
+    bindStore("playStoreBtn", "#");
+    bindStore("appStoreBtn2", "#");
+    bindStore("playStoreBtn2", "#");
   </script>
 </body>
 </html>
