@@ -9,21 +9,106 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/pages/site_2050.css?v=2050_1">
   <style>
-    /* Banner dots */
-    #bannerDots{ display:flex; gap:8px; padding: 0 14px 14px; }
-    #bannerDots .bdot{
-      width:8px; height:8px; border-radius:99px;
-      background: rgba(255,255,255,0.25);
+    /* banner rail */
+    .banner-rail{
+      position:relative;
+      height: 290px;
+      border-radius: 26px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 22px 70px rgba(0,0,0,0.35);
+      background: rgba(0,0,0,0.25);
+      cursor: grab;
+      user-select:none;
+    }
+    .banner-rail:active{ cursor:grabbing; }
+    .banner-slide{
+      position:absolute; inset:0;
+      opacity:0;
+      transform: scale(1.02);
+      transition: opacity .55s ease, transform .75s ease;
+    }
+    .banner-slide.active{
+      opacity:1;
+      transform: scale(1);
+    }
+    .banner-slide img{
+      width:100%; height:100%;
+      object-fit:cover;
+      filter: saturate(1.05) contrast(1.04);
+    }
+    .banner-cap{
+      position:absolute;
+      left:14px; right:14px; bottom:12px;
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .banner-cap b{
+      font-weight:1000;
+      font-size: 13px;
+      letter-spacing: -0.2px;
+    }
+    .banner-cap span{
+      display:block;
+      margin-top:4px;
+      font-weight:800;
+      font-size: 12px;
+      color: rgba(255,255,255,0.72);
+      line-height:1.35;
+      max-width: 520px;
+    }
+    .banner-dots{
+      position:absolute;
+      left:50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      display:flex;
+      gap:8px;
+      z-index: 3;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      backdrop-filter: blur(10px);
+    }
+    .dot{
+      width: 9px; height: 9px;
+      border-radius: 99px;
       border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.18);
       cursor:pointer;
+      padding:0;
     }
-    #bannerDots .bdot.on{
-      background: rgba(165,180,252,0.95);
-      box-shadow: 0 0 18px rgba(99,102,241,0.45);
-      border-color: rgba(99,102,241,0.55);
+    .dot.on{
+      border-color: rgba(165,180,252,0.75);
+      background: rgba(99,102,241,0.75);
+      box-shadow: 0 0 18px rgba(99,102,241,0.35);
     }
-    .hero-banner{ background: #000; }
-    .hero-banner img{ width:100%; height: 290px; object-fit:cover; display:block; }
+
+    /* pro icon tint */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
+    }
+    .icon{
+      position:relative;
+      overflow:hidden;
+    }
+    .icon::after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.20), transparent 55%);
+      transform: rotate(18deg);
+      opacity:.35;
+      pointer-events:none;
+    }
+    .card:hover .icon::after{ opacity:.55; }
   </style>
 </head>
 
@@ -61,7 +146,6 @@
 
     <main class="page">
 
-      <!-- HERO -->
       <section class="hero section" style="border-top:none;">
         <div class="hero-grid">
 
@@ -79,7 +163,7 @@
             <div class="hero-cta">
               <a class="btn primary" href="#modules">Modüller</a>
               <a class="btn secondary" href="#scenarios">Gerçek Senaryolar</a>
-              <a class="btn ghost" href="#rules">Kurallar & Netlik</a>
+              <a class="btn ghost" href="/pages/module_pricing.html">Kurallar & Netlik</a>
             </div>
 
             <p class="sub" style="margin-top:12px;">
@@ -90,35 +174,86 @@
 
           <div class="hero-card">
             <div class="cap">
-              <div class="pill"><b>FaceToFace</b> • Anlık konuşma çevirisi</div>
-              <div class="pill"><b>Academy</b> • Seviye + kısa AI ders</div>
-              <div class="pill"><b>Meeting</b> • 20 kişi, 20 dil, tek oda</div>
-              <div class="pill"><b>Offline</b> • İnternet yoksa da devam</div>
+              <div class="pill"><b>FaceToFace</b> • Konuşma çevirisi</div>
+              <div class="pill"><b>Academy</b> • Seviye + kısa ders</div>
+              <div class="pill"><b>Meeting</b> • 20 kişi, 20 dil</div>
+              <div class="pill"><b>Offline</b> • İnternet yoksa da</div>
             </div>
 
-            <!-- ✅ AUTO + SWIPE BANNER -->
-            <div class="hero-banner" id="bannerRail">
-              <img id="heroBannerImg"
-                   src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1800&q=80"
-                   alt="italkyAI banner">
+            <!-- ✅ AUTO BANNER SLIDER -->
+            <div class="banner-rail" id="bannerRail" aria-label="italkyAI banners">
+              <div class="banner-slide active">
+                <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=80" alt="FaceToFace">
+                <div class="banner-cap">
+                  <div>
+                    <b>FaceToFace • Masaya koy, konuş</b>
+                    <span>İki kişi iki dil: italkyAI çevirir ve otomatik seslendirir.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1520975693411-b4a5d5b56925?auto=format&fit=crop&w=1600&q=80" alt="Cafe translation">
+                <div class="banner-cap"><div><b>Kafe / Restoran</b><span>Menüyü çevir, siparişi doğru ver. Turist gibi değil, yerli gibi.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80" alt="Meeting">
+                <div class="banner-cap"><div><b>Online Toplantı</b><span>2 kişi de olur 20 kişi de: herkes kendi dilinde konuşur, herkes anlar.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80" alt="Academy">
+                <div class="banner-cap"><div><b>italky Academy</b><span>Seviye tespit + kısa AI ders: hedefe odaklı gelişim.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1600&q=80" alt="Photo translate">
+                <div class="banner-cap"><div><b>Fotoğraftan Çeviri</b><span>Menü, tabela, kitap… çek ve kendi dilinde oku.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1600&q=80" alt="Document translate">
+                <div class="banner-cap"><div><b>Belgeden Çeviri</b><span>PDF ve dosyalarda “anlamadan imzalama” biter.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1516589091380-5d8e87df6999?auto=format&fit=crop&w=1600&q=80" alt="Chat AI">
+                <div class="banner-cap"><div><b>Sohbet AI</b><span>Pratik, dertleşme, günlük konuşma: çekinmeden konuş.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1600&q=80" alt="Speaking AI">
+                <div class="banner-cap"><div><b>Konuşkan AI</b><span>Akıcılık simülasyonu: konuşma kasını güçlendir.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80" alt="Business">
+                <div class="banner-cap"><div><b>İş Dünyası</b><span>Mail, mesaj, toplantı: dil bariyeri artık iş bariyeri değil.</span></div></div>
+              </div>
+
+              <div class="banner-slide">
+                <img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1600&q=80" alt="Offline">
+                <div class="banner-cap"><div><b>Offline</b><span>İnternet yoksa da devam: FaceToFace + Metin çeviri.</span></div></div>
+              </div>
+
+              <div class="banner-dots" id="bannerDots"></div>
             </div>
-            <div id="bannerDots"></div>
+
           </div>
-
         </div>
       </section>
 
-      <!-- MODULES -->
       <section class="section" id="modules">
         <h2 class="h2">Uygulamada neler var?</h2>
         <p class="sub">
-          Her modül ayrı sayfaya gider ve “ne işe yarar / kim için / nasıl çalışır / kurallar” net anlatılır.
+          Her modül ayrı sayfaya gider ve “ne işe yarar / kim için / nasıl çalışır / en önemli kurallar” net anlatılır.
           Aşağıdaki kartlara tıklayın.
         </p>
 
         <div class="cards">
           <a class="card" href="/pages/module_facetoface.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(14,165,233,.22), rgba(99,102,241,.14)); box-shadow:0 0 24px rgba(14,165,233,.18);">
+            <div class="icon" style="background:rgba(14,165,233,.18)">
               <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             </div>
             <h3>FaceToFace AI</h3>
@@ -127,7 +262,7 @@
           </a>
 
           <a class="card" href="/pages/module_academy.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(99,102,241,.24), rgba(236,72,153,.12)); box-shadow:0 0 24px rgba(99,102,241,.20);">
+            <div class="icon" style="background:rgba(99,102,241,.20)">
               <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14"/><path d="M22 3h-6a4 4 0 0 0-4 4v14"/></svg>
             </div>
             <h3>italky Academy</h3>
@@ -136,7 +271,7 @@
           </a>
 
           <a class="card" href="/pages/module_meeting.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(236,72,153,.22), rgba(14,165,233,.10)); box-shadow:0 0 24px rgba(236,72,153,.18);">
+            <div class="icon" style="background:rgba(236,72,153,.18)">
               <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
             </div>
             <h3>Online Toplantı</h3>
@@ -145,7 +280,7 @@
           </a>
 
           <a class="card" href="/pages/module_text.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(34,197,94,.22), rgba(14,165,233,.10)); box-shadow:0 0 24px rgba(34,197,94,.16);">
+            <div class="icon" style="background:rgba(34,197,94,.18)">
               <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
             </div>
             <h3>Metinden Çeviri</h3>
@@ -154,25 +289,25 @@
           </a>
 
           <a class="card" href="/pages/module_photo.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(14,165,233,.22), rgba(236,72,153,.10)); box-shadow:0 0 24px rgba(14,165,233,.16);">
+            <div class="icon" style="background:rgba(14,165,233,.18)">
               <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </div>
             <h3>Fotoğraftan Çeviri</h3>
             <p>Menü, tabela, kitap… Fotoğraf çek, kendi dilinde oku.</p>
-            <span class="tag">Seyahat kurtarıcı</span>
+            <span class="tag">Seyahat</span>
           </a>
 
           <a class="card" href="/pages/module_document.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(99,102,241,.24), rgba(255,255,255,.06)); box-shadow:0 0 24px rgba(99,102,241,.16);">
+            <div class="icon" style="background:rgba(99,102,241,.20)">
               <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             </div>
             <h3>Belgeden Çeviri</h3>
-            <p>PDF/dosya. Anlamadan imzalama yok. Profesyonel okuma deneyimi.</p>
+            <p>PDF/dosya. Anlamadan imzalama yok. Profesyonel okuma.</p>
             <span class="tag">Resmi işler</span>
           </a>
 
           <a class="card" href="/pages/module_chat.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(34,197,94,.20), rgba(99,102,241,.10)); box-shadow:0 0 24px rgba(34,197,94,.14);">
+            <div class="icon" style="background:rgba(236,72,153,.18)">
               <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>
             </div>
             <h3>Sohbet AI</h3>
@@ -181,16 +316,16 @@
           </a>
 
           <a class="card" href="/pages/module_speaking.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(236,72,153,.22), rgba(99,102,241,.10)); box-shadow:0 0 24px rgba(236,72,153,.14);">
+            <div class="icon" style="background:rgba(34,197,94,.18)">
               <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
             </div>
             <h3>Konuşkan AI</h3>
             <p>Akıcı konuşma simülasyonu. Telaffuz + ritim + özgüven.</p>
-            <span class="tag">Konuşma gücü</span>
+            <span class="tag">Akıcılık</span>
           </a>
 
           <a class="card" href="/pages/module_games.html">
-            <div class="icon" style="background:linear-gradient(135deg, rgba(14,165,233,.22), rgba(34,197,94,.10)); box-shadow:0 0 24px rgba(14,165,233,.14);">
+            <div class="icon" style="background:rgba(14,165,233,.18)">
               <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4M8 10v4"/></svg>
             </div>
             <h3>Eğlenerek Öğren</h3>
@@ -200,63 +335,36 @@
         </div>
       </section>
 
-      <!-- SCENARIOS -->
       <section class="section" id="scenarios">
         <h2 class="h2">Gerçek hayat senaryoları</h2>
         <p class="sub">
-          “Ben bunu nerede kullanacağım?” sorusunun cevabı: her yerde.
-          italkyAI, iletişimin en kritik anlarında yanındadır.
+          “Ben bunu nerede kullanacağım?” sorusunun cevabı burada.
         </p>
 
         <div class="cards">
           <div class="card" style="grid-column:span 6;">
-            <div class="icon" style="background:rgba(236,72,153,.16)"><svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M12 3v18"/></svg></div>
+            <div class="icon" style="background:rgba(236,72,153,.18)"><svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M12 3v18"/></svg></div>
             <h3>Kafe / Restoran</h3>
             <p>Garsonla konuş, menüyü çevir, siparişi doğru ver.</p>
             <span class="tag">FaceToFace + Fotoğraf</span>
           </div>
 
           <div class="card" style="grid-column:span 6;">
-            <div class="icon" style="background:rgba(99,102,241,.18)"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h6"/></svg></div>
+            <div class="icon" style="background:rgba(99,102,241,.20)"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h6"/></svg></div>
             <h3>İş / Toplantı</h3>
-            <p>20 farklı dil konuşulan tek toplantı… herkes anlar.</p>
+            <p>20 farklı dil konuşulan tek toplantı… italkyAI ile herkes aynı masada.</p>
             <span class="tag">Online Meeting</span>
           </div>
         </div>
       </section>
 
-      <!-- RULES -->
-      <section class="section" id="rules">
-        <h2 class="h2">Kurallar & Netlik</h2>
-        <p class="sub">
-          Gizli ücret yok. Abonelik yok. Deneyim net: modülü açarsın, işini yaparsın, kapatırsın.
-        </p>
-
-        <div class="cards">
-          <div class="card" style="grid-column:span 6;">
-            <div class="icon" style="background:rgba(255,255,255,.08)"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
-            <h3>Şeffaf kullanım</h3>
-            <p>Ne alıyorsan o. BE FREE bir prensip.</p>
-            <span class="tag">Güven</span>
-          </div>
-          <div class="card" style="grid-column:span 6;">
-            <div class="icon" style="background:rgba(255,255,255,.08)"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
-            <h3>Tek ekosistem</h3>
-            <p>Çeviri, öğrenme, toplantı… tek uygulama.</p>
-            <span class="tag">Tutarlılık</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- DOWNLOAD -->
       <section class="section" id="download">
         <h2 class="h2">Uygulamayı indir</h2>
-        <p class="sub">Buton linklerini sen ekleyeceksin. Tasarım hazır.</p>
-
+        <p class="sub">Play Store / App Store linklerini sen bağlayacaksın. Her sayfada hazır durur.</p>
         <div class="hero-cta" style="margin-top:14px;">
           <a class="btn primary" href="#">Google Play</a>
           <a class="btn ghost" href="#">App Store</a>
-          <a class="btn" href="/pages/module_about.html">Hakkımızda</a>
+          <a class="btn" href="/pages/module_about.html">Uygulama Hakkında</a>
         </div>
       </section>
 
@@ -276,7 +384,6 @@
 
   </div>
 
-  <!-- Language sheet -->
   <div class="sheet" id="langSheet" aria-hidden="true">
     <div class="sheet-card">
       <div class="sheet-top">
@@ -290,8 +397,11 @@
 
   <script type="module">
     import { detectSiteLang, setSiteLang, mountLangPicker } from "/js/site_lang.js";
+    import { mountBannerCarousel } from "/js/site_banner.js";
+
     const picked = await detectSiteLang();
     setSiteLang(picked);
+
     mountLangPicker({
       btnId:"langBtn",
       sheetId:"langSheet",
@@ -300,8 +410,8 @@
       closeId:"langSheetClose",
       labelId:"langLabel"
     });
-  </script>
 
-  <script src="/js/site_banner.js?v=1"></script>
+    mountBannerCarousel({ rootId:"bannerRail", dotsId:"bannerDots", intervalMs: 5200 });
+  </script>
 </body>
 </html>
