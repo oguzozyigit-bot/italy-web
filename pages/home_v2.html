@@ -20,7 +20,6 @@
       font-family: 'Outfit', sans-serif; overflow-x: hidden;
     }
 
-    /* 📱 MOBİL UYUMLU NEBULA ARKA PLAN */
     .nebula-bg {
       position: fixed; inset: 0; z-index: -1;
       background: 
@@ -43,7 +42,6 @@
     .brand-line span { color: #6366f1; }
     .brand-slogan { font-size: 8px; font-weight: 900; letter-spacing: 3px; opacity: 0.6; }
 
-    /* İkonların Üst Bar Listesi */
     .nav-icons-bar { 
       display: flex; gap: 15px; margin-top: 10px; overflow-x: auto; 
       width: 100%; padding: 5px 0; scrollbar-width: none;
@@ -54,7 +52,6 @@
       text-decoration: none; white-space: nowrap; text-transform: uppercase;
     }
 
-    /* 🚀 HERO SECTION (Mobile Optimized) */
     section {
       min-height: 100vh; display: flex; flex-direction: column; align-items: center;
       padding: 140px 20px 60px; text-align: center; gap: 40px;
@@ -64,14 +61,13 @@
     .grad-text { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .hero-text p { font-size: 16px; opacity: 0.7; margin: 20px auto; max-width: 500px; line-height: 1.5; }
 
-    /* 📱 TELEFON VİTRİNİ (Birebir Uygulama Arayüzü) */
+    /* 📱 TELEFON VİTRİNİ */
     .phone-mockup {
-      width: 320px; height: 650px; background: #000; border-radius: 40px;
-      border: 8px solid #1a1a1a; position: relative; overflow: hidden;
+      width: 330px; height: 680px; background: #000; border-radius: 45px;
+      border: 9px solid #1a1a1a; position: relative; overflow: hidden;
       box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 20px rgba(99, 102, 241, 0.3);
     }
 
-    /* Uygulama İçeriği (Senin Kodun) */
     .app-viewport { height: 100%; display: flex; flex-direction: column; background: #02000f; }
     
     .app-header {
@@ -82,28 +78,41 @@
     .app-header .ai { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .user-meta { display: flex; align-items: center; gap: 8px; text-align: right; }
     .user-meta span { font-size: 10px; font-weight: 900; color: #a5b4fc; }
-    .app-avatar { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #6366f1; background: url('https://i.pravatar.cc/100?img=32') center/cover; }
+    .app-avatar { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #6366f1; background: url('https://i.pravatar.cc/100?img=32') center/cover; }
 
-    /* Uygulama Hub İçeriği */
-    .app-main { flex: 1; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-    .neural-orb { width: 100px; height: 100px; margin: 10px auto; position: relative; display: flex; align-items: center; justify-content: center; }
-    .ai-ring { position: absolute; inset: -3px; border-radius: 50%; border: 2px solid transparent; background: var(--ai-gradient) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); mask-composite: exclude; animation: rot 15s linear infinite; }
+    .app-main { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; scrollbar-width: none; }
+    .app-main::-webkit-scrollbar { display: none; }
+
+    /* 🧠 FaceToFace Portal */
+    .neural-orb { width: 110px; height: 110px; margin: 5px auto; position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .ai-ring { position: absolute; inset: -4px; border-radius: 50%; border: 2.5px solid transparent; background: var(--ai-gradient) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); mask-composite: exclude; animation: rot 15s linear infinite; }
     @keyframes rot { from {transform:rotate(0deg)} to {transform:rotate(360deg)} }
-    .ai-core { width: 75px; height: 75px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); border: 1px solid rgba(255,255,255,0.1); }
-    
-    .academy-bar { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 12px; border: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-    .bar-group { display: flex; gap: 2.5px; align-items: flex-end; height: 20px; }
-    .b-bar { width: 3px; border-radius: 4px; background: #6366f1; animation: h 1s infinite alternate; }
-    @keyframes h { from {height: 5px} to {height: 20px} }
+    .ai-core { width: 85px; height: 85px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); border: 2px solid transparent; background-image: linear-gradient(#000,#000), var(--ai-gradient); background-origin: border-box; background-clip: content-box, border-box; animation: b 4s infinite ease-in-out; }
+    @keyframes b { 0%, 100% {transform: scale(1)} 50% {transform: scale(1.05)} }
 
-    .pro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .pro-tile { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 18px; padding: 12px; font-size: 10px; font-weight: 800; text-align: center; }
+    /* 🎓 Academy Bar */
+    .academy-bar { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 12px 18px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; cursor: pointer; }
+    .bar-group { display: flex; gap: 3px; align-items: flex-end; height: 20px; }
+    .b-bar { width: 3.5px; border-radius: 10px; background: #6366f1; animation: h 1.2s infinite ease-in-out; }
+    @keyframes h { 0%, 100% {height: 6px} 50% {height: 20px} }
 
-    /* 🛠 NAV TOOLS */
+    /* 🛠 Grid Layout (Tüm İkonlar) */
+    .pro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pro-tile { 
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
+      border-radius: 20px; padding: 12px; display: flex; align-items: center; gap: 10px; 
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .pro-tile:active { transform: scale(0.96); }
+    .t-ico { width: 35px; height: 35px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; }
+    .pro-tile label { font-size: 11px; font-weight: 800; color: #fff; line-height: 1.2; text-align: left; }
+
+    /* 📹 Meeting Bar */
+    .meeting-bar { background: rgba(255,255,255,0.05); border-radius: 24px; padding: 14px 20px; border: 1px solid rgba(99,102,241,0.3); display: flex; align-items: center; gap: 15px; cursor: pointer; }
+
     .nav-tools { position: fixed; right: 15px; bottom: 30px; display: flex; flex-direction: column; gap: 10px; z-index: 3000; }
     .tool-btn { width: 45px; height: 45px; border-radius: 50%; background: #fff; color: #000; border: none; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
 
-    /* 📥 DOWNLOAD CTA */
     .btn-mega { padding: 18px 40px; border-radius: 100px; background: var(--ai-gradient); color: #fff; font-weight: 900; text-decoration: none; display: inline-block; box-shadow: 0 10px 30px rgba(99,102,241,0.4); }
   </style>
 </head>
@@ -124,8 +133,10 @@
       <a href="#academy">Academy</a>
       <a href="#text">Metinden Çeviri</a>
       <a href="#photo">Fotoğraftan Çeviri</a>
-      <a href="#meeting">Online Toplantı</a>
+      <a href="#document">Belgeden Çeviri</a>
+      <a href="#games">Oyunlarla Öğren</a>
       <a href="#chat">Sohbet AI</a>
+      <a href="#meeting">Online Toplantı</a>
     </div>
   </nav>
 
@@ -137,46 +148,67 @@
   <main>
     <section id="hub-showcase">
       <div class="hero-text">
-        <h1>CEBİNDEKİ<br><span class="grad-text">GLOBAL AKADEMİ</span></h1>
+        <h1>SADECE ÇEVİRİ DEĞİL<br><span class="grad-text">BİR AKADEMİ</span></h1>
         <p>italkyAI; anlık iletişim kuran FaceToFace teknolojisi ve seni geliştiren AI Akademi'yi tek merkezde birleştirir. Sadece çeviri değil, gerçek bir özgürlük.</p>
-        <a href="#download" class="btn-mega">HEMEN DENEYİMLE</a>
+        <a href="#download" class="btn-mega">HEMEN ÜCRETSİZ BAŞLA</a>
       </div>
 
       <div class="phone-mockup">
         <div class="app-viewport">
-          <div class="app-header">
+          <header class="app-header">
             <div class="brand"><h1>italky<span class="ai">AI</span></h1><div style="font-size:6px; font-weight:900; letter-spacing:1px; opacity:0.5;">BE FREE</div></div>
             <div class="user-meta">
               <div><span>Jeton: 328</span></div>
               <div class="app-avatar"></div>
             </div>
-          </div>
-          <div class="app-main">
-            <div class="neural-orb" onclick="window.location.href='#facetoface'">
-              <div class="ai-ring"></div>
-              <div class="ai-core">
-                <svg width="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          </header>
+
+          <main class="app-main">
+            <div class="portal-zone" style="display:flex; flex-direction:column; align-items:center;" onclick="window.location.href='#facetoface'">
+              <div class="neural-orb">
+                <div class="ai-ring"></div>
+                <div class="ai-core">
+                  <svg width="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+                </div>
+              </div>
+              <div style="text-align:center; margin-top:8px;">
+                <h3 style="margin:0; font-size:20px; font-weight:900;">FaceToFace</h3>
+                <p style="margin:0; font-size:9px; font-weight:800; opacity:0.5;">Yüzyüze Anlık Çeviri</p>
               </div>
             </div>
-            <div style="text-align:center; font-weight:900; font-size:18px;">FaceToFace</div>
 
-            <div class="academy-bar">
+            <div class="academy-bar" onclick="window.location.href='#academy'">
               <div class="bar-group">
                 <div class="b-bar" style="background:#ff0000; animation-delay:0.1s"></div>
-                <div class="b-bar" style="background:#00ff00; animation-delay:0.3s"></div>
-                <div class="b-bar" style="background:#0000ff; animation-delay:0.5s"></div>
+                <div class="b-bar" style="background:#ff7f00; animation-delay:0.3s"></div>
+                <div class="b-bar" style="background:#ffff00; animation-delay:0.5s"></div>
+                <div class="b-bar" style="background:#00ff00; animation-delay:0.7s"></div>
               </div>
-              <div style="font-weight:900; font-size:14px;">italky Academy<br><span style="font-size:8px; opacity:0.5;">YAPAY ZEKA İLE DİL EĞİTİMİ</span></div>
+              <div style="text-align:left;">
+                <h4 style="margin:0; font-size:16px; font-weight:900;">italky <span class="grad-text">Academy</span></h4>
+                <p style="margin:0; font-size:9px; font-weight:800; opacity:0.4;">YAPAY ZEKA İLE DİL EĞİTİMİ</p>
+              </div>
             </div>
 
             <div class="pro-grid">
-              <div class="pro-tile">Metinden Çeviri</div>
-              <div class="pro-tile">Fotoğraftan Çeviri</div>
-              <div class="pro-tile">Sohbet AI</div>
-              <div class="pro-tile">Eğlenerek Öğren</div>
+              <div class="pro-tile" onclick="window.location.href='#text'"><div class="t-ico" style="color:#34d399">Aa</div><label>Metinden<br>Çeviri</label></div>
+              <div class="pro-tile" onclick="window.location.href='#photo'"><div class="t-ico" style="color:#60a5fa">◎</div><label>Fotoğraftan<br>Çeviri</label></div>
+              <div class="pro-tile" onclick="window.location.href='#document'"><div class="t-ico" style="color:#f472b6">≡</div><label>Belgeden<br>Çeviri</label></div>
+              <div class="pro-tile" onclick="window.location.href='#games'"><div class="t-ico">🎯</div><label>Eğlenerek<br>Öğren</label></div>
+              <div class="pro-tile" onclick="window.location.href='#chat'"><div class="t-ico">💬</div><label>Sohbet <span class="grad-text">AI</span></label></div>
+              <div class="pro-tile" onclick="window.location.href='#chat'"><div class="t-ico">🎓</div><label>Chat <span class="grad-text">AI</span></label></div>
             </div>
-          </div>
-          <div style="padding:10px; text-align:center; font-size:8px; font-weight:900; border-top:1px solid var(--border);">italkyAI @ italkyAcedemia By Ozyigit's</div>
+
+            <div class="meeting-bar" onclick="window.location.href='#meeting'">
+              <div style="font-size:20px;">📹</div>
+              <div style="text-align:left;">
+                <h4 style="margin:0; font-size:15px; font-weight:900;">Online Toplantı</h4>
+                <p style="margin:0; font-size:9px; font-weight:800; opacity:0.4;">CANLI ÇEVİRİ ODALARI</p>
+              </div>
+            </div>
+          </main>
+          
+          <footer style="padding:12px; text-align:center; font-size:9px; font-weight:900; border-top:1px solid var(--border); opacity:0.4;">italkyAI @ italkyAcedemia By Ozyigit's</footer>
         </div>
       </div>
     </section>
