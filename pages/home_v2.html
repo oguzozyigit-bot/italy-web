@@ -3,139 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>italkyAI | Be Free. Speak All.</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <title>italkyAI | Sınırları Kaldır, Dünyayı Konuş</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #05050a;
-            --card-bg: rgba(15, 15, 35, 0.7);
-            --accent: #8b5cf6;
-            --accent-pink: #d946ef;
+            --bg: #020205;
+            --primary: #8b5cf6;
+            --secondary: #d946ef;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
             --text: #ffffff;
-            --neon-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Outfit', sans-serif; 
-            background-color: var(--bg); 
+            background: var(--bg); 
             color: var(--text); 
+            line-height: 1.6;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #1a1a3a 0%, #05050a 100%);
         }
 
-        /* --- NAVIGATION --- */
+        /* --- ŞIK NAVİGASYON --- */
         header {
-            position: fixed; top: 0; width: 100%; padding: 25px 5%;
+            position: fixed; top: 0; width: 100%; height: 80px;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 1000; backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0 8%; z-index: 1000;
+            backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
         }
-        .logo { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
-        .logo span { background: linear-gradient(90deg, var(--accent), var(--accent-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .jeton-pill { background: linear-gradient(90deg, #6366f1, #a855f7); padding: 8px 20px; border-radius: 50px; font-weight: 600; font-size: 14px; box-shadow: var(--neon-shadow); }
+        .logo { font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+        .logo span { background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 25px; font-size: 14px; font-weight: 600; opacity: 0.7; }
 
-        /* --- HERO SECTION --- */
+        /* --- HERO: VİZYON --- */
         .hero {
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 10%;
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; background: radial-gradient(circle at center, #1e1b4b 0%, #020205 80%);
+            padding: 0 10%;
         }
-        .hero h1 { font-size: clamp(50px, 8vw, 110px); font-weight: 900; line-height: 0.9; letter-spacing: -4px; margin-bottom: 20px; }
-        .hero h1 span { color: var(--accent); text-shadow: var(--neon-shadow); }
-        .hero p { font-size: 22px; color: rgba(255,255,255,0.6); max-width: 700px; margin-bottom: 40px; }
+        .hero h1 { font-size: clamp(45px, 7vw, 90px); font-weight: 900; line-height: 1; margin-bottom: 25px; letter-spacing: -3px; }
+        .hero p { font-size: 24px; color: #aaa; max-width: 850px; margin-bottom: 40px; }
+        .btn-main { background: linear-gradient(90deg, var(--primary), var(--secondary)); color: #fff; padding: 18px 45px; border-radius: 50px; text-decoration: none; font-weight: 800; font-size: 18px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4); }
 
-        /* --- INTERACTIVE HUB (YÜZEN KARTLAR) --- */
-        .hub-container {
-            position: relative; width: 100%; max-width: 1200px; margin: 0 auto; height: 700px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .core-circle {
-            width: 250px; height: 250px; background: var(--bg); border: 4px solid var(--accent);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 32px; font-weight: 900; box-shadow: 0 0 60px rgba(139, 92, 246, 0.6);
-            z-index: 10; animation: pulse 3s infinite;
-        }
+        /* --- MODÜL SECTİONLARI (Bol Görsel & Açıklama) --- */
+        .section { padding: 120px 8%; border-bottom: 1px solid var(--border); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .reverse { direction: rtl; }
+        .reverse .text-content { direction: ltr; }
 
-        .floating-card {
-            position: absolute; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1);
-            padding: 25px; border-radius: 20px; width: 280px; backdrop-filter: blur(10px);
-            transition: 0.4s ease; cursor: pointer;
-        }
-        .floating-card:hover { transform: scale(1.1) translateY(-10px); border-color: var(--accent); box-shadow: var(--neon-shadow); }
-        .floating-card h3 { color: var(--accent); margin-bottom: 10px; font-size: 18px; text-transform: uppercase; }
-        .floating-card p { font-size: 14px; opacity: 0.7; line-height: 1.5; }
+        .img-holder { position: relative; border-radius: 40px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.5); border: 1px solid var(--border); }
+        .img-holder img { width: 100%; height: 500px; object-fit: cover; transition: 0.6s; }
+        .img-holder:hover img { transform: scale(1.05); }
 
-        /* Kart Konumları */
-        .c1 { top: 5%; left: 10%; }
-        .c2 { top: 5%; right: 10%; }
-        .c3 { bottom: 10%; left: 5%; }
-        .c4 { bottom: 10%; right: 5%; }
-        .c5 { top: 40%; left: -5%; }
-        .c6 { top: 40%; right: -5%; }
+        .tag { color: var(--primary); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; display: block; margin-bottom: 15px; }
+        h2 { font-size: 55px; font-weight: 900; margin-bottom: 25px; line-height: 1.1; }
+        .desc { font-size: 19px; color: #b1b1b1; margin-bottom: 30px; }
+        
+        /* Modüllere Özgün İkonik Listeler */
+        .feature-list { list-style: none; }
+        .feature-list li { margin-bottom: 15px; display: flex; align-items: center; font-weight: 600; font-size: 17px; }
+        .feature-list li::before { content: "✓"; color: var(--secondary); margin-right: 15px; font-weight: 900; }
 
-        /* --- ANIMATIONS --- */
-        @keyframes pulse {
-            0% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
-            50% { box-shadow: 0 0 80px rgba(139, 92, 246, 0.8); }
-            100% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.4); }
-        }
+        /* --- OYUN & EĞLENCE (GAMIFICATION) --- */
+        .game-zone { background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 60px; padding: 80px; text-align: center; }
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 50px; }
+        .game-card { background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--border); }
+        .game-card h3 { font-size: 24px; margin-bottom: 15px; color: var(--secondary); }
 
         /* --- FOOTER --- */
-        footer { padding: 50px 0; text-align: center; opacity: 0.4; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
-
-        @media (max-width: 768px) {
-            .hub-container { height: auto; display: grid; grid-template-columns: 1fr; gap: 20px; padding: 50px 5%; }
-            .floating-card { position: relative; width: 100%; top: auto; left: auto; right: auto; bottom: auto; }
-            .core-circle { margin: 40px auto; }
-        }
+        footer { padding: 80px 8%; background: #000; text-align: center; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <header>
     <div class="logo">italky<span>AI</span></div>
-    <div class="jeton-pill">Jeton: 328</div>
+    <nav class="nav-links">
+        <a href="#face">FaceToFace</a>
+        <a href="#academy">Academy</a>
+        <a href="#meeting">Meeting</a>
+        <a href="#tools">Modüller</a>
+        <a href="#" class="btn-main" style="padding: 10px 25px; font-size: 13px;">GİRİŞ YAP</a>
+    </nav>
 </header>
 
 <section class="hero">
-    <h1>BE FREE. <br><span>SPEAK ALL.</span></h1>
-    <p>Dünya seninle, arandaki tek engel kalktı. Geleceğin iletişim ekosistemine hoş geldin.</p>
-    
-    <div class="hub-container">
-        <div class="core-circle">italkyAI</div>
+    <span class="tag">DİL BARİYERİNE SON</span>
+    <h1>Bildiğin Tüm <br>Sınırları <span>Unut.</span></h1>
+    <p>italkyAI, yapay zekayı bir çevirmen değil, bir yaşam arkadaşı haline getirir. 20+ modül, profesyonel araçlar ve eğlenceli eğitim ekosistemiyle tanış.</p>
+    <a href="#face" class="btn-main">Keşfetmeye Başla</a>
+</section>
 
-        <div class="floating-card c1">
-            <h3>FaceToFace AI</h3>
-            <p>Anlık yüz yüze çeviri. Telefonu masaya bırakın ve dünyayı dinleyin.</p>
+<section id="face" class="section">
+    <div class="grid-2">
+        <div class="text-content">
+            <span class="tag">YÜZYÜZE ANLIK ÇEVİRİ</span>
+            <h2>FaceToFace ile Sohbetin Akışını Yakala</h2>
+            <p class="desc">Telefonu masanın ortasına koyun ve sadece kendiniz olun. Karşınızdaki Japonca, siz Türkçe konuşun; italkyAI her cümleyi milisaniyeler içinde çevirip seslendirsin. Göz temasını asla kesmeyin.</p>
+            <ul class="feature-list">
+                <li>Düşük Gecikmeli Ses Analizi</li>
+                <li>Doğal Vurgulu Seslendirme</li>
+                <li>Gürültülü Ortamlarda Yüksek Başarı</li>
+            </ul>
         </div>
-
-        <div class="floating-card c2">
-            <h3>Academy AI</h3>
-            <p>Kişisel AI dil eğitmeni. Sizinle her gün pratik yapan akıllı koç.</p>
+        <div class="img-holder">
+            <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&q=80&w=1200" alt="Face to Face Interaction">
         </div>
+    </div>
+</section>
 
-        <div class="floating-card c3">
-            <h3>Online Meeting</h3>
-            <p>Canlı toplantı odaları. Uluslararası toplantılarda anlık alt yazı desteği.</p>
+<section id="academy" class="section">
+    <div class="grid-2 reverse">
+        <div class="text-content">
+            <span class="tag">ITALKY ACADEMY</span>
+            <h2>Yapay Zeka ile Seviyeni Belirle ve Geliş</h2>
+            <p class="desc">Klasik kursları unutun. Academy, önce senin seviyeni "Seviye Tespit Sınavı" ile analiz eder, sonra sana özel bir yol haritası çıkarır. Seninle dertleşen, hatalarını düzelten bir öğretmenin olduğunu hayal et.</p>
+            <ul class="feature-list">
+                <li>Kişiselleştirilmiş Öğrenme Planı</li>
+                <li>Hataları Anlık Düzeltme & Geri Bildirim</li>
+                <li>A1'den C2'ye Tam Kapsamlı İçerik</li>
+            </ul>
         </div>
-
-        <div class="floating-card c4">
-            <h3>Eğlenceli Oyunlar</h3>
-            <p>Dil öğrenimini bir bağımlılığa dönüştüren interaktif görevler.</p>
+        <div class="img-holder">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200" alt="Learning with AI">
         </div>
+    </div>
+</section>
 
-        <div class="floating-card c5">
-            <h3>Belge Çeviri</h3>
-            <p>PDF ve dokümanlarını saniyeler içinde formatı bozmadan çevir.</p>
+<section id="meeting" class="section">
+    <div class="grid-2">
+        <div class="text-content">
+            <span class="tag">TOPLANTI ODALARI</span>
+            <h2>Global İş Dünyasında Söz Sahibi Ol</h2>
+            <p class="desc">Online toplantı odalarımızda dil engeli yok. Zoom veya Meet entegrasyonuyla, dünyanın diğer ucundaki partnerlerinle kendi dilinde konuş, onlar kendi dilinde anlasın. Canlı alt yazı desteğiyle hiçbir detayı kaçırma.</p>
+            <ul class="feature-list">
+                <li>Canlı Toplantı Alt Yazı Desteği</li>
+                <li>Çoklu Katılımcı Çeviri Modu</li>
+                <li>Toplantı Notlarını Anlık Özetleme</li>
+            </ul>
         </div>
+        <div class="img-holder">
+            <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1200" alt="Digital Global Meeting">
+        </div>
+    </div>
+</section>
 
-        <div class="floating-card c6">
-            <h3>Fotoğraf & Lens</h3>
-            <p>Gördüğün her şeyi tara, anında kendi dilinde oku.</p>
+<section id="tools" class="section">
+    <div class="grid-2 reverse">
+        <div class="text-content">
+            <span class="tag">GÖRSEL ZEKA</span>
+            <h2>Fotoğrafı Çek, Anında Anla</h2>
+            <p class="desc">Yabancı dilde bir menü, tabela veya karmaşık bir sözleşme mi var? Sadece fotoğrafını çek. italkyAI dokümanı tarasın, orijinal tasarımını bozmadan metni senin diline çevirsin.</p>
+            <ul class="feature-list">
+                <li>Gelişmiş OCR (Karakter Tanıma)</li>
+                <li>Doküman Formatını Koruyan Çeviri</li>
+                <li>El Yazısı Tanıma Yeteneği</li>
+            </ul>
+        </div>
+        <div class="img-holder">
+            <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=1200" alt="Document Translation">
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="game-zone">
+        <span class="tag" style="color:#fff;">OYUNLAŞTIRILMIŞ EĞİTİM</span>
+        <h2>Eğlenerek Öğren, Jetonları Topla</h2>
+        <div class="game-grid">
+            <div class="game-card">
+                <h3>Kelime Avı</h3>
+                <p>Zamana karşı yarışarak kelime hazneni geliştir.</p>
+            </div>
+            <div class="game-card">
+                <h3>Sohbet AI</h3>
+                <p>7/24 konuşabileceğin, her dilde felsefe yapan partner.</p>
+            </div>
+            <div class="game-card">
+                <h3>Chat AI</h3>
+                <p>Belirli konularda tartışarak akıcı konuşma pratiği yap.</p>
+            </div>
         </div>
     </div>
 </section>
 
 <footer>
-    italkyAI @ italkyAcedemia By Ozyigit's • 2026 • Gelecek Burada.
+    <div class="logo">italky<span>AI</span></div>
+    <p style="margin: 20px 0; opacity: 0.5;">italkyAI @ italkyAcedemia By Ozyigit's • 2026</p>
+    <p>Dünya ile arandaki mesafeyi bir uygulamayla kapat.</p>
 </footer>
 
 </body>
