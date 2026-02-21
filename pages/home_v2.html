@@ -1,1044 +1,272 @@
-<!-- FILE: /pages/home_v2.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Home v2</title>
-  <link rel="icon" href="data:," />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>italkyAI | Cebindeki Global Dünya</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/pages/site.css?v=2">
 
-  <style>
-    :root{
-      /* ✅ White base */
-      --bg:#ffffff;
-      --ink:#0b1020;
-      --muted:#4b5563;
-      --muted2:#6b7280;
-
-      /* Accents */
-      --a1:#6366f1; /* indigo */
-      --a2:#ec4899; /* pink */
-      --a3:#22c55e; /* green */
-      --a4:#f59e0b; /* amber */
-      --a5:#06b6d4; /* cyan */
-      --a6:#8b5cf6; /* violet */
-
-      --grad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 45%,#ec4899 100%);
-
-      /* Surfaces */
-      --card:#ffffff;
-      --glass: rgba(255,255,255,.75);
-      --border: rgba(17,24,39,.10);
-      --shadow: 0 24px 70px rgba(15,23,42,.10);
-
-      --r: 26px;
-      --wrap: min(1040px, calc(100vw - 28px));
-      --safeT: env(safe-area-inset-top, 0px);
-      --safeB: env(safe-area-inset-bottom, 0px);
-    }
-
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html,body{ margin:0; width:100%; height:100%; background:var(--bg); color:var(--ink); font-family:Outfit,sans-serif; overflow-x:hidden; scroll-behavior:smooth; }
-
-    /* Soft ambient background (still WHITE) */
-    .bg{
-      position:fixed; inset:0; z-index:0; pointer-events:none;
-      background:
-        radial-gradient(circle at 15% 10%, rgba(99,102,241,.12), transparent 45%),
-        radial-gradient(circle at 80% 30%, rgba(236,72,153,.10), transparent 45%),
-        radial-gradient(circle at 40% 85%, rgba(34,197,94,.10), transparent 50%),
-        linear-gradient(#ffffff, #ffffff);
-    }
-    .gridLines{
-      position:absolute; inset:-40%;
-      background-image:
-        linear-gradient(rgba(15,23,42,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(15,23,42,.03) 1px, transparent 1px);
-      background-size: 90px 90px;
-      transform: rotate(12deg);
-      opacity:.45;
-    }
-
-    /* Sticky header */
-    header{
-      position:sticky; top:0; z-index:50;
-      padding: calc(12px + var(--safeT)) 14px 12px;
-      background: rgba(255,255,255,.82);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-    .topbar{
-      width: var(--wrap);
-      margin: 0 auto;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .brand{
-      display:flex; align-items:center; gap:12px;
-      user-select:none;
-      min-width: 180px;
-    }
-    .logoWord{
-      font-family:"Space Grotesk",sans-serif;
-      font-weight:800;
-      font-size:22px;
-      letter-spacing:-.6px;
-      line-height:1;
-    }
-    .logoWord .ai{
-      background: var(--grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-    .sub{
-      font-size:10px;
-      color: rgba(17,24,39,.55);
-      font-weight:900;
-      letter-spacing:4px;
-      margin-top:3px;
-    }
-
-    .downloadWrap{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
-    .dlBtn{
-      height:40px;
-      padding:0 14px;
-      border-radius: 999px;
-      border:1px solid var(--border);
-      background: #fff;
-      color: var(--ink);
-      font-weight: 950;
-      font-size: 12px;
-      display:flex; align-items:center; gap:10px;
-      cursor:pointer;
-      box-shadow: 0 18px 44px rgba(15,23,42,.10);
-      transition: transform .18s ease, box-shadow .18s ease;
-      text-decoration:none;
-      user-select:none;
-    }
-    .dlBtn:active{ transform: scale(.98); }
-    .dlIcon{
-      width:26px; height:26px;
-      border-radius: 10px;
-      display:flex; align-items:center; justify-content:center;
-      border:1px solid rgba(0,0,0,.08);
-      background: rgba(255,255,255,.9);
-    }
-    .dlBtn.primary{
-      border:none;
-      background: var(--grad);
-      color:#fff;
-      box-shadow: 0 22px 56px rgba(99,102,241,.18);
-    }
-    .dlBtn.primary .dlIcon{
-      background: rgba(0,0,0,.18);
-      border-color: rgba(255,255,255,.22);
-    }
-
-    /* Scroll menu (chips) */
-    .navRow{
-      width: var(--wrap);
-      margin: 10px auto 0;
-      display:flex; gap:10px;
-      overflow:auto; padding-bottom: 4px;
-      scroll-snap-type:x mandatory;
-    }
-    .navRow::-webkit-scrollbar{ display:none; }
-    .navBtn{
-      scroll-snap-align:start;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.92);
-      color: rgba(17,24,39,.90);
-      padding:10px 14px;
-      border-radius:999px;
-      font-weight:950;
-      font-size:12px;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      cursor:pointer;
-      user-select:none;
-      display:inline-flex; align-items:center; gap:9px;
-      transition: transform .18s ease, box-shadow .18s ease;
-      box-shadow: 0 14px 34px rgba(15,23,42,.08);
-    }
-    .navBtn:active{ transform: scale(.98); }
-
-    .chipDot{
-      width:10px; height:10px; border-radius:50%;
-      background: var(--c, var(--a1));
-      box-shadow: 0 0 0 6px rgba(99,102,241,.10);
-      flex:0 0 auto;
-    }
-
-    /* Main wrapper */
-    main{
-      position:relative; z-index:10;
-      width: var(--wrap);
-      margin: 0 auto;
-      padding: 18px 0 120px;
-    }
-
-    /* Hero */
-    .hero{
-      border-radius: calc(var(--r) + 12px);
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.88);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      padding: 20px;
-      position:relative;
-    }
-    .hero::before{
-      content:"";
-      position:absolute; inset:-40%;
-      background:
-        radial-gradient(circle at 22% 28%, rgba(99,102,241,.18), transparent 55%),
-        radial-gradient(circle at 82% 30%, rgba(236,72,153,.14), transparent 55%),
-        radial-gradient(circle at 45% 88%, rgba(34,197,94,.14), transparent 60%);
-      transform: rotate(12deg);
-      pointer-events:none;
-    }
-    .heroInner{ position:relative; z-index:2; }
-
-    .kicker{
-      display:inline-flex; align-items:center; gap:10px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border:1px solid rgba(99,102,241,.18);
-      background: rgba(99,102,241,.06);
-      font-weight: 1000;
-      font-size: 12px;
-      letter-spacing: .2px;
-      color: rgba(17,24,39,.85);
-    }
-    .kDot{
-      width:10px; height:10px; border-radius:50%;
-      background: var(--grad);
-      box-shadow: 0 0 0 7px rgba(99,102,241,.12);
-    }
-
-    .heroTitle{
-      margin: 14px 0 10px;
-      font-size: clamp(30px, 4.3vw, 58px);
-      font-weight: 1000;
-      line-height: 1.02;
-      letter-spacing: -1.3px;
-      color: rgba(17,24,39,.98);
-    }
-    .heroTitle .g{
-      background: var(--grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-
-    .heroSub{
-      color: rgba(17,24,39,.72);
-      font-size: 16px;
-      line-height:1.6;
-      max-width: 860px;
-      margin-bottom: 14px;
-    }
-
-    .heroBullets{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .bItem{
-      border-radius: 20px;
-      border:1px solid rgba(17,24,39,.08);
-      background: rgba(255,255,255,.85);
-      padding: 12px 14px;
-      display:flex; gap:12px; align-items:flex-start;
-      box-shadow: 0 16px 38px rgba(15,23,42,.06);
-    }
-    .bIco{
-      width:44px; height:44px;
-      border-radius: 16px;
-      display:flex; align-items:center; justify-content:center;
-      border:1px solid rgba(0,0,0,.06);
-      background: var(--g, var(--grad));
-      color:#0b1020;
-      font-weight: 1000;
-      flex: 0 0 auto;
-      position:relative;
-      overflow:hidden;
-    }
-    .bIco::after{
-      content:"";
-      position:absolute; inset:-30%;
-      background: rgba(255,255,255,.30);
-      transform: rotate(25deg);
-      opacity:.35;
-    }
-    .bTxt h4{ margin:0 0 4px; font-size: 14px; font-weight: 1000; }
-    .bTxt p{ margin:0; font-size: 12.5px; color: rgba(17,24,39,.70); line-height: 1.5; }
-
-    /* Banner rail */
-    .rail{
-      margin-top: 16px;
-      display:flex; gap: 14px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x mandatory;
-      padding-bottom: 6px;
-    }
-    .rail::-webkit-scrollbar{ display:none; }
-
-    .banner{
-      scroll-snap-align:start;
-      min-width: min(650px, 88vw);
-      height: 260px;
-      border-radius: 28px;
-      border: 1px solid rgba(17,24,39,.10);
-      position:relative;
-      overflow:hidden;
-      background: rgba(255,255,255,.9);
-      box-shadow: 0 22px 60px rgba(15,23,42,.10);
-      cursor:pointer;
-      user-select:none;
-      transform: translateZ(0);
-    }
-    .banner img{
-      width:100%; height:100%;
-      object-fit: cover;
-      filter: saturate(1.06) contrast(1.04);
-      transform: scale(1.03);
-    }
-    .banner::after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(90deg, rgba(0,0,0,.60), rgba(0,0,0,.06));
-    }
-    .bOverlay{
-      position:absolute; left:16px; right:16px; bottom:16px;
-      z-index:2;
-      color:#fff;
-    }
-    .bPill{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.22);
-      background: rgba(0,0,0,.32);
-      font-weight: 1000;
-      font-size: 12px;
-    }
-    .bDot{
-      width:9px; height:9px; border-radius:50%;
-      background: var(--grad);
-      box-shadow: 0 0 0 7px rgba(99,102,241,.15);
-    }
-    .bH{
-      margin-top: 10px;
-      font-size: 22px;
-      font-weight: 1000;
-      letter-spacing: -.4px;
-    }
-    .bP{
-      margin-top: 6px;
-      font-size: 13px;
-      color: rgba(255,255,255,.82);
-      max-width: 520px;
-      line-height:1.55;
-    }
-
-    /* Section */
-    .section{
-      margin-top: 16px;
-      padding: 18px;
-      border-radius: calc(var(--r) + 10px);
-      border:1px solid rgba(17,24,39,.10);
-      background: rgba(255,255,255,.90);
-      box-shadow: var(--shadow);
-    }
-    .secHead{
-      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
-      flex-wrap:wrap;
-      margin-bottom: 14px;
-    }
-    .secHead h2{
-      margin:0;
-      font-size: 26px;
-      font-weight: 1000;
-      letter-spacing: -.6px;
-    }
-    .secHead p{
-      margin:0;
-      color: rgba(17,24,39,.68);
-      font-size: 13.5px;
-      max-width: 600px;
-      line-height:1.6;
-    }
-
-    /* Module grid */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
-    }
-
-    .card{
-      border-radius: 26px;
-      border:1px solid rgba(17,24,39,.10);
-      background: rgba(255,255,255,.92);
-      overflow:hidden;
-      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-      box-shadow: 0 18px 44px rgba(15,23,42,.08);
-      position:relative;
-    }
-    .card:hover{
-      transform: translateY(-4px);
-      border-color: rgba(99,102,241,.22);
-      box-shadow: 0 22px 54px rgba(15,23,42,.10);
-    }
-
-    .cImg{ height: 170px; position:relative; overflow:hidden; }
-    .cImg img{ width:100%; height:100%; object-fit:cover; }
-    .cImg::after{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.74));
-    }
-
-    .cBody{ padding: 14px; }
-    .cTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 10px; }
-
-    .iconPill{
-      width:46px; height:46px;
-      border-radius: 18px;
-      display:flex; align-items:center; justify-content:center;
-      border:1px solid rgba(0,0,0,.06);
-      box-shadow: 0 16px 34px rgba(15,23,42,.12);
-      position:relative;
-      overflow:hidden;
-      flex: 0 0 auto;
-      background: var(--g, var(--grad));
-      color:#0b1020;
-      font-weight: 1000;
-      font-size: 18px;
-    }
-    .iconPill::after{
-      content:"";
-      position:absolute; inset:-40%;
-      background: rgba(255,255,255,.32);
-      transform: rotate(25deg);
-      opacity:.35;
-    }
-
-    .tagAI{
-      display:inline-flex; align-items:center; gap:7px;
-      padding:6px 10px;
-      border-radius: 999px;
-      border:1px solid rgba(17,24,39,.10);
-      background: rgba(99,102,241,.06);
-      font-weight: 950;
-      font-size: 11px;
-      color: rgba(17,24,39,.82);
-      white-space:nowrap;
-    }
-    .tagAI b{
-      background: var(--grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-
-    .cTitle{ margin: 0 0 6px; font-size: 18px; font-weight: 1000; letter-spacing: -.3px; }
-    .cDesc{ margin:0; color: rgba(17,24,39,.70); font-size: 13.2px; line-height: 1.6; }
-
-    .cList{
-      margin: 10px 0 0;
-      padding-left: 16px;
-      color: rgba(17,24,39,.70);
-      font-size: 12.6px;
-      line-height: 1.6;
-    }
-    .cList li{ margin: 4px 0; }
-
-    .openBtn{
-      margin-top: 12px;
-      height: 46px;
-      border-radius: 18px;
-      border: none;
-      background: var(--g, var(--grad));
-      color: #0b1020;
-      font-weight: 1000;
-      width: 100%;
-      cursor:pointer;
-      box-shadow: 0 18px 40px rgba(99,102,241,.14);
-      transition: transform .18s ease;
-      text-decoration:none;
-      display:flex; align-items:center; justify-content:center;
-      user-select:none;
-    }
-    .openBtn:active{ transform: scale(.98); }
-
-    /* CTA strip */
-    .ctaStrip{
-      margin-top: 16px;
-      border-radius: calc(var(--r) + 10px);
-      border:1px solid rgba(17,24,39,.10);
-      background: rgba(255,255,255,.92);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-wrap:wrap;
-    }
-    .ctaCell{
-      flex:1;
-      min-width: 240px;
-      padding: 16px;
-      border-right: 1px solid rgba(17,24,39,.08);
-      display:flex; flex-direction:column; gap:8px;
-    }
-    .ctaCell:last-child{ border-right:none; }
-    .ctaCell h3{ margin:0; font-size: 16px; font-weight: 1000; }
-    .ctaCell p{ margin:0; font-size: 13px; color: rgba(17,24,39,.68); line-height:1.6; }
-    .ctaRow{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 4px; }
-
-    .miniBtn{
-      height: 40px;
-      padding: 0 14px;
-      border-radius: 999px;
-      border:1px solid rgba(17,24,39,.12);
-      background: #fff;
-      color: rgba(17,24,39,.92);
-      font-weight: 950;
-      font-size: 12px;
-      display:flex; align-items:center; gap:8px;
-      cursor:pointer;
-      user-select:none;
-      text-decoration:none;
-    }
-    .miniBtn.primary{
-      border:none;
-      background: var(--grad);
-      color:#fff;
-    }
-
-    /* Sticky footer bar */
-    .bottomBar{
-      position:fixed; left:0; right:0; bottom:0;
-      z-index:60;
-      padding: 10px 12px calc(10px + var(--safeB));
-      background: rgba(255,255,255,.86);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-    }
-    .bottomInner{
-      width: var(--wrap);
-      margin: 0 auto;
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      flex-wrap:wrap;
-    }
-    .footLinks{
-      display:flex; gap:14px; flex-wrap:wrap; align-items:center;
-    }
-    .footLinks a{
-      color: rgba(17,24,39,.62);
-      text-decoration:none;
-      font-weight: 950;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .sig{
-      font-weight: 950;
-      font-size: 12px;
-      letter-spacing: .4px;
-      background: var(--grad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      white-space:nowrap;
-    }
-
-    /* Anchors offset for sticky header */
-    .anchor{ scroll-margin-top: 140px; }
-
-    /* Mobile tweaks */
-    @media (max-width: 520px){
-      header{ padding-left: 10px; padding-right: 10px; }
-      .topbar{ width: calc(100vw - 20px); }
-      .navRow{ width: calc(100vw - 20px); }
-      main{ width: calc(100vw - 20px); }
-      .banner{ height: 230px; min-width: 88vw; }
-      .heroTitle{ letter-spacing: -1px; }
-      .dlBtn{ height: 38px; padding: 0 12px; }
-      .dlIcon{ width:24px; height:24px; }
-      .bottomInner{ width: calc(100vw - 20px); }
-    }
-  </style>
+<style>
+.hero{
+  background: linear-gradient(135deg,#f8fafc 0%, #eef2ff 100%);
+  padding: 120px 20px 100px;
+  text-align:center;
+}
+.hero h1{
+  font-size: clamp(32px,5vw,56px);
+  font-weight:1000;
+  letter-spacing:-1px;
+}
+.hero span{
+  background: linear-gradient(135deg,#7c3aed,#3b82f6,#ec4899);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hero p{
+  max-width:800px;
+  margin:20px auto 30px;
+  font-weight:600;
+  color:#475569;
+  line-height:1.6;
+}
+.cta-row{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.btn-big{
+  padding:14px 28px;
+  border-radius:16px;
+  font-weight:900;
+  font-size:14px;
+  text-decoration:none;
+}
+.btn-primary{
+  background:linear-gradient(135deg,#7c3aed,#3b82f6);
+  color:#fff;
+}
+.btn-secondary{
+  background:#fff;
+  border:1px solid rgba(15,23,42,0.1);
+  color:#0f172a;
+}
+.section-white{
+  background:#fff;
+}
+.section-soft{
+  background:#f8fafc;
+}
+.module-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:18px;
+  margin-top:30px;
+}
+.module-card{
+  background:#fff;
+  border:1px solid rgba(15,23,42,0.08);
+  border-radius:24px;
+  padding:22px;
+  transition:0.3s;
+  text-decoration:none;
+  color:inherit;
+}
+.module-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 20px 60px rgba(2,6,23,.12);
+}
+.module-card h3{
+  margin:12px 0 8px;
+  font-weight:900;
+  font-size:18px;
+}
+.module-card p{
+  font-size:14px;
+  color:#64748b;
+  font-weight:600;
+  line-height:1.5;
+}
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  margin-top:10px;
+  background:rgba(124,58,237,0.08);
+  color:#7c3aed;
+}
+.big-banner{
+  border-radius:30px;
+  overflow:hidden;
+  margin:40px 0;
+}
+.big-banner img{
+  width:100%;
+  height:400px;
+  object-fit:cover;
+}
+</style>
 </head>
-
 <body>
-  <div class="bg"><div class="gridLines"></div></div>
 
-  <!-- Sticky Header -->
-  <header>
-    <div class="topbar">
-      <div class="brand">
-        <div>
-          <div class="logoWord">italky<span class="ai">AI</span></div>
-          <div class="sub">BE FREE</div>
-        </div>
-      </div>
+<header class="topbar">
+  <a class="brand" href="#">
+    <span class="brand-italky">italky</span>
+    <span class="brand-ai">AI</span>
+    <span class="brand-sub">GLOBAL COMMUNICATION</span>
+  </a>
+  <div class="top-cta">
+    <a class="btn-main" href="#download">Uygulamayı İndir</a>
+  </div>
+</header>
 
-      <!-- ✅ Download buttons (placeholders: update links when ready) -->
-      <div class="downloadWrap">
-        <a class="dlBtn" href="#download" title="Uygulamayı indir">
-          <span class="dlIcon">⬇️</span>
-          <span>İndir</span>
-        </a>
-        <a class="dlBtn" href="#download" title="Google Play">
-          <span class="dlIcon">▶️</span>
-          <span>Google Play</span>
-        </a>
-        <a class="dlBtn primary" href="#download" title="App Store">
-          <span class="dlIcon"></span>
-          <span>App Store</span>
-        </a>
-      </div>
-    </div>
+<main class="page">
 
-    <!-- Scroll menu -->
-    <div class="navRow" id="navRow">
-      <div class="navBtn" data-to="#hero"><span class="chipDot" style="--c:var(--a1)"></span> Başla</div>
-      <div class="navBtn" data-to="#moduller"><span class="chipDot" style="--c:var(--a2)"></span> Modüller</div>
-      <div class="navBtn" data-to="#f2f"><span class="chipDot" style="--c:var(--a5)"></span> FaceToFace</div>
-      <div class="navBtn" data-to="#academy"><span class="chipDot" style="--c:var(--a3)"></span> italky Academy</div>
-      <div class="navBtn" data-to="#tools"><span class="chipDot" style="--c:var(--a4)"></span> Çeviri Araçları</div>
-      <div class="navBtn" data-to="#ai"><span class="chipDot" style="--c:var(--a6)"></span> Chat & Sohbet AI</div>
-      <div class="navBtn" data-to="#meeting"><span class="chipDot" style="--c:var(--a1)"></span> Online Toplantı</div>
-      <div class="navBtn" data-to="#download"><span class="chipDot" style="--c:var(--a2)"></span> İndir</div>
-    </div>
-  </header>
+<!-- HERO -->
+<section class="hero">
+  <h1><span>Cebindeki Öğretmen.</span><br>Cebindeki Tercüman.</h1>
+  <p>
+    italkyAI; konuşmayı, anlamayı ve öğrenmeyi tek bir uygulamada birleştirir.
+    Abonelik yok. Sabit ücret yok.  
+    İhtiyacın kadar kullan, özgürce iletişim kur.
+  </p>
 
-  <main>
-    <!-- HERO -->
-    <section class="hero anchor" id="hero">
-      <div class="heroInner">
-        <div class="kicker"><span class="kDot"></span> Abonelik yok • Sabit ücret yok • AI her modülde</div>
+  <div class="cta-row">
+    <a href="#download" class="btn-big btn-primary">Hemen İndir</a>
+    <a href="#modules" class="btn-big btn-secondary">Modülleri Keşfet</a>
+  </div>
+</section>
 
-        <div class="heroTitle">
-          Cebindeki <span class="g">AI Öğretmen</span>.<br>
-          Cebindeki <span class="g">Global Tercüman</span>.
-        </div>
-
-        <div class="heroSub">
-          italkyAI; konuşmayı, okumayı ve öğrenmeyi tek uygulamada birleştirir.
-          Seyahat ederken, çalışırken, öğrenirken — dil “engel” olmaktan çıkar.
-          Modüller tek tek güçlüdür, birlikte ise tam bir ekosistem.
-        </div>
-
-        <div class="heroBullets">
-          <div class="bItem">
-            <div class="bIco" style="--g:linear-gradient(135deg,#a5b4fc,#6366f1,#22c55e);">AI</div>
-            <div class="bTxt">
-              <h4>Yapay Zeka vurgusu hep önde</h4>
-              <p>Konuşma, çeviri, pratik, oyun… her yerde AI destekli deneyim.</p>
-            </div>
-          </div>
-
-          <div class="bItem">
-            <div class="bIco" style="--g:linear-gradient(135deg,#f59e0b,#ec4899,#6366f1);">⚡</div>
-            <div class="bTxt">
-              <h4>Tek uygulama, çok iş</h4>
-              <p>Çeviri için ayrı, pratik için ayrı uygulama yok. Hepsi italkyAI’da.</p>
-            </div>
-          </div>
-
-          <div class="bItem">
-            <div class="bIco" style="--g:linear-gradient(135deg,#22c55e,#06b6d4,#a5b4fc);">🧠</div>
-            <div class="bTxt">
-              <h4>Karmaşık değil, “net”</h4>
-              <p>Butonlar renkli ve anlaşılır. Tıklayınca ilgili modüle gider.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Real-photo banners -->
-        <div class="rail" id="heroRail">
-          <div class="banner" data-to="#f2f" title="FaceToFace">
-            <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1400&q=70" alt="FaceToFace" />
-            <div class="bOverlay">
-              <div class="bPill"><span class="bDot"></span> FaceToFace • Anlık Çeviri</div>
-              <div class="bH">Masada iki kişi, iki dil, tek anlaşma.</div>
-              <div class="bP">Bir kafede sohbet… italkyAI konuşmayı çevirir ve seslendirir. Turist gibi değil, yerli gibi.</div>
-            </div>
-          </div>
-
-          <div class="banner" data-to="#tools" title="Fotoğraftan Çeviri">
-            <img src="https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=1400&q=70" alt="Photo Translate" />
-            <div class="bOverlay">
-              <div class="bPill"><span class="bDot"></span> Fotoğraftan Çeviri</div>
-              <div class="bH">Menü, tabela, kitap: çek → anla.</div>
-              <div class="bP">Telefonu yazının üzerine tut. Yazı, kendi diline döner. Hızlı ve pratik.</div>
-            </div>
-          </div>
-
-          <div class="banner" data-to="#meeting" title="Online Toplantı">
-            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&q=70" alt="Online Meeting" />
-            <div class="bOverlay">
-              <div class="bPill"><span class="bDot"></span> Online Toplantı</div>
-              <div class="bH">Dünyanın her yerinden, tek odada.</div>
-              <div class="bP">İster 2 kişi ister 20 kişi: herkes kendi dilinde konuşur, herkes anlar.</div>
-            </div>
-          </div>
-
-          <div class="banner" data-to="#academy" title="italky Academy">
-            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=70" alt="Academy" />
-            <div class="bOverlay">
-              <div class="bPill"><span class="bDot"></span> italky Academy</div>
-              <div class="bH">Cebindeki öğretmen: 7/24 pratik.</div>
-              <div class="bP">Seviye tespit, ders, oyunlar… Hepsi AI ile kişiye özel.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- MODULES -->
-    <section class="section anchor" id="moduller">
-      <div class="secHead">
-        <div>
-          <h2>Uygulamada neler var?</h2>
-          <p>
-            Her modülün amacı belli: “tek işi en iyi şekilde yapmak.”
-            Butonlara dokununca ilgili modül açılır. Uzun uzun aramana gerek yok.
-          </p>
-        </div>
-        <div class="kicker" style="border-color:rgba(236,72,153,.18); background: rgba(236,72,153,.05);">
-          <span class="kDot"></span> AI vurgusu: HIZ • DOĞALLIK • PRATİK
-        </div>
-      </div>
-
-      <div class="grid">
-        <!-- FaceToFace -->
-        <article class="card anchor" id="f2f">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#a5b4fc,#6366f1,#22c55e);">🎙️</div>
-              <div class="tagAI">AI <b>Realtime</b></div>
-            </div>
-            <h3 class="cTitle">FaceToFace</h3>
-            <p class="cDesc">
-              Karşılıklı konuşmayı gerçek hayatta “akıtmak” için.
-              Siz konuşursunuz, AI çevirir; çeviri gelir gelmez otomatik seslendirir.
-              İstersen hoparlör ikonuyla tekrar dinlersin.
-            </p>
-            <ul class="cList">
-              <li>Kafede sipariş, yolda yön sorma, otelde check-in…</li>
-              <li>Çift taraf dil seçimi: herkes kendi diliyle rahat eder.</li>
-              <li>Akıcılık odaklı: “kelime kelime” değil, anlamı korur.</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#a5b4fc,#6366f1,#22c55e);" href="/pages/facetoface.html">FaceToFace’i Aç</a>
-          </div>
-        </article>
-
-        <!-- italky Academy -->
-        <article class="card anchor" id="academy">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#22c55e,#06b6d4,#a5b4fc);">🎓</div>
-              <div class="tagAI">AI <b>Teacher</b></div>
-            </div>
-            <h3 class="cTitle">italky Academy</h3>
-            <p class="cDesc">
-              “Kurs gibi” değil: kısa, net, kişiye özel.
-              AI öğretmen; seviyeni görür, zayıf yönlerini yakalar ve hedefli pratik verir.
-            </p>
-            <ul class="cList">
-              <li>Seviye tespit + kişiye özel yol haritası</li>
-              <li>Hızlı ders akışları: 10-15 dakikada sonuç</li>
-              <li>Oyunlarla pekiştirme + pratik konuşma</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#22c55e,#06b6d4,#a5b4fc);" href="/pages/academy.html">Academy’ye Gir</a>
-          </div>
-        </article>
-
-        <!-- Text Translate -->
-        <article class="card anchor" id="tools">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#f59e0b,#ec4899,#6366f1);">Aa</div>
-              <div class="tagAI">AI <b>Context</b></div>
-            </div>
-            <h3 class="cTitle">Metinden Çeviri</h3>
-            <p class="cDesc">
-              Mesaj, e-posta, makale… bağlamı kaybetmeden çeviri.
-              Gerekirse giriş/çıkış metnini seslendir.
-            </p>
-            <ul class="cList">
-              <li>Uzun metinlerde “anlam akışı” korunur</li>
-              <li>Hızlı: kopyala-yapıştır → anında çeviri</li>
-              <li>Dil seçimi net: yanlış dile düşmez</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#f59e0b,#ec4899,#6366f1);" href="/pages/text_translate.html">Metinden Çeviri</a>
-          </div>
-        </article>
-
-        <!-- Photo Translate -->
-        <article class="card">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#06b6d4,#a5b4fc,#ec4899);">📷</div>
-              <div class="tagAI">AI <b>Vision</b></div>
-            </div>
-            <h3 class="cTitle">Fotoğraftan Çeviri</h3>
-            <p class="cDesc">
-              Menü ve tabelalarda “okuma stresi” biter.
-              Kamerayı tut, metni yakala, kendi dilinde gör.
-            </p>
-            <ul class="cList">
-              <li>Restoran menüsü, sokak tabelası, kitap sayfası</li>
-              <li>Hızlı OCR + çeviri akışı</li>
-              <li>İstersen sesli okuma</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#06b6d4,#a5b4fc,#ec4899);" href="/pages/photo.html">Fotoğraftan Çeviri</a>
-          </div>
-        </article>
-
-        <!-- Document Translate -->
-        <article class="card">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#a5b4fc,#22c55e,#f59e0b);">📄</div>
-              <div class="tagAI">AI <b>Document</b></div>
-            </div>
-            <h3 class="cTitle">Belgeden Çeviri</h3>
-            <p class="cDesc">
-              PDF / Word içerikleri için hızlı anlama.
-              İş, eğitim, başvuru belgelerinde vakit kazandırır.
-            </p>
-            <ul class="cList">
-              <li>Dosya yükle → dil seç → çeviriyi al</li>
-              <li>Uzun dokümanlarda hızlı özet mantığı</li>
-              <li>Gerektiğinde sesli okuma</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#a5b4fc,#22c55e,#f59e0b);" href="/pages/doc.html">Belgeden Çeviri</a>
-          </div>
-        </article>
-
-        <!-- Games -->
-        <article class="card">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#22c55e,#f59e0b,#ec4899);">🎮</div>
-              <div class="tagAI">AI <b>Gamify</b></div>
-            </div>
-            <h3 class="cTitle">Eğlenerek Öğren</h3>
-            <p class="cDesc">
-              Dil öğrenmenin “sıkıcı” tarafını siler.
-              Oyunlar pratik yaptırır, kelimeyi kalıcı hale getirir.
-            </p>
-            <ul class="cList">
-              <li>Kelime oyunları + hızlı görevler</li>
-              <li>Seviye ve konuya göre akıllı içerik</li>
-              <li>Öğrenme motivasyonu “kendiliğinden” artar</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#22c55e,#f59e0b,#ec4899);" href="/pages/games.html">Oyunları Aç</a>
-          </div>
-        </article>
-
-        <!-- Chat AI -->
-        <article class="card anchor" id="ai">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#a5b4fc,#6366f1,#06b6d4);">💬</div>
-              <div class="tagAI">AI <b>Coach</b></div>
-            </div>
-            <h3 class="cTitle">Chat AI</h3>
-            <p class="cDesc">
-              “Konu bazlı” pratik: mülakat provası, sunum provası, mail yazımı, seyahat planı…
-              AI düzeltir, geliştirir, daha doğal söyletir.
-            </p>
-            <ul class="cList">
-              <li>Hataları yakalar ve alternatif cümle önerir</li>
-              <li>Resmi / samimi ton seçimi</li>
-              <li>Hızlı pratik: 10 dakikada fark</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#a5b4fc,#6366f1,#06b6d4);" href="/pages/chat_ai.html">Chat AI’ı Aç</a>
-          </div>
-        </article>
-
-        <!-- Sohbet AI -->
-        <article class="card">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#ec4899,#f59e0b,#a5b4fc);">🗣️</div>
-              <div class="tagAI">AI <b>Buddy</b></div>
-            </div>
-            <h3 class="cTitle">Sohbet AI</h3>
-            <p class="cDesc">
-              “Akıcılık” için en iyi yöntem: çekinmeden konuşmak.
-              Sohbet AI; doğal konuşma refleksi kazandırır, dertleşir, pratik yaptırır.
-            </p>
-            <ul class="cList">
-              <li>Günlük konuşma kalıpları</li>
-              <li>Konuşma cesareti + akıcılık</li>
-              <li>Dil bariyeri psikolojisini kırar</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#ec4899,#f59e0b,#a5b4fc);" href="/pages/sohbet_ai.html">Sohbet AI</a>
-          </div>
-        </article>
-
-        <!-- Online Meeting -->
-        <article class="card anchor" id="meeting">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#06b6d4,#6366f1,#ec4899);">🧩</div>
-              <div class="tagAI">AI <b>Meeting</b></div>
-            </div>
-            <h3 class="cTitle">Online Toplantı</h3>
-            <p class="cDesc">
-              Dünyanın her yerinden 20 farklı dille gelen insanlar tek toplantıda birbirini anlar.
-              Dil bariyeri iş bariyeri olmaktan çıkar.
-            </p>
-            <ul class="cList">
-              <li>İster 2 kişi ister 20 kişi: oda mantığı</li>
-              <li>Çok dil desteği: herkes kendi dilinde</li>
-              <li>Toplantı odaklı akış: hızlı ve net</li>
-            </ul>
-            <a class="openBtn" style="--g:linear-gradient(135deg,#06b6d4,#6366f1,#ec4899);" href="/pages/meeting.html">Online Toplantı</a>
-          </div>
-        </article>
-
-        <!-- Offline Pack -->
-        <article class="card anchor" id="download">
-          <div class="cImg">
-            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=70" alt="">
-          </div>
-          <div class="cBody">
-            <div class="cTop">
-              <div class="iconPill" style="--g:linear-gradient(135deg,#22c55e,#06b6d4,#a5b4fc);">🛰️</div>
-              <div class="tagAI">AI <b>Offline</b></div>
-            </div>
-            <h3 class="cTitle">Offline Dil Paketi</h3>
-            <p class="cDesc">
-              İnternetin çekmediği yerde bile iletişim devam eder.
-              Seyahat, uçak, kırsal… “sigorta” gibi çalışır.
-            </p>
-            <ul class="cList">
-              <li>Offline kullanım: FaceToFace + Metinden Çeviri</li>
-              <li>Uzun süreli erişim</li>
-              <li>İnternetsizken bile “konuşma devam”</li>
-            </ul>
-
-            <!-- download CTA inside card -->
-            <div class="ctaRow">
-              <a class="miniBtn primary" href="#" title="Google Play linkini buraya koy">Google Play</a>
-              <a class="miniBtn" href="#" title="App Store linkini buraya koy">App Store</a>
-              <a class="miniBtn" href="/pages/contact.html">Kurumsal / Destek</a>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- CTA STRIP (simple, pro, not messy) -->
-    <section class="ctaStrip">
-      <div class="ctaCell">
-        <h3>Abonelik yok</h3>
-        <p>Kullanmadığın ayın parasını ödeme derdi yok. Aç, kullan, kapat.</p>
-        <div class="ctaRow">
-          <a class="miniBtn primary" href="/pages/faq.html">SSS</a>
-          <a class="miniBtn" href="/pages/about.html">Hakkımızda</a>
-        </div>
-      </div>
-      <div class="ctaCell">
-        <h3>Tek ekosistem</h3>
-        <p>Çeviri + pratik + oyun + toplantı… Hepsi aynı deneyimde birleşir.</p>
-        <div class="ctaRow">
-          <a class="miniBtn primary" href="#moduller">Modüller</a>
-          <a class="miniBtn" href="/pages/privacy.html">Gizlilik</a>
-        </div>
-      </div>
-      <div class="ctaCell">
-        <h3>AI ile daha doğal</h3>
-        <p>Kelime kelime değil; anlamı koruyan, akıcı ve anlaşılır iletişim.</p>
-        <div class="ctaRow">
-          <a class="miniBtn primary" href="/pages/facetoface.html">FaceToFace</a>
-          <a class="miniBtn" href="/pages/text_translate.html">Metin Çeviri</a>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Sticky bottom bar -->
-  <div class="bottomBar">
-    <div class="bottomInner">
-      <div class="footLinks">
-        <a href="/pages/about.html">Hakkımızda</a>
-        <a href="/pages/faq.html">SSS</a>
-        <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
-      </div>
-      <div class="sig">italkyAI @ italkyAcademy By Ozyigit's • 2026</div>
-    </div>
+<!-- FACE TO FACE -->
+<section class="section section-white" id="modules">
+  <div class="section-head">
+    <h2>FaceToFace AI</h2>
+    <p>Dünyanın iki ucundaki insanlar aynı masada gibi konuşsun. Dil engeli ortadan kalksın.</p>
   </div>
 
-  <script type="module">
-    // Nav scroll
-    document.querySelectorAll(".navBtn").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const sel = btn.getAttribute("data-to");
-        const el = sel ? document.querySelector(sel) : null;
-        if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
-      });
-    });
+  <div class="big-banner">
+    <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=80">
+  </div>
 
-    // Banner click -> section
-    document.querySelectorAll(".banner").forEach(b=>{
-      b.addEventListener("click", ()=>{
-        const sel = b.getAttribute("data-to");
-        const el = sel ? document.querySelector(sel) : null;
-        if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
-      });
-    });
+  <a href="/pages/module_facetoface.html" class="module-card">
+    <h3>Karşılıklı Anlık Çeviri</h3>
+    <p>Sen Türkçe konuş, karşı taraf kendi dilinde duysun. O konuşsun, sen anında anla.</p>
+    <div class="badge">Seyahat • İş • Günlük Hayat</div>
+  </a>
+</section>
 
-    // Auto-swipe rail (manual swipe also OK)
-    const rail = document.getElementById("heroRail");
-    if(rail){
-      let i=0;
-      setInterval(()=>{
-        const cards = rail.querySelectorAll(".banner");
-        if(!cards.length) return;
-        i = (i+1) % cards.length;
-        rail.scrollTo({ left: cards[i].offsetLeft - 10, behavior:"smooth" });
-      }, 5200);
-    }
-  </script>
+<!-- ACADEMY -->
+<section class="section section-soft">
+  <div class="section-head">
+    <h2>italky Academy</h2>
+    <p>Seviyeni belirle. AI öğretmeninle yüksel. Gerçek gelişim başlasın.</p>
+  </div>
+
+  <div class="module-grid">
+    <a href="/pages/module_academy.html" class="module-card">
+      <h3>Seviye Tespit Sınavı</h3>
+      <p>Yapay zeka analiz eder, eksiklerini gösterir, plan çıkarır.</p>
+      <div class="badge">Gerçek Analiz</div>
+    </a>
+
+    <a href="/pages/module_academy.html" class="module-card">
+      <h3>AI Özel Ders</h3>
+      <p>7/24 aktif, sabırlı, yorulmayan öğretmen deneyimi.</p>
+      <div class="badge">Kişisel Plan</div>
+    </a>
+
+    <a href="/pages/module_games.html" class="module-card">
+      <h3>Eğlenerek Öğren</h3>
+      <p>Oyunlarla kelime refleksi geliştir, öğrenmeyi hızlandır.</p>
+      <div class="badge">Gamification</div>
+    </a>
+  </div>
+</section>
+
+<!-- ÇEVİRİ MODÜLLERİ -->
+<section class="section section-white">
+  <div class="section-head">
+    <h2>Akıllı Çeviri Modülleri</h2>
+    <p>Metin, belge, fotoğraf… Hepsi tek uygulamada.</p>
+  </div>
+
+  <div class="module-grid">
+    <a href="/pages/module_text.html" class="module-card">
+      <h3>Metinden Çeviri</h3>
+      <p>Uzun yazılar, mesajlar, e-postalar anında çevrilir.</p>
+    </a>
+
+    <a href="/pages/module_photo.html" class="module-card">
+      <h3>Fotoğraftan Çeviri</h3>
+      <p>Menü, tabela, kitap… Fotoğraf çek, kendi dilinde oku.</p>
+    </a>
+
+    <a href="/pages/module_document.html" class="module-card">
+      <h3>Belgeden Çeviri</h3>
+      <p>PDF ve dökümanları anlamadan imzalama.</p>
+    </a>
+
+    <a href="/pages/module_offline.html" class="module-card">
+      <h3>Offline Dil Paketi</h3>
+      <p>İnternet olmasa bile iletişim devam eder.</p>
+    </a>
+  </div>
+</section>
+
+<!-- AI MODÜLLERİ -->
+<section class="section section-soft">
+  <div class="section-head">
+    <h2>AI Sohbet & Konuşkan AI</h2>
+    <p>Dil pratiği, günlük sohbet, konuşma akışı… Hepsi AI ile.</p>
+  </div>
+
+  <div class="module-grid">
+    <a href="/pages/module_chat.html" class="module-card">
+      <h3>Chat AI</h3>
+      <p>Dil pratiği yap, cümlelerini düzelt, gelişimini hızlandır.</p>
+    </a>
+
+    <a href="/pages/module_chat.html" class="module-card">
+      <h3>Sohbet AI</h3>
+      <p>Her dilde rahat konuşma pratiği.</p>
+    </a>
+
+    <a href="/pages/module_meeting.html" class="module-card">
+      <h3>Online Toplantı</h3>
+      <p>20 farklı dil konuşan insan tek toplantıda anlaşır.</p>
+    </a>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="section section-white" id="download">
+  <div class="section-head">
+    <h2>Şimdi Başla</h2>
+    <p>Bir uygulama. Yüzlerce senaryo. Sınırsız iletişim.</p>
+  </div>
+
+  <div class="cta-row" style="margin-top:30px;">
+    <a href="#" class="btn-big btn-primary">Google Play</a>
+    <a href="#" class="btn-big btn-secondary">App Store</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="bottombar">
+  <div class="bottom-links">
+    <a href="/pages/about.html">Hakkımızda</a>
+    <a href="/pages/faq.html">SSS</a>
+    <a href="/pages/privacy.html">Gizlilik</a>
+    <a href="/pages/contact.html">İletişim</a>
+  </div>
+  <div class="bottom-sign">italkyAI • By Ozyigit’s • 2026</div>
+</footer>
+
 </body>
 </html>
-```0
