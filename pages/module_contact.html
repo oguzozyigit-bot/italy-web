@@ -1,0 +1,82 @@
+<!-- FILE: /pages/module_contact.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>italkyAI • İletişim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/pages/site_2050.css?v=2050_1">
+</head>
+<body>
+  <div class="bg2050"></div><div class="stars2050"></div>
+  <div class="shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="/pages/home_v2.html"><div class="brand-line">italky<span class="brand-ai">AI</span></div><div class="brand-slogan">BE FREE</div></a>
+        <nav class="nav">
+          <a href="/pages/home_v2.html">Ana Sayfa</a>
+          <a href="/pages/module_about.html">Hakkımızda</a>
+          <a href="/pages/module_faq.html">SSS</a>
+          <a href="/pages/module_privacy.html">Gizlilik</a>
+          <button class="langbtn" id="langBtn" type="button"><span class="langdot"></span><span id="langLabel">🌐</span></button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero section" style="border-top:none;">
+        <div class="kicker"><i></i> Bize ulaş</div>
+        <h1 class="hero-title">İletişim</h1>
+        <p class="hero-desc">Geri bildirim = ürünün yakıtı. Hata, öneri, iş birliği… yaz, hızlı ilerleyelim.</p>
+        <div class="big-banner">
+          <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=80" alt="contact">
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="cards">
+          <div class="card" style="grid-column:span 6;">
+            <h3>Destek</h3>
+            <p>Model + ekran görüntüsü + “adım adım” anlatım gönder. En hızlı yol bu.</p>
+            <span class="tag">Hızlı çözüm</span>
+          </div>
+          <div class="card" style="grid-column:span 6;">
+            <h3>İş birliği</h3>
+            <p>Kurumsal kullanım, eğitim kurumları, topluluk projeleri… hepsine açığız.</p>
+            <span class="tag">Büyüme</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="bottombar">
+      <div class="bottombar-inner">
+        <div class="bottom-links">
+          <a href="/pages/module_about.html">Hakkımızda</a>
+          <a href="/pages/module_faq.html">SSS</a>
+          <a href="/pages/module_privacy.html">Gizlilik</a>
+          <a href="/pages/module_contact.html">İletişim</a>
+        </div>
+        <div class="bottom-sign">italkyAI • BE FREE • By Ozyigit’s • 2026</div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="sheet" id="langSheet">
+    <div class="sheet-card">
+      <div class="sheet-top">
+        <b>Language</b><input id="langSheetQuery" placeholder="Search language…">
+        <button id="langSheetClose" type="button">✕</button>
+      </div>
+      <div class="sheet-list" id="langSheetList"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { detectSiteLang, setSiteLang, mountLangPicker } from "/js/site_lang.js";
+    const picked = await detectSiteLang(); setSiteLang(picked);
+    mountLangPicker({ btnId:"langBtn", sheetId:"langSheet", listId:"langSheetList", queryId:"langSheetQuery", closeId:"langSheetClose", labelId:"langLabel" });
+  </script>
+</body>
+</html>
