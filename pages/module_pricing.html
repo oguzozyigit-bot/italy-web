@@ -1,0 +1,196 @@
+<!-- FILE: /pages/module_pricing.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>italkyAI • Kurallar & Jeton Mantığı</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/pages/site_2050.css?v=2050_1">
+  <style>
+    .table{margin-top:14px;border-radius:26px;border:1px solid rgba(255,255,255,.12);overflow:hidden;background:rgba(255,255,255,.05)}
+    .row{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:14px;border-top:1px solid rgba(255,255,255,.08)}
+    .row:first-child{border-top:none}
+    .left{min-width:0}
+    .name{font-weight:1000}
+    .desc{margin-top:6px;color:rgba(255,255,255,.72);font-weight:750;font-size:13px;line-height:1.5}
+    .right{white-space:nowrap;font-weight:1000;color:#a5b4fc}
+    .noteBox{margin-top:14px;padding:16px;border-radius:26px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18)}
+    .noteBox b{color:#fff}
+    .mini{font-size:12px;font-weight:850;color:rgba(255,255,255,.72);line-height:1.55}
+  </style>
+</head>
+<body>
+<div class="bg2050"></div><div class="stars2050"></div>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/pages/home_v2.html"><div class="brand-line">italky<span class="brand-ai">AI</span></div><div class="brand-slogan">BE FREE</div></a>
+      <nav class="nav">
+        <a class="navlink" href="/pages/home_v2.html#modules">← Modüller</a>
+        <a class="navlink primary" href="#download">İndir</a>
+        <button class="langbtn navlink" id="langBtn" type="button"><span class="langdot"></span><span id="langLabel">🌐</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="section" style="border-top:none;">
+      <div class="kicker"><i></i> Netlik & Güven</div>
+      <h1 class="hero-title">Kullanım Mantığı <span class="grad">Basit</span></h1>
+      <p class="sub">
+        italkyAI abonelik uygulaması değildir. “Öde–öde–unut” yok.
+        Mantık şu: <b>Jeton al → ihtiyacın olan modülü aç → işin bitince kapat</b>.
+      </p>
+
+      <div class="big-banner">
+        <img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1800&q=80" alt="pricing banner">
+      </div>
+
+      <div class="noteBox">
+        <div class="mini">
+          <b>1 Jeton = 2 TL</b> (Bu oranı ileride değiştirebilirsin. Burada mantığı sabitlemek için yazıyoruz.)<br>
+          Süreli modüllerde amaç şu: kullanıcı “tek işlem için ayrı uygulama” indirmesin; tek ekosistemde kalsın.
+        </div>
+      </div>
+
+      <h2 class="h2" style="margin-top:22px;">Modül bazlı kullanım</h2>
+      <p class="sub">Aşağıdaki tablo, kullanıcıya “ne alıyorum” sorusunun cevabını net verir.</p>
+
+      <div class="table">
+        <div class="row">
+          <div class="left">
+            <div class="name">FaceToFace</div>
+            <div class="desc">Karşılıklı konuşma çevirisi + otomatik seslendirme.</div>
+          </div>
+          <div class="right">2 Jeton • 24 dk</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Metinden Çeviri</div>
+            <div class="desc">Mesaj, e-posta, uzun metin çevirisi.</div>
+          </div>
+          <div class="right">1 Jeton • 24 saat</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Belgeden Çeviri</div>
+            <div class="desc">PDF / dosya okuma–çeviri deneyimi.</div>
+          </div>
+          <div class="right">1 Jeton • 24 saat</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Fotoğraftan Çeviri</div>
+            <div class="desc">Menü, tabela, kitap sayfası — çek ve oku.</div>
+          </div>
+          <div class="right">1 Jeton • 24 saat</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Oyunlar</div>
+            <div class="desc">Kelime tekrarını eğlenceye çevirir.</div>
+          </div>
+          <div class="right">1 Jeton • 24 saat</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Seviye Tespit</div>
+            <div class="desc">Başlangıç seviyeni ölçer, gelişim yolunu belirler.</div>
+          </div>
+          <div class="right">10 Jeton</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Ders (Academy)</div>
+            <div class="desc">AI öğretmenle kısa, odaklı ders.</div>
+          </div>
+          <div class="right">15 Jeton</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Chat AI</div>
+            <div class="desc">Konulu pratik + bilgi + soru-cevap.</div>
+          </div>
+          <div class="right">5 Jeton • 60 dk</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Sohbet AI</div>
+            <div class="desc">Dertleşme, özgür sohbet, günlük konuşma.</div>
+          </div>
+          <div class="right">10 Jeton • 60 dk</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Online Toplantı</div>
+            <div class="desc">2-20 kişi, çok dilli toplantı — herkes anlar.</div>
+          </div>
+          <div class="right">20 Jeton • 60 dk</div>
+        </div>
+
+        <div class="row">
+          <div class="left">
+            <div class="name">Offline Dil Paketi</div>
+            <div class="desc">FaceToFace + Metinden Çeviri offline çalışır.</div>
+          </div>
+          <div class="right">100 Jeton • 365 gün</div>
+        </div>
+      </div>
+
+      <div class="noteBox">
+        <div class="mini">
+          <b>Önemli:</b> “Süreli kullanım” kullanıcıyı kilitlemek için değil,
+          <b>tek uygulamada kalmasını</b> sağlamak için. İhtiyacın olduğunda aç, bitince çık.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="download">
+      <h2 class="h2">Uygulamayı indir</h2>
+      <p class="sub">Buton linklerini sonra sen bağlarsın. Her sayfada hazır duracak.</p>
+      <div class="hero-cta" style="margin-top:14px;">
+        <a class="btn primary" href="#">Google Play</a>
+        <a class="btn ghost" href="#">App Store</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bottombar">
+    <div class="bottombar-inner">
+      <div class="bottom-links">
+        <a href="/pages/module_about.html">Hakkımızda</a>
+        <a href="/pages/module_faq.html">SSS</a>
+        <a href="/pages/module_privacy.html">Gizlilik</a>
+        <a href="/pages/module_contact.html">İletişim</a>
+      </div>
+      <div class="bottom-sign">italkyAI • BE FREE • By Ozyigit’s • 2026</div>
+    </div>
+  </footer>
+
+</div>
+
+<div class="sheet" id="langSheet">
+  <div class="sheet-card">
+    <div class="sheet-top"><b>Language</b><input id="langSheetQuery" placeholder="Search language…"><button id="langSheetClose">✕</button></div>
+    <div class="sheet-list" id="langSheetList"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { detectSiteLang, setSiteLang, mountLangPicker } from "/js/site_lang.js";
+  const picked = await detectSiteLang(); setSiteLang(picked);
+  mountLangPicker({ btnId:"langBtn", sheetId:"langSheet", listId:"langSheetList", queryId:"langSheetQuery", closeId:"langSheetClose", labelId:"langLabel" });
+</script>
+</body>
+</html>
