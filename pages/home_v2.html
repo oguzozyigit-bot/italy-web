@@ -1,209 +1,729 @@
-<style>
-  :root{
-    --bg:#030014;
-    --card: rgba(255,255,255,.04);
-    --border: rgba(255,255,255,.10);
-    --text: rgba(255,255,255,.92);
-    --muted: rgba(255,255,255,.62);
-    --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 45%,#ec4899 100%);
-  }
+<!-- FILE: /pages/home_v2.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Home v2</title>
+  <link rel="icon" href="data:," />
 
-  .ai-badge{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:8px 12px; border-radius:999px;
-    border:1px solid rgba(165,180,252,.35);
-    background: rgba(0,0,0,.28);
-    backdrop-filter: blur(10px);
-    font-weight:900; font-size:12px; letter-spacing:.4px;
-  }
-  .ai-dot{
-    width:10px; height:10px; border-radius:50%;
-    background: var(--aiGrad);
-    box-shadow: 0 0 18px rgba(99,102,241,.55);
-  }
-  .ai-title{
-    font-size: clamp(28px, 4.6vw, 52px);
-    font-weight: 950;
-    line-height: 1.05;
-    margin: 10px 0 10px;
-  }
-  .ai-title span{
-    background: var(--aiGrad);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .ai-sub{
-    color: var(--muted);
-    font-size: 16px;
-    max-width: 860px;
-  }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
-  /* HERO banners */
-  .heroWrap{
-    margin-top: 110px; /* sticky header varsa */
-    padding: 26px 8%;
-  }
-  .heroCard{
-    position:relative;
-    border-radius: 34px;
-    border: 1px solid var(--border);
-    background: radial-gradient(circle at 20% 20%, rgba(99,102,241,.18), rgba(3,0,20,.72) 60%, rgba(236,72,153,.08));
-    overflow:hidden;
-    padding: 26px;
-  }
-  .heroRail{
-    margin-top: 18px;
-    display:flex;
-    gap: 14px;
-    overflow:auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 6px;
-  }
-  .heroRail::-webkit-scrollbar{ display:none; }
-  .banner{
-    min-width: min(560px, 86vw);
-    height: 220px;
-    border-radius: 26px;
-    border: 1px solid rgba(255,255,255,.10);
-    overflow:hidden;
-    position:relative;
-    scroll-snap-align: start;
-    background: rgba(255,255,255,.04);
-  }
-  .banner img{
-    width:100%; height:100%;
-    object-fit: cover;
-    filter: saturate(1.08) contrast(1.05);
-    transform: scale(1.03);
-  }
-  .banner::after{
-    content:"";
-    position:absolute; inset:0;
-    background: linear-gradient(90deg, rgba(0,0,0,.62), rgba(0,0,0,.10));
-  }
-  .bannerTxt{
-    position:absolute;
-    left: 16px; bottom: 16px;
-    right: 16px;
-    z-index:2;
-  }
-  .bannerKicker{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:8px 10px; border-radius:999px;
-    border:1px solid rgba(255,255,255,.18);
-    background: rgba(0,0,0,.35);
-    font-weight:900; font-size:12px;
-  }
-  .bannerH{
-    margin-top: 10px;
-    font-size: 22px;
-    font-weight: 950;
-  }
-  .bannerP{
-    color: rgba(255,255,255,.72);
-    font-size: 13px;
-    margin-top: 6px;
-    max-width: 520px;
-  }
+  <style>
+    :root{
+      --bg:#030014;
+      --panel: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.64);
+      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 45%,#ec4899 100%);
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
+      --r: 28px;
+      --safeT: env(safe-area-inset-top, 0px);
+      --safeB: env(safe-area-inset-bottom, 0px);
+      --wrap: min(980px, calc(100vw - 28px));
+    }
 
-  /* Modules grid */
-  .modsWrap{ padding: 26px 8% 70px; }
-  .modsHead{
-    display:flex; justify-content:space-between; gap:16px; align-items:end;
-    margin-bottom: 18px;
-  }
-  .modsHead h2{
-    font-size: 34px; font-weight: 950;
-    letter-spacing: -1px;
-    margin:0;
-  }
-  .modsHead p{
-    margin:0; color: var(--muted); max-width: 520px;
-  }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html,body{ margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:Outfit,sans-serif; overflow-x:hidden; scroll-behavior:smooth; }
 
-  .modsGrid{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-  }
-  .modCard{
-    border-radius: 28px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    overflow:hidden;
-    transition: transform .25s ease, border-color .25s ease;
-  }
-  .modCard:hover{
-    transform: translateY(-4px);
-    border-color: rgba(165,180,252,.35);
-  }
-  .modImg{
-    height: 160px;
-    position:relative;
-    overflow:hidden;
-    background: rgba(255,255,255,.04);
-  }
-  .modImg img{ width:100%; height:100%; object-fit:cover; }
-  .modImg::after{
-    content:"";
-    position:absolute; inset:0;
-    background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.75));
-  }
-  .modBody{ padding: 16px; }
-  .modTop{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    margin-bottom: 10px;
-  }
+    /* cosmic bg */
+    .bg{
+      position:fixed; inset:0; z-index:0; overflow:hidden;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(99,102,241,.18), transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(236,72,153,.12), transparent 55%),
+        radial-gradient(circle at 50% 50%, rgba(10,0,40,.6), rgba(3,0,20,1) 65%);
+    }
+    .stars{
+      position:absolute; inset:-30%;
+      background-image:
+        radial-gradient(#fff 1px, transparent 1px),
+        radial-gradient(#fff 1px, transparent 1px);
+      background-size: 90px 90px, 150px 150px;
+      background-position: 0 0, 40px 60px;
+      opacity:.08;
+      transform: rotate(12deg);
+      pointer-events:none;
+    }
 
-  /* Renkli ikon kapsülü */
-  .iconPill{
-    width: 44px; height: 44px;
-    border-radius: 16px;
-    display:flex; align-items:center; justify-content:center;
-    border: 1px solid rgba(255,255,255,.10);
-    box-shadow: 0 10px 26px rgba(0,0,0,.35);
-    position:relative;
-    overflow:hidden;
-  }
-  .iconPill::before{
-    content:"";
-    position:absolute; inset:-40%;
-    background: var(--g, var(--aiGrad));
-    filter: blur(0px);
-    transform: rotate(25deg);
-    opacity:.95;
-  }
-  .iconPill span{
-    position:relative;
-    font-weight: 1000;
-    font-size: 18px;
-    color:#05050a;
-  }
+    /* sticky header */
+    header{
+      position:sticky; top:0; z-index:50;
+      padding: calc(14px + var(--safeT)) 14px 14px;
+      background: rgba(3,0,20,.55);
+      backdrop-filter: blur(16px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .topbar{
+      width: var(--wrap);
+      margin: 0 auto;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      user-select:none;
+    }
+    .logoWord{
+      font-family:"Space Grotesk",sans-serif;
+      font-weight:800;
+      font-size:22px;
+      letter-spacing:-.5px;
+      line-height:1;
+    }
+    .logoWord .ai{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .sub{
+      font-size:10px;
+      color: rgba(255,255,255,.55);
+      font-weight:900;
+      letter-spacing:4px;
+      margin-top:3px;
+    }
 
-  .tagAI{
-    display:inline-flex; align-items:center; gap:7px;
-    padding:6px 10px; border-radius:999px;
-    background: rgba(0,0,0,.28);
-    border:1px solid rgba(255,255,255,.12);
-    font-weight:900; font-size:11px;
-    color: rgba(255,255,255,.86);
-  }
-  .tagAI b{
-    background: var(--aiGrad);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color: transparent;
-  }
+    .userPill{
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      max-width: min(56vw, 420px);
+    }
+    .userText{ display:flex; flex-direction:column; line-height:1.1; min-width:0; }
+    .userName{ font-weight:950; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .userMeta{ font-weight:800; font-size:11px; color: rgba(255,255,255,.60); }
+    .avatar{
+      width:34px; height:34px; border-radius:50%;
+      border:2px solid rgba(99,102,241,.55);
+      object-fit:cover;
+      flex: 0 0 auto;
+      background: rgba(255,255,255,.08);
+    }
 
-  .modTitle{
-    font-size: 18px;
-    font-weight: 950;
-    margin: 0 0 6px;
-  }
-  .modDesc{
-    margin:0;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.5;
-  }
-</style>
+    /* mini nav (scroll) */
+    .navRow{
+      width: var(--wrap);
+      margin: 12px auto 0;
+      display:flex; gap:10px;
+      overflow:auto; padding-bottom: 4px;
+      scroll-snap-type:x mandatory;
+    }
+    .navRow::-webkit-scrollbar{ display:none; }
+    .navBtn{
+      scroll-snap-align:start;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.26);
+      color: rgba(255,255,255,.92);
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      cursor:pointer;
+      user-select:none;
+      display:inline-flex; align-items:center; gap:8px;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .navBtn:active{ transform: scale(.98); }
+    .navDot{
+      width:8px; height:8px; border-radius:50%;
+      background: var(--aiGrad);
+      box-shadow: 0 0 14px rgba(99,102,241,.55);
+      flex:0 0 auto;
+    }
+
+    /* main */
+    main{
+      position:relative; z-index:10;
+      width: var(--wrap);
+      margin: 0 auto;
+      padding: 18px 0 120px;
+    }
+
+    /* hero */
+    .hero{
+      border-radius: calc(var(--r) + 10px);
+      border:1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(circle at 15% 18%, rgba(99,102,241,.22), transparent 55%),
+        radial-gradient(circle at 82% 70%, rgba(236,72,153,.16), transparent 55%),
+        rgba(255,255,255,.03);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      padding: 18px;
+    }
+
+    .aiBadge{
+      display:inline-flex; align-items:center; gap:9px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(165,180,252,.28);
+      background: rgba(0,0,0,.22);
+      backdrop-filter: blur(12px);
+      font-weight:950;
+      font-size:12px;
+      letter-spacing:.3px;
+    }
+    .aiDot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--aiGrad);
+      box-shadow: 0 0 18px rgba(99,102,241,.55);
+    }
+    .heroTitle{
+      margin: 14px 0 10px;
+      font-size: clamp(28px, 4.5vw, 56px);
+      font-weight: 1000;
+      line-height: 1.02;
+      letter-spacing: -1.4px;
+    }
+    .heroTitle .g{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .heroSub{
+      color: var(--muted);
+      font-size: 16px;
+      line-height:1.55;
+      max-width: 860px;
+    }
+
+    /* carousel */
+    .rail{
+      margin-top: 16px;
+      display:flex; gap: 14px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 6px;
+    }
+    .rail::-webkit-scrollbar{ display:none; }
+
+    .banner{
+      scroll-snap-align:start;
+      min-width: min(620px, 86vw);
+      height: 240px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.10);
+      position:relative;
+      overflow:hidden;
+      background: rgba(255,255,255,.04);
+      box-shadow: 0 18px 50px rgba(0,0,0,.45);
+      cursor:pointer;
+      user-select:none;
+      transform: translateZ(0);
+    }
+    .banner img{
+      width:100%; height:100%;
+      object-fit: cover;
+      filter: saturate(1.08) contrast(1.08);
+      transform: scale(1.03);
+    }
+    .banner::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(90deg, rgba(0,0,0,.68), rgba(0,0,0,.08));
+    }
+    .bTxt{
+      position:absolute; left:16px; right:16px; bottom:16px;
+      z-index:2;
+    }
+    .bKicker{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.36);
+      font-weight:950;
+      font-size:12px;
+    }
+    .bH{
+      margin-top: 10px;
+      font-size: 22px;
+      font-weight: 1000;
+      letter-spacing: -.4px;
+    }
+    .bP{
+      margin-top: 6px;
+      font-size: 13px;
+      color: rgba(255,255,255,.74);
+      max-width: 520px;
+      line-height:1.5;
+    }
+
+    /* modules */
+    .section{
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: calc(var(--r) + 6px);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      box-shadow: var(--shadow);
+    }
+    .secHead{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+      flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+    .secHead h2{
+      margin:0;
+      font-size: 26px;
+      font-weight: 1000;
+      letter-spacing: -.6px;
+    }
+    .secHead p{
+      margin:0;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 540px;
+      line-height:1.5;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .card{
+      border-radius: 26px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      overflow:hidden;
+      transition: transform .22s ease, border-color .22s ease, background .22s ease;
+    }
+    .card:hover{
+      transform: translateY(-4px);
+      border-color: rgba(165,180,252,.30);
+      background: rgba(255,255,255,.045);
+    }
+    .cImg{
+      height: 160px;
+      position:relative;
+      overflow:hidden;
+      background: rgba(255,255,255,.04);
+    }
+    .cImg img{ width:100%; height:100%; object-fit:cover; }
+    .cImg::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.80));
+    }
+    .cBody{ padding: 14px; }
+    .cTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 10px; }
+
+    .iconPill{
+      width:46px; height:46px;
+      border-radius: 18px;
+      display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 16px 32px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .iconPill::before{
+      content:"";
+      position:absolute; inset:-40%;
+      background: var(--g, var(--aiGrad));
+      transform: rotate(25deg);
+      opacity:.96;
+    }
+    .iconPill span{
+      position:relative;
+      font-weight: 1000;
+      font-size: 18px;
+      color:#05050a;
+    }
+
+    .tagAI{
+      display:inline-flex; align-items:center; gap:7px;
+      padding:6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      font-weight:950;
+      font-size: 11px;
+      color: rgba(255,255,255,.86);
+      white-space:nowrap;
+    }
+    .tagAI b{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .cTitle{ margin: 0 0 6px; font-size: 18px; font-weight: 1000; letter-spacing: -.3px; }
+    .cDesc{ margin:0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .ctaRow{
+      margin-top: 14px;
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .cta{
+      flex:1;
+      min-width: 180px;
+      height: 48px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color:#fff;
+      font-weight: 950;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+    .cta:active{ transform: scale(.98); }
+    .cta.primary{
+      border:none;
+      background: var(--aiGrad);
+      box-shadow: 0 18px 40px rgba(99,102,241,.18);
+    }
+
+    /* footer */
+    footer{
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: calc(var(--r) + 6px);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.02);
+      text-align:center;
+      color: rgba(255,255,255,.55);
+      font-weight: 800;
+      letter-spacing: .4px;
+    }
+    .footLinks{
+      display:flex; justify-content:center; flex-wrap:wrap;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .footLinks a{
+      color: rgba(255,255,255,.55);
+      text-decoration:none;
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .footSig{
+      font-size: 12px;
+      font-weight: 950;
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    /* subtle section anchors offset */
+    .anchor { scroll-margin-top: 120px; }
+  </style>
+</head>
+
+<body>
+  <div class="bg"><div class="stars"></div></div>
+
+  <!-- Sticky Header -->
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div>
+          <div class="logoWord">italky<span class="ai">AI</span></div>
+          <div class="sub">BE FREE</div>
+        </div>
+      </div>
+
+      <div class="userPill" title="Profil">
+        <div class="userText">
+          <div class="userName" id="userName">Kullanıcı</div>
+          <div class="userMeta" id="userMeta">Dil bariyerleri kalkıyor…</div>
+        </div>
+        <img class="avatar" id="userPic" src="" alt="avatar" />
+      </div>
+    </div>
+
+    <!-- Scroll menu -->
+    <div class="navRow" id="navRow">
+      <div class="navBtn" data-to="#anasayfa"><span class="navDot"></span> Anasayfa</div>
+      <div class="navBtn" data-to="#facetoface"><span class="navDot"></span> FaceToFace</div>
+      <div class="navBtn" data-to="#academy"><span class="navDot"></span> italky Academy</div>
+      <div class="navBtn" data-to="#fotograf"><span class="navDot"></span> Fotoğraftan Çeviri</div>
+      <div class="navBtn" data-to="#metin"><span class="navDot"></span> Metinden Çeviri</div>
+      <div class="navBtn" data-to="#belge"><span class="navDot"></span> Belgeden Çeviri</div>
+      <div class="navBtn" data-to="#oyun"><span class="navDot"></span> Eğlenerek Öğren</div>
+      <div class="navBtn" data-to="#chatai"><span class="navDot"></span> Chat AI</div>
+      <div class="navBtn" data-to="#sohbetai"><span class="navDot"></span> Sohbet AI</div>
+      <div class="navBtn" data-to="#toplanti"><span class="navDot"></span> Online Toplantı</div>
+      <div class="navBtn" data-to="#offline"><span class="navDot"></span> Offline Paket</div>
+      <div class="navBtn" data-to="#iletisim"><span class="navDot"></span> İletişim</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero anchor" id="anasayfa">
+      <div class="aiBadge"><span class="aiDot"></span> AI vurgulu iletişim ekosistemi • Tek uygulama</div>
+
+      <div class="heroTitle">
+        Cebindeki <span class="g">Öğretmen</span>. <br>
+        Cebindeki <span class="g">Tercüman</span>.
+      </div>
+
+      <div class="heroSub">
+        italkyAI; konuşmayı, okumayı ve öğrenmeyi tek yerde birleştirir.
+        Çeviri için ayrı uygulama, pratik için ayrı uygulama yok.
+        Aç → işini gör → devam et.
+      </div>
+
+      <div class="rail" id="heroRail">
+        <div class="banner" data-to="#facetoface">
+          <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=70" alt="FaceToFace" />
+          <div class="bTxt">
+            <div class="bKicker"><span class="aiDot"></span> FaceToFace • AI Anlık Çeviri</div>
+            <div class="bH">Masaya bırak, konuşma aksın.</div>
+            <div class="bP">Herkes kendi dilinde konuşur. italkyAI anında çevirir ve seslendirir.</div>
+          </div>
+        </div>
+
+        <div class="banner" data-to="#fotograf">
+          <img src="https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=1400&q=70" alt="Fotoğraftan Çeviri" />
+          <div class="bTxt">
+            <div class="bKicker"><span class="aiDot"></span> Fotoğraftan Çeviri</div>
+            <div class="bH">Menü, tabela, kitap… çek ve anla.</div>
+            <div class="bP">Kamerayı tut, yazıyı yakala, dil bariyerini sıfırla.</div>
+          </div>
+        </div>
+
+        <div class="banner" data-to="#toplanti">
+          <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1400&q=70" alt="Online Toplantı" />
+          <div class="bTxt">
+            <div class="bKicker"><span class="aiDot"></span> Online Toplantı</div>
+            <div class="bH">2 kişi de olur, 20 kişi de.</div>
+            <div class="bP">Tek odada çok dil: herkes kendi dilinde konuşur, herkes anlar.</div>
+          </div>
+        </div>
+
+        <div class="banner" data-to="#academy">
+          <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1400&q=70" alt="italky Academy" />
+          <div class="bTxt">
+            <div class="bKicker"><span class="aiDot"></span> italky Academy</div>
+            <div class="bH">AI öğretmenle hedefli ders.</div>
+            <div class="bP">Seviye tespit → kişiye özel ders → pratik → oyunlar.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ctaRow">
+        <div class="cta primary" onclick="location.href='/pages/facetoface.html'">FaceToFace’i Aç</div>
+        <div class="cta" onclick="location.href='/pages/text_translate.html'">Metinden Çeviri</div>
+        <div class="cta" onclick="location.href='/pages/photo.html'">Fotoğraftan Çeviri</div>
+      </div>
+    </section>
+
+    <!-- MODULES -->
+    <section class="section anchor" id="moduller">
+      <div class="secHead">
+        <div>
+          <h2>Uygulamada neler var?</h2>
+          <p>Her modül tek bir işi “çok iyi” yapar. Hepsi AI ile güçlenir, hepsi aynı ekosistemde çalışır.</p>
+        </div>
+        <div class="aiBadge"><span class="aiDot"></span> AI her yerde: konuşma • çeviri • öğrenme</div>
+      </div>
+
+      <div class="grid">
+        <article class="card anchor" id="facetoface">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#a5b4fc,#6366f1,#22c55e);"><span>🎙️</span></div>
+              <div class="tagAI">AI <b>Realtime</b></div>
+            </div>
+            <h3 class="cTitle">FaceToFace</h3>
+            <p class="cDesc">Telefon masada. Karşılıklı konuşma akıyor. italkyAI anında çevirir ve seslendirir. Hoparlörle tekrar dinlersin.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="metin">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#22c55e,#a5b4fc,#6366f1);"><span>Aa</span></div>
+              <div class="tagAI">AI <b>Context</b></div>
+            </div>
+            <h3 class="cTitle">Metinden Çeviri</h3>
+            <p class="cDesc">Mesaj, e-posta, uzun metin… Anlamı bozmadan doğal çeviri. İstersen giriş/çıkışı seslendir.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="belge">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#f59e0b,#ec4899,#6366f1);"><span>📄</span></div>
+              <div class="tagAI">AI <b>Document</b></div>
+            </div>
+            <h3 class="cTitle">Belgeden Çeviri</h3>
+            <p class="cDesc">PDF/Word içeriklerini hızlı anlayın. İş, okul, sözleşme… “Okudum mu?” stresini bitirir.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="fotograf">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#60a5fa,#a5b4fc,#ec4899);"><span>📷</span></div>
+              <div class="tagAI">AI <b>Vision</b></div>
+            </div>
+            <h3 class="cTitle">Fotoğraftan Çeviri</h3>
+            <p class="cDesc">Menüler, tabelalar, kitap sayfaları… Sadece çekin ve kendi dilinizde okuyun.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="academy">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#ec4899,#a5b4fc,#22c55e);"><span>🎓</span></div>
+              <div class="tagAI">AI <b>Teacher</b></div>
+            </div>
+            <h3 class="cTitle">italky Academy</h3>
+            <p class="cDesc">Seviye tespit → kişiye özel ders → pratik akışı. “Kurs gibi” değil: kısa, net, sonuç odaklı.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="oyun">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#22c55e,#f59e0b,#ec4899);"><span>🎮</span></div>
+              <div class="tagAI">AI <b>Gamify</b></div>
+            </div>
+            <h3 class="cTitle">Eğlenerek Öğren</h3>
+            <p class="cDesc">Kelime oyunları, mini görevler, hızlı pratik. Öğrenme “zor” değil “alışkanlık” olur.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="chatai">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1551836022-deb4988cc6c0?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#a5b4fc,#60a5fa,#22c55e);"><span>💬</span></div>
+              <div class="tagAI">AI <b>Coach</b></div>
+            </div>
+            <h3 class="cTitle">Chat AI</h3>
+            <p class="cDesc">Konu seç, pratik yap: mülakat provası, sunum provası, mail yazımı… AI düzeltir, geliştirir.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="sohbetai">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1520975661595-6453be3f7070?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#ec4899,#f59e0b,#a5b4fc);"><span>🗣️</span></div>
+              <div class="tagAI">AI <b>Buddy</b></div>
+            </div>
+            <h3 class="cTitle">Sohbet AI</h3>
+            <p class="cDesc">Sınav gibi değil sohbet gibi: çekinmeden konuş, akıcılığı artır, günlük dil refleksi kazan.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="toplanti">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#60a5fa,#6366f1,#ec4899);"><span>🧩</span></div>
+              <div class="tagAI">AI <b>Meeting</b></div>
+            </div>
+            <h3 class="cTitle">Online Toplantı</h3>
+            <p class="cDesc">2 kişi de olur, 20 kişi de. Tek odada çok dil: herkes kendi dilinde konuşur, herkes anlar.</p>
+          </div>
+        </article>
+
+        <article class="card anchor" id="offline">
+          <div class="cImg"><img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=70" alt=""></div>
+          <div class="cBody">
+            <div class="cTop">
+              <div class="iconPill" style="--g:linear-gradient(135deg,#22c55e,#60a5fa,#a5b4fc);"><span>🛰️</span></div>
+              <div class="tagAI">AI <b>Offline</b></div>
+            </div>
+            <h3 class="cTitle">Offline Dil Paketi</h3>
+            <p class="cDesc">İnternet yokken bile iletişim devam eder. Seyahat/uçak/kırsal için “sigorta” gibi çalışır.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="ctaRow" style="margin-top:16px;">
+        <div class="cta" onclick="location.href='/pages/about.html'">Hakkımızda</div>
+        <div class="cta" onclick="location.href='/pages/faq.html'">SSS</div>
+        <div class="cta" onclick="location.href='/pages/privacy.html'">Gizlilik</div>
+        <div class="cta primary" onclick="location.href='/pages/contact.html'">İletişim</div>
+      </div>
+    </section>
+
+    <footer class="anchor" id="iletisim">
+      <div class="footLinks">
+        <a href="/pages/about.html">Hakkımızda</a>
+        <a href="/pages/faq.html">SSS</a>
+        <a href="/pages/privacy.html">Gizlilik</a>
+        <a href="/pages/contact.html">İletişim</a>
+      </div>
+      <div class="footSig">italkyAI @ italkyAcademy By Ozyigit's • 2026</div>
+    </footer>
+  </main>
+
+  <script type="module">
+    // Basit profil sync (varsa)
+    try{
+      const raw = localStorage.getItem("italky_user_v1");
+      if(raw){
+        const u = JSON.parse(raw);
+        const n = (u?.name || u?.fullname || u?.display_name || "Kullanıcı");
+        const first = String(n).split(" ")[0] || "Kullanıcı";
+        const pic = u?.picture || u?.avatar || "";
+        const nn = document.getElementById("userName");
+        const pp = document.getElementById("userPic");
+        const mm = document.getElementById("userMeta");
+        if(nn) nn.textContent = first;
+        if(pp && pic) pp.src = pic;
+        if(mm) mm.textContent = "BE FREE • AI aktif";
+      }
+    }catch{}
+
+    // Nav scroll
+    document.querySelectorAll(".navBtn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const sel = btn.getAttribute("data-to");
+        const el = sel ? document.querySelector(sel) : null;
+        if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    });
+
+    // Banner click -> section
+    document.querySelectorAll(".banner").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        const sel = b.getAttribute("data-to");
+        const el = sel ? document.querySelector(sel) : null;
+        if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    });
+
+    // Auto-swipe rail (elle kaydırma da açık)
+    const rail = document.getElementById("heroRail");
+    if(rail){
+      let i=0;
+      setInterval(()=>{
+        const cards = rail.querySelectorAll(".banner");
+        if(!cards.length) return;
+        i = (i+1) % cards.length;
+        rail.scrollTo({ left: cards[i].offsetLeft - 10, behavior:"smooth" });
+      }, 4200);
+    }
+  </script>
+</body>
+</html>
+```0
