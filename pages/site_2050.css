@@ -504,3 +504,64 @@ html,body{
   box-shadow: 0 0 18px rgba(236,72,153,0.35);
   display:inline-block;
 }
+/* === TOPBAR ALIGN FIX (icons too high) === */
+.topbar{
+  height: 72px; /* bar yüksekliği */
+  display:flex;
+  align-items:center; /* DİKEY ORTA */
+}
+
+.topbar-inner{
+  height: 72px;
+  display:flex;
+  align-items:center; /* DİKEY ORTA */
+  justify-content:space-between;
+  gap:14px;
+}
+
+.nav{
+  height: 72px;
+  display:flex;
+  align-items:center;  /* DİKEY ORTA */
+  gap:10px;
+}
+
+/* Menü linkleri / butonlar aynı hizada */
+.nav a, .nav button{
+  height: 44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height: 1;
+  padding: 0 12px;
+  border-radius: 999px;
+}
+
+/* Eğer sen ikonlu “pill” buton kullanıyorsan */
+.nav a .ico, .nav button .ico{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  transform: translateY(0); /* yukarı kaymayı sıfırla */
+}
+
+/* Dil butonu */
+.langbtn{
+  height: 44px;
+  padding: 0 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+/* Bayrak + kod aynı hizada dursun */
+#langLabel{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight: 800;
+}
