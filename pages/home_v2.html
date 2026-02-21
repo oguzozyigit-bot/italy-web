@@ -4,46 +4,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Cebindeki Tercüman ve Öğretmen</title>
+  <title>italkyAI • Abonelik Yok. Özgürlük Var.</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --bg:#ffffff;
       --ink:#0b1020;
-      --muted:#5b647a;
-      --line:rgba(12,18,40,.12);
-      --card:#ffffff;
-      --shadow: 0 18px 45px rgba(10,12,25,.10);
+      --muted:#5c6477;
+      --muted2:#7a8396;
+      --line: rgba(12,18,40,.12);
+      --soft: rgba(12,18,40,.06);
 
       --ai1:#6366f1;
       --ai2:#ec4899;
       --aiGrad: linear-gradient(135deg, var(--ai1), var(--ai2));
-      --chip:#f3f5ff;
 
-      --topH: 76px;
-      --bottomH: 74px;
+      --shadow: 0 18px 45px rgba(10,12,25,.10);
+      --shadow2: 0 10px 24px rgba(10,12,25,.08);
 
-      --radius: 26px;
-      --radius2: 18px;
-      --pad: clamp(14px, 3vw, 22px);
-      --maxW: 1100px;
+      --maxW: 1140px;
+      --pad: clamp(14px, 3.2vw, 24px);
+
+      --topH: 78px;
+      --botH: 74px;
+
+      --r1: 26px;
+      --r2: 18px;
     }
 
     *{ box-sizing:border-box; }
-    html,body{ margin:0; padding:0; width:100%; height:100%; font-family:Outfit,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--ink); }
+    html,body{ margin:0; padding:0; width:100%; height:100%; }
+    body{
+      font-family: Outfit, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: var(--bg);
+      color: var(--ink);
+      overflow-x:hidden;
+    }
     a{ color:inherit; text-decoration:none; }
 
-    /* ======= sticky top bar ======= */
+    /* ====== TOP BAR ====== */
     header{
       position: sticky; top:0; z-index: 9999;
       height: calc(var(--topH) + env(safe-area-inset-top));
       padding-top: env(safe-area-inset-top);
-      background: rgba(255,255,255,0.78);
-      backdrop-filter: blur(14px);
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--line);
     }
     .topbar{
@@ -53,40 +62,44 @@
       padding: 0 var(--pad);
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap: 12px;
+      gap: 14px;
     }
 
     .brand{
-      display:flex; flex-direction:column; gap:4px;
+      min-width: 180px;
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+      cursor:pointer;
       user-select:none;
     }
     .brand .logo{
       font-size: 22px;
-      font-weight: 900;
+      font-weight: 1000;
       letter-spacing: -0.4px;
-      line-height: 1;
-      display:flex; align-items:baseline; gap:4px;
+      display:flex;
+      gap:4px;
+      align-items:baseline;
+      line-height:1;
     }
     .brand .logo .ai{
       background: var(--aiGrad);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-    .brand .tagline{
+    .brand .tag{
       font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 2.8px;
+      font-weight: 1000;
+      letter-spacing: 3.2px;
       color: rgba(12,18,40,.55);
       text-transform: uppercase;
+      line-height:1;
     }
 
-    /* scrollable menu chips */
     .chipNav{
       flex: 1;
       display:flex;
-      gap:10px;
-      align-items:center;
+      gap: 10px;
       overflow:auto;
       padding: 10px 0;
       scrollbar-width:none;
@@ -94,34 +107,43 @@
     .chipNav::-webkit-scrollbar{ display:none; }
     .chip{
       flex: 0 0 auto;
+      display:flex;
+      align-items:center;
+      gap: 8px;
       padding: 10px 12px;
       border-radius: 999px;
-      background: var(--chip);
-      border: 1px solid rgba(99,102,241,.18);
+      border: 1px solid rgba(12,18,40,.12);
+      background: rgba(12,18,40,.03);
       font-size: 12px;
-      font-weight: 900;
-      color: rgba(20,24,60,.88);
+      font-weight: 1000;
+      color: rgba(12,18,40,.86);
       cursor:pointer;
       user-select:none;
       white-space: nowrap;
-      transition: transform .15s ease, background .15s ease;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
     }
-    .chip:active{ transform: scale(.98); }
     .chip .dot{
-      display:inline-block; width:8px; height:8px; border-radius:99px; margin-right:8px;
+      width: 8px; height:8px; border-radius:99px;
       background: var(--aiGrad);
-      vertical-align: middle;
+    }
+    .chip:active{ transform: scale(.985); }
+    .chip:hover{
+      background: rgba(12,18,40,.045);
+      border-color: rgba(99,102,241,.22);
     }
 
-    .ctaRow{
-      display:flex; gap:10px; align-items:center; flex:0 0 auto;
+    .cta{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex: 0 0 auto;
     }
     .btn{
       height: 42px;
       padding: 0 14px;
       border-radius: 999px;
       border: 1px solid rgba(12,18,40,.14);
-      background: #fff;
+      background:#fff;
       box-shadow: 0 10px 20px rgba(10,12,25,.06);
       font-weight: 1000;
       font-size: 12px;
@@ -136,60 +158,81 @@
     .btn.primary{
       border: none;
       background: var(--aiGrad);
-      color: #fff;
-      box-shadow: 0 16px 34px rgba(99,102,241,.22);
+      color:#fff;
+      box-shadow: 0 16px 34px rgba(99,102,241,.20);
     }
     .btn:active{ transform: scale(.99); }
 
-    /* ======= page container ======= */
+    /* ====== WRAP ====== */
     .wrap{
       max-width: var(--maxW);
       margin: 0 auto;
-      padding: 26px var(--pad) calc(var(--bottomH) + env(safe-area-inset-bottom) + 22px);
+      padding: 22px var(--pad) calc(var(--botH) + env(safe-area-inset-bottom) + 22px);
     }
 
-    /* ======= hero ======= */
+    section{ scroll-margin-top: calc(var(--topH) + env(safe-area-inset-top) + 14px); }
+
+    /* ====== HERO ====== */
     .hero{
-      padding: clamp(22px, 3.8vw, 44px);
-      border-radius: calc(var(--radius) + 10px);
+      border-radius: calc(var(--r1) + 10px);
       border: 1px solid var(--line);
       background:
-        radial-gradient(circle at 18% 18%, rgba(99,102,241,.18) 0%, transparent 40%),
-        radial-gradient(circle at 82% 22%, rgba(236,72,153,.14) 0%, transparent 38%),
+        radial-gradient(circle at 18% 18%, rgba(99,102,241,.10) 0%, transparent 46%),
+        radial-gradient(circle at 82% 20%, rgba(236,72,153,.08) 0%, transparent 46%),
         #fff;
       box-shadow: var(--shadow);
       overflow:hidden;
-      position:relative;
+      padding: clamp(18px, 3vw, 32px);
     }
     .heroGrid{
       display:grid;
-      grid-template-columns: 1.08fr .92fr;
-      gap: clamp(16px, 3vw, 30px);
-      align-items:center;
+      grid-template-columns: 1.1fr .9fr;
+      gap: clamp(14px, 3vw, 28px);
+      align-items:stretch;
     }
     @media(max-width: 920px){
       .heroGrid{ grid-template-columns: 1fr; }
     }
 
-    .hero h1{
-      margin:0;
-      font-size: clamp(30px, 4.6vw, 62px);
-      line-height: 1.0;
-      letter-spacing: -1.2px;
+    .hKicker{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(99,102,241,.18);
+      background: rgba(99,102,241,.07);
       font-weight: 1000;
+      font-size: 12px;
+      color: rgba(12,18,40,.88);
+      width: fit-content;
     }
-    .hero h1 .grad{
+    .hKicker b{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      font-weight: 1200;
+    }
+
+    h1{
+      margin: 12px 0 0;
+      font-size: clamp(30px, 4.6vw, 60px);
+      line-height: 0.98;
+      letter-spacing: -1.2px;
+      font-weight: 1200;
+    }
+    .grad{
       background: var(--aiGrad);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-    .hero p{
-      margin: 14px 0 0;
+    .hSub{
+      margin: 12px 0 0;
       font-size: clamp(14px, 2.2vw, 18px);
       color: rgba(12,18,40,.70);
       font-weight: 700;
-      line-height: 1.45;
-      max-width: 62ch;
+      line-height: 1.5;
+      max-width: 70ch;
     }
 
     .heroBadges{
@@ -201,26 +244,25 @@
     .badge{
       padding: 10px 12px;
       border-radius: 999px;
-      background: rgba(12,18,40,.04);
-      border: 1px solid rgba(12,18,40,.10);
+      border: 1px solid rgba(12,18,40,.12);
+      background: rgba(12,18,40,.03);
       font-size: 12px;
       font-weight: 1000;
-      color: rgba(12,18,40,.84);
+      color: rgba(12,18,40,.82);
     }
     .badge strong{
       color: rgba(99,102,241,.95);
-      font-weight: 1100;
+      font-weight: 1200;
     }
 
-    /* slider */
     .slider{
-      border-radius: calc(var(--radius) + 8px);
+      border-radius: calc(var(--r1) + 10px);
       border: 1px solid var(--line);
+      box-shadow: var(--shadow2);
       overflow:hidden;
-      background: #fff;
-      box-shadow: 0 16px 34px rgba(10,12,25,.08);
+      background:#fff;
       position:relative;
-      min-height: 360px;
+      min-height: 380px;
     }
     .slide{
       position:absolute; inset:0;
@@ -228,116 +270,110 @@
       transform: scale(1.02);
       transition: opacity .45s ease, transform .55s ease;
     }
-    .slide.active{
-      opacity:1;
-      transform: scale(1);
-    }
-    .slide img{
-      width:100%; height:100%;
-      object-fit: cover;
-      display:block;
-      filter: saturate(1.05) contrast(1.02);
-    }
-    .slideOverlay{
+    .slide.active{ opacity:1; transform: scale(1); }
+    .slide img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .shade{
       position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 44%, rgba(255,255,255,0.92) 100%);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0.92) 100%);
     }
-    .slideText{
-      position:absolute; left: 18px; right: 18px; bottom: 16px;
-      background: rgba(255,255,255,0.78);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(12,18,40,.10);
+    .cap{
+      position:absolute; left: 14px; right: 14px; bottom: 14px;
       border-radius: 18px;
+      border: 1px solid rgba(12,18,40,.10);
+      background: rgba(255,255,255,.84);
+      backdrop-filter: blur(10px);
       padding: 12px 12px;
     }
-    .slideText .k{
-      font-size: 11px; font-weight: 1100; letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(99,102,241,.90);
+    .cap .k{
+      font-size: 11px;
+      font-weight: 1200;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(99,102,241,.92);
     }
-    .slideText .t{
+    .cap .t{
       margin-top: 6px;
       font-size: 14px;
-      font-weight: 1000;
+      font-weight: 1100;
       color: rgba(12,18,40,.88);
       line-height: 1.25;
     }
     .dots{
-      position:absolute; top: 12px; right: 12px;
+      position:absolute; top: 12px; right: 12px; z-index:5;
       display:flex; gap:7px;
-      z-index:5;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(12,18,40,.10);
+      backdrop-filter: blur(10px);
+      border-radius: 999px;
+      padding: 8px 10px;
     }
     .dot{
-      width: 10px; height: 10px; border-radius: 99px;
-      background: rgba(255,255,255,0.75);
-      border: 1px solid rgba(12,18,40,.18);
+      width: 10px; height:10px;
+      border-radius: 99px;
+      background: rgba(12,18,40,.18);
       cursor:pointer;
     }
-    .dot.active{
-      background: var(--aiGrad);
-      border-color: rgba(99,102,241,.30);
-    }
+    .dot.active{ background: var(--aiGrad); }
 
-    /* section */
-    section{
-      margin-top: 28px;
-      scroll-margin-top: calc(var(--topH) + env(safe-area-inset-top) + 14px);
-    }
+    /* ====== SECTION HEAD ====== */
     .secHead{
+      margin-top: 26px;
       display:flex;
       align-items:flex-end;
       justify-content:space-between;
       gap: 14px;
-      margin: 0 0 14px;
     }
     .secHead h2{
       margin:0;
       font-size: clamp(20px, 3.2vw, 34px);
       letter-spacing: -0.6px;
-      font-weight: 1100;
+      font-weight: 1200;
     }
     .secHead p{
       margin:0;
       color: rgba(12,18,40,.65);
       font-weight: 700;
-      max-width: 64ch;
-      line-height: 1.35;
+      max-width: 70ch;
+      line-height: 1.4;
     }
 
     .card{
-      background: var(--card);
+      margin-top: 14px;
+      background:#fff;
       border: 1px solid var(--line);
-      border-radius: calc(var(--radius) + 6px);
-      padding: clamp(14px, 2.6vw, 22px);
+      border-radius: calc(var(--r1) + 10px);
       box-shadow: var(--shadow);
+      padding: clamp(14px, 2.6vw, 22px);
     }
 
-    /* feature rows */
     .featRow{
       display:grid;
-      grid-template-columns: 1.05fr .95fr;
+      grid-template-columns: 1.02fr .98fr;
       gap: clamp(14px, 2.8vw, 26px);
       align-items:center;
     }
-    .featRow.rev{ grid-template-columns: .95fr 1.05fr; }
+    .featRow.rev{ grid-template-columns: .98fr 1.02fr; }
     @media(max-width: 920px){
       .featRow, .featRow.rev{ grid-template-columns: 1fr; }
     }
-    .featKicker{
+
+    .kicker{
       font-size: 12px;
-      font-weight: 1100;
+      font-weight: 1200;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(236,72,153,.90);
+      color: rgba(236,72,153,.92);
     }
-    .featTitle{
-      margin: 8px 0 10px;
+    .title{
+      margin: 10px 0 10px;
       font-size: clamp(22px, 3.4vw, 44px);
       letter-spacing: -0.8px;
-      font-weight: 1100;
-      line-height: 1.05;
+      font-weight: 1200;
+      line-height: 1.06;
     }
-    .featDesc{
-      margin: 0;
+    .desc{
+      margin:0;
       font-size: 15px;
       color: rgba(12,18,40,.70);
       font-weight: 700;
@@ -361,10 +397,9 @@
     .bullets li::before{
       content:"✦";
       color: rgba(99,102,241,.95);
-      font-weight: 1200;
+      font-weight: 1300;
       margin-top: 1px;
     }
-
     .priceChip{
       margin-top: 14px;
       display:inline-flex;
@@ -374,165 +409,155 @@
       border-radius: 999px;
       background: rgba(99,102,241,.08);
       border: 1px solid rgba(99,102,241,.18);
-      font-weight: 1000;
+      font-weight: 1100;
       color: rgba(12,18,40,.88);
     }
-    .priceChip b{
-      color: rgba(99,102,241,.95);
-    }
+    .priceChip b{ color: rgba(99,102,241,.95); }
 
     .imgCard{
-      border-radius: calc(var(--radius) + 10px);
+      border-radius: calc(var(--r1) + 10px);
       overflow:hidden;
       border: 1px solid var(--line);
-      box-shadow: 0 18px 45px rgba(10,12,25,.12);
+      box-shadow: var(--shadow2);
       background:#fff;
       min-height: 360px;
       position:relative;
     }
-    .imgCard img{
-      width:100%; height:100%;
-      object-fit: cover;
-      display:block;
-    }
-    .imgStamp{
+    .imgCard img{ width:100%; height:100%; object-fit: cover; display:block; }
+    .stamp{
       position:absolute;
       left: 14px; bottom: 14px;
-      background: rgba(255,255,255,0.82);
-      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.86);
       border: 1px solid rgba(12,18,40,.10);
+      backdrop-filter: blur(10px);
       border-radius: 16px;
       padding: 10px 10px;
-      font-weight: 1000;
-      color: rgba(12,18,40,.88);
-      max-width: 72%;
+      font-weight: 1100;
+      color: rgba(12,18,40,.86);
+      max-width: 78%;
     }
-    .imgStamp small{
+    .stamp small{
       display:block;
       margin-top: 4px;
       font-weight: 900;
       color: rgba(12,18,40,.62);
     }
 
-    /* pricing grid */
-    .pricingGrid{
+    /* ====== MODULE GRID ====== */
+    .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
       gap: 12px;
       margin-top: 12px;
     }
-    .pItem{
+    .m{
       grid-column: span 4;
-      background: #fff;
-      border: 1px solid var(--line);
       border-radius: 22px;
+      border: 1px solid var(--line);
+      background:#fff;
+      box-shadow: var(--shadow2);
       padding: 16px 14px;
-      box-shadow: 0 14px 30px rgba(10,12,25,.08);
       position:relative;
       overflow:hidden;
     }
-    .pItem::after{
+    .m::after{
       content:"";
-      position:absolute; inset:auto -20% -60% -20%;
-      height: 160px;
-      background: radial-gradient(circle at 40% 20%, rgba(99,102,241,.18), transparent 70%);
+      position:absolute; inset:auto -20% -70% -20%;
+      height: 170px;
+      background: radial-gradient(circle at 40% 20%, rgba(99,102,241,.14), transparent 70%);
       transform: rotate(6deg);
       pointer-events:none;
     }
-    .pTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    .mTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
       position:relative; z-index:2;
     }
-    .pName{
-      font-weight:1100;
-      letter-spacing:-0.2px;
-      font-size: 14px;
-    }
-    .pIcon{
+    .mName{ font-weight: 1200; font-size: 14px; letter-spacing: -0.2px; }
+    .mIcon{
       width: 36px; height:36px;
       border-radius: 14px;
       background: rgba(99,102,241,.10);
       border: 1px solid rgba(99,102,241,.18);
       display:flex; align-items:center; justify-content:center;
       font-size: 18px;
+      flex: 0 0 auto;
     }
-    .pDesc{
+    .mDesc{
       position:relative; z-index:2;
       margin-top: 10px;
       font-size: 13px;
-      color: rgba(12,18,40,.65);
       font-weight: 700;
+      color: rgba(12,18,40,.66);
       line-height: 1.35;
-      min-height: 52px;
+      min-height: 56px;
     }
-    .pCost{
+    .mCost{
       position:relative; z-index:2;
       margin-top: 12px;
       padding-top: 12px;
       border-top: 1px dashed rgba(12,18,40,.18);
-      font-weight: 1100;
-      color: rgba(12,18,40,.90);
       display:flex;
       justify-content:space-between;
-      gap:10px;
       align-items:center;
+      gap: 10px;
+      font-weight: 1100;
       font-size: 13px;
+      color: rgba(12,18,40,.86);
     }
-    .pCost b{ color: rgba(99,102,241,.95); }
-    @media(max-width: 980px){
-      .pItem{ grid-column: span 6; }
-    }
-    @media(max-width: 640px){
-      .pItem{ grid-column: span 12; }
-    }
+    .mCost b{ color: rgba(99,102,241,.95); }
 
-    /* offline banner */
+    @media(max-width: 980px){ .m{ grid-column: span 6; } }
+    @media(max-width: 640px){ .m{ grid-column: span 12; } }
+
+    /* ====== OFFLINE ====== */
     .offline{
-      border-radius: calc(var(--radius) + 10px);
-      padding: clamp(18px, 3vw, 30px);
+      margin-top: 14px;
+      border-radius: calc(var(--r1) + 10px);
       border: 1px solid rgba(99,102,241,.22);
       background: linear-gradient(135deg, rgba(99,102,241,.14), rgba(236,72,153,.10), #fff);
-      box-shadow: 0 18px 45px rgba(10,12,25,.10);
-      overflow:hidden;
-      position:relative;
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 30px);
     }
     .offline h3{
       margin:0;
       font-size: clamp(20px, 3vw, 34px);
-      letter-spacing:-0.6px;
-      font-weight: 1100;
+      font-weight: 1200;
+      letter-spacing: -0.6px;
     }
     .offline p{
       margin: 10px 0 0;
       color: rgba(12,18,40,.70);
       font-weight: 700;
-      line-height: 1.5;
+      line-height: 1.55;
       max-width: 78ch;
     }
-    .offline .bigPrice{
+    .offline .big{
       margin-top: 14px;
       display:inline-flex;
+      align-items:center;
+      gap: 10px;
       padding: 12px 14px;
       border-radius: 18px;
       background: #0b1020;
       color:#fff;
-      font-weight: 1100;
-      letter-spacing: -0.2px;
+      font-weight: 1200;
       box-shadow: 0 18px 44px rgba(10,12,25,.22);
     }
-    .offline .bigPrice span{
+    .offline .big span{
       background: var(--aiGrad);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
-      font-weight: 1200;
-      margin-left: 8px;
+      font-weight: 1300;
     }
 
-    /* faq */
+    /* ====== FAQ ====== */
     .faq{
+      margin-top: 12px;
       display:grid;
       gap: 12px;
-      margin-top: 12px;
     }
     details{
       border: 1px solid var(--line);
@@ -543,7 +568,7 @@
     }
     summary{
       cursor:pointer;
-      font-weight: 1000;
+      font-weight: 1100;
       color: rgba(12,18,40,.90);
       list-style:none;
     }
@@ -552,16 +577,16 @@
       margin: 10px 0 0;
       color: rgba(12,18,40,.70);
       font-weight: 700;
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
-    /* bottom bar */
+    /* ====== BOTTOM BAR ====== */
     .bottomBar{
       position: fixed;
       left:0; right:0; bottom:0;
-      height: calc(var(--bottomH) + env(safe-area-inset-bottom));
+      height: calc(var(--botH) + env(safe-area-inset-bottom));
       padding-bottom: env(safe-area-inset-bottom);
-      background: rgba(255,255,255,0.88);
+      background: rgba(255,255,255,.88);
       backdrop-filter: blur(14px);
       border-top: 1px solid var(--line);
       z-index: 9998;
@@ -580,29 +605,23 @@
       color: rgba(12,18,40,.78);
       font-size: 12px;
     }
-    .bottomInner .mini{
-      opacity:.9;
-      line-height: 1.25;
-    }
-    .bottomInner .mini b{
-      color: rgba(99,102,241,.95);
-    }
-
-    .footLinks{
+    .bottomInner .mini{ line-height: 1.25; }
+    .bottomInner .mini b{ color: rgba(99,102,241,.95); }
+    .links{
       display:flex;
       gap: 14px;
       flex-wrap:wrap;
       justify-content:flex-end;
     }
-    .footLinks a{
+    .links a{
       color: rgba(12,18,40,.60);
-      font-weight: 1000;
+      font-weight: 1100;
       text-transform: uppercase;
       letter-spacing: .9px;
       font-size: 10px;
+      cursor:pointer;
     }
 
-    /* reduced motion */
     @media (prefers-reduced-motion: reduce){
       *{ scroll-behavior: auto !important; transition:none !important; animation:none !important; }
     }
@@ -613,9 +632,9 @@
 
 <header>
   <div class="topbar">
-    <div class="brand" role="button" tabindex="0" data-scroll="#hero">
+    <div class="brand" data-scroll="#hero" tabindex="0" title="Başa dön">
       <div class="logo">italky<span class="ai">AI</span></div>
-      <div class="tagline">BE FREE</div>
+      <div class="tag">BE FREE</div>
     </div>
 
     <nav class="chipNav" aria-label="Bölümler">
@@ -629,9 +648,9 @@
       <div class="chip" data-scroll="#contact"><span class="dot"></span>İletişim</div>
     </nav>
 
-    <div class="ctaRow">
+    <div class="cta">
       <button class="btn" id="btnPlay" type="button">Google Play</button>
-      <button class="btn primary" id="btnApp" type="button">Uygulamayı İndir</button>
+      <button class="btn primary" id="btnDownload" type="button">Uygulamayı İndir</button>
     </div>
   </div>
 </header>
@@ -642,63 +661,62 @@
   <section id="hero" class="hero">
     <div class="heroGrid">
       <div>
-        <h1>Dil bilmiyor olmanız <span class="grad">önemsiz.</span></h1>
-        <p>
-          italkyAI; konuşmayı, okumayı, yazmayı ve öğrenmeyi tek uygulamada birleştirir.
-          <b>Abonelik yok.</b> Kullanmadığınız şeye para ödemezsiniz.
-          <b>Jeton al, kullan, bitir.</b>
+        <div class="hKicker">ABONELİK YOK • <b>JETON SİSTEMİ</b> • KULLAN VE BİTİR</div>
+        <h1>Cebinizdeki <span class="grad">Öğretmen.</span><br/>Cebinizdeki <span class="grad">Tercüman.</span></h1>
+        <p class="hSub">
+          italkyAI; konuşmayı, okumayı ve öğrenmeyi tek uygulamada birleştirir.
+          Kullanmıyorsan ödeme yok. Kontrol sende.
         </p>
 
         <div class="heroBadges">
-          <div class="badge"><strong>Abonelik yok</strong> • sabit ücret yok</div>
-          <div class="badge"><strong>Jeton sistemi</strong> • kontrol sende</div>
-          <div class="badge"><strong>FaceToFace</strong> • anında konuş</div>
-          <div class="badge"><strong>Academy</strong> • AI ile geliş</div>
+          <div class="badge"><strong>1 Jeton = 2 TL</strong> (basit ve şeffaf)</div>
+          <div class="badge"><strong>FaceToFace</strong> anlık sesli çeviri</div>
+          <div class="badge"><strong>Academy</strong> seviye + ders planı</div>
+          <div class="badge"><strong>Toplantı</strong> 2–20 kişi, herkes anlasın</div>
         </div>
 
         <div class="heroBadges" style="margin-top:10px;">
-          <div class="badge">Fiyat: <strong>1 Jeton = 2 TL</strong></div>
-          <div class="badge">Toplantı: <strong>2 kişi / 20 kişi</strong> fark etmez</div>
+          <div class="badge">Hedef: <strong>“İndirdim, hemen işime yaradı.”</strong></div>
+          <div class="badge">Dert: <strong>Abonelik tuzağı yok.</strong></div>
         </div>
       </div>
 
-      <div class="slider" aria-label="Bannerlar">
+      <div class="slider" aria-label="Gerçek kullanım senaryoları">
         <div class="dots" id="dots"></div>
 
-        <!-- Gerçek foto bannerlar (Unsplash) -->
-        <div class="slide active" data-title="Kafede FaceToFace" data-k="FaceToFace">
-          <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=80" alt="Kafede konuşma" />
-          <div class="slideOverlay"></div>
-          <div class="slideText">
+        <div class="slide active">
+          <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=80" alt="Kafede konuşan insanlar" />
+          <div class="shade"></div>
+          <div class="cap">
             <div class="k">FACETOFACE</div>
-            <div class="t">Masaya bırak, göz teması kaybolmasın. Herkes kendi dilinde konuşsun.</div>
+            <div class="t">Masaya bırak. Herkes kendi dilinde konuşsun. italkyAI çevirsin.</div>
           </div>
         </div>
 
-        <div class="slide" data-title="Menü Fotoğraf Çeviri" data-k="Fotoğraftan Çeviri">
-          <img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=1600&q=80" alt="Kafede menü" />
-          <div class="slideOverlay"></div>
-          <div class="slideText">
+        <div class="slide">
+          <img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=1600&q=80" alt="Menü fotoğrafı" />
+          <div class="shade"></div>
+          <div class="cap">
             <div class="k">FOTOĞRAFTAN ÇEVİRİ</div>
-            <div class="t">Menü, tabela, kitap… Çek, anında oku. Dil engeli sıfır.</div>
+            <div class="t">Menü / tabela / kitap… Çek ve kendi dilinde oku.</div>
           </div>
         </div>
 
-        <div class="slide" data-title="Online Toplantı" data-k="Toplantı">
+        <div class="slide">
           <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=80" alt="Toplantı" />
-          <div class="slideOverlay"></div>
-          <div class="slideText">
+          <div class="shade"></div>
+          <div class="cap">
             <div class="k">ONLINE TOPLANTI</div>
-            <div class="t">İster 2 kişi ister 20 kişi: Herkes konuşsun, herkes anlasın.</div>
+            <div class="t">İster 2 kişi ister 20 kişi. Herkes konuşsun, herkes anlasın.</div>
           </div>
         </div>
 
-        <div class="slide" data-title="italky Academy" data-k="Academy">
-          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80" alt="Ders" />
-          <div class="slideOverlay"></div>
-          <div class="slideText">
+        <div class="slide">
+          <img src="https://images.unsplash.com/photo-1516387938699-a93567ec168e?auto=format&fit=crop&w=1600&q=80" alt="Çalışma" />
+          <div class="shade"></div>
+          <div class="cap">
             <div class="k">ITALKY ACADEMY</div>
-            <div class="t">Seviye tespit → AI ders planı → kısa, net, hızlı gelişim.</div>
+            <div class="t">Seviye tespit → AI ders planı → 15 dk odak dersler.</div>
           </div>
         </div>
       </div>
@@ -717,23 +735,23 @@
     <div class="card">
       <div class="featRow">
         <div>
-          <div class="featKicker">Amiral Gemisi</div>
-          <div class="featTitle">“Turist gibi değil, yerli gibi.”</div>
-          <p class="featDesc">
-            Telefonu masaya bırakın. Siz Türkçe konuşun, italkyAI karşı tarafa o dilde seslendirsin.
-            Karşı taraf konuşsun, italkyAI size Türkçe anlatsın. Dil yokmuş gibi.
+          <div class="kicker">Amiral Gemisi</div>
+          <div class="title">“Göz teması kaybolmasın.”</div>
+          <p class="desc">
+            Telefon masada durur. Siz konuşursunuz. italkyAI çevirmeyi otomatik seslendirir.
+            İstersen çeviri balonunun yanındaki hoparlöre dokunup tekrar dinlersin.
           </p>
           <ul class="bullets">
-            <li>Kafe / restoran / otel / sokak: pratik anlar için birebir.</li>
-            <li>Konuşma bittiğinde çeviri otomatik okunur; istersen hoparlör ikonuyla tekrar dinlersin.</li>
-            <li>Çok dilli kullanım: seç, konuş, bitti.</li>
+            <li>Kafe, otel, yol tarifi, alışveriş… anında “anlaşma” modu.</li>
+            <li>Çok dil: üst/alt dil seçersin, sistem çalışır.</li>
+            <li>Abonelik yok: ihtiyacın olduğunda aç, bitince kapat.</li>
           </ul>
           <div class="priceChip">Maliyet: <b>2 Jeton</b> • <b>24 dakika</b> kullanım</div>
         </div>
 
         <div class="imgCard">
-          <img src="https://images.unsplash.com/photo-1520975682094-4a167b4f1c70?auto=format&fit=crop&w=1600&q=80" alt="Karşılıklı konuşma" />
-          <div class="imgStamp">Gerçek senaryo: Masada konuş, italkyAI çeviriyi seslendirsin.<small>En hızlı “anlaşma” modu.</small></div>
+          <img src="https://images.unsplash.com/photo-1520975682094-4a167b4f1c70?auto=format&fit=crop&w=1600&q=80" alt="Sohbet" />
+          <div class="stamp">Gerçek sahne: masada sohbet, ekranda çeviri.<small>Turist modu bitti.</small></div>
         </div>
       </div>
     </div>
@@ -751,21 +769,21 @@
     <div class="card">
       <div class="featRow rev">
         <div class="imgCard">
-          <img src="https://images.unsplash.com/photo-1516387938699-a93567ec168e?auto=format&fit=crop&w=1600&q=80" alt="Çalışma" />
-          <div class="imgStamp">Seviye tespit → kişisel plan → kısa dersler<small>“Zaman kaybı yok” modu.</small></div>
+          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80" alt="Ders" />
+          <div class="stamp">Seviye → analiz → ders planı<small>Odak: hızlı gelişim.</small></div>
         </div>
 
         <div>
-          <div class="featKicker">Gerçek gelişim</div>
-          <div class="featTitle">Önce nerede olduğunu gör, sonra zirveye çık.</div>
-          <p class="featDesc">
-            Seviye tespit sınavı ile başlarsın. Sonra AI öğretmen, seviyene göre görevler verir:
-            hedef dil + altında Türkçe açıklama. Kısa kısa, net net.
+          <div class="kicker">Gerçek Gelişim</div>
+          <div class="title">Önce seviyeni gör, sonra yüksel.</div>
+          <p class="desc">
+            Seviye tespit sınavı ile başlarsın. AI öğretmen eksiklerini bulur ve 15 dakikalık derslerle
+            günlük bir rutin kurar. İstersen aynı gün birden fazla ders alırsın.
           </p>
           <ul class="bullets">
-            <li>Seviye tespit: zayıf noktayı bulur, planı ona göre kurar.</li>
-            <li>Dersler 15 dakika: odak bozulmadan ilerlersin.</li>
-            <li>İstersen aynı gün birden fazla ders alırsın.</li>
+            <li>Seviye tespit: 10 Jeton (tek sefer)</li>
+            <li>Ders: 15 Jeton (15 dk)</li>
+            <li>Hedef dil + Türkçe açıklama: net ve anlaşılır</li>
           </ul>
           <div class="priceChip">Seviye Tespit: <b>10 Jeton</b> • Ders: <b>15 Jeton</b></div>
         </div>
@@ -778,88 +796,87 @@
     <div class="secHead">
       <div>
         <h2>Modüller</h2>
-        <p>Çeviri, konuşma, okuma, oyun ve toplantı: her ihtiyaca tek uygulama.</p>
+        <p>Her modülün bir amacı var. “Sadece cool” değil — gerçekten iş görsün diye.</p>
       </div>
     </div>
 
     <div class="card">
-      <div class="pricingGrid">
+      <div class="grid">
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Metinden Çeviri</div><div class="pIcon">📝</div></div>
-          <div class="pDesc">Mesaj, mail, uzun metin… Hızlı çevir. İstersen sesiyle dinle.</div>
-          <div class="pCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Metinden Çeviri</div><div class="mIcon">📝</div></div>
+          <div class="mDesc">Mesaj, mail, uzun metin… 24 saat boyunca rahat rahat çevir.</div>
+          <div class="mCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Belgeden Çeviri</div><div class="pIcon">📄</div></div>
-          <div class="pDesc">PDF/Word içerikleri anlamak için: “dosyayı aç, anla”.</div>
-          <div class="pCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Belgeden Çeviri</div><div class="mIcon">📄</div></div>
+          <div class="mDesc">PDF/Word içeriklerini hızlıca anla. İş ve okul için.</div>
+          <div class="mCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Fotoğraftan Çeviri</div><div class="pIcon">📸</div></div>
-          <div class="pDesc">Menü, tabela, kitap sayfası… Çek ve kendi dilinde oku.</div>
-          <div class="pCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Fotoğraftan Çeviri</div><div class="mIcon">📸</div></div>
+          <div class="mDesc">Menü/tabela/kitap… Çek ve anında kendi dilinde oku.</div>
+          <div class="mCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Oyunlar</div><div class="pIcon">🎮</div></div>
-          <div class="pDesc">Kelime, hız, refleks… Eğlenerek öğren ve kalıcı hale getir.</div>
-          <div class="pCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Eğlenerek Öğren</div><div class="mIcon">🎮</div></div>
+          <div class="mDesc">Kelime oyunlarıyla “öğrenme”yi refleks haline getir.</div>
+          <div class="mCost"><span>Süre</span><b>1 Jeton / 24 Saat</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Chat AI</div><div class="pIcon">🧠</div></div>
-          <div class="pDesc">Hedef: pratik. Bir konu seç, konuş. Hatalarını düzelttir.</div>
-          <div class="pCost"><span>Süre</span><b>5 Jeton / 60 Dakika</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Chat AI</div><div class="mIcon">🧠</div></div>
+          <div class="mDesc">Pratik odaklı: konu seç, konuş, düzeltme al, geliş.</div>
+          <div class="mCost"><span>Süre</span><b>5 Jeton / 60 dk</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Sohbet AI</div><div class="pIcon">💬</div></div>
-          <div class="pDesc">Hedef: akış. Daha serbest, daha “insan gibi” sohbet.</div>
-          <div class="pCost"><span>Süre</span><b>10 Jeton / 60 Dakika</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Sohbet AI</div><div class="mIcon">💬</div></div>
+          <div class="mDesc">Serbest akış: günlük konuşma, dertleşme, pratik.</div>
+          <div class="mCost"><span>Süre</span><b>10 Jeton / 60 dk</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Online Toplantı</div><div class="pIcon">🎥</div></div>
-          <div class="pDesc">2 kişi de olur 20 kişi de. Herkes konuşsun, herkes anlasın.</div>
-          <div class="pCost"><span>Süre</span><b>20 Jeton / 60 Dakika</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Konuşkan AI</div><div class="mIcon">🗣️</div></div>
+          <div class="mDesc">Sesli pratik: konuş, cevap al, tekrar et. Akıcılık kazan.</div>
+          <div class="mCost"><span>Süre</span><b>10 Jeton / 60 dk</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Konuşkan AI</div><div class="pIcon">🗣️</div></div>
-          <div class="pDesc">Sesli pratik: konuş, cevap al, tekrar et. “Konuşma kası” geliştir.</div>
-          <div class="pCost"><span>Süre</span><b>10 Jeton / 60 Dakika</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Online Toplantı</div><div class="mIcon">🎥</div></div>
+          <div class="mDesc">Herkese açık: 2 kişi de olur, 20 kişi de. Anlık anlaş.</div>
+          <div class="mCost"><span>Süre</span><b>20 Jeton / 60 dk</b></div>
         </div>
 
-        <div class="pItem">
-          <div class="pTop"><div class="pName">Seviye Tespit Sınavı</div><div class="pIcon">🧪</div></div>
-          <div class="pDesc">AI analiz eder: seviyen, eksiklerin, hedef yol haritan.</div>
-          <div class="pCost"><span>Tek Sefer</span><b>10 Jeton</b></div>
+        <div class="m">
+          <div class="mTop"><div class="mName">Seviye Tespit</div><div class="mIcon">🧪</div></div>
+          <div class="mDesc">AI analiz eder: seviyen, eksiklerin ve hedef yol haritan.</div>
+          <div class="mCost"><span>Tek sefer</span><b>10 Jeton</b></div>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- PRICING (jeton menüsü) -->
+  <!-- PRICING -->
   <section id="pricing">
     <div class="secHead">
       <div>
         <h2>Jeton Menüsü</h2>
-        <p>Abonelik yok. Kullandığın kadar öde. Basit.</p>
+        <p>Şeffaf ve anlaşılır: “Ben neye ne ödüyorum?” sorusu burada bitiyor.</p>
       </div>
     </div>
 
     <div class="card">
       <div class="featRow">
         <div>
-          <div class="featKicker">Şeffaf fiyat</div>
-          <div class="featTitle">1 Jeton = <span style="background:var(--aiGrad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2 TL</span></div>
-          <p class="featDesc">
-            italkyAI’da sabit aylık ücret yok. “Kullanmadığın ayın parasını ödemek” yok.
-            Jeton alırsın, ihtiyacın olduğunda kullanırsın.
+          <div class="kicker">Şeffaf fiyat</div>
+          <div class="title">1 Jeton = <span class="grad">2 TL</span></div>
+          <p class="desc">
+            Abonelik yok. Kullandığın kadar öde. “İptal unutursan para gider” devri bitti.
           </p>
           <ul class="bullets">
             <li>FaceToFace: 2 Jeton / 24 dk</li>
@@ -868,16 +885,16 @@
             <li>Fotoğraftan Çeviri: 1 Jeton / 24 saat</li>
             <li>Oyunlar: 1 Jeton / 24 saat</li>
             <li>Seviye Tespit: 10 Jeton</li>
-            <li>Ders: 15 Jeton (15 dk)</li>
+            <li>Ders: 15 Jeton</li>
             <li>Chat AI: 5 Jeton / 60 dk</li>
-            <li>Sohbet AI / Konuşkan AI: 10 Jeton / 60 dk</li>
+            <li>Sohbet / Konuşkan AI: 10 Jeton / 60 dk</li>
             <li>Online Toplantı: 20 Jeton / 60 dk</li>
           </ul>
         </div>
 
         <div class="imgCard">
           <img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1600&q=80" alt="Kullanım" />
-          <div class="imgStamp">“Bir kahve parasıyla bütün gün çeviri” hissi.<small>Abonelik yok, kontrol sende.</small></div>
+          <div class="stamp">“Kullanmadığın şeye para yok.”<small>Kontrol tamamen sende.</small></div>
         </div>
       </div>
     </div>
@@ -888,17 +905,17 @@
     <div class="secHead">
       <div>
         <h2>Offline Dil Paketi</h2>
-        <p>İnternetin bittiği yerde konuşma bitmesin.</p>
+        <p>İnternet yoksa da anlaşma devam.</p>
       </div>
     </div>
 
     <div class="offline">
-      <h3>İnternetin çekmediği yerde bile konuş.</h3>
+      <h3>İnternetin bitse de sohbetin bitmesin.</h3>
       <p>
-        Uçakta, dağda, yolda… Offline Dil Paketi ile <b>FaceToFace</b> ve <b>Metinden Çeviri</b>
-        modülleri çevrimdışı kullanılabilir. Süre: <b>365 gün</b>.
+        Offline Dil Paketi ile <b>FaceToFace</b> ve <b>Metinden Çeviri</b> modüllerini
+        <b>365 gün</b> çevrimdışı kullanırsın. Uçak, dağ, bodrum katı… fark etmez.
       </p>
-      <div class="bigPrice">Paket: <span>100 Jeton / 365 Gün</span></div>
+      <div class="big">Paket: <span>100 Jeton / 365 Gün</span></div>
     </div>
   </section>
 
@@ -916,23 +933,21 @@
         <summary>Abonelik var mı?</summary>
         <p>Hayır. italkyAI abonelik satmaz. Jeton alırsın, ihtiyacın olunca kullanırsın.</p>
       </details>
-
       <details>
-        <summary>Chat AI ile Sohbet AI farkı ne?</summary>
-        <p>
-          <b>Chat AI</b> daha hedef odaklıdır: pratik, konu çalışma, düzeltme.
-          <b>Sohbet AI</b> daha serbesttir: akış, muhabbet, günlük konuşma.
-        </p>
+        <summary>Chat AI nedir?</summary>
+        <p><b>Pratik odaklı</b> bir moddur. Konu seçersin, konuşursun, hatalarını düzelttirirsin. Dil pratiği için “antrenman salonu” gibi.</p>
       </details>
-
       <details>
-        <summary>Online Toplantı kaç kişilik?</summary>
-        <p>İster 2 kişi, ister 20 kişi. Herkes konuşur, herkes anlar. Dil bariyeri kalkar.</p>
+        <summary>Sohbet AI nedir?</summary>
+        <p><b>Serbest akış</b> modudur. Dertleşme, günlük konuşma, sohbet… Daha rahat ve daha “insan gibi” akış hedefler.</p>
       </details>
-
       <details>
-        <summary>Offline paket ne işe yarıyor?</summary>
-        <p>İnternet yokken FaceToFace ve Metinden Çeviri’yi kullanabilmen için. 365 gün geçerli.</p>
+        <summary>Konuşkan AI nedir?</summary>
+        <p>Sesli pratik odaklıdır. Konuşursun, cevap alırsın, tekrar edersin. Akıcılığı hızlandırmak için tasarlanır.</p>
+      </details>
+      <details>
+        <summary>Online toplantı kaç kişilik?</summary>
+        <p>Herkese açık: 2 kişi de olur 20 kişi de. Dil bariyeri artık “toplantı bariyeri” değildir.</p>
       </details>
     </div>
   </section>
@@ -942,12 +957,12 @@
     <div class="secHead">
       <div>
         <h2>İletişim</h2>
-        <p>Geri bildirim, iş birlikleri ve basın için.</p>
+        <p>Geri bildirim, iş birlikleri, basın.</p>
       </div>
     </div>
 
     <div class="card">
-      <p style="margin:0; font-weight:800; color: rgba(12,18,40,.78); line-height:1.6;">
+      <p style="margin:0; font-weight:800; color: rgba(12,18,40,.78); line-height:1.7;">
         Mail: <b>info@italky.ai</b><br>
         Basın / İş birliği: <b>partner@italky.ai</b><br>
         Destek: <b>support@italky.ai</b>
@@ -960,40 +975,40 @@
 <div class="bottomBar">
   <div class="bottomInner">
     <div class="mini">Abonelik yok • <b>1 Jeton = 2 TL</b> • Kullan ve bitir</div>
-    <div class="footLinks">
-      <a href="#faq" data-scroll="#faq">SSS</a>
-      <a href="#contact" data-scroll="#contact">İletişim</a>
-      <a href="#" id="privacyLink">Gizlilik</a>
-      <a href="#" id="aboutLink">Hakkımızda</a>
+    <div class="links">
+      <a data-scroll="#faq">SSS</a>
+      <a data-scroll="#contact">İletişim</a>
+      <a id="privacyLink">Gizlilik</a>
+      <a id="aboutLink">Hakkımızda</a>
     </div>
   </div>
 </div>
 
 <script>
-  // ====== smooth scroll ======
-  function scrollToId(sel){
+  // ===== Smooth scroll =====
+  function scrollToSel(sel){
     const el = document.querySelector(sel);
     if(!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  document.querySelectorAll("[data-scroll]").forEach(btn=>{
-    btn.addEventListener("click", (e)=>{
+  document.querySelectorAll("[data-scroll]").forEach(x=>{
+    x.addEventListener("click", (e)=>{
       e.preventDefault();
-      const sel = btn.getAttribute("data-scroll");
-      if(sel) scrollToId(sel);
+      const sel = x.getAttribute("data-scroll");
+      if(sel) scrollToSel(sel);
     });
   });
+  document.querySelector(".brand")?.addEventListener("click", ()=> scrollToSel("#hero"));
+  document.querySelector(".brand")?.addEventListener("keydown", (e)=>{ if(e.key==="Enter") scrollToSel("#hero"); });
 
-  // ====== slider ======
+  // ===== Slider =====
   const slides = Array.from(document.querySelectorAll(".slide"));
   const dotsWrap = document.getElementById("dots");
 
   slides.forEach((_, i)=>{
     const d = document.createElement("div");
     d.className = "dot" + (i===0 ? " active":"");
-    d.addEventListener("click", ()=>{
-      setSlide(i, true);
-    });
+    d.addEventListener("click", ()=> setSlide(i, true));
     dotsWrap.appendChild(d);
   });
   const dots = Array.from(document.querySelectorAll(".dot"));
@@ -1003,8 +1018,8 @@
 
   function setSlide(i, resetTimer){
     idx = i % slides.length;
-    slides.forEach((s, k)=> s.classList.toggle("active", k===idx));
-    dots.forEach((d, k)=> d.classList.toggle("active", k===idx));
+    slides.forEach((s,k)=> s.classList.toggle("active", k===idx));
+    dots.forEach((d,k)=> d.classList.toggle("active", k===idx));
     if(resetTimer){
       clearInterval(timer);
       timer = setInterval(()=> setSlide((idx+1)%slides.length, false), 4200);
@@ -1012,22 +1027,17 @@
   }
   timer = setInterval(()=> setSlide((idx+1)%slides.length, false), 4200);
 
-  // ====== store links ======
-  // TODO: yayınlanınca gerçek linkleri buraya koy
+  // ===== Store links (placeholder) =====
+  // Yayına alınca gerçek linkleri koy:
   const PLAY_URL = "https://play.google.com/store/apps/details?id=YOUR_APP_ID";
-  const APPSTORE_URL = "https://apps.apple.com/app/idYOUR_APP_ID";
+  const APP_URL  = PLAY_URL;
 
   document.getElementById("btnPlay")?.addEventListener("click", ()=> window.location.href = PLAY_URL);
-  document.getElementById("btnApp")?.addEventListener("click", ()=> window.location.href = PLAY_URL);
+  document.getElementById("btnDownload")?.addEventListener("click", ()=> window.location.href = APP_URL);
 
-  // footer links placeholder
-  document.getElementById("privacyLink")?.addEventListener("click", (e)=>{ e.preventDefault(); alert("Gizlilik sayfasını /pages/privacy.html olarak bağlayacağız."); });
-  document.getElementById("aboutLink")?.addEventListener("click", (e)=>{ e.preventDefault(); alert("Hakkımızda sayfasını /pages/about.html olarak bağlayacağız."); });
-
-  // keyboard accessible brand
-  document.querySelector(".brand")?.addEventListener("keydown", (e)=>{
-    if(e.key === "Enter") scrollToId("#hero");
-  });
+  // footer placeholder links
+  document.getElementById("privacyLink")?.addEventListener("click", ()=> alert("Gizlilik sayfasını /pages/privacy.html olarak bağlayacağız."));
+  document.getElementById("aboutLink")?.addEventListener("click", ()=> alert("Hakkımızda sayfasını /pages/about.html olarak bağlayacağız."));
 </script>
 
 </body>
