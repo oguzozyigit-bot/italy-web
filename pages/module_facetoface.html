@@ -1,99 +1,169 @@
-<!doctype html><html lang="tr"><head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-<title>italkyAI • FaceToFace</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/site.css?v=2">
-</head><body>
+<!-- FILE: /pages/module_facetoface.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>italkyAI • FaceToFace AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/pages/site_2050.css?v=2050_1">
+  <style>
+    .mini-hero{ margin-top: 6px; }
+    .hero-img{ width:100%; height: 460px; object-fit:cover; border-radius: var(--radius); border:1px solid rgba(255,255,255,0.12); box-shadow: 0 22px 70px rgba(0,0,0,0.35); }
+    @media (max-width: 820px){ .hero-img{ height: 280px; } }
+    .cols{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:14px; }
+    @media (max-width: 980px){ .cols{ grid-template-columns: 1fr; } }
+    .noteCard{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      box-shadow: 0 16px 55px rgba(0,0,0,0.28);
+      padding: 16px;
+    }
+    .noteCard h3{ margin:0 0 8px; font-size:16px; font-weight:1000; }
+    .noteCard p{ margin:0; color: rgba(255,255,255,0.72); font-weight:750; line-height:1.6; }
+    .dlbar{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="bg2050"></div><div class="stars2050"></div>
 
-<header class="topbar">
-  <a class="brand" href="/pages/home_v2.html">
-    <span class="brand-italky">italky</span><span class="brand-ai">AI</span>
-    <span class="brand-sub">FACETOFACE</span>
-  </a>
-  <nav class="topnav">
-    <a class="pill" href="/pages/home_v2.html#modules">Modüller</a>
-    <a class="pill" href="/pages/module_academy.html">Academy</a>
-    <a class="pill" href="/pages/module_meeting.html">Toplantı</a>
-  </nav>
-  <div class="top-cta"><a class="btn-main" href="/pages/home_v2.html#download">İndir</a></div>
-</header>
+  <div class="shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="/pages/home_v2.html" aria-label="italkyAI">
+          <div class="brand-line">italky<span class="brand-ai">AI</span></div>
+          <div class="brand-slogan">BE FREE</div>
+        </a>
 
-<main class="page">
-  <section class="section">
-    <div class="banner">
-      <div class="img" style="background-image:url('https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1600&q=80');"></div>
-      <div class="body">
-        <div class="kicker">AMİRAL GEMİSİ</div>
-        <h2>FaceToFace: Konuş, herkes anlasın</h2>
-        <p>
-          Telefonu masaya bırak. Karşındaki kendi dilinde konuşsun, sen kendi dilinde anla.
-          Sen konuş, o kendi dilinde duysun. Göz teması bozulmadan iletişim devam eder.
+        <nav class="nav" id="topNav">
+          <a class="navlink active" href="/pages/module_facetoface.html">FaceToFace</a>
+          <a class="navlink" href="/pages/module_academy.html">italky Academy</a>
+          <a class="navlink" href="/pages/module_games.html">Eğlenerek Öğren</a>
+          <a class="navlink" href="/pages/module_photo.html">Fotoğraftan Çeviri</a>
+          <a class="navlink" href="/pages/module_text.html">Metinden Çeviri</a>
+          <a class="navlink" href="/pages/module_document.html">Belgeden Çeviri</a>
+          <a class="navlink" href="/pages/module_chat.html">Sohbet AI</a>
+          <a class="navlink" href="/pages/module_speaking.html">Konuşkan AI</a>
+          <a class="navlink primary" href="/pages/module_meeting.html">Online Toplantı</a>
+
+          <button class="langbtn navlink" id="langBtn" type="button" title="Language">
+            <span class="langdot"></span><span id="langLabel">🌐</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="section" style="border-top:none;">
+        <div class="kicker"><i></i> Amiral gemisi</div>
+        <h1 class="hero-title">FaceToFace <span class="grad">AI</span></h1>
+        <p class="sub">
+          İki kişi farklı dil konuşur. Telefon masada durur. Siz konuşursunuz — italkyAI anında çevirir ve
+          karşı tarafa kendi dilinde seslendirir. Gerçek hayat akışında “duraksız” iletişim hedeflenir.
         </p>
-      </div>
-    </div>
 
-    <div class="list">
-      <div class="item">
-        <div class="row">
-          <div class="ico ico-blue">🎧</div>
-          <div>
-            <div class="title">Çift yönlü akış</div>
-            <p class="desc">İki taraf da kendi dilinde konuşur. Çeviri otomatik yürür.</p>
-            <div class="mini">Seyahat • Kafe • Taksi • Otel</div>
+        <div class="dlbar">
+          <a class="btn primary" href="#download">Google Play’den indir</a>
+          <a class="btn ghost" href="#download">App Store’dan indir</a>
+          <a class="btn" href="/pages/facetoface.html">Uygulamada Aç</a>
+        </div>
+
+        <div class="mini-hero" style="margin-top:16px;">
+          <img class="hero-img"
+               src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1800&q=80"
+               alt="FaceToFace cafe">
+        </div>
+
+        <div class="cols">
+          <div class="noteCard">
+            <h3>Ne işe yarar?</h3>
+            <p>
+              Restoranda sipariş, otelde check-in, sokakta yol tarifi, müzede soru sorma…
+              Kısacası “anlık konuşma” gereken her yerde FaceToFace AI devreye girer.
+            </p>
+          </div>
+          <div class="noteCard">
+            <h3>Nasıl çalışır?</h3>
+            <p>
+              Mikrofonu basılı tutarsın → konuşma yazıya döner → hedef dile çevrilir →
+              otomatik seslendirilir. İstersen çevirinin yanındaki hoparlörle tekrar dinlersin.
+            </p>
+          </div>
+          <div class="noteCard">
+            <h3>Kurallar (netlik)</h3>
+            <p>
+              En iyi sonuç için kısa cümle, net telaffuz, gürültüsüz ortam önerilir.
+              Konuşma bittiğinde sistem çeviri + seslendirme yapar.
+            </p>
+          </div>
+          <div class="noteCard">
+            <h3>Kimin için?</h3>
+            <p>
+              Seyahat edenler, turizm işletmeleri, yabancı müşteriyle görüşen esnaf,
+              göçmen/öğrenci/ziyaretçiler… “iletişim anı” yaşayan herkes için.
+            </p>
           </div>
         </div>
-      </div>
 
-      <div class="item">
-        <div class="row">
-          <div class="ico ico-violet">⚡</div>
-          <div>
-            <div class="title">Akış bozulmaz</div>
-            <p class="desc">“Telefonla uğraşma” hissi yok. Konuşma doğal kalır.</p>
-            <div class="mini">Hız • Netlik • Güven</div>
-          </div>
+        <div class="big-banner">
+          <img src="https://images.unsplash.com/photo-1520975693411-b4a5d5b56925?auto=format&fit=crop&w=1800&q=80"
+               alt="people conversation">
         </div>
-      </div>
+      </section>
 
-      <div class="item">
-        <div class="row">
-          <div class="ico ico-pink">🔊</div>
-          <div>
-            <div class="title">Anında seslendirme</div>
-            <p class="desc">Çeviri çıktısı seslendirilebilir; gerektiğinde tekrar dinlersin.</p>
-            <div class="mini">Pratik • Tekrar • Öğrenme</div>
-          </div>
+      <section class="section" id="download">
+        <h2 class="h2">İndir ve konuşmaya başla</h2>
+        <p class="sub">
+          Uygulama içindeki FaceToFace modülü, dil bariyerini “saniyeler içinde” görünmez yapar.
+          BE FREE — konuş, dünya anlasın.
+        </p>
+        <div class="hero-cta" style="margin-top:14px;">
+          <a class="btn primary" href="#">Google Play</a>
+          <a class="btn ghost" href="#">App Store</a>
+          <a class="btn" href="/pages/home_v2.html">Ana sayfaya dön</a>
         </div>
-      </div>
+      </section>
+    </main>
 
-      <div class="item">
-        <div class="row">
-          <div class="ico ico-green">🧩</div>
-          <div>
-            <div class="title">Basit kullanım</div>
-            <p class="desc">Mikrofonu aç → konuş → italkyAI geri kalanını halleder.</p>
-            <div class="mini">“İşte bu!” anı</div>
-          </div>
+    <footer class="bottombar">
+      <div class="bottombar-inner">
+        <div class="bottom-links">
+          <a href="/pages/module_about.html">Hakkımızda</a>
+          <a href="/pages/module_faq.html">SSS</a>
+          <a href="/pages/module_privacy.html">Gizlilik</a>
+          <a href="/pages/module_contact.html">İletişim</a>
         </div>
+        <div class="bottom-sign">italkyAI • BE FREE • By Ozyigit’s • 2026</div>
       </div>
-    </div>
-
-    <div class="cta">
-      <h3>Sen konuş, dünya anlasın.</h3>
-      <p>FaceToFace; seyahatte, işte, sokakta, restoranda… iletişimin “en hızlı” halidir.</p>
-    </div>
-  </section>
-</main>
-
-<footer class="bottombar">
-  <div class="bottom-links">
-    <a href="/pages/home_v2.html">Site</a>
-    <a href="/pages/faq.html">SSS</a>
-    <a href="/pages/privacy.html">Gizlilik</a>
-    <a href="/pages/contact.html">İletişim</a>
+    </footer>
   </div>
-  <div class="bottom-sign">italkyAI • FaceToFace • By Ozyigit’s • 2026</div>
-</footer>
 
-</body></html>
+  <!-- Lang Sheet -->
+  <div class="sheet" id="langSheet" aria-hidden="true">
+    <div class="sheet-card">
+      <div class="sheet-top">
+        <b>Language</b>
+        <input id="langSheetQuery" placeholder="Search language…">
+        <button id="langSheetClose" type="button">✕</button>
+      </div>
+      <div class="sheet-list" id="langSheetList"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { detectSiteLang, setSiteLang, mountLangPicker } from "/js/site_lang.js";
+    const picked = await detectSiteLang(); setSiteLang(picked);
+    mountLangPicker({ btnId:"langBtn", sheetId:"langSheet", listId:"langSheetList", queryId:"langSheetQuery", closeId:"langSheetClose", labelId:"langLabel" });
+
+    // pathname active
+    [...document.querySelectorAll("#topNav .navlink")].forEach(a=>{
+      if(a.tagName==="A" && a.getAttribute("href") && location.pathname.endsWith(a.getAttribute("href"))){
+        [...document.querySelectorAll("#topNav .navlink")].forEach(x=>x.classList.remove("active"));
+        a.classList.add("active");
+      }
+    });
+  </script>
+</body>
+</html>
