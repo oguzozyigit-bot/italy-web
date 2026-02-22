@@ -3,10 +3,6 @@ import { getSiteLang } from "/js/i18n.js";
 import { supabase } from "/js/supabase_client.js";
 import { setHeaderTokens } from "/js/ui_shell.js";
 
-/* ===============================
-   ✅ CANONICAL HOST FIX
-   www.italky.ai -> italky.ai (tek origin, tek session)
-================================ */
 (function enforceCanonicalHost(){
   try{
     const h = String(location.hostname || "").toLowerCase().trim();
@@ -20,15 +16,11 @@ import { setHeaderTokens } from "/js/ui_shell.js";
 const $ = (id)=>document.getElementById(id);
 
 const API_BASE = "https://italky-api.onrender.com";
-
-/* ✅ LOGIN artık index.html */
 const LOGIN_PATH = "/index.html";
 const HOME_PATH  = "/pages/home.html";
 const PROFILE_PATH = "/pages/profile.html";
 
-/* ===============================
-   AUTH (refresh loop kill)
-================================ */
+/* ===== AUTH ===== */
 async function waitForSession(maxMs=6000){
   const start = Date.now();
   while(Date.now()-start < maxMs){
@@ -41,19 +33,17 @@ async function waitForSession(maxMs=6000){
   return null;
 }
 
+function showLoginNeeded(){
+  alert("Giriş gerekli. Lütfen giriş yapın.");
+  // Redirect döngüsü olmasın diye otomatik atma yok.
+}
+
 async function requireLogin(){
   const session = await waitForSession(6000);
-
   if(!session?.user){
-    // ✅ döngü olmasın diye 1 kere redirect
-    if(sessionStorage.getItem("F2F_REDIRECTED") === "1") return false;
-    sessionStorage.setItem("F2F_REDIRECTED", "1");
-    location.replace(LOGIN_PATH);
+    showLoginNeeded();
     return false;
   }
-
-  // login olmuşsa kill flag sıfırla
-  try{ sessionStorage.removeItem("F2F_REDIRECTED"); }catch{}
   return true;
 }
 
@@ -70,9 +60,7 @@ function getSystemUILang(){
 }
 let UI_LANG = getSystemUILang();
 
-/* ===============================
-   LANGS
-================================ */
+/* ===== LANGS ===== */
 const LANGS = [
   { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
   { code:"en", flag:"🇬🇧", bcp:"en-US" },
@@ -119,9 +107,7 @@ function canonicalLangCode(code){
   const c = String(code||"").toLowerCase();
   return c.split("-")[0];
 }
-function normalizeApiLang(code){
-  return canonicalLangCode(code);
-}
+function normalizeApiLang(code){ return canonicalLangCode(code); }
 function langObj(code){
   const c = String(code||"").toLowerCase();
   return LANGS.find(x=>x.code===c) || LANGS.find(x=>x.code===canonicalLangCode(c));
@@ -143,15 +129,11 @@ function labelChip(code){
   return `${flag} ${langLabel(code)}`;
 }
 
-/* ===============================
-   STATE
-================================ */
+/* ===== STATE ===== */
 let topLang = "en";
 let botLang = "tr";
 
-/* ===============================
-   TOKEN SESSION
-================================ */
+/* ===== TOKEN SESSION ===== */
 let sessionGranted = false;
 
 function unwrapRow(data){
@@ -165,13 +147,12 @@ async function ensureFacetofaceSession(){
 
   const s = await waitForSession(6000);
   if(!s?.user){
-    location.replace(LOGIN_PATH);
+    showLoginNeeded();
     return false;
   }
 
   try{
-    let { data, error } = await supabase.rpc("start_facetoface_session");
-
+    const { data, error } = await supabase.rpc("start_facetoface_session");
     if(error){
       const msg = String(error.message||"");
       if(msg.includes("INSUFFICIENT_TOKENS")){
@@ -179,7 +160,6 @@ async function ensureFacetofaceSession(){
         location.href = PROFILE_PATH;
         return false;
       }
-      console.warn("start_facetoface_session error:", error);
       alert("FaceToFace oturumu başlatılamadı.");
       return false;
     }
@@ -189,35 +169,24 @@ async function ensureFacetofaceSession(){
 
     sessionGranted = true;
     return true;
-
-  }catch(e){
-    console.warn("start_facetoface_session catch:", e);
+  }catch{
     alert("FaceToFace oturumu başlatılamadı.");
     return false;
   }
 }
 
-/* ===============================
-   ROOT STATE (logo rotate + eq)
-================================ */
+/* ===== ROOT UI ===== */
 function setRootClasses({to, listening=false, speaking=false}){
   const root = $("frameRoot");
   if(!root) return;
-
   root.classList.remove("to-top","to-bot","listening","speaking");
-
-  if(to === "top") root.classList.add("to-top");
-  else root.classList.add("to-bot");
-
+  if(to === "top") root.classList.add("to-top"); else root.classList.add("to-bot");
   if(listening) root.classList.add("listening");
   if(speaking) root.classList.add("speaking");
 }
 
-/* ===============================
-   TTS
-================================ */
+/* ===== TTS ===== */
 let speakTimer = null;
-
 function speakRaw(text, langCode, onDone){
   const t = String(text||"").trim();
   if(!t) { onDone?.(); return; }
@@ -235,10 +204,8 @@ function speakRaw(text, langCode, onDone){
 
   if(!window.speechSynthesis){ onDone?.(); return; }
   try{ window.speechSynthesis.cancel(); }catch{}
-
   const u = new SpeechSynthesisUtterance(t);
   u.lang = bcp(langCode);
-  u.volume=1; u.rate=1; u.pitch=1;
   u.onend = ()=> onDone?.();
   u.onerror = ()=> onDone?.();
   setTimeout(()=>{ try{ window.speechSynthesis.speak(u); }catch{ onDone?.(); } }, 60);
@@ -246,20 +213,15 @@ function speakRaw(text, langCode, onDone){
 
 let lastSpeakerSide = "bot";
 function speakWithUI(side, text, langCode){
-  setRootClasses({to: side, listening: false, speaking: true});
-  speakRaw(text, langCode, ()=>{
-    setRootClasses({to: side, listening: false, speaking: false});
-  });
+  setRootClasses({to: side, listening:false, speaking:true});
+  speakRaw(text, langCode, ()=> setRootClasses({to: side, listening:false, speaking:false}));
 }
 
-/* ===============================
-   UI: Popover
-================================ */
+/* ===== POPOVER ===== */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
 }
-
 function renderPop(side){
   const list = $(side==="top" ? "list-top" : "list-bot");
   if(!list) return;
@@ -276,7 +238,7 @@ function renderPop(side){
   `).join("");
 
   list.querySelectorAll(".pop-item").forEach(item=>{
-    item.addEventListener("click", (e)=>{
+    item.addEventListener("click",(e)=>{
       e.preventDefault(); e.stopPropagation();
       const code = item.getAttribute("data-code") || "en";
       if(side==="top") topLang = code; else botLang = code;
@@ -286,21 +248,15 @@ function renderPop(side){
     });
   });
 }
-
 function togglePopover(side){
   const pop = $(side==="top" ? "pop-top" : "pop-bot");
   if(!pop) return;
   const willShow = !pop.classList.contains("show");
   closeAllPop();
-  if(willShow){
-    pop.classList.add("show");
-    renderPop(side);
-  }
+  if(willShow){ pop.classList.add("show"); renderPop(side); }
 }
 
-/* ===============================
-   UI: Bubbles
-================================ */
+/* ===== BUBBLES ===== */
 function addBubble(side, kind, text, langForSpeak){
   const wrap = (side==="top") ? $("topBody") : $("botBody");
   if(!wrap) return;
@@ -320,17 +276,8 @@ function addBubble(side, kind, text, langForSpeak){
     const spk = document.createElement("button");
     spk.className = "spk-icon";
     spk.type = "button";
-    spk.innerHTML = `
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
-        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z"></path>
-        <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
-      </svg>
-    `;
-    spk.addEventListener("click", (e)=>{
-      e.preventDefault(); e.stopPropagation();
-      speakWithUI(side, txt.textContent, langForSpeak);
-    });
+    spk.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3z"></path><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z"></path><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>`;
+    spk.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); speakWithUI(side, txt.textContent, langForSpeak); });
     bubble.appendChild(spk);
   }
 
@@ -338,49 +285,36 @@ function addBubble(side, kind, text, langForSpeak){
   try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
 }
 
-/* ===============================
-   TRANSLATE
-================================ */
+/* ===== TRANSLATE ===== */
 async function translateViaApi(text, source, target){
   const t = String(text||"").trim();
   if(!t) return t;
-
   const src = normalizeApiLang(source);
   const dst = normalizeApiLang(target);
-  if(src === dst) return t;
+  if(src===dst) return t;
 
   const ctrl = new AbortController();
   const to = setTimeout(()=>ctrl.abort(), 25000);
 
   try{
-    const body = { text:t, from_lang:src, to_lang:dst };
     const r = await fetch(`${API_BASE}/api/translate`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ text:t, from_lang:src, to_lang:dst }),
       signal: ctrl.signal
     });
-
-    if(!r.ok){
-      const err = await r.text().catch(()=> "");
-      console.warn("translate HTTP", r.status, err);
-      return null;
-    }
-
+    if(!r.ok) return null;
     const data = await r.json().catch(()=>({}));
     const out = String(data?.translated||data?.translation||data?.text||"").trim();
     return out || null;
-  }catch(e){
-    console.warn("translateViaApi failed:", e);
+  }catch{
     return null;
   }finally{
     clearTimeout(to);
   }
 }
 
-/* ===============================
-   STT
-================================ */
+/* ===== STT ===== */
 function buildRecognizer(langCode){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR) return null;
@@ -392,12 +326,9 @@ function buildRecognizer(langCode){
   return rec;
 }
 
-let active = null;
-let recTop = null;
-let recBot = null;
-let pending = null;
+let active=null, recTop=null, recBot=null, pending=null;
 
-function setMicUI(which, on){
+function setMicUI(which,on){
   const btn = (which==="top") ? $("topMic") : $("botMic");
   btn?.classList.toggle("listening", !!on);
 }
@@ -406,8 +337,7 @@ function stopAll(){
   try{ recTop?.stop?.(); }catch{}
   try{ recBot?.stop?.(); }catch{}
   recTop=null; recBot=null; active=null;
-  setMicUI("top", false);
-  setMicUI("bot", false);
+  setMicUI("top", false); setMicUI("bot", false);
   try{ window.NativeTTS?.stop?.(); }catch{}
   try{ window.speechSynthesis?.cancel?.(); }catch{}
   clearTimeout(speakTimer);
@@ -419,10 +349,7 @@ async function start(which){
   if(!ok) return;
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){
-    alert("Bu cihaz SpeechRecognition desteklemiyor.");
-    return;
-  }
+  if(!SR){ alert("Bu cihaz SpeechRecognition desteklemiyor."); return; }
 
   if(active && active !== which) stopAll();
 
@@ -430,14 +357,11 @@ async function start(which){
   const dst = (which==="top") ? botLang : topLang;
 
   const rec = buildRecognizer(src);
-  if(!rec){
-    alert("Mikrofon başlatılamadı.");
-    return;
-  }
+  if(!rec){ alert("Mikrofon başlatılamadı."); return; }
 
   active = which;
-  setMicUI(which, true);
-  setRootClasses({to: (which==="top"?"top":"bot"), listening:true, speaking:false});
+  setMicUI(which,true);
+  setRootClasses({to:(which==="top"?"top":"bot"), listening:true, speaking:false});
 
   rec.onresult = (e)=>{
     const t = e.results?.[0]?.[0]?.transcript || "";
@@ -446,35 +370,28 @@ async function start(which){
 
     addBubble(which, "them", finalText, src);
     pending = { which, finalText, src, dst };
-
     try{ rec.stop(); }catch{}
   };
 
-  rec.onerror = (err)=>{
-    console.error("STT Error:", err);
-    stopAll();
-  };
+  rec.onerror = ()=>{ stopAll(); };
 
   rec.onend = async ()=>{
-    if(active === which) active = null;
-    setMicUI(which, false);
+    if(active===which) active=null;
+    setMicUI(which,false);
 
     const p = pending;
-    if(p && p.which === which){
-      pending = null;
-
+    if(p && p.which===which){
+      pending=null;
       const other = (which==="top") ? "bot" : "top";
       const translated = await translateViaApi(p.finalText, p.src, p.dst);
       const speakLang = normalizeApiLang(p.dst);
 
       if(!translated){
         addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", speakLang);
-        setRootClasses({to:lastSpeakerSide, listening:false, speaking:false});
         return;
       }
 
       addBubble(other, "me", translated, speakLang);
-
       lastSpeakerSide = other;
       speakWithUI(other, translated, speakLang);
     }else{
@@ -482,13 +399,11 @@ async function start(which){
     }
   };
 
-  if(which==="top") recTop = rec; else recBot = rec;
-  try{ rec.start(); }catch(e){ console.warn(e); stopAll(); }
+  if(which==="top") recTop=rec; else recBot=rec;
+  try{ rec.start(); }catch{ stopAll(); }
 }
 
-/* ===============================
-   BINDINGS
-================================ */
+/* ===== BINDINGS ===== */
 function bindUI(){
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
@@ -513,24 +428,18 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  $("topMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation(); closeAllPop();
-    if(active==="top") stopAll(); else start("top");
-  });
-  $("botMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation(); closeAllPop();
-    if(active==="bot") stopAll(); else start("bot");
-  });
+  $("topMic")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); if(active==="top") stopAll(); else start("top"); });
+  $("botMic")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); if(active==="bot") stopAll(); else start("bot"); });
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
-  if(!(await requireLogin())) return;
+  const ok = await requireLogin();
+  if(!ok) return;
 
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
 
   bindUI();
-
   try{ window.speechSynthesis?.getVoices?.(); }catch{}
   setRootClasses({to:"bot", listening:false, speaking:false});
 });
