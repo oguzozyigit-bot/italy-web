@@ -1,13 +1,14 @@
-// FILE: /js/ui_guard.js
+i// FILE: /js/ui_guard.js
 import { startAuthState } from "/js/auth.js";
 
 /**
- * protectedPage=true: user yoksa login'e at
+ * protectedPage=true: user yoksa index'e at (login artık index.html)
  * public: user yoksa kalabilir
  *
- * ✅ FIX:
- * - auth state ilk anda null gelebilir (özellikle webview/refresh)
- * - hemen redirect etmek yerine kısa bir "grace period" bekliyoruz.
+ * FIX:
+ * - auth state ilk anda null gelebilir
+ * - hemen redirect etmek yerine grace period bekle
+ * - redirect döngüsünü engelle (1 kez)
  */
 export function bootPage({
   protectedPage = false,
@@ -28,12 +29,16 @@ export function bootPage({
     if(!protectedPage) return;
     if(redirectTimer) return;
 
-    // ✅ 600ms grace period
     redirectTimer = setTimeout(()=>{
-      if(!hasUserEver){
-        location.replace("/pages/login.html");
-      }
-    }, 600);
+      if(hasUserEver) return;
+
+      // ✅ redirect loop kill-switch
+      if(sessionStorage.getItem("GUARD_REDIRECTED") === "1") return;
+      sessionStorage.setItem("GUARD_REDIRECTED", "1");
+
+      // ✅ login artık index.html
+      location.replace("/index.html");
+    }, 900); // 600 yerine 900ms daha güvenli
   }
 
   startAuthState(({ user, wallet: bal }) => {
@@ -42,12 +47,14 @@ export function bootPage({
       return;
     }
 
-    // ✅ user geldiyse redirect iptal
     hasUserEver = true;
     if(redirectTimer){
       clearTimeout(redirectTimer);
       redirectTimer = null;
     }
+
+    // ✅ login olunca loop flag sıfırlansın
+    try{ sessionStorage.removeItem("GUARD_REDIRECTED"); }catch{}
 
     if(nameEl){
       nameEl.textContent =
