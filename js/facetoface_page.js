@@ -3,12 +3,12 @@ import { getSiteLang } from "/js/i18n.js";
 import { supabase } from "/js/supabase_client.js";
 import { setHeaderTokens } from "/js/ui_shell.js";
 
+/* ✅ CANONICAL HOST */
 (function enforceCanonicalHost(){
   try{
     const h = String(location.hostname || "").toLowerCase().trim();
     if(h === "www.italky.ai"){
-      const to = "https://italky.ai" + location.pathname + location.search + location.hash;
-      location.replace(to);
+      location.replace("https://italky.ai" + location.pathname + location.search + location.hash);
     }
   }catch{}
 })();
@@ -20,33 +20,9 @@ const LOGIN_PATH = "/index.html";
 const HOME_PATH  = "/pages/home.html";
 const PROFILE_PATH = "/pages/profile.html";
 
-/* ===== AUTH ===== */
-async function waitForSession(maxMs=6000){
-  const start = Date.now();
-  while(Date.now()-start < maxMs){
-    try{
-      const { data:{ session } } = await supabase.auth.getSession();
-      if(session?.user) return session;
-    }catch{}
-    await new Promise(r=>setTimeout(r, 250));
-  }
-  return null;
-}
-
-function showLoginNeeded(){
-  alert("Giriş gerekli. Lütfen giriş yapın.");
-  // Redirect döngüsü olmasın diye otomatik atma yok.
-}
-
-async function requireLogin(){
-  const session = await waitForSession(6000);
-  if(!session?.user){
-    showLoginNeeded();
-    return false;
-  }
-  return true;
-}
-
+/* ===============================
+   UI LANG
+================================ */
 function getSystemUILang(){
   try{
     const l = String(getSiteLang?.() || "").toLowerCase().trim();
@@ -60,7 +36,9 @@ function getSystemUILang(){
 }
 let UI_LANG = getSystemUILang();
 
-/* ===== LANGS ===== */
+/* ===============================
+   LANGS
+================================ */
 const LANGS = [
   { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
   { code:"en", flag:"🇬🇧", bcp:"en-US" },
@@ -84,9 +62,6 @@ const LANGS = [
   { code:"el", flag:"🇬🇷", bcp:"el-GR" },
   { code:"uk", flag:"🇺🇦", bcp:"uk-UA" },
   { code:"ru", flag:"🇷🇺", bcp:"ru-RU" },
-  { code:"az", flag:"🇦🇿", bcp:"az-AZ" },
-  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" },
-  { code:"hy", flag:"🇦🇲", bcp:"hy-AM" },
   { code:"ar", flag:"🇸🇦", bcp:"ar-SA" },
   { code:"he", flag:"🇮🇱", bcp:"he-IL" },
   { code:"fa", flag:"🇮🇷", bcp:"fa-IR" },
@@ -98,7 +73,6 @@ const LANGS = [
   { code:"vi", flag:"🇻🇳", bcp:"vi-VN" },
   { code:"th", flag:"🇹🇭", bcp:"th-TH" },
   { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
-  { code:"zh-tw", flag:"🇹🇼", bcp:"zh-TW" },
   { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
   { code:"ko", flag:"🇰🇷", bcp:"ko-KR" }
 ];
@@ -129,99 +103,31 @@ function labelChip(code){
   return `${flag} ${langLabel(code)}`;
 }
 
-/* ===== STATE ===== */
+/* ===============================
+   STATE
+================================ */
 let topLang = "en";
 let botLang = "tr";
 
-/* ===== TOKEN SESSION ===== */
+let isLoggedIn = false;      // ✅ login gate artık UI’yi kesmez
 let sessionGranted = false;
 
-function unwrapRow(data){
-  if(Array.isArray(data)) return data[0] || null;
-  if(data && typeof data === "object") return data;
-  return null;
-}
-
-async function ensureFacetofaceSession(){
-  if(sessionGranted) return true;
-
-  const s = await waitForSession(6000);
-  if(!s?.user){
-    showLoginNeeded();
-    return false;
-  }
-
+/* ===============================
+   HELPERS
+================================ */
+function toast(msg){
+  // Facetoface sayfasında toast yoksa alert fallback
   try{
-    const { data, error } = await supabase.rpc("start_facetoface_session");
-    if(error){
-      const msg = String(error.message||"");
-      if(msg.includes("INSUFFICIENT_TOKENS")){
-        alert("Jeton yetersiz. Devam etmek için jeton yükleyin.");
-        location.href = PROFILE_PATH;
-        return false;
-      }
-      alert("FaceToFace oturumu başlatılamadı.");
-      return false;
-    }
-
-    const row = unwrapRow(data) || {};
-    if(row?.tokens_left != null) setHeaderTokens(row.tokens_left);
-
-    sessionGranted = true;
-    return true;
-  }catch{
-    alert("FaceToFace oturumu başlatılamadı.");
-    return false;
-  }
+    // istersen buraya kendi toast implementini koyarsın
+    console.log("[toast]", msg);
+  }catch{}
 }
 
-/* ===== ROOT UI ===== */
-function setRootClasses({to, listening=false, speaking=false}){
-  const root = $("frameRoot");
-  if(!root) return;
-  root.classList.remove("to-top","to-bot","listening","speaking");
-  if(to === "top") root.classList.add("to-top"); else root.classList.add("to-bot");
-  if(listening) root.classList.add("listening");
-  if(speaking) root.classList.add("speaking");
-}
-
-/* ===== TTS ===== */
-let speakTimer = null;
-function speakRaw(text, langCode, onDone){
-  const t = String(text||"").trim();
-  if(!t) { onDone?.(); return; }
-
-  if(window.NativeTTS && typeof window.NativeTTS.speak === "function"){
-    try{ window.NativeTTS.stop?.(); }catch{}
-    setTimeout(()=>{
-      try{ window.NativeTTS.speak(t, String(langCode||"en")); }catch(e){ console.warn(e); }
-      const ms = Math.min(7000, Math.max(1200, t.length * 60));
-      clearTimeout(speakTimer);
-      speakTimer = setTimeout(()=>onDone?.(), ms);
-    }, 220);
-    return;
-  }
-
-  if(!window.speechSynthesis){ onDone?.(); return; }
-  try{ window.speechSynthesis.cancel(); }catch{}
-  const u = new SpeechSynthesisUtterance(t);
-  u.lang = bcp(langCode);
-  u.onend = ()=> onDone?.();
-  u.onerror = ()=> onDone?.();
-  setTimeout(()=>{ try{ window.speechSynthesis.speak(u); }catch{ onDone?.(); } }, 60);
-}
-
-let lastSpeakerSide = "bot";
-function speakWithUI(side, text, langCode){
-  setRootClasses({to: side, listening:false, speaking:true});
-  speakRaw(text, langCode, ()=> setRootClasses({to: side, listening:false, speaking:false}));
-}
-
-/* ===== POPOVER ===== */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
 }
+
 function renderPop(side){
   const list = $(side==="top" ? "list-top" : "list-bot");
   if(!list) return;
@@ -248,73 +154,90 @@ function renderPop(side){
     });
   });
 }
+
 function togglePopover(side){
   const pop = $(side==="top" ? "pop-top" : "pop-bot");
   if(!pop) return;
   const willShow = !pop.classList.contains("show");
   closeAllPop();
-  if(willShow){ pop.classList.add("show"); renderPop(side); }
-}
-
-/* ===== BUBBLES ===== */
-function addBubble(side, kind, text, langForSpeak){
-  const wrap = (side==="top") ? $("topBody") : $("botBody");
-  if(!wrap) return;
-
-  const bubble = document.createElement("div");
-  bubble.className = `bubble ${kind}`;
-
-  const txt = document.createElement("span");
-  txt.className = "txt";
-  txt.textContent = String(text||"").trim() || "—";
-  bubble.appendChild(txt);
-
-  if(kind === "me"){
-    wrap.querySelectorAll(".bubble.me.is-latest").forEach(x=>x.classList.remove("is-latest"));
-    bubble.classList.add("is-latest");
-
-    const spk = document.createElement("button");
-    spk.className = "spk-icon";
-    spk.type = "button";
-    spk.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3z"></path><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z"></path><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>`;
-    spk.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); speakWithUI(side, txt.textContent, langForSpeak); });
-    bubble.appendChild(spk);
+  if(willShow){
+    pop.classList.add("show");
+    renderPop(side);
   }
-
-  wrap.appendChild(bubble);
-  try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
 }
 
-/* ===== TRANSLATE ===== */
-async function translateViaApi(text, source, target){
-  const t = String(text||"").trim();
-  if(!t) return t;
-  const src = normalizeApiLang(source);
-  const dst = normalizeApiLang(target);
-  if(src===dst) return t;
+/* ===============================
+   AUTH
+================================ */
+async function checkLoginOnce(){
+  try{
+    const { data:{ session } } = await supabase.auth.getSession();
+    isLoggedIn = !!session?.user;
+  }catch{
+    isLoggedIn = false;
+  }
+}
 
-  const ctrl = new AbortController();
-  const to = setTimeout(()=>ctrl.abort(), 25000);
+function showLoginBannerIfNeeded(){
+  if(isLoggedIn) return;
+
+  // basit uyarı: üstteki dil butonunun yanında görünür olsun diye alert yerine console/confirm
+  // istersen UI banner ekleriz; şimdilik tıklanınca login’e yolluyoruz
+}
+
+function ensureLoginByUserAction(){
+  // döngü yok: sadece kullanıcı isteyince login’e gider
+  location.href = LOGIN_PATH;
+}
+
+/* ===============================
+   TOKEN SESSION / RPC
+================================ */
+function unwrapRow(data){
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && typeof data === "object") return data;
+  return null;
+}
+
+async function ensureFacetofaceSession(){
+  if(sessionGranted) return true;
+
+  await checkLoginOnce();
+  if(!isLoggedIn){
+    alert("Bu özellik için giriş gerekli.");
+    ensureLoginByUserAction();
+    return false;
+  }
 
   try{
-    const r = await fetch(`${API_BASE}/api/translate`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ text:t, from_lang:src, to_lang:dst }),
-      signal: ctrl.signal
-    });
-    if(!r.ok) return null;
-    const data = await r.json().catch(()=>({}));
-    const out = String(data?.translated||data?.translation||data?.text||"").trim();
-    return out || null;
-  }catch{
-    return null;
-  }finally{
-    clearTimeout(to);
+    const { data, error } = await supabase.rpc("start_facetoface_session");
+    if(error){
+      const msg = String(error.message||"");
+      if(msg.includes("INSUFFICIENT_TOKENS")){
+        alert("Jeton yetersiz. Devam etmek için jeton yükleyin.");
+        location.href = PROFILE_PATH;
+        return false;
+      }
+      alert("FaceToFace oturumu başlatılamadı.");
+      return false;
+    }
+
+    const row = unwrapRow(data) || {};
+    if(row?.tokens_left != null) setHeaderTokens(row.tokens_left);
+
+    sessionGranted = true;
+    return true;
+
+  }catch(e){
+    console.warn(e);
+    alert("FaceToFace oturumu başlatılamadı.");
+    return false;
   }
 }
 
-/* ===== STT ===== */
+/* ===============================
+   STT (MIC)
+================================ */
 function buildRecognizer(langCode){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR) return null;
@@ -338,10 +261,43 @@ function stopAll(){
   try{ recBot?.stop?.(); }catch{}
   recTop=null; recBot=null; active=null;
   setMicUI("top", false); setMicUI("bot", false);
-  try{ window.NativeTTS?.stop?.(); }catch{}
   try{ window.speechSynthesis?.cancel?.(); }catch{}
-  clearTimeout(speakTimer);
-  setRootClasses({to:lastSpeakerSide, listening:false, speaking:false});
+}
+
+async function translateViaApi(text, source, target){
+  const t = String(text||"").trim();
+  if(!t) return t;
+
+  const src = normalizeApiLang(source);
+  const dst = normalizeApiLang(target);
+  if(src===dst) return t;
+
+  try{
+    const r = await fetch(`${API_BASE}/api/translate`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ text:t, from_lang:src, to_lang:dst })
+    });
+    if(!r.ok) return null;
+    const data = await r.json().catch(()=>({}));
+    const out = String(data?.translated||data?.translation||data?.text||"").trim();
+    return out || null;
+  }catch{
+    return null;
+  }
+}
+
+function addBubble(side, kind, text){
+  const wrap = (side==="top") ? $("topBody") : $("botBody");
+  if(!wrap) return;
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${kind}`;
+  const txt = document.createElement("span");
+  txt.className = "txt";
+  txt.textContent = String(text||"").trim() || "—";
+  bubble.appendChild(txt);
+  wrap.appendChild(bubble);
+  try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
 }
 
 async function start(which){
@@ -349,7 +305,10 @@ async function start(which){
   if(!ok) return;
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ alert("Bu cihaz SpeechRecognition desteklemiyor."); return; }
+  if(!SR){
+    alert("Bu cihaz SpeechRecognition desteklemiyor.");
+    return;
+  }
 
   if(active && active !== which) stopAll();
 
@@ -361,14 +320,13 @@ async function start(which){
 
   active = which;
   setMicUI(which,true);
-  setRootClasses({to:(which==="top"?"top":"bot"), listening:true, speaking:false});
 
   rec.onresult = (e)=>{
     const t = e.results?.[0]?.[0]?.transcript || "";
     const finalText = String(t||"").trim();
     if(!finalText) return;
 
-    addBubble(which, "them", finalText, src);
+    addBubble(which, "them", finalText);
     pending = { which, finalText, src, dst };
     try{ rec.stop(); }catch{}
   };
@@ -384,18 +342,11 @@ async function start(which){
       pending=null;
       const other = (which==="top") ? "bot" : "top";
       const translated = await translateViaApi(p.finalText, p.src, p.dst);
-      const speakLang = normalizeApiLang(p.dst);
-
       if(!translated){
-        addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", speakLang);
+        addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
         return;
       }
-
-      addBubble(other, "me", translated, speakLang);
-      lastSpeakerSide = other;
-      speakWithUI(other, translated, speakLang);
-    }else{
-      setRootClasses({to:lastSpeakerSide, listening:false, speaking:false});
+      addBubble(other, "me", translated);
     }
   };
 
@@ -403,17 +354,22 @@ async function start(which){
   try{ rec.start(); }catch{ stopAll(); }
 }
 
-/* ===== BINDINGS ===== */
+/* ===============================
+   BINDINGS (UI her zaman aktif)
+================================ */
 function bindUI(){
+  // Home nav
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
+  // Clear
   $("clearBtn")?.addEventListener("click", ()=>{
     stopAll();
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
   });
 
+  // Popovers
   $("topLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("top"); });
   $("botLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("bot"); });
 
@@ -428,18 +384,24 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  $("topMic")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); if(active==="top") stopAll(); else start("top"); });
-  $("botMic")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); closeAllPop(); if(active==="bot") stopAll(); else start("bot"); });
+  // MIC
+  $("topMic")?.addEventListener("click",(e)=>{
+    e.preventDefault(); e.stopPropagation(); closeAllPop();
+    if(active==="top") stopAll(); else start("top");
+  });
+  $("botMic")?.addEventListener("click",(e)=>{
+    e.preventDefault(); e.stopPropagation(); closeAllPop();
+    if(active==="bot") stopAll(); else start("bot");
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
-  const ok = await requireLogin();
-  if(!ok) return;
-
+  // ✅ UI her zaman hazır
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
-
   bindUI();
-  try{ window.speechSynthesis?.getVoices?.(); }catch{}
-  setRootClasses({to:"bot", listening:false, speaking:false});
+
+  // ✅ Login kontrolü sadece mic için (arkada)
+  await checkLoginOnce();
+  showLoginBannerIfNeeded();
 });
