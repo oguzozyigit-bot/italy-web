@@ -1,7 +1,6 @@
 // FILE: /js/facetoface_page.js
 import { getSiteLang } from "/js/i18n.js";
 import { supabase } from "/js/supabase_client.js";
-import { ensureAuthAndCacheUser } from "/js/auth.js";
 import { setHeaderTokens } from "/js/ui_shell.js";
 
 /* ===============================
@@ -21,20 +20,40 @@ import { setHeaderTokens } from "/js/ui_shell.js";
 const $ = (id)=>document.getElementById(id);
 
 const API_BASE = "https://italky-api.onrender.com";
-const LOGIN_PATH = "/pages/login.html";
+
+/* ✅ LOGIN artık index.html */
+const LOGIN_PATH = "/index.html";
 const HOME_PATH  = "/pages/home.html";
 const PROFILE_PATH = "/pages/profile.html";
 
 /* ===============================
-   AUTH
+   AUTH (refresh loop kill)
 ================================ */
+async function waitForSession(maxMs=6000){
+  const start = Date.now();
+  while(Date.now()-start < maxMs){
+    try{
+      const { data:{ session } } = await supabase.auth.getSession();
+      if(session?.user) return session;
+    }catch{}
+    await new Promise(r=>setTimeout(r, 250));
+  }
+  return null;
+}
+
 async function requireLogin(){
-  const { data:{ session } } = await supabase.auth.getSession();
+  const session = await waitForSession(6000);
+
   if(!session?.user){
+    // ✅ döngü olmasın diye 1 kere redirect
+    if(sessionStorage.getItem("F2F_REDIRECTED") === "1") return false;
+    sessionStorage.setItem("F2F_REDIRECTED", "1");
     location.replace(LOGIN_PATH);
     return false;
   }
-  try{ await ensureAuthAndCacheUser(); }catch{}
+
+  // login olmuşsa kill flag sıfırla
+  try{ sessionStorage.removeItem("F2F_REDIRECTED"); }catch{}
   return true;
 }
 
@@ -132,53 +151,26 @@ let botLang = "tr";
 
 /* ===============================
    TOKEN SESSION
-   ✅ Array/Object uyumlu + NOT_AUTHENTICATED retry
 ================================ */
 let sessionGranted = false;
 
 function unwrapRow(data){
-  // Supabase RPC bazen: [{...}] bazen: {...} dönebilir
   if(Array.isArray(data)) return data[0] || null;
   if(data && typeof data === "object") return data;
-  return null;
-}
-
-async function waitForSession(maxMs=6000){
-  const start = Date.now();
-  while(Date.now()-start < maxMs){
-    const { data:{ session } } = await supabase.auth.getSession();
-    if(session?.user) return session;
-    await new Promise(r=>setTimeout(r, 250));
-  }
   return null;
 }
 
 async function ensureFacetofaceSession(){
   if(sessionGranted) return true;
 
-  // 1) kesin session var mı?
-  const s0 = await supabase.auth.getSession().catch(()=>({data:{session:null}}));
-  if(!s0?.data?.session?.user){
-    // www/italky karışıklığı olmasın diye zaten en başta canonical yaptık.
+  const s = await waitForSession(6000);
+  if(!s?.user){
     location.replace(LOGIN_PATH);
     return false;
   }
 
-  // 2) RPC çağır
   try{
     let { data, error } = await supabase.rpc("start_facetoface_session");
-
-    // NOT_AUTHENTICATED gelirse: 1 kez bekle + tekrar dene
-    if(error && String(error.message||"").includes("NOT_AUTHENTICATED")){
-      const s = await waitForSession(6000);
-      if(!s){
-        location.replace(LOGIN_PATH);
-        return false;
-      }
-      const retry = await supabase.rpc("start_facetoface_session");
-      data = retry.data;
-      error = retry.error;
-    }
 
     if(error){
       const msg = String(error.message||"");
@@ -222,7 +214,7 @@ function setRootClasses({to, listening=false, speaking=false}){
 }
 
 /* ===============================
-   TTS (Android WebView fix)
+   TTS
 ================================ */
 let speakTimer = null;
 
@@ -252,6 +244,7 @@ function speakRaw(text, langCode, onDone){
   setTimeout(()=>{ try{ window.speechSynthesis.speak(u); }catch{ onDone?.(); } }, 60);
 }
 
+let lastSpeakerSide = "bot";
 function speakWithUI(side, text, langCode){
   setRootClasses({to: side, listening: false, speaking: true});
   speakRaw(text, langCode, ()=>{
@@ -285,13 +278,10 @@ function renderPop(side){
   list.querySelectorAll(".pop-item").forEach(item=>{
     item.addEventListener("click", (e)=>{
       e.preventDefault(); e.stopPropagation();
-
       const code = item.getAttribute("data-code") || "en";
       if(side==="top") topLang = code; else botLang = code;
-
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
-
       closeAllPop();
     });
   });
@@ -300,10 +290,8 @@ function renderPop(side){
 function togglePopover(side){
   const pop = $(side==="top" ? "pop-top" : "pop-bot");
   if(!pop) return;
-
   const willShow = !pop.classList.contains("show");
   closeAllPop();
-
   if(willShow){
     pop.classList.add("show");
     renderPop(side);
@@ -408,7 +396,6 @@ let active = null;
 let recTop = null;
 let recBot = null;
 let pending = null;
-let lastSpeakerSide = "bot";
 
 function setMicUI(which, on){
   const btn = (which==="top") ? $("topMic") : $("botMic");
@@ -450,7 +437,6 @@ async function start(which){
 
   active = which;
   setMicUI(which, true);
-
   setRootClasses({to: (which==="top"?"top":"bot"), listening:true, speaking:false});
 
   rec.onresult = (e)=>{
@@ -490,12 +476,7 @@ async function start(which){
       addBubble(other, "me", translated, speakLang);
 
       lastSpeakerSide = other;
-      setRootClasses({to:other, listening:false, speaking:true});
-
-      speakRaw(translated, speakLang, ()=>{
-        setRootClasses({to:other, listening:false, speaking:false});
-      });
-
+      speakWithUI(other, translated, speakLang);
     }else{
       setRootClasses({to:lastSpeakerSide, listening:false, speaking:false});
     }
@@ -551,6 +532,5 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   bindUI();
 
   try{ window.speechSynthesis?.getVoices?.(); }catch{}
-
   setRootClasses({to:"bot", listening:false, speaking:false});
 });
