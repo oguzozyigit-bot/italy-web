@@ -131,7 +131,7 @@
     .pop-name{ font-weight: 900; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .pop-code{ font-weight: 900; font-size: 12px; opacity: .7; }
 
-    /* ✅ MERKEZ HUB — BUNU DÜZELTTİM */
+    /* ✅ MERKEZ HUB (TIKLANABİLİR) */
     .center-hub{
       height: 104px;
       position: relative;
@@ -141,7 +141,7 @@
       justify-content: center;
       background: rgba(0,0,0,0.55);
       backdrop-filter: blur(16px);
-      pointer-events: auto; /* ✅ eskiden none'du, tüm tıklamayı öldürüyordu */
+      pointer-events: auto; /* ✅ kritik fix */
     }
 
     .nav-btn{
@@ -226,25 +226,9 @@
     }
     .bubble .txt{ max-width: 78vw; }
 
-    .bubble.me .txt{
-      font-size: 18px;
-      font-weight: 650;
-      opacity: .75;
-      line-height: 1.15;
-    }
-    .bubble.me.is-latest .txt{
-      font-size: 30px;
-      font-weight: 900;
-      opacity: 1;
-      line-height: 1.06;
-      letter-spacing: .2px;
-    }
-    .bubble.them .txt{
-      font-size: 18px;
-      font-weight: 450;
-      opacity: .55;
-      line-height: 1.2;
-    }
+    .bubble.me .txt{ font-size: 18px; font-weight: 650; opacity: .75; line-height: 1.15; }
+    .bubble.me.is-latest .txt{ font-size: 30px; font-weight: 900; opacity: 1; line-height: 1.06; letter-spacing: .2px; }
+    .bubble.them .txt{ font-size: 18px; font-weight: 450; opacity: .55; line-height: 1.2; }
 
     .spk-icon{
       width: 40px; height: 40px; border-radius: 50%;
@@ -359,6 +343,6 @@
 
   </div>
 
-  <script type="module" src="/js/facetoface_page.js?v=FIX_NOLOOP_1"></script>
+  <script type="module" src="/js/facetoface_page.js?v=FINAL_NOLOOP_FULL"></script>
 </body>
 </html>
