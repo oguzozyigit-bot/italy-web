@@ -1,3 +1,4 @@
+// FILE: /js/lang_pool_full.js
 export const LANG_POOL = [
   { code:"tr", flag:"🇹🇷", name:"Türkçe" },
   { code:"en", flag:"🇬🇧", name:"English" },
