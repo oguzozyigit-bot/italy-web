@@ -118,12 +118,39 @@ let sessionGranted = false;
 ================================ */
 let phase = "idle";          // idle | recording | translating | speaking
 let active = null;           // "top" | "bot" | null
+let lastMicSide = "bot";     // "top" | "bot" — konuşma bitince logo buraya döner
 
-function canStart(which){
+function canStart(){
   return phase === "idle";
 }
 function otherSide(which){ return which === "top" ? "bot" : "top"; }
-function setPhase(p){ phase = p; updateMicLocks(); }
+
+function frame(){
+  return document.getElementById("frameRoot");
+}
+
+// Logo yön: to-top => üst mic tarafı, to-bot => alt mic tarafı
+function setCenterDirection(side){
+  const fr = frame();
+  if(!fr) return;
+  fr.classList.toggle("to-top", side === "top");
+  fr.classList.toggle("to-bot", side !== "top");
+}
+
+function setFrameState(state, side){
+  const fr = frame();
+  if(!fr) return;
+
+  fr.classList.toggle("listening", state === "listening");
+  fr.classList.toggle("speaking", state === "speaking");
+
+  if(side) setCenterDirection(side);
+}
+
+function setPhase(p){
+  phase = p;
+  updateMicLocks();
+}
 
 function lockMic(which, locked){
   const el = (which === "top") ? $("topMic") : $("botMic");
@@ -140,7 +167,8 @@ function updateMicLocks(){
     if(active === "top") lockBot = true;
     if(active === "bot") lockTop = true;
   } else if(phase === "translating" || phase === "speaking"){
-    lockTop = true; lockBot = true;
+    lockTop = true;
+    lockBot = true;
   }
 
   lockMic("top", lockTop);
@@ -159,7 +187,7 @@ let toastEl = null;
 let toastTimer = null;
 
 function showToast(text){
-  try{ if(navigator.vibrate) navigator.vibrate(25); }catch{}
+  try{ if(navigator.vibrate) navigator.vibrate(18); }catch{}
 
   if(!toastEl){
     toastEl = document.createElement("div");
@@ -228,9 +256,7 @@ function renderPop(side){
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
 
-      // ✅ Tek satır bilgilendirme (abartı yok)
       toast("🎙️ Sesli komut: 'Dil değiştir İngilizce'  /  'Translate to English'");
-
       closeAllPop();
     });
   });
@@ -333,6 +359,8 @@ function stopAll(){
   setMicUI("bot", false);
 
   try{ window.speechSynthesis?.cancel?.(); }catch{}
+  setFrameState("idle", lastMicSide);
+
   setPhase("idle");
   updateMicLocks();
 }
@@ -373,12 +401,15 @@ async function speakLocal(text, langCode){
     const objUrl = URL.createObjectURL(blob);
 
     const a = new Audio(objUrl);
+    a.playsInline = true;
+    a.muted = false;
     a.onended = () => URL.revokeObjectURL(objUrl);
     a.onerror  = () => URL.revokeObjectURL(objUrl);
 
     await a.play();
   }catch(e){
     console.log("TTS failed:", e);
+    toast("🔇 Ses çıkmadı (TTS)");
   }
 }
 
@@ -440,17 +471,48 @@ async function translateViaApi(text, source, target){
 }
 
 /* ===============================
-   UI BUBBLES
+   UI BUBBLES + SPEAKER ICON
 ================================ */
-function addBubble(side, kind, text){
+function clearLatestTranslated(side){
   const wrap = (side==="top") ? $("topBody") : $("botBody");
   if(!wrap) return;
+  wrap.querySelectorAll(".bubble.me.is-latest").forEach(el=>el.classList.remove("is-latest"));
+}
+
+function makeSpeakerIcon(onClick){
+  const btn = document.createElement("div");
+  btn.className = "spk-icon";
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89 0 5.23 2.34 5.23 5.23S16.89 15.75 14 15.75v2.06c4.02 0 7.29-3.27 7.29-7.29S18.02 3.23 14 3.23z"/>
+    </svg>
+  `;
+  btn.addEventListener("click", onClick);
+  return btn;
+}
+
+function addBubble(side, kind, text, opts={}){
+  const wrap = (side==="top") ? $("topBody") : $("botBody");
+  if(!wrap) return;
+
   const bubble = document.createElement("div");
   bubble.className = `bubble ${kind}`;
+
+  // translated big
+  if(kind === "me" && opts.latest){
+    bubble.classList.add("is-latest");
+  }
+
+  if(kind === "me" && opts.speakable){
+    const icon = makeSpeakerIcon(()=> speakLocal(text, opts.speakLang || "en"));
+    bubble.appendChild(icon);
+  }
+
   const txt = document.createElement("span");
   txt.className = "txt";
   txt.textContent = String(text||"").trim() || "—";
   bubble.appendChild(txt);
+
   wrap.appendChild(bubble);
   try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
 }
@@ -461,7 +523,7 @@ function addBubble(side, kind, text){
 async function start(which){
   closeAllPop();
 
-  if(!canStart(which)){
+  if(!canStart()){
     toast("İşlem bitmeden tekrar konuşulmaz.");
     return;
   }
@@ -475,6 +537,7 @@ async function start(which){
     return;
   }
 
+  // stop any TTS before recording
   try{ window.speechSynthesis?.cancel?.(); }catch{}
 
   const src = (which==="top") ? topLang : botLang;
@@ -484,6 +547,11 @@ async function start(which){
   if(!rec){ alert("Mikrofon başlatılamadı."); return; }
 
   active = which;
+  lastMicSide = which;
+
+  setCenterDirection(which);
+  setFrameState("listening", which);
+
   setPhase("recording");
   setMicUI(which, true);
 
@@ -501,6 +569,7 @@ async function start(which){
 
   rec.onend = async ()=>{
     setMicUI(which,false);
+    setFrameState("idle", lastMicSide);
 
     const p = pending;
     pending = null;
@@ -536,24 +605,35 @@ async function start(which){
       return;
     }
 
-    // ✅ 2) Komut değilse: önce konuşanı yazdır
+    // ✅ 2) Komut değilse: konuşanı yazdır
     addBubble(which, "them", p.finalText);
 
     // ✅ 3) NORMAL TRANSLATION
     const translated = await translateViaApi(p.finalText, p.src, p.dst);
 
     if(!translated){
-      addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
+      addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", { latest:false, speakable:false });
       setPhase("idle");
       updateMicLocks();
       return;
     }
 
-    addBubble(other, "me", translated);
+    // Son çeviri büyük, öncekini küçült
+    clearLatestTranslated(other);
+    addBubble(other, "me", translated, {
+      latest: true,
+      speakable: true,
+      speakLang: p.dst
+    });
+
+    // ✅ 4) Speaking state + yön: hoparlör tarafına dön (diğer tarafa), bittiğinde geri mic tarafına dön
+    setCenterDirection(other);
+    setFrameState("speaking", other);
 
     setPhase("speaking");
     await speakLocal(translated, p.dst);
 
+    setFrameState("idle", lastMicSide);
     setPhase("idle");
     updateMicLocks();
   };
@@ -604,6 +684,11 @@ function bindUI(){
 document.addEventListener("DOMContentLoaded", async ()=>{
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
+
+  // başlangıç yönü
+  setCenterDirection("bot");
+  setFrameState("idle", "bot");
+
   bindUI();
 
   await checkLoginOnce();
