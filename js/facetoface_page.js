@@ -178,6 +178,8 @@ function showToast(text){
     toastEl.style.fontWeight = "900";
     toastEl.style.fontSize = "12px";
     toastEl.style.letterSpacing = ".2px";
+    toastEl.style.opacity = "0";
+    toastEl.style.transition = "opacity .15s ease";
     document.body.appendChild(toastEl);
   }
 
@@ -187,7 +189,7 @@ function showToast(text){
   if(toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>{
     if(toastEl) toastEl.style.opacity = "0";
-  }, 1200);
+  }, 1400);
 }
 
 function toast(msg){ showToast(String(msg||"")); }
@@ -219,11 +221,16 @@ function renderPop(side){
     item.addEventListener("click",(e)=>{
       e.preventDefault(); e.stopPropagation();
       const code = item.getAttribute("data-code") || "en";
-      if(side==="top") topLang = code; else botLang = code;
+
+      if(side==="top") topLang = code;
+      else botLang = code;
 
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
-    toast("🎙️ Sesli komut: 'Dil değiştir İngilizce'  /  'Translate to English'");
+
+      // ✅ Tek satır bilgilendirme (abartı yok)
+      toast("🎙️ Sesli komut: 'Dil değiştir İngilizce'  /  'Translate to English'");
+
       closeAllPop();
     });
   });
@@ -331,29 +338,48 @@ function stopAll(){
 }
 
 /* ===============================
-   TTS (LOCAL)
+   TTS (LOCAL -> /api/tts fallback)
 ================================ */
-function speakLocal(text, langCode){
-  const t = String(text||"").trim();
-  if(!t) return Promise.resolve();
-  if(!("speechSynthesis" in window)) return Promise.resolve();
+async function speakLocal(text, langCode){
+  const t = String(text || "").trim();
+  if(!t) return;
 
-  return new Promise((resolve)=>{
-    try{
-      const u = new SpeechSynthesisUtterance(t);
-      u.lang = bcp(langCode);
-      u.rate = 1.0;
-      u.pitch = 1.0;
-
-      u.onend = ()=>resolve();
-      u.onerror = ()=>resolve();
-
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    }catch{
-      resolve();
+  // 1) Web Speech (Chrome)
+  try{
+    if("speechSynthesis" in window){
+      await new Promise((resolve)=>{
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = bcp(langCode);
+        u.rate = 1.0;
+        u.pitch = 1.0;
+        u.onend = resolve;
+        u.onerror = resolve;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      });
+      return;
     }
-  });
+  }catch{}
+
+  // 2) WebView/APK için garanti: Backend TTS (/api/tts)
+  try{
+    const lang = normalizeApiLang(langCode);
+    const url = `${API_BASE}/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(t)}`;
+
+    const res = await fetch(url, { method: "GET" });
+    if(!res.ok) throw new Error("TTS HTTP " + res.status);
+
+    const blob = await res.blob();
+    const objUrl = URL.createObjectURL(blob);
+
+    const a = new Audio(objUrl);
+    a.onended = () => URL.revokeObjectURL(objUrl);
+    a.onerror  = () => URL.revokeObjectURL(objUrl);
+
+    await a.play();
+  }catch(e){
+    console.log("TTS failed:", e);
+  }
 }
 
 /* ===============================
@@ -466,7 +492,7 @@ async function start(which){
     const finalText = String(t||"").trim();
     if(!finalText) return;
 
-    // ✅ Komut/çeviri ayrımını onend'de yapacağız. Burada bubble yazmıyoruz.
+    // Komut/çeviri ayrımını onend'de yapacağız
     pending = { which, finalText, src, dst };
     try{ rec.stop(); }catch{}
   };
