@@ -1,4 +1,5 @@
 // FILE: /js/facetoface_page.js
+import { LANG_POOL } from "/js/lang_pool_full.js";
 import { getSiteLang } from "/js/i18n.js";
 import { supabase } from "/js/supabase_client.js";
 import { setHeaderTokens } from "/js/ui_shell.js";
@@ -35,48 +36,6 @@ function getSystemUILang(){
   return "tr";
 }
 let UI_LANG = getSystemUILang();
-
-/* ===============================
-   LANGS
-================================ */
-const LANGS = [
-  { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
-  { code:"en", flag:"🇬🇧", bcp:"en-US" },
-  { code:"de", flag:"🇩🇪", bcp:"de-DE" },
-  { code:"fr", flag:"🇫🇷", bcp:"fr-FR" },
-  { code:"it", flag:"🇮🇹", bcp:"it-IT" },
-  { code:"es", flag:"🇪🇸", bcp:"es-ES" },
-  { code:"pt", flag:"🇵🇹", bcp:"pt-PT" },
-  { code:"pt-br", flag:"🇧🇷", bcp:"pt-BR" },
-  { code:"nl", flag:"🇳🇱", bcp:"nl-NL" },
-  { code:"sv", flag:"🇸🇪", bcp:"sv-SE" },
-  { code:"no", flag:"🇳🇴", bcp:"nb-NO" },
-  { code:"da", flag:"🇩🇰", bcp:"da-DK" },
-  { code:"fi", flag:"🇫🇮", bcp:"fi-FI" },
-  { code:"pl", flag:"🇵🇱", bcp:"pl-PL" },
-  { code:"cs", flag:"🇨🇿", bcp:"cs-CZ" },
-  { code:"sk", flag:"🇸🇰", bcp:"sk-SK" },
-  { code:"hu", flag:"🇭🇺", bcp:"hu-HU" },
-  { code:"ro", flag:"🇷🇴", bcp:"ro-RO" },
-  { code:"bg", flag:"🇧🇬", bcp:"bg-BG" },
-  { code:"el", flag:"🇬🇷", bcp:"el-GR" },
-  { code:"uk", flag:"🇺🇦", bcp:"uk-UA" },
-  { code:"ru", flag:"🇷🇺", bcp:"ru-RU" },
-  { code:"ar", flag:"🇸🇦", bcp:"ar-SA" },
-  { code:"he", flag:"🇮🇱", bcp:"he-IL" },
-  { code:"fa", flag:"🇮🇷", bcp:"fa-IR" },
-  { code:"ur", flag:"🇵🇰", bcp:"ur-PK" },
-  { code:"hi", flag:"🇮🇳", bcp:"hi-IN" },
-  { code:"bn", flag:"🇧🇩", bcp:"bn-BD" },
-  { code:"id", flag:"🇮🇩", bcp:"id-ID" },
-  { code:"ms", flag:"🇲🇾", bcp:"ms-MY" },
-  { code:"vi", flag:"🇻🇳", bcp:"vi-VN" },
-  { code:"th", flag:"🇹🇭", bcp:"th-TH" },
-  { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
-  { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
-  { code:"ko", flag:"🇰🇷", bcp:"ko-KR" },
-  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" }
-];
 
 function canonicalLangCode(code){
   const c = String(code||"").toLowerCase();
