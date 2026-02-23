@@ -3,125 +3,140 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • 2500 Quantum</title>
+  <title>italkyAI • 2076 Origin</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --bg-void: #02000f;
-      --quantum-blue: #6366f1;
-      --quantum-pink: #ec4899;
+      --neon-cyan: #00f3ff;
+      --neon-purple: #bc13fe;
+      --glass: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.12);
     }
 
     html, body {
       margin: 0; padding: 0; width: 100%; height: 100%;
-      background-color: var(--bg-void); font-family: 'Outfit', sans-serif;
+      background-color: #050505; font-family: 'Outfit', sans-serif;
       overflow: hidden; color: #fff;
     }
 
-    /* Kuantum Alanı Efekti */
+    /* Arkaplan: Hareketli Nebula */
     body::before {
       content: ""; position: fixed; inset: 0;
-      background: radial-gradient(circle at 50% 120%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
-      pointer-events: none;
+      background: radial-gradient(circle at 80% 20%, rgba(188, 19, 254, 0.15) 0%, transparent 40%),
+                  radial-gradient(circle at 20% 80%, rgba(0, 243, 255, 0.15) 0%, transparent 40%);
+      filter: blur(80px); z-index: -1;
     }
 
     .app-viewport {
       width: 100%; max-width: 430px; height: 100dvh; margin: 0 auto;
       display: flex; flex-direction: column; position: relative;
-      background: rgba(10, 10, 30, 0.4); backdrop-filter: blur(30px);
-      border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);
+      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(60px);
     }
 
-    /* PREMIUM HEADER (Fonksiyonel Yapı Korundu) */
+    /* HEADER: Minimalist Origin */
     .premium-header {
-      padding: calc(45px + env(safe-area-inset-top)) 20px 15px;
+      padding: calc(55px + env(safe-area-inset-top)) 25px 20px;
       display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
     }
     .brand-group h1 {
-      font-family: 'Space Grotesk', sans-serif; font-size: 24px; margin: 0; font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif; font-size: 22px; margin: 0;
+      letter-spacing: -1px; font-weight: 700;
     }
-    .brand-group h1 .ai { color: var(--quantum-blue); text-shadow: 0 0 10px var(--quantum-blue); }
+    .brand-group h1 span { color: var(--neon-cyan); text-shadow: 0 0 15px rgba(0,243,255,0.5); }
 
-    .user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
-    .uMeta { text-align: right; }
-    .uName { font-weight: 900; font-size: 13px; letter-spacing: 0.5px; }
-    .uJeton { font-size: 10px; color: var(--quantum-pink); font-weight: 900; }
+    .user-info { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+    .uName { font-weight: 900; font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,0.5); }
+    .uJeton { 
+        font-size: 11px; color: #fff; font-weight: 900; 
+        background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+        padding: 2px 8px; border-radius: 4px; margin-top: 4px; text-align: center;
+    }
     .avatar {
-      width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--quantum-blue);
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); overflow: hidden;
+      width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border);
+      padding: 3px; background: rgba(255,255,255,0.05); transition: 0.5s;
     }
+    .user-info:hover .avatar { border-color: var(--neon-cyan); transform: rotate(180deg); }
 
-    /* PAGE CONTENT: Akışkan Yapı */
+    /* CONTENT */
     #pageContent {
       flex: 1; display: flex; flex-direction: column;
-      padding: 10px 20px; gap: 12px; overflow-y: auto; scrollbar-width: none;
+      padding: 0 25px; gap: 20px; overflow-y: auto; scrollbar-width: none;
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    /* FaceToFace (Işıklandırılmış Orb) */
-    .portal-zone { padding: 10px 0; text-align: center; cursor: pointer; }
-    .ai-core {
-      width: 100px; height: 100px; margin: 0 auto; background: #000; border-radius: 50%;
-      border: 2px solid var(--quantum-blue); position: relative;
+    /* FACETOFACE: Holografik Küre */
+    .portal-zone { position: relative; padding: 30px 0; perspective: 1000px; }
+    .ai-orb-container {
+      width: 140px; height: 140px; margin: 0 auto; position: relative;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
-      animation: corePulse 3s infinite ease-in-out;
     }
-
-    /* Academy Pro Kartları - Kuantum Versiyon */
-    .academy-pro {
-      background: rgba(255, 255, 255, 0.03); border-radius: 18px; padding: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 15px;
-      cursor: pointer; transition: 0.3s;
+    .orb-ring {
+      position: absolute; inset: 0; border: 1px solid var(--neon-cyan);
+      border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%;
+      animation: morph 8s linear infinite; opacity: 0.4;
     }
-    .academy-pro:active { transform: scale(0.97); background: rgba(255,255,255,0.06); }
+    .orb-ring.inner { animation-direction: reverse; border-color: var(--neon-purple); inset: 10px; }
     
-    .icon-wrap {
-      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05);
-      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    .ai-core-origin {
+      width: 80px; height: 80px; background: #fff; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 40px #fff, 0 0 80px var(--neon-cyan);
+      animation: pulse 4s infinite ease-in-out;
     }
 
-    .academy-text h2 { margin: 0; font-size: 16px; font-weight: 800; }
-    .academy-text h2 span { color: var(--quantum-blue); }
-    .academy-text p { margin: 0; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
-
-    /* ALT KISIM: 2500 HUD PANELİ (Boşluğu Dolduran Kısım) */
-    .hud-footer {
-      padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
-      display: flex; flex-direction: column; align-items: center; gap: 15px;
+    /* Gelişmiş Kartlar: Glass-Edge */
+    .card-origin {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: 2px; padding: 20px; display: flex; align-items: center; gap: 20px;
+      cursor: pointer; position: relative; transition: 0.4s;
+      clip-path: polygon(0 0, 100% 0, 100% 80%, 95% 100%, 0 100%);
+    }
+    .card-origin:active { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+    .card-origin::before {
+        content: ""; position: absolute; left: 0; top: 0; width: 2px; height: 100%;
+        background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan);
     }
 
-    /* Dinamik Frekans Analizörü */
-    .frequency-viz {
-      display: flex; align-items: flex-end; gap: 3px; height: 30px; opacity: 0.6;
+    .origin-icon { font-size: 22px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
+    .origin-text h2 { margin: 0; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+    .origin-text p { margin: 5px 0 0; font-size: 9px; color: rgba(255,255,255,0.4); font-weight: 600; }
+
+    /* FOOTER: Bio-Link */
+    .footer-2076 {
+      padding: 40px 25px; display: flex; flex-direction: column; align-items: center; gap: 20px;
     }
-    .freq-bar {
-      width: 3px; background: var(--quantum-blue); border-radius: 10px;
-      animation: freqAnim 1.2s infinite ease-in-out;
+    .scanner-line {
+      width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+      position: relative; overflow: hidden;
+    }
+    .scanner-line::after {
+        content: ""; position: absolute; inset: 0; background: #fff;
+        animation: scan 2s infinite;
     }
 
-    /* Alt Navigasyon: Holografik Düğmeler */
-    .hud-nav { display: flex; gap: 25px; }
-    .hud-nav a {
-      text-decoration: none; font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.3);
-      text-transform: uppercase; letter-spacing: 2px;
+    .nav-2076 { display: flex; gap: 30px; }
+    .nav-2076 a {
+      text-decoration: none; font-size: 10px; font-weight: 900; color: #fff;
+      opacity: 0.4; transition: 0.3s; letter-spacing: 2px;
+    }
+    .nav-2076 a:hover { opacity: 1; color: var(--neon-cyan); }
+
+    .origin-status {
+      font-size: 8px; font-weight: 900; letter-spacing: 4px; color: var(--neon-purple);
+      text-shadow: 0 0 10px var(--neon-purple);
     }
 
-    /* Sistem İzleme */
-    .sys-info {
-      font-size: 8px; font-weight: 900; color: var(--quantum-pink);
-      letter-spacing: 3px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;
+    @keyframes morph {
+      0% { border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%; transform: rotate(0deg); }
+      50% { border-radius: 50% 50% 20% 80% / 25% 80% 20% 75%; }
+      100% { border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%; transform: rotate(360deg); }
     }
-    .blink-dot { width: 4px; height: 4px; background: var(--quantum-pink); border-radius: 50%; animation: blink 1s infinite; }
-
-    @keyframes corePulse { 0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); } 50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); } }
-    @keyframes freqAnim { 0%, 100% { height: 5px; } 50% { height: 25px; } }
-    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+    @keyframes scan { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
   </style>
 </head>
@@ -131,96 +146,89 @@
 
     <header class="premium-header">
       <div class="brand-group" id="brandHome">
-        <h1>italky<span class="ai">AI</span></h1>
+        <h1>italky<span>AI</span></h1>
       </div>
 
       <div class="user-info" id="profileBtn">
         <div class="uMeta">
-          <div class="uName" id="userName">USER_SYNC</div>
-          <div class="uJeton" id="headerJeton">0000</div>
+          <div class="uName" id="userName">SYNC_NODE</div>
+          <div class="uJeton" id="headerJeton">0.000</div>
         </div>
-        <div class="avatar"><img src="" id="userPic" alt=""></div>
+        <div class="avatar"><img src="" id="userPic" style="width:100%; height:100%; object-fit:cover; border-radius:50%;"></div>
       </div>
     </header>
 
     <div id="pageContent">
 
       <div class="portal-zone" data-href="/facetoface.html">
-        <div class="ai-core">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 11v1a7 7 0 0 1-14 0v-2"/>
+        <div class="ai-orb-container">
+          <div class="orb-ring"></div>
+          <div class="orb-ring inner"></div>
+          <div class="ai-core-origin">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
             </svg>
+          </div>
         </div>
-        <div style="margin-top:10px;">
-          <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:-1px;">FACETOFACE</h2>
-          <p style="margin:0; font-size:10px; color:var(--quantum-blue); font-weight:800;">QUANTUM REAL-TIME LINK</p>
+        <div style="text-align:center; margin-top:25px;">
+          <h2 style="margin:0; font-size:18px; font-weight:900; letter-spacing:4px;">FACE TO FACE</h2>
+          <p style="margin:5px 0 0; font-size:9px; color:var(--neon-cyan); font-weight:900;">DIRECT NEURAL INTERFACE</p>
         </div>
       </div>
 
-      <div class="academy-pro" data-href="/pages/f2f_connect.html">
-        <div class="icon-wrap">🛰️</div>
-        <div class="academy-text"><h2>Walkie <span>Talkie</span></h2><p>P2P ENCRYPTED CONNECT</p></div>
+      <div class="card-origin" data-href="/pages/f2f_connect.html">
+        <div class="origin-icon">🛰️</div>
+        <div class="origin-text"><h2>Walkie Talkie</h2><p>Quantum Link Established</p></div>
       </div>
 
-      <div class="academy-pro" data-href="/pages/offline.html">
-        <div class="icon-wrap">📡</div>
-        <div class="academy-text"><h2>Offline <span>Çeviri</span></h2><p>LOCAL DATA CORE</p></div>
+      <div class="card-origin" data-href="/pages/offline.html">
+        <div class="origin-icon">🧬</div>
+        <div class="origin-text"><h2>Offline Core</h2><p>Local Bio-Storage Active</p></div>
       </div>
 
-      <div class="academy-pro" data-href="/pages/teacher_select.html">
-        <div class="icon-wrap">🧠</div>
-        <div class="academy-text"><h2>italky <span>Academy</span></h2><p>NEURAL TEACHER SYNC</p></div>
+      <div class="card-origin" data-href="/pages/teacher_select.html">
+        <div class="origin-icon">💎</div>
+        <div class="origin-text"><h2>Academy</h2><p>Cognitive Learning Module</p></div>
       </div>
 
-      <div class="academy-pro" data-href="/pages/game.html">
-        <div class="icon-wrap">🎮</div>
-        <div class="academy-text"><h2>Eğlenerek <span>Öğren</span></h2><p>SIMULATION MODE</p></div>
+      <div class="card-origin" data-href="/pages/game.html">
+        <div class="origin-icon">🌌</div>
+        <div class="origin-text"><h2>Simulation</h2><p>Enter Experience Void</p></div>
       </div>
 
     </div>
 
-    <footer class="hud-footer">
-      <div class="frequency-viz">
-        <div class="freq-bar" style="animation-delay: 0.1s"></div>
-        <div class="freq-bar" style="animation-delay: 0.3s"></div>
-        <div class="freq-bar" style="animation-delay: 0.5s"></div>
-        <div class="freq-bar" style="animation-delay: 0.2s"></div>
-        <div class="freq-bar" style="animation-delay: 0.4s"></div>
-        <div class="freq-bar" style="animation-delay: 0.1s"></div>
-      </div>
-
-      <nav class="hud-nav">
-        <a href="/pages/about.html">INFO</a>
-        <a href="/pages/faq.html">HELP</a>
-        <a href="/pages/contact.html">LINK</a>
+    <footer class="footer-2076">
+      <div class="scanner-line"></div>
+      
+      <nav class="nav-2076">
+        <a href="/pages/about.html">CORE</a>
+        <a href="/pages/faq.html">SYNC</a>
+        <a href="/pages/contact.html">NODE</a>
       </nav>
 
-      <div class="sys-info">
-        <span class="blink-dot"></span>
-        Neural System Active • Core_2500_X
+      <div class="origin-status">
+        STATUS: STABLE // 2076.REV_01
       </div>
     </footer>
 
   </div>
 
   <script>
-    // Mevcut ui_shell.js mantığına tam uyumlu yönlendirme
     function go(url){ if(!url) return; window.location.assign(url); }
 
     document.getElementById("brandHome")?.addEventListener("click", ()=>go("/pages/home.html"));
     document.getElementById("profileBtn")?.addEventListener("click", ()=>go("/pages/profile.html"));
 
     document.querySelectorAll("[data-href]").forEach(el=>{
-      const url = el.getAttribute("data-href");
-      el.addEventListener("click", () => go(url));
+      el.addEventListener("click", () => go(el.getAttribute("data-href")));
     });
 
-    // Kullanıcı Bilgisi Yükleme (Mevcut Fonksiyonların)
     function loadUser(){
         const u = JSON.parse(localStorage.getItem("italky_user") || "{}");
-        if(u.full_name) document.getElementById("userName").textContent = u.full_name.split(" ")[0].toUpperCase();
-        if(u.tokens !== undefined) document.getElementById("headerJeton").textContent = u.tokens.toString().padStart(4, '0');
+        if(u.full_name) document.getElementById("userName").textContent = u.full_name.split(" ")[0].toUpperCase() + "_PTR";
+        if(u.tokens !== undefined) document.getElementById("headerJeton").textContent = (u.tokens / 1000).toFixed(3);
         if(u.picture) document.getElementById("userPic").src = u.picture;
     }
     window.addEventListener("load", loadUser);
