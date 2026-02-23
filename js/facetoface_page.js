@@ -37,6 +37,39 @@ function getSystemUILang(){
 }
 let UI_LANG = getSystemUILang();
 
+/* ===============================
+   LANG POOL (FULL) -> FACETOFACE LANGS
+   (code, flag, bcp) + search support
+================================ */
+const BCP = {
+  "tr":"tr-TR","en":"en-US","de":"de-DE","fr":"fr-FR","it":"it-IT","es":"es-ES",
+  "pt":"pt-PT","pt-br":"pt-BR","nl":"nl-NL","sv":"sv-SE","no":"nb-NO","da":"da-DK",
+  "fi":"fi-FI","pl":"pl-PL","cs":"cs-CZ","sk":"sk-SK","hu":"hu-HU","ro":"ro-RO",
+  "bg":"bg-BG","el":"el-GR","uk":"uk-UA","ru":"ru-RU","ar":"ar-SA","he":"he-IL",
+  "fa":"fa-IR","ur":"ur-PK","hi":"hi-IN","bn":"bn-BD","id":"id-ID","ms":"ms-MY",
+  "vi":"vi-VN","th":"th-TH","zh":"zh-CN","ja":"ja-JP","ko":"ko-KR","ka":"ka-GE",
+  "az":"az-AZ","hy":"hy-AM","kk":"kk-KZ","ky":"ky-KG","uz":"uz-UZ","tk":"tk-TM","tg":"tg-TJ",
+  "sr":"sr-RS","hr":"hr-HR","bs":"bs-BA","sl":"sl-SI","mk":"mk-MK","sq":"sq-AL",
+  "et":"et-EE","lv":"lv-LV","lt":"lt-LT","af":"af-ZA","sw":"sw-KE","am":"am-ET",
+  "ca":"ca-ES","eu":"eu-ES","gl":"gl-ES","is":"is-IS","ga":"ga-IE","cy":"cy-GB",
+  "fil":"fil-PH","mn":"mn-MN","ne":"ne-NP","si":"si-LK","ta":"ta-IN","te":"te-IN","mr":"mr-IN","gu":"gu-IN"
+};
+
+const LANGS = (Array.isArray(LANG_POOL) ? LANG_POOL : []).map(l => {
+  const code = String(l.code || "").toLowerCase().trim();
+  if(!code) return null;
+  const flag = l.flag || "🌐";
+  const bcp = BCP[code] || "en-US";
+  return { code, flag, bcp };
+}).filter(Boolean);
+
+// ensure basics
+if(!LANGS.find(x=>x.code==="tr")) LANGS.unshift({code:"tr",flag:"🇹🇷",bcp:"tr-TR"});
+if(!LANGS.find(x=>x.code==="en")) LANGS.unshift({code:"en",flag:"🇬🇧",bcp:"en-US"});
+
+/* ===============================
+   LANG HELPERS
+================================ */
 function canonicalLangCode(code){
   const c = String(code||"").toLowerCase();
   return c.split("-")[0];
@@ -176,19 +209,25 @@ function showToast(text){
 function toast(msg){ showToast(String(msg||"")); }
 
 /* ===============================
-   POPUP HELPERS
+   POPUP HELPERS + SEARCH
 ================================ */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
 }
 
-function renderPop(side){
+function renderPop(side, filterText=""){
   const list = $(side==="top" ? "list-top" : "list-bot");
   if(!list) return;
   const sel = (side==="top") ? topLang : botLang;
 
-  list.innerHTML = LANGS.map(l=>`
+  const q = String(filterText||"").trim().toLowerCase();
+  const filtered = !q ? LANGS : LANGS.filter(l=>{
+    const name = String(langLabel(l.code) || "").toLowerCase();
+    return l.code.includes(q) || name.includes(q);
+  });
+
+  list.innerHTML = filtered.map(l=>`
     <div class="pop-item ${l.code===sel?"active":""}" data-code="${l.code}">
       <div class="pop-left">
         <div class="pop-flag">${l.flag}</div>
@@ -215,6 +254,42 @@ function renderPop(side){
   });
 }
 
+function ensureSearchBox(side){
+  const listId = (side==="top") ? "list-top" : "list-bot";
+  const list = $(listId);
+  if(!list) return;
+
+  // already inserted
+  if(list.parentElement?.querySelector?.(".lang-search")) return;
+
+  const inp = document.createElement("input");
+  inp.className = "lang-search";
+  inp.placeholder = "Dil ara…";
+  inp.autocomplete = "off";
+  inp.spellcheck = false;
+
+  // style inline (CSS file yoksa da çalışsın)
+  inp.style.width = "calc(100% - 20px)";
+  inp.style.margin = "10px";
+  inp.style.padding = "10px 12px";
+  inp.style.borderRadius = "14px";
+  inp.style.border = "1px solid rgba(255,255,255,0.14)";
+  inp.style.background = "rgba(0,0,0,0.25)";
+  inp.style.color = "#fff";
+  inp.style.fontWeight = "900";
+  inp.style.fontFamily = "Outfit, system-ui, sans-serif";
+  inp.style.letterSpacing = ".2px";
+
+  list.parentElement.insertBefore(inp, list);
+
+  inp.addEventListener("input", ()=>{
+    renderPop(side, inp.value);
+  });
+
+  // initial render
+  renderPop(side, "");
+}
+
 function togglePopover(side){
   const pop = $(side==="top" ? "pop-top" : "pop-bot");
   if(!pop) return;
@@ -222,7 +297,12 @@ function togglePopover(side){
   closeAllPop();
   if(willShow){
     pop.classList.add("show");
-    renderPop(side);
+    ensureSearchBox(side);
+    // ensureSearchBox calls renderPop
+    try{
+      const inp = pop.querySelector(".lang-search");
+      inp?.focus?.();
+    }catch{}
   }
 }
 
