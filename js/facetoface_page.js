@@ -366,33 +366,61 @@ async function speakLocal(text, langCode){
   const t = String(text || "").trim();
   if(!t) return;
 
-  // 1) Web Speech
-  try{
-    if("speechSynthesis" in window){
-      await new Promise((resolve)=>{
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = bcp(langCode);
-        u.rate = 1.0;
-        u.pitch = 1.0;
-        u.onend = resolve;
-        u.onerror = resolve;
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(u);
-      });
-      return;
-    }
-  }catch{}
-
-  // 2) Backend TTS (/api/tts) — multiple formats
   const lang = normalizeApiLang(langCode);
 
-  async function fetchAudio(url, init){
-    return await fetch(url, {
-      mode: "cors",
+  try{
+    const res = await fetch(`${API_BASE}/api/tts`, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
       credentials: "include",
-      ...init
+      body: JSON.stringify({
+        text: t,
+        lang: lang,
+        voice: null,
+        speaking_rate: 1,
+        pitch: 0
+      })
     });
+
+    if(!res.ok){
+      const err = await res.text().catch(()=> "");
+      console.log("TTS HTTP ERROR:", res.status, err);
+      toast("🔇 TTS HTTP " + res.status);
+      return;
+    }
+
+    const data = await res.json().catch(()=>null);
+    if(!data || !data.ok || !data.audio_base64){
+      console.log("TTS INVALID RESPONSE:", data);
+      toast("🔇 TTS response invalid");
+      return;
+    }
+
+    // base64 -> blob
+    const b64 = data.audio_base64;
+    const binary = atob(b64);
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+
+    for(let i=0;i<len;i++){
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    const blob = new Blob([bytes], { type: "audio/mpeg" });
+    const objUrl = URL.createObjectURL(blob);
+
+    const audio = new Audio(objUrl);
+    audio.playsInline = true;
+    audio.onended = () => URL.revokeObjectURL(objUrl);
+    audio.onerror = () => URL.revokeObjectURL(objUrl);
+
+    await audio.play();
+
+  }catch(e){
+    console.log("TTS FAILED:", e);
+    toast("🔇 TTS failed");
   }
+}
 
   async function playBlob(res){
     const ct = (res.headers.get("content-type") || "").toLowerCase();
