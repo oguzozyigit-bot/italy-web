@@ -13,9 +13,12 @@ const PROFILE_PATH = "/pages/profile.html";
 /* ===============================
    SETTINGS
 ================================ */
-const HOLD_MAX_MS = 90000;      // ✅ 1.5 dakika (istersen 120000 yap)
-const RELEASE_DELAY_MS = 350;   // ✅ bırakınca nefes payı
-const MIN_HOLD_MS = 160;        // kazara dokunma filtresi
+const HOLD_MAX_MS = 45000;       // ✅ 45 saniye
+const RELEASE_DELAY_MS = 350;    // ✅ bırakınca nefes payı
+const MIN_HOLD_MS = 160;         // kazara dokunma
+const RESTART_GAP_MS = 120;      // SR kendi kapanırsa tekrar başlatma aralığı
+const TYPE_SPEED_MS = 14;        // daktilo hızı
+const AUDIO_DEBOUNCE_MS = 250;   // hoparlör spam engeli
 
 /* ===============================
    UI LANG
@@ -106,15 +109,14 @@ function labelChip(code){
 ================================ */
 let topLang = "en";
 let botLang = "tr";
-
 let isLoggedIn = false;
 let sessionGranted = false;
 
 /* ===============================
-   VISUAL STATE
+   VISUAL / LOCKS
 ================================ */
-let phase = "idle";          // idle | recording | translating | speaking
-let active = null;           // "top" | "bot" | null
+let phase = "idle";     // idle | recording | translating | speaking
+let active = null;      // "top" | "bot" | null
 let lastMicSide = "bot";
 
 function frame(){ return document.getElementById("frameRoot"); }
@@ -137,8 +139,6 @@ function setPhase(p){
   phase = p;
   updateMicLocks();
 }
-
-function otherSide(which){ return which === "top" ? "bot" : "top"; }
 
 function lockMic(which, locked){
   const el = (which === "top") ? $("topMic") : $("botMic");
@@ -165,26 +165,24 @@ function updateMicLocks(){
 function setMicUI(which,on){
   const btn = (which==="top") ? $("topMic") : $("botMic");
   if(!btn) return;
-
   btn.classList.toggle("listening", !!on);
-
   if(on){
     btn.style.boxShadow = "0 0 48px rgba(99,102,241,0.60), 0 0 22px rgba(236,72,153,0.32)";
     btn.style.transform = "scale(1.04)";
-  }else{
+  } else {
     btn.style.boxShadow = "";
     btn.style.transform = "";
   }
 }
 
 /* ===============================
-   TOAST + TIMER BADGE
+   TOAST + TIMER
 ================================ */
-let toastEl = null;
-let toastTimer = null;
+let toastEl = null, toastTimer = null;
 
-function showToast(text){
-  try{ if(navigator.vibrate) navigator.vibrate(14); }catch{}
+function toast(msg){
+  const text = String(msg||"");
+  try{ if(navigator.vibrate) navigator.vibrate(12); }catch{}
 
   if(!toastEl){
     toastEl = document.createElement("div");
@@ -202,7 +200,6 @@ function showToast(text){
     toastEl.style.fontFamily = "Outfit, system-ui, sans-serif";
     toastEl.style.fontWeight = "900";
     toastEl.style.fontSize = "12px";
-    toastEl.style.letterSpacing = ".2px";
     toastEl.style.opacity = "0";
     toastEl.style.transition = "opacity .15s ease";
     toastEl.style.pointerEvents = "none";
@@ -211,49 +208,63 @@ function showToast(text){
 
   toastEl.textContent = text;
   toastEl.style.opacity = "1";
-
   if(toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ if(toastEl) toastEl.style.opacity = "0"; }, 1200);
+  toastTimer = setTimeout(()=>{ if(toastEl) toastEl.style.opacity="0"; }, 1200);
 }
-function toast(msg){ showToast(String(msg||"")); }
 
-let timerBadge = null;
-function ensureTimerBadge(){
-  if(timerBadge) return;
-  timerBadge = document.createElement("div");
-  timerBadge.style.position = "fixed";
-  timerBadge.style.right = "14px";
-  timerBadge.style.top = "14px";
-  timerBadge.style.zIndex = "999999";
-  timerBadge.style.padding = "8px 10px";
-  timerBadge.style.borderRadius = "999px";
-  timerBadge.style.border = "1px solid rgba(255,255,255,0.14)";
-  timerBadge.style.background = "rgba(0,0,0,0.55)";
-  timerBadge.style.backdropFilter = "blur(10px)";
-  timerBadge.style.color = "rgba(255,255,255,0.92)";
-  timerBadge.style.fontFamily = "Outfit, system-ui, sans-serif";
-  timerBadge.style.fontWeight = "900";
-  timerBadge.style.fontSize = "12px";
-  timerBadge.style.opacity = "0";
-  timerBadge.style.transition = "opacity .15s ease";
-  timerBadge.style.pointerEvents = "none";
-  document.body.appendChild(timerBadge);
+let timerTop = null, timerBot = null;
+function ensureTimerBadges(){
+  if(timerTop && timerBot) return;
+
+  const make = ()=>{
+    const el = document.createElement("div");
+    el.style.position = "fixed";
+    el.style.right = "14px";
+    el.style.zIndex = "999999";
+    el.style.padding = "8px 10px";
+    el.style.borderRadius = "999px";
+    el.style.border = "1px solid rgba(255,255,255,0.14)";
+    el.style.background = "rgba(0,0,0,0.55)";
+    el.style.backdropFilter = "blur(10px)";
+    el.style.color = "rgba(255,255,255,0.92)";
+    el.style.fontFamily = "Outfit, system-ui, sans-serif";
+    el.style.fontWeight = "900";
+    el.style.fontSize = "12px";
+    el.style.opacity = "0";
+    el.style.transition = "opacity .15s ease";
+    el.style.pointerEvents = "none";
+    document.body.appendChild(el);
+    return el;
+  };
+
+  timerTop = make();
+  timerBot = make();
+
+  timerTop.style.top = "18px";
+  timerTop.style.transform = "rotate(180deg)";
+
+  timerBot.style.bottom = "18px";
 }
-function setTimerBadge(msLeft){
-  ensureTimerBadge();
+
+function setTimerBadges(msLeft){
+  ensureTimerBadges();
   if(msLeft == null){
-    timerBadge.style.opacity = "0";
+    timerTop.style.opacity = "0";
+    timerBot.style.opacity = "0";
     return;
   }
   const s = Math.max(0, Math.ceil(msLeft/1000));
-  timerBadge.textContent = `⏱ ${s}s`;
-  timerBadge.style.opacity = "1";
+  const txt = `⏱ ${s}s`;
+  timerTop.textContent = txt;
+  timerBot.textContent = txt;
+  timerTop.style.opacity = "1";
+  timerBot.style.opacity = "1";
 }
 
 function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
 /* ===============================
-   POPUP + SEARCH
+   POPUP (no design changes) + SEARCH
 ================================ */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
@@ -263,10 +274,9 @@ function closeAllPop(){
 function renderPop(side, filterText=""){
   const list = $(side==="top" ? "list-top" : "list-bot");
   if(!list) return;
-
   const sel = (side==="top") ? topLang : botLang;
-  const q = String(filterText||"").trim().toLowerCase();
 
+  const q = String(filterText||"").trim().toLowerCase();
   const filtered = !q ? LANGS : LANGS.filter(l=>{
     const name = String(langLabel(l.code) || "").toLowerCase();
     return l.code.includes(q) || name.includes(q);
@@ -291,7 +301,7 @@ function renderPop(side, filterText=""){
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
 
-      toast("🎙️ Sesli komut: 'Dil değiştir İngilizce'");
+      toast("🎙️ Komut: Dil değiştir İngilizce");
       closeAllPop();
     });
   });
@@ -301,7 +311,6 @@ function ensureSearchBox(side){
   const pop = $(side==="top" ? "pop-top" : "pop-bot");
   const list = $(side==="top" ? "list-top" : "list-bot");
   if(!pop || !list) return;
-
   if(pop.querySelector(".lang-search")) return;
 
   const inp = document.createElement("input");
@@ -321,10 +330,8 @@ function ensureSearchBox(side){
   inp.style.fontFamily = "Outfit, system-ui, sans-serif";
 
   pop.insertBefore(inp, list);
-
   inp.addEventListener("input", ()=> renderPop(side, inp.value));
   renderPop(side, "");
-  setTimeout(()=>{ try{ inp.focus(); }catch{} }, 0);
 }
 
 function togglePopover(side){
@@ -339,7 +346,7 @@ function togglePopover(side){
 }
 
 /* ===============================
-   AUTH / TOKENS
+   AUTH / SESSION
 ================================ */
 async function checkLoginOnce(){
   try{
@@ -349,16 +356,6 @@ async function checkLoginOnce(){
     isLoggedIn = false;
   }
 }
-function showLoginBannerIfNeeded(){
-  if(isLoggedIn) return;
-}
-function ensureLoginByUserAction(){ location.href = LOGIN_PATH; }
-
-function unwrapRow(data){
-  if(Array.isArray(data)) return data[0] || null;
-  if(data && typeof data === "object") return data;
-  return null;
-}
 
 async function ensureFacetofaceSession(){
   if(sessionGranted) return true;
@@ -366,7 +363,7 @@ async function ensureFacetofaceSession(){
   await checkLoginOnce();
   if(!isLoggedIn){
     alert("Bu özellik için giriş gerekli.");
-    ensureLoginByUserAction();
+    location.href = LOGIN_PATH;
     return false;
   }
 
@@ -394,8 +391,14 @@ async function ensureFacetofaceSession(){
   }
 }
 
+function unwrapRow(data){
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && typeof data === "object") return data;
+  return null;
+}
+
 /* ===============================
-   STT
+   STT (SpeechRecognition) - Restartable
 ================================ */
 function buildRecognizer(langCode){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -409,7 +412,7 @@ function buildRecognizer(langCode){
 }
 
 /* ===============================
-   AUDIO (prevent overlap)
+   AUDIO (no overlap)
 ================================ */
 let audioObj = null;
 let lastAudioAt = 0;
@@ -441,14 +444,11 @@ async function speakLocal(text, langCode){
   const t = String(text || "").trim();
   if(!t) return;
 
-  // double click spam: 250ms debounce
   const now = Date.now();
-  if(now - lastAudioAt < 250){
+  if(now - lastAudioAt < AUDIO_DEBOUNCE_MS){
     stopAudio();
-    lastAudioAt = now;
-  } else {
-    lastAudioAt = now;
   }
+  lastAudioAt = now;
 
   const lang = normalizeApiLang(langCode);
 
@@ -459,7 +459,6 @@ async function speakLocal(text, langCode){
       credentials: "include",
       body: JSON.stringify({ text: t, lang, speaking_rate: 1, pitch: 0 })
     });
-
     if(!res.ok){
       toast("🔇 TTS HTTP " + res.status);
       return;
@@ -476,27 +475,24 @@ async function speakLocal(text, langCode){
     const bytes = new Uint8Array(binary.length);
     for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
 
-    const blob = new Blob([bytes], { type: "audio/mpeg" });
-    await playAudioBlob(blob);
+    await playAudioBlob(new Blob([bytes], { type:"audio/mpeg" }));
   }catch{
     toast("🔇 TTS failed");
   }
 }
 
 /* ===============================
-   COMMAND PARSE
+   COMMAND PARSE (voice command language switch)
 ================================ */
 async function parseCommand(text){
-  const t = String(text || "").trim();
+  const t = String(text||"").trim();
   if(!t) return null;
-
   try{
     const r = await fetch(`${API_BASE}/api/command_parse`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type":"application/json" },
       body: JSON.stringify({ text: t, ui_lang: UI_LANG })
     });
-
     if(!r.ok) return null;
     return await r.json().catch(()=>null);
   }catch{
@@ -519,7 +515,7 @@ async function translateViaApi(text, source, target){
     const r = await fetch(`${API_BASE}/api/translate_ai`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ text: t, from_lang: src, to_lang: dst, style: "chat", provider: "auto" })
+      body: JSON.stringify({ text: t, from_lang: src, to_lang: dst, style:"chat", provider:"auto" })
     });
     if(!r.ok) return null;
     const data = await r.json().catch(()=>({}));
@@ -533,7 +529,7 @@ async function translateViaApi(text, source, target){
 /* ===============================
    TYPEWRITER
 ================================ */
-async function typeWriter(el, fullText, speed=14){
+async function typeWriter(el, fullText, speed=TYPE_SPEED_MS){
   el.textContent = "";
   const text = String(fullText||"");
   for(let i=0;i<text.length;i++){
@@ -573,10 +569,7 @@ function addBubble(side, kind, text, opts={}){
 
   const bubble = document.createElement("div");
   bubble.className = `bubble ${kind}`;
-
-  if(kind === "me" && opts.latest){
-    bubble.classList.add("is-latest");
-  }
+  if(kind === "me" && opts.latest) bubble.classList.add("is-latest");
 
   if(kind === "me" && opts.speakable){
     const icon = makeSpeakerIcon(()=> speakLocal(text, opts.speakLang || "en"));
@@ -594,14 +587,93 @@ function addBubble(side, kind, text, opts={}){
 }
 
 /* ===============================
-   PUSH TO TALK (HOLD)
+   HOLD / RESTARTABLE SR
 ================================ */
-let currentRec = null;
-let holdStart = 0;
-let holdTimer = null;
+let holdActive = false;
+let holdSide = null;
+let holdLang = null;
+
+let holdStartAt = 0;
+let holdInterval = null;
 
 let finalParts = "";
-let lastInterim = "";
+let interimParts = "";
+
+let rec = null;
+
+function resetBuffers(){
+  finalParts = "";
+  interimParts = "";
+}
+
+function bufferText(){
+  // ✅ final yoksa interim ile kurtar
+  return (finalParts + " " + interimParts).trim();
+}
+
+function stopHoldTimer(){
+  if(holdInterval){ clearInterval(holdInterval); holdInterval = null; }
+  setTimerBadges(null);
+}
+
+function startHoldTimer(){
+  stopHoldTimer();
+  const start = Date.now();
+  holdInterval = setInterval(()=>{
+    const elapsed = Date.now() - start;
+    const left = HOLD_MAX_MS - elapsed;
+    setTimerBadges(left);
+    if(left <= 0){
+      // 45 saniye doldu → otomatik bitir
+      endHold(true);
+    }
+  }, 250);
+}
+
+function attachRecHandlers(){
+  if(!rec) return;
+
+  rec.onresult = (e)=>{
+    let interimNow = "";
+    for(let i=0;i<e.results.length;i++){
+      const r = e.results[i];
+      const txt = r?.[0]?.transcript || "";
+      if(!txt) continue;
+
+      if(r.isFinal){
+        finalParts = (finalParts + " " + txt.trim()).trim();
+      }else{
+        interimNow = (interimNow + " " + txt.trim()).trim();
+      }
+    }
+    if(interimNow) interimParts = interimNow;
+  };
+
+  rec.onerror = ()=>{
+    // SR hata verdi -> eğer hala basılıysa restart dene
+    try{ rec?.stop?.(); }catch{}
+  };
+
+  rec.onend = async ()=>{
+    // Eğer hâlâ basılı tutuyorsak ve süre dolmadıysa: restart
+    if(holdActive){
+      const elapsed = Date.now() - holdStartAt;
+      if(elapsed < HOLD_MAX_MS){
+        await sleep(RESTART_GAP_MS);
+        try{
+          rec = buildRecognizer(holdLang);
+          if(rec){
+            attachRecHandlers();
+            rec.start();
+            return;
+          }
+        }catch{}
+      }
+    }
+
+    // basılı değilse finalize akışı endHold içinde zaten tetiklenmiş olur
+  };
+}
 
 async function beginHold(which){
   closeAllPop();
@@ -620,13 +692,12 @@ async function beginHold(which){
     return;
   }
 
-  const src = (which==="top") ? topLang : botLang;
-  const rec = buildRecognizer(src);
-  if(!rec) return;
-
-  holdStart = Date.now();
-  finalParts = "";
-  lastInterim = "";
+  // setup
+  holdActive = true;
+  holdSide = which;
+  holdLang = (which==="top") ? topLang : botLang;
+  holdStartAt = Date.now();
+  resetBuffers();
 
   active = which;
   lastMicSide = which;
@@ -636,121 +707,108 @@ async function beginHold(which){
   setPhase("recording");
   setMicUI(which, true);
 
-  // Max süre sayacı
-  if(holdTimer) clearInterval(holdTimer);
-  const startAt = Date.now();
-  holdTimer = setInterval(()=>{
-    const elapsed = Date.now() - startAt;
-    const left = HOLD_MAX_MS - elapsed;
-    setTimerBadge(left);
-    if(left <= 0){
-      endHold(); // süre doldu
-    }
-  }, 250);
+  startHoldTimer();
 
-  rec.onresult = (e)=>{
-    // hem final hem interim topla
-    let interimNow = "";
-    for(let i=0;i<e.results.length;i++){
-      const r = e.results[i];
-      const txt = r?.[0]?.transcript || "";
-      if(!txt) continue;
-
-      if(r.isFinal){
-        finalParts = (finalParts + " " + txt.trim()).trim();
-      }else{
-        interimNow = (interimNow + " " + txt.trim()).trim();
-      }
-    }
-    if(interimNow) lastInterim = interimNow;
-  };
-
-  rec.onerror = ()=>{
-    endHold();
-  };
-
-  rec.onend = async ()=>{
-    if(holdTimer){ clearInterval(holdTimer); holdTimer = null; }
-    setTimerBadge(null);
-
-    setMicUI(which,false);
-    setFrameState("idle", lastMicSide);
-
-    const duration = Date.now() - holdStart;
-    if(duration < MIN_HOLD_MS){
-      setPhase("idle");
-      updateMicLocks();
-      return;
-    }
-
-    // ✅ kritik: final hiç gelmezse interim ile kurtar
-    const finalText = (finalParts + " " + lastInterim).trim();
-    if(!finalText){
-      setPhase("idle");
-      updateMicLocks();
-      return;
-    }
-
-    await sleep(RELEASE_DELAY_MS);
-    setPhase("translating");
-
-    const other = otherSide(which);
-    const dst = (which==="top") ? botLang : topLang;
-
-    // komut mu?
-    const cmd = await parseCommand(finalText);
-    if(cmd && cmd.is_command && cmd.target_lang){
-      if(which === "top"){
-        botLang = cmd.target_lang;
-        if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
-        toast(`🎯 Hedef: ${langLabel(botLang)}`);
-      }else{
-        topLang = cmd.target_lang;
-        if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
-        toast(`🎯 Hedef: ${langLabel(topLang)}`);
-      }
-      closeAllPop();
-      setPhase("idle");
-      updateMicLocks();
-      return;
-    }
-
-    // konuşanı yaz
-    addBubble(which, "them", finalText);
-
-    const translated = await translateViaApi(finalText, src, dst);
-    if(!translated){
-      addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
-      setPhase("idle");
-      updateMicLocks();
-      return;
-    }
-
-    // typewriter + big latest + speaker
-    clearLatestTranslated(other);
-    const node = addBubble(other, "me", "", { latest:true, speakable:true, speakLang:dst });
-    if(node?.txt){
-      await typeWriter(node.txt, translated, 14);
-    }
-
-    setCenterDirection(other);
-    setFrameState("speaking", other);
-    setPhase("speaking");
-
-    await speakLocal(translated, dst);
-
-    setFrameState("idle", lastMicSide);
-    setPhase("idle");
-    updateMicLocks();
-  };
-
-  currentRec = rec;
-  try{ rec.start(); }catch{ endHold(); }
+  // start recognizer
+  try{
+    rec = buildRecognizer(holdLang);
+    if(!rec) throw new Error("rec null");
+    attachRecHandlers();
+    rec.start();
+  }catch(e){
+    toast("STT başlatılamadı");
+    // fallback: reset
+    endHold(false);
+  }
 }
 
-function endHold(){
-  try{ currentRec?.stop?.(); }catch{}
-  currentRec = null;
+async function finalizeHold(forced){
+  // forced: süre doldu vs
+
+  const duration = Date.now() - holdStartAt;
+  if(!forced && duration < MIN_HOLD_MS){
+    setPhase("idle");
+    updateMicLocks();
+    return;
+  }
+
+  const finalText = bufferText();
+  if(!finalText){
+    setPhase("idle");
+    updateMicLocks();
+    return;
+  }
+
+  await sleep(RELEASE_DELAY_MS);
+  setPhase("translating");
+
+  const which = holdSide;
+  const other = otherSide(which);
+
+  const src = (which==="top") ? topLang : botLang;
+  const dst = (which==="top") ? botLang : topLang;
+
+  // ✅ sesli komutla dil değiştir
+  const cmd = await parseCommand(finalText);
+  if(cmd && cmd.is_command && cmd.target_lang){
+    if(which === "top"){
+      botLang = cmd.target_lang;
+      if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
+      toast(`🎯 Hedef: ${langLabel(botLang)}`);
+    }else{
+      topLang = cmd.target_lang;
+      if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
+      toast(`🎯 Hedef: ${langLabel(topLang)}`);
+    }
+    closeAllPop();
+    setPhase("idle");
+    updateMicLocks();
+    return;
+  }
+
+  // konuşanı yaz
+  addBubble(which, "them", finalText);
+
+  const translated = await translateViaApi(finalText, src, dst);
+  if(!translated){
+    addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
+    setPhase("idle");
+    updateMicLocks();
+    return;
+  }
+
+  clearLatestTranslated(other);
+  const node = addBubble(other, "me", "", { latest:true, speakable:true, speakLang:dst });
+  if(node?.txt){
+    await typeWriter(node.txt, translated, TYPE_SPEED_MS);
+  }
+
+  setCenterDirection(other);
+  setFrameState("speaking", other);
+  setPhase("speaking");
+
+  await speakLocal(translated, dst);
+
+  setFrameState("idle", lastMicSide);
+  setPhase("idle");
+  updateMicLocks();
+}
+
+async function endHold(forced=false){
+  if(!holdActive) return;
+
+  holdActive = false;
+  stopHoldTimer();
+
+  setMicUI(holdSide, false);
+  setFrameState("idle", lastMicSide);
+
+  // stop recognizer
+  try{ rec?.stop?.(); }catch{}
+  rec = null;
+
+  // finalize
+  await finalizeHold(!!forced);
 }
 
 /* ===============================
@@ -760,21 +818,20 @@ function bindHold(btnId, side){
   const btn = $(btnId);
   if(!btn) return;
 
-  // Pointer Events: mobil/pc tek sistem
   btn.addEventListener("pointerdown",(e)=>{
     e.preventDefault();
     try{ btn.setPointerCapture(e.pointerId); }catch{}
     beginHold(side);
   });
 
-  btn.addEventListener("pointerup",(e)=>{
+  btn.addEventListener("pointerup", async (e)=>{
     e.preventDefault();
     try{ btn.releasePointerCapture(e.pointerId); }catch{}
-    endHold();
+    await endHold(false);
   });
 
-  btn.addEventListener("pointercancel",()=> endHold());
-  btn.addEventListener("pointerleave",()=> endHold());
+  btn.addEventListener("pointercancel", ()=> endHold(false));
+  btn.addEventListener("pointerleave", ()=> endHold(false));
 }
 
 function bindUI(){
@@ -782,19 +839,18 @@ function bindUI(){
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
   $("clearBtn")?.addEventListener("click", ()=>{
-    try{ currentRec?.stop?.(); }catch{}
-    currentRec = null;
-
     stopAudio();
-
-    if(holdTimer){ clearInterval(holdTimer); holdTimer = null; }
-    setTimerBadge(null);
+    stopHoldTimer();
+    try{ rec?.stop?.(); }catch{}
+    rec = null;
+    holdActive = false;
 
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
 
     setMicUI("top", false);
     setMicUI("bot", false);
+
     setFrameState("idle", lastMicSide);
     setPhase("idle");
     updateMicLocks();
@@ -831,9 +887,6 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   setFrameState("idle", "bot");
 
   bindUI();
-
   await checkLoginOnce();
-  showLoginBannerIfNeeded();
-
   updateMicLocks();
 });
