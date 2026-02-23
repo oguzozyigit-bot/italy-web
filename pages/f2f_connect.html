@@ -93,6 +93,118 @@
     }
     .dot{width:8px;height:8px;border-radius:99px;background:#f59e0b;box-shadow:0 0 14px rgba(245,158,11,.35)}
     .dot.ok{background:#22c55e;box-shadow:0 0 14px rgba(34,197,94,.35)}
+
+    /* ✅ Dil seçimi (FaceToFace ile aynı mantık) */
+    .lang-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .lang-trigger{
+      flex:1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .3px;
+      cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      backdrop-filter: blur(12px);
+    }
+
+    .popover{
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(92vw, 360px);
+      height: 420px;
+      background: #0a0a0f;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 24px;
+      display: none;
+      flex-direction: column;
+      z-index: 5000;
+      overflow: hidden;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.92);
+    }
+    .popover.show{ display:flex; }
+
+    .pop-head{
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 900;
+      letter-spacing: .3px;
+    }
+    .pop-close{
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      user-select: none;
+    }
+    .pop-list{
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      scrollbar-width: none;
+    }
+    .pop-list::-webkit-scrollbar{ display:none; }
+
+    .pop-item{
+      padding: 12px 12px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+    .pop-item:hover{ background: rgba(255,255,255,0.06); }
+    .pop-item.active{
+      background: rgba(99,102,241,0.14);
+      border-color: rgba(99,102,241,0.25);
+    }
+    .pop-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .pop-flag{ font-size: 18px; }
+    .pop-name{ font-weight: 900; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .pop-code{ font-weight: 900; font-size: 12px; opacity: .7; }
+
+    /* QR Scanner panel (BarcodeDetector varsa) */
+    .scanner{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display:none;
+      z-index: 6000;
+      padding: calc(14px + var(--safe-top)) 14px calc(14px + var(--safe-bottom));
+    }
+    .scanner.show{ display:block; }
+    .scanCard{
+      height: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.06);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .scanTop{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 12px;
+      border-bottom:1px solid rgba(255,255,255,0.10);
+      font-weight:900;
+    }
+    video{ width:100%; height:100%; object-fit:cover; background:#000; }
+    .scanHint{ padding:10px 12px; color:rgba(255,255,255,0.7); font-size:12px; font-weight:800; border-top:1px solid rgba(255,255,255,0.10); }
   </style>
 </head>
 <body>
@@ -103,9 +215,22 @@
     </div>
 
     <div class="card">
-      <p class="h1">Face-to-Face • 2 Cihaz</p>
-      <p class="p">Her kişi kendi telefonunu kullanır. QR veya kod ile bağlanılır. Başlatan (Host) öder.</p>
-      <div class="mini">Bağlanınca otomatik konuşma ekranına geçer.</div>
+      <p class="h1">Walkie Talkie • Çoklu Sohbet</p>
+      <p class="p">Her kişi kendi telefonunu kullanır. QR veya kod ile bağlanılır.</p>
+      <div class="mini">Bağlantı kurulduğunda otomatik konuşma ekranına geçer.</div>
+
+      <!-- ✅ Dil seçimi (FaceToFace popover aynı) -->
+      <div class="lang-row">
+        <button class="lang-trigger" id="hostLangBtn">
+          <span id="hostLangTxt">🇹🇷 HOST: TÜRKÇE</span>
+          <span>⌵</span>
+        </button>
+        <button class="lang-trigger" id="guestLangBtn">
+          <span id="guestLangTxt">🇬🇧 GUEST: ENGLISH</span>
+          <span>⌵</span>
+        </button>
+      </div>
+      <div class="mini">İpucu: Daha sonra konuşma ekranında da komutla hedef dili değiştireceğiz.</div>
     </div>
 
     <div class="card" id="lobby">
@@ -117,7 +242,7 @@
     </div>
 
     <div class="card" id="hostCard" style="display:none">
-      <p class="h1">Sohbeti Başlat (Host)</p>
+      <p class="h1">Sohbeti Başlat</p>
       <div class="qrbox">
         <div class="qrimg"><img id="qrImg" alt="QR" width="220" height="220"/></div>
         <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px">
@@ -133,11 +258,18 @@
           </div>
         </div>
       </div>
-      <div class="mini">Guest bağlanınca konuşma ekranında otomatik görürsünüz.</div>
+      <div class="mini">Guest bağlanınca otomatik konuşma ekranına geçeceksiniz.</div>
     </div>
 
     <div class="card" id="guestCard" style="display:none">
-      <p class="h1">Sohbete Katıl (Guest)</p>
+      <p class="h1">Sohbete Katıl</p>
+
+      <div class="row" style="margin-top:0">
+        <button class="primary" id="btnScan">QR Oku</button>
+        <button class="ghost" id="btnBackGuestTop">Geri</button>
+      </div>
+
+      <div class="mini">QR okuyamıyorsa kod girerek bağlanabilirsin:</div>
       <input class="input" id="roomInput" placeholder="KOD (örn: X8K4PZ)" maxlength="8"/>
       <div class="row">
         <button class="primary" id="btnJoin">Bağlan</button>
@@ -147,6 +279,31 @@
     </div>
   </div>
 
-  <script type="module" src="/js/f2f_connect.js?v=2"></script>
+  <!-- ✅ Popover (tek popup, iki buton kullanıyor) -->
+  <div class="popover" id="langPop" role="dialog" aria-label="Dil seçimi">
+    <div class="pop-head">
+      <div id="popTitle">DİL SEÇ</div>
+      <div class="pop-close" id="popClose">✕</div>
+    </div>
+    <div class="pop-list" id="popList"></div>
+  </div>
+
+  <!-- ✅ QR Scanner -->
+  <div class="scanner" id="scanner">
+    <div class="scanCard">
+      <div class="scanTop">
+        <div>QR Oku</div>
+        <button class="btn" id="scanClose">Kapat</button>
+      </div>
+      <div style="flex:1;position:relative">
+        <video id="scanVideo" playsinline></video>
+      </div>
+      <div class="scanHint" id="scanHint">
+        Kamerayı QR koda tut. (Destek yoksa “Kod gir” kullan.)
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/f2f_connect.js?v=3"></script>
 </body>
 </html>
