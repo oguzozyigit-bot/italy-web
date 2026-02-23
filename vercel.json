@@ -1,10 +1,5 @@
 {
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.italky.ai" }],
-      "destination": "https://italky.ai/$1",
-      "permanent": true
-    }
+  "rewrites": [
+    { "source": "/pages/(.*)", "destination": "/pages/$1" }
   ]
 }
