@@ -3,14 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Quantum Hub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <title>italkyAI • 2500 Quantum</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --quantum-glow: rgba(99, 102, 241, 0.6);
-      --neon-pink: #ec4899;
-      --bg-void: #02010a;
+      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+      --bg-void: #02000f;
+      --quantum-blue: #6366f1;
+      --quantum-pink: #ec4899;
     }
 
     html, body {
@@ -19,122 +22,107 @@
       overflow: hidden; color: #fff;
     }
 
-    /* Arkaplan: Kuantum Sisi */
+    /* Kuantum Alanı Efekti */
     body::before {
       content: ""; position: fixed; inset: 0;
-      background: radial-gradient(circle at 50% 100%, #1e1b4b 0%, transparent 60%);
-      z-index: -1;
+      background: radial-gradient(circle at 50% 120%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+      pointer-events: none;
     }
 
     .app-viewport {
       width: 100%; max-width: 430px; height: 100dvh; margin: 0 auto;
       display: flex; flex-direction: column; position: relative;
-      background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(50px);
+      background: rgba(10, 10, 30, 0.4); backdrop-filter: blur(30px);
+      border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* HEADER: Holografik Cam */
+    /* PREMIUM HEADER (Fonksiyonel Yapı Korundu) */
     .premium-header {
-      padding: calc(50px + env(safe-area-inset-top)) 20px 20px;
+      padding: calc(45px + env(safe-area-inset-top)) 20px 15px;
       display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .brand-group h1 {
-      font-family: 'Space Grotesk', sans-serif; font-size: 24px; margin: 0;
-      letter-spacing: -1px; font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif; font-size: 24px; margin: 0; font-weight: 700;
     }
-    .brand-group h1 span:last-child { color: #6366f1; text-shadow: 0 0 15px #6366f1; }
-    
-    .uJeton {
-      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
-      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 900;
-      color: #a5b4fc; box-shadow: inset 0 0 10px rgba(99, 102, 241, 0.2);
+    .brand-group h1 .ai { color: var(--quantum-blue); text-shadow: 0 0 10px var(--quantum-blue); }
+
+    .user-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .uMeta { text-align: right; }
+    .uName { font-weight: 900; font-size: 13px; letter-spacing: 0.5px; }
+    .uJeton { font-size: 10px; color: var(--quantum-pink); font-weight: 900; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid var(--quantum-blue);
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); overflow: hidden;
     }
 
-    /* PAGE CONTENT: Scroll Değil, Bir Akış */
+    /* PAGE CONTENT: Akışkan Yapı */
     #pageContent {
-      flex: 1; display: flex; flex-direction: column; gap: 15px;
-      padding: 20px; overflow-y: auto; scrollbar-width: none;
-      mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+      flex: 1; display: flex; flex-direction: column;
+      padding: 10px 20px; gap: 12px; overflow-y: auto; scrollbar-width: none;
     }
     #pageContent::-webkit-scrollbar { display: none; }
 
-    /* FaceToFace: Merkeze Odaklı */
-    .portal-zone { padding: 20px 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+    /* FaceToFace (Işıklandırılmış Orb) */
+    .portal-zone { padding: 10px 0; text-align: center; cursor: pointer; }
     .ai-core {
-      width: 90px; height: 90px; border-radius: 50%;
-      background: #000; position: relative; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 30px var(--quantum-glow); border: 1px solid rgba(255,255,255,0.2);
-    }
-    .ai-core svg { filter: drop-shadow(0 0 5px #fff); }
-
-    /* KARTLAR: Floating (Havada Asılı) Efekti */
-    .card-quantum {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px; padding: 18px;
-      display: flex; align-items: center; gap: 15px;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative; overflow: hidden;
-    }
-    .card-quantum:active { transform: scale(0.95) translateY(5px); background: rgba(255,255,255,0.07); }
-    
-    .card-quantum::before {
-      content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      transform: skewX(-25deg); transition: 0.5s;
-    }
-    .card-quantum:hover::before { left: 150%; }
-
-    .icon-box {
-      width: 42px; height: 42px; border-radius: 14px;
+      width: 100px; height: 100px; margin: 0 auto; background: #000; border-radius: 50%;
+      border: 2px solid var(--quantum-blue); position: relative;
       display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      font-size: 20px;
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
+      animation: corePulse 3s infinite ease-in-out;
     }
 
-    .card-quantum h2 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.5px; }
-    .card-quantum p { margin: 2px 0 0; font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 600; text-transform: uppercase; }
-
-    /* ALT KISIM: 2500 Yılı HUD (Heads-up Display) */
-    .quantum-footer {
-      height: 160px; position: relative;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: linear-gradient(to top, rgba(99, 102, 241, 0.1), transparent);
+    /* Academy Pro Kartları - Kuantum Versiyon */
+    .academy-pro {
+      background: rgba(255, 255, 255, 0.03); border-radius: 18px; padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 15px;
+      cursor: pointer; transition: 0.3s;
+    }
+    .academy-pro:active { transform: scale(0.97); background: rgba(255,255,255,0.06); }
+    
+    .icon-wrap {
+      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
     }
 
-    /* Boşluğu dolduran Neural Wave */
-    .neural-wave {
-      position: absolute; top: 0; width: 100%; height: 40px;
-      display: flex; align-items: center; justify-content: center; gap: 3px;
-    }
-    .wave-bar {
-      width: 2px; height: 10px; background: var(--quantum-glow);
-      border-radius: 2px; animation: wave 1.5s ease-in-out infinite;
-    }
-    @keyframes wave {
-      0%, 100% { height: 5px; opacity: 0.3; }
-      50% { height: 25px; opacity: 1; }
+    .academy-text h2 { margin: 0; font-size: 16px; font-weight: 800; }
+    .academy-text h2 span { color: var(--quantum-blue); }
+    .academy-text p { margin: 0; font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
+
+    /* ALT KISIM: 2500 HUD PANELİ (Boşluğu Dolduran Kısım) */
+    .hud-footer {
+      padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+      display: flex; flex-direction: column; align-items: center; gap: 15px;
     }
 
-    .nav-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-      z-index: 10; margin-top: 20px;
+    /* Dinamik Frekans Analizörü */
+    .frequency-viz {
+      display: flex; align-items: flex-end; gap: 3px; height: 30px; opacity: 0.6;
     }
-    .nav-item {
-      text-align: center; text-decoration: none;
-      font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.3);
-      letter-spacing: 1px; transition: 0.3s;
+    .freq-bar {
+      width: 3px; background: var(--quantum-blue); border-radius: 10px;
+      animation: freqAnim 1.2s infinite ease-in-out;
     }
-    .nav-item:active { color: #fff; text-shadow: 0 0 10px #fff; }
 
-    .system-status {
-      margin-top: 25px; font-size: 8px; font-weight: 900;
-      color: var(--neon-pink); opacity: 0.6; text-transform: uppercase;
-      letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
+    /* Alt Navigasyon: Holografik Düğmeler */
+    .hud-nav { display: flex; gap: 25px; }
+    .hud-nav a {
+      text-decoration: none; font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.3);
+      text-transform: uppercase; letter-spacing: 2px;
     }
-    .status-dot { width: 4px; height: 4px; background: var(--neon-pink); border-radius: 50%; box-shadow: 0 0 8px var(--neon-pink); animation: blink 1s infinite; }
 
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    /* Sistem İzleme */
+    .sys-info {
+      font-size: 8px; font-weight: 900; color: var(--quantum-pink);
+      letter-spacing: 3px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;
+    }
+    .blink-dot { width: 4px; height: 4px; background: var(--quantum-pink); border-radius: 50%; animation: blink 1s infinite; }
+
+    @keyframes corePulse { 0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); } 50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); } }
+    @keyframes freqAnim { 0%, 100% { height: 5px; } 50% { height: 25px; } }
+    @keyframes blink { 50% { opacity: 0; } }
+
   </style>
 </head>
 
@@ -142,93 +130,100 @@
   <div class="app-viewport">
 
     <header class="premium-header">
-      <div class="brand-group" onclick="location.reload()">
-        <h1><span>italky</span><span>AI</span></h1>
+      <div class="brand-group" id="brandHome">
+        <h1>italky<span class="ai">AI</span></h1>
       </div>
-      <div class="user-info" onclick="go('/pages/profile.html')" style="display:flex; align-items:center; gap:12px;">
-        <div class="uJeton" id="headerJeton">... JETON</div>
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky" id="userPic" style="width:35px; height:35px; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);">
+
+      <div class="user-info" id="profileBtn">
+        <div class="uMeta">
+          <div class="uName" id="userName">USER_SYNC</div>
+          <div class="uJeton" id="headerJeton">0000</div>
+        </div>
+        <div class="avatar"><img src="" id="userPic" alt=""></div>
       </div>
     </header>
 
     <div id="pageContent">
+
       <div class="portal-zone" data-href="/facetoface.html">
         <div class="ai-core">
-          <div class="ai-ring" style="position:absolute; inset:-5px; border:1px solid var(--quantum-glow); border-radius:50%; animation: rotateOrbit 10s linear infinite;"></div>
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 11v1a7 7 0 0 1-14 0v-2"/>
-          </svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 11v1a7 7 0 0 1-14 0v-2"/>
+            </svg>
         </div>
-        <div style="text-align:center; margin-top:15px;">
-          <h2 style="margin:0; font-size:22px; letter-spacing:-0.5px;">FACETOFACE</h2>
-          <p style="margin:0; font-size:10px; color:#a5b4fc; font-weight:900;">NEURAL REAL-TIME TRANSLATE</p>
+        <div style="margin-top:10px;">
+          <h2 style="margin:0; font-size:22px; font-weight:900; letter-spacing:-1px;">FACETOFACE</h2>
+          <p style="margin:0; font-size:10px; color:var(--quantum-blue); font-weight:800;">QUANTUM REAL-TIME LINK</p>
         </div>
       </div>
 
-      <div class="card-quantum" data-href="/pages/f2f_connect.html">
-        <div class="icon-box">📡</div>
-        <div><h2>Walkie Talkie</h2><p>P2P Quantum Connect</p></div>
+      <div class="academy-pro" data-href="/pages/f2f_connect.html">
+        <div class="icon-wrap">🛰️</div>
+        <div class="academy-text"><h2>Walkie <span>Talkie</span></h2><p>P2P ENCRYPTED CONNECT</p></div>
       </div>
 
-      <div class="card-quantum" data-href="/pages/offline.html">
-        <div class="icon-box">💾</div>
-        <div><h2>Offline Çeviri</h2><p>Local Core Database</p></div>
+      <div class="academy-pro" data-href="/pages/offline.html">
+        <div class="icon-wrap">📡</div>
+        <div class="academy-text"><h2>Offline <span>Çeviri</span></h2><p>LOCAL DATA CORE</p></div>
       </div>
 
-      <div class="card-quantum" data-href="/pages/teacher_select.html">
-        <div class="icon-box">🧠</div>
-        <div><h2>italky Academy</h2><p>Deep Learning Education</p></div>
+      <div class="academy-pro" data-href="/pages/teacher_select.html">
+        <div class="icon-wrap">🧠</div>
+        <div class="academy-text"><h2>italky <span>Academy</span></h2><p>NEURAL TEACHER SYNC</p></div>
       </div>
 
-      <div class="card-quantum" data-href="/pages/game.html">
-        <div class="icon-box">🎮</div>
-        <div><h2>Eğlenerek Öğren</h2><p>Interactive Experience</p></div>
+      <div class="academy-pro" data-href="/pages/game.html">
+        <div class="icon-wrap">🎮</div>
+        <div class="academy-text"><h2>Eğlenerek <span>Öğren</span></h2><p>SIMULATION MODE</p></div>
       </div>
+
     </div>
 
-    <footer class="quantum-footer">
-      <div class="neural-wave">
-        <div class="wave-bar" style="animation-delay: 0.1s"></div>
-        <div class="wave-bar" style="animation-delay: 0.2s"></div>
-        <div class="wave-bar" style="animation-delay: 0.3s"></div>
-        <div class="wave-bar" style="animation-delay: 0.4s"></div>
-        <div class="wave-bar" style="animation-delay: 0.5s"></div>
-        <div class="wave-bar" style="animation-delay: 0.4s"></div>
-        <div class="wave-bar" style="animation-delay: 0.3s"></div>
-        <div class="wave-bar" style="animation-delay: 0.2s"></div>
-        <div class="wave-bar" style="animation-delay: 0.1s"></div>
+    <footer class="hud-footer">
+      <div class="frequency-viz">
+        <div class="freq-bar" style="animation-delay: 0.1s"></div>
+        <div class="freq-bar" style="animation-delay: 0.3s"></div>
+        <div class="freq-bar" style="animation-delay: 0.5s"></div>
+        <div class="freq-bar" style="animation-delay: 0.2s"></div>
+        <div class="freq-bar" style="animation-delay: 0.4s"></div>
+        <div class="freq-bar" style="animation-delay: 0.1s"></div>
       </div>
 
-      <div class="nav-grid">
-        <a href="/pages/about.html" class="nav-item">CORE</a>
-        <a href="/pages/faq.html" class="nav-item">HELP</a>
-        <a href="/pages/contact.html" class="nav-item">LINK</a>
-      </div>
+      <nav class="hud-nav">
+        <a href="/pages/about.html">INFO</a>
+        <a href="/pages/faq.html">HELP</a>
+        <a href="/pages/contact.html">LINK</a>
+      </nav>
 
-      <div class="system-status">
-        <div class="status-dot"></div>
-        System Active: 2500.02.23_v7.0
+      <div class="sys-info">
+        <span class="blink-dot"></span>
+        Neural System Active • Core_2500_X
       </div>
     </footer>
 
   </div>
 
   <script>
-    function go(url){ if(url) window.location.href = url; }
+    // Mevcut ui_shell.js mantığına tam uyumlu yönlendirme
+    function go(url){ if(!url) return; window.location.assign(url); }
 
-    document.querySelectorAll("[data-href]").forEach(el => {
-      el.addEventListener("click", () => go(el.getAttribute("data-href")));
+    document.getElementById("brandHome")?.addEventListener("click", ()=>go("/pages/home.html"));
+    document.getElementById("profileBtn")?.addEventListener("click", ()=>go("/pages/profile.html"));
+
+    document.querySelectorAll("[data-href]").forEach(el=>{
+      const url = el.getAttribute("data-href");
+      el.addEventListener("click", () => go(url));
     });
 
-    // Kullanıcı Verisi Yükleme
-    window.addEventListener("load", () => {
-      try {
+    // Kullanıcı Bilgisi Yükleme (Mevcut Fonksiyonların)
+    function loadUser(){
         const u = JSON.parse(localStorage.getItem("italky_user") || "{}");
-        if(u.tokens !== undefined) document.getElementById("headerJeton").textContent = u.tokens + " JETON";
+        if(u.full_name) document.getElementById("userName").textContent = u.full_name.split(" ")[0].toUpperCase();
+        if(u.tokens !== undefined) document.getElementById("headerJeton").textContent = u.tokens.toString().padStart(4, '0');
         if(u.picture) document.getElementById("userPic").src = u.picture;
-      } catch(e) {}
-    });
+    }
+    window.addEventListener("load", loadUser);
   </script>
 </body>
 </html>
