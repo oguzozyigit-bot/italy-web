@@ -74,7 +74,8 @@ const LANGS = [
   { code:"th", flag:"🇹🇭", bcp:"th-TH" },
   { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
   { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
-  { code:"ko", flag:"🇰🇷", bcp:"ko-KR" }
+  { code:"ko", flag:"🇰🇷", bcp:"ko-KR" },
+  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" } // ✅ Gürcüce
 ];
 
 function canonicalLangCode(code){
@@ -145,19 +146,15 @@ function lockMic(which, locked){
 }
 
 function updateMicLocks(){
-  // Base: everything unlocked
   let lockTop = false;
   let lockBot = false;
 
   if(phase === "recording"){
-    // while one recording: lock the other
     if(active === "top"){ lockBot = true; }
     if(active === "bot"){ lockTop = true; }
   } else if(phase === "translating" || phase === "speaking"){
-    // hard lock both
     lockTop = true; lockBot = true;
   } else if(phase === "idle"){
-    // enforce turn if nextTurn set
     if(nextTurn === "top") lockBot = true;
     if(nextTurn === "bot") lockTop = true;
   }
@@ -175,7 +172,6 @@ function setMicUI(which,on){
    HELPERS
 ================================ */
 function toast(msg){
-  // Basit, sessiz: istersen burayı kendi toast’ına bağla
   try{ console.log("[toast]", msg); }catch{}
 }
 
@@ -236,7 +232,6 @@ async function checkLoginOnce(){
 
 function showLoginBannerIfNeeded(){
   if(isLoggedIn) return;
-  // şimdilik banner yok
 }
 
 function ensureLoginByUserAction(){
@@ -343,6 +338,10 @@ function speakLocal(text, langCode){
     }
   });
 }
+
+/* ===============================
+   COMMAND PARSE
+================================ */
 async function parseCommand(text){
   const t = String(text || "").trim();
   if(!t) return null;
@@ -358,18 +357,15 @@ async function parseCommand(text){
     });
 
     if(!r.ok) return null;
-
     const data = await r.json().catch(()=>null);
-    if(!data) return null;
-
-    // Beklenen: {is_command, source_lang, target_lang, confidence, provider_used}
-    return data;
-  }catch(e){
+    return data || null;
+  }catch{
     return null;
   }
 }
+
 /* ===============================
-   TRANSLATE API
+   TRANSLATE API (AI)
 ================================ */
 async function translateViaApi(text, source, target){
   const t = String(text||"").trim();
@@ -379,7 +375,6 @@ async function translateViaApi(text, source, target){
   const dst = normalizeApiLang(target);
   if(src===dst) return t;
 
-  // ✅ AI çeviri endpoint
   try{
     const r = await fetch(`${API_BASE}/api/translate_ai`,{
       method:"POST",
@@ -388,8 +383,8 @@ async function translateViaApi(text, source, target){
         text: t,
         from_lang: src,
         to_lang: dst,
-        // istersen sonra açarız:
-        style: "chat" // "fast" | "chat"
+        style: "chat",
+        provider: "auto" // ✅ Gemini -> OpenAI
       })
     });
     if(!r.ok) return null;
@@ -441,17 +436,14 @@ async function start(which){
     return;
   }
 
-  // stop any TTS before recording
   try{ window.speechSynthesis?.cancel?.(); }catch{}
 
-  // Build recognizer
   const src = (which==="top") ? topLang : botLang;
   const dst = (which==="top") ? botLang : topLang;
 
   const rec = buildRecognizer(src);
   if(!rec){ alert("Mikrofon başlatılamadı."); return; }
 
-  // Set phase/locks
   active = which;
   setPhase("recording");
   setMicUI(which, true);
@@ -461,19 +453,15 @@ async function start(which){
     const finalText = String(t||"").trim();
     if(!finalText) return;
 
-    // Show original on the speaking side
     addBubble(which, "them", finalText);
 
     pending = { which, finalText, src, dst };
     try{ rec.stop(); }catch{}
   };
 
-  rec.onerror = ()=>{
-    stopAll();
-  };
+  rec.onerror = ()=>{ stopAll(); };
 
   rec.onend = async ()=>{
-    // stop recording UI
     setMicUI(which,false);
 
     const p = pending;
@@ -486,60 +474,63 @@ async function start(which){
       return;
     }
 
-    // Translation phase (lock both)
     setPhase("translating");
 
     const other = otherSide(which);
 
-    // Translate
+    // ✅ COMMAND CHECK
+    const cmd = await parseCommand(p.finalText);
+
+    if(cmd && cmd.is_command && cmd.target_lang){
+      botLang = cmd.target_lang;
+      if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
+      closeAllPop();
+      toast(`🎯 Hedef dil: ${langLabel(botLang)} (${cmd.provider_used || "auto"})`);
+
+      setPhase("idle");
+      setNextTurn(other);
+      return;
+    }
+
+    // ✅ NORMAL TRANSLATION
     const translated = await translateViaApi(p.finalText, p.src, p.dst);
 
     if(!translated){
       addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
       setPhase("idle");
-      // sıra yine de diğer tarafa geçsin (konuşma “tur” sayılır)
       setNextTurn(other);
       return;
     }
 
-    // Show translation on the other side
     addBubble(other, "me", translated);
 
-    // Speak phase (lock both while speaking)
     setPhase("speaking");
     await speakLocal(translated, p.dst);
 
-    // Done → next turn is the opposite side (forced alternation)
     setPhase("idle");
     setNextTurn(other);
   };
 
   if(which==="top") recTop=rec; else recBot=rec;
 
-  try{ rec.start(); }catch{
-    stopAll();
-  }
+  try{ rec.start(); }catch{ stopAll(); }
 }
 
 /* ===============================
-   BINDINGS (UI her zaman aktif)
+   BINDINGS
 ================================ */
 function bindUI(){
-  // Home nav
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
-  // Clear
   $("clearBtn")?.addEventListener("click", ()=>{
     stopAll();
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
-    // sıra sıfırlansın: isteyen başlasın
     nextTurn = null;
     updateMicLocks();
   });
 
-  // Popovers
   $("topLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("top"); });
   $("botLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("bot"); });
 
@@ -554,7 +545,6 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // MIC (click to start)
   $("topMic")?.addEventListener("click",(e)=>{
     e.preventDefault(); e.stopPropagation();
     start("top");
@@ -566,15 +556,12 @@ function bindUI(){
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
-  // ✅ UI her zaman hazır
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
   bindUI();
 
-  // ✅ Login kontrolü sadece mic için (arkada)
   await checkLoginOnce();
   showLoginBannerIfNeeded();
 
-  // başlangıçta herkes konuşabilir
   updateMicLocks();
 });
