@@ -27,7 +27,7 @@ function getSystemUILang(){
 let UI_LANG = getSystemUILang();
 
 /* ===============================
-   LANGS (dynamic load - NO hard import)
+   LANGS (dynamic load)
 ================================ */
 const BCP = {
   "tr":"tr-TR","en":"en-US","de":"de-DE","fr":"fr-FR","it":"it-IT","es":"es-ES",
@@ -60,11 +60,9 @@ async function loadLangPool(){
       return { code, flag: l.flag || "🌐", bcp: BCP[code] || "en-US" };
     }).filter(Boolean);
 
-    // ensure tr/en
     if(!LANGS.find(x=>x.code==="tr")) LANGS.unshift({code:"tr",flag:"🇹🇷",bcp:"tr-TR"});
     if(!LANGS.find(x=>x.code==="en")) LANGS.unshift({code:"en",flag:"🇬🇧",bcp:"en-US"});
   }catch(e){
-    // dil havuzu gelmese bile sayfa çalışsın
     console.warn("LANG_POOL load failed:", e);
   }
 }
@@ -74,6 +72,7 @@ function canonicalLangCode(code){
   return c.split("-")[0];
 }
 function normalizeApiLang(code){ return canonicalLangCode(code); }
+
 function langObj(code){
   const c = String(code||"").toLowerCase();
   return LANGS.find(x=>x.code===c) || LANGS.find(x=>x.code===canonicalLangCode(c));
@@ -105,11 +104,11 @@ let isLoggedIn = false;
 let sessionGranted = false;
 
 /* ===============================
-   ENGINE / VISUAL STATE
+   VISUAL STATE
 ================================ */
 let phase = "idle";          // idle | recording | translating | speaking
 let active = null;           // "top" | "bot" | null
-let lastMicSide = "bot";     // konuşma bitince logo buraya döner
+let lastMicSide = "bot";
 
 function frame(){ return document.getElementById("frameRoot"); }
 
@@ -119,7 +118,6 @@ function setCenterDirection(side){
   fr.classList.toggle("to-top", side === "top");
   fr.classList.toggle("to-bot", side !== "top");
 }
-
 function setFrameState(state, side){
   const fr = frame();
   if(!fr) return;
@@ -132,12 +130,6 @@ function setPhase(p){
   phase = p;
   updateMicLocks();
 }
-
-function canStart(){
-  return phase === "idle";
-}
-
-function otherSide(which){ return which === "top" ? "bot" : "top"; }
 
 function lockMic(which, locked){
   const el = (which === "top") ? $("topMic") : $("botMic");
@@ -161,17 +153,17 @@ function updateMicLocks(){
   lockMic("bot", lockBot);
 }
 
-// ✅ mic belirginlik: class + glow
 function setMicUI(which,on){
   const btn = (which==="top") ? $("topMic") : $("botMic");
   if(!btn) return;
 
   btn.classList.toggle("listening", !!on);
 
+  // daha belirgin
   if(on){
-    btn.style.boxShadow = "0 0 40px rgba(99,102,241,0.45), 0 0 18px rgba(236,72,153,0.25)";
-    btn.style.transform = "scale(1.03)";
-  } else {
+    btn.style.boxShadow = "0 0 44px rgba(99,102,241,0.55), 0 0 22px rgba(236,72,153,0.30)";
+    btn.style.transform = "scale(1.04)";
+  }else{
     btn.style.boxShadow = "";
     btn.style.transform = "";
   }
@@ -184,7 +176,7 @@ let toastEl = null;
 let toastTimer = null;
 
 function showToast(text){
-  try{ if(navigator.vibrate) navigator.vibrate(18); }catch{}
+  try{ if(navigator.vibrate) navigator.vibrate(16); }catch{}
 
   if(!toastEl){
     toastEl = document.createElement("div");
@@ -213,14 +205,14 @@ function showToast(text){
   toastEl.style.opacity = "1";
 
   if(toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{
-    if(toastEl) toastEl.style.opacity = "0";
-  }, 1400);
+  toastTimer = setTimeout(()=>{ if(toastEl) toastEl.style.opacity = "0"; }, 1400);
 }
 function toast(msg){ showToast(String(msg||"")); }
 
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
 /* ===============================
-   POPUP HELPERS + SEARCH
+   POPUP + SEARCH
 ================================ */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
@@ -230,9 +222,10 @@ function closeAllPop(){
 function renderPop(side, filterText=""){
   const list = $(side==="top" ? "list-top" : "list-bot");
   if(!list) return;
-  const sel = (side==="top") ? topLang : botLang;
 
+  const sel = (side==="top") ? topLang : botLang;
   const q = String(filterText||"").trim().toLowerCase();
+
   const filtered = !q ? LANGS : LANGS.filter(l=>{
     const name = String(langLabel(l.code) || "").toLowerCase();
     return l.code.includes(q) || name.includes(q);
@@ -252,9 +245,7 @@ function renderPop(side, filterText=""){
     item.addEventListener("click",(e)=>{
       e.preventDefault(); e.stopPropagation();
       const code = item.getAttribute("data-code") || "en";
-
-      if(side==="top") topLang = code;
-      else botLang = code;
+      if(side==="top") topLang = code; else botLang = code;
 
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
@@ -287,14 +278,10 @@ function ensureSearchBox(side){
   inp.style.color = "#fff";
   inp.style.fontWeight = "900";
   inp.style.fontFamily = "Outfit, system-ui, sans-serif";
-  inp.style.letterSpacing = ".2px";
 
   pop.insertBefore(inp, list);
 
-  inp.addEventListener("input", ()=>{
-    renderPop(side, inp.value);
-  });
-
+  inp.addEventListener("input", ()=> renderPop(side, inp.value));
   renderPop(side, "");
   setTimeout(()=>{ try{ inp.focus(); }catch{} }, 0);
 }
@@ -327,7 +314,7 @@ function showLoginBannerIfNeeded(){
 function ensureLoginByUserAction(){ location.href = LOGIN_PATH; }
 
 /* ===============================
-   TOKEN SESSION / RPC
+   TOKENS
 ================================ */
 function unwrapRow(data){
   if(Array.isArray(data)) return data[0] || null;
@@ -372,37 +359,18 @@ async function ensureFacetofaceSession(){
 }
 
 /* ===============================
-   STT (MIC)
+   STT
 ================================ */
 function buildRecognizer(langCode){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR) return null;
   const rec = new SR();
   rec.lang = bcp(langCode);
-  rec.interimResults = false;
-  rec.continuous = false;
+  rec.interimResults = true;
+  rec.continuous = true;
   rec.maxAlternatives = 1;
   return rec;
 }
-
-let recTop=null, recBot=null, pending=null;
-
-function stopAll(){
-  try{ recTop?.stop?.(); }catch{}
-  try{ recBot?.stop?.(); }catch{}
-  recTop=null; recBot=null; active=null; pending=null;
-
-  setMicUI("top", false);
-  setMicUI("bot", false);
-
-  try{ window.speechSynthesis?.cancel?.(); }catch{}
-  setFrameState("idle", lastMicSide);
-
-  setPhase("idle");
-  updateMicLocks();
-}
-
-function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
 /* ===============================
    TTS
@@ -499,6 +467,23 @@ async function translateViaApi(text, source, target){
 }
 
 /* ===============================
+   TYPEWRITER
+================================ */
+async function typeWriter(el, fullText, speed=16){
+  el.textContent = "";
+  const text = String(fullText||"");
+  for(let i=0;i<text.length;i++){
+    el.textContent += text[i];
+    // scroll keep
+    try{
+      const wrap = el.closest?.(".chat-body");
+      if(wrap) wrap.scrollTop = wrap.scrollHeight;
+    }catch{}
+    await sleep(speed);
+  }
+}
+
+/* ===============================
    UI BUBBLES
 ================================ */
 function clearLatestTranslated(side){
@@ -521,7 +506,7 @@ function makeSpeakerIcon(onClick){
 
 function addBubble(side, kind, text, opts={}){
   const wrap = (side==="top") ? $("topBody") : $("botBody");
-  if(!wrap) return;
+  if(!wrap) return null;
 
   const bubble = document.createElement("div");
   bubble.className = `bubble ${kind}`;
@@ -542,33 +527,36 @@ function addBubble(side, kind, text, opts={}){
 
   wrap.appendChild(bubble);
   try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
+  return { bubble, txt, wrap };
 }
 
 /* ===============================
-   MAIN
+   PUSH-TO-TALK (press & hold)
 ================================ */
-async function start(which){
+let currentRec = null;
+let holdStart = 0;
+let bufferFinal = "";
+
+async function beginHold(which){
   closeAllPop();
 
-  if(!canStart()){
-    toast("İşlem bitmeden tekrar konuşulmaz.");
+  if(phase !== "idle"){
+    toast("İşlem bitmeden konuşulmaz.");
     return;
   }
 
   const ok = await ensureFacetofaceSession();
   if(!ok) return;
 
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){
+  const src = (which==="top") ? topLang : botLang;
+  const rec = buildRecognizer(src);
+  if(!rec){
     alert("Bu cihaz SpeechRecognition desteklemiyor.");
     return;
   }
 
-  const src = (which==="top") ? topLang : botLang;
-  const dst = (which==="top") ? botLang : topLang;
-
-  const rec = buildRecognizer(src);
-  if(!rec){ alert("Mikrofon başlatılamadı."); return; }
+  holdStart = Date.now();
+  bufferFinal = "";
 
   active = which;
   lastMicSide = which;
@@ -580,38 +568,46 @@ async function start(which){
   setMicUI(which, true);
 
   rec.onresult = (e)=>{
-    const t = e.results?.[0]?.[0]?.transcript || "";
-    const finalText = String(t||"").trim();
-    if(!finalText) return;
-
-    pending = { which, finalText, src, dst };
-    try{ rec.stop(); }catch{}
+    // final parçaları biriktir
+    for(let i=0;i<e.results.length;i++){
+      const r = e.results[i];
+      const txt = r?.[0]?.transcript || "";
+      if(r && r.isFinal && txt.trim()){
+        bufferFinal = (bufferFinal + " " + txt.trim()).trim();
+      }
+    }
   };
 
-  rec.onerror = ()=>{ stopAll(); };
+  rec.onerror = ()=>{ endHold(); };
 
   rec.onend = async ()=>{
     setMicUI(which,false);
     setFrameState("idle", lastMicSide);
 
-    const p = pending;
-    pending = null;
-    active = null;
-
-    if(!p || p.which !== which){
+    const duration = Date.now() - holdStart;
+    if(duration < 150){
       setPhase("idle");
       updateMicLocks();
       return;
     }
 
-    // ✅ Nefes payı
-    await sleep(350);
+    const finalText = String(bufferFinal||"").trim();
+    if(!finalText){
+      setPhase("idle");
+      updateMicLocks();
+      return;
+    }
+
+    // nefes payı
+    await sleep(400);
 
     setPhase("translating");
 
     const other = otherSide(which);
+    const dst = (which==="top") ? botLang : topLang;
 
-    const cmd = await parseCommand(p.finalText);
+    // komut mu?
+    const cmd = await parseCommand(finalText);
     if(cmd && cmd.is_command && cmd.target_lang){
       if(which === "top"){
         botLang = cmd.target_lang;
@@ -628,52 +624,95 @@ async function start(which){
       return;
     }
 
-    addBubble(which, "them", p.finalText);
+    // konuşanı yaz
+    addBubble(which, "them", finalText);
 
-    const translated = await translateViaApi(p.finalText, p.src, p.dst);
+    const translated = await translateViaApi(finalText, src, dst);
     if(!translated){
-      addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", { latest:false, speakable:false });
+      addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
       setPhase("idle");
       updateMicLocks();
       return;
     }
 
+    // çeviri bubble: daktilo + büyük son
     clearLatestTranslated(other);
-    addBubble(other, "me", translated, { latest:true, speakable:true, speakLang:p.dst });
+    const node = addBubble(other, "me", "", { latest:true, speakable:true, speakLang:dst });
+    if(node?.txt){
+      // typewriter
+      await typeWriter(node.txt, translated, 14);
+    }
 
     setCenterDirection(other);
     setFrameState("speaking", other);
 
     setPhase("speaking");
-    await speakLocal(translated, p.dst);
+    await speakLocal(translated, dst);
 
     setFrameState("idle", lastMicSide);
     setPhase("idle");
     updateMicLocks();
   };
 
-  if(which==="top") recTop=rec; else recBot=rec;
+  currentRec = rec;
+  try{ rec.start(); }catch{ endHold(); }
+}
 
-  try{ rec.start(); }catch{ stopAll(); }
+function endHold(){
+  try{ currentRec?.stop?.(); }catch{}
+  currentRec = null;
 }
 
 /* ===============================
    BINDINGS
 ================================ */
+function bindHold(btnId, side){
+  const btn = $(btnId);
+  if(!btn) return;
+
+  // Touch
+  btn.addEventListener("touchstart",(e)=>{
+    e.preventDefault();
+    beginHold(side);
+  },{passive:false});
+
+  btn.addEventListener("touchend",(e)=>{
+    e.preventDefault();
+    endHold();
+  });
+
+  // Mouse
+  btn.addEventListener("mousedown",(e)=>{
+    e.preventDefault();
+    beginHold(side);
+  });
+
+  btn.addEventListener("mouseup",(e)=>{
+    e.preventDefault();
+    endHold();
+  });
+
+  btn.addEventListener("mouseleave",()=> endHold());
+}
+
 function bindUI(){
-  // nav
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
-  // clear
   $("clearBtn")?.addEventListener("click", ()=>{
-    stopAll();
+    try{ currentRec?.stop?.(); }catch{}
+    currentRec = null;
+
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
+
+    setMicUI("top", false);
+    setMicUI("bot", false);
+    setFrameState("idle", lastMicSide);
+    setPhase("idle");
     updateMicLocks();
   });
 
-  // popovers
   $("topLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("top"); });
   $("botLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("bot"); });
 
@@ -688,19 +727,15 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // mic
-  $("topMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    start("top");
-  });
-  $("botMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation();
-    start("bot");
-  });
+  // ✅ basılı tut konuş
+  bindHold("topMic","top");
+  bindHold("botMic","bot");
 }
 
+/* ===============================
+   BOOT
+================================ */
 document.addEventListener("DOMContentLoaded", async ()=>{
-  // ✅ dil havuzunu önce yükle (import fail olsa bile UI çalışır)
   await loadLangPool();
 
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
