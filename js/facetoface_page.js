@@ -376,7 +376,6 @@ async function speakLocal(text, langCode){
       body: JSON.stringify({
         text: t,
         lang: lang,
-        voice: "",
         speaking_rate: 1,
         pitch: 0
       })
@@ -398,9 +397,8 @@ async function speakLocal(text, langCode){
 
     const b64 = data.audio_base64;
     const binary = atob(b64);
-    const len = binary.length;
-    const bytes = new Uint8Array(len);
-    for(let i=0;i<len;i++) bytes[i] = binary.charCodeAt(i);
+    const bytes = new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
 
     const blob = new Blob([bytes], { type: "audio/mpeg" });
     const objUrl = URL.createObjectURL(blob);
@@ -411,6 +409,7 @@ async function speakLocal(text, langCode){
     audio.onerror = () => URL.revokeObjectURL(objUrl);
 
     await audio.play();
+
   }catch(e){
     console.log("TTS FAILED:", e);
     toast("🔇 TTS failed");
