@@ -1,18 +1,7 @@
 // FILE: /js/facetoface_page.js
-import { LANG_POOL } from "/js/lang_pool_full.js";
 import { getSiteLang } from "/js/i18n.js";
 import { supabase } from "/js/supabase_client.js";
 import { setHeaderTokens } from "/js/ui_shell.js";
-
-/* ✅ CANONICAL HOST */
-(function enforceCanonicalHost(){
-  try{
-    const h = String(location.hostname || "").toLowerCase().trim();
-    if(h === "www.italky.ai"){
-      location.replace("https://italky.ai" + location.pathname + location.search + location.hash);
-    }
-  }catch{}
-})();
 
 const $ = (id)=>document.getElementById(id);
 
@@ -38,8 +27,7 @@ function getSystemUILang(){
 let UI_LANG = getSystemUILang();
 
 /* ===============================
-   LANG POOL (FULL) -> FACETOFACE LANGS
-   (code, flag, bcp) + search support
+   LANGS (dynamic load - NO hard import)
 ================================ */
 const BCP = {
   "tr":"tr-TR","en":"en-US","de":"de-DE","fr":"fr-FR","it":"it-IT","es":"es-ES",
@@ -55,21 +43,32 @@ const BCP = {
   "fil":"fil-PH","mn":"mn-MN","ne":"ne-NP","si":"si-LK","ta":"ta-IN","te":"te-IN","mr":"mr-IN","gu":"gu-IN"
 };
 
-const LANGS = (Array.isArray(LANG_POOL) ? LANG_POOL : []).map(l => {
-  const code = String(l.code || "").toLowerCase().trim();
-  if(!code) return null;
-  const flag = l.flag || "🌐";
-  const bcp = BCP[code] || "en-US";
-  return { code, flag, bcp };
-}).filter(Boolean);
+let LANGS = [
+  { code:"tr", flag:"🇹🇷", bcp:"tr-TR" },
+  { code:"en", flag:"🇬🇧", bcp:"en-US" },
+];
 
-// ensure basics
-if(!LANGS.find(x=>x.code==="tr")) LANGS.unshift({code:"tr",flag:"🇹🇷",bcp:"tr-TR"});
-if(!LANGS.find(x=>x.code==="en")) LANGS.unshift({code:"en",flag:"🇬🇧",bcp:"en-US"});
+async function loadLangPool(){
+  try{
+    const mod = await import("/js/lang_pool_full.js");
+    const pool = mod?.LANG_POOL;
+    if(!Array.isArray(pool) || pool.length < 5) return;
 
-/* ===============================
-   LANG HELPERS
-================================ */
+    LANGS = pool.map(l=>{
+      const code = String(l.code||"").toLowerCase().trim();
+      if(!code) return null;
+      return { code, flag: l.flag || "🌐", bcp: BCP[code] || "en-US" };
+    }).filter(Boolean);
+
+    // ensure tr/en
+    if(!LANGS.find(x=>x.code==="tr")) LANGS.unshift({code:"tr",flag:"🇹🇷",bcp:"tr-TR"});
+    if(!LANGS.find(x=>x.code==="en")) LANGS.unshift({code:"en",flag:"🇬🇧",bcp:"en-US"});
+  }catch(e){
+    // dil havuzu gelmese bile sayfa çalışsın
+    console.warn("LANG_POOL load failed:", e);
+  }
+}
+
 function canonicalLangCode(code){
   const c = String(code||"").toLowerCase();
   return c.split("-")[0];
@@ -162,9 +161,20 @@ function updateMicLocks(){
   lockMic("bot", lockBot);
 }
 
+// ✅ mic belirginlik: class + glow
 function setMicUI(which,on){
   const btn = (which==="top") ? $("topMic") : $("botMic");
-  btn?.classList.toggle("listening", !!on);
+  if(!btn) return;
+
+  btn.classList.toggle("listening", !!on);
+
+  if(on){
+    btn.style.boxShadow = "0 0 40px rgba(99,102,241,0.45), 0 0 18px rgba(236,72,153,0.25)";
+    btn.style.transform = "scale(1.03)";
+  } else {
+    btn.style.boxShadow = "";
+    btn.style.transform = "";
+  }
 }
 
 /* ===============================
@@ -195,6 +205,7 @@ function showToast(text){
     toastEl.style.letterSpacing = ".2px";
     toastEl.style.opacity = "0";
     toastEl.style.transition = "opacity .15s ease";
+    toastEl.style.pointerEvents = "none";
     document.body.appendChild(toastEl);
   }
 
@@ -255,12 +266,11 @@ function renderPop(side, filterText=""){
 }
 
 function ensureSearchBox(side){
-  const listId = (side==="top") ? "list-top" : "list-bot";
-  const list = $(listId);
-  if(!list) return;
+  const pop = $(side==="top" ? "pop-top" : "pop-bot");
+  const list = $(side==="top" ? "list-top" : "list-bot");
+  if(!pop || !list) return;
 
-  // already inserted
-  if(list.parentElement?.querySelector?.(".lang-search")) return;
+  if(pop.querySelector(".lang-search")) return;
 
   const inp = document.createElement("input");
   inp.className = "lang-search";
@@ -268,7 +278,6 @@ function ensureSearchBox(side){
   inp.autocomplete = "off";
   inp.spellcheck = false;
 
-  // style inline (CSS file yoksa da çalışsın)
   inp.style.width = "calc(100% - 20px)";
   inp.style.margin = "10px";
   inp.style.padding = "10px 12px";
@@ -280,14 +289,14 @@ function ensureSearchBox(side){
   inp.style.fontFamily = "Outfit, system-ui, sans-serif";
   inp.style.letterSpacing = ".2px";
 
-  list.parentElement.insertBefore(inp, list);
+  pop.insertBefore(inp, list);
 
   inp.addEventListener("input", ()=>{
     renderPop(side, inp.value);
   });
 
-  // initial render
   renderPop(side, "");
+  setTimeout(()=>{ try{ inp.focus(); }catch{} }, 0);
 }
 
 function togglePopover(side){
@@ -298,11 +307,6 @@ function togglePopover(side){
   if(willShow){
     pop.classList.add("show");
     ensureSearchBox(side);
-    // ensureSearchBox calls renderPop
-    try{
-      const inp = pop.querySelector(".lang-search");
-      inp?.focus?.();
-    }catch{}
   }
 }
 
@@ -398,8 +402,10 @@ function stopAll(){
   updateMicLocks();
 }
 
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
 /* ===============================
-   TTS (BACKEND /api/tts -> {ok,audio_base64})
+   TTS
 ================================ */
 async function speakLocal(text, langCode){
   const t = String(text || "").trim();
@@ -412,25 +418,17 @@ async function speakLocal(text, langCode){
       method: "POST",
       headers: { "Content-Type":"application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        text: t,
-        lang: lang,
-        speaking_rate: 1,
-        pitch: 0
-      })
+      body: JSON.stringify({ text: t, lang, speaking_rate: 1, pitch: 0 })
     });
 
     if(!res.ok){
-      const err = await res.text().catch(()=> "");
-      console.log("TTS HTTP ERROR:", res.status, err);
       toast("🔇 TTS HTTP " + res.status);
       return;
     }
 
     const data = await res.json().catch(()=>null);
     if(!data || !data.ok || !data.audio_base64){
-      console.log("TTS INVALID RESPONSE:", data);
-      toast("🔇 TTS response invalid");
+      toast("🔇 TTS invalid");
       return;
     }
 
@@ -448,9 +446,7 @@ async function speakLocal(text, langCode){
     audio.onerror = () => URL.revokeObjectURL(objUrl);
 
     await audio.play();
-
-  }catch(e){
-    console.log("TTS FAILED:", e);
+  }catch{
     toast("🔇 TTS failed");
   }
 }
@@ -466,15 +462,11 @@ async function parseCommand(text){
     const r = await fetch(`${API_BASE}/api/command_parse`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: t,
-        ui_lang: UI_LANG
-      })
+      body: JSON.stringify({ text: t, ui_lang: UI_LANG })
     });
 
     if(!r.ok) return null;
-    const data = await r.json().catch(()=>null);
-    return data || null;
+    return await r.json().catch(()=>null);
   }catch{
     return null;
   }
@@ -495,13 +487,7 @@ async function translateViaApi(text, source, target){
     const r = await fetch(`${API_BASE}/api/translate_ai`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        text: t,
-        from_lang: src,
-        to_lang: dst,
-        style: "chat",
-        provider: "auto"
-      })
+      body: JSON.stringify({ text: t, from_lang: src, to_lang: dst, style: "chat", provider: "auto" })
     });
     if(!r.ok) return null;
     const data = await r.json().catch(()=>({}));
@@ -513,7 +499,7 @@ async function translateViaApi(text, source, target){
 }
 
 /* ===============================
-   UI BUBBLES + SPEAKER ICON
+   UI BUBBLES
 ================================ */
 function clearLatestTranslated(side){
   const wrap = (side==="top") ? $("topBody") : $("botBody");
@@ -578,8 +564,6 @@ async function start(which){
     return;
   }
 
-  try{ window.speechSynthesis?.cancel?.(); }catch{}
-
   const src = (which==="top") ? topLang : botLang;
   const dst = (which==="top") ? botLang : topLang;
 
@@ -620,11 +604,13 @@ async function start(which){
       return;
     }
 
+    // ✅ Nefes payı
+    await sleep(350);
+
     setPhase("translating");
 
     const other = otherSide(which);
 
-    // ✅ COMMAND: yazdırma yok
     const cmd = await parseCommand(p.finalText);
     if(cmd && cmd.is_command && cmd.target_lang){
       if(which === "top"){
@@ -642,7 +628,6 @@ async function start(which){
       return;
     }
 
-    // normal konuşma: yazdır
     addBubble(which, "them", p.finalText);
 
     const translated = await translateViaApi(p.finalText, p.src, p.dst);
@@ -656,7 +641,6 @@ async function start(which){
     clearLatestTranslated(other);
     addBubble(other, "me", translated, { latest:true, speakable:true, speakLang:p.dst });
 
-    // speaking anim + yön
     setCenterDirection(other);
     setFrameState("speaking", other);
 
@@ -677,9 +661,11 @@ async function start(which){
    BINDINGS
 ================================ */
 function bindUI(){
+  // nav
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
+  // clear
   $("clearBtn")?.addEventListener("click", ()=>{
     stopAll();
     if($("topBody")) $("topBody").innerHTML="";
@@ -687,6 +673,7 @@ function bindUI(){
     updateMicLocks();
   });
 
+  // popovers
   $("topLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("top"); });
   $("botLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("bot"); });
 
@@ -701,6 +688,7 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
+  // mic
   $("topMic")?.addEventListener("click",(e)=>{
     e.preventDefault(); e.stopPropagation();
     start("top");
@@ -712,6 +700,9 @@ function bindUI(){
 }
 
 document.addEventListener("DOMContentLoaded", async ()=>{
+  // ✅ dil havuzunu önce yükle (import fail olsa bile UI çalışır)
+  await loadLangPool();
+
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
 
