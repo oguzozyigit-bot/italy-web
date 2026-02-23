@@ -11,6 +11,13 @@ const HOME_PATH  = "/pages/home.html";
 const PROFILE_PATH = "/pages/profile.html";
 
 /* ===============================
+   SETTINGS
+================================ */
+const HOLD_MAX_MS = 90000;      // ✅ 1.5 dakika (istersen 120000 yap)
+const RELEASE_DELAY_MS = 350;   // ✅ bırakınca nefes payı
+const MIN_HOLD_MS = 160;        // kazara dokunma filtresi
+
+/* ===============================
    UI LANG
 ================================ */
 function getSystemUILang(){
@@ -131,6 +138,8 @@ function setPhase(p){
   updateMicLocks();
 }
 
+function otherSide(which){ return which === "top" ? "bot" : "top"; }
+
 function lockMic(which, locked){
   const el = (which === "top") ? $("topMic") : $("botMic");
   if(!el) return;
@@ -159,9 +168,8 @@ function setMicUI(which,on){
 
   btn.classList.toggle("listening", !!on);
 
-  // daha belirgin
   if(on){
-    btn.style.boxShadow = "0 0 44px rgba(99,102,241,0.55), 0 0 22px rgba(236,72,153,0.30)";
+    btn.style.boxShadow = "0 0 48px rgba(99,102,241,0.60), 0 0 22px rgba(236,72,153,0.32)";
     btn.style.transform = "scale(1.04)";
   }else{
     btn.style.boxShadow = "";
@@ -170,13 +178,13 @@ function setMicUI(which,on){
 }
 
 /* ===============================
-   TOAST
+   TOAST + TIMER BADGE
 ================================ */
 let toastEl = null;
 let toastTimer = null;
 
 function showToast(text){
-  try{ if(navigator.vibrate) navigator.vibrate(16); }catch{}
+  try{ if(navigator.vibrate) navigator.vibrate(14); }catch{}
 
   if(!toastEl){
     toastEl = document.createElement("div");
@@ -205,9 +213,42 @@ function showToast(text){
   toastEl.style.opacity = "1";
 
   if(toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ if(toastEl) toastEl.style.opacity = "0"; }, 1400);
+  toastTimer = setTimeout(()=>{ if(toastEl) toastEl.style.opacity = "0"; }, 1200);
 }
 function toast(msg){ showToast(String(msg||"")); }
+
+let timerBadge = null;
+function ensureTimerBadge(){
+  if(timerBadge) return;
+  timerBadge = document.createElement("div");
+  timerBadge.style.position = "fixed";
+  timerBadge.style.right = "14px";
+  timerBadge.style.top = "14px";
+  timerBadge.style.zIndex = "999999";
+  timerBadge.style.padding = "8px 10px";
+  timerBadge.style.borderRadius = "999px";
+  timerBadge.style.border = "1px solid rgba(255,255,255,0.14)";
+  timerBadge.style.background = "rgba(0,0,0,0.55)";
+  timerBadge.style.backdropFilter = "blur(10px)";
+  timerBadge.style.color = "rgba(255,255,255,0.92)";
+  timerBadge.style.fontFamily = "Outfit, system-ui, sans-serif";
+  timerBadge.style.fontWeight = "900";
+  timerBadge.style.fontSize = "12px";
+  timerBadge.style.opacity = "0";
+  timerBadge.style.transition = "opacity .15s ease";
+  timerBadge.style.pointerEvents = "none";
+  document.body.appendChild(timerBadge);
+}
+function setTimerBadge(msLeft){
+  ensureTimerBadge();
+  if(msLeft == null){
+    timerBadge.style.opacity = "0";
+    return;
+  }
+  const s = Math.max(0, Math.ceil(msLeft/1000));
+  timerBadge.textContent = `⏱ ${s}s`;
+  timerBadge.style.opacity = "1";
+}
 
 function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
@@ -250,7 +291,7 @@ function renderPop(side, filterText=""){
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
 
-      toast("🎙️ Sesli komut: 'Dil değiştir İngilizce'  /  'Translate to English'");
+      toast("🎙️ Sesli komut: 'Dil değiştir İngilizce'");
       closeAllPop();
     });
   });
@@ -298,7 +339,7 @@ function togglePopover(side){
 }
 
 /* ===============================
-   AUTH
+   AUTH / TOKENS
 ================================ */
 async function checkLoginOnce(){
   try{
@@ -313,9 +354,6 @@ function showLoginBannerIfNeeded(){
 }
 function ensureLoginByUserAction(){ location.href = LOGIN_PATH; }
 
-/* ===============================
-   TOKENS
-================================ */
 function unwrapRow(data){
   if(Array.isArray(data)) return data[0] || null;
   if(data && typeof data === "object") return data;
@@ -337,7 +375,7 @@ async function ensureFacetofaceSession(){
     if(error){
       const msg = String(error.message||"");
       if(msg.includes("INSUFFICIENT_TOKENS")){
-        alert("Jeton yetersiz. Devam etmek için jeton yükleyin.");
+        alert("Jeton yetersiz.");
         location.href = PROFILE_PATH;
         return false;
       }
@@ -350,9 +388,7 @@ async function ensureFacetofaceSession(){
 
     sessionGranted = true;
     return true;
-
-  }catch(e){
-    console.warn(e);
+  }catch{
     alert("FaceToFace oturumu başlatılamadı.");
     return false;
   }
@@ -373,11 +409,46 @@ function buildRecognizer(langCode){
 }
 
 /* ===============================
+   AUDIO (prevent overlap)
+================================ */
+let audioObj = null;
+let lastAudioAt = 0;
+
+function stopAudio(){
+  try{
+    if(audioObj){
+      audioObj.pause();
+      audioObj.currentTime = 0;
+    }
+  }catch{}
+  audioObj = null;
+}
+
+async function playAudioBlob(blob){
+  stopAudio();
+  const url = URL.createObjectURL(blob);
+  audioObj = new Audio(url);
+  audioObj.playsInline = true;
+  audioObj.onended = ()=>{ try{ URL.revokeObjectURL(url); }catch{} };
+  audioObj.onerror = ()=>{ try{ URL.revokeObjectURL(url); }catch{} };
+  await audioObj.play();
+}
+
+/* ===============================
    TTS
 ================================ */
 async function speakLocal(text, langCode){
   const t = String(text || "").trim();
   if(!t) return;
+
+  // double click spam: 250ms debounce
+  const now = Date.now();
+  if(now - lastAudioAt < 250){
+    stopAudio();
+    lastAudioAt = now;
+  } else {
+    lastAudioAt = now;
+  }
 
   const lang = normalizeApiLang(langCode);
 
@@ -406,14 +477,7 @@ async function speakLocal(text, langCode){
     for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
 
     const blob = new Blob([bytes], { type: "audio/mpeg" });
-    const objUrl = URL.createObjectURL(blob);
-
-    const audio = new Audio(objUrl);
-    audio.playsInline = true;
-    audio.onended = () => URL.revokeObjectURL(objUrl);
-    audio.onerror = () => URL.revokeObjectURL(objUrl);
-
-    await audio.play();
+    await playAudioBlob(blob);
   }catch{
     toast("🔇 TTS failed");
   }
@@ -469,12 +533,11 @@ async function translateViaApi(text, source, target){
 /* ===============================
    TYPEWRITER
 ================================ */
-async function typeWriter(el, fullText, speed=16){
+async function typeWriter(el, fullText, speed=14){
   el.textContent = "";
   const text = String(fullText||"");
   for(let i=0;i<text.length;i++){
     el.textContent += text[i];
-    // scroll keep
     try{
       const wrap = el.closest?.(".chat-body");
       if(wrap) wrap.scrollTop = wrap.scrollHeight;
@@ -531,11 +594,14 @@ function addBubble(side, kind, text, opts={}){
 }
 
 /* ===============================
-   PUSH-TO-TALK (press & hold)
+   PUSH TO TALK (HOLD)
 ================================ */
 let currentRec = null;
 let holdStart = 0;
-let bufferFinal = "";
+let holdTimer = null;
+
+let finalParts = "";
+let lastInterim = "";
 
 async function beginHold(which){
   closeAllPop();
@@ -548,59 +614,84 @@ async function beginHold(which){
   const ok = await ensureFacetofaceSession();
   if(!ok) return;
 
-  const src = (which==="top") ? topLang : botLang;
-  const rec = buildRecognizer(src);
-  if(!rec){
-    alert("Bu cihaz SpeechRecognition desteklemiyor.");
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    alert("Bu cihazda konuşma tanıma yok. (Chrome gerekli)");
     return;
   }
 
+  const src = (which==="top") ? topLang : botLang;
+  const rec = buildRecognizer(src);
+  if(!rec) return;
+
   holdStart = Date.now();
-  bufferFinal = "";
+  finalParts = "";
+  lastInterim = "";
 
   active = which;
   lastMicSide = which;
 
   setCenterDirection(which);
   setFrameState("listening", which);
-
   setPhase("recording");
   setMicUI(which, true);
 
+  // Max süre sayacı
+  if(holdTimer) clearInterval(holdTimer);
+  const startAt = Date.now();
+  holdTimer = setInterval(()=>{
+    const elapsed = Date.now() - startAt;
+    const left = HOLD_MAX_MS - elapsed;
+    setTimerBadge(left);
+    if(left <= 0){
+      endHold(); // süre doldu
+    }
+  }, 250);
+
   rec.onresult = (e)=>{
-    // final parçaları biriktir
+    // hem final hem interim topla
+    let interimNow = "";
     for(let i=0;i<e.results.length;i++){
       const r = e.results[i];
       const txt = r?.[0]?.transcript || "";
-      if(r && r.isFinal && txt.trim()){
-        bufferFinal = (bufferFinal + " " + txt.trim()).trim();
+      if(!txt) continue;
+
+      if(r.isFinal){
+        finalParts = (finalParts + " " + txt.trim()).trim();
+      }else{
+        interimNow = (interimNow + " " + txt.trim()).trim();
       }
     }
+    if(interimNow) lastInterim = interimNow;
   };
 
-  rec.onerror = ()=>{ endHold(); };
+  rec.onerror = ()=>{
+    endHold();
+  };
 
   rec.onend = async ()=>{
+    if(holdTimer){ clearInterval(holdTimer); holdTimer = null; }
+    setTimerBadge(null);
+
     setMicUI(which,false);
     setFrameState("idle", lastMicSide);
 
     const duration = Date.now() - holdStart;
-    if(duration < 150){
+    if(duration < MIN_HOLD_MS){
       setPhase("idle");
       updateMicLocks();
       return;
     }
 
-    const finalText = String(bufferFinal||"").trim();
+    // ✅ kritik: final hiç gelmezse interim ile kurtar
+    const finalText = (finalParts + " " + lastInterim).trim();
     if(!finalText){
       setPhase("idle");
       updateMicLocks();
       return;
     }
 
-    // nefes payı
-    await sleep(400);
-
+    await sleep(RELEASE_DELAY_MS);
     setPhase("translating");
 
     const other = otherSide(which);
@@ -635,18 +726,17 @@ async function beginHold(which){
       return;
     }
 
-    // çeviri bubble: daktilo + büyük son
+    // typewriter + big latest + speaker
     clearLatestTranslated(other);
     const node = addBubble(other, "me", "", { latest:true, speakable:true, speakLang:dst });
     if(node?.txt){
-      // typewriter
       await typeWriter(node.txt, translated, 14);
     }
 
     setCenterDirection(other);
     setFrameState("speaking", other);
-
     setPhase("speaking");
+
     await speakLocal(translated, dst);
 
     setFrameState("idle", lastMicSide);
@@ -670,29 +760,21 @@ function bindHold(btnId, side){
   const btn = $(btnId);
   if(!btn) return;
 
-  // Touch
-  btn.addEventListener("touchstart",(e)=>{
+  // Pointer Events: mobil/pc tek sistem
+  btn.addEventListener("pointerdown",(e)=>{
     e.preventDefault();
-    beginHold(side);
-  },{passive:false});
-
-  btn.addEventListener("touchend",(e)=>{
-    e.preventDefault();
-    endHold();
-  });
-
-  // Mouse
-  btn.addEventListener("mousedown",(e)=>{
-    e.preventDefault();
+    try{ btn.setPointerCapture(e.pointerId); }catch{}
     beginHold(side);
   });
 
-  btn.addEventListener("mouseup",(e)=>{
+  btn.addEventListener("pointerup",(e)=>{
     e.preventDefault();
+    try{ btn.releasePointerCapture(e.pointerId); }catch{}
     endHold();
   });
 
-  btn.addEventListener("mouseleave",()=> endHold());
+  btn.addEventListener("pointercancel",()=> endHold());
+  btn.addEventListener("pointerleave",()=> endHold());
 }
 
 function bindUI(){
@@ -702,6 +784,11 @@ function bindUI(){
   $("clearBtn")?.addEventListener("click", ()=>{
     try{ currentRec?.stop?.(); }catch{}
     currentRec = null;
+
+    stopAudio();
+
+    if(holdTimer){ clearInterval(holdTimer); holdTimer = null; }
+    setTimerBadge(null);
 
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
@@ -727,7 +814,6 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // ✅ basılı tut konuş
   bindHold("topMic","top");
   bindHold("botMic","bot");
 }
