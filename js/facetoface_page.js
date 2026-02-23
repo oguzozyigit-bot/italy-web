@@ -223,7 +223,7 @@ function renderPop(side){
 
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
-
+    toast("🎙️ Sesli komut: 'Dil değiştir İngilizce'  /  'Translate to English'");
       closeAllPop();
     });
   });
