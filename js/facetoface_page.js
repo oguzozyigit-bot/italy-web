@@ -343,7 +343,31 @@ function speakLocal(text, langCode){
     }
   });
 }
+async function parseCommand(text){
+  const t = String(text || "").trim();
+  if(!t) return null;
 
+  try{
+    const r = await fetch(`${API_BASE}/api/command_parse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: t,
+        ui_lang: UI_LANG
+      })
+    });
+
+    if(!r.ok) return null;
+
+    const data = await r.json().catch(()=>null);
+    if(!data) return null;
+
+    // Beklenen: {is_command, source_lang, target_lang, confidence, provider_used}
+    return data;
+  }catch(e){
+    return null;
+  }
+}
 /* ===============================
    TRANSLATE API
 ================================ */
