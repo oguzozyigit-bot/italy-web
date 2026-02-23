@@ -1,12 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.italky.ai" }],
-      "destination": "https://italky.ai/$1",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     { "source": "/pages/:path*", "destination": "/pages/:path*" },
     { "source": "/js/:path*", "destination": "/js/:path*" },
