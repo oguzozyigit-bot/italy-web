@@ -109,7 +109,7 @@
     .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
 
-    /* NEW: WalkieTalkie card — farklı animasyon */
+    /* WalkieTalkie animasyonu (AYNEN) */
     .walkie-logo{ display:flex; align-items:center; gap:6px; height:32px; }
     .pulse-dot{
       width:8px; height:8px; border-radius:99px;
@@ -146,7 +146,7 @@
       50%{transform:scale(1.35); opacity:1}
     }
 
-    /* NEW: Online Çevirir card — farklı animasyon */
+    /* Offline Çeviri kartı (AYNEN, sadece metin/link değişti) */
     .online-logo{
       width:34px; height:34px; border-radius:14px;
       border:1px solid rgba(255,255,255,0.12);
@@ -161,17 +161,16 @@
       animation:spin 1.8s linear infinite;
     }
     .online-logo:after{
-      content:"Aa";
+      content:"↓";
       position:absolute; inset:0;
       display:flex; align-items:center; justify-content:center;
       font-weight:900;
       color:#fff;
-      opacity:.9;
-      mix-blend-mode:normal;
+      opacity:.92;
     }
     @keyframes spin{ to{ transform:rotate(360deg)} }
 
-    /* NEW: Eğlenerek Öğren card — farklı animasyon */
+    /* Eğlenerek Öğren kartı (AYNEN) */
     .learn-logo{
       width:34px; height:34px; border-radius:14px;
       border:1px solid rgba(255,255,255,0.12);
@@ -196,6 +195,37 @@
     @keyframes bounceGlow{
       0%,100%{transform:translateY(6px); opacity:.6}
       50%{transform:translateY(-6px); opacity:1}
+    }
+
+    /* ✅ YENİ: Metinden Çeviri ikonu — farklı animasyon (sadece yeni buton) */
+    .text-logo{
+      width:34px; height:34px; border-radius:14px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      position:relative;
+      overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .text-logo:before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      background: linear-gradient(90deg, rgba(99,102,241,0), rgba(99,102,241,.55), rgba(236,72,153,0));
+      transform: translateX(-120%);
+      animation: scan 1.25s ease-in-out infinite;
+      opacity:.85;
+    }
+    .text-logo:after{
+      content:"Aa";
+      position:relative;
+      font-weight:900;
+      color:#fff;
+      opacity:.95;
+    }
+    @keyframes scan{
+      0%{ transform: translateX(-130%); }
+      60%{ transform: translateX(130%); }
+      100%{ transform: translateX(130%); }
     }
 
     @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -267,7 +297,7 @@
         <div class="portal-info"><h1>FaceToFace</h1><p>Yüzyüze Anlık Çeviri</p></div>
       </div>
 
-      <!-- 2) WalkieTalkie (Academy tarzı ama farklı animasyon) -->
+      <!-- 2) WalkieTalkie -->
       <div class="academy-pro" data-href="/pages/f2f_connect.html">
         <div class="walkie-logo">
           <div class="pulse-dot"></div>
@@ -276,10 +306,16 @@
         <div class="academy-text"><h2>Walkie <span>Talkie</span></h2><p>2 TELEFON • QR/KOD İLE BAĞLAN</p></div>
       </div>
 
-      <!-- 3) Online Çevirir (farklı animasyon) -->
-      <div class="academy-pro" data-href="/pages/text_translate.html">
+      <!-- 3) Offline Çeviri (Online değil) -->
+      <div class="academy-pro" data-href="/facetoface_offline.html">
         <div class="online-logo"></div>
-        <div class="academy-text"><h2>Online <span>Çevirir</span></h2><p>AI DESTEKLİ METİN ÇEVİRİ</p></div>
+        <div class="academy-text"><h2>Offline <span>Çeviri</span></h2><p>İNDİRİLEN DİL PAKETLERİ</p></div>
+      </div>
+
+      <!-- ✅ 3.5) Metinden Çeviri (YENİ, en alta ek) -->
+      <div class="academy-pro" data-href="/pages/text_translate.html">
+        <div class="text-logo"></div>
+        <div class="academy-text"><h2>Metinden <span>Çeviri</span></h2><p>AI DESTEKLİ METİN ÇEVİRİ</p></div>
       </div>
 
       <!-- 4) italky Academy (ASLA DOKUNMADIM) -->
@@ -291,16 +327,10 @@
         <div class="academy-text"><h2>italky <span>Academy</span></h2><p>YAPAY ZEKA İLE DİL EĞİTİMİ</p></div>
       </div>
 
-      <!-- 5) Eğlenerek Öğren (farklı animasyon) -->
+      <!-- 5) Eğlenerek Öğren -->
       <div class="academy-pro" data-href="/pages/game.html">
         <div class="learn-logo"><span>🎯</span></div>
         <div class="academy-text"><h2>Eğlenerek <span>Öğren</span></h2><p>OYUNLARLA PRATİK YAP</p></div>
-      </div>
-
-      <!-- Offline çeviri hariç diğerleri kaldırıldı. Offline çeviri varsa kendi linki aynen kalsın. -->
-      <div class="academy-pro" data-href="/pages/offline.html" style="display:none" id="offlineKeep">
-        <div class="online-logo"></div>
-        <div class="academy-text"><h2>Offline <span>Çeviri</span></h2><p>İNDİRİLEN DİL PAKETLERİ</p></div>
       </div>
 
     </div>
@@ -319,8 +349,6 @@
   </div>
 
   <script>
-    // Alt/üst bar ui_shell.js'den geliyordu: burada dokunmuyoruz, sadece yönlendirme yapıyoruz.
-
     function go(url){
       if(!url) return;
       try{ window.location.assign(url); }catch{ window.location.href = url; }
@@ -336,7 +364,6 @@
       el.addEventListener("touchend", handler, { passive:false });
     });
 
-    // kullanıcı bilgisi (eski davranışa dokunmadan)
     function pickFirstName(full){
       const s = String(full||"").trim();
       if(!s) return "";
