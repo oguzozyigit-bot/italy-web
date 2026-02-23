@@ -75,7 +75,7 @@ const LANGS = [
   { code:"zh", flag:"🇨🇳", bcp:"zh-CN" },
   { code:"ja", flag:"🇯🇵", bcp:"ja-JP" },
   { code:"ko", flag:"🇰🇷", bcp:"ko-KR" },
-  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" } // ✅ Gürcüce
+  { code:"ka", flag:"🇬🇪", bcp:"ka-GE" }
 ];
 
 function canonicalLangCode(code){
@@ -114,16 +114,11 @@ let isLoggedIn = false;
 let sessionGranted = false;
 
 /* ===============================
-   ENGINE (SIRA YOK — çakışma önleme)
+   ENGINE / VISUAL STATE
 ================================ */
 let phase = "idle";          // idle | recording | translating | speaking
 let active = null;           // "top" | "bot" | null
 let lastMicSide = "bot";     // konuşma bitince logo buraya döner
-
-function canStart(){
-  return phase === "idle";
-}
-function otherSide(which){ return which === "top" ? "bot" : "top"; }
 
 function frame(){ return document.getElementById("frameRoot"); }
 
@@ -146,6 +141,12 @@ function setPhase(p){
   phase = p;
   updateMicLocks();
 }
+
+function canStart(){
+  return phase === "idle";
+}
+
+function otherSide(which){ return which === "top" ? "bot" : "top"; }
 
 function lockMic(which, locked){
   const el = (which === "top") ? $("topMic") : $("botMic");
@@ -175,7 +176,7 @@ function setMicUI(which,on){
 }
 
 /* ===============================
-   UI FEEDBACK
+   TOAST
 ================================ */
 let toastEl = null;
 let toastTimer = null;
@@ -213,7 +214,6 @@ function showToast(text){
     if(toastEl) toastEl.style.opacity = "0";
   }, 1400);
 }
-
 function toast(msg){ showToast(String(msg||"")); }
 
 /* ===============================
@@ -360,7 +360,7 @@ function stopAll(){
 }
 
 /* ===============================
-   TTS (LOCAL -> /api/tts fallback, multi-try)
+   TTS (BACKEND /api/tts -> {ok,audio_base64})
 ================================ */
 async function speakLocal(text, langCode){
   const t = String(text || "").trim();
@@ -376,7 +376,7 @@ async function speakLocal(text, langCode){
       body: JSON.stringify({
         text: t,
         lang: lang,
-        voice: null,
+        voice: "",
         speaking_rate: 1,
         pitch: 0
       })
@@ -396,15 +396,11 @@ async function speakLocal(text, langCode){
       return;
     }
 
-    // base64 -> blob
     const b64 = data.audio_base64;
     const binary = atob(b64);
     const len = binary.length;
     const bytes = new Uint8Array(len);
-
-    for(let i=0;i<len;i++){
-      bytes[i] = binary.charCodeAt(i);
-    }
+    for(let i=0;i<len;i++) bytes[i] = binary.charCodeAt(i);
 
     const blob = new Blob([bytes], { type: "audio/mpeg" });
     const objUrl = URL.createObjectURL(blob);
@@ -415,86 +411,10 @@ async function speakLocal(text, langCode){
     audio.onerror = () => URL.revokeObjectURL(objUrl);
 
     await audio.play();
-
   }catch(e){
     console.log("TTS FAILED:", e);
     toast("🔇 TTS failed");
   }
-}
-
-  async function playBlob(res){
-    const ct = (res.headers.get("content-type") || "").toLowerCase();
-
-    if(ct.includes("application/json") || ct.includes("text/")){
-      const txt = await res.text().catch(()=> "");
-      throw new Error(`TTS_NOT_AUDIO (${res.status}) ${txt.slice(0,120)}`);
-    }
-
-    const blob = await res.blob();
-    const objUrl = URL.createObjectURL(blob);
-    const a = new Audio(objUrl);
-    a.playsInline = true;
-    a.onended = () => URL.revokeObjectURL(objUrl);
-    a.onerror  = () => URL.revokeObjectURL(objUrl);
-    await a.play();
-  }
-
-  const tries = [
-    {
-      name: "GET lang+text",
-      run: async () => fetchAudio(
-        `${API_BASE}/api/tts?lang=${encodeURIComponent(lang)}&text=${encodeURIComponent(t)}`,
-        { method: "GET" }
-      )
-    },
-    {
-      name: "GET to_lang+q",
-      run: async () => fetchAudio(
-        `${API_BASE}/api/tts?to_lang=${encodeURIComponent(lang)}&q=${encodeURIComponent(t)}`,
-        { method: "GET" }
-      )
-    },
-    {
-      name: "POST {text,lang}",
-      run: async () => fetchAudio(
-        `${API_BASE}/api/tts`,
-        {
-          method: "POST",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify({ text: t, lang })
-        }
-      )
-    },
-    {
-      name: "POST {text,to_lang}",
-      run: async () => fetchAudio(
-        `${API_BASE}/api/tts`,
-        {
-          method: "POST",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify({ text: t, to_lang: lang })
-        }
-      )
-    }
-  ];
-
-  for(const tr of tries){
-    try{
-      const res = await tr.run();
-      if(res.status === 405) continue;
-      if(res.ok){
-        await playBlob(res);
-        return;
-      }else{
-        const hint = await res.text().catch(()=> "");
-        console.log("[TTS TRY FAIL]", tr.name, res.status, hint.slice(0,120));
-      }
-    }catch(e){
-      console.log("[TTS TRY ERR]", tr.name, String(e));
-    }
-  }
-
-  toast("🔇 Ses çıkmadı (TTS). /api/tts formatı uyuşmuyor.");
 }
 
 /* ===============================
@@ -523,7 +443,7 @@ async function parseCommand(text){
 }
 
 /* ===============================
-   TRANSLATE API (AI)
+   TRANSLATE AI
 ================================ */
 async function translateViaApi(text, source, target){
   const t = String(text||"").trim();
@@ -666,8 +586,8 @@ async function start(which){
 
     const other = otherSide(which);
 
+    // ✅ COMMAND: yazdırma yok
     const cmd = await parseCommand(p.finalText);
-
     if(cmd && cmd.is_command && cmd.target_lang){
       if(which === "top"){
         botLang = cmd.target_lang;
@@ -684,10 +604,10 @@ async function start(which){
       return;
     }
 
+    // normal konuşma: yazdır
     addBubble(which, "them", p.finalText);
 
     const translated = await translateViaApi(p.finalText, p.src, p.dst);
-
     if(!translated){
       addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.", { latest:false, speakable:false });
       setPhase("idle");
@@ -696,12 +616,9 @@ async function start(which){
     }
 
     clearLatestTranslated(other);
-    addBubble(other, "me", translated, {
-      latest: true,
-      speakable: true,
-      speakLang: p.dst
-    });
+    addBubble(other, "me", translated, { latest:true, speakable:true, speakLang:p.dst });
 
+    // speaking anim + yön
     setCenterDirection(other);
     setFrameState("speaking", other);
 
