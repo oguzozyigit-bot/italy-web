@@ -343,62 +343,7 @@
 
   </div>
 
-  <script>
-(function(){
-  try{
-    const k="__f2f_boot_count_v1";
-    const n=(parseInt(sessionStorage.getItem(k)||"0",10)+1);
-    sessionStorage.setItem(k,String(n));
-
-    // 3+ defa üst üste yükleniyorsa: loop vardır -> JS'i yükleme
-    if(n>=3){
-      const msg=document.createElement("div");
-      msg.style.position="fixed";
-      msg.style.inset="0";
-      msg.style.zIndex="999999";
-      msg.style.display="flex";
-      msg.style.alignItems="center";
-      msg.style.justifyContent="center";
-      msg.style.padding="18px";
-      msg.style.background="#050508";
-      msg.style.color="#fff";
-      msg.style.fontFamily="Outfit,system-ui,sans-serif";
-      msg.innerHTML = `
-        <div style="max-width:520px;border:1px solid rgba(255,255,255,.14);border-radius:22px;padding:16px;background:rgba(255,255,255,.06)">
-          <div style="font-weight:900;font-size:16px;margin-bottom:8px">Face-to-Face loop tespit edildi</div>
-          <div style="opacity:.7;font-size:13px;line-height:1.4">
-            JS yüklemesi durduruldu. Bu, import tarafında bir yönlendirme/reload tetiklendiğini gösterir.
-            <br><br>
-            Şimdi Console/Network’te hangi dosyanın yönlendirme yaptığını görebiliriz.
-          </div>
-          <button id="f2f_try" style="margin-top:12px;width:100%;padding:12px 14px;border-radius:16px;border:none;font-weight:900;cursor:pointer;background:linear-gradient(135deg,#a5b4fc,#6366f1,#ec4899);color:#0b0b12">
-            Tekrar Dene
-          </button>
-          <button id="f2f_reset" style="margin-top:10px;width:100%;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font-weight:900;cursor:pointer">
-            Sayaç Sıfırla
-          </button>
-        </div>
-      `;
-      document.body.appendChild(msg);
-      document.getElementById("f2f_try").onclick=()=>location.reload();
-      document.getElementById("f2f_reset").onclick=()=>{sessionStorage.removeItem(k); location.reload();};
-      return;
-    }
-
-    // Normalde JS'i buradan yükle
-    const s=document.createElement("script");
-    s.type="module";
-    s.src="/js/facetoface_page.js?v=FINAL_NOLOOP_FULL";
-    document.body.appendChild(s);
-
-  }catch(e){
-    // fallback
-    const s=document.createElement("script");
-    s.type="module";
-    s.src="/js/facetoface_page.js?v=FINAL_NOLOOP_FULL";
-    document.body.appendChild(s);
-  }
-})();
-</script>
+  <!-- ✅ Boot-guard kaldırıldı. Direkt JS yükleniyor. -->
+  <script type="module" src="/js/facetoface_page.js?v=FINAL_NOLOOP_FULL"></script>
 </body>
 </html>
