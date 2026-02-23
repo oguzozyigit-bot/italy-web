@@ -110,19 +110,18 @@ function labelChip(code){
 let topLang = "en";
 let botLang = "tr";
 
-let isLoggedIn = false;      // ✅ login gate artık UI’yi kesmez
+let isLoggedIn = false;
 let sessionGranted = false;
 
 /* ===============================
-   HALF-DUPLEX (SIRA) ENGINE
+   ENGINE (SIRA YOK — sadece çakışma önleme)
 ================================ */
 let phase = "idle";          // idle | recording | translating | speaking
 let active = null;           // "top" | "bot" | null
-let nextTurn = null;         // null => anyone; otherwise "top" or "bot" (forced alternation)
 
 function canStart(which){
+  // SIRA YOK: sadece işlem bitmeden başlamayı engelle
   if(phase !== "idle") return false;
-  if(nextTurn && nextTurn !== which) return false;
   return true;
 }
 
@@ -130,11 +129,6 @@ function otherSide(which){ return which === "top" ? "bot" : "top"; }
 
 function setPhase(p){
   phase = p;
-  updateMicLocks();
-}
-
-function setNextTurn(which){
-  nextTurn = which; // "top" or "bot" or null
   updateMicLocks();
 }
 
@@ -150,13 +144,13 @@ function updateMicLocks(){
   let lockBot = false;
 
   if(phase === "recording"){
-    if(active === "top"){ lockBot = true; }
-    if(active === "bot"){ lockTop = true; }
+    // biri kayıt alırken diğerini kilitle
+    if(active === "top") lockBot = true;
+    if(active === "bot") lockTop = true;
   } else if(phase === "translating" || phase === "speaking"){
-    lockTop = true; lockBot = true;
-  } else if(phase === "idle"){
-    if(nextTurn === "top") lockBot = true;
-    if(nextTurn === "bot") lockTop = true;
+    // çeviri/tts sırasında ikisini de kilitle
+    lockTop = true;
+    lockBot = true;
   }
 
   lockMic("top", lockTop);
@@ -229,11 +223,9 @@ async function checkLoginOnce(){
     isLoggedIn = false;
   }
 }
-
 function showLoginBannerIfNeeded(){
   if(isLoggedIn) return;
 }
-
 function ensureLoginByUserAction(){
   location.href = LOGIN_PATH;
 }
@@ -318,7 +310,6 @@ function stopAll(){
 function speakLocal(text, langCode){
   const t = String(text||"").trim();
   if(!t) return Promise.resolve();
-
   if(!("speechSynthesis" in window)) return Promise.resolve();
 
   return new Promise((resolve)=>{
@@ -413,17 +404,13 @@ function addBubble(side, kind, text){
 }
 
 /* ===============================
-   HALF-DUPLEX TURN (MAIN)
+   MAIN
 ================================ */
 async function start(which){
   closeAllPop();
 
   if(!canStart(which)){
-    if(phase !== "idle"){
-      toast("Sırayla: işlem bitmeden konuşulmaz.");
-      return;
-    }
-    toast("Sıra sende değil 🙂");
+    toast("İşlem bitmeden tekrar konuşulmaz.");
     return;
   }
 
@@ -478,17 +465,23 @@ async function start(which){
 
     const other = otherSide(which);
 
-    // ✅ COMMAND CHECK
+    // ✅ COMMAND CHECK (hangi tarafta söylediyse karşı tarafın dili değişir)
     const cmd = await parseCommand(p.finalText);
 
     if(cmd && cmd.is_command && cmd.target_lang){
-      botLang = cmd.target_lang;
-      if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
-      closeAllPop();
-      toast(`🎯 Hedef dil: ${langLabel(botLang)} (${cmd.provider_used || "auto"})`);
+      if(which === "top"){
+        botLang = cmd.target_lang;
+        if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
+        toast(`🎯 Karşı dil: ${langLabel(botLang)} (${cmd.provider_used || "auto"})`);
+      }else{
+        topLang = cmd.target_lang;
+        if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
+        toast(`🎯 Karşı dil: ${langLabel(topLang)} (${cmd.provider_used || "auto"})`);
+      }
 
+      closeAllPop();
       setPhase("idle");
-      setNextTurn(other);
+      updateMicLocks();
       return;
     }
 
@@ -498,7 +491,7 @@ async function start(which){
     if(!translated){
       addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
       setPhase("idle");
-      setNextTurn(other);
+      updateMicLocks();
       return;
     }
 
@@ -508,7 +501,7 @@ async function start(which){
     await speakLocal(translated, p.dst);
 
     setPhase("idle");
-    setNextTurn(other);
+    updateMicLocks();
   };
 
   if(which==="top") recTop=rec; else recBot=rec;
@@ -527,7 +520,6 @@ function bindUI(){
     stopAll();
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
-    nextTurn = null;
     updateMicLocks();
   });
 
