@@ -113,14 +113,70 @@ let isLoggedIn = false;      // ✅ login gate artık UI’yi kesmez
 let sessionGranted = false;
 
 /* ===============================
+   HALF-DUPLEX (SIRA) ENGINE
+================================ */
+let phase = "idle";          // idle | recording | translating | speaking
+let active = null;           // "top" | "bot" | null
+let nextTurn = null;         // null => anyone; otherwise "top" or "bot" (forced alternation)
+
+function canStart(which){
+  if(phase !== "idle") return false;
+  if(nextTurn && nextTurn !== which) return false;
+  return true;
+}
+
+function otherSide(which){ return which === "top" ? "bot" : "top"; }
+
+function setPhase(p){
+  phase = p;
+  updateMicLocks();
+}
+
+function setNextTurn(which){
+  nextTurn = which; // "top" or "bot" or null
+  updateMicLocks();
+}
+
+function lockMic(which, locked){
+  const el = (which === "top") ? $("topMic") : $("botMic");
+  if(!el) return;
+  el.style.pointerEvents = locked ? "none" : "auto";
+  el.style.opacity = locked ? "0.55" : "1";
+}
+
+function updateMicLocks(){
+  // Base: everything unlocked
+  let lockTop = false;
+  let lockBot = false;
+
+  if(phase === "recording"){
+    // while one recording: lock the other
+    if(active === "top"){ lockBot = true; }
+    if(active === "bot"){ lockTop = true; }
+  } else if(phase === "translating" || phase === "speaking"){
+    // hard lock both
+    lockTop = true; lockBot = true;
+  } else if(phase === "idle"){
+    // enforce turn if nextTurn set
+    if(nextTurn === "top") lockBot = true;
+    if(nextTurn === "bot") lockTop = true;
+  }
+
+  lockMic("top", lockTop);
+  lockMic("bot", lockBot);
+}
+
+function setMicUI(which,on){
+  const btn = (which==="top") ? $("topMic") : $("botMic");
+  btn?.classList.toggle("listening", !!on);
+}
+
+/* ===============================
    HELPERS
 ================================ */
 function toast(msg){
-  // Facetoface sayfasında toast yoksa alert fallback
-  try{
-    // istersen buraya kendi toast implementini koyarsın
-    console.log("[toast]", msg);
-  }catch{}
+  // Basit, sessiz: istersen burayı kendi toast’ına bağla
+  try{ console.log("[toast]", msg); }catch{}
 }
 
 function closeAllPop(){
@@ -180,13 +236,10 @@ async function checkLoginOnce(){
 
 function showLoginBannerIfNeeded(){
   if(isLoggedIn) return;
-
-  // basit uyarı: üstteki dil butonunun yanında görünür olsun diye alert yerine console/confirm
-  // istersen UI banner ekleriz; şimdilik tıklanınca login’e yolluyoruz
+  // şimdilik banner yok
 }
 
 function ensureLoginByUserAction(){
-  // döngü yok: sadece kullanıcı isteyince login’e gider
   location.href = LOGIN_PATH;
 }
 
@@ -249,21 +302,51 @@ function buildRecognizer(langCode){
   return rec;
 }
 
-let active=null, recTop=null, recBot=null, pending=null;
-
-function setMicUI(which,on){
-  const btn = (which==="top") ? $("topMic") : $("botMic");
-  btn?.classList.toggle("listening", !!on);
-}
+let recTop=null, recBot=null, pending=null;
 
 function stopAll(){
   try{ recTop?.stop?.(); }catch{}
   try{ recBot?.stop?.(); }catch{}
-  recTop=null; recBot=null; active=null;
-  setMicUI("top", false); setMicUI("bot", false);
+  recTop=null; recBot=null; active=null; pending=null;
+
+  setMicUI("top", false);
+  setMicUI("bot", false);
+
   try{ window.speechSynthesis?.cancel?.(); }catch{}
+  setPhase("idle");
+  updateMicLocks();
 }
 
+/* ===============================
+   TTS (LOCAL)
+================================ */
+function speakLocal(text, langCode){
+  const t = String(text||"").trim();
+  if(!t) return Promise.resolve();
+
+  if(!("speechSynthesis" in window)) return Promise.resolve();
+
+  return new Promise((resolve)=>{
+    try{
+      const u = new SpeechSynthesisUtterance(t);
+      u.lang = bcp(langCode);
+      u.rate = 1.0;
+      u.pitch = 1.0;
+
+      u.onend = ()=>resolve();
+      u.onerror = ()=>resolve();
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }catch{
+      resolve();
+    }
+  });
+}
+
+/* ===============================
+   TRANSLATE API
+================================ */
 async function translateViaApi(text, source, target){
   const t = String(text||"").trim();
   if(!t) return t;
@@ -287,6 +370,9 @@ async function translateViaApi(text, source, target){
   }
 }
 
+/* ===============================
+   UI BUBBLES
+================================ */
 function addBubble(side, kind, text){
   const wrap = (side==="top") ? $("topBody") : $("botBody");
   if(!wrap) return;
@@ -300,7 +386,21 @@ function addBubble(side, kind, text){
   try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
 }
 
+/* ===============================
+   HALF-DUPLEX TURN (MAIN)
+================================ */
 async function start(which){
+  closeAllPop();
+
+  if(!canStart(which)){
+    if(phase !== "idle"){
+      toast("Sırayla: işlem bitmeden konuşulmaz.");
+      return;
+    }
+    toast("Sıra sende değil 🙂");
+    return;
+  }
+
   const ok = await ensureFacetofaceSession();
   if(!ok) return;
 
@@ -310,48 +410,84 @@ async function start(which){
     return;
   }
 
-  if(active && active !== which) stopAll();
+  // stop any TTS before recording
+  try{ window.speechSynthesis?.cancel?.(); }catch{}
 
+  // Build recognizer
   const src = (which==="top") ? topLang : botLang;
   const dst = (which==="top") ? botLang : topLang;
 
   const rec = buildRecognizer(src);
   if(!rec){ alert("Mikrofon başlatılamadı."); return; }
 
+  // Set phase/locks
   active = which;
-  setMicUI(which,true);
+  setPhase("recording");
+  setMicUI(which, true);
 
   rec.onresult = (e)=>{
     const t = e.results?.[0]?.[0]?.transcript || "";
     const finalText = String(t||"").trim();
     if(!finalText) return;
 
+    // Show original on the speaking side
     addBubble(which, "them", finalText);
+
     pending = { which, finalText, src, dst };
     try{ rec.stop(); }catch{}
   };
 
-  rec.onerror = ()=>{ stopAll(); };
+  rec.onerror = ()=>{
+    stopAll();
+  };
 
   rec.onend = async ()=>{
-    if(active===which) active=null;
+    // stop recording UI
     setMicUI(which,false);
 
     const p = pending;
-    if(p && p.which===which){
-      pending=null;
-      const other = (which==="top") ? "bot" : "top";
-      const translated = await translateViaApi(p.finalText, p.src, p.dst);
-      if(!translated){
-        addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
-        return;
-      }
-      addBubble(other, "me", translated);
+    pending = null;
+    active = null;
+
+    if(!p || p.which !== which){
+      setPhase("idle");
+      updateMicLocks();
+      return;
     }
+
+    // Translation phase (lock both)
+    setPhase("translating");
+
+    const other = otherSide(which);
+
+    // Translate
+    const translated = await translateViaApi(p.finalText, p.src, p.dst);
+
+    if(!translated){
+      addBubble(other, "me", "⚠️ Çeviri şu an yapılamadı.");
+      setPhase("idle");
+      // sıra yine de diğer tarafa geçsin (konuşma “tur” sayılır)
+      setNextTurn(other);
+      return;
+    }
+
+    // Show translation on the other side
+    addBubble(other, "me", translated);
+
+    // Speak phase (lock both while speaking)
+    setPhase("speaking");
+    await speakLocal(translated, p.dst);
+
+    // Done → next turn is the opposite side (forced alternation)
+    setPhase("idle");
+    setNextTurn(other);
   };
 
   if(which==="top") recTop=rec; else recBot=rec;
-  try{ rec.start(); }catch{ stopAll(); }
+
+  try{ rec.start(); }catch{
+    stopAll();
+  }
 }
 
 /* ===============================
@@ -367,6 +503,9 @@ function bindUI(){
     stopAll();
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
+    // sıra sıfırlansın: isteyen başlasın
+    nextTurn = null;
+    updateMicLocks();
   });
 
   // Popovers
@@ -384,14 +523,14 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // MIC
+  // MIC (click to start)
   $("topMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation(); closeAllPop();
-    if(active==="top") stopAll(); else start("top");
+    e.preventDefault(); e.stopPropagation();
+    start("top");
   });
   $("botMic")?.addEventListener("click",(e)=>{
-    e.preventDefault(); e.stopPropagation(); closeAllPop();
-    if(active==="bot") stopAll(); else start("bot");
+    e.preventDefault(); e.stopPropagation();
+    start("bot");
   });
 }
 
@@ -404,4 +543,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   // ✅ Login kontrolü sadece mic için (arkada)
   await checkLoginOnce();
   showLoginBannerIfNeeded();
+
+  // başlangıçta herkes konuşabilir
+  updateMicLocks();
 });
