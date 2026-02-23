@@ -35,11 +35,7 @@ const BCP = {
   "bg":"bg-BG","el":"el-GR","uk":"uk-UA","ru":"ru-RU","ar":"ar-SA","he":"he-IL",
   "fa":"fa-IR","ur":"ur-PK","hi":"hi-IN","bn":"bn-BD","id":"id-ID","ms":"ms-MY",
   "vi":"vi-VN","th":"th-TH","zh":"zh-CN","ja":"ja-JP","ko":"ko-KR","ka":"ka-GE",
-  "az":"az-AZ","hy":"hy-AM","kk":"kk-KZ","ky":"ky-KG","uz":"uz-UZ","tk":"tk-TM","tg":"tg-TJ",
-  "sr":"sr-RS","hr":"hr-HR","bs":"bs-BA","sl":"sl-SI","mk":"mk-MK","sq":"sq-AL",
-  "et":"et-EE","lv":"lv-LV","lt":"lt-LT","af":"af-ZA","sw":"sw-KE","am":"am-ET",
-  "ca":"ca-ES","eu":"eu-ES","gl":"gl-ES","is":"is-IS","ga":"ga-IE","cy":"cy-GB",
-  "fil":"fil-PH","mn":"mn-MN","ne":"ne-NP","si":"si-LK","ta":"ta-IN","te":"te-IN","mr":"mr-IN","gu":"gu-IN"
+  "az":"az-AZ"
 };
 
 let LANGS = [
@@ -91,10 +87,11 @@ function labelChip(code){
 /* STATE */
 let topLang = "en";
 let botLang = "tr";
+
 let isLoggedIn = false;
 let sessionGranted = false;
 
-let phase = "idle"; // idle | recording | translating | speaking
+let phase = "idle";  // idle | recording | translating | speaking
 let active = null;
 let lastMicSide = "bot";
 
@@ -113,7 +110,12 @@ function setFrameState(state, side){
   fr.classList.toggle("speaking", state === "speaking");
   if(side) setCenterDirection(side);
 }
-function setPhase(p){ phase = p; updateMicLocks(); }
+function setPhase(p){
+  phase = p;
+  updateMicLocks();
+}
+
+function otherSide(which){ return which === "top" ? "bot" : "top"; }
 
 function lockMic(which, locked){
   const el = (which === "top") ? $("topMic") : $("botMic");
@@ -171,7 +173,7 @@ function toast(msg){
 }
 function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
-/* POPUP + SEARCH */
+/* POPUP */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
@@ -202,10 +204,8 @@ function renderPop(side, filterText=""){
       e.preventDefault(); e.stopPropagation();
       const code = item.getAttribute("data-code") || "en";
       if(side==="top") topLang = code; else botLang = code;
-
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
-
       closeAllPop();
     });
   });
@@ -231,7 +231,6 @@ function ensureSearchBox(side){
   inp.style.fontWeight="900";
   inp.style.fontFamily="Outfit,system-ui,sans-serif";
   pop.insertBefore(inp, list);
-
   inp.addEventListener("input",()=>renderPop(side, inp.value));
   renderPop(side,"");
 }
@@ -246,32 +245,25 @@ function togglePopover(side){
   }
 }
 
-/* AUTH/TOKENS */
+/* AUTH / TOKENS */
 async function checkLoginOnce(){
   try{
     const { data:{ session } } = await supabase.auth.getSession();
     isLoggedIn = !!session?.user;
   }catch{ isLoggedIn=false; }
 }
-function unwrapRow(data){
-  if(Array.isArray(data)) return data[0] || null;
-  if(data && typeof data === "object") return data;
-  return null;
-}
 async function ensureFacetofaceSession(){
   if(sessionGranted) return true;
-
   await checkLoginOnce();
   if(!isLoggedIn){
     alert("Bu özellik için giriş gerekli.");
     location.href = LOGIN_PATH;
     return false;
   }
-
   try{
     const { data, error } = await supabase.rpc("start_facetoface_session");
     if(error){
-      alert("FaceToFace oturumu başlatılamadı.");
+      alert("Oturum başlatılamadı.");
       return false;
     }
     const row = unwrapRow(data) || {};
@@ -279,12 +271,17 @@ async function ensureFacetofaceSession(){
     sessionGranted = true;
     return true;
   }catch{
-    alert("FaceToFace oturumu başlatılamadı.");
+    alert("Oturum başlatılamadı.");
     return false;
   }
 }
+function unwrapRow(data){
+  if(Array.isArray(data)) return data[0] || null;
+  if(data && typeof data === "object") return data;
+  return null;
+}
 
-/* AUDIO (no overlap) */
+/* AUDIO */
 let audioObj=null, lastAudioAt=0;
 function stopAudio(){
   try{
@@ -333,7 +330,7 @@ async function speakLocal(text, langCode){
   await playAudioBlob(new Blob([bytes], {type:"audio/mpeg"}));
 }
 
-/* COMMAND PARSE */
+/* COMMAND PARSE (sesli komutla dil değiştir) */
 async function parseCommand(text){
   const t = String(text||"").trim();
   if(!t) return null;
@@ -346,7 +343,7 @@ async function parseCommand(text){
   return await r.json().catch(()=>null);
 }
 
-/* TRANSLATE AI */
+/* TRANSLATE */
 async function translateViaApi(text, source, target){
   const t = String(text||"").trim();
   if(!t) return t;
@@ -415,16 +412,19 @@ function addBubble(side, kind, text, opts={}){
 }
 
 /* ===============================
-   CLICK TO START / CLICK TO STOP (OLD MODE)
+   CLICK START / CLICK STOP (FIXED)
+   - İlk tık: start
+   - İkinci tık: stop + çeviri (artık phase kontrolü yok)
 ================================ */
 let rec = null;
-let recBufferFinal = "";
-let recBufferInterim = "";
 let recWhich = null;
+let bufFinal = "";
+let bufInterim = "";
 
 function buildRec(which){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR) return null;
+
   const src = (which==="top") ? topLang : botLang;
 
   const r = new SR();
@@ -435,31 +435,35 @@ function buildRec(which){
   return r;
 }
 
-function startRec(which){
+async function startRec(which){
+  const ok = await ensureFacetofaceSession();
+  if(!ok) return;
+
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){
-    toast("Bu cihazda STT yok. (WebView)");
-    toast("Metinle çeviri için: metni yazıp gönder (sonraki adım).");
+    toast("STT yok (WebView).");
     return;
   }
 
+  // if already recording, ignore
+  if(rec) return;
+
   recWhich = which;
-  recBufferFinal = "";
-  recBufferInterim = "";
+  bufFinal = "";
+  bufInterim = "";
 
   active = which;
   lastMicSide = which;
+
   setPhase("recording");
   setMicUI(which, true);
   setFrameState("listening", which);
 
   rec = buildRec(which);
   if(!rec){
-    stopRec();
+    await stopRec(true);
     return;
   }
-
-  const src = (which==="top") ? topLang : botLang;
 
   rec.onresult = (e)=>{
     let interimNow = "";
@@ -467,42 +471,54 @@ function startRec(which){
       const rr = e.results[i];
       const txt = rr?.[0]?.transcript || "";
       if(!txt) continue;
+
       if(rr.isFinal){
-        recBufferFinal = (recBufferFinal + " " + txt.trim()).trim();
+        bufFinal = (bufFinal + " " + txt.trim()).trim();
       }else{
         interimNow = (interimNow + " " + txt.trim()).trim();
       }
     }
-    if(interimNow) recBufferInterim = interimNow;
+    if(interimNow) bufInterim = interimNow;
   };
 
-  rec.onerror = ()=> stopRec();
+  rec.onerror = ()=> stopRec(true);
+
+  // Eğer Web Speech kendi kendine kapanırsa da stopRec ile çeviri dene
   rec.onend = ()=> {
-    // Chrome bazen kendi kapatır; kayıt modunda kalmak istemiyoruz, kullanıcı tekrar basar.
+    if(rec){
+      stopRec(false); // kendi kapattı -> çeviriyi dene
+    }
   };
 
-  try{ rec.start(); }catch{ stopRec(); }
+  try{ rec.start(); }
+  catch{ await stopRec(true); }
 }
 
-async function stopRec(){
+async function stopRec(forceNoTranslate){
   if(!rec) return;
 
   const which = recWhich;
-
   try{ rec.stop(); }catch{}
   rec = null;
+  recWhich = null;
 
   setMicUI(which, false);
   setFrameState("idle", lastMicSide);
 
-  const text = (recBufferFinal + " " + recBufferInterim).trim();
-  recBufferFinal = ""; recBufferInterim = ""; recWhich = null;
+  const text = (bufFinal + " " + bufInterim).trim();
+  bufFinal = ""; bufInterim = "";
 
-  setPhase("idle");
-  updateMicLocks();
+  // force stop: translation iptal
+  if(forceNoTranslate){
+    setPhase("idle");
+    updateMicLocks();
+    return;
+  }
 
   if(!text){
     toast("Metin yok (STT üretmedi).");
+    setPhase("idle");
+    updateMicLocks();
     return;
   }
 
@@ -517,11 +533,14 @@ async function stopRec(){
       $("topLangTxt").textContent = labelChip(topLang);
     }
     toast("🎯 Dil değişti");
+    setPhase("idle");
+    updateMicLocks();
     return;
   }
 
   // translate flow
   setPhase("translating");
+
   const other = otherSide(which);
   const src = (which==="top") ? topLang : botLang;
   const dst = (which==="top") ? botLang : topLang;
@@ -549,9 +568,7 @@ async function stopRec(){
   updateMicLocks();
 }
 
-/* ===============================
-   BINDINGS
-================================ */
+/* BINDINGS */
 function bindUI(){
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
@@ -580,17 +597,17 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // click toggle
-  $("topMic")?.addEventListener("click",(e)=>{
+  // ✅ FIX: recording iken ikinci tık stopRec yapacak (phase kontrolü kaldırıldı)
+  $("topMic")?.addEventListener("click", async (e)=>{
     e.preventDefault(); e.stopPropagation();
-    if(phase !== "idle") return;
-    if(rec) stopRec(); else startRec("top");
+    if(rec) await stopRec(false);
+    else await startRec("top");
   });
 
-  $("botMic")?.addEventListener("click",(e)=>{
+  $("botMic")?.addEventListener("click", async (e)=>{
     e.preventDefault(); e.stopPropagation();
-    if(phase !== "idle") return;
-    if(rec) stopRec(); else startRec("bot");
+    if(rec) await stopRec(false);
+    else await startRec("bot");
   });
 }
 
