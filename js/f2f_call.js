@@ -1,238 +1,162 @@
-// FILE: /js/f2f_call.js
-const API_BASE = "https://italky-api.onrender.com";
+from __future__ import annotations
 
-const $ = (id)=>document.getElementById(id);
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+import json
+import time
+from typing import Dict, Optional, Any
 
-const params = new URLSearchParams(location.search);
-const room = (params.get("room")||"").trim().toUpperCase();
-const role = (params.get("role")||"").trim().toLowerCase(); // host|guest
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-$("roomPill").textContent = "ROOM: " + (room || "—");
-$("rolePill").textContent = role === "host" ? "HOST (Ödeyen)" : "GUEST (Ücretsiz)";
+router = APIRouter(tags=["f2f-ws"])
 
-function toast(msg){
-  const el = $("toast");
-  el.textContent = msg;
-  el.style.opacity = "1";
-  setTimeout(()=> el.style.opacity = "0", 1200);
-}
+# In-memory rooms (MVP)
+# room_id -> {
+#   "host": WebSocket|None,
+#   "guest": WebSocket|None,
+#   "lang": {"host_lang":"tr","guest_lang":"en"},
+#   "host_credits": int,
+#   "updated_at": float
+# }
+ROOMS: Dict[str, Dict[str, Any]] = {}
 
-function setFrame(listening=false, speaking=false, dir="bot"){
-  const fr = document.getElementById("frameRoot");
-  fr.classList.toggle("listening", listening);
-  fr.classList.toggle("speaking", speaking);
-  fr.classList.toggle("to-top", dir==="top");
-  fr.classList.toggle("to-bot", dir!=="top");
-}
+DEFAULT_HOST_LANG = "tr"
+DEFAULT_GUEST_LANG = "en"
+DEFAULT_HOST_CREDITS = 999999  # MVP: sınırsız gibi davranır (sonra Supabase jetona bağlarız)
 
-let ws = null;
+def now() -> float:
+    return time.time()
 
-function wsUrl(){
-  return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
-}
-
-function addBubble(kind, text, opts={}){
-  const chat = $("chat");
-  const b = document.createElement("div");
-  b.className = "bubble " + kind + (opts.latest ? " is-latest" : "");
-
-  if(kind === "me"){
-    // speaker icon
-    const icon = document.createElement("div");
-    icon.className = "spk-icon";
-    icon.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89 0 5.23 2.34 5.23 5.23S16.89 15.75 14 15.75v2.06c4.02 0 7.29-3.27 7.29-7.29S18.02 3.23 14 3.23z"/></svg>`;
-    icon.onclick = ()=> speakViaBackendTTS(text, opts.lang || "en");
-    b.appendChild(icon);
-  }
-
-  const t = document.createElement("div");
-  t.className = "txt";
-  t.textContent = text;
-  b.appendChild(t);
-
-  // latest handling
-  if(kind === "me"){
-    chat.querySelectorAll(".bubble.me.is-latest").forEach(x=>x.classList.remove("is-latest"));
-  }
-
-  chat.appendChild(b);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-async function speakViaBackendTTS(text, lang){
-  // /api/tts -> {ok, audio_base64, provider_used}
-  try{
-    const res = await fetch(`${API_BASE}/api/tts`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        text,
-        lang,
-        speaking_rate: 1,
-        pitch: 0
-      })
-    });
-    if(!res.ok){
-      toast("🔇 TTS HTTP " + res.status);
-      return;
-    }
-    const data = await res.json().catch(()=>null);
-    if(!data?.ok || !data.audio_base64){
-      toast("🔇 TTS invalid");
-      return;
+def room_init(room_id: str) -> Dict[str, Any]:
+    return {
+        "host": None,
+        "guest": None,
+        "lang": {"host_lang": DEFAULT_HOST_LANG, "guest_lang": DEFAULT_GUEST_LANG},
+        "host_credits": DEFAULT_HOST_CREDITS,
+        "updated_at": now(),
     }
 
-    const b64 = data.audio_base64;
-    const binary = atob(b64);
-    const bytes = new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
-    const blob = new Blob([bytes], { type:"audio/mpeg" });
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.onended = ()=>URL.revokeObjectURL(url);
-    audio.onerror = ()=>URL.revokeObjectURL(url);
-    await audio.play();
-  }catch{
-    toast("🔇 TTS failed");
-  }
-}
+async def ws_send(ws: Optional[WebSocket], msg: Dict[str, Any]) -> None:
+    if ws is None:
+        return
+    try:
+        await ws.send_text(json.dumps(msg))
+    except Exception:
+        return
 
-async function translateAI(text, from, to){
-  const res = await fetch(`${API_BASE}/api/translate_ai`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      text,
-      from_lang: from,
-      to_lang: to,
-      style: "chat",
-      provider: "auto"
-    })
-  });
-  if(!res.ok) return null;
-  const data = await res.json().catch(()=>null);
-  return data?.translated ? String(data.translated) : null;
-}
+async def broadcast_room(room_id: str, msg: Dict[str, Any]) -> None:
+    room = ROOMS.get(room_id)
+    if not room:
+        return
+    await ws_send(room.get("host"), msg)
+    await ws_send(room.get("guest"), msg)
 
-async function parseCommand(text){
-  const res = await fetch(`${API_BASE}/api/command_parse`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text, ui_lang:"tr" })
-  });
-  if(!res.ok) return null;
-  return await res.json().catch(()=>null);
-}
+def deduct_host(room_id: str, cost: int = 1) -> int:
+    room = ROOMS.get(room_id)
+    if not room:
+        return 0
+    credits = int(room.get("host_credits") or 0)
+    credits = max(0, credits - int(cost))
+    room["host_credits"] = credits
+    room["updated_at"] = now()
+    return credits
 
-// MVP dil kuralı: Host TR, Guest EN (sonraki adım popover)
-function myInputBCP(){ return role==="host" ? "tr-TR" : "en-US"; }
-function mySrc(){ return role==="host" ? "tr" : "en"; }
-function peerLang(){ return role==="host" ? "en" : "tr"; }
+@router.websocket("/f2f/ws/{room_id}")
+async def f2f_ws(ws: WebSocket, room_id: str):
+    await ws.accept()
 
-function connect(){
-  if(!room || !role) {
-    toast("Room/role yok.");
-    return;
-  }
-  ws = new WebSocket(wsUrl());
+    role: Optional[str] = None
+    room = ROOMS.setdefault(room_id, room_init(room_id))
 
-  ws.onopen = ()=>{
-    ws.send(JSON.stringify({ type:"hello", role }));
-    toast("Bağlandı.");
-  };
+    try:
+        while True:
+            raw = await ws.receive_text()
+            msg = json.loads(raw or "{}")
+            mtype = msg.get("type")
 
-  ws.onmessage = async (ev)=>{
-    const msg = JSON.parse(ev.data);
-    if(msg.type === "info"){
-      toast(msg.message || "info");
-      return;
-    }
-    if(msg.type === "peer_joined"){
-      toast("Guest bağlandı ✅");
-      $("hint").textContent = "Hazır. Konuşabilirsin.";
-      return;
-    }
-    if(msg.type === "translated"){
-      // gelen çeviri (bu cihazda me bubble)
-      const text = String(msg.text||"").trim();
-      const lang = String(msg.lang||"en").trim();
-      if(text){
-        addBubble("me", text, { latest:true, lang });
-        setFrame(false, true, "bot");
-        await speakViaBackendTTS(text, lang);
-        setFrame(false, false, role==="host" ? "top" : "bot");
-      }
-    }
-  };
+            # ---- HELLO ----
+            if mtype == "hello":
+                role = msg.get("role")
+                if role not in ("host", "guest"):
+                    await ws_send(ws, {"type":"info","message":"invalid role"})
+                    continue
 
-  ws.onclose = ()=> toast("Bağlantı kapandı.");
-}
+                # only 1 host, 1 guest
+                if room.get(role) is not None:
+                    await ws_send(ws, {"type":"info","message":f"{role} already connected"})
+                    continue
 
-$("btnLeave").onclick = ()=>{
-  try{ ws?.close?.(); }catch{}
-  location.href = "/pages/f2f_connect.html";
-};
+                room[role] = ws
+                room["updated_at"] = now()
 
-$("btnTalk").onclick = async ()=>{
-  if(!SpeechRecognition){
-    toast("STT yok (Chrome gerekiyor).");
-    return;
-  }
-  if(!ws || ws.readyState !== 1){
-    toast("Bağlantı yok.");
-    return;
-  }
+                await ws_send(ws, {"type":"info","message":f"connected as {role}"})
 
-  // listening visual
-  $("btnTalk").classList.add("listening");
-  setFrame(true, false, role==="host" ? "top" : "bot");
+                # send current language state + credits to both
+                await broadcast_room(room_id, {
+                    "type":"lang_state",
+                    "host_lang": room["lang"]["host_lang"],
+                    "guest_lang": room["lang"]["guest_lang"],
+                })
+                await ws_send(room.get("host"), {
+                    "type":"host_credits",
+                    "credits": room.get("host_credits", 0)
+                })
 
-  const rec = new SpeechRecognition();
-  rec.lang = myInputBCP();
-  rec.interimResults = false;
-  rec.continuous = false;
-  rec.maxAlternatives = 1;
+                # notify host when guest joins
+                if role == "guest" and room.get("host") is not None:
+                    await ws_send(room.get("host"), {"type":"peer_joined"})
+                continue
 
-  rec.onresult = async (e)=>{
-    const spoken = String(e.results?.[0]?.[0]?.transcript || "").trim();
-    if(!spoken) return;
+            # ---- HOST SET LANG (sync) ----
+            if mtype == "set_lang":
+                # Only host can set languages in MVP
+                if role != "host":
+                    await ws_send(ws, {"type":"info","message":"only host can set languages"})
+                    continue
 
-    // komut mu? (komut yazdırma yok)
-    const cmd = await parseCommand(spoken);
-    if(cmd?.is_command && cmd?.target_lang){
-      toast("🎯 Target changed");
-      // MVP: sadece bilgilendiriyoruz; sonraki adımda dil set’i sync edeceğiz
-      return;
-    }
+                host_lang = (msg.get("host_lang") or "").strip().lower()
+                guest_lang = (msg.get("guest_lang") or "").strip().lower()
+                if not host_lang or not guest_lang:
+                    await ws_send(ws, {"type":"info","message":"missing host_lang/guest_lang"})
+                    continue
 
-    // konuşanı yazdır
-    addBubble("them", spoken);
+                room["lang"]["host_lang"] = host_lang
+                room["lang"]["guest_lang"] = guest_lang
+                room["updated_at"] = now()
 
-    toast("Çeviriliyor…");
-    const translated = await translateAI(spoken, mySrc(), peerLang());
-    if(!translated){
-      toast("Çeviri hatası.");
-      return;
-    }
+                await broadcast_room(room_id, {
+                    "type":"lang_state",
+                    "host_lang": host_lang,
+                    "guest_lang": guest_lang
+                })
+                continue
 
-    // karşı tarafa gönder
-    ws.send(JSON.stringify({
-      type:"translated",
-      text: translated,
-      lang: peerLang()
-    }));
+            # ---- TRANSLATED MESSAGE ----
+            if mtype == "translated":
+                # Host pays for every translated turn (both directions)
+                # MVP: in-memory credits; later wire Supabase RPC here
+                remaining = deduct_host(room_id, cost=1)
+                await ws_send(room.get("host"), {"type":"host_credits","credits": remaining})
 
-    toast("Gönderildi ✅");
-  };
+                # Pass-through to peer
+                target = "guest" if role == "host" else "host"
+                peer = room.get(target)
+                if peer is None:
+                    await ws_send(ws, {"type":"info","message":"peer not connected yet"})
+                    continue
 
-  rec.onerror = ()=> toast("STT hata.");
-  rec.onend = ()=>{
-    $("btnTalk").classList.remove("listening");
-    setFrame(false, false, role==="host" ? "top" : "bot");
-  };
+                await ws_send(peer, msg)
+                continue
 
-  try{ rec.start(); }catch{ toast("STT start edilemedi."); }
-};
+            await ws_send(ws, {"type":"info","message":"unknown message type"})
 
-connect();
+    except WebSocketDisconnect:
+        pass
+    except Exception:
+        pass
+    finally:
+        # cleanup
+        if role in ("host","guest") and room.get(role) is ws:
+            room[role] = None
+
+        # remove empty room
+        if room.get("host") is None and room.get("guest") is None:
+            ROOMS.pop(room_id, None)
