@@ -1,247 +1,297 @@
+<!-- FILE: /pages/home.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Final Pro Hub</title>
+  <title>italkyAI • Academy Home</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-      --footer-offset: 110px;
-      --bg-void: #02000f;
+    :root{
+      --ai-gradient: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+      --bg:#02000f;
+      --panel: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.12);
+      --muted: rgba(255,255,255,0.58);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    html,body{ margin:0; width:100%; height:100%; background:var(--bg); color:#fff; font-family:'Outfit',sans-serif; overflow:hidden; }
+    .app{
+      width:100%; max-width:430px; height:100dvh; margin:0 auto;
+      display:flex; flex-direction:column; position:relative;
+      background: rgba(10,10,30,0.40);
+      backdrop-filter: blur(26px);
+      border-left: 1px solid rgba(255,255,255,0.08);
+      border-right: 1px solid rgba(255,255,255,0.08);
     }
 
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      background-color: var(--bg-void); font-family: 'Outfit', sans-serif;
-      overflow: hidden; color: #fff;
+    /* HEADER */
+    .header{
+      padding: calc(42px + var(--safe-top)) 18px 14px;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.22);
+    }
+    .brand h1{
+      font-family:'Space Grotesk',sans-serif;
+      font-size:26px; margin:0; font-weight:700; line-height:1;
+      display:flex; gap:2px;
+    }
+    .brand .ai{
+      background: var(--ai-gradient);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .brand .slogan{
+      margin-top:6px;
+      font-size:8px; font-weight:900; letter-spacing:3px;
+      text-transform:uppercase;
+      color: rgba(255,255,255,0.45);
     }
 
-    .app-viewport {
-      width: 100%; max-width: 430px; height: 100dvh; margin: 0 auto;
-      display: flex; flex-direction: column; position: relative;
-      background: rgba(10, 10, 30, 0.4); backdrop-filter: blur(30px);
-      border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1);
+    .user{
+      display:flex; align-items:center; gap:10px;
+      cursor:pointer; user-select:none;
+    }
+    .uMeta{ display:flex; flex-direction:column; align-items:flex-end; }
+    .uName{ font-weight:900; font-size:13px; }
+    .uJeton{ font-size:10px; font-weight:900; color:#a5b4fc; }
+    .avatar{
+      width:36px; height:36px; border-radius:50%;
+      border:1.5px solid #6366f1; overflow:hidden;
+      background: rgba(255,255,255,0.08);
+    }
+    .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* CONTENT */
+    .content{
+      flex:1;
+      padding: 12px 18px calc(18px + var(--safe-bottom));
+      overflow-y:auto;
+      scrollbar-width:none;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .content::-webkit-scrollbar{ display:none; }
+
+    .tile{
+      background: var(--panel);
+      border:1px solid var(--border);
+      border-radius: 24px;
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .08s ease, opacity .08s ease;
+    }
+    .tile:active{ transform: scale(.988); opacity:.98; }
+    .left{ display:flex; align-items:center; gap:14px; min-width:0; }
+    .icon{
+      width:46px; height:46px; border-radius:16px;
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+      position:relative;
+      overflow:hidden;
+    }
+    .title{ font-weight:900; font-size:15px; margin:0; line-height:1.1; }
+    .desc{ margin:4px 0 0; font-size:11px; font-weight:800; color: var(--muted); line-height:1.25; }
+    .arrow{
+      width:34px; height:34px; border-radius:12px;
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.10);
+      display:flex; align-items:center; justify-content:center;
+      flex:0 0 auto;
+      opacity:.9;
+    }
+    .arrow svg{ width:16px; height:16px; fill:none; stroke:#fff; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; opacity:.9; }
+
+    /* Special: Walkie icon motion */
+    .walkie-badge{
+      width:18px; height:18px; border-radius:6px;
+      background: var(--ai-gradient);
+      box-shadow: 0 0 14px rgba(99,102,241,0.25);
+      animation: pulse 1.35s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); opacity:.85; }
+      50%{ transform: scale(1.18); opacity:1; }
     }
 
-    /* PREMIUM HEADER */
-    .premium-header {
-      padding: calc(45px + env(safe-area-inset-top)) 18px 15px;
-      display: flex; align-items: flex-start; justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.2);
+    /* Academy text-logo icon */
+    .academy-logo{
+      font-family:'Space Grotesk',sans-serif;
+      font-weight:700;
+      letter-spacing:.2px;
+      font-size:13px;
     }
-    .brand-group h1 {
-      font-family: 'Space Grotesk', sans-serif; font-size: 26px; margin: 0;
-      font-weight: 700; line-height: 1; display: flex; gap: 2px;
-    }
-    .brand-group h1 .ai {
-      background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .brand-slogan {
-      font-size: 8px; font-weight: 900; letter-spacing: 3px; color: rgba(255,255,255,0.5);
-      text-transform: uppercase; margin-top: 5px;
+    .academy-logo .ai{
+      background: var(--ai-gradient);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
 
-    .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select:none; }
-    .uMeta { display: flex; flex-direction: column; align-items: flex-end; }
-    .uName { font-weight: 900; font-size: 13px; }
-    .uJeton { font-size: 10px; font-weight: 900; color: #a5b4fc; }
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #6366f1;
-      overflow: hidden; background: rgba(255,255,255,0.1);
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; display:block; }
-
-    /* PAGE CONTENT */
-    #pageContent {
-      height: calc(100vh - 180px);
-      display: flex; flex-direction: column; justify-content: space-between;
-      padding: 10px 18px var(--footer-offset); box-sizing: border-box;
-      gap: 8px; overflow-y: auto; scrollbar-width: none;
-    }
-    #pageContent::-webkit-scrollbar { display: none; }
-
-    .portal-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 5px 0; user-select:none; }
-    .neural-orb { width: 115px; height: 115px; position: relative; display: flex; align-items: center; justify-content: center; }
-    .ai-ring {
-      position: absolute; inset: -4px; border-radius: 50%; padding: 2.5px; background: var(--ai-gradient);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude; animation: rotateOrbit 15s linear infinite;
-    }
-    .orbit-energy { position: absolute; inset: -12px; border-radius: 50%; animation: rotateOrbit 8s linear infinite; }
-    .e-ball { position: absolute; width: 11px; height: 11px; border-radius: 50%; filter: blur(1px); }
-    .ball-l { top: -5px; left: 50%; transform: translateX(-50%); background: #1e3a8a; box-shadow: 0 0 15px #1e3a8a; }
-    .ball-b { bottom: -5px; left: 50%; transform: translateX(-50%); background: #801336; box-shadow: 0 0 15px #801336; }
-    .ai-core {
-      width: 85px; height: 85px; background: #000; border-radius: 50%;
-      background-image: linear-gradient(#000, #000), var(--ai-gradient);
-      background-origin: border-box; background-clip: content-box, border-box;
-      border: 2px solid transparent; display: flex; align-items: center; justify-content: center;
-      animation: aiBreathe 4s infinite ease-in-out; z-index: 10;
-    }
-    .portal-info { text-align: center; margin-top: 10px; }
-    .portal-info h1 { margin: 0; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -1px; }
-    .portal-info p { margin: 2px 0 0; font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); }
-
-    .academy-pro {
-      background: rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 14px 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; gap: 16px;
-      cursor: pointer; user-select:none;
-    }
-    .spectrum-logo { gap: 3.5px; display: flex; align-items: center; height: 32px; }
-    .bar { width: 3.5px; border-radius: 10px; animation: barMove 1.2s infinite ease-in-out; }
-    .bar-1 { height: 10px; background: #ff0000; animation-delay: 0.1s; }
-    .bar-2 { height: 18px; background: #ff7f00; animation-delay: 0.3s; }
-    .bar-3 { height: 26px; background: #ffff00; animation-delay: 0.5s; }
-    .bar-4 { height: 32px; background: #00ff00; animation-delay: 0.7s; }
-    .bar-5 { height: 26px; background: #0000ff; animation-delay: 0.5s; }
-    .bar-6 { height: 18px; background: #4b0082; animation-delay: 0.3s; }
-    .bar-7 { height: 10px; background: #8b00ff; animation-delay: 0.1s; }
-    .academy-text h2 { margin: 0; font-size: 18px; font-weight: 900; color: #fff; }
-    .academy-text h2 span { background: var(--ai-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .academy-text p { margin: 0; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); }
-
-    .pro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .pro-tile {
-      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 22px; padding: 14px; display: flex; align-items: center; gap: 12px;
-      cursor: pointer; user-select:none;
-    }
-    .tile-icon {
-      width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.06);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px;
-    }
-    .ico-txt::before { content: "Aa"; color: #34d399; font-weight: 900; }
-    .ico-cam::before { content: "◎"; color: #60a5fa; font-weight: 900; }
-    .ico-doc::before { content: "≡"; color: #f472b6; font-weight: 900; }
-    .ico-fun::before { content: "🎯"; }
-    .ico-chat::before { content: "💬"; }
-    .ico-teacher::before { content: "🎓"; }
-    .pro-tile label { font-size: 12px; font-weight: 800; color: #fff; line-height: 1.2; cursor: pointer; }
-
-    .meeting-bar {
-      background: rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 16px 22px;
-      border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; gap: 16px;
-      cursor: pointer; user-select:none;
+    .note{
+      margin-top: 6px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.62);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.35;
     }
 
-    /* FOOTER */
-    .premium-footer {
-      position: absolute; bottom: 0; width: 100%; height: var(--footer-offset);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.3); backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .footer-nav { display: flex; gap: 20px; margin-bottom: 8px; flex-wrap:wrap; justify-content:center; }
-    .footer-nav a {
-      font-size: 10px; font-weight: 900; color: rgba(255,255,255,0.4);
-      text-decoration: none; text-transform: uppercase;
-    }
-    .signature {
-      font-size: 11px; font-weight: 900;
-      background: linear-gradient(to right, #fff, #6366f1, #fff);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      opacity: 0.7;
-      text-align:center;
-      padding: 0 10px;
-    }
-
-    @keyframes rotateOrbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes aiBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-    @keyframes barMove { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
-
-    /* küçük dokunuş: aktif basış */
-    .academy-pro:active, .portal-zone:active, .pro-tile:active, .meeting-bar:active { transform: scale(.985); opacity:.98; }
   </style>
 </head>
 
 <body>
-  <div class="app-viewport">
-    <header class="premium-header">
-      <div class="brand-group" id="brandHome" style="cursor:pointer;">
+  <div class="app">
+    <header class="header">
+      <div class="brand" id="brandHome">
         <h1><span>italky</span><span class="ai">AI</span></h1>
-        <div class="brand-slogan">BE FREE</div>
+        <div class="slogan">ITALKY ACADEMY</div>
       </div>
 
-      <div class="user-info" id="profileBtn" title="Profil">
+      <div class="user" id="profileBtn" title="Profil">
         <div class="uMeta">
           <div class="uName" id="userName">Kullanıcı</div>
           <div class="uJeton">Jeton: <span id="headerJeton">—</span></div>
         </div>
-        <div class="avatar">
-          <img src="" id="userPic" alt="">
-        </div>
+        <div class="avatar"><img src="" id="userPic" alt=""></div>
       </div>
     </header>
 
-    <div id="pageContent">
-      <div class="portal-zone" data-href="/facetoface.html">
-        <div class="neural-orb">
-          <div class="ai-ring"></div>
-          <div class="orbit-energy"><div class="e-ball ball-l"></div><div class="e-ball ball-b"></div></div>
-          <div class="ai-core">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+    <main class="content">
+
+      <!-- 1) FaceToFace (aynı kalıyor) -->
+      <div class="tile" data-href="/facetoface.html">
+        <div class="left">
+          <div class="icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.95">
+              <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
               <path d="M19 11v1a7 7 0 0 1-14 0v-2"/>
               <line x1="12" y1="19" x2="12" y2="23"/>
             </svg>
           </div>
+          <div style="min-width:0">
+            <div class="title">FaceToFace</div>
+            <div class="desc">Yüzyüze anlık çeviri (mevcut mod)</div>
+          </div>
         </div>
-        <div class="portal-info"><h1>FaceToFace</h1><p>Yüzyüze Anlık Çeviri</p></div>
-      </div>
-
-      <div class="academy-pro" data-href="/pages/teacher_select.html">
-        <div class="spectrum-logo">
-          <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
-          <div class="bar bar-4"></div><div class="bar bar-5"></div><div class="bar bar-6"></div><div class="bar bar-7"></div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
         </div>
-        <div class="academy-text"><h2>italky <span>Academy</span></h2><p>YAPAY ZEKA İLE DİL EĞİTİMİ</p></div>
       </div>
 
-      <div class="pro-grid">
-        <div class="pro-tile" data-href="/pages/text_translate.html"><div class="tile-icon ico-txt"></div><label>Metinden<br>Çeviri</label></div>
-        <div class="pro-tile" data-href="/pages/photo.html"><div class="tile-icon ico-cam"></div><label>Fotoğraftan<br>Çeviri</label></div>
-        <div class="pro-tile" data-href="/pages/document.html"><div class="tile-icon ico-doc"></div><label>Belgeden<br>Çeviri</label></div>
-        <div class="pro-tile" data-href="/pages/game.html"><div class="tile-icon ico-fun"></div><label>Eğlenerek<br>Öğren</label></div>
-        <div class="pro-tile" data-href="/pages/module_chat.html"><div class="tile-icon ico-chat"></div><label>Sohbet <span>AI</span></label></div>
-        <div class="pro-tile" data-href="/pages/module_speaking.html"><div class="tile-icon ico-teacher"></div><label>Konuşkan <span>AI</span></label></div>
+      <!-- 2) WalkieTalkie (hareketli ikon) -->
+      <div class="tile" data-href="/pages/f2f_connect.html">
+        <div class="left">
+          <div class="icon" aria-hidden="true">
+            <div class="walkie-badge"></div>
+          </div>
+          <div style="min-width:0">
+            <div class="title">WalkieTalkie</div>
+            <div class="desc">2 telefon • QR/kod ile bağlan • Host öder</div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
       </div>
 
-      <div class="meeting-bar" data-href="/pages/module_meeting.html">
-        <div class="tile-icon">📹</div>
-        <div class="academy-text"><h2 style="margin:0;font-size:18px;font-weight:900;">Online Toplantı</h2><p style="margin:0;font-size:10px;font-weight:800;color:rgba(255,255,255,0.4);">CANLI ÇEVİRİ ODALARI</p></div>
+      <!-- 3) italky Academy (sadece yazı-logo) -->
+      <div class="tile" data-href="/pages/teacher_select.html">
+        <div class="left">
+          <div class="icon" aria-hidden="true">
+            <div class="academy-logo">italky<span class="ai">AI</span></div>
+          </div>
+          <div style="min-width:0">
+            <div class="title">italky Academy</div>
+            <div class="desc">AI destekli eğitim akışı</div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
       </div>
-    </div>
 
-    <footer class="premium-footer">
-      <nav class="footer-nav">
-        <a href="/pages/about.html">Hakkımızda</a>
-        <a href="/pages/faq.html">SSS</a>
-        <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
-      </nav>
-      <div class="signature">italkyAI @ italkyAcademy By Ozyigit's • 2026</div>
-    </footer>
+      <!-- 4) Online Çevirir -->
+      <div class="tile" data-href="/pages/text_translate.html">
+        <div class="left">
+          <div class="icon" aria-hidden="true">
+            <span style="font-weight:900;opacity:.9">Aa</span>
+          </div>
+          <div style="min-width:0">
+            <div class="title">Online Çevirir</div>
+            <div class="desc">AI online çeviri (metin)</div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 5) italky Academy (ikinci blok) -->
+      <div class="tile" data-href="/pages/italky_academy.html">
+        <div class="left">
+          <div class="icon" aria-hidden="true">
+            <div class="academy-logo">italky<span class="ai">AI</span></div>
+          </div>
+          <div style="min-width:0">
+            <div class="title">italky Academy</div>
+            <div class="desc">Kurslar • seviye • plan</div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 6) Eğlenerek Öğren -->
+      <div class="tile" data-href="/pages/game.html">
+        <div class="left">
+          <div class="icon" aria-hidden="true">
+            <span style="font-weight:900;opacity:.95">🎯</span>
+          </div>
+          <div style="min-width:0">
+            <div class="title">Eğlenerek Öğren</div>
+            <div class="desc">Oyunlarla kelime ve pratik</div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="note">
+        Offline Çeviri (varsa) bu sayfada kaldırılmadı. Diğer modüller gizlendi ve linkleri yeni yapıya bağlandı.
+      </div>
+
+    </main>
   </div>
 
   <script>
-    // ✅ Tek yerden güvenli yönlendirme
     function go(url){
       if(!url) return;
       try{ window.location.assign(url); }catch{ window.location.href = url; }
     }
 
-    // ✅ Header click
     document.getElementById("brandHome")?.addEventListener("click", ()=>go("/pages/home.html"));
     document.getElementById("profileBtn")?.addEventListener("click", ()=>go("/pages/profile.html"));
 
-    // ✅ Kart click (telefon için sağlam)
     document.querySelectorAll("[data-href]").forEach(el=>{
       const url = el.getAttribute("data-href");
       const handler = (e)=>{ e.preventDefault(); e.stopPropagation(); go(url); };
@@ -249,13 +299,12 @@
       el.addEventListener("touchend", handler, { passive:false });
     });
 
-    // ✅ Kullanıcı bilgisi doldur (italky_user_v1 ana kaynak)
     function pickFirstName(full){
       const s = String(full||"").trim();
       if(!s) return "";
       const parts = s.split(/\s+/).filter(Boolean);
-      if(parts.length <= 2) return s; // Huri Hüma gibi
-      return parts.slice(0, -1).join(" "); // soyadı at
+      if(parts.length <= 2) return s;
+      return parts.slice(0, -1).join(" ");
     }
 
     function loadUser(){
@@ -268,12 +317,10 @@
 
           const full = u.full_name || u.fullname || u.name || u.display_name || u.email || "Kullanıcı";
           const showName = pickFirstName(full) || "Kullanıcı";
-
           document.getElementById("userName").textContent = showName;
 
           const tk = (u.tokens ?? u.token ?? u.jeton ?? null);
-          if(tk != null) document.getElementById("headerJeton").textContent = String(tk);
-          else document.getElementById("headerJeton").textContent = "—";
+          document.getElementById("headerJeton").textContent = (tk != null) ? String(tk) : "—";
 
           const pic = u.picture || u.avatar || u.avatar_url || u.photo || "";
           if(pic){
@@ -284,7 +331,6 @@
           return;
         }catch(_e){}
       }
-      // fallback
       document.getElementById("userName").textContent = "Kullanıcı";
       document.getElementById("headerJeton").textContent = "—";
     }
