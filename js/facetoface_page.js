@@ -355,15 +355,22 @@ async function translateViaApi(text, source, target){
   const dst = normalizeApiLang(target);
   if(src===dst) return t;
 
+  // ✅ AI çeviri endpoint
   try{
-    const r = await fetch(`${API_BASE}/api/translate`,{
+    const r = await fetch(`${API_BASE}/api/translate_ai`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ text:t, from_lang:src, to_lang:dst })
+      body: JSON.stringify({
+        text: t,
+        from_lang: src,
+        to_lang: dst,
+        // istersen sonra açarız:
+        style: "chat" // "fast" | "chat"
+      })
     });
     if(!r.ok) return null;
     const data = await r.json().catch(()=>({}));
-    const out = String(data?.translated||data?.translation||data?.text||"").trim();
+    const out = String(data?.translated || "").trim();
     return out || null;
   }catch{
     return null;
