@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>italkyAI | Be Free. Speak All.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030308;
+            --primary: #8b5cf6;
+            --secondary: #d946ef;
+            --accent: #3b82f6;
+            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at center, #1a1a3a 0%, #030308 100%);
+        }
+
+        /* --- HEADER --- */
+        header {
+            position: fixed; top: 0; width: 100%; height: 80px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 5%; z-index: 1000;
+            backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
+        }
+        .logo { font-size: 24px; font-weight: 800; }
+        .logo span { background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .jeton-pill { background: var(--primary); padding: 8px 20px; border-radius: 50px; font-weight: 800; font-size: 13px; box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+
+        /* --- MAIN HUB AREA --- */
+        .hub-section {
+            height: 100vh; display: flex; align-items: center; justify-content: center;
+            position: relative; padding: 0 5%;
+        }
+
+        /* Merkezdeki Telefon */
+        .phone-center {
+            position: relative; width: 280px; height: 580px;
+            border-radius: 40px; border: 4px solid var(--border);
+            background: #000; box-shadow: 0 0 100px rgba(139, 92, 246, 0.2);
+            z-index: 10; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .phone-screen {
+            flex: 1; padding: 20px; background: radial-gradient(circle at top, #1e1b4b, #000);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center;
+        }
+        .phone-screen h2 { font-size: 18px; margin-bottom: 10px; color: var(--primary); }
+        .phone-screen p { font-size: 12px; opacity: 0.6; }
+
+        /* Etraftaki Modüller (Yüzen Kartlar) */
+        .mod-card {
+            position: absolute; width: 220px; padding: 20px;
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: 24px; backdrop-filter: blur(10px);
+            transition: 0.4s ease; cursor: pointer; z-index: 5;
+        }
+        .mod-card:hover { 
+            transform: scale(1.1) translateY(-10px); 
+            border-color: var(--primary); 
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3); 
+        }
+        .mod-card h3 { font-size: 16px; margin-bottom: 8px; color: var(--primary); }
+        .mod-card p { font-size: 13px; color: #94a3b8; line-height: 1.4; }
+
+        /* Kart Konumları */
+        .top-left { top: 15%; left: 15%; }
+        .top-right { top: 15%; right: 15%; }
+        .bottom-left { bottom: 15%; left: 15%; }
+        .bottom-right { bottom: 15%; right: 15%; }
+        .mid-left { top: 50%; left: 5%; transform: translateY(-50%); }
+        .mid-right { top: 50%; right: 5%; transform: translateY(-50%); }
+
+        /* Slogan Alanı */
+        .hero-title {
+            position: absolute; top: 15%; width: 100%; text-align: center;
+            z-index: 1; pointer-events: none;
+        }
+        .hero-title h1 { font-size: 80px; font-weight: 800; letter-spacing: -4px; opacity: 0.1; line-height: 0.8; }
+
+        /* --- CTA BUTTON --- */
+        .btn-start {
+            position: absolute; bottom: 8%; background: #fff; color: #000;
+            padding: 16px 40px; border-radius: 100px; font-weight: 800;
+            text-decoration: none; transition: 0.3s;
+        }
+        .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 30px #fff; }
+
+        @media (max-width: 1024px) {
+            .hub-section { height: auto; padding: 120px 5%; flex-direction: column; }
+            .mod-card { position: relative; width: 100%; top: auto; left: auto; right: auto; bottom: auto; transform: none !important; margin-bottom: 15px; }
+            .hero-title h1 { font-size: 40px; opacity: 0.5; position: relative; top: 0; margin-bottom: 30px; }
+            .phone-center { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">italky<span>AI</span></div>
+    <div class="jeton-pill">328 Jeton Aktif</div>
+</header>
+
+<section class="hub-section">
+    <div class="hero-title">
+        <h1>BE FREE. <br> SPEAK ALL.</h1>
+    </div>
+
+    <div class="mod-card top-left">
+        <h3>FaceToFace AI</h3>
+        <p>Karşılıklı masaya koyun ve dünyayı dinleyin.</p>
+    </div>
+
+    <div class="mod-card top-right">
+        <h3>italky Academy</h3>
+        <p>Seviye tespiti ve kişisel AI öğretmen.</p>
+    </div>
+
+    <div class="mod-card mid-left">
+        <h3>Fotoğraf & Lens</h3>
+        <p>Gördüğün her şeyi anında kendi dilinde oku.</p>
+    </div>
+
+    <div class="phone-center">
+        <div class="phone-screen">
+            <div style="font-size: 40px; margin-bottom: 20px;">💜</div>
+            <h2>italkyAI</h2>
+            <p>Cebinizdeki Global Dünya</p>
+        </div>
+    </div>
+
+    <div class="mod-card mid-right">
+        <h3>Online Toplantı</h3>
+        <p>Global odalarda dil engelsiz görüşmeler.</p>
+    </div>
+
+    <div class="mod-card bottom-left">
+        <h3>Oyunlar</h3>
+        <p>Eğlenerek öğren, jetonlarını katla.</p>
+    </div>
+
+    <div class="mod-card bottom-right">
+        <h3>Sohbet & Chat AI</h3>
+        <p>7/24 dertleşebileceğin akıllı asistanın.</p>
+    </div>
+
+    <a href="#download" class="btn-start">UYGULAMAYI KEŞFET</a>
+</section>
+
+</body>
+</html>
