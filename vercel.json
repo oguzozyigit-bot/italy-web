@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/admin", "destination": "/pages/admin.html" }
+    { "source": "/pages/(.*)", "destination": "/pages/$1" }
   ]
 }
