@@ -120,17 +120,10 @@ let phase = "idle";          // idle | recording | translating | speaking
 let active = null;           // "top" | "bot" | null
 
 function canStart(which){
-  // SIRA YOK: sadece işlem bitmeden başlamayı engelle
-  if(phase !== "idle") return false;
-  return true;
+  return phase === "idle";
 }
-
 function otherSide(which){ return which === "top" ? "bot" : "top"; }
-
-function setPhase(p){
-  phase = p;
-  updateMicLocks();
-}
+function setPhase(p){ phase = p; updateMicLocks(); }
 
 function lockMic(which, locked){
   const el = (which === "top") ? $("topMic") : $("botMic");
@@ -144,13 +137,10 @@ function updateMicLocks(){
   let lockBot = false;
 
   if(phase === "recording"){
-    // biri kayıt alırken diğerini kilitle
     if(active === "top") lockBot = true;
     if(active === "bot") lockTop = true;
   } else if(phase === "translating" || phase === "speaking"){
-    // çeviri/tts sırasında ikisini de kilitle
-    lockTop = true;
-    lockBot = true;
+    lockTop = true; lockBot = true;
   }
 
   lockMic("top", lockTop);
@@ -163,12 +153,48 @@ function setMicUI(which,on){
 }
 
 /* ===============================
-   HELPERS
+   UI FEEDBACK (chip + vibrate)
 ================================ */
-function toast(msg){
-  try{ console.log("[toast]", msg); }catch{}
+let toastEl = null;
+let toastTimer = null;
+
+function showToast(text){
+  try{ if(navigator.vibrate) navigator.vibrate(25); }catch{}
+
+  if(!toastEl){
+    toastEl = document.createElement("div");
+    toastEl.style.position = "fixed";
+    toastEl.style.left = "50%";
+    toastEl.style.top = "14px";
+    toastEl.style.transform = "translateX(-50%)";
+    toastEl.style.zIndex = "999999";
+    toastEl.style.padding = "10px 14px";
+    toastEl.style.borderRadius = "999px";
+    toastEl.style.border = "1px solid rgba(255,255,255,0.14)";
+    toastEl.style.background = "rgba(0,0,0,0.70)";
+    toastEl.style.backdropFilter = "blur(12px)";
+    toastEl.style.color = "rgba(255,255,255,0.92)";
+    toastEl.style.fontFamily = "Outfit, system-ui, sans-serif";
+    toastEl.style.fontWeight = "900";
+    toastEl.style.fontSize = "12px";
+    toastEl.style.letterSpacing = ".2px";
+    document.body.appendChild(toastEl);
+  }
+
+  toastEl.textContent = text;
+  toastEl.style.opacity = "1";
+
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{
+    if(toastEl) toastEl.style.opacity = "0";
+  }, 1200);
 }
 
+function toast(msg){ showToast(String(msg||"")); }
+
+/* ===============================
+   HELPERS
+================================ */
 function closeAllPop(){
   $("pop-top")?.classList.remove("show");
   $("pop-bot")?.classList.remove("show");
@@ -194,8 +220,10 @@ function renderPop(side){
       e.preventDefault(); e.stopPropagation();
       const code = item.getAttribute("data-code") || "en";
       if(side==="top") topLang = code; else botLang = code;
+
       const t = (side==="top") ? $("topLangTxt") : $("botLangTxt");
       if(t) t.textContent = labelChip(code);
+
       closeAllPop();
     });
   });
@@ -226,9 +254,7 @@ async function checkLoginOnce(){
 function showLoginBannerIfNeeded(){
   if(isLoggedIn) return;
 }
-function ensureLoginByUserAction(){
-  location.href = LOGIN_PATH;
-}
+function ensureLoginByUserAction(){ location.href = LOGIN_PATH; }
 
 /* ===============================
    TOKEN SESSION / RPC
@@ -375,7 +401,7 @@ async function translateViaApi(text, source, target){
         from_lang: src,
         to_lang: dst,
         style: "chat",
-        provider: "auto" // ✅ Gemini -> OpenAI
+        provider: "auto"
       })
     });
     if(!r.ok) return null;
@@ -440,8 +466,7 @@ async function start(which){
     const finalText = String(t||"").trim();
     if(!finalText) return;
 
-    addBubble(which, "them", finalText);
-
+    // ✅ Komut/çeviri ayrımını onend'de yapacağız. Burada bubble yazmıyoruz.
     pending = { which, finalText, src, dst };
     try{ rec.stop(); }catch{}
   };
@@ -465,18 +490,18 @@ async function start(which){
 
     const other = otherSide(which);
 
-    // ✅ COMMAND CHECK (hangi tarafta söylediyse karşı tarafın dili değişir)
+    // ✅ 1) COMMAND CHECK (komutsa: yazdırma yok)
     const cmd = await parseCommand(p.finalText);
 
     if(cmd && cmd.is_command && cmd.target_lang){
       if(which === "top"){
         botLang = cmd.target_lang;
         if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
-        toast(`🎯 Karşı dil: ${langLabel(botLang)} (${cmd.provider_used || "auto"})`);
+        toast(`🎯 Hedef: ${langLabel(botLang)}`);
       }else{
         topLang = cmd.target_lang;
         if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
-        toast(`🎯 Karşı dil: ${langLabel(topLang)} (${cmd.provider_used || "auto"})`);
+        toast(`🎯 Hedef: ${langLabel(topLang)}`);
       }
 
       closeAllPop();
@@ -485,7 +510,10 @@ async function start(which){
       return;
     }
 
-    // ✅ NORMAL TRANSLATION
+    // ✅ 2) Komut değilse: önce konuşanı yazdır
+    addBubble(which, "them", p.finalText);
+
+    // ✅ 3) NORMAL TRANSLATION
     const translated = await translateViaApi(p.finalText, p.src, p.dst);
 
     if(!translated){
