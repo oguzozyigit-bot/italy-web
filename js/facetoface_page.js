@@ -1,7 +1,8 @@
 // FILE: /js/facetoface_page.js
-// ✅ FINAL: Bas -> kayıt başlar | tekrar bas -> durur & çevirir
+// ✅ FINAL (TEK DOSYA): Bas -> kayıt başlar | tekrar bas -> durur & çevirir
 // ✅ 20 saniye auto-stop: mic kapanır + çeviri çalışır
 // ✅ Kayıt sırasında canlı yazı: her 4 sn /api/stt ile güncelle (WebView uyumlu)
+// ✅ Konuşma bitince: STT metni önce AI ile DÜZELT -> sonra ÇEVİR
 // ✅ Sesli komutla dil değiştir: /api/command_parse
 // ✅ Daktilo çeviri + TTS + hoparlör üst üste binmez
 
@@ -493,6 +494,34 @@ async function translateViaApi(text, source, target){
 }
 
 /* ===============================
+   AI CLEAN (before translate)
+================================ */
+async function cleanSpeechText(text, lang){
+  const t = String(text||"").trim();
+  if(!t) return t;
+
+  try{
+    const r = await fetch(`${API_BASE}/api/translate_ai`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        text: t,
+        from_lang: normalizeApiLang(lang),
+        to_lang: normalizeApiLang(lang),
+        style: "chat",
+        provider: "auto"
+      })
+    });
+    if(!r.ok) return t;
+    const data = await r.json().catch(()=>null);
+    const out = String(data?.translated || "").trim();
+    return out || t;
+  }catch{
+    return t;
+  }
+}
+
+/* ===============================
    STT (MediaRecorder -> /api/stt)
 ================================ */
 function pickMime(){
@@ -574,7 +603,6 @@ function addBubble(side, kind, text, opts={}){
 
 /* ===============================
    LIVE TEXT (during recording)
-   - we show a bubble on the speaking side and update its text every few seconds
 ================================ */
 function commonPrefixLen(a,b){
   const n = Math.min(a.length,b.length);
@@ -585,14 +613,12 @@ function commonPrefixLen(a,b){
   return i;
 }
 function mergeLiveText(oldText, newText){
-  // remove duplicates by prefix overlap
   const a = String(oldText||"");
   const b = String(newText||"");
   if(!a) return b;
   if(!b) return a;
   const k = commonPrefixLen(a, b);
-  if(k >= Math.min(20, a.length, b.length)) return b; // similar -> replace
-  // else append missing
+  if(k >= Math.min(20, a.length, b.length)) return b;
   if(a.includes(b)) return a;
   if(b.includes(a)) return b;
   return (a + " " + b).trim();
@@ -608,7 +634,7 @@ let liveText = "";           // accumulated display
 let liveLastSentAt = 0;
 
 async function startRecording(which){
-  if(recJob) return; // already recording
+  if(recJob) return;
 
   closeAllPop();
   const ok = await ensureFacetofaceSession();
@@ -625,43 +651,36 @@ async function startRecording(which){
 
   toast("🎙️ Kayıt başladı (tekrar bas → bitir)");
 
-  // create live bubble
+  // live bubble
   liveNode = addBubble(which, "them", "…");
   liveText = "";
   liveLastSentAt = 0;
 
-  // start MediaRecorder
   const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
   const mime = pickMime();
   const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
 
   const chunks = [];
   mr.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
-
   mr.start(250);
 
   const startedAt = Date.now();
-
-  // Timer badges (both sides)
   ensureTimerBadges();
+
   const tickTimer = setInterval(()=>{
     const left = MAX_RECORD_MS - (Date.now() - startedAt);
     setTimerBadges(left);
   }, 250);
 
-  // Auto stop at 20s -> call stopAndProcess() so UI/mic closes properly
   const hardTimer = setTimeout(()=>{
-    stopAndProcess(); // ✅ guaranteed close
+    stopAndProcess(); // auto-stop
   }, MAX_RECORD_MS);
 
-  // Live STT timer (every 4s)
   const liveTimer = setInterval(async ()=>{
     if(!recJob) return;
-    // Don't spam: if too soon, skip
     if(Date.now() - liveLastSentAt < LIVE_STT_EVERY_MS - 50) return;
     liveLastSentAt = Date.now();
 
-    // build blob from current chunks
     if(chunks.length < 2) return;
     const blob = new Blob(chunks, { type: mr.mimeType || "audio/webm" });
     const srcLang = (which==="top") ? topLang : botLang;
@@ -672,9 +691,7 @@ async function startRecording(which){
         liveText = mergeLiveText(liveText, text);
         if(liveNode?.txt) liveNode.txt.textContent = liveText;
       }
-    }catch{
-      // ignore live failures
-    }
+    }catch{}
   }, LIVE_STT_EVERY_MS);
 
   recJob = { stream, mr, chunks, hardTimer, tickTimer, liveTimer };
@@ -691,17 +708,17 @@ async function stopAndProcess(){
   try{ clearInterval(recJob.liveTimer); }catch{}
   setTimerBadges(null);
 
-  // stop stream+rec
+  // stop stream + recorder
   try{ recJob.stream.getTracks().forEach(t=>t.stop()); }catch{}
   try{ recJob.mr.stop(); }catch{}
 
-  // finalize blob
   const blob = new Blob(recJob.chunks, { type: recJob.mr.mimeType || "audio/webm" });
 
-  // reset recording state first (so UI won't get stuck even if API fails)
+  // reset record state first (prevents stuck UI)
   recJob = null;
   recSide = null;
 
+  // mic kapanır
   setMicUI(which, false);
   setFrameState("idle", lastMicSide);
 
@@ -718,7 +735,7 @@ async function stopAndProcess(){
   const dst = (which==="top") ? botLang : topLang;
   const other = otherSide(which);
 
-  // STT final
+  // final STT
   let text = "";
   try{
     text = await sttBlob(blob, normalizeApiLang(src));
@@ -737,15 +754,18 @@ async function stopAndProcess(){
     return;
   }
 
-  // Replace live bubble with final spoken text
+  // ✅ AI ile düzelt
+  const cleaned = await cleanSpeechText(text, src);
+
+  // live bubble -> cleaned
   try{
-    if(liveNode?.txt) liveNode.txt.textContent = text;
+    if(liveNode?.txt) liveNode.txt.textContent = cleaned;
   }catch{}
   liveNode = null;
   liveText = "";
 
-  // Command?
-  const cmd = await parseCommand(text);
+  // Command? (cleaned)
+  const cmd = await parseCommand(cleaned);
   if(cmd && cmd.is_command && cmd.target_lang){
     if(which === "top"){
       botLang = cmd.target_lang;
@@ -761,8 +781,8 @@ async function stopAndProcess(){
     return;
   }
 
-  // Translate
-  const translated = await translateViaApi(text, src, dst);
+  // Translate (cleaned)
+  const translated = await translateViaApi(cleaned, src, dst);
   if(!translated){
     addBubble(other, "me", "⚠️ Çeviri yapılamadı.");
     setPhase("idle");
@@ -774,7 +794,6 @@ async function stopAndProcess(){
   const node = addBubble(other, "me", "", { latest:true, speakable:true, speakLang:dst });
   if(node?.txt) await typeWriter(node.txt, translated, TYPE_SPEED_MS);
 
-  // Speak
   setCenterDirection(other);
   setFrameState("speaking", other);
   setPhase("speaking");
@@ -834,7 +853,7 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // Mic toggles (start/stop)
+  // Mic toggles
   $("topMic")?.addEventListener("click", async (e)=>{
     e.preventDefault(); e.stopPropagation();
     if(recJob) return await stopAndProcess();
@@ -852,7 +871,6 @@ function bindUI(){
    BOOT
 ================================ */
 document.addEventListener("DOMContentLoaded", async ()=>{
-  // UI init
   if($("topLangTxt")) $("topLangTxt").textContent = labelChip(topLang);
   if($("botLangTxt")) $("botLangTxt").textContent = labelChip(botLang);
 
@@ -864,3 +882,4 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   await checkLoginOnce();
   updateMicLocks();
 });
+```0
