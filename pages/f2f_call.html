@@ -17,9 +17,8 @@
     :root{
       --frameW: min(480px, calc(100vw - 18px));
       --topH: 74px;
-      --footerH: 74px;
       --dockH: 78px;
-      --gap: 10px;
+      --sigH: 34px;
 
       --bg:#030014;
       --text: rgba(255,255,255,.92);
@@ -87,22 +86,8 @@
       background: rgba(0,0,0,.35);
       backdrop-filter: blur(12px);
     }
-    .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .backBtn{
-      width:44px;height:44px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color:#fff;
-      font-size:20px;font-weight:1000;
-      display:flex;align-items:center;justify-content:center;
-      cursor:pointer; user-select:none;
-    }
-    .backBtn:active{ transform: scale(.96); }
-
-    .mini-brand{
-      display:flex; flex-direction:column;
-      user-select:none; cursor:pointer; line-height:1;
-      margin-top: 2px;
+    .brand{
+      display:flex; flex-direction:column; line-height:1; user-select:none;
     }
     .logo-line{
       font-family:'Space Grotesk', sans-serif;
@@ -127,36 +112,9 @@
       text-transform: uppercase;
     }
 
-    .rightControls{ display:flex; align-items:center; gap:10px; min-width:0; }
-    .usertext{
-      min-width:0;
-      display:flex; flex-direction:column; align-items:flex-end; gap:2px;
-      max-width: 200px;
+    .top-actions{
+      display:flex; align-items:center; gap:10px;
     }
-    .uname{ font-weight: 900; font-size: 12px; color: rgba(255,255,255,0.92); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .plan{ font-weight: 800; font-size: 11px; color: rgba(255,255,255,0.55); white-space:nowrap; }
-
-    .avatar-btn{
-      width: 42px; height: 42px;
-      border:none; background:transparent;
-      border-radius:999px;
-      overflow:hidden;
-      cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .avatar-btn:active{ transform: scale(.96); }
-    .avatar-btn img{ width:42px; height:42px; border-radius:999px; object-fit:cover; display:block; }
-    .avatar-fallback{
-      width:42px; height:42px; border-radius:999px;
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 1000;
-      color: rgba(255,255,255,0.92);
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.10);
-      user-select:none;
-    }
-
-    /* language select (native, always clickable) */
     .langSelect{
       height: 38px;
       border-radius: 14px;
@@ -166,7 +124,76 @@
       font-weight: 900;
       font-size: 12px;
       padding: 0 10px;
-      max-width: 140px;
+      max-width: 150px;
+    }
+    .exitBtn{
+      width:40px; height:40px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      user-select:none;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .exitBtn:active{ transform: scale(.96); }
+
+    /* PARTICIPANTS STRIP */
+    .peopleBar{
+      z-index: 2500;
+      background: rgba(0,0,0,.22);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: 8px 10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .peopleCount{
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,.70);
+      white-space:nowrap;
+    }
+    .peopleScroll{
+      flex:1;
+      display:flex;
+      gap:10px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width:none;
+      padding-bottom:2px;
+    }
+    .peopleScroll::-webkit-scrollbar{ display:none; }
+
+    .pItem{
+      flex: 0 0 auto;
+      width:48px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+    .pAvatar{
+      width:40px; height:40px;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 900;
+      color: rgba(255,255,255,.86);
+      user-select:none;
+    }
+    .pAvatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .pName{
+      font-size:10px;
+      font-weight: 900;
+      opacity:.65;
+      white-space:nowrap;
+      max-width:48px;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .clearChat{
@@ -184,8 +211,8 @@
     #chat.chat-area{
       position: absolute;
       left: 0; right: 0;
-      top: calc(var(--topH) + 34px);
-      bottom: calc(var(--dockH) + var(--footerH) + var(--gap));
+      top: calc(var(--topH) + 44px + 52px); /* topbar + clear + peoplebar approx */
+      bottom: calc(var(--dockH) + var(--sigH) + env(safe-area-inset-bottom));
       padding: 14px 12px;
 
       overflow-y:auto;
@@ -248,7 +275,6 @@
       backdrop-filter: blur(8px);
       white-space: pre-wrap;
       word-break: break-word;
-      position:relative;
     }
     .bubble.bot{
       border-left:4px solid var(--ai2);
@@ -260,34 +286,13 @@
       text-align:right;
     }
 
-    /* speaker button */
-    .spkBtn{
-      position:absolute;
-      top:8px;
-      right:8px;
-      width:28px;height:28px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.22);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      user-select:none;
-    }
-    .spkBtn svg{
-      width:16px;height:16px;
-      stroke: rgba(255,255,255,.9);
-      fill:none;
-      stroke-width:2;
-      stroke-linecap:round; stroke-linejoin:round;
-    }
-
     /* INPUT DOCK */
     .input-dock{
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       width: var(--frameW);
-      bottom: var(--footerH);
+      bottom: calc(var(--sigH) + env(safe-area-inset-bottom));
       z-index: 2600;
       padding: 10px 12px;
       background: rgba(0,0,0,.32);
@@ -334,7 +339,6 @@
       cursor:pointer; user-select:none;
       flex-shrink:0;
     }
-
     .icon-btn svg, .send-btn svg{
       width:20px; height:20px;
       stroke: rgba(255,255,255,.88);
@@ -344,6 +348,7 @@
       stroke-linejoin:round;
       opacity:.95;
     }
+    .send-btn svg{ width:18px; height:18px; } /* smaller plane */
 
     .icon-btn.listening{
       border-color: rgba(79,70,229,.45);
@@ -365,48 +370,26 @@
       100%{ transform: scale(0.92); opacity:.75; }
     }
 
-    /* smaller plane */
-    .send-btn svg{ width:18px; height:18px; }
-
-    /* FOOTER */
-    .footerbar{
+    /* SIGNATURE only */
+    .signatureBar{
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
       width: var(--frameW);
       bottom: 0;
       z-index: 2400;
-      height: var(--footerH);
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      height: var(--sigH);
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
       background: rgba(3, 0, 20, 0.95);
       border-top: 1px solid rgba(255,255,255,.05);
       backdrop-filter: blur(10px);
       display:flex;
-      flex-direction:column;
+      align-items:center;
       justify-content:center;
-      gap: 6px;
-    }
-    .links{
-      display:flex;
-      gap: 16px;
-      justify-content:center;
-      flex-wrap:wrap;
-      line-height:1;
-    }
-    .links a{
-      color: rgba(255,255,255,0.55);
-      text-decoration:none;
-      font-size: 12px;
-      font-weight: 800;
-      transition:.2s;
-    }
-    .links a:active{ opacity:.85; }
-    .footerBrand{
-      text-align:center;
       font-size: 10px;
-      color: rgba(255,255,255,0.22);
-      letter-spacing: 0.2px;
-      font-weight: 700;
+      font-weight: 900;
+      letter-spacing: .6px;
+      color: rgba(255,255,255,0.25);
     }
   </style>
 </head>
@@ -421,30 +404,20 @@
   <div class="mobile-frame" id="mobileFrame">
 
     <div class="topbar">
-      <div class="leftControls">
-        <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
-
-        <div class="mini-brand" id="logoHome" title="Ana sayfa">
-          <div class="logo-line">
-            <span class="logo-main">italky</span><span class="logo-ai">AI</span>
-          </div>
-          <div class="logo-slogan">BE FREE</div>
-        </div>
+      <div class="brand">
+        <div class="logo-line"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
+        <div class="logo-slogan">BE FREE</div>
       </div>
 
-      <div class="rightControls">
+      <div class="top-actions">
         <select class="langSelect" id="langSelect" title="Dil Seç"></select>
-
-        <div class="usertext">
-          <div class="uname" id="userName">—</div>
-          <div class="plan" id="roomInfo">ROOM: —</div>
-        </div>
-
-        <button class="avatar-btn" id="avatarBtn" aria-label="Profil">
-          <img id="avatarImg" alt="" style="display:none"/>
-          <span class="avatar-fallback" id="avatarFallback">•</span>
-        </button>
+        <button class="exitBtn" id="exitBtn" title="Çık">✕</button>
       </div>
+    </div>
+
+    <div class="peopleBar">
+      <div class="peopleCount" id="peopleCount">0</div>
+      <div class="peopleScroll" id="peopleScroll"></div>
     </div>
 
     <div class="clearChat" id="clearChat">Sohbeti Temizle</div>
@@ -473,18 +446,10 @@
       </div>
     </div>
 
-    <div class="footerbar">
-      <div class="links">
-        <a href="/pages/about.html">Hakkında</a>
-        <a href="/pages/faq.html">SSS</a>
-        <a href="/pages/privacy.html">Gizlilik</a>
-        <a href="/pages/contact.html">İletişim</a>
-      </div>
-      <div class="footerBrand">italkyAI By Ozyigit’s 2026</div>
-    </div>
+    <div class="signatureBar">italkyAI @ italkyAcedemia By Ozyigit’s</div>
 
   </div>
 
-  <script type="module" src="/js/f2f_call.js?v=CHAT_UI_FINAL"></script>
+  <script type="module" src="/js/f2f_call.js?v=CHAT_UI_FINAL_V2"></script>
 </body>
 </html>
