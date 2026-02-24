@@ -1,18 +1,36 @@
 // FILE: /js/f2f_call.js
 import { LANG_POOL } from "/js/lang_pool_full.js";
+import { STORAGE_KEY } from "/js/config.js";
+import { shortDisplayName } from "/js/ui_shell.js";
 
 const API_BASE = "https://italky-api.onrender.com";
 const $ = (id)=>document.getElementById(id);
 
 const params = new URLSearchParams(location.search);
 const room = (params.get("room")||"").trim().toUpperCase();
-const role = (params.get("role")||"").trim().toLowerCase(); // host|guest|...
+const role = (params.get("role")||"").trim().toLowerCase();
 let myLang = (params.get("me_lang")||localStorage.getItem("f2f_my_lang")||"tr").trim().toLowerCase();
-
 localStorage.setItem("f2f_my_lang", myLang);
 
 $("roomPill").textContent = "ROOM: " + (room || "—");
 $("rolePill").textContent = role ? role.toUpperCase() : "—";
+
+/* ✅ profile from cache */
+function getProfileFromCache(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return { name:"Kullanıcı", picture:"" };
+    const u = JSON.parse(raw);
+    const full = u.display_name || u.full_name || u.name || "";
+    const name = shortDisplayName(full || "Kullanıcı");
+    const picture = u.picture || u.avatar || u.avatar_url || "";
+    return { name, picture };
+  }catch{
+    return { name:"Kullanıcı", picture:"" };
+  }
+}
+const MY_PROFILE = getProfileFromCache();
+
 $("meLangTxt").textContent = langLabel(myLang);
 
 let ws = null;
@@ -63,7 +81,6 @@ function renderLangList(){
     });
   });
 }
-
 function openLangPop(){
   renderLangList();
   $("langPop")?.classList.add("show");
@@ -99,7 +116,7 @@ function connect(){
   ws = new WebSocket(wsUrl());
 
   ws.onopen = ()=>{
-    ws.send(JSON.stringify({ type:"hello", room, role, from: clientId, me_lang: myLang }));
+    ws.send(JSON.stringify({ type:"hello", room, role, from: clientId, me_lang: myLang, from_name: MY_PROFILE.name }));
     $("hint").textContent = "Bağlandı ✅";
   };
 
@@ -107,26 +124,23 @@ function connect(){
     let msg = null;
     try{ msg = JSON.parse(ev.data); }catch{ return; }
 
-    // eski mesajlar
     if(msg.type === "info"){
       $("hint").textContent = msg.message || "info";
       return;
     }
 
-    // ✅ biz "translated" tipini hem broadcast hem compat için kullanıyoruz:
-    // {type:"translated", from, text, lang}
     if(msg.type === "translated"){
       const from = String(msg.from || "");
-      if(from && from === clientId) return; // kendini tekrar gösterme
+      if(from && from === clientId) return;
 
       const srcLang = String(msg.lang || "en").trim().toLowerCase();
       const raw = String(msg.text || "").trim();
+      const name = String(msg.from_name || "Katılımcı").trim();
+
       if(!raw) return;
 
-      // Karşıdan gelen ham metni önce göster (them)
-      addBubble("them", raw);
+      addBubble("them", raw, { name });
 
-      // Herkes kendi diline çevirsin
       let out = raw;
       if(srcLang && myLang && srcLang !== myLang){
         $("hint").textContent = "Çeviriliyor…";
@@ -134,7 +148,6 @@ function connect(){
         if(tr) out = tr;
       }
 
-      // Çeviriyi büyük yaz (me)
       addBubble("me", out, { latest:true, lang: myLang });
       await speakViaTTS(out, myLang);
 
@@ -150,26 +163,50 @@ function connect(){
 
 /* ===============================
    UI BUBBLES
+   - them bubble: name etiketi (küçük)
 ================================ */
 function addBubble(kind, text, opts={}){
   const chat = $("chat");
   const b = document.createElement("div");
   b.className = "bubble " + kind + (opts.latest ? " is-latest" : "");
 
+  // name label
+  if(kind === "them" && opts.name){
+    const tag = document.createElement("div");
+    tag.style.fontWeight = "900";
+    tag.style.fontSize = "11px";
+    tag.style.opacity = "0.55";
+    tag.style.marginBottom = "4px";
+    tag.style.textTransform = "uppercase";
+    tag.textContent = String(opts.name).slice(0, 22);
+    const col = document.createElement("div");
+    col.style.display = "flex";
+    col.style.flexDirection = "column";
+    col.style.alignItems = "center";
+    col.appendChild(tag);
+
+    const t = document.createElement("div");
+    t.className = "txt";
+    t.textContent = text;
+    col.appendChild(t);
+
+    b.appendChild(col);
+  } else {
+    const t = document.createElement("div");
+    t.className = "txt";
+    t.textContent = text;
+    b.appendChild(t);
+  }
+
   if(kind === "me"){
     const icon = document.createElement("div");
     icon.className = "spk-icon";
     icon.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89 0 5.23 2.34 5.23 5.23S16.89 15.75 14 15.75v2.06c4.02 0 7.29-3.27 7.29-7.29S18.02 3.23 14 3.23z"/></svg>`;
     icon.onclick = ()=> speakViaTTS(text, opts.lang || myLang || "en");
-    b.appendChild(icon);
+    b.insertBefore(icon, b.firstChild);
 
     chat.querySelectorAll(".bubble.me.is-latest").forEach(x=>x.classList.remove("is-latest"));
   }
-
-  const t = document.createElement("div");
-  t.className = "txt";
-  t.textContent = text;
-  b.appendChild(t);
 
   chat.appendChild(b);
   chat.scrollTop = chat.scrollHeight;
@@ -193,7 +230,7 @@ function stopAudio(){
 
 async function speakViaTTS(text, lang){
   const now = Date.now();
-  if(now - lastAudioAt < 250) stopAudio();
+  if(now - lastAudioAt < AUDIO_DEBOUNCE_MS) stopAudio();
   lastAudioAt = now;
 
   try{
@@ -260,7 +297,6 @@ async function sttBlob(blob, lang){
   return String(j.text||"").trim();
 }
 
-// ✅ aynı dilde düzeltme (noktalama + akıcılık)
 async function cleanSpeechText(text, lang){
   const t = String(text||"").trim();
   if(!t) return t;
@@ -372,10 +408,10 @@ async function stopRecord(){
       return;
     }
 
-    // Ekranda benim söylediklerim (them)
-    addBubble("them", cleaned);
+    // Ekranda benim söylediklerim
+    addBubble("them", cleaned, { name: MY_PROFILE.name });
 
-    // WS broadcast: herkes kendi diline çevirir
+    // WS broadcast
     if(!ws || ws.readyState !== 1){
       $("hint").textContent = "Bağlantı yok";
       return;
@@ -384,6 +420,7 @@ async function stopRecord(){
     ws.send(JSON.stringify({
       type:"translated",
       from: clientId,
+      from_name: MY_PROFILE.name,
       text: cleaned,
       lang: myLang
     }));
