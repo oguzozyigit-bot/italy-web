@@ -2,14 +2,12 @@
 import { LANG_POOL } from "/js/lang_pool_full.js";
 
 const $ = (id)=>document.getElementById(id);
-
 const LANGS = Array.isArray(LANG_POOL) ? LANG_POOL : [
   { code:"tr", flag:"🇹🇷", name:"Türkçe" },
   { code:"en", flag:"🇬🇧", name:"English" },
 ];
 
 function norm(code){ return String(code||"").toLowerCase().trim(); }
-
 function displayName(code){
   const c = norm(code);
   const item = LANGS.find(x=>norm(x.code)===c);
@@ -17,43 +15,30 @@ function displayName(code){
   const name = item?.name || c.toUpperCase();
   return `${flag} ${name}`;
 }
-
 function randCode(n=6){
   const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  let s="";
-  for(let i=0;i<n;i++) s += a[Math.floor(Math.random()*a.length)];
+  let s=""; for(let i=0;i<n;i++) s += a[Math.floor(Math.random()*a.length)];
   return s;
 }
-
 function qs(k){ return new URLSearchParams(location.search).get(k); }
+function go(u){ try{ location.assign(u); }catch{ location.href=u; } }
 
-function go(u){
-  try{ location.assign(u); }catch{ location.href=u; }
-}
-
-/* ✅ herkes kendi dilini seçer */
 let myLang = localStorage.getItem("f2f_my_lang") || "tr";
 
-/* ===============================
-   Popover picker
-================================ */
+/* Popover */
 function closePop(){ $("langPop")?.classList.remove("show"); }
-
 function openPop(){
-  const pop = $("langPop");
   const list = $("popList");
-  if(!pop || !list) return;
+  if(!list) return;
 
   list.innerHTML = LANGS.map(l=>{
     const c = norm(l.code);
-    const active = myLang === c;
-    const flag = l.flag || "🌐";
-    const name = l.name || c.toUpperCase();
+    const active = (c === myLang);
     return `
       <div class="pop-item ${active?"active":""}" data-code="${c}">
         <div class="pop-left">
-          <div class="pop-flag">${flag}</div>
-          <div class="pop-name">${name}</div>
+          <div class="pop-flag">${l.flag || "🌐"}</div>
+          <div class="pop-name">${l.name || c.toUpperCase()}</div>
         </div>
         <div class="pop-code">${c.toUpperCase()}</div>
       </div>
@@ -70,21 +55,18 @@ function openPop(){
     });
   });
 
-  pop.classList.add("show");
+  $("langPop")?.classList.add("show");
 }
-
 function syncLangLabel(){
-  if($("meLangTxt")) $("meLangTxt").textContent = displayName(myLang).replace(" ", "  BENİM DİLİM: ");
+  const t = $("meLangTxt");
+  if(t) t.textContent = `BENİM DİLİM: ${displayName(myLang)}`;
 }
 
-/* ===============================
-   Host page
-================================ */
+/* Host page */
 function initHost(){
   const room = qs("room") || randCode(6);
   $("roomCode").textContent = room;
 
-  // QR join url (join page)
   const joinUrl = `https://italky.ai/pages/f2f_join.html?join=${encodeURIComponent(room)}`;
   $("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
 
@@ -99,25 +81,22 @@ function initHost(){
   });
 
   $("btnGoCall")?.addEventListener("click", ()=>{
-    // Konuşma ekranına geç (şimdilik facetoface)
-    const url = `/facetoface.html?room=${encodeURIComponent(room)}&role=host&me_lang=${encodeURIComponent(myLang)}`;
+    const url = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host&me_lang=${encodeURIComponent(myLang)}`;
     go(url);
   });
 
   $("btnBack")?.addEventListener("click", ()=> go("/pages/f2f_connect.html"));
 }
 
-/* ===============================
-   Join page
-================================ */
+/* Join page: camera */
 let scanStream=null;
 let scanTimer=null;
 
 async function stopScanner(){
   try{ if(scanTimer) clearInterval(scanTimer); }catch{}
-  scanTimer=null;
+  scanTimer = null;
   try{ scanStream?.getTracks?.().forEach(t=>t.stop()); }catch{}
-  scanStream=null;
+  scanStream = null;
   $("scanner")?.classList.remove("show");
 }
 
@@ -127,37 +106,71 @@ async function startScanner(){
   const hint = $("scanHint");
   if(!sc || !vid) return;
 
-  const hasBD = ("BarcodeDetector" in window);
   sc.classList.add("show");
 
-  if(!hasBD){
-    if(hint) hint.textContent = "QR tarayıcı desteklenmiyor. Kod girerek devam et.";
+  // iOS/WebView güvence
+  try{
+    vid.setAttribute("playsinline","");
+    vid.muted = true;
+    vid.autoplay = true;
+  }catch{}
+
+  if(hint) hint.textContent = "Kamera izni istenebilir…";
+
+  // BarcodeDetector var mı?
+  const hasBD = ("BarcodeDetector" in window);
+
+  // Kamera açmayı dene (facingMode + fallback)
+  let constraintsList = [
+    { video: { facingMode: { ideal: "environment" } }, audio:false },
+    { video: { facingMode: "environment" }, audio:false },
+    { video: true, audio:false }
+  ];
+
+  for(const cons of constraintsList){
+    try{
+      scanStream = await navigator.mediaDevices.getUserMedia(cons);
+      break;
+    }catch(e){
+      scanStream = null;
+    }
+  }
+
+  if(!scanStream){
+    if(hint) hint.textContent = "Kamera açılamadı. (İzin/cihaz) Kod girerek devam et.";
     return;
   }
 
   try{
-    scanStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" }, audio:false });
     vid.srcObject = scanStream;
     await vid.play();
-
-    const detector = new BarcodeDetector({ formats:["qr_code"] });
-    scanTimer = setInterval(async ()=>{
-      try{
-        const barcodes = await detector.detect(vid);
-        if(barcodes?.length){
-          const raw = barcodes[0].rawValue || "";
-          const u = new URL(raw, location.origin);
-          const j = u.searchParams.get("join");
-          if(j){
-            $("roomInput").value = String(j).toUpperCase();
-            await stopScanner();
-          }
-        }
-      }catch{}
-    }, 240);
   }catch{
-    if(hint) hint.textContent = "Kamera açılamadı. Kod girerek devam et.";
+    if(hint) hint.textContent = "Video oynatılamadı. Kod girerek devam et.";
+    return;
   }
+
+  if(!hasBD){
+    if(hint) hint.textContent = "QR okuma cihazda desteklenmiyor. Kamerayı kapatıp kod gir.";
+    return;
+  }
+
+  if(hint) hint.textContent = "QR koda tut. Okuyunca otomatik doldurur.";
+
+  const detector = new BarcodeDetector({ formats:["qr_code"] });
+  scanTimer = setInterval(async ()=>{
+    try{
+      const barcodes = await detector.detect(vid);
+      if(barcodes?.length){
+        const raw = barcodes[0].rawValue || "";
+        const u = new URL(raw, location.origin);
+        const j = u.searchParams.get("join");
+        if(j){
+          $("roomInput").value = String(j).toUpperCase();
+          await stopScanner();
+        }
+      }
+    }catch{}
+  }, 240);
 }
 
 function initJoin(){
@@ -173,18 +186,17 @@ function initJoin(){
       alert("Kod gir.");
       return;
     }
-    const url = `/facetoface.html?room=${encodeURIComponent(room)}&role=guest&me_lang=${encodeURIComponent(myLang)}`;
+    const url = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=guest&me_lang=${encodeURIComponent(myLang)}`;
     go(url);
   });
 
   $("btnBack")?.addEventListener("click", ()=> go("/pages/f2f_connect.html"));
 }
 
-/* ===============================
-   Common bindings
-================================ */
+/* Boot */
 document.addEventListener("DOMContentLoaded", ()=>{
   $("popClose")?.addEventListener("click", closePop);
+  $("meLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); openPop(); });
 
   document.addEventListener("click",(e)=>{
     const pop = $("langPop");
@@ -194,7 +206,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
     if(!inside && !isBtn) closePop();
   }, { capture:true });
 
-  $("meLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); openPop(); });
   syncLangLabel();
 
   if($("roomCode") && $("qrImg")) initHost();
