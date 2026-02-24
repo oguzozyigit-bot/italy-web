@@ -20,9 +20,7 @@
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
 
-    /* ✅ Modal açıkken footer tıklanmasın (seçim bloklanmasın) */
     body.modal-open .premium-footer{ pointer-events:none !important; }
-    body.modal-open .stars-field, body.modal-open .nebula-bg{ pointer-events:none !important; }
 
     .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; position:relative; z-index:30; }
 
@@ -65,10 +63,7 @@
       flex-direction:column;
       gap:12px;
       scrollbar-width:none;
-      mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
       min-height: 42vh;
-      position:relative;
-      z-index:30;
     }
     .chat::-webkit-scrollbar{display:none}
 
@@ -78,13 +73,7 @@
     .bubble.me .txt{font-size:18px;font-weight:450;opacity:.60}
     .bubble.me.is-latest .txt{font-size:30px;font-weight:900;opacity:1}
 
-    .tag{
-      font-weight:1000;
-      font-size:11px;
-      opacity:.55;
-      margin-bottom:4px;
-      text-transform:uppercase;
-    }
+    .tag{ font-weight:1000; font-size:11px; opacity:.55; margin-bottom:4px; text-transform:uppercase; }
 
     .spk-icon{
       width:40px;height:40px;border-radius:50%;
@@ -95,65 +84,57 @@
     }
     .spk-icon svg{ width:18px;height:18px;fill:#fff;opacity:.95; }
 
-    /* ✅ Yazı alanı */
+    /* ✅ Composer: büyüyen textarea + mic + send */
     .composer{
       display:flex;
+      align-items:flex-end;
       gap:10px;
-      align-items:center;
-      position:relative;
-      z-index:30;
     }
-    .textIn{
+    .textArea{
       flex:1;
-      height:46px;
+      min-height:46px;
+      max-height:140px;
+      resize:none;
+      overflow:auto;
       border-radius:16px;
       border:1px solid rgba(255,255,255,0.14);
       background:rgba(0,0,0,0.25);
       color:#fff;
-      padding:0 12px;
+      padding:10px 12px;
       font-weight:900;
+      line-height:1.25;
     }
-    .sendBtn{
+    .iconBtn{
+      width:46px;
       height:46px;
-      padding:0 14px;
       border-radius:16px;
-      border:none;
-      background:var(--ai-gradient);
-      color:#0b0b12;
-      font-weight:1000;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
       cursor:pointer;
       user-select:none;
       position:relative;
       overflow:hidden;
     }
-    .sendBtn:active{ transform: scale(.985); }
-
-    .talk{
-      border:none;border-radius:18px;padding:16px 14px;font-weight:1000;
-      color:#0b0b12;background:var(--ai-gradient);
-      cursor:pointer;box-shadow:0 16px 40px rgba(99,102,241,0.16);
-      position:relative; overflow:hidden;
-      z-index:30;
+    .iconBtn:active{ transform: scale(.985); }
+    .iconBtn svg{ width:20px; height:20px; fill:none; stroke:#fff; stroke-width:2.2; opacity:.95; }
+    .iconBtn.primary{
+      border:none;
+      background: var(--ai-gradient);
     }
-    .talk:before{
-      content:"";
-      position:absolute; inset:-80px;
-      background: conic-gradient(from 0deg, rgba(255,255,255,0), rgba(255,255,255,0.22), rgba(255,255,255,0));
-      animation: spin 2.1s linear infinite;
-      opacity: .55; pointer-events:none;
-    }
-    .talk span{ position:relative; z-index:2; }
-    @keyframes spin{ to{ transform: rotate(360deg);} }
+    .iconBtn.primary svg{ stroke:#0b0b12; }
 
-    .talk.listening{
-      animation:breathe 1.2s infinite ease-in-out;
+    .iconBtn.listening{
       box-shadow:0 0 36px rgba(99,102,241,0.45), 0 0 18px rgba(236,72,153,0.25);
+      animation: breathe 1.2s infinite ease-in-out;
     }
     @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
-    .hint{color:var(--muted);font-size:12px;font-weight:900;text-align:center; z-index:30; }
+    .hint{color:var(--muted);font-size:12px;font-weight:900;text-align:center}
 
-    /* ✅ Modal popover (footer üstünde KİLİT) */
+    /* Modal */
     .popover{
       position: fixed;
       left: 50%; top: 50%;
@@ -168,30 +149,12 @@
       z-index: 20050 !important;
       overflow: hidden;
       box-shadow: 0 22px 60px rgba(0,0,0,0.92);
-      pointer-events:auto !important;
     }
     .popover.show{ display:flex; }
-
-    .pop-head{
-      padding: 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.10);
-      display:flex; justify-content:space-between; align-items:center;
-      font-weight:1000;
-    }
-    .pop-close{
-      cursor:pointer;
-      padding:8px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      user-select:none;
-    }
+    .pop-head{ padding:14px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; justify-content:space-between; align-items:center; font-weight:1000; }
+    .pop-close{ cursor:pointer; padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); user-select:none; }
     .pop-list{ flex:1; overflow:auto; padding:10px; }
-    .pop-item{
-      padding:12px; border-radius:16px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      cursor:pointer; border:1px solid transparent; user-select:none;
-    }
+    .pop-item{ padding:12px; border-radius:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; border:1px solid transparent; }
     .pop-item:hover{ background: rgba(255,255,255,0.06); }
     .pop-item.active{ background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.25); }
     .pop-left{ display:flex; align-items:center; gap:10px; min-width:0; }
@@ -210,21 +173,34 @@
         <button class="btn" id="btnLeave">Çık</button>
       </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:wrap; position:relative; z-index:30;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <div class="pill" id="rolePill">—</div>
         <button class="btn" id="meLangBtn"><span id="meLangTxt">🌐 Dilim</span> ⌵</button>
       </div>
 
       <div class="chat" id="chat"></div>
 
-      <!-- ✅ Yaz -->
       <div class="composer">
-        <input class="textIn" id="txtMsg" placeholder="Mesaj yaz…" maxlength="800" />
-        <button class="sendBtn" id="btnSend">Gönder</button>
+        <textarea class="textArea" id="txtMsg" rows="1" placeholder="Mesaj yaz…"></textarea>
+
+        <!-- küçük mic -->
+        <button class="iconBtn" id="btnMic" aria-label="Mikrofon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+            <path d="M19 11v1a7 7 0 0 1-14 0v-1"/>
+            <path d="M12 19v3"/>
+          </svg>
+        </button>
+
+        <!-- uçak -->
+        <button class="iconBtn primary" id="btnSend" aria-label="Gönder">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 2L11 13"/>
+            <path d="M22 2L15 22l-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
       </div>
 
-      <!-- ✅ Konuş -->
-      <button class="talk" id="btnTalk"><span>🎤 Konuş</span></button>
       <div class="hint" id="hint">Bağlantı bekleniyor…</div>
     </div>
   </div>
@@ -242,6 +218,6 @@
     mountShell();
   </script>
 
-  <script type="module" src="/js/f2f_call.js?v=FINAL_V2"></script>
+  <script type="module" src="/js/f2f_call.js?v=FINAL_V3"></script>
 </body>
 </html>
