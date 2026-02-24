@@ -1,0 +1,250 @@
+<!-- FILE: /pages/f2f_join.html -->
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>italkyAI • Join</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --ai-gradient: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+      --card: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.14);
+      --muted: rgba(255,255,255,0.62);
+      --r: 22px;
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+    .card{
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      background:var(--card);
+      padding:16px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+    }
+    .h1{ margin:0 0 6px; font-size:18px; font-weight:1000; }
+    .p{ margin:0; color:var(--muted); font-size:12.5px; line-height:1.45; }
+
+    .lang-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .lang-trigger{
+      flex:1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 1000;
+      letter-spacing: .3px;
+      cursor: pointer;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      backdrop-filter: blur(12px);
+    }
+
+    .input{
+      width:100%;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(0,0,0,0.25);
+      color:#fff;
+      border-radius:16px;
+      padding:12px 12px;
+      font-weight:1000;
+      letter-spacing:2px;
+      text-transform:uppercase;
+    }
+
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:16px;
+      padding:14px 14px;
+      font-weight:1000;
+      cursor:pointer;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+    }
+    .btnPrimary{
+      color:#0b0b12;
+      background: var(--ai-gradient);
+      box-shadow: 0 18px 46px rgba(99,102,241,0.18);
+    }
+    .btnGhost{
+      color:#fff;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+    }
+    .btn:before{
+      content:"";
+      position:absolute;
+      inset:-80px;
+      background: conic-gradient(from 0deg, rgba(255,255,255,0), rgba(255,255,255,0.20), rgba(255,255,255,0));
+      animation: spin 2.2s linear infinite;
+      opacity: .55;
+      pointer-events:none;
+    }
+    .btn span{ position:relative; z-index:2; }
+    @keyframes spin{ to{ transform: rotate(360deg);} }
+    .btn:active{ transform: scale(.985); }
+
+    /* Popover */
+    .popover{
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(92vw, 360px);
+      height: 420px;
+      background: #0a0a0f;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 24px;
+      display: none;
+      flex-direction: column;
+      z-index: 5000;
+      overflow: hidden;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.92);
+    }
+    .popover.show{ display:flex; }
+    .pop-head{
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 1000;
+      letter-spacing: .3px;
+    }
+    .pop-close{
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      user-select: none;
+    }
+    .pop-list{
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      scrollbar-width: none;
+    }
+    .pop-list::-webkit-scrollbar{ display:none; }
+    .pop-item{
+      padding: 12px 12px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+    .pop-item:hover{ background: rgba(255,255,255,0.06); }
+    .pop-item.active{
+      background: rgba(99,102,241,0.14);
+      border-color: rgba(99,102,241,0.25);
+    }
+    .pop-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .pop-flag{ font-size: 18px; }
+    .pop-name{ font-weight: 900; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .pop-code{ font-weight: 900; font-size: 12px; opacity: .7; }
+
+    /* Scanner */
+    .scanner{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display:none;
+      z-index: 6000;
+      padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+    }
+    .scanner.show{ display:block; }
+    .scanCard{
+      height: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.06);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .scanTop{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 12px;
+      border-bottom:1px solid rgba(255,255,255,0.10);
+      font-weight:1000;
+    }
+    video{ width:100%; height:100%; object-fit:cover; background:#000; }
+    .scanHint{ padding:10px 12px; color:rgba(255,255,255,0.7); font-size:12px; font-weight:800; border-top:1px solid rgba(255,255,255,0.10); }
+  </style>
+</head>
+
+<body>
+  <div id="pageContent">
+    <div class="wrap">
+
+      <div class="card">
+        <p class="h1">Sohbete Bağlan</p>
+        <p class="p">QR oku veya kod gir. Sonra konuşma ekranına geç.</p>
+
+        <div class="lang-row">
+          <button class="lang-trigger" id="hostLangBtn"><span id="hostLangTxt">🇹🇷 HOST: TÜRKÇE</span><span>⌵</span></button>
+          <button class="lang-trigger" id="guestLangBtn"><span id="guestLangTxt">🇬🇧 GUEST: ENGLISH</span><span>⌵</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <button class="btn btnPrimary" id="btnScan"><span>QR Oku</span></button>
+        <div style="height:10px"></div>
+
+        <div class="p" style="margin-bottom:8px">KOD</div>
+        <input class="input" id="roomInput" placeholder="KOD (örn: X8K4PZ)" maxlength="8"/>
+        <div style="height:10px"></div>
+
+        <button class="btn btnPrimary" id="btnJoin"><span>Bağlan</span></button>
+        <div style="height:10px"></div>
+        <button class="btn btnGhost" id="btnBack"><span>Geri</span></button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="popover" id="langPop">
+    <div class="pop-head">
+      <div id="popTitle">DİL SEÇ</div>
+      <div class="pop-close" id="popClose">✕</div>
+    </div>
+    <div class="pop-list" id="popList"></div>
+  </div>
+
+  <div class="scanner" id="scanner">
+    <div class="scanCard">
+      <div class="scanTop">
+        <div>QR Oku</div>
+        <button class="btn btnGhost" id="scanClose"><span>Kapat</span></button>
+      </div>
+      <div style="flex:1;position:relative">
+        <video id="scanVideo" playsinline></video>
+      </div>
+      <div class="scanHint" id="scanHint">
+        Kamerayı QR koda tut. (Destek yoksa “Kod gir” kullan.)
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell();
+  </script>
+
+  <script type="module" src="/js/f2f_connect.js?v=4"></script>
+</body>
+</html>
