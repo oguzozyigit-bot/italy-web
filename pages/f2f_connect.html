@@ -29,7 +29,7 @@
       box-shadow: 0 16px 40px rgba(0,0,0,0.45);
       transform: translateZ(0);
     }
-    .h1{ margin:0 0 6px; font-size:18px; font-weight:900; }
+    .h1{ margin:0 0 6px; font-size:18px; font-weight:1000; }
     .p{ margin:0; color:var(--muted); font-size:12.5px; line-height:1.45; }
 
     .btn{
@@ -42,7 +42,6 @@
       user-select:none;
       position:relative;
       overflow:hidden;
-      transform: translateZ(0);
     }
     .btnPrimary{
       color:#0b0b12;
@@ -54,7 +53,6 @@
       border:1px solid var(--border);
       background: rgba(255,255,255,0.06);
     }
-    /* shimmer */
     .btn:before{
       content:"";
       position:absolute;
@@ -66,24 +64,16 @@
     }
     .btn span{ position:relative; z-index:2; }
     @keyframes spin{ to{ transform: rotate(360deg);} }
-
     .btn:active{ transform: scale(.985); }
-
-    /* subtle floating */
-    .floaty{ animation: floaty 3.6s ease-in-out infinite; }
-    @keyframes floaty{
-      0%,100%{ transform: translateY(0); }
-      50%{ transform: translateY(-3px); }
-    }
   </style>
 </head>
 
 <body>
   <div id="pageContent">
     <div class="wrap">
-      <div class="card floaty">
+      <div class="card">
         <p class="h1">Walkie Talkie • Çoklu Sohbet</p>
-        <p class="p">Her kişi kendi telefonunu kullanır. QR veya kod ile bağlanılır. Bağlantı kurulduğunda otomatik konuşma ekranına geçer.</p>
+        <p class="p">Sınırsız katılımcı. QR veya kod ile girilir. Herkes kendi dilini seçer.</p>
       </div>
 
       <div class="card">
@@ -94,7 +84,6 @@
     </div>
   </div>
 
-  <!-- ✅ Shell -->
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     mountShell();
@@ -102,7 +91,7 @@
 
   <script type="module">
     const go = (u)=>{ try{ location.assign(u); }catch{ location.href=u; } };
-    document.getElementById("goHost").onclick = ()=> go("/pages/f2f_host.html");
+    document.getElementById("goHost").onclick  = ()=> go("/pages/f2f_host.html");
     document.getElementById("goGuest").onclick = ()=> go("/pages/f2f_join.html");
   </script>
 </body>
