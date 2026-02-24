@@ -95,9 +95,7 @@ msgInput.addEventListener("keydown", (e)=>{
   }
 });
 
-$("clearChat")?.addEventListener("click", ()=>{ /* kaldırıldıysa sorun yok */ });
-
-/* ===== participants strip (seen users) ===== */
+/* ===== participants strip ===== */
 const participants = new Map(); // id -> {name,picture}
 function nameChip(n){
   const s = String(n||"").trim();
@@ -147,6 +145,40 @@ function renderParticipants(){
 const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
 upsertParticipant(clientId, MY.name, MY.picture);
 
+/* ===== ECHO / AI-FEELING FIX =====
+   Kendi yolladığımız mesajların hash’ini tutup, server geri yollarsa görmezden geliyoruz.
+*/
+function msgKey(text, lang){
+  return `${norm(lang)}::${String(text||"").trim()}`;
+}
+const sentKeys = new Map(); // key -> timestamp
+function rememberSent(text, lang){
+  const k = msgKey(text, lang);
+  sentKeys.set(k, Date.now());
+  // cleanup (30s)
+  for(const [kk,ts] of sentKeys.entries()){
+    if(Date.now() - ts > 30000) sentKeys.delete(kk);
+  }
+}
+function isEchoOfMine(text, lang, from, fromName){
+  const k = msgKey(text, lang);
+  const ts = sentKeys.get(k);
+  if(!ts) return false;
+
+  // Eğer from/clientId eşleşiyorsa kesin echo
+  if(from && from === clientId) return true;
+
+  // Bazı backendler from’u bozuyor: isim benzerse de echo say
+  const fn = String(fromName||"").trim().toLowerCase();
+  const my = String(MY.name||"").trim().toLowerCase();
+  if(fn && my && (fn === my)) return true;
+
+  // Son çare: çok kısa sürede gelmişse echo
+  if(Date.now() - ts < 6000) return true;
+
+  return false;
+}
+
 /* ===== WS ===== */
 let ws = null;
 
@@ -174,35 +206,35 @@ function connect(){
     let msg=null;
     try{ msg = JSON.parse(ev.data); }catch{ return; }
 
-    // ✅ ODAYA GELEN MESAJ
-    if(msg.type === "translated"){
-      const from = String(msg.from||"");
-      if(from && from === clientId) return; // echo yok
+    if(msg.type !== "translated") return;
 
-      const srcLang = norm(msg.lang || "en");
-      const raw = String(msg.text || "").trim();
-      const fromName = String(msg.from_name || "Katılımcı").trim();
-      const fromPic  = String(msg.from_pic || "").trim();
+    const from = String(msg.from||"").trim();
+    const srcLang = norm(msg.lang || "en");
+    const raw = String(msg.text || "").trim();
+    const fromName = String(msg.from_name || "Katılımcı").trim();
+    const fromPic  = String(msg.from_pic || "").trim();
 
-      upsertParticipant(from || ("p_"+fromName), fromName, fromPic);
-      if(!raw) return;
+    if(!raw) return;
 
-      // ✅ Ben her zaman “karşı tarafı” solda görmeliyim.
-      // Çeviri gerekiyorsa solda çeviriyi göster.
-      let shown = raw;
-      if(srcLang && myLang && srcLang !== myLang){
-        const tr = await translateAI(raw, srcLang, myLang);
-        if(tr) shown = tr;
-      }
+    // ✅ ECHO engelle (AI hissi burada bitiyor)
+    if(isEchoOfMine(raw, srcLang, from, fromName)) return;
 
-      addMessage("left", fromName, fromPic, shown);
-      await speakViaTTS(shown, myLang);
+    upsertParticipant(from || ("p_"+fromName), fromName, fromPic);
+
+    // solda: benim dilimde
+    let shown = raw;
+    if(srcLang && myLang && srcLang !== myLang){
+      const tr = await translateAI(raw, srcLang, myLang);
+      if(tr) shown = tr;
     }
+
+    addMessage("left", fromName, fromPic, shown);
+    await speakViaTTS(shown, myLang);
   };
 }
 connect();
 
-/* ===== chat bubbles (no speaker icons) ===== */
+/* ===== chat bubbles ===== */
 function addMessage(side, name, pic, text){
   const row = document.createElement("div");
   row.className = "msgRow " + (side === "right" ? "right" : "left");
@@ -323,10 +355,13 @@ async function sendTyped(){
 
   const cleaned = await cleanSpeechText(raw, myLang);
 
-  // ✅ Benim mesajım sadece sağda (AI yok)
+  // ✅ benim mesajım sağda
   addMessage("right", MY.name, MY.picture, cleaned);
 
-  // ✅ Odaya gönder
+  // ✅ echo engel için kaydet
+  rememberSent(cleaned, myLang);
+
+  // ✅ odaya gönder
   if(ws && ws.readyState === 1){
     ws.send(JSON.stringify({
       type:"translated",
@@ -380,6 +415,7 @@ async function stopRecord(){
     const cleaned = await cleanSpeechText(raw, myLang);
 
     addMessage("right", MY.name, MY.picture, cleaned);
+    rememberSent(cleaned, myLang);
 
     if(ws && ws.readyState === 1){
       ws.send(JSON.stringify({
