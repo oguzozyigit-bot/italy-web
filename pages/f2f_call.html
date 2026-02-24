@@ -196,22 +196,11 @@
       text-overflow:ellipsis;
     }
 
-    .clearChat{
-      text-align:center;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--befree);
-      padding: 8px 0 6px;
-      user-select:none;
-      cursor:pointer;
-    }
-    .clearChat:active{ opacity:.85; }
-
-    /* CHAT AREA */
+    /* CHAT AREA (✅ clearChat kaldırıldığı için top hesabı güncellendi) */
     #chat.chat-area{
       position: absolute;
       left: 0; right: 0;
-      top: calc(var(--topH) + 44px + 52px); /* topbar + clear + peoplebar approx */
+      top: calc(var(--topH) + 52px); /* topbar + peoplebar */
       bottom: calc(var(--dockH) + var(--sigH) + env(safe-area-inset-bottom));
       padding: 14px 12px;
 
@@ -348,7 +337,7 @@
       stroke-linejoin:round;
       opacity:.95;
     }
-    .send-btn svg{ width:18px; height:18px; } /* smaller plane */
+    .send-btn svg{ width:18px; height:18px; }
 
     .icon-btn.listening{
       border-color: rgba(79,70,229,.45);
@@ -420,7 +409,7 @@
       <div class="peopleScroll" id="peopleScroll"></div>
     </div>
 
-    <div class="clearChat" id="clearChat">Sohbeti Temizle</div>
+    <!-- ✅ Sohbeti Temizle kaldırıldı -->
 
     <div class="chat-area" id="chat"></div>
 
@@ -450,6 +439,6 @@
 
   </div>
 
-  <script type="module" src="/js/f2f_call.js?v=CHAT_UI_FINAL_V2"></script>
+  <script type="module" src="/js/f2f_call.js?v=CHAT_UI_FINAL_V3"></script>
 </body>
 </html>
