@@ -17,8 +17,10 @@
     :root{
       --frameW: min(480px, calc(100vw - 18px));
       --topH: 74px;
+      --peopleH: 56px;
       --dockH: 78px;
       --sigH: 34px;
+      --gap: 10px;
 
       --bg:#030014;
       --text: rgba(255,255,255,.92);
@@ -72,7 +74,7 @@
       }
     }
 
-    /* TOP BAR */
+    /* ===== TOP BAR ===== */
     .topbar{
       position: sticky;
       top: 0;
@@ -86,8 +88,22 @@
       background: rgba(0,0,0,.35);
       backdrop-filter: blur(12px);
     }
-    .brand{
-      display:flex; flex-direction:column; line-height:1; user-select:none;
+    .leftControls{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .backBtn{
+      width:44px;height:44px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color:#fff;
+      font-size:20px;font-weight:1000;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer; user-select:none;
+    }
+    .backBtn:active{ transform: scale(.96); }
+
+    .mini-brand{
+      display:flex; flex-direction:column;
+      user-select:none; cursor:pointer; line-height:1;
+      margin-top: 2px;
     }
     .logo-line{
       font-family:'Space Grotesk', sans-serif;
@@ -112,9 +128,7 @@
       text-transform: uppercase;
     }
 
-    .top-actions{
-      display:flex; align-items:center; gap:10px;
-    }
+    .rightControls{ display:flex; align-items:center; gap:10px; min-width:0; }
     .langSelect{
       height: 38px;
       border-radius: 14px;
@@ -139,21 +153,24 @@
     }
     .exitBtn:active{ transform: scale(.96); }
 
-    /* PARTICIPANTS STRIP */
+    /* ===== PARTICIPANTS STRIP ===== */
     .peopleBar{
-      z-index: 2500;
-      background: rgba(0,0,0,.22);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      padding: 8px 10px;
+      height: var(--peopleH);
       display:flex;
       align-items:center;
       gap:10px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,.22);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      z-index: 2500;
     }
     .peopleCount{
       font-size:12px;
       font-weight:900;
       color: rgba(255,255,255,.70);
       white-space:nowrap;
+      min-width: 18px;
+      text-align:center;
     }
     .peopleScroll{
       flex:1;
@@ -196,11 +213,11 @@
       text-overflow:ellipsis;
     }
 
-    /* CHAT AREA (✅ clearChat kaldırıldığı için top hesabı güncellendi) */
+    /* ===== CHAT AREA ===== */
     #chat.chat-area{
       position: absolute;
       left: 0; right: 0;
-      top: calc(var(--topH) + 52px); /* topbar + peoplebar */
+      top: calc(var(--topH) + var(--peopleH));
       bottom: calc(var(--dockH) + var(--sigH) + env(safe-area-inset-bottom));
       padding: 14px 12px;
 
@@ -275,7 +292,7 @@
       text-align:right;
     }
 
-    /* INPUT DOCK */
+    /* ===== INPUT DOCK ===== */
     .input-dock{
       position: fixed;
       left: 50%;
@@ -328,8 +345,9 @@
       cursor:pointer; user-select:none;
       flex-shrink:0;
     }
+
     .icon-btn svg, .send-btn svg{
-      width:20px; height:20px;
+      width:21px; height:21px;
       stroke: rgba(255,255,255,.88);
       fill:none;
       stroke-width:2;
@@ -337,7 +355,6 @@
       stroke-linejoin:round;
       opacity:.95;
     }
-    .send-btn svg{ width:18px; height:18px; }
 
     .icon-btn.listening{
       border-color: rgba(79,70,229,.45);
@@ -359,7 +376,7 @@
       100%{ transform: scale(0.92); opacity:.75; }
     }
 
-    /* SIGNATURE only */
+    /* ===== SIGNATURE only ===== */
     .signatureBar{
       position: fixed;
       left: 50%;
@@ -393,23 +410,28 @@
   <div class="mobile-frame" id="mobileFrame">
 
     <div class="topbar">
-      <div class="brand">
-        <div class="logo-line"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
-        <div class="logo-slogan">BE FREE</div>
+      <div class="leftControls">
+        <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
+
+        <div class="mini-brand" id="logoHome" title="Ana sayfa">
+          <div class="logo-line">
+            <span class="logo-main">italky</span><span class="logo-ai">AI</span>
+          </div>
+          <div class="logo-slogan">BE FREE</div>
+        </div>
       </div>
 
-      <div class="top-actions">
+      <div class="rightControls">
         <select class="langSelect" id="langSelect" title="Dil Seç"></select>
         <button class="exitBtn" id="exitBtn" title="Çık">✕</button>
       </div>
     </div>
 
+    <!-- ✅ Katılımcılar şeridi burada -->
     <div class="peopleBar">
-      <div class="peopleCount" id="peopleCount">0</div>
+      <div class="peopleCount" id="peopleCount">1</div>
       <div class="peopleScroll" id="peopleScroll"></div>
     </div>
-
-    <!-- ✅ Sohbeti Temizle kaldırıldı -->
 
     <div class="chat-area" id="chat"></div>
 
@@ -439,6 +461,7 @@
 
   </div>
 
-  <script type="module" src="/js/f2f_call.js?v=CHAT_UI_FINAL_V3"></script>
+  <!-- ✅ AI chat script DEĞİL, WalkieTalkie script -->
+  <script type="module" src="/js/f2f_call.js?v=CHAT_WT_FINAL_001"></script>
 </body>
 </html>
