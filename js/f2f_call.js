@@ -95,7 +95,7 @@ msgInput.addEventListener("keydown", (e)=>{
   }
 });
 
-/* ===== participants strip ===== */
+/* ===== participants strip (seen users) ===== */
 const participants = new Map(); // id -> {name,picture}
 function nameChip(n){
   const s = String(n||"").trim();
@@ -145,37 +145,89 @@ function renderParticipants(){
 const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
 upsertParticipant(clientId, MY.name, MY.picture);
 
-/* ===== ECHO / AI-FEELING FIX =====
-   Kendi yolladığımız mesajların hash’ini tutup, server geri yollarsa görmezden geliyoruz.
-*/
-function msgKey(text, lang){
-  return `${norm(lang)}::${String(text||"").trim()}`;
+/* ===== HARD RULES (no OpenAI/Gemini names + identity lock) ===== */
+function stripForbidden(text){
+  let s = String(text||"");
+  // asla görünmesin
+  const bad = [/openai/ig, /gemini/ig, /chatgpt/ig, /gpt[- ]?\d+/ig];
+  for(const re of bad) s = s.replace(re, "");
+  return s.replace(/\s{2,}/g," ").trim();
 }
-const sentKeys = new Map(); // key -> timestamp
-function rememberSent(text, lang){
-  const k = msgKey(text, lang);
-  sentKeys.set(k, Date.now());
-  // cleanup (30s)
-  for(const [kk,ts] of sentKeys.entries()){
-    if(Date.now() - ts > 30000) sentKeys.delete(kk);
-  }
-}
-function isEchoOfMine(text, lang, from, fromName){
-  const k = msgKey(text, lang);
-  const ts = sentKeys.get(k);
-  if(!ts) return false;
 
-  // Eğer from/clientId eşleşiyorsa kesin echo
+function isIdentityQuestionTR(text){
+  const s = String(text||"").toLowerCase();
+  return (
+    s.includes("sen kimsin") ||
+    s.includes("seni kim yaratt") ||
+    s.includes("seni kim yaptı") ||
+    s.includes("senin programcın") ||
+    s.includes("programcın kim") ||
+    s.includes("seni kim yazdı") ||
+    s.includes("hangi model") ||
+    s.includes("openai") ||
+    s.includes("gemini") ||
+    s.includes("chatgpt")
+  );
+}
+
+function identityAnswer(){
+  // kilitli cevap
+  return "Ben italky Academy tarafından geliştirildim. Programcım Oğuz Özyiğit.";
+}
+
+/* ===== ECHO KILLER (çok sert) =====
+   Server senin mesajını farklı biçimde geri yolluyor olabilir.
+   Bu yüzden sadece “exact değil”, benzerlik de yakalayıp kesiyoruz.
+*/
+function tokenize(s){
+  return String(s||"")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu," ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 60);
+}
+function jaccard(a,b){
+  const A = new Set(tokenize(a));
+  const B = new Set(tokenize(b));
+  if(A.size===0 || B.size===0) return 0;
+  let inter=0;
+  for(const x of A) if(B.has(x)) inter++;
+  const uni = A.size + B.size - inter;
+  return uni ? inter/uni : 0;
+}
+
+const sentLog = []; // {text, lang, t}
+function rememberSent(text, lang){
+  sentLog.push({ text:String(text||"").trim(), lang:norm(lang), t:Date.now() });
+  // 30 saniyelik tut
+  const now = Date.now();
+  while(sentLog.length && (now - sentLog[0].t > 30000)) sentLog.shift();
+}
+
+function isEcho(msgText, msgLang, msgFrom, msgFromName){
+  const txt = String(msgText||"").trim();
+  const lang = norm(msgLang||"");
+  const from = String(msgFrom||"").trim();
+  const fromName = String(msgFromName||"").trim().toLowerCase();
+  const myName = String(MY.name||"").trim().toLowerCase();
+
+  // 1) from eşleşirse kesin echo
   if(from && from === clientId) return true;
 
-  // Bazı backendler from’u bozuyor: isim benzerse de echo say
-  const fn = String(fromName||"").trim().toLowerCase();
-  const my = String(MY.name||"").trim().toLowerCase();
-  if(fn && my && (fn === my)) return true;
+  // 2) isim eşleşirse büyük ihtimal echo (backend from’u bozuyorsa)
+  if(fromName && myName && fromName === myName) return true;
 
-  // Son çare: çok kısa sürede gelmişse echo
-  if(Date.now() - ts < 6000) return true;
+  // 3) son 30 sn içinde gönderdiğim mesajlarla benzerlik
+  for(const it of sentLog){
+    // çok yakın zamanda geldiyse ve benzerlik yüksekse echo kabul
+    const sim = jaccard(it.text, txt);
+    if(sim >= 0.72) return true;
 
+    // dil farklı olsa bile aynı cümle “çevirilmiş echo” olabilir:
+    // yine sim 0.55 üstüyse ve 8 sn içindeyse kes
+    if(Date.now() - it.t < 8000 && sim >= 0.55) return true;
+  }
   return false;
 }
 
@@ -206,27 +258,40 @@ function connect(){
     let msg=null;
     try{ msg = JSON.parse(ev.data); }catch{ return; }
 
+    // Sadece user mesajlarını al: translated
     if(msg.type !== "translated") return;
 
     const from = String(msg.from||"").trim();
     const srcLang = norm(msg.lang || "en");
-    const raw = String(msg.text || "").trim();
+    let raw = String(msg.text || "").trim();
     const fromName = String(msg.from_name || "Katılımcı").trim();
     const fromPic  = String(msg.from_pic || "").trim();
 
     if(!raw) return;
 
-    // ✅ ECHO engelle (AI hissi burada bitiyor)
-    if(isEchoOfMine(raw, srcLang, from, fromName)) return;
+    // ✅ yasak kelime süpür
+    raw = stripForbidden(raw);
+    if(!raw) return;
+
+    // ✅ AI/bot/server mesajlarını tamamen reddet
+    const lowerName = fromName.toLowerCase();
+    if(lowerName.includes("ai") || lowerName.includes("bot") || lowerName.includes("assistant") || lowerName.includes("server")){
+      return;
+    }
+
+    // ✅ echo killer: burada AI hissi bitiyor
+    if(isEcho(raw, srcLang, from, fromName)) return;
 
     upsertParticipant(from || ("p_"+fromName), fromName, fromPic);
 
-    // solda: benim dilimde
+    // Solda: benim dilimde göster
     let shown = raw;
     if(srcLang && myLang && srcLang !== myLang){
       const tr = await translateAI(raw, srcLang, myLang);
-      if(tr) shown = tr;
+      if(tr) shown = stripForbidden(tr);
     }
+
+    if(!shown) return;
 
     addMessage("left", fromName, fromPic, shown);
     await speakViaTTS(shown, myLang);
@@ -347,21 +412,29 @@ async function cleanSpeechText(text, lang){
 
 /* ===== SEND typed ===== */
 async function sendTyped(){
-  const raw = String(msgInput.value||"").trim();
+  let raw = String(msgInput.value||"").trim();
   if(!raw) return;
 
   msgInput.value = "";
   growTA();
 
-  const cleaned = await cleanSpeechText(raw, myLang);
+  // ✅ kimlik sorusu geldiyse: sabit cevap (kilit)
+  if(isIdentityQuestionTR(raw)){
+    raw = identityAnswer();
+  }
 
-  // ✅ benim mesajım sağda
+  raw = stripForbidden(raw);
+  if(!raw) return;
+
+  const cleaned = stripForbidden(await cleanSpeechText(raw, myLang));
+
+  // benim mesajım sağda
   addMessage("right", MY.name, MY.picture, cleaned);
 
-  // ✅ echo engel için kaydet
+  // echo engel
   rememberSent(cleaned, myLang);
 
-  // ✅ odaya gönder
+  // odaya gönder
   if(ws && ws.readyState === 1){
     ws.send(JSON.stringify({
       type:"translated",
@@ -406,13 +479,19 @@ async function stopRecord(){
 
     const blob = new Blob(recJob.chunks, { type: recJob.mr.mimeType || "audio/webm" });
     recJob=null;
-
     if(!blob || blob.size < 800) return;
 
-    const raw = await sttBlob(blob, myLang);
+    let raw = await sttBlob(blob, myLang);
     if(!raw) return;
 
-    const cleaned = await cleanSpeechText(raw, myLang);
+    if(isIdentityQuestionTR(raw)){
+      raw = identityAnswer();
+    }
+
+    raw = stripForbidden(raw);
+    if(!raw) return;
+
+    const cleaned = stripForbidden(await cleanSpeechText(raw, myLang));
 
     addMessage("right", MY.name, MY.picture, cleaned);
     rememberSent(cleaned, myLang);
