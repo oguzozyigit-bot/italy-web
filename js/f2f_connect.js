@@ -1,4 +1,7 @@
 // FILE: /js/f2f_connect.js
+import { STORAGE_KEY } from "/js/config.js";
+import { shortDisplayName } from "/js/ui_shell.js";
+
 const API_BASE = "https://italky-api.onrender.com";
 const $ = (id)=>document.getElementById(id);
 
@@ -10,8 +13,24 @@ function randCode(n=6){
   let s=""; for(let i=0;i<n;i++) s += a[Math.floor(Math.random()*a.length)];
   return s;
 }
+
 function wsUrl(room){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
+}
+
+function getProfileFromCache(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return { name:"Kullanıcı", picture:"", lang:(localStorage.getItem("f2f_my_lang")||"tr") };
+    const u = JSON.parse(raw);
+    const full = u.display_name || u.full_name || u.name || "";
+    const name = shortDisplayName(full || "Kullanıcı");
+    const picture = u.picture || u.avatar || u.avatar_url || "";
+    const lang = localStorage.getItem("f2f_my_lang") || "tr";
+    return { name, picture, lang };
+  }catch{
+    return { name:"Kullanıcı", picture:"", lang:(localStorage.getItem("f2f_my_lang")||"tr") };
+  }
 }
 
 async function wsJoinCheck(room, timeoutMs=2500){
@@ -44,14 +63,85 @@ async function wsJoinCheck(room, timeoutMs=2500){
   });
 }
 
+/* ✅ HOST: Odayı gerçekten oluştur */
+async function createRoomOnBackend(room){
+  return new Promise((resolve)=>{
+    const me = getProfileFromCache();
+    let ok = false;
+
+    let ws;
+    try{ ws = new WebSocket(wsUrl(room)); }catch{ return resolve(false); }
+
+    const to = setTimeout(()=>{
+      try{ ws.close(); }catch{}
+      resolve(false);
+    }, 3500);
+
+    ws.onopen = ()=>{
+      // NEW backend protocol
+      ws.send(JSON.stringify({
+        type: "create",
+        room,
+        from: "host",
+        from_name: me.name,
+        from_pic: me.picture || "",
+        me_lang: (me.lang || "tr")
+      }));
+      // create başarılıysa room_created gelir; gelmezse open olsa bile 1sn sonra true say
+      setTimeout(()=>{
+        if(!ok){
+          ok = true;
+          clearTimeout(to);
+          try{ ws.close(); }catch{}
+          resolve(true);
+        }
+      }, 900);
+    };
+
+    ws.onmessage = (ev)=>{
+      try{
+        const msg = JSON.parse(ev.data);
+        if(msg.type === "room_created"){
+          ok = true;
+          clearTimeout(to);
+          try{ ws.close(); }catch{}
+          resolve(true);
+        }
+      }catch{}
+    };
+
+    ws.onerror = ()=>{
+      clearTimeout(to);
+      try{ ws.close(); }catch{}
+      resolve(false);
+    };
+
+    ws.onclose = ()=>{
+      if(!ok){
+        clearTimeout(to);
+        resolve(false);
+      }
+    };
+  });
+}
+
 /* ---------- HOST PAGE ---------- */
-function initHost(){
-  const room = qs("room") || randCode(6);
+async function initHost(){
+  const room = (qs("room") || randCode(6)).toUpperCase();
+
   $("roomCode").textContent = room;
 
-  // QR join link
   const joinUrl = `https://italky.ai/pages/f2f_join.html?join=${encodeURIComponent(room)}`;
   $("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
+
+  // ✅ oda hazırla
+  const statusEl = $("hostStatus");
+  if(statusEl) statusEl.textContent = "Oda hazırlanıyor…";
+
+  const created = await createRoomOnBackend(room);
+  if(statusEl){
+    statusEl.textContent = created ? "Oda hazır ✅" : "Oda oluşturulamadı ❌ (internet/backend)";
+  }
 
   $("btnCopy")?.addEventListener("click", async ()=>{
     try{
@@ -63,7 +153,7 @@ function initHost(){
     }
   });
 
-  // ✅ Host odasını backend’de GERÇEKTEN oluştur
+  // call sayfasında host olarak devam
   $("btnGoCall")?.addEventListener("click", ()=>{
     go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`);
   });
@@ -177,8 +267,9 @@ async function joinFlow(){
 
   const ok = await wsJoinCheck(room);
   if(!ok){
-    setJoinHint("❌ Kod hatalı olabilir veya sohbet odası kapanmış olabilir.");
-    alert("Kod hatalı olabilir veya sohbet odası kapanmış olabilir.");
+    const msg = "❌ Kod hatalı olabilir veya sohbet odası kapanmış olabilir.";
+    setJoinHint(msg);
+    alert(msg);
     return;
   }
 
