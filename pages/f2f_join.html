@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>italkyAI • Join</title>
 
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
@@ -23,7 +26,6 @@
     .h1{ margin:0 0 6px; font-size:18px; font-weight:1000; }
     .p{ margin:0; color:var(--muted); font-size:12.5px; line-height:1.45; }
 
-    .lang-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
     .lang-trigger{
       width:100%;
       background: rgba(255,255,255,0.06);
@@ -33,14 +35,12 @@
       color: #fff;
       font-size: 12px;
       font-weight: 1000;
-      letter-spacing: .3px;
       cursor: pointer;
       user-select: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      backdrop-filter: blur(12px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
 
     .input{
@@ -57,14 +57,8 @@
 
     .btn{
       width:100%;
-      border:none;
-      border-radius:16px;
-      padding:14px 14px;
-      font-weight:1000;
-      cursor:pointer;
-      user-select:none;
-      position:relative;
-      overflow:hidden;
+      border:none;border-radius:16px;padding:14px 14px;
+      font-weight:1000;cursor:pointer;user-select:none;position:relative;overflow:hidden;
     }
     .btnPrimary{ color:#0b0b12; background: var(--ai-gradient); box-shadow: 0 18px 46px rgba(99,102,241,0.18); }
     .btnGhost{ color:#fff; border:1px solid var(--border); background: rgba(255,255,255,0.06); }
@@ -77,72 +71,40 @@
     @keyframes spin{ to{ transform: rotate(360deg);} }
     .btn:active{ transform: scale(.985); }
 
-    .popover{
-      position: fixed; left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      width: min(92vw, 360px); height: 420px;
-      background: #0a0a0f;
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 24px;
-      display: none; flex-direction: column;
-      z-index: 5000; overflow: hidden;
-      box-shadow: 0 22px 60px rgba(0,0,0,0.92);
+    /* ✅ Popover: footer üstünde KİLİT */
+    .popover{ z-index: 20050 !important; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:min(92vw,360px); height:420px; background:#0a0a0f; border:1px solid rgba(255,255,255,0.16);
+      border-radius:24px; display:none; flex-direction:column; overflow:hidden; box-shadow:0 22px 60px rgba(0,0,0,0.92);
     }
     .popover.show{ display:flex; }
-    .pop-head{ padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.10); display:flex; justify-content:space-between; align-items:center; font-weight:1000; }
-    .pop-close{ cursor:pointer; padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); }
-    .pop-list{ flex:1; overflow-y:auto; padding:10px; scrollbar-width:none; }
-    .pop-list::-webkit-scrollbar{ display:none; }
+    .pop-head{ padding:14px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; justify-content:space-between; align-items:center; font-weight:1000; }
+    .pop-close{ cursor:pointer; padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); }
+    .pop-list{ flex:1; overflow:auto; padding:10px; }
     .pop-item{ padding:12px; border-radius:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; border:1px solid transparent; }
-    .pop-item:hover{ background: rgba(255,255,255,0.06); }
-    .pop-item.active{ background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.25); }
+    .pop-item:hover{ background:rgba(255,255,255,0.06); }
+    .pop-item.active{ background:rgba(99,102,241,0.14); border-color:rgba(99,102,241,0.25); }
     .pop-left{ display:flex; align-items:center; gap:10px; min-width:0; }
     .pop-flag{ font-size:18px; }
     .pop-name{ font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
     .pop-code{ font-weight:900; font-size:12px; opacity:.7; }
 
-    /* Scanner */
-    .scanner{
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.85);
-      display:none;
-      z-index: 6000;
-      padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
-    }
+    /* ✅ Scanner: footer üstünde KİLİT */
+    .scanner{ z-index: 20060 !important; position:fixed; inset:0; background:rgba(0,0,0,0.88); display:none; padding:14px; }
     .scanner.show{ display:block; }
-    .scanCard{
-      height: 100%;
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 22px;
-      background: rgba(255,255,255,0.06);
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-    }
-    .scanTop{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:12px 12px;
-      border-bottom:1px solid rgba(255,255,255,0.10);
-      font-weight:1000;
-    }
+    .scanCard{ height:100%; border:1px solid rgba(255,255,255,0.14); border-radius:22px; background:rgba(255,255,255,0.06); display:flex; flex-direction:column; overflow:hidden; }
+    .scanTop{ display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.10); font-weight:1000; }
+    .scanHint{ padding:10px 12px; color:rgba(255,255,255,0.7); font-size:12px; font-weight:900; border-top:1px solid rgba(255,255,255,0.10); }
     video{ width:100%; height:100%; object-fit:cover; background:#000; }
-    .scanHint{ padding:10px 12px; color:rgba(255,255,255,0.7); font-size:12px; font-weight:800; border-top:1px solid rgba(255,255,255,0.10); }
   </style>
 </head>
 
 <body>
   <div id="pageContent">
     <div class="wrap">
-
       <div class="card">
         <p class="h1">Sohbete Bağlan</p>
-        <p class="p">QR oku veya kod gir. Katılımcı sayısı sınırsız. Herkes kendi dilini seçer.</p>
-
-        <div class="lang-row">
-          <button class="lang-trigger" id="meLangBtn">
-            <span id="meLangTxt">🌐 BENİM DİLİM</span><span>⌵</span>
-          </button>
-        </div>
+        <p class="p">QR oku veya kod gir. Herkes kendi dilini seçer.</p>
+        <button class="lang-trigger" id="meLangBtn"><span id="meLangTxt">🌐 BENİM DİLİM</span><span>⌵</span></button>
       </div>
 
       <div class="card">
@@ -150,22 +112,18 @@
         <div style="height:10px"></div>
 
         <div class="p" style="margin-bottom:8px">KOD</div>
-        <input class="input" id="roomInput" placeholder="KOD (örn: X8K4PZ)" maxlength="8"/>
+        <input class="input" id="roomInput" placeholder="KOD (örn: X8K4PZ)" maxlength="12"/>
         <div style="height:10px"></div>
 
         <button class="btn btnPrimary" id="btnJoin"><span>Bağlan</span></button>
         <div style="height:10px"></div>
         <button class="btn btnGhost" id="btnBack"><span>Geri</span></button>
       </div>
-
     </div>
   </div>
 
   <div class="popover" id="langPop">
-    <div class="pop-head">
-      <div>BENİM DİLİM</div>
-      <div class="pop-close" id="popClose">✕</div>
-    </div>
+    <div class="pop-head"><div>Benim Dilim</div><div class="pop-close" id="popClose">✕</div></div>
     <div class="pop-list" id="popList"></div>
   </div>
 
@@ -176,11 +134,9 @@
         <button class="btn btnGhost" id="scanClose"><span>Kapat</span></button>
       </div>
       <div style="flex:1;position:relative">
-        <video id="scanVideo" playsinline></video>
+        <video id="scanVideo" autoplay muted playsinline></video>
       </div>
-      <div class="scanHint" id="scanHint">
-        Kamerayı QR koda tut. (Destek yoksa “Kod gir” kullan.)
-      </div>
+      <div class="scanHint" id="scanHint">Kamera açılıyor…</div>
     </div>
   </div>
 
@@ -189,6 +145,6 @@
     mountShell();
   </script>
 
-  <script type="module" src="/js/f2f_connect.js?v=5"></script>
+  <script type="module" src="/js/f2f_connect.js?v=LOCKED_V6"></script>
 </body>
 </html>
