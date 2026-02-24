@@ -9,6 +9,7 @@ const $ = (id)=>document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const room = (params.get("room")||"").trim().toUpperCase();
 const role = (params.get("role")||"").trim().toLowerCase();
+
 let myLang = (params.get("me_lang")||localStorage.getItem("f2f_my_lang")||"tr").trim().toLowerCase();
 localStorage.setItem("f2f_my_lang", myLang);
 
@@ -18,13 +19,6 @@ const LANGS = Array.isArray(LANG_POOL) ? LANG_POOL : [
 ];
 
 function norm(code){ return String(code||"").toLowerCase().trim(); }
-function langLabel(code){
-  const c = norm(code);
-  const item = LANGS.find(x=>norm(x.code)===c);
-  const flag = item?.flag || "🌐";
-  const name = item?.name || c.toUpperCase();
-  return `${flag} ${name}`;
-}
 
 function getProfileFromCache(){
   try{
@@ -39,30 +33,18 @@ function getProfileFromCache(){
     return { name:"Kullanıcı", picture:"" };
   }
 }
-const MY_PROFILE = getProfileFromCache();
+const MY = getProfileFromCache();
 
+/* ===== UI refs ===== */
 const chat = $("chat");
 const msgInput = $("msgInput");
 const micBtn = $("micBtn");
 const sendBtn = $("sendBtn");
 const langSelect = $("langSelect");
+const peopleScroll = $("peopleScroll");
+const peopleCount = $("peopleCount");
 
-/* Topbar setup */
-$("roomInfo").textContent = "ROOM: " + (room || "—");
-$("userName").textContent = MY_PROFILE.name || "Kullanıcı";
-
-if(MY_PROFILE.picture){
-  $("avatarImg").src = MY_PROFILE.picture;
-  $("avatarImg").style.display = "block";
-  $("avatarFallback").style.display = "none";
-}else{
-  $("avatarFallback").textContent = (MY_PROFILE.name||"K")[0]?.toUpperCase() || "•";
-}
-$("avatarBtn").onclick = ()=> location.href="/pages/profile.html";
-$("logoHome").onclick = ()=> location.href="/pages/home.html";
-$("backBtn").onclick = ()=> location.href="/pages/f2f_connect.html";
-
-/* Populate lang select (always clickable) */
+/* ===== language select ===== */
 (function initLangSelect(){
   langSelect.innerHTML = LANGS.map(l=>{
     const c = norm(l.code);
@@ -76,11 +58,33 @@ $("backBtn").onclick = ()=> location.href="/pages/f2f_connect.html";
   });
 })();
 
-/* Auto-grow textarea + send on Enter */
+/* ===== exit confirm (multilang minimal) ===== */
+const I18N = {
+  tr: { confirm:"Sohbetten çıkmak istiyor musunuz?", yes:"Evet", no:"Hayır" },
+  en: { confirm:"Do you want to leave the chat?", yes:"Yes", no:"No" },
+  de: { confirm:"Möchten Sie den Chat verlassen?", yes:"Ja", no:"Nein" },
+  fr: { confirm:"Voulez-vous quitter le chat ?", yes:"Oui", no:"Non" },
+  es: { confirm:"¿Quieres salir del chat?", yes:"Sí", no:"No" },
+  it: { confirm:"Vuoi uscire dalla chat?", yes:"Sì", no:"No" },
+  ru: { confirm:"Выйти из чата?", yes:"Да", no:"Нет" },
+  ar: { confirm:"هل تريد مغادرة الدردشة؟", yes:"نعم", no:"لا" },
+};
+function t(key){
+  const pack = I18N[myLang] || I18N.en;
+  return pack[key] || I18N.en[key] || "";
+}
+
+$("exitBtn").onclick = ()=>{
+  const ok = confirm(t("confirm"));
+  if(ok) location.href = "/pages/home.html";
+};
+
+/* ===== textarea auto-grow + enter send ===== */
 function growTA(){
   msgInput.style.height = "0px";
   const h = Math.min(120, msgInput.scrollHeight);
   msgInput.style.height = h + "px";
+  chat.scrollTop = chat.scrollHeight;
 }
 msgInput.addEventListener("input", growTA);
 setTimeout(growTA, 0);
@@ -92,40 +96,87 @@ msgInput.addEventListener("keydown", (e)=>{
   }
 });
 
-$("clearChat").onclick = ()=>{
-  chat.innerHTML = "";
-};
+/* ===== clear ===== */
+$("clearChat").onclick = ()=>{ chat.innerHTML = ""; };
 
-/* ===== WS ===== */
-let ws = null;
+/* ===== participants strip ===== */
+const participants = new Map(); // id -> {name,picture}
+function nameChip(n){
+  // “Oğuz Ö.” -> “Oğuz.Ö”
+  const s = String(n||"").trim();
+  if(!s) return "•";
+  return s.replace(/\s+([A-ZÇĞİÖŞÜ])\./, ".$1").replace(/\s+/g," ");
+}
+function upsertParticipant(id, name, picture){
+  if(!id) return;
+  if(!participants.has(id)){
+    participants.set(id, { name: name || "User", picture: picture || "" });
+  }else{
+    const p = participants.get(id);
+    p.name = name || p.name;
+    p.picture = picture || p.picture;
+  }
+  renderParticipants();
+}
+function renderParticipants(){
+  peopleScroll.innerHTML = "";
+  for(const [id,p] of participants.entries()){
+    const item = document.createElement("div");
+    item.className = "pItem";
+
+    const av = document.createElement("div");
+    av.className = "pAvatar";
+    if(p.picture){
+      const img = document.createElement("img");
+      img.src = p.picture;
+      img.referrerPolicy = "no-referrer";
+      av.appendChild(img);
+    }else{
+      av.textContent = (String(p.name||"•")[0]||"•").toUpperCase();
+    }
+
+    const nm = document.createElement("div");
+    nm.className = "pName";
+    nm.textContent = nameChip(p.name);
+
+    item.appendChild(av);
+    item.appendChild(nm);
+    peopleScroll.appendChild(item);
+  }
+  peopleCount.textContent = String(participants.size);
+}
+
+/* self add */
 const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
+upsertParticipant(clientId, MY.name, MY.picture);
+
+/* ===== WS connect ===== */
+let ws = null;
 
 function wsUrl(){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
 }
 
 function connect(){
-  if(!room) return addMeta("Room eksik");
+  if(!room){
+    // room yoksa yine de UI çalışsın
+    return;
+  }
   ws = new WebSocket(wsUrl());
-
   ws.onopen = ()=>{
     ws.send(JSON.stringify({
-      type:"hello", room, role,
+      type:"hello",
+      room,
+      role,
       from: clientId,
-      from_name: MY_PROFILE.name,
+      from_name: MY.name,
+      from_pic: MY.picture || "",
       me_lang: myLang
     }));
-    addMeta("Bağlandı ✅");
   };
-
   ws.onmessage = async (ev)=>{
     let msg=null;
     try{ msg = JSON.parse(ev.data); }catch{ return; }
-
-    if(msg.type === "info"){
-      addMeta(String(msg.message||"info"));
-      return;
-    }
 
     if(msg.type === "translated"){
       const from = String(msg.from||"");
@@ -133,10 +184,14 @@ function connect(){
 
       const srcLang = norm(msg.lang || "en");
       const raw = String(msg.text || "").trim();
-      const name = String(msg.from_name || "Katılımcı").trim();
+      const fromName = String(msg.from_name || "Katılımcı").trim();
+      const fromPic = String(msg.from_pic || "").trim();
+
+      upsertParticipant(from || ("p_"+fromName), fromName, fromPic);
+
       if(!raw) return;
 
-      addMessage("left", name, raw, false, null);
+      addMessage("left", fromName, fromPic, raw);
 
       let out = raw;
       if(srcLang && myLang && srcLang !== myLang){
@@ -144,41 +199,28 @@ function connect(){
         if(tr) out = tr;
       }
 
-      addMessage("right", MY_PROFILE.name, out, true, myLang);
+      addMessage("right", MY.name, MY.picture, out);
       await speakViaTTS(out, myLang);
     }
   };
 }
 connect();
 
-/* ===== UI helpers ===== */
-function avatarNode(src, name){
-  const a = document.createElement("div");
-  a.className = "msgAvatar";
-  if(src){
-    const img = document.createElement("img");
-    img.src = src;
-    img.referrerPolicy = "no-referrer";
-    a.appendChild(img);
-  }else{
-    a.textContent = (String(name||"•")[0]||"•").toUpperCase();
-  }
-  return a;
-}
-
-function addMeta(text){
-  const b = document.createElement("div");
-  b.className = "bubble meta";
-  b.textContent = text;
-  chat.appendChild(b);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function addMessage(side, name, text, speakable=false, lang=null){
+/* ===== chat bubbles (no speaker icons) ===== */
+function addMessage(side, name, pic, text){
   const row = document.createElement("div");
   row.className = "msgRow " + (side === "right" ? "right" : "left");
 
-  const av = avatarNode(side==="right" ? MY_PROFILE.picture : "", name);
+  const av = document.createElement("div");
+  av.className = "msgAvatar";
+  if(pic){
+    const img = document.createElement("img");
+    img.src = pic;
+    img.referrerPolicy = "no-referrer";
+    av.appendChild(img);
+  }else{
+    av.textContent = (String(name||"•")[0]||"•").toUpperCase();
+  }
 
   const wrap = document.createElement("div");
   wrap.className = "bubbleWrap";
@@ -192,19 +234,6 @@ function addMessage(side, name, text, speakable=false, lang=null){
   bubble.className = "bubble " + (side === "right" ? "user" : "bot");
   bubble.textContent = text;
 
-  if(speakable){
-    const sp = document.createElement("div");
-    sp.className = "spkBtn";
-    sp.innerHTML = `
-      <svg viewBox="0 0 24 24">
-        <path d="M3 10v4h4l5 4V6L7 10H3z"></path>
-        <path d="M16 8c1.5 1 1.5 7 0 8"></path>
-        <path d="M19 6c3 2 3 10 0 12"></path>
-      </svg>`;
-    sp.onclick = ()=> speakViaTTS(text, lang || myLang || "en");
-    bubble.appendChild(sp);
-  }
-
   wrap.appendChild(bubble);
 
   row.appendChild(av);
@@ -214,7 +243,7 @@ function addMessage(side, name, text, speakable=false, lang=null){
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* ===== API calls ===== */
+/* ===== API: translate + tts + stt ===== */
 async function translateAI(text, from, to){
   const res = await fetch(`${API_BASE}/api/translate_ai`,{
     method:"POST",
@@ -259,7 +288,6 @@ async function speakViaTTS(text, lang){
   await audioObj.play();
 }
 
-/* ===== STT (MediaRecorder + /api/stt) ===== */
 function pickMime(){
   const cands = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
   for(const m of cands){
@@ -294,48 +322,46 @@ async function parseCommand(text){
   const r = await fetch(`${API_BASE}/api/command_parse`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text: t, ui_lang: "tr" })
+    body: JSON.stringify({ text: t, ui_lang: myLang })
   });
   if(!r.ok) return null;
   return await r.json().catch(()=>null);
 }
 
-/* ===== SEND typed ===== */
+/* ===== send typed ===== */
 async function sendTyped(){
   const raw = String(msgInput.value||"").trim();
   if(!raw) return;
+
   msgInput.value = "";
   growTA();
 
-  // command
+  // optional: voice command via text too
   const cmd = await parseCommand(raw);
   if(cmd?.is_command && cmd?.target_lang){
     myLang = norm(cmd.target_lang);
     localStorage.setItem("f2f_my_lang", myLang);
     langSelect.value = myLang;
-    addMeta("Dil değişti ✅");
     return;
   }
 
   const cleaned = await cleanSpeechText(raw, myLang);
-  addMessage("right", MY_PROFILE.name, cleaned, true, myLang);
+  addMessage("right", MY.name, MY.picture, cleaned);
 
-  if(!ws || ws.readyState !== 1){
-    addMeta("Bağlantı yok");
-    return;
+  if(ws && ws.readyState === 1){
+    ws.send(JSON.stringify({
+      type:"translated",
+      from: clientId,
+      from_name: MY.name,
+      from_pic: MY.picture || "",
+      text: cleaned,
+      lang: myLang
+    }));
   }
-
-  ws.send(JSON.stringify({
-    type:"translated",
-    from: clientId,
-    from_name: MY_PROFILE.name,
-    text: cleaned,
-    lang: myLang
-  }));
 }
 sendBtn.addEventListener("click", sendTyped);
 
-/* ===== MIC toggle ===== */
+/* ===== mic toggle ===== */
 let recJob=null, isBusy=false;
 
 async function startRecord(){
@@ -351,12 +377,8 @@ async function startRecord(){
     const timer = setTimeout(()=> stopRecord(), 20000);
     recJob = { stream, mr, chunks, timer };
     micBtn.classList.add("listening");
-    addMeta("Dinliyorum…");
-  }catch{
-    addMeta("Mikrofon açılamadı");
-  }finally{
-    isBusy=false;
-  }
+  }catch{}
+  finally{ isBusy=false; }
 }
 
 async function stopRecord(){
@@ -371,13 +393,10 @@ async function stopRecord(){
     const blob = new Blob(recJob.chunks, { type: recJob.mr.mimeType || "audio/webm" });
     recJob=null;
 
-    if(!blob || blob.size < 800){
-      addMeta("Ses alınamadı");
-      return;
-    }
+    if(!blob || blob.size < 800) return;
 
     const raw = await sttBlob(blob, myLang);
-    if(!raw){ addMeta("Metin çıkmadı"); return; }
+    if(!raw) return;
 
     const cleaned = await cleanSpeechText(raw, myLang);
 
@@ -386,29 +405,23 @@ async function stopRecord(){
       myLang = norm(cmd.target_lang);
       localStorage.setItem("f2f_my_lang", myLang);
       langSelect.value = myLang;
-      addMeta("Dil değişti ✅");
       return;
     }
 
-    addMessage("right", MY_PROFILE.name, cleaned, true, myLang);
+    addMessage("right", MY.name, MY.picture, cleaned);
 
-    if(!ws || ws.readyState !== 1){
-      addMeta("Bağlantı yok");
-      return;
+    if(ws && ws.readyState === 1){
+      ws.send(JSON.stringify({
+        type:"translated",
+        from: clientId,
+        from_name: MY.name,
+        from_pic: MY.picture || "",
+        text: cleaned,
+        lang: myLang
+      }));
     }
-
-    ws.send(JSON.stringify({
-      type:"translated",
-      from: clientId,
-      from_name: MY_PROFILE.name,
-      text: cleaned,
-      lang: myLang
-    }));
-  }catch{
-    addMeta("İşlem hatası");
-  }finally{
-    isBusy=false;
-  }
+  }catch{}
+  finally{ isBusy=false; }
 }
 
 micBtn.addEventListener("click", ()=>{
