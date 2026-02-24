@@ -1,16 +1,21 @@
 // FILE: /js/f2f_connect.js
+const API_BASE = "https://italky-api.onrender.com";
 const $ = (id)=>document.getElementById(id);
 
 function qs(k){ return new URLSearchParams(location.search).get(k); }
 function go(u){ try{ location.assign(u); }catch{ location.href=u; } }
 
-/* ---------- HOST PAGE (unchanged basics) ---------- */
 function randCode(n=6){
   const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   let s=""; for(let i=0;i<n;i++) s += a[Math.floor(Math.random()*a.length)];
   return s;
 }
 
+function wsUrl(room){
+  return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
+}
+
+/* ---------- HOST PAGE ---------- */
 function initHost(){
   const room = qs("room") || randCode(6);
   $("roomCode").textContent = room;
@@ -29,15 +34,13 @@ function initHost(){
   });
 
   $("btnGoCall")?.addEventListener("click", ()=>{
-    // Dil seçimi sohbet sayfasında
-    const url = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`;
-    go(url);
+    go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`);
   });
 
   $("btnBack")?.addEventListener("click", ()=> go("/pages/f2f_connect.html"));
 }
 
-/* ---------- JOIN PAGE (camera always opens preview) ---------- */
+/* ---------- JOIN PAGE ---------- */
 let scanStream=null;
 let scanTimer=null;
 
@@ -58,6 +61,7 @@ function setJoinHint(msg){
   if(el) el.textContent = msg;
 }
 
+/* Kamera: preview aç, decode varsa yap */
 async function startScanner(){
   const sc = $("scanner");
   const vid = $("scanVideo");
@@ -65,13 +69,11 @@ async function startScanner(){
 
   sc.classList.add("show");
 
-  // Secure context check (WebView sometimes)
   if(location.protocol !== "https:" && location.hostname !== "localhost"){
-    setScanHint("Kamera için HTTPS gerekir. Kod girerek devam et.");
+    setScanHint("Kamera için HTTPS gerekir. Kod gir.");
     return;
   }
 
-  // barcode detector optional
   const hasBD = ("BarcodeDetector" in window);
 
   try{
@@ -82,7 +84,6 @@ async function startScanner(){
 
   setScanHint("Kamera izni istenebilir…");
 
-  // Try multiple constraints (environment -> fallback)
   const tries = [
     { video: { facingMode: { ideal: "environment" } }, audio:false },
     { video: { facingMode: "environment" }, audio:false },
@@ -94,13 +95,11 @@ async function startScanner(){
     try{
       scanStream = await navigator.mediaDevices.getUserMedia(cons);
       break;
-    }catch(e){
-      scanStream = null;
-    }
+    }catch{}
   }
 
   if(!scanStream){
-    setScanHint("Kamera açılamadı. (İzin/cihaz) Kod girerek devam et.");
+    setScanHint("Kamera açılamadı. Kod girerek devam et.");
     return;
   }
 
@@ -108,17 +107,16 @@ async function startScanner(){
     vid.srcObject = scanStream;
     await vid.play();
   }catch{
-    setScanHint("Video oynatılamadı. Kod girerek devam et.");
+    setScanHint("Video açılamadı. Kod gir.");
     return;
   }
 
-  // If no QR decoding support, still show camera preview
   if(!hasBD){
-    setScanHint("Bu cihaz QR taramayı desteklemiyor. Kod girerek devam et.");
+    setScanHint("Bu cihaz QR okumayı desteklemiyor. Kod gir.");
     return;
   }
 
-  setScanHint("QR koda tut. Okuyunca otomatik doldurur.");
+  setScanHint("QR koda tut. Okuyunca otomatik dolar.");
 
   const detector = new BarcodeDetector({ formats:["qr_code"] });
   scanTimer = setInterval(async ()=>{
@@ -134,10 +132,72 @@ async function startScanner(){
           setJoinHint("QR okundu ✅ Bağlan’a bas.");
         }
       }
-    }catch{
-      // keep trying
-    }
+    }catch{}
   }, 240);
+}
+
+/* ✅ ODA VAR MI? KONTROLÜ */
+function checkRoomExists(room, timeoutMs=3500){
+  return new Promise((resolve)=>{
+    let done=false;
+    const finish = (ok)=>{
+      if(done) return;
+      done=true;
+      try{ ws?.close?.(); }catch{}
+      resolve(!!ok);
+    };
+
+    // WS açmayı dene
+    let ws;
+    try{
+      ws = new WebSocket(wsUrl(room));
+    }catch{
+      return finish(false);
+    }
+
+    const to = setTimeout(()=> finish(false), timeoutMs);
+
+    ws.onopen = ()=>{
+      // backend destekliyorsa explicit check:
+      try{
+        ws.send(JSON.stringify({ type:"join_check" }));
+      }catch{}
+      // Eğer backend böyle bir cevap göndermiyorsa yine de "open" = büyük ihtimal var
+      // ama yanlış kodda da open olabiliyorsa, server "close" atar. 400ms bekleyelim.
+      setTimeout(()=> finish(true), 400);
+    };
+
+    ws.onmessage = (ev)=>{
+      try{
+        const msg = JSON.parse(ev.data);
+        if(msg.type === "room_ok") { clearTimeout(to); return finish(true); }
+        if(msg.type === "room_not_found") { clearTimeout(to); return finish(false); }
+      }catch{}
+    };
+
+    ws.onerror = ()=>{ clearTimeout(to); finish(false); };
+    ws.onclose = ()=>{ clearTimeout(to); finish(false); };
+  });
+}
+
+async function joinFlow(){
+  const room = String($("roomInput")?.value || "").trim().toUpperCase();
+  if(room.length < 4){
+    alert("Kod gir.");
+    return;
+  }
+
+  setJoinHint("Kontrol ediliyor…");
+
+  const ok = await checkRoomExists(room);
+  if(!ok){
+    setJoinHint("❌ Kod yanlış veya oda yok.");
+    alert("Kod yanlış veya oda yok.");
+    return;
+  }
+
+  // ✅ oda var: sohbete geç
+  go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=guest`);
 }
 
 function initJoin(){
@@ -147,15 +207,7 @@ function initJoin(){
   $("btnScan")?.addEventListener("click", ()=> startScanner());
   $("scanClose")?.addEventListener("click", ()=> stopScanner());
 
-  $("btnJoin")?.addEventListener("click", ()=>{
-    const room = String($("roomInput")?.value || "").trim().toUpperCase();
-    if(room.length < 4){
-      alert("Kod gir.");
-      return;
-    }
-    const url = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=guest`;
-    go(url);
-  });
+  $("btnJoin")?.addEventListener("click", joinFlow);
 
   $("btnBack")?.addEventListener("click", ()=> go("/pages/f2f_connect.html"));
 }
