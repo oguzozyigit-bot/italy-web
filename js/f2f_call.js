@@ -5,7 +5,6 @@ import { shortDisplayName } from "/js/ui_shell.js";
 
 const API_BASE = "https://italky-api.onrender.com";
 const $ = (id)=>document.getElementById(id);
-const $$ = (sel)=>document.querySelector(sel);
 
 const params = new URLSearchParams(location.search);
 const room = (params.get("room")||"").trim().toUpperCase();
@@ -14,27 +13,36 @@ const role = (params.get("role")||"").trim().toLowerCase();
 let myLang = (params.get("me_lang")||localStorage.getItem("f2f_my_lang")||"tr").trim().toLowerCase();
 localStorage.setItem("f2f_my_lang", myLang);
 
-// ---- tolerant element binding (IDs may differ across your HTML versions)
-const chat = $("chat");
-const msgInput = $("msgInput") || $("txtMsg") || $$("textarea");
-const sendBtn = $("sendBtn") || $("btnSend");
-const micBtn  = $("micBtn")  || $("btnMic");
-const langSelect = $("langSelect");
-
-if(!chat || !msgInput || !sendBtn || !micBtn){
-  console.error("[F2F_CALL] Missing elements", {
-    chat: !!chat, msgInput: !!msgInput, sendBtn: !!sendBtn, micBtn: !!micBtn
-  });
-}
-
-// ---- language list
 const LANGS = Array.isArray(LANG_POOL) ? LANG_POOL : [
   { code:"tr", flag:"🇹🇷", name:"Türkçe" },
   { code:"en", flag:"🇬🇧", name:"English" },
 ];
 const norm = (c)=>String(c||"").toLowerCase().trim();
+function langLabel(code){
+  const c = norm(code);
+  const item = LANGS.find(x=>norm(x.code)===c);
+  const flag = item?.flag || "🌐";
+  const name = item?.name || c.toUpperCase();
+  return `${flag} ${name}`;
+}
 
-// ---- profile
+// UI
+const chat = $("chat");
+const msgInput = $("msgInput");
+const sendBtn = $("sendBtn");
+const micBtn = $("micBtn");
+const langSelect = $("langSelect");
+const peopleScroll = $("peopleScroll");
+const peopleCount = $("peopleCount");
+
+if(!chat || !msgInput || !sendBtn || !micBtn || !peopleScroll || !peopleCount){
+  console.error("[F2F_CALL] Missing required elements", {
+    chat:!!chat, msgInput:!!msgInput, sendBtn:!!sendBtn, micBtn:!!micBtn,
+    peopleScroll:!!peopleScroll, peopleCount:!!peopleCount
+  });
+}
+
+// Profile
 function getProfileFromCache(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -50,14 +58,7 @@ function getProfileFromCache(){
 }
 const MY = getProfileFromCache();
 
-// ---- init lang select (if exists)
-function langLabel(code){
-  const c = norm(code);
-  const item = LANGS.find(x=>norm(x.code)===c);
-  const flag = item?.flag || "🌐";
-  const name = item?.name || c.toUpperCase();
-  return `${flag} ${name}`;
-}
+// Lang select
 if(langSelect){
   langSelect.innerHTML = LANGS.map(l=>{
     const c = norm(l.code);
@@ -71,7 +72,27 @@ if(langSelect){
   });
 }
 
-// ---- textarea auto grow + enter send
+// Exit confirm (same as before)
+const I18N = {
+  tr: { confirm:"Sohbetten çıkmak istiyor musunuz?" },
+  en: { confirm:"Do you want to leave the chat?" },
+  de: { confirm:"Möchten Sie den Chat verlassen?" },
+  fr: { confirm:"Voulez-vous quitter le chat ?" },
+  es: { confirm:"¿Quieres salir del chat?" },
+  it: { confirm:"Vuoi uscire dalla chat?" },
+  ru: { confirm:"Выйти из чата?" },
+  ar: { confirm:"هل تريد مغادرة الدردشة؟" },
+};
+function t(key){
+  const pack = I18N[myLang] || I18N.en;
+  return pack[key] || I18N.en[key] || "";
+}
+$("exitBtn")?.addEventListener("click", ()=>{
+  const ok = confirm(t("confirm"));
+  if(ok) location.href = "/pages/home.html";
+});
+
+// textarea grow + Enter send (Shift+Enter new line)
 function growTA(){
   try{
     msgInput.style.height = "0px";
@@ -90,9 +111,57 @@ msgInput?.addEventListener("keydown",(e)=>{
   }
 });
 
-// ---- bubble renderer (simple, reliable)
+// ===== Participants strip (always show self + seen senders)
+const participants = new Map(); // key -> {name,pic}
+function chipName(name){
+  // "Oğuz Ö." -> "Oğuz.Ö"
+  const s = String(name||"").trim();
+  return s.replace(/\s+([A-ZÇĞİÖŞÜ])\./, ".$1").replace(/\s+/g," ");
+}
+function renderParticipants(){
+  if(!peopleScroll) return;
+  peopleScroll.innerHTML = "";
+  for(const [k,p] of participants.entries()){
+    const item = document.createElement("div");
+    item.className = "pItem";
+
+    const av = document.createElement("div");
+    av.className = "pAvatar";
+    if(p.pic){
+      const img = document.createElement("img");
+      img.src = p.pic;
+      img.referrerPolicy = "no-referrer";
+      av.appendChild(img);
+    }else{
+      av.textContent = (String(p.name||"•")[0]||"•").toUpperCase();
+    }
+
+    const nm = document.createElement("div");
+    nm.className = "pName";
+    nm.textContent = chipName(p.name);
+
+    item.appendChild(av);
+    item.appendChild(nm);
+    peopleScroll.appendChild(item);
+  }
+}
+function upsertParticipant(key, name, pic){
+  if(!key) return;
+  if(!participants.has(key)) participants.set(key, { name:name||"User", pic:pic||"" });
+  else{
+    const p = participants.get(key);
+    p.name = name || p.name;
+    p.pic = pic || p.pic;
+  }
+  renderParticipants();
+}
+
+// self
+const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
+upsertParticipant(clientId, MY.name, MY.picture);
+
+// ===== Chat bubbles
 function addMessage(side, name, pic, text){
-  if(!chat) return;
   const row = document.createElement("div");
   row.className = "msgRow " + (side === "right" ? "right" : "left");
 
@@ -127,7 +196,7 @@ function addMessage(side, name, pic, text){
   chat.scrollTop = chat.scrollHeight;
 }
 
-// ---- API helpers
+// ===== API
 async function translateAI(text, from, to){
   const res = await fetch(`${API_BASE}/api/translate_ai`,{
     method:"POST",
@@ -172,7 +241,127 @@ async function speakViaTTS(text, lang){
   await audioObj.play();
 }
 
-// ---- STT
+async function cleanSpeechText(text, lang){
+  const t = String(text||"").trim();
+  if(!t) return t;
+  const r = await fetch(`${API_BASE}/api/translate_ai`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ text: t, from_lang: lang, to_lang: lang, style:"chat", provider:"auto" })
+  });
+  if(!r.ok) return t;
+  const data = await r.json().catch(()=>null);
+  return String(data?.translated||"").trim() || t;
+}
+
+// ===== WS (message-only, but **do not show ANY incoming** until presence confirmed)
+let ws = null;
+let presenceKnown = false;
+let presenceCount = 1;
+
+function wsUrl(){
+  return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
+}
+
+function connect(){
+  if(!room) return;
+
+  ws = new WebSocket(wsUrl());
+
+  ws.onopen = ()=>{
+    const helloType = (role === "host") ? "create" : "join";
+    ws.send(JSON.stringify({
+      type: helloType,
+      room,
+      from: clientId,
+      from_name: MY.name,
+      from_pic: MY.picture || "",
+      me_lang: myLang
+    }));
+  };
+
+  ws.onmessage = async (ev)=>{
+    let msg=null;
+    try{ msg = JSON.parse(ev.data); }catch{ return; }
+
+    if(msg.type === "presence"){
+      presenceKnown = true;
+      const c = Number(msg.count||0);
+      if(Number.isFinite(c) && c >= 0) presenceCount = c;
+
+      // UI count (always show)
+      peopleCount.textContent = String(Math.max(1, presenceCount));
+      return;
+    }
+
+    if(msg.type === "room_not_found"){
+      alert(msg.message || "Kod hatalı olabilir veya sohbet odası kapanmış olabilir.");
+      location.href = "/pages/f2f_connect.html";
+      return;
+    }
+
+    // ✅ kritik: presence gelmeden hiçbir gelen mesajı gösterme
+    if(!presenceKnown) return;
+
+    // ✅ tek kişiyken hiçbir gelen mesajı gösterme
+    if(presenceCount <= 1) return;
+
+    if(msg.type === "message"){
+      const srcLang = norm(msg.lang || "en");
+      const raw = String(msg.text||"").trim();
+      const fromName = String(msg.from_name||"Katılımcı").trim();
+      const fromPic = String(msg.from_pic||"").trim();
+      const fromId = String(msg.from||"").trim();
+
+      if(!raw) return;
+
+      // sender in strip
+      upsertParticipant(fromId || ("p_"+fromName), fromName, fromPic);
+
+      // show in my language
+      let shown = raw;
+      if(srcLang && myLang && srcLang !== myLang){
+        const tr = await translateAI(raw, srcLang, myLang);
+        if(tr) shown = tr;
+      }
+
+      addMessage("left", fromName, fromPic, shown);
+      await speakViaTTS(shown, myLang);
+    }
+  };
+
+  ws.onclose = ()=>{};
+}
+connect();
+
+// ===== SEND typed: always show my own message immediately
+async function sendTyped(){
+  const raw = String(msgInput?.value || "").trim();
+  if(!raw) return;
+
+  msgInput.value = "";
+  growTA();
+
+  const cleaned = await cleanSpeechText(raw, myLang);
+
+  // always show right
+  addMessage("right", MY.name, MY.picture, cleaned);
+
+  // also keep self in strip + update count at least 1
+  upsertParticipant(clientId, MY.name, MY.picture);
+  if(!presenceKnown){
+    // offline/unknown: show at least 1
+    peopleCount.textContent = "1";
+  }
+
+  if(ws && ws.readyState === 1){
+    ws.send(JSON.stringify({ type:"message", text: cleaned }));
+  }
+}
+
+sendBtn?.addEventListener("click", sendTyped);
+
+// ===== MIC toggle (send as message-only)
 function pickMime(){
   const cands = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
   for(const m of cands){
@@ -189,114 +378,7 @@ async function sttBlob(blob, lang){
   const j = await r.json();
   return String(j.text||"").trim();
 }
-async function cleanSpeechText(text, lang){
-  const t = String(text||"").trim();
-  if(!t) return t;
-  const r = await fetch(`${API_BASE}/api/translate_ai`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text: t, from_lang: lang, to_lang: lang, style:"chat", provider:"auto" })
-  });
-  if(!r.ok) return t;
-  const data = await r.json().catch(()=>null);
-  return String(data?.translated||"").trim() || t;
-}
 
-// ---- WS: message-only protocol
-const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
-let ws = null;
-let presenceCount = 1; // default self only
-
-function wsUrl(){
-  return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
-}
-
-function connect(){
-  if(!room) return;
-
-  ws = new WebSocket(wsUrl());
-
-  ws.onopen = ()=>{
-    // NEW protocol: host=create, guest=join
-    const helloType = (role === "host") ? "create" : "join";
-    ws.send(JSON.stringify({
-      type: helloType,
-      room,
-      from: clientId,
-      from_name: MY.name,
-      from_pic: MY.picture || "",
-      me_lang: myLang
-    }));
-  };
-
-  ws.onmessage = async (ev)=>{
-    let msg=null;
-    try{ msg = JSON.parse(ev.data); }catch{ return; }
-
-    // presence (if backend sends)
-    if(msg.type === "presence"){
-      const c = Number(msg.count||0);
-      if(Number.isFinite(c) && c >= 0) presenceCount = c;
-      return;
-    }
-
-    // if join fails
-    if(msg.type === "room_not_found"){
-      alert(msg.message || "Kod hatalı olabilir veya sohbet odası kapanmış olabilir.");
-      location.href = "/pages/f2f_connect.html";
-      return;
-    }
-
-    // IMPORTANT: if you are alone, ignore any incoming chat messages
-    if(presenceCount <= 1){
-      return;
-    }
-
-    // message-only
-    if(msg.type === "message"){
-      const srcLang = norm(msg.lang || "en");
-      const raw = String(msg.text||"").trim();
-      const fromName = String(msg.from_name||"Katılımcı").trim();
-      const fromPic = String(msg.from_pic||"").trim();
-      if(!raw) return;
-
-      // show in my lang
-      let shown = raw;
-      if(srcLang && myLang && srcLang !== myLang){
-        const tr = await translateAI(raw, srcLang, myLang);
-        if(tr) shown = tr;
-      }
-
-      addMessage("left", fromName, fromPic, shown);
-      await speakViaTTS(shown, myLang);
-    }
-  };
-
-  ws.onclose = ()=>{};
-}
-connect();
-
-// ---- SEND typed: always show my own message immediately
-async function sendTyped(){
-  const raw = String(msgInput?.value || "").trim();
-  if(!raw) return;
-
-  msgInput.value = "";
-  growTA();
-
-  const cleaned = await cleanSpeechText(raw, myLang);
-
-  // ALWAYS show my message right (even if WS broken)
-  addMessage("right", MY.name, MY.picture, cleaned);
-
-  if(ws && ws.readyState === 1){
-    ws.send(JSON.stringify({ type:"message", text: cleaned }));
-  }
-}
-
-sendBtn?.addEventListener("click", sendTyped);
-
-// ---- MIC toggle (send as message-only)
 let recJob=null, isBusy=false;
 
 async function startRecord(){
@@ -347,3 +429,6 @@ micBtn?.addEventListener("click", ()=>{
   if(!recJob) return startRecord();
   return stopRecord();
 });
+
+// default count visible at least 1
+peopleCount.textContent = "1";
