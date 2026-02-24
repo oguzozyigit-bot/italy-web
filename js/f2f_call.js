@@ -10,12 +10,13 @@ const params = new URLSearchParams(location.search);
 const room = (params.get("room")||"").trim().toUpperCase();
 const role = (params.get("role")||"").trim().toLowerCase();
 let myLang = (params.get("me_lang")||localStorage.getItem("f2f_my_lang")||"tr").trim().toLowerCase();
+
 localStorage.setItem("f2f_my_lang", myLang);
 
 $("roomPill").textContent = "ROOM: " + (room || "—");
 $("rolePill").textContent = role ? role.toUpperCase() : "—";
 
-/* ✅ profile from cache */
+/* profile from cache */
 function getProfileFromCache(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -31,14 +32,7 @@ function getProfileFromCache(){
 }
 const MY_PROFILE = getProfileFromCache();
 
-$("meLangTxt").textContent = langLabel(myLang);
-
-let ws = null;
-const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
-
-/* ===============================
-   LANG PICKER
-================================ */
+/* language list */
 const LANGS = Array.isArray(LANG_POOL) ? LANG_POOL : [
   { code:"tr", flag:"🇹🇷", name:"Türkçe" },
   { code:"en", flag:"🇬🇧", name:"English" },
@@ -53,9 +47,23 @@ function langLabel(code){
   return `${flag} ${name}`;
 }
 
+$("meLangTxt").textContent = langLabel(myLang);
+
+/* Modal open/close: footer tıklamasını kilitle */
+function openLangPop(){
+  renderLangList();
+  document.body.classList.add("modal-open");
+  $("langPop")?.classList.add("show");
+}
+function closeLangPop(){
+  $("langPop")?.classList.remove("show");
+  document.body.classList.remove("modal-open");
+}
+
 function renderLangList(){
   const list = $("popList");
   if(!list) return;
+
   list.innerHTML = LANGS.map(l=>{
     const c = norm(l.code);
     const active = (c === myLang);
@@ -76,17 +84,10 @@ function renderLangList(){
       myLang = c;
       localStorage.setItem("f2f_my_lang", myLang);
       $("meLangTxt").textContent = langLabel(myLang);
-      closeLangPop();
       $("hint").textContent = "Dil güncellendi ✅";
+      closeLangPop();
     });
   });
-}
-function openLangPop(){
-  renderLangList();
-  $("langPop")?.classList.add("show");
-}
-function closeLangPop(){
-  $("langPop")?.classList.remove("show");
 }
 
 $("meLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); openLangPop(); });
@@ -100,9 +101,10 @@ document.addEventListener("click",(e)=>{
   if(!inside && !isBtn) closeLangPop();
 }, {capture:true});
 
-/* ===============================
-   WS
-================================ */
+/* WS */
+let ws = null;
+const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
+
 function wsUrl(){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
 }
@@ -136,7 +138,6 @@ function connect(){
       const srcLang = String(msg.lang || "en").trim().toLowerCase();
       const raw = String(msg.text || "").trim();
       const name = String(msg.from_name || "Katılımcı").trim();
-
       if(!raw) return;
 
       addBubble("them", raw, { name });
@@ -152,117 +153,87 @@ function connect(){
       await speakViaTTS(out, myLang);
 
       $("hint").textContent = "✅";
-      return;
     }
   };
 
-  ws.onclose = ()=>{
-    $("hint").textContent = "Bağlantı kapandı.";
-  };
+  ws.onclose = ()=>{ $("hint").textContent = "Bağlantı kapandı."; };
 }
 
-/* ===============================
-   UI BUBBLES
-   - them bubble: name etiketi (küçük)
-================================ */
+/* bubbles */
 function addBubble(kind, text, opts={}){
   const chat = $("chat");
   const b = document.createElement("div");
   b.className = "bubble " + kind + (opts.latest ? " is-latest" : "");
-
-  // name label
-  if(kind === "them" && opts.name){
-    const tag = document.createElement("div");
-    tag.style.fontWeight = "900";
-    tag.style.fontSize = "11px";
-    tag.style.opacity = "0.55";
-    tag.style.marginBottom = "4px";
-    tag.style.textTransform = "uppercase";
-    tag.textContent = String(opts.name).slice(0, 22);
-    const col = document.createElement("div");
-    col.style.display = "flex";
-    col.style.flexDirection = "column";
-    col.style.alignItems = "center";
-    col.appendChild(tag);
-
-    const t = document.createElement("div");
-    t.className = "txt";
-    t.textContent = text;
-    col.appendChild(t);
-
-    b.appendChild(col);
-  } else {
-    const t = document.createElement("div");
-    t.className = "txt";
-    t.textContent = text;
-    b.appendChild(t);
-  }
 
   if(kind === "me"){
     const icon = document.createElement("div");
     icon.className = "spk-icon";
     icon.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89 0 5.23 2.34 5.23 5.23S16.89 15.75 14 15.75v2.06c4.02 0 7.29-3.27 7.29-7.29S18.02 3.23 14 3.23z"/></svg>`;
     icon.onclick = ()=> speakViaTTS(text, opts.lang || myLang || "en");
-    b.insertBefore(icon, b.firstChild);
+    b.appendChild(icon);
 
     chat.querySelectorAll(".bubble.me.is-latest").forEach(x=>x.classList.remove("is-latest"));
   }
+
+  const col = document.createElement("div");
+  col.style.display = "flex";
+  col.style.flexDirection = "column";
+  col.style.alignItems = "center";
+
+  if(kind === "them" && opts.name){
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = String(opts.name).slice(0, 26);
+    col.appendChild(tag);
+  }
+
+  const t = document.createElement("div");
+  t.className = "txt";
+  t.textContent = text;
+  col.appendChild(t);
+
+  b.appendChild(col);
 
   chat.appendChild(b);
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* ===============================
-   TTS + TRANSLATE
-================================ */
-let audioObj = null;
-let lastAudioAt = 0;
-
+/* TTS + translate */
+let audioObj=null, lastAudioAt=0;
 function stopAudio(){
   try{
-    if(audioObj){
-      audioObj.pause();
-      audioObj.currentTime = 0;
-    }
+    if(audioObj){ audioObj.pause(); audioObj.currentTime=0; }
   }catch{}
-  audioObj = null;
+  audioObj=null;
 }
 
 async function speakViaTTS(text, lang){
   const now = Date.now();
-  if(now - lastAudioAt < AUDIO_DEBOUNCE_MS) stopAudio();
+  if(now - lastAudioAt < 250) stopAudio();
   lastAudioAt = now;
 
-  try{
-    const res = await fetch(`${API_BASE}/api/tts`, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ text, lang, speaking_rate: 1, pitch: 0 })
-    });
-    if(!res.ok){
-      $("hint").textContent = "TTS HTTP " + res.status;
-      return;
-    }
-    const data = await res.json().catch(()=>null);
-    if(!data?.ok || !data.audio_base64){
-      $("hint").textContent = "TTS invalid";
-      return;
-    }
-    const b64 = data.audio_base64;
-    const binary = atob(b64);
-    const bytes = new Uint8Array(binary.length);
-    for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
-    const blob = new Blob([bytes], { type:"audio/mpeg" });
-    const url = URL.createObjectURL(blob);
+  const res = await fetch(`${API_BASE}/api/tts`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ text, lang, speaking_rate: 1, pitch: 0 })
+  });
 
-    stopAudio();
-    audioObj = new Audio(url);
-    audioObj.onended = ()=>URL.revokeObjectURL(url);
-    audioObj.onerror = ()=>URL.revokeObjectURL(url);
-    await audioObj.play();
-  }catch{
-    $("hint").textContent = "TTS failed";
-  }
+  if(!res.ok){ $("hint").textContent = "TTS HTTP " + res.status; return; }
+  const data = await res.json().catch(()=>null);
+  if(!data?.ok || !data.audio_base64){ $("hint").textContent="TTS invalid"; return; }
+
+  const b64 = data.audio_base64;
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  const blob = new Blob([bytes], { type:"audio/mpeg" });
+  const url = URL.createObjectURL(blob);
+
+  stopAudio();
+  audioObj = new Audio(url);
+  audioObj.onended = ()=>URL.revokeObjectURL(url);
+  audioObj.onerror = ()=>URL.revokeObjectURL(url);
+  await audioObj.play();
 }
 
 async function translateAI(text, from, to){
@@ -276,9 +247,7 @@ async function translateAI(text, from, to){
   return data?.translated ? String(data.translated) : null;
 }
 
-/* ===============================
-   STT + CLEAN + COMMAND
-================================ */
+/* STT + Clean + Command */
 function pickMime(){
   const cands = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
   for(const m of cands){
@@ -301,25 +270,14 @@ async function cleanSpeechText(text, lang){
   const t = String(text||"").trim();
   if(!t) return t;
 
-  try{
-    const r = await fetch(`${API_BASE}/api/translate_ai`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        text: t,
-        from_lang: lang,
-        to_lang: lang,
-        style:"chat",
-        provider:"auto"
-      })
-    });
-    if(!r.ok) return t;
-    const data = await r.json().catch(()=>null);
-    const out = String(data?.translated||"").trim();
-    return out || t;
-  }catch{
-    return t;
-  }
+  const r = await fetch(`${API_BASE}/api/translate_ai`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ text: t, from_lang: lang, to_lang: lang, style:"chat", provider:"auto" })
+  });
+  if(!r.ok) return t;
+  const data = await r.json().catch(()=>null);
+  return String(data?.translated||"").trim() || t;
 }
 
 async function parseCommand(text){
@@ -334,43 +292,34 @@ async function parseCommand(text){
   return await r.json().catch(()=>null);
 }
 
-/* ===============================
-   TALK BUTTON: toggle record
-================================ */
-let recJob = null; // {stream,mr,chunks,timer}
-let isBusy = false;
+/* Talk: toggle record */
+let recJob=null; // {stream,mr,chunks,timer}
+let isBusy=false;
 
 async function startRecord(){
   if(isBusy) return;
-  isBusy = true;
-
+  isBusy=true;
   try{
     const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
     const mime = pickMime();
     const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-    const chunks = [];
-
+    const chunks=[];
     mr.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
-
     mr.start(250);
-
     const timer = setTimeout(()=> stopRecord(), 20000);
-
     recJob = { stream, mr, chunks, timer };
-
     $("btnTalk").classList.add("listening");
     $("hint").textContent = "Dinliyorum… (Tekrar bas: Bitir)";
-
   }catch{
     $("hint").textContent = "Mikrofon açılamadı";
   }finally{
-    isBusy = false;
+    isBusy=false;
   }
 }
 
 async function stopRecord(){
   if(!recJob || isBusy) return;
-  isBusy = true;
+  isBusy=true;
 
   try{
     clearTimeout(recJob.timer);
@@ -381,24 +330,19 @@ async function stopRecord(){
     $("hint").textContent = "Metne çevriliyor…";
 
     const blob = new Blob(recJob.chunks, { type: recJob.mr.mimeType || "audio/webm" });
-    recJob = null;
+    recJob=null;
 
     if(!blob || blob.size < 800){
       $("hint").textContent = "Ses alınamadı";
       return;
     }
 
-    // STT
     const raw = await sttBlob(blob, myLang);
-    if(!raw){
-      $("hint").textContent = "Metin çıkmadı";
-      return;
-    }
+    if(!raw){ $("hint").textContent="Metin çıkmadı"; return; }
 
-    // CLEAN
     const cleaned = await cleanSpeechText(raw, myLang);
 
-    // COMMAND? (benim dili değiştir)
+    // Komutla dil değiştir
     const cmd = await parseCommand(cleaned);
     if(cmd?.is_command && cmd?.target_lang){
       myLang = String(cmd.target_lang).toLowerCase();
@@ -408,10 +352,9 @@ async function stopRecord(){
       return;
     }
 
-    // Ekranda benim söylediklerim
+    // Benim söylediğim (etiketli)
     addBubble("them", cleaned, { name: MY_PROFILE.name });
 
-    // WS broadcast
     if(!ws || ws.readyState !== 1){
       $("hint").textContent = "Bağlantı yok";
       return;
@@ -430,7 +373,7 @@ async function stopRecord(){
     console.warn(e);
     $("hint").textContent = "İşlem hatası";
   }finally{
-    isBusy = false;
+    isBusy=false;
   }
 }
 
@@ -439,6 +382,55 @@ $("btnTalk").onclick = async ()=>{
   return stopRecord();
 };
 
+/* TEXT SEND (keyboard) */
+async function sendTyped(){
+  const input = $("txtMsg");
+  if(!input) return;
+  const raw = String(input.value||"").trim();
+  if(!raw) return;
+
+  input.value = "";
+
+  // Komutla dil değiştir (yazıyla da)
+  const cmd = await parseCommand(raw);
+  if(cmd?.is_command && cmd?.target_lang){
+    myLang = String(cmd.target_lang).toLowerCase();
+    localStorage.setItem("f2f_my_lang", myLang);
+    $("meLangTxt").textContent = langLabel(myLang);
+    $("hint").textContent = "Dil değişti ✅";
+    return;
+  }
+
+  // Yazı: önce temizle (aynı dil) -> broadcast
+  const cleaned = await cleanSpeechText(raw, myLang);
+
+  addBubble("them", cleaned, { name: MY_PROFILE.name });
+
+  if(!ws || ws.readyState !== 1){
+    $("hint").textContent = "Bağlantı yok";
+    return;
+  }
+
+  ws.send(JSON.stringify({
+    type:"translated",
+    from: clientId,
+    from_name: MY_PROFILE.name,
+    text: cleaned,
+    lang: myLang
+  }));
+
+  $("hint").textContent = "Gönderildi ✅";
+}
+
+$("btnSend")?.addEventListener("click", sendTyped);
+$("txtMsg")?.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){
+    e.preventDefault();
+    sendTyped();
+  }
+});
+
+/* leave */
 $("btnLeave").onclick = ()=>{
   try{ ws?.close?.(); }catch{}
   location.href = "/pages/f2f_connect.html";
