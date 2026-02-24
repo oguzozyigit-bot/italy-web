@@ -58,28 +58,27 @@ const peopleCount = $("peopleCount");
   });
 })();
 
-/* ===== exit confirm (multilang minimal) ===== */
+/* ===== exit confirm ===== */
 const I18N = {
-  tr: { confirm:"Sohbetten çıkmak istiyor musunuz?", yes:"Evet", no:"Hayır" },
-  en: { confirm:"Do you want to leave the chat?", yes:"Yes", no:"No" },
-  de: { confirm:"Möchten Sie den Chat verlassen?", yes:"Ja", no:"Nein" },
-  fr: { confirm:"Voulez-vous quitter le chat ?", yes:"Oui", no:"Non" },
-  es: { confirm:"¿Quieres salir del chat?", yes:"Sí", no:"No" },
-  it: { confirm:"Vuoi uscire dalla chat?", yes:"Sì", no:"No" },
-  ru: { confirm:"Выйти из чата?", yes:"Да", no:"Нет" },
-  ar: { confirm:"هل تريد مغادرة الدردشة؟", yes:"نعم", no:"لا" },
+  tr: { confirm:"Sohbetten çıkmak istiyor musunuz?" },
+  en: { confirm:"Do you want to leave the chat?" },
+  de: { confirm:"Möchten Sie den Chat verlassen?" },
+  fr: { confirm:"Voulez-vous quitter le chat ?" },
+  es: { confirm:"¿Quieres salir del chat?" },
+  it: { confirm:"Vuoi uscire dalla chat?" },
+  ru: { confirm:"Выйти из чата?" },
+  ar: { confirm:"هل تريد مغادرة الدردشة؟" },
 };
 function t(key){
   const pack = I18N[myLang] || I18N.en;
   return pack[key] || I18N.en[key] || "";
 }
-
 $("exitBtn").onclick = ()=>{
   const ok = confirm(t("confirm"));
   if(ok) location.href = "/pages/home.html";
 };
 
-/* ===== textarea auto-grow + enter send ===== */
+/* ===== textarea grow + enter send ===== */
 function growTA(){
   msgInput.style.height = "0px";
   const h = Math.min(120, msgInput.scrollHeight);
@@ -96,13 +95,11 @@ msgInput.addEventListener("keydown", (e)=>{
   }
 });
 
-/* ===== clear ===== */
-$("clearChat").onclick = ()=>{ chat.innerHTML = ""; };
+$("clearChat")?.addEventListener("click", ()=>{ /* kaldırıldıysa sorun yok */ });
 
-/* ===== participants strip ===== */
+/* ===== participants strip (seen users) ===== */
 const participants = new Map(); // id -> {name,picture}
 function nameChip(n){
-  // “Oğuz Ö.” -> “Oğuz.Ö”
   const s = String(n||"").trim();
   if(!s) return "•";
   return s.replace(/\s+([A-ZÇĞİÖŞÜ])\./, ".$1").replace(/\s+/g," ");
@@ -146,11 +143,11 @@ function renderParticipants(){
   peopleCount.textContent = String(participants.size);
 }
 
-/* self add */
+/* self */
 const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
 upsertParticipant(clientId, MY.name, MY.picture);
 
-/* ===== WS connect ===== */
+/* ===== WS ===== */
 let ws = null;
 
 function wsUrl(){
@@ -158,10 +155,8 @@ function wsUrl(){
 }
 
 function connect(){
-  if(!room){
-    // room yoksa yine de UI çalışsın
-    return;
-  }
+  if(!room) return;
+
   ws = new WebSocket(wsUrl());
   ws.onopen = ()=>{
     ws.send(JSON.stringify({
@@ -174,33 +169,34 @@ function connect(){
       me_lang: myLang
     }));
   };
+
   ws.onmessage = async (ev)=>{
     let msg=null;
     try{ msg = JSON.parse(ev.data); }catch{ return; }
 
+    // ✅ ODAYA GELEN MESAJ
     if(msg.type === "translated"){
       const from = String(msg.from||"");
-      if(from && from === clientId) return;
+      if(from && from === clientId) return; // echo yok
 
       const srcLang = norm(msg.lang || "en");
       const raw = String(msg.text || "").trim();
       const fromName = String(msg.from_name || "Katılımcı").trim();
-      const fromPic = String(msg.from_pic || "").trim();
+      const fromPic  = String(msg.from_pic || "").trim();
 
       upsertParticipant(from || ("p_"+fromName), fromName, fromPic);
-
       if(!raw) return;
 
-      addMessage("left", fromName, fromPic, raw);
-
-      let out = raw;
+      // ✅ Ben her zaman “karşı tarafı” solda görmeliyim.
+      // Çeviri gerekiyorsa solda çeviriyi göster.
+      let shown = raw;
       if(srcLang && myLang && srcLang !== myLang){
         const tr = await translateAI(raw, srcLang, myLang);
-        if(tr) out = tr;
+        if(tr) shown = tr;
       }
 
-      addMessage("right", MY.name, MY.picture, out);
-      await speakViaTTS(out, myLang);
+      addMessage("left", fromName, fromPic, shown);
+      await speakViaTTS(shown, myLang);
     }
   };
 }
@@ -243,7 +239,7 @@ function addMessage(side, name, pic, text){
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* ===== API: translate + tts + stt ===== */
+/* ===== API ===== */
 async function translateAI(text, from, to){
   const res = await fetch(`${API_BASE}/api/translate_ai`,{
     method:"POST",
@@ -316,19 +312,8 @@ async function cleanSpeechText(text, lang){
   const data = await r.json().catch(()=>null);
   return String(data?.translated||"").trim() || t;
 }
-async function parseCommand(text){
-  const t = String(text||"").trim();
-  if(!t) return null;
-  const r = await fetch(`${API_BASE}/api/command_parse`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text: t, ui_lang: myLang })
-  });
-  if(!r.ok) return null;
-  return await r.json().catch(()=>null);
-}
 
-/* ===== send typed ===== */
+/* ===== SEND typed ===== */
 async function sendTyped(){
   const raw = String(msgInput.value||"").trim();
   if(!raw) return;
@@ -336,18 +321,12 @@ async function sendTyped(){
   msgInput.value = "";
   growTA();
 
-  // optional: voice command via text too
-  const cmd = await parseCommand(raw);
-  if(cmd?.is_command && cmd?.target_lang){
-    myLang = norm(cmd.target_lang);
-    localStorage.setItem("f2f_my_lang", myLang);
-    langSelect.value = myLang;
-    return;
-  }
-
   const cleaned = await cleanSpeechText(raw, myLang);
+
+  // ✅ Benim mesajım sadece sağda (AI yok)
   addMessage("right", MY.name, MY.picture, cleaned);
 
+  // ✅ Odaya gönder
   if(ws && ws.readyState === 1){
     ws.send(JSON.stringify({
       type:"translated",
@@ -361,7 +340,7 @@ async function sendTyped(){
 }
 sendBtn.addEventListener("click", sendTyped);
 
-/* ===== mic toggle ===== */
+/* ===== MIC toggle ===== */
 let recJob=null, isBusy=false;
 
 async function startRecord(){
@@ -399,14 +378,6 @@ async function stopRecord(){
     if(!raw) return;
 
     const cleaned = await cleanSpeechText(raw, myLang);
-
-    const cmd = await parseCommand(cleaned);
-    if(cmd?.is_command && cmd?.target_lang){
-      myLang = norm(cmd.target_lang);
-      localStorage.setItem("f2f_my_lang", myLang);
-      langSelect.value = myLang;
-      return;
-    }
 
     addMessage("right", MY.name, MY.picture, cleaned);
 
