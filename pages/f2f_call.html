@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • Face-to-Face Call</title>
+  <title>italkyAI • Call</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -12,48 +12,87 @@
   <style>
     :root{
       --ai-gradient: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
-      --bg:#050508;
       --border: rgba(255,255,255,0.14);
       --muted: rgba(255,255,255,0.62);
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
-    html,body{margin:0;width:100%;height:100%;background:var(--bg);color:#fff;font-family:Outfit,sans-serif;overflow:hidden}
-    .wrap{max-width:560px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;gap:12px;padding:calc(12px + var(--safe-top)) 14px calc(14px + var(--safe-bottom))}
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:10px 12px;border:1px solid var(--border);border-radius:18px;
-      background:rgba(255,255,255,0.04);backdrop-filter: blur(12px);
+
+    /* ✅ Shell içerik alanında çalışacağız */
+    .wrap{
+      max-width:560px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
     }
-    .brand{font-family:"Space Grotesk",sans-serif;font-weight:700;letter-spacing:.4px}
-    .brand .ai{background:var(--ai-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+    .toprow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand{
+      font-family:"Space Grotesk",sans-serif;
+      font-weight:700;
+      letter-spacing:.4px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+    }
+    .brand .ai{
+      background:var(--ai-gradient);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
     .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:8px 12px;border-radius:999px;border:1px solid var(--border);
       background:rgba(0,0,0,0.25);
       font-weight:900;font-size:12px;color:rgba(255,255,255,0.92);
+      white-space:nowrap;
     }
+
     .btn{
       border:1px solid var(--border);
       background:rgba(255,255,255,0.06);
       color:#fff;
       padding:10px 12px;border-radius:999px;
       font-weight:900;font-size:12px;cursor:pointer;user-select:none;
+      white-space:nowrap;
     }
+
     .chat{
-      flex:1;border:1px solid rgba(255,255,255,0.10);
-      border-radius:22px;background:rgba(255,255,255,0.04);
-      overflow:auto;padding:14px 12px;display:flex;flex-direction:column;gap:12px;
+      flex:1;
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:22px;
+      background:rgba(255,255,255,0.04);
+      overflow:auto;
+      padding:14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
       scrollbar-width:none;
       mask-image: linear-gradient(to bottom, transparent, black 12%, black 88%, transparent);
+      min-height: 44vh;
     }
     .chat::-webkit-scrollbar{display:none}
+
     .bubble{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;word-break:break-word}
     .bubble .txt{max-width:78vw}
+
     .bubble.them .txt{font-size:18px;font-weight:650;opacity:.85}
     .bubble.me .txt{font-size:18px;font-weight:450;opacity:.60}
     .bubble.me.is-latest .txt{font-size:30px;font-weight:900;opacity:1}
+
     .spk-icon{
       width:40px;height:40px;border-radius:50%;
       background:rgba(255,255,255,0.10);
@@ -61,35 +100,111 @@
       cursor:pointer;border:1px solid rgba(255,255,255,0.15);flex:0 0 auto;
     }
     .spk-icon svg{ width:18px;height:18px;fill:#fff;opacity:.95; }
+
     .talk{
-      border:none;border-radius:18px;padding:16px 14px;font-weight:900;
+      border:none;border-radius:18px;padding:16px 14px;font-weight:1000;
       color:#0b0b12;background:var(--ai-gradient);
       cursor:pointer;box-shadow:0 16px 40px rgba(99,102,241,0.16);
+      position:relative; overflow:hidden;
     }
+    .talk:before{
+      content:"";
+      position:absolute; inset:-80px;
+      background: conic-gradient(from 0deg, rgba(255,255,255,0), rgba(255,255,255,0.22), rgba(255,255,255,0));
+      animation: spin 2.1s linear infinite;
+      opacity: .55; pointer-events:none;
+    }
+    .talk span{ position:relative; z-index:2; }
+    @keyframes spin{ to{ transform: rotate(360deg);} }
+
     .talk.listening{
       animation:breathe 1.2s infinite ease-in-out;
       box-shadow:0 0 36px rgba(99,102,241,0.45), 0 0 18px rgba(236,72,153,0.25);
     }
     @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-    .hint{color:var(--muted);font-size:12px;font-weight:800}
+
+    .hint{color:var(--muted);font-size:12px;font-weight:900; text-align:center}
+
+    /* ✅ Dil popover */
+    .popover{
+      position: fixed; left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(92vw, 360px); height: 420px;
+      background: #0a0a0f;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 24px;
+      display: none; flex-direction: column;
+      z-index: 5000; overflow: hidden;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.92);
+    }
+    .popover.show{ display:flex; }
+    .pop-head{
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      display:flex; justify-content:space-between; align-items:center;
+      font-weight:1000;
+    }
+    .pop-close{
+      cursor:pointer;
+      padding:8px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      user-select:none;
+    }
+    .pop-list{ flex:1; overflow-y:auto; padding:10px; scrollbar-width:none; }
+    .pop-list::-webkit-scrollbar{ display:none; }
+    .pop-item{
+      padding:12px; border-radius:16px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      cursor:pointer; border:1px solid transparent; user-select:none;
+    }
+    .pop-item:hover{ background: rgba(255,255,255,0.06); }
+    .pop-item.active{ background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.25); }
+    .pop-left{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .pop-flag{ font-size:18px; }
+    .pop-name{ font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+    .pop-code{ font-weight:900; font-size:12px; opacity:.7; }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">italky<span class="ai">AI</span> • Call</div>
-      <div class="pill" id="roomPill">ROOM: —</div>
-      <button class="btn" id="btnLeave">Çık</button>
+  <!-- ✅ ui_shell.js bunun içeriğini main-content içine alacak -->
+  <div id="pageContent">
+    <div class="wrap">
+
+      <div class="toprow">
+        <div class="brand">italky<span class="ai">AI</span> • Call</div>
+        <div class="pill" id="roomPill">ROOM: —</div>
+        <button class="btn" id="btnLeave">Çık</button>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <div class="pill" id="rolePill">—</div>
+        <button class="btn" id="meLangBtn"><span id="meLangTxt">🌐 Dilim</span> ⌵</button>
+      </div>
+
+      <div class="chat" id="chat"></div>
+
+      <button class="talk" id="btnTalk"><span>🎤 Konuş</span></button>
+      <div class="hint" id="hint">Bağlantı bekleniyor…</div>
     </div>
-
-    <div class="pill" id="rolePill">—</div>
-
-    <div class="chat" id="chat"></div>
-
-    <button class="talk" id="btnTalk">🎤 Konuş</button>
-    <div class="hint" id="hint">Bağlantı bekleniyor…</div>
   </div>
 
-  <script type="module" src="/js/f2f_call.js?v=2"></script>
+  <div class="popover" id="langPop">
+    <div class="pop-head">
+      <div>Benim Dilim</div>
+      <div class="pop-close" id="popClose">✕</div>
+    </div>
+    <div class="pop-list" id="popList"></div>
+  </div>
+
+  <!-- ✅ Shell mount -->
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell();
+  </script>
+
+  <script type="module" src="/js/f2f_call.js?v=FINAL_MULTI"></script>
 </body>
 </html>
