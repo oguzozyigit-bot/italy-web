@@ -137,12 +137,26 @@ html,body{
   background: var(--bar-bg); border-top: 1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
 }
-.footer-nav{ display:flex; gap: 22px; justify-content:center; }
+.footer-nav{ display:flex; gap: 22px; justify-content:center; flex-wrap:wrap; }
 .footer-nav a{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.45); text-decoration:none; text-transform: uppercase; }
 .prestige-signature{ font-size: 12px; font-weight: 900; letter-spacing: 1.5px; margin-top: 8px; background: linear-gradient(to right, #fff, #6366f1, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.8; }
 `;
 
-/* ✅ YARDIMCI FONKSİYONLAR */
+/* ✅ İSİM KISALTMA: “Oğuz Özyiğit” -> “Oğuz Ö.”, “Huri Hüma Özyiğit” -> “Huri Hüma Ö.” */
+export function shortDisplayName(fullName){
+  const s = String(fullName || "").trim().replace(/\s+/g, " ");
+  if(!s) return "Kullanıcı";
+  const parts = s.split(" ").filter(Boolean);
+  if(parts.length === 1) return parts[0];
+
+  const last = parts[parts.length - 1];
+  const first = parts.slice(0, -1).join(" ");
+
+  const initial = last[0] ? (last[0].toUpperCase() + ".") : "";
+  return `${first} ${initial}`.trim();
+}
+
+/* ✅ YARDIMCI */
 function injectShellStyle(){
   if (document.getElementById("italkyShellStyle")) return;
   const st = document.createElement("style");
@@ -158,7 +172,10 @@ function safeSetText(id, val){
 
 function safeSetImg(id, src){
   const el = document.getElementById(id);
-  if (el && src) el.src = src;
+  if (el && src) {
+    el.src = src;
+    el.referrerPolicy = "no-referrer";
+  }
 }
 
 export function hydrateFromCache(){
@@ -167,25 +184,33 @@ export function hydrateFromCache(){
     const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw) return;
     const u = JSON.parse(raw);
-    if (u?.name) safeSetText("userName", u.name);
-    if (u?.picture) safeSetImg("userPic", u.picture);
+
+    // ✅ name: kısa format
+    const nm = u?.display_name || u?.name || u?.full_name || "";
+    safeSetText("userName", shortDisplayName(nm));
+
+    // ✅ avatar
+    const pic = u?.picture || u?.avatar || u?.avatar_url || "";
+    if (pic) safeSetImg("userPic", pic);
+
     if (u?.tokens != null) safeSetText("headerJeton", String(u.tokens));
   }catch{}
 }
 
-/* ✅ ANA MOUNT FONKSİYONU */
+/* ✅ ANA MOUNT */
 export function mountShell(options = {}){
   injectShellStyle();
-  try{ document.body.style.background = "var(--bg-void)"; }catch{}
 
-  // Eğer zaten shell içindeysek tekrar kurma, sadece içeriği güncelle
+  // ✅ Beyaz flash fix: html+body arkaplanı daha REPLACE öncesi koy
+  try{
+    document.documentElement.style.backgroundColor = "var(--bg-void)";
+    document.body.style.backgroundColor = "var(--bg-void)";
+  }catch{}
+
   if (document.getElementById("italkyAppShell")) {
     const main = document.getElementById("shellMain");
-    if (main && options?.scroll === "none") {
-      main.style.overflow = "hidden";
-    } else if (main) {
-      main.style.overflow = "auto";
-    }
+    if (main && options?.scroll === "none") main.style.overflow = "hidden";
+    else if (main) main.style.overflow = "auto";
     hydrateFromCache();
     return;
   }
@@ -193,7 +218,6 @@ export function mountShell(options = {}){
   const content = document.getElementById("pageContent");
   if(!content) return;
 
-  // Katmanları Oluştur
   const nebula = document.createElement("div");
   nebula.className = "nebula-bg";
   const stars = document.createElement("div");
@@ -207,14 +231,10 @@ export function mountShell(options = {}){
   const main = shell.querySelector("#shellMain");
   main.appendChild(content);
 
-  if (options?.scroll === "none") {
-    main.style.overflow = "hidden";
-  }
+  if (options?.scroll === "none") main.style.overflow = "hidden";
 
-  // Body'yi temizle ve Shell'i bas
   document.body.replaceChildren(nebula, stars, shell);
 
-  // Navigasyon Eventleri
   document.getElementById("brandHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
   document.getElementById("profileBtn")?.addEventListener("click", ()=>location.href="/pages/profile.html");
 
