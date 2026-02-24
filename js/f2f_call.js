@@ -35,7 +35,7 @@ function getProfileFromCache(){
 }
 const MY = getProfileFromCache();
 
-/* ===== UI refs ===== */
+/* UI */
 const chat = $("chat");
 const msgInput = $("msgInput");
 const micBtn = $("micBtn");
@@ -44,7 +44,7 @@ const langSelect = $("langSelect");
 const peopleScroll = $("peopleScroll");
 const peopleCount = $("peopleCount");
 
-/* ===== language select ===== */
+/* Lang select */
 (function initLangSelect(){
   langSelect.innerHTML = LANGS.map(l=>{
     const c = norm(l.code);
@@ -58,7 +58,7 @@ const peopleCount = $("peopleCount");
   });
 })();
 
-/* ===== exit confirm ===== */
+/* Exit confirm */
 const I18N = {
   tr: { confirm:"Sohbetten çıkmak istiyor musunuz?" },
   en: { confirm:"Do you want to leave the chat?" },
@@ -78,7 +78,7 @@ $("exitBtn").onclick = ()=>{
   if(ok) location.href = "/pages/home.html";
 };
 
-/* ===== textarea grow + enter send ===== */
+/* Textarea grow + enter */
 function growTA(){
   msgInput.style.height = "0px";
   const h = Math.min(120, msgInput.scrollHeight);
@@ -95,18 +95,12 @@ msgInput.addEventListener("keydown", (e)=>{
   }
 });
 
-/* ===== participants strip (seen users) ===== */
-const participants = new Map(); // id -> {name,picture}
-function nameChip(n){
-  const s = String(n||"").trim();
-  if(!s) return "•";
-  return s.replace(/\s+([A-ZÇĞİÖŞÜ])\./, ".$1").replace(/\s+/g," ");
-}
+/* Participants (seen) */
+const participants = new Map();
 function upsertParticipant(id, name, picture){
   if(!id) return;
-  if(!participants.has(id)){
-    participants.set(id, { name: name || "User", picture: picture || "" });
-  }else{
+  if(!participants.has(id)) participants.set(id, { name:name||"User", picture:picture||"" });
+  else {
     const p = participants.get(id);
     p.name = name || p.name;
     p.picture = picture || p.picture;
@@ -132,7 +126,7 @@ function renderParticipants(){
 
     const nm = document.createElement("div");
     nm.className = "pName";
-    nm.textContent = nameChip(p.name);
+    nm.textContent = String(p.name||"").slice(0,8);
 
     item.appendChild(av);
     item.appendChild(nm);
@@ -145,95 +139,8 @@ function renderParticipants(){
 const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
 upsertParticipant(clientId, MY.name, MY.picture);
 
-/* ===== HARD RULES (no OpenAI/Gemini names + identity lock) ===== */
-function stripForbidden(text){
-  let s = String(text||"");
-  // asla görünmesin
-  const bad = [/openai/ig, /gemini/ig, /chatgpt/ig, /gpt[- ]?\d+/ig];
-  for(const re of bad) s = s.replace(re, "");
-  return s.replace(/\s{2,}/g," ").trim();
-}
-
-function isIdentityQuestionTR(text){
-  const s = String(text||"").toLowerCase();
-  return (
-    s.includes("sen kimsin") ||
-    s.includes("seni kim yaratt") ||
-    s.includes("seni kim yaptı") ||
-    s.includes("senin programcın") ||
-    s.includes("programcın kim") ||
-    s.includes("seni kim yazdı") ||
-    s.includes("hangi model") ||
-    s.includes("openai") ||
-    s.includes("gemini") ||
-    s.includes("chatgpt")
-  );
-}
-
-function identityAnswer(){
-  // kilitli cevap
-  return "Ben italky Academy tarafından geliştirildim. Programcım Oğuz Özyiğit.";
-}
-
-/* ===== ECHO KILLER (çok sert) =====
-   Server senin mesajını farklı biçimde geri yolluyor olabilir.
-   Bu yüzden sadece “exact değil”, benzerlik de yakalayıp kesiyoruz.
-*/
-function tokenize(s){
-  return String(s||"")
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu," ")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 60);
-}
-function jaccard(a,b){
-  const A = new Set(tokenize(a));
-  const B = new Set(tokenize(b));
-  if(A.size===0 || B.size===0) return 0;
-  let inter=0;
-  for(const x of A) if(B.has(x)) inter++;
-  const uni = A.size + B.size - inter;
-  return uni ? inter/uni : 0;
-}
-
-const sentLog = []; // {text, lang, t}
-function rememberSent(text, lang){
-  sentLog.push({ text:String(text||"").trim(), lang:norm(lang), t:Date.now() });
-  // 30 saniyelik tut
-  const now = Date.now();
-  while(sentLog.length && (now - sentLog[0].t > 30000)) sentLog.shift();
-}
-
-function isEcho(msgText, msgLang, msgFrom, msgFromName){
-  const txt = String(msgText||"").trim();
-  const lang = norm(msgLang||"");
-  const from = String(msgFrom||"").trim();
-  const fromName = String(msgFromName||"").trim().toLowerCase();
-  const myName = String(MY.name||"").trim().toLowerCase();
-
-  // 1) from eşleşirse kesin echo
-  if(from && from === clientId) return true;
-
-  // 2) isim eşleşirse büyük ihtimal echo (backend from’u bozuyorsa)
-  if(fromName && myName && fromName === myName) return true;
-
-  // 3) son 30 sn içinde gönderdiğim mesajlarla benzerlik
-  for(const it of sentLog){
-    // çok yakın zamanda geldiyse ve benzerlik yüksekse echo kabul
-    const sim = jaccard(it.text, txt);
-    if(sim >= 0.72) return true;
-
-    // dil farklı olsa bile aynı cümle “çevirilmiş echo” olabilir:
-    // yine sim 0.55 üstüyse ve 8 sn içindeyse kes
-    if(Date.now() - it.t < 8000 && sim >= 0.55) return true;
-  }
-  return false;
-}
-
-/* ===== WS ===== */
+/* WS */
 let ws = null;
-
 function wsUrl(){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
 }
@@ -242,11 +149,12 @@ function connect(){
   if(!room) return;
 
   ws = new WebSocket(wsUrl());
+
   ws.onopen = ()=>{
+    const helloType = (role === "host") ? "create" : "join";
     ws.send(JSON.stringify({
-      type:"hello",
+      type: helloType,
       room,
-      role,
       from: clientId,
       from_name: MY.name,
       from_pic: MY.picture || "",
@@ -258,48 +166,48 @@ function connect(){
     let msg=null;
     try{ msg = JSON.parse(ev.data); }catch{ return; }
 
-    // Sadece user mesajlarını al: translated
-    if(msg.type !== "translated") return;
-
-    const from = String(msg.from||"").trim();
-    const srcLang = norm(msg.lang || "en");
-    let raw = String(msg.text || "").trim();
-    const fromName = String(msg.from_name || "Katılımcı").trim();
-    const fromPic  = String(msg.from_pic || "").trim();
-
-    if(!raw) return;
-
-    // ✅ yasak kelime süpür
-    raw = stripForbidden(raw);
-    if(!raw) return;
-
-    // ✅ AI/bot/server mesajlarını tamamen reddet
-    const lowerName = fromName.toLowerCase();
-    if(lowerName.includes("ai") || lowerName.includes("bot") || lowerName.includes("assistant") || lowerName.includes("server")){
+    // room not found on join
+    if(msg.type === "room_not_found"){
+      alert(msg.message || "Kod hatalı olabilir veya sohbet odası kapanmış olabilir.");
+      location.href = "/pages/f2f_connect.html";
       return;
     }
 
-    // ✅ echo killer: burada AI hissi bitiyor
-    if(isEcho(raw, srcLang, from, fromName)) return;
-
-    upsertParticipant(from || ("p_"+fromName), fromName, fromPic);
-
-    // Solda: benim dilimde göster
-    let shown = raw;
-    if(srcLang && myLang && srcLang !== myLang){
-      const tr = await translateAI(raw, srcLang, myLang);
-      if(tr) shown = stripForbidden(tr);
+    // presence count
+    if(msg.type === "presence"){
+      // sayı yazdırmak istersen: peopleCount.textContent = String(msg.count||participants.size)
+      return;
     }
 
-    if(!shown) return;
+    // ✅ ONLY raw message
+    if(msg.type === "message"){
+      const from = String(msg.from||"");
+      const srcLang = norm(msg.lang || "en");
+      const raw = String(msg.text||"").trim();
+      const fromName = String(msg.from_name||"Katılımcı").trim();
+      const fromPic = String(msg.from_pic||"").trim();
 
-    addMessage("left", fromName, fromPic, shown);
-    await speakViaTTS(shown, myLang);
+      if(!raw) return;
+
+      upsertParticipant(from || ("p_"+fromName), fromName, fromPic);
+
+      // Show in my language (translate locally)
+      let shown = raw;
+      if(srcLang && myLang && srcLang !== myLang){
+        const tr = await translateAI(raw, srcLang, myLang);
+        if(tr) shown = tr;
+      }
+
+      addMessage("left", fromName, fromPic, shown);
+      await speakViaTTS(shown, myLang);
+    }
   };
+
+  ws.onclose = ()=>{};
 }
 connect();
 
-/* ===== chat bubbles ===== */
+/* bubbles */
 function addMessage(side, name, pic, text){
   const row = document.createElement("div");
   row.className = "msgRow " + (side === "right" ? "right" : "left");
@@ -328,7 +236,6 @@ function addMessage(side, name, pic, text){
   bubble.textContent = text;
 
   wrap.appendChild(bubble);
-
   row.appendChild(av);
   row.appendChild(wrap);
 
@@ -336,7 +243,7 @@ function addMessage(side, name, pic, text){
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* ===== API ===== */
+/* APIs */
 async function translateAI(text, from, to){
   const res = await fetch(`${API_BASE}/api/translate_ai`,{
     method:"POST",
@@ -381,6 +288,7 @@ async function speakViaTTS(text, lang){
   await audioObj.play();
 }
 
+/* STT */
 function pickMime(){
   const cands = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
   for(const m of cands){
@@ -410,45 +318,27 @@ async function cleanSpeechText(text, lang){
   return String(data?.translated||"").trim() || t;
 }
 
-/* ===== SEND typed ===== */
+/* send typed -> raw message */
 async function sendTyped(){
-  let raw = String(msgInput.value||"").trim();
+  const raw = String(msgInput.value||"").trim();
   if(!raw) return;
 
   msgInput.value = "";
   growTA();
 
-  // ✅ kimlik sorusu geldiyse: sabit cevap (kilit)
-  if(isIdentityQuestionTR(raw)){
-    raw = identityAnswer();
-  }
+  const cleaned = await cleanSpeechText(raw, myLang);
 
-  raw = stripForbidden(raw);
-  if(!raw) return;
-
-  const cleaned = stripForbidden(await cleanSpeechText(raw, myLang));
-
-  // benim mesajım sağda
+  // show my message right
   addMessage("right", MY.name, MY.picture, cleaned);
 
-  // echo engel
-  rememberSent(cleaned, myLang);
-
-  // odaya gönder
+  // send raw
   if(ws && ws.readyState === 1){
-    ws.send(JSON.stringify({
-      type:"translated",
-      from: clientId,
-      from_name: MY.name,
-      from_pic: MY.picture || "",
-      text: cleaned,
-      lang: myLang
-    }));
+    ws.send(JSON.stringify({ type:"message", text: cleaned }));
   }
 }
 sendBtn.addEventListener("click", sendTyped);
 
-/* ===== MIC toggle ===== */
+/* mic toggle -> raw message */
 let recJob=null, isBusy=false;
 
 async function startRecord(){
@@ -479,32 +369,18 @@ async function stopRecord(){
 
     const blob = new Blob(recJob.chunks, { type: recJob.mr.mimeType || "audio/webm" });
     recJob=null;
+
     if(!blob || blob.size < 800) return;
 
-    let raw = await sttBlob(blob, myLang);
+    const raw = await sttBlob(blob, myLang);
     if(!raw) return;
 
-    if(isIdentityQuestionTR(raw)){
-      raw = identityAnswer();
-    }
-
-    raw = stripForbidden(raw);
-    if(!raw) return;
-
-    const cleaned = stripForbidden(await cleanSpeechText(raw, myLang));
+    const cleaned = await cleanSpeechText(raw, myLang);
 
     addMessage("right", MY.name, MY.picture, cleaned);
-    rememberSent(cleaned, myLang);
 
     if(ws && ws.readyState === 1){
-      ws.send(JSON.stringify({
-        type:"translated",
-        from: clientId,
-        from_name: MY.name,
-        from_pic: MY.picture || "",
-        text: cleaned,
-        lang: myLang
-      }));
+      ws.send(JSON.stringify({ type:"message", text: cleaned }));
     }
   }catch{}
   finally{ isBusy=false; }
