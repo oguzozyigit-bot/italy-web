@@ -10,9 +10,38 @@ function randCode(n=6){
   let s=""; for(let i=0;i<n;i++) s += a[Math.floor(Math.random()*a.length)];
   return s;
 }
-
 function wsUrl(room){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
+}
+
+async function wsJoinCheck(room, timeoutMs=2500){
+  return new Promise((resolve)=>{
+    let done=false;
+    const finish=(ok)=>{
+      if(done) return;
+      done=true;
+      try{ ws?.close?.(); }catch{}
+      resolve(!!ok);
+    };
+
+    let ws;
+    try{ ws = new WebSocket(wsUrl(room)); }catch{ return finish(false); }
+
+    const to = setTimeout(()=>finish(false), timeoutMs);
+
+    ws.onopen = ()=>{
+      try{ ws.send(JSON.stringify({ type:"join_check", room })); }catch{}
+    };
+    ws.onmessage = (ev)=>{
+      try{
+        const msg = JSON.parse(ev.data);
+        if(msg.type === "room_ok"){ clearTimeout(to); finish(true); }
+        if(msg.type === "room_not_found"){ clearTimeout(to); finish(false); }
+      }catch{}
+    };
+    ws.onerror = ()=>{ clearTimeout(to); finish(false); };
+    ws.onclose = ()=>{ clearTimeout(to); finish(false); };
+  });
 }
 
 /* ---------- HOST PAGE ---------- */
@@ -20,6 +49,7 @@ function initHost(){
   const room = qs("room") || randCode(6);
   $("roomCode").textContent = room;
 
+  // QR join link
   const joinUrl = `https://italky.ai/pages/f2f_join.html?join=${encodeURIComponent(room)}`;
   $("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
 
@@ -33,6 +63,7 @@ function initHost(){
     }
   });
 
+  // ✅ Host odasını backend’de GERÇEKTEN oluştur
   $("btnGoCall")?.addEventListener("click", ()=>{
     go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`);
   });
@@ -61,7 +92,6 @@ function setJoinHint(msg){
   if(el) el.textContent = msg;
 }
 
-/* Kamera: preview aç, decode varsa yap */
 async function startScanner(){
   const sc = $("scanner");
   const vid = $("scanVideo");
@@ -136,50 +166,6 @@ async function startScanner(){
   }, 240);
 }
 
-/* ✅ ODA VAR MI? KONTROLÜ */
-function checkRoomExists(room, timeoutMs=3500){
-  return new Promise((resolve)=>{
-    let done=false;
-    const finish = (ok)=>{
-      if(done) return;
-      done=true;
-      try{ ws?.close?.(); }catch{}
-      resolve(!!ok);
-    };
-
-    // WS açmayı dene
-    let ws;
-    try{
-      ws = new WebSocket(wsUrl(room));
-    }catch{
-      return finish(false);
-    }
-
-    const to = setTimeout(()=> finish(false), timeoutMs);
-
-    ws.onopen = ()=>{
-      // backend destekliyorsa explicit check:
-      try{
-        ws.send(JSON.stringify({ type:"join_check" }));
-      }catch{}
-      // Eğer backend böyle bir cevap göndermiyorsa yine de "open" = büyük ihtimal var
-      // ama yanlış kodda da open olabiliyorsa, server "close" atar. 400ms bekleyelim.
-      setTimeout(()=> finish(true), 400);
-    };
-
-    ws.onmessage = (ev)=>{
-      try{
-        const msg = JSON.parse(ev.data);
-        if(msg.type === "room_ok") { clearTimeout(to); return finish(true); }
-        if(msg.type === "room_not_found") { clearTimeout(to); return finish(false); }
-      }catch{}
-    };
-
-    ws.onerror = ()=>{ clearTimeout(to); finish(false); };
-    ws.onclose = ()=>{ clearTimeout(to); finish(false); };
-  });
-}
-
 async function joinFlow(){
   const room = String($("roomInput")?.value || "").trim().toUpperCase();
   if(room.length < 4){
@@ -189,14 +175,13 @@ async function joinFlow(){
 
   setJoinHint("Kontrol ediliyor…");
 
-  const ok = await checkRoomExists(room);
+  const ok = await wsJoinCheck(room);
   if(!ok){
-    setJoinHint("❌ Kod yanlış veya oda yok.");
-    alert("Kod yanlış veya oda yok.");
+    setJoinHint("❌ Kod hatalı olabilir veya sohbet odası kapanmış olabilir.");
+    alert("Kod hatalı olabilir veya sohbet odası kapanmış olabilir.");
     return;
   }
 
-  // ✅ oda var: sohbete geç
   go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=guest`);
 }
 
@@ -208,7 +193,6 @@ function initJoin(){
   $("scanClose")?.addEventListener("click", ()=> stopScanner());
 
   $("btnJoin")?.addEventListener("click", joinFlow);
-
   $("btnBack")?.addEventListener("click", ()=> go("/pages/f2f_connect.html"));
 }
 
