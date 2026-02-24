@@ -1,10 +1,9 @@
 // FILE: /js/facetoface_page.js
-// ✅ TEK DOSYA (FINAL): MediaRecorder + /api/stt + /api/translate_ai + /api/tts + /api/command_parse
-// ✅ Mantık: Bas -> Kayıt başlar | Tekrar bas -> Durdurur ve çevirir
-// ✅ Max 20 saniye (otomatik durur)
-// ✅ Daktilo (typewriter) çeviri
-// ✅ Sesli komutla dil değiştir (command_parse)
-// ✅ Hoparlör üst üste binmez (tek audio channel)
+// ✅ FINAL: Bas -> kayıt başlar | tekrar bas -> durur & çevirir
+// ✅ 20 saniye auto-stop: mic kapanır + çeviri çalışır
+// ✅ Kayıt sırasında canlı yazı: her 4 sn /api/stt ile güncelle (WebView uyumlu)
+// ✅ Sesli komutla dil değiştir: /api/command_parse
+// ✅ Daktilo çeviri + TTS + hoparlör üst üste binmez
 
 import { LANG_POOL } from "/js/lang_pool_full.js";
 import { getSiteLang } from "/js/i18n.js";
@@ -31,9 +30,10 @@ const PROFILE_PATH = "/pages/profile.html";
 /* ===============================
    SETTINGS
 ================================ */
-const MAX_RECORD_MS = 20000;      // ✅ 20 saniye max
-const TYPE_SPEED_MS = 14;         // daktilo hızı
-const AUDIO_DEBOUNCE_MS = 250;    // hoparlör spam
+const MAX_RECORD_MS = 20000;          // ✅ 20 saniye
+const LIVE_STT_EVERY_MS = 4000;       // ✅ canlı yazı güncelleme aralığı
+const TYPE_SPEED_MS = 14;             // daktilo
+const AUDIO_DEBOUNCE_MS = 250;        // hoparlör spam
 
 /* ===============================
    UI LANG
@@ -157,7 +157,6 @@ function updateMicLocks(){
   let lockBot = false;
 
   if(phase === "recording"){
-    // biri kayıt yaparken diğeri kilit
     if(active === "top") lockBot = true;
     if(active === "bot") lockTop = true;
   } else if(phase === "translating" || phase === "speaking"){
@@ -215,6 +214,58 @@ function toast(msg){
 }
 
 function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+/* ===============================
+   TIMER BADGES (both sides, top rotated)
+================================ */
+let timerTop=null, timerBot=null;
+function ensureTimerBadges(){
+  if(timerTop && timerBot) return;
+
+  const make = ()=>{
+    const el = document.createElement("div");
+    el.style.position = "fixed";
+    el.style.right = "14px";
+    el.style.zIndex = "999999";
+    el.style.padding = "8px 10px";
+    el.style.borderRadius = "999px";
+    el.style.border = "1px solid rgba(255,255,255,0.14)";
+    el.style.background = "rgba(0,0,0,0.55)";
+    el.style.backdropFilter = "blur(10px)";
+    el.style.color = "rgba(255,255,255,0.92)";
+    el.style.fontFamily = "Outfit, system-ui, sans-serif";
+    el.style.fontWeight = "900";
+    el.style.fontSize = "12px";
+    el.style.opacity = "0";
+    el.style.transition = "opacity .15s ease";
+    el.style.pointerEvents = "none";
+    document.body.appendChild(el);
+    return el;
+  };
+
+  timerTop = make();
+  timerBot = make();
+
+  timerTop.style.top = "18px";
+  timerTop.style.transform = "rotate(180deg)";
+
+  timerBot.style.bottom = "18px";
+}
+
+function setTimerBadges(msLeft){
+  ensureTimerBadges();
+  if(msLeft == null){
+    timerTop.style.opacity="0";
+    timerBot.style.opacity="0";
+    return;
+  }
+  const s = Math.max(0, Math.ceil(msLeft/1000));
+  const txt = `⏱ ${s}s`;
+  timerTop.textContent = txt;
+  timerBot.textContent = txt;
+  timerTop.style.opacity="1";
+  timerBot.style.opacity="1";
+}
 
 /* ===============================
    POPUP + SEARCH
@@ -401,6 +452,7 @@ async function speakLocal(text, langCode){
   const bin = atob(data.audio_base64);
   const bytes = new Uint8Array(bin.length);
   for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+
   await playAudioBlob(new Blob([bytes], {type:"audio/mpeg"}));
 }
 
@@ -451,27 +503,6 @@ function pickMime(){
   return "";
 }
 
-async function startFixedRecord(){
-  const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-  const mime = pickMime();
-  const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-  const chunks = [];
-  mr.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
-
-  const done = new Promise((resolve,reject)=>{
-    mr.onstop = ()=> resolve(new Blob(chunks, { type: mr.mimeType || "audio/webm" }));
-    mr.onerror = (e)=> reject(e);
-  });
-
-  mr.start(250);
-
-  const hard = setTimeout(()=>{
-    try{ mr.stop(); }catch{}
-  }, MAX_RECORD_MS);
-
-  return { stream, mr, done, hard };
-}
-
 async function sttBlob(blob, lang){
   const fd = new FormData();
   fd.append("file", blob, "speech.webm");
@@ -500,7 +531,7 @@ async function typeWriter(el, text, speed=TYPE_SPEED_MS){
 }
 
 /* ===============================
-   BUBBLES + SPEAKER ICON
+   BUBBLES + SPEAKER
 ================================ */
 function clearLatestTranslated(side){
   const wrap = (side==="top") ? $("topBody") : $("botBody");
@@ -510,12 +541,11 @@ function clearLatestTranslated(side){
 
 function makeSpeakerIcon(onClick){
   const btn = document.createElement("div");
-  btn.className = "spk-icon";
+  btn.className="spk-icon";
   btn.innerHTML = `
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03zM14 3.23v2.06c2.89 0 5.23 2.34 5.23 5.23S16.89 15.75 14 15.75v2.06c4.02 0 7.29-3.27 7.29-7.29S18.02 3.23 14 3.23z"/>
-    </svg>
-  `;
+    </svg>`;
   btn.addEventListener("click", onClick);
   return btn;
 }
@@ -528,34 +558,59 @@ function addBubble(side, kind, text, opts={}){
   bubble.className = `bubble ${kind}`;
   if(kind === "me" && opts.latest) bubble.classList.add("is-latest");
 
-  let icon = null;
   if(kind === "me" && opts.speakable){
-    icon = makeSpeakerIcon(()=> speakLocal(text, opts.speakLang || "en"));
-    bubble.appendChild(icon);
+    bubble.appendChild(makeSpeakerIcon(()=> speakLocal(text, opts.speakLang||"en")));
   }
 
   const txt = document.createElement("span");
-  txt.className = "txt";
+  txt.className="txt";
   txt.textContent = String(text||"").trim() || "—";
   bubble.appendChild(txt);
 
   wrap.appendChild(bubble);
   try{ wrap.scrollTop = wrap.scrollHeight; }catch{}
+  return { txt, bubble };
+}
 
-  return { txt, bubble, icon };
+/* ===============================
+   LIVE TEXT (during recording)
+   - we show a bubble on the speaking side and update its text every few seconds
+================================ */
+function commonPrefixLen(a,b){
+  const n = Math.min(a.length,b.length);
+  let i=0;
+  for(; i<n; i++){
+    if(a[i] !== b[i]) break;
+  }
+  return i;
+}
+function mergeLiveText(oldText, newText){
+  // remove duplicates by prefix overlap
+  const a = String(oldText||"");
+  const b = String(newText||"");
+  if(!a) return b;
+  if(!b) return a;
+  const k = commonPrefixLen(a, b);
+  if(k >= Math.min(20, a.length, b.length)) return b; // similar -> replace
+  // else append missing
+  if(a.includes(b)) return a;
+  if(b.includes(a)) return b;
+  return (a + " " + b).trim();
 }
 
 /* ===============================
    RECORD TOGGLE (CLICK START/STOP)
 ================================ */
-let recJob = null;   // {stream, mr, done, hard}
+let recJob = null;           // { stream, mr, chunks, hardTimer, tickTimer, liveTimer }
 let recSide = null;
+let liveNode = null;         // { txt, bubble }
+let liveText = "";           // accumulated display
+let liveLastSentAt = 0;
 
 async function startRecording(which){
-  if(recJob) return; // zaten kayıt var
+  if(recJob) return; // already recording
 
   closeAllPop();
-
   const ok = await ensureFacetofaceSession();
   if(!ok) return;
 
@@ -570,18 +625,59 @@ async function startRecording(which){
 
   toast("🎙️ Kayıt başladı (tekrar bas → bitir)");
 
-  try{
-    recJob = await startFixedRecord();
-  }catch(e){
-    console.warn(e);
-    toast("🎤 Mikrofon açılamadı");
-    recJob = null;
-    recSide = null;
-    setMicUI(which,false);
-    setFrameState("idle", lastMicSide);
-    setPhase("idle");
-    updateMicLocks();
-  }
+  // create live bubble
+  liveNode = addBubble(which, "them", "…");
+  liveText = "";
+  liveLastSentAt = 0;
+
+  // start MediaRecorder
+  const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+  const mime = pickMime();
+  const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+
+  const chunks = [];
+  mr.ondataavailable = (e)=>{ if(e.data && e.data.size) chunks.push(e.data); };
+
+  mr.start(250);
+
+  const startedAt = Date.now();
+
+  // Timer badges (both sides)
+  ensureTimerBadges();
+  const tickTimer = setInterval(()=>{
+    const left = MAX_RECORD_MS - (Date.now() - startedAt);
+    setTimerBadges(left);
+  }, 250);
+
+  // Auto stop at 20s -> call stopAndProcess() so UI/mic closes properly
+  const hardTimer = setTimeout(()=>{
+    stopAndProcess(); // ✅ guaranteed close
+  }, MAX_RECORD_MS);
+
+  // Live STT timer (every 4s)
+  const liveTimer = setInterval(async ()=>{
+    if(!recJob) return;
+    // Don't spam: if too soon, skip
+    if(Date.now() - liveLastSentAt < LIVE_STT_EVERY_MS - 50) return;
+    liveLastSentAt = Date.now();
+
+    // build blob from current chunks
+    if(chunks.length < 2) return;
+    const blob = new Blob(chunks, { type: mr.mimeType || "audio/webm" });
+    const srcLang = (which==="top") ? topLang : botLang;
+
+    try{
+      const text = await sttBlob(blob, normalizeApiLang(srcLang));
+      if(text){
+        liveText = mergeLiveText(liveText, text);
+        if(liveNode?.txt) liveNode.txt.textContent = liveText;
+      }
+    }catch{
+      // ignore live failures
+    }
+  }, LIVE_STT_EVERY_MS);
+
+  recJob = { stream, mr, chunks, hardTimer, tickTimer, liveTimer };
 }
 
 async function stopAndProcess(){
@@ -589,25 +685,27 @@ async function stopAndProcess(){
 
   const which = recSide;
 
-  // stop record
-  try{ clearTimeout(recJob.hard); }catch{}
+  // stop timers
+  try{ clearTimeout(recJob.hardTimer); }catch{}
+  try{ clearInterval(recJob.tickTimer); }catch{}
+  try{ clearInterval(recJob.liveTimer); }catch{}
+  setTimerBadges(null);
+
+  // stop stream+rec
   try{ recJob.stream.getTracks().forEach(t=>t.stop()); }catch{}
   try{ recJob.mr.stop(); }catch{}
 
-  let blob = null;
-  try{
-    blob = await recJob.done;
-  }catch(e){
-    console.warn(e);
-  }
+  // finalize blob
+  const blob = new Blob(recJob.chunks, { type: recJob.mr.mimeType || "audio/webm" });
 
+  // reset recording state first (so UI won't get stuck even if API fails)
   recJob = null;
   recSide = null;
 
-  setMicUI(which,false);
+  setMicUI(which, false);
   setFrameState("idle", lastMicSide);
 
-  if(!blob || blob.size < 500){
+  if(!blob || blob.size < 800){
     toast("Ses alınamadı");
     setPhase("idle");
     updateMicLocks();
@@ -620,13 +718,13 @@ async function stopAndProcess(){
   const dst = (which==="top") ? botLang : topLang;
   const other = otherSide(which);
 
-  // STT
+  // STT final
   let text = "";
   try{
     text = await sttBlob(blob, normalizeApiLang(src));
   }catch(e){
     console.warn(e);
-    toast("STT çalışmadı (/api/stt)");
+    toast("STT çalışmadı");
     setPhase("idle");
     updateMicLocks();
     return;
@@ -639,7 +737,14 @@ async function stopAndProcess(){
     return;
   }
 
-  // command?
+  // Replace live bubble with final spoken text
+  try{
+    if(liveNode?.txt) liveNode.txt.textContent = text;
+  }catch{}
+  liveNode = null;
+  liveText = "";
+
+  // Command?
   const cmd = await parseCommand(text);
   if(cmd && cmd.is_command && cmd.target_lang){
     if(which === "top"){
@@ -656,10 +761,7 @@ async function stopAndProcess(){
     return;
   }
 
-  // show spoken
-  addBubble(which, "them", text);
-
-  // translate
+  // Translate
   const translated = await translateViaApi(text, src, dst);
   if(!translated){
     addBubble(other, "me", "⚠️ Çeviri yapılamadı.");
@@ -668,12 +770,11 @@ async function stopAndProcess(){
     return;
   }
 
-  // typewriter + speaker icon
   clearLatestTranslated(other);
   const node = addBubble(other, "me", "", { latest:true, speakable:true, speakLang:dst });
   if(node?.txt) await typeWriter(node.txt, translated, TYPE_SPEED_MS);
 
-  // speaking
+  // Speak
   setCenterDirection(other);
   setFrameState("speaking", other);
   setPhase("speaking");
@@ -689,22 +790,29 @@ async function stopAndProcess(){
    BINDINGS
 ================================ */
 function bindUI(){
-  // nav
   $("homeBtn")?.addEventListener("click", ()=> location.href = HOME_PATH);
   $("homeLink")?.addEventListener("click", ()=> location.href = HOME_PATH);
 
-  // clear
   $("clearBtn")?.addEventListener("click", ()=>{
     stopAudio();
+
     if(recJob){
-      try{ clearTimeout(recJob.hard); }catch{}
+      try{ clearTimeout(recJob.hardTimer); }catch{}
+      try{ clearInterval(recJob.tickTimer); }catch{}
+      try{ clearInterval(recJob.liveTimer); }catch{}
       try{ recJob.stream.getTracks().forEach(t=>t.stop()); }catch{}
       try{ recJob.mr.stop(); }catch{}
       recJob = null;
       recSide = null;
     }
+
+    setTimerBadges(null);
+    liveNode = null;
+    liveText = "";
+
     if($("topBody")) $("topBody").innerHTML="";
     if($("botBody")) $("botBody").innerHTML="";
+
     setMicUI("top",false);
     setMicUI("bot",false);
     setFrameState("idle", lastMicSide);
@@ -712,7 +820,6 @@ function bindUI(){
     updateMicLocks();
   });
 
-  // popovers
   $("topLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("top"); });
   $("botLangBtn")?.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); togglePopover("bot"); });
 
@@ -727,7 +834,7 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // mic toggles
+  // Mic toggles (start/stop)
   $("topMic")?.addEventListener("click", async (e)=>{
     e.preventDefault(); e.stopPropagation();
     if(recJob) return await stopAndProcess();
