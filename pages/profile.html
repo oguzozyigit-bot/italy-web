@@ -179,18 +179,16 @@
   </div>
 
   <script type="module">
-    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
-    import { initProfilePage } from "/js/profile_page.js";
+  import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
+  import { initProfilePage } from "/js/profile_page.js";
 
-    // ✅ Shell her zaman
-    try{ mountShell(); }catch(e){ console.error("[mountShell]", e); }
+  try{ mountShell(); }catch(e){ console.error("[mountShell]", e); }
 
-    // ✅ Profile init
-    try{
-      await initProfilePage({ setHeaderTokens });
-    }catch(e){
-      console.error("[initProfilePage]", e);
-    }
-  </script>
+  try{
+    await initProfilePage({ setHeaderTokens });
+  }catch(e){
+    console.error("[initProfilePage]", e);
+  }
+</script>
 </body>
 </html>
