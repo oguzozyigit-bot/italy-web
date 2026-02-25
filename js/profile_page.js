@@ -1,8 +1,9 @@
 // FILE: /js/profile_page.js
 // ✅ FIXED: profiles tablosunda "uuid" YOK → doğru kolon "id" (auth.users.id ile aynı)
-// ✅ RLS kuralı da auth.uid() = profiles.id olmalı
+// ✅ RLS kuralı: auth.uid() = profiles.id
 // ✅ Profil ekranı: DB olmasa bile session'dan doldurur
 // ✅ Güvenli çıkış %100 çalışır (signOut patlasa bile)
+// ✅ last_login_at günceller + shell cache’i tazeler
 
 import { supabase } from "/js/supabase_client.js";
 import { STORAGE_KEY } from "/js/config.js";
@@ -95,6 +96,19 @@ function genMemberNo(){
   return `${randLetter()}${randDigits7()}`;
 }
 
+/* ✅ Shell cache yaz */
+function updateLocalUserCache({ full_name, email, tokens, avatar_url }){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const u = raw ? JSON.parse(raw) : {};
+    if(full_name) u.name = full_name;
+    if(email) u.email = email;
+    if(tokens != null) u.tokens = tokens;
+    if(avatar_url) u.picture = avatar_url;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+  }catch{}
+}
+
 /* ✅ Session’dan ekrana bas (DB olmasa bile) */
 function paintFromSession(user){
   const full = String(user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || "Kullanıcı");
@@ -138,7 +152,7 @@ async function tryInsertProfile(user){
     const metaPic  = String(user.user_metadata?.picture || user.user_metadata?.avatar_url || "").trim();
 
     const insert = {
-      id: user.id,                  // ✅ en kritik satır
+      id: user.id,
       email: user.email || null,
       full_name: metaName || null,
       avatar_url: metaPic || null,
@@ -159,6 +173,19 @@ async function tryInsertProfile(user){
   }catch(e){
     console.warn("[profiles.insert]", e);
     return null;
+  }
+}
+
+/* ✅ last_login_at update (silent) */
+async function touchLastLogin(userId){
+  try{
+    await supabase
+      .from("profiles")
+      .update({ last_login_at: new Date().toISOString() })
+      .eq("id", userId);
+  }catch(e){
+    // RLS engellese bile sayfayı bozmasın
+    console.warn("[last_login_at update]", e);
   }
 }
 
@@ -190,15 +217,17 @@ function renderLevels(profile){
 }
 
 export async function initProfilePage({ setHeaderTokens } = {}){
-  // ✅ Butonları en baştan bağla
+  // ✅ Butonları en baştan bağla (click kaçmasın)
   const logoutBtn = $("logoutBtn");
-  if(logoutBtn) logoutBtn.onclick = safeLogoutHard;
+  if(logoutBtn){
+    logoutBtn.addEventListener("click", (e)=>{ e.preventDefault(); safeLogoutHard(); });
+  }
 
   const offBtn = $("offlineDownloadBtn");
-  if(offBtn) offBtn.onclick = ()=>location.href="/pages/offline.html";
+  if(offBtn) offBtn.addEventListener("click", ()=>location.href="/pages/offline.html");
 
   const buyBtn = $("buyTokensBtn");
-  if(buyBtn) buyBtn.onclick = ()=>toast("Jeton yükleme yakında (Google Play).");
+  if(buyBtn) buyBtn.addEventListener("click", ()=>toast("Jeton yükleme yakında (Google Play)."));
 
   // ✅ session
   const { data:{ session } } = await supabase.auth.getSession();
@@ -217,6 +246,9 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     if(!profile) profile = await tryLoadProfile(user.id);
   }
 
+  // ✅ last_login_at
+  await touchLastLogin(user.id);
+
   // DB yoksa bile sayfa boş kalmasın
   if(!profile){
     safeText("memberNo", "—");
@@ -231,8 +263,9 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   }
 
   // ✅ ekrana bas
+  const fullName = profile.full_name || (user.user_metadata?.full_name || user.user_metadata?.name) || (user.email||"—");
   safeText("pEmail", profile.email || user.email || "—");
-  safeText("pName", profile.full_name || (user.user_metadata?.full_name || user.user_metadata?.name) || (user.email||"—"));
+  safeText("pName", fullName);
 
   // member no yoksa üret ve id ile update et
   let memberNo = profile.member_no;
@@ -254,7 +287,7 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   // ✅ header kısaltma + avatar
   try{
     const hn = document.getElementById("userName");
-    if(hn) hn.textContent = shortDisplayName(profile.full_name || user.email || "Kullanıcı");
+    if(hn) hn.textContent = shortDisplayName(fullName);
 
     const pic = String(profile.avatar_url || user.user_metadata?.picture || user.user_metadata?.avatar_url || "");
     const hp = document.getElementById("userPic");
@@ -264,9 +297,17 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     }
   }catch{}
 
+  // ✅ cache update (shell tutarlı)
+  updateLocalUserCache({
+    full_name: fullName,
+    email: (profile.email || user.email || ""),
+    tokens,
+    avatar_url: (profile.avatar_url || user.user_metadata?.picture || "")
+  });
+
   // ✅ copy member no
   const copyBtn = $("copyMemberBtn");
-  if(copyBtn) copyBtn.onclick = ()=>copyText(memberNo || "");
+  if(copyBtn) copyBtn.addEventListener("click", ()=>copyText(memberNo || ""));
 
   renderLevels(profile);
   renderOffline(profile);
@@ -274,7 +315,7 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   // delete butonu
   const deleteBtn = $("deleteBtn");
   if(deleteBtn){
-    deleteBtn.onclick = async ()=>{
+    deleteBtn.addEventListener("click", async ()=>{
       const ok = confirm("Hesap silme talebi oluşturulsun mu? 30 gün içinde giriş yaparsanız iptal edilir.");
       if(!ok) return;
       try{
@@ -284,6 +325,6 @@ export async function initProfilePage({ setHeaderTokens } = {}){
         console.warn(e);
         toast("Silme talebi kaydedilemedi");
       }
-    };
+    });
   }
 }
