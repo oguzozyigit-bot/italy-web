@@ -5,8 +5,8 @@ import { shortDisplayName } from "/js/ui_shell.js";
 const API_BASE = "https://italky-api.onrender.com";
 const $ = (id)=>document.getElementById(id);
 
-function qs(k){ return new URLSearchParams(location.search).get(k); }
-function go(u){ try{ location.assign(u); }catch{ location.href=u; } }
+const qs = (k)=>new URLSearchParams(location.search).get(k);
+const normRoom = (s)=>String(s||"").trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8);
 
 function randCode(n=6){
   const a="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -14,28 +14,79 @@ function randCode(n=6){
   return s;
 }
 function wsUrl(room){
-  return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
+  return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${encodeURIComponent(room)}`;
 }
 
+function setText(id, v){
+  const el = $(id);
+  if(el) el.textContent = String(v ?? "");
+}
+
+/* ===== Profile cache (sadece isim/pp; dili chatte seçecek) ===== */
 function getProfileFromCache(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    const lang = (localStorage.getItem("f2f_my_lang") || "tr");
-    if(!raw) return { name:"Kullanıcı", picture:"", lang };
-
+    if(!raw) return { name:"Kullanıcı", picture:"" };
     const u = JSON.parse(raw);
     const full = u.display_name || u.full_name || u.name || "";
     const name = shortDisplayName(full || "Kullanıcı");
     const picture = u.picture || u.avatar || u.avatar_url || "";
-    return { name, picture, lang };
+    return { name, picture };
   }catch{
-    return { name:"Kullanıcı", picture:"", lang:(localStorage.getItem("f2f_my_lang")||"tr") };
+    return { name:"Kullanıcı", picture:"" };
   }
 }
+const ME = getProfileFromCache();
 
-/* ===============================
-   WS JOIN CHECK
-================================ */
+/* ===== HOST: odanın backend’de gerçekten oluşması ===== */
+async function createRoomOnBackend(room, timeoutMs=4500){
+  return new Promise((resolve)=>{
+    let done=false;
+    const finish=(ok)=>{
+      if(done) return;
+      done=true;
+      try{ ws?.close?.(); }catch{}
+      resolve(!!ok);
+    };
+
+    let ws;
+    try{ ws = new WebSocket(wsUrl(room)); }catch{ return finish(false); }
+
+    const to = setTimeout(()=>finish(false), timeoutMs);
+
+    ws.onopen = ()=>{
+      try{
+        ws.send(JSON.stringify({
+          type:"create",
+          from: "host_" + Math.random().toString(16).slice(2,10),
+          from_name: ME.name,
+          from_pic: ME.picture || "",
+          me_lang: (localStorage.getItem("f2f_my_lang")||"tr"),
+        }));
+      }catch{}
+    };
+
+    ws.onmessage = (ev)=>{
+      try{
+        const msg = JSON.parse(ev.data);
+        if(msg.type === "room_created"){
+          clearTimeout(to);
+          return finish(true);
+        }
+        // Bazı durumlarda room_created gelmese bile presence gelirse oda var demektir.
+        if(msg.type === "presence"){
+          clearTimeout(to);
+          return finish(true);
+        }
+      }catch{}
+    };
+
+    ws.onerror = ()=>{ clearTimeout(to); finish(false); };
+    ws.onclose = ()=>{ /* finish zaten */ };
+  });
+}
+
+/* ===== JOIN CHECK: oda var mı? (guest) ===== */
 async function wsJoinCheck(room, timeoutMs=2500){
   return new Promise((resolve)=>{
     let done=false;
@@ -52,95 +103,35 @@ async function wsJoinCheck(room, timeoutMs=2500){
     const to = setTimeout(()=>finish(false), timeoutMs);
 
     ws.onopen = ()=>{
-      try{ ws.send(JSON.stringify({ type:"join_check", room })); }catch{}
+      try{ ws.send(JSON.stringify({ type:"join_check" })); }catch{}
     };
+
     ws.onmessage = (ev)=>{
       try{
         const msg = JSON.parse(ev.data);
-        if(msg.type === "room_ok"){ clearTimeout(to); finish(true); }
-        if(msg.type === "room_not_found"){ clearTimeout(to); finish(false); }
+        if(msg.type === "room_ok"){ clearTimeout(to); return finish(true); }
+        if(msg.type === "room_not_found"){ clearTimeout(to); return finish(false); }
       }catch{}
     };
+
     ws.onerror = ()=>{ clearTimeout(to); finish(false); };
-    ws.onclose = ()=>{ clearTimeout(to); finish(false); };
+    ws.onclose = ()=>{ /* finish zaten */ };
   });
 }
 
-/* ===============================
-   HOST CREATE (must receive room_created)
-================================ */
-async function createRoomOnBackend(room){
-  return new Promise((resolve)=>{
-    const me = getProfileFromCache();
-    let ws;
-    try{ ws = new WebSocket(wsUrl(room)); }catch{ return resolve(false); }
-
-    const to = setTimeout(()=>{
-      try{ ws.close(); }catch{}
-      resolve(false);
-    }, 3500);
-
-    ws.onopen = ()=>{
-      ws.send(JSON.stringify({
-        type: "create",
-        room,
-        from: "host",              // host panelde sabit olabilir
-        from_name: me.name,
-        from_pic: me.picture || "",
-        me_lang: (me.lang || "tr")
-      }));
-    };
-
-    ws.onmessage = (ev)=>{
-      try{
-        const msg = JSON.parse(ev.data);
-        if(msg.type === "room_created"){
-          clearTimeout(to);
-          try{ ws.close(); }catch{}
-          resolve(true);
-        }
-      }catch{}
-    };
-
-    ws.onerror = ()=>{
-      clearTimeout(to);
-      try{ ws.close(); }catch{}
-      resolve(false);
-    };
-  });
-}
-
-/* ===============================
-   QR IMAGE DECODE FALLBACK
-================================ */
-async function decodeQrFromImageFile(file){
-  const fd = new FormData();
-  fd.append("file", file);
-  const r = await fetch("https://api.qrserver.com/v1/read-qr-code/", { method:"POST", body: fd });
-  if(!r.ok) return null;
-  const data = await r.json().catch(()=>null);
-  const txt = data?.[0]?.symbol?.[0]?.data || null;
-  return txt ? String(txt) : null;
-}
-
-/* ===============================
-   CAMERA SCANNER (BarcodeDetector varsa)
-================================ */
+/* ===== QR (kamera) ===== */
 let scanStream=null;
 let scanTimer=null;
-let detector=null;
+
+function setScanHint(msg){ setText("scanHint", msg); }
 
 async function stopScanner(){
   try{ if(scanTimer) clearInterval(scanTimer); }catch{}
   scanTimer=null;
-  detector=null;
   try{ scanStream?.getTracks?.().forEach(t=>t.stop()); }catch{}
   scanStream=null;
   $("scanner")?.classList.remove("show");
 }
-
-function setScanHint(msg){ const el=$("scanHint"); if(el) el.textContent = msg; }
-function setJoinHint(msg){ const el=$("joinHint"); if(el) el.textContent = msg; }
 
 async function startScanner(){
   const sc = $("scanner");
@@ -149,10 +140,20 @@ async function startScanner(){
 
   sc.classList.add("show");
 
+  // HTTPS şartı
   if(location.protocol !== "https:" && location.hostname !== "localhost"){
-    setScanHint("Kamera için HTTPS gerekir. Kod gir.");
+    setScanHint("Kamera için HTTPS gerekir. Kod girerek devam et.");
     return;
   }
+
+  // Android WebView/Chrome bazı cihazlarda BarcodeDetector yok → sadece kamera açmaya çalışma, mesaj ver.
+  const hasBD = ("BarcodeDetector" in window);
+
+  try{
+    vid.setAttribute("playsinline","");
+    vid.muted = true;
+    vid.autoplay = true;
+  }catch{}
 
   setScanHint("Kamera izni istenebilir…");
 
@@ -171,7 +172,7 @@ async function startScanner(){
   }
 
   if(!scanStream){
-    setScanHint("Kamera açılamadı. Kod gir veya Foto ile QR seç.");
+    setScanHint("Kamera açılamadı. (İzin / WebView) Kod girerek devam et.");
     return;
   }
 
@@ -179,167 +180,115 @@ async function startScanner(){
     vid.srcObject = scanStream;
     await vid.play();
   }catch{
-    setScanHint("Video açılamadı. Kod gir veya Foto ile QR seç.");
+    setScanHint("Video açılamadı. Kod girerek devam et.");
     return;
   }
 
-  if(!("BarcodeDetector" in window)){
-    setScanHint("Bu cihaz canlı QR okumayı desteklemiyor. Foto ile QR seç veya kod gir.");
+  if(!hasBD){
+    setScanHint("Bu cihaz QR okumayı desteklemiyor. Kod girerek devam et.");
     return;
   }
 
-  try{
-    detector = new BarcodeDetector({ formats:["qr_code"] });
-  }catch{
-    detector = null;
-    setScanHint("QR okuyucu başlatılamadı. Foto ile QR seç veya kod gir.");
-    return;
-  }
+  setScanHint("QR koda tut. Okuyunca kod otomatik dolar.");
 
-  setScanHint("QR koda tut. Okuyunca otomatik dolar.");
-
+  const detector = new BarcodeDetector({ formats:["qr_code"] });
   scanTimer = setInterval(async ()=>{
-    if(!detector) return;
     try{
       const barcodes = await detector.detect(vid);
       if(barcodes?.length){
         const raw = barcodes[0].rawValue || "";
         const u = new URL(raw, location.origin);
-        const code = u.searchParams.get("join");
-        if(code){
-          $("roomInput").value = String(code).toUpperCase();
+        const j = u.searchParams.get("join");
+        if(j){
+          const code = normRoom(j);
+          if($("roomInput")) $("roomInput").value = code;
           await stopScanner();
-          setJoinHint("QR okundu ✅ Bağlan’a bas.");
+          setText("joinHint", "QR okundu ✅ Bağlan’a bas.");
         }
       }
     }catch{}
   }, 240);
 }
 
-/* ===============================
-   HOST INIT
-================================ */
-async function initHost(){
-  const room = (qs("room") || randCode(6)).toUpperCase();
+/* ===== UI FLOW ===== */
+async function initHostMode(){
+  const room = normRoom(qs("room") || randCode(6));
+  setText("roomCode", room);
 
-  $("roomCode").textContent = room;
+  // QR image (kod linki)
+  const joinUrl = `https://italky.ai/pages/f2f_connect.html?mode=join&join=${encodeURIComponent(room)}`;
+  const qr = $("qrImg");
+  if(qr) qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
 
-  // QR: aynı sayfaya join ile dön
-  const joinUrl = `https://italky.ai/pages/f2f_connect.html?join=${encodeURIComponent(room)}`;
-  $("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
+  setText("hostStatus", "Oda hazırlanıyor…");
 
-  $("hostStatus").textContent = "Oda hazırlanıyor…";
-  const created = await createRoomOnBackend(room);
-  $("hostStatus").textContent = created ? "Oda hazır ✅" : "Oda oluşturulamadı ❌";
+  const ok = await createRoomOnBackend(room);
+  setText("hostStatus", ok ? "Oda hazır ✅ Kod paylaşabilirsin." : "Oda oluşturulamadı ❌ (backend/bağlantı)");
 
   $("btnCopy")?.addEventListener("click", async ()=>{
     try{
       await navigator.clipboard.writeText(room);
-      $("btnCopy").querySelector("span").textContent = "Kopyalandı ✅";
-      setTimeout(()=> $("btnCopy").querySelector("span").textContent="Kodu Kopyala", 900);
+      setText("hostStatus", "Kopyalandı ✅");
+      setTimeout(()=>setText("hostStatus", ok ? "Oda hazır ✅ Kod paylaşabilirsin." : "Oda oluşturulamadı ❌"), 900);
     }catch{
       alert("Kod: " + room);
     }
   });
 
   $("btnGoCall")?.addEventListener("click", ()=>{
-    go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`);
+    // Dil seçimi sohbet sayfasında: burada me_lang taşımıyoruz
+    location.href = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`;
   });
 }
 
-/* ===============================
-   JOIN INIT
-================================ */
-async function joinFlow(){
-  const code = String($("roomInput")?.value || "").trim().toUpperCase();
-  if(code.length < 4){
-    alert("Kod gir.");
-    return;
-  }
-
-  setJoinHint("Kontrol ediliyor…");
-
-  const ok = await wsJoinCheck(code);
-  if(!ok){
-    const msg = "❌ Kod hatalı olabilir veya oda kapanmış olabilir.";
-    setJoinHint(msg);
-    alert(msg);
-    return;
-  }
-
-  go(`/pages/f2f_call.html?room=${encodeURIComponent(code)}&role=guest`);
-}
-
-function initJoin(){
+function initJoinMode(){
+  // join param geldiyse doldur
   const join = qs("join");
   if(join && $("roomInput")){
-    $("roomInput").value = String(join).toUpperCase();
-    setJoinHint("QR/kod alındı ✅ Bağlan’a bas.");
+    $("roomInput").value = normRoom(join);
+    setText("joinHint", "Kod alındı ✅ Bağlan’a bas.");
+  }else{
+    setText("joinHint", "Kodu gir ve Bağlan’a bas.");
   }
 
-  $("btnScan")?.addEventListener("click", startScanner);
-  $("scanClose")?.addEventListener("click", stopScanner);
-  $("btnJoin")?.addEventListener("click", joinFlow);
+  $("btnScan")?.addEventListener("click", ()=> startScanner());
+  $("scanClose")?.addEventListener("click", ()=> stopScanner());
 
-  $("btnPickQR")?.addEventListener("click", async ()=>{
-    try{
-      const inp = document.createElement("input");
-      inp.type = "file";
-      inp.accept = "image/*";
-      inp.capture = "environment";
-      inp.onchange = async ()=>{
-        const f = inp.files?.[0];
-        if(!f) return;
-        setJoinHint("QR çözülüyor…");
-        const raw = await decodeQrFromImageFile(f);
-        if(!raw){
-          setJoinHint("QR okunamadı. Kod gir.");
-          return;
-        }
-        try{
-          const u = new URL(raw, location.origin);
-          const code = u.searchParams.get("join");
-          if(code){
-            $("roomInput").value = String(code).toUpperCase();
-            setJoinHint("QR çözüldü ✅ Bağlan’a bas.");
-          }else{
-            setJoinHint("QR geçersiz. Kod gir.");
-          }
-        }catch{
-          setJoinHint("QR geçersiz. Kod gir.");
-        }
-      };
-      inp.click();
-    }catch{
-      setJoinHint("Foto seçilemiyor. Kod gir.");
+  $("btnJoin")?.addEventListener("click", async ()=>{
+    const room = normRoom($("roomInput")?.value || "");
+    if(room.length < 4){
+      alert("Kod gir.");
+      return;
     }
-  });
 
-  document.addEventListener("visibilitychange", ()=>{ if(document.hidden) stopScanner(); });
+    setText("joinHint", "Kontrol ediliyor…");
+
+    const ok = await wsJoinCheck(room);
+    if(!ok){
+      const msg = "❌ Kod hatalı olabilir veya oda kapanmış olabilir.";
+      setText("joinHint", msg);
+      alert(msg);
+      return;
+    }
+
+    // ✅ oda var: sohbete geç
+    location.href = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=guest`;
+  });
 }
 
-/* ===============================
-   BOOT
-================================ */
-document.addEventListener("DOMContentLoaded", ()=>{
-  // Host panel açık mı?
-  if($("hostPanel") && !$("hostPanel").classList.contains("hide")){
-    initHost();
-  }
-  // Join panel açık mı?
-  if($("joinPanel") && !$("joinPanel").classList.contains("hide")){
-    initJoin();
-  }
-
-  // Panel değişince init tekrar çalışsın (mode switch)
-  // (Home JS'in history.replaceState ile yaptığı switch sonrası)
-  const obs = new MutationObserver(()=>{
-    if($("hostPanel") && !$("hostPanel").classList.contains("hide")){
-      if(!$("roomCode").textContent || $("roomCode").textContent.includes("-")) initHost();
-    }
-    if($("joinPanel") && !$("joinPanel").classList.contains("hide")){
-      initJoin();
-    }
+/* ===== BOOT ===== */
+document.addEventListener("DOMContentLoaded", async ()=>{
+  // Scanner kapatma garanti
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.hidden) stopScanner();
   });
-  obs.observe(document.body, { attributes:true, childList:true, subtree:true });
+
+  const mode = qs("mode") || (qs("join") ? "join" : "home");
+
+  // home mod: hiçbir şey yapma
+  if(mode === "host"){
+    await initHostMode();
+  }else if(mode === "join"){
+    initJoinMode();
+  }
 });
