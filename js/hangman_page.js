@@ -1,5 +1,6 @@
 // FILE: /js/hangman_page.js
 import { mountShell } from "/js/ui_shell.js";
+import { supabase } from "/js/supabase_client.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -86,13 +87,7 @@ function pick(pool, count, usedSet, saveUsed, filterFn){
   return chosen;
 }
 
-// ---- SCORE RULES (Senin istediğin) ----
-// 1) Best score: her dil + her seviye ayrı, sonsuza kadar saklanır
-// 2) RoundScore: her kelime 100 ile başlar, yanlış+joker -10
-// 3) Lives: 3, flawless+no joker => +1 life (max 9)
-// 4) Kelime bilemezse: 1 can gider, puan almaz
-// 5) TotalScore: doğru kelimelerin puanları birikir (GameOver'a kadar)
-
+// ---- SCORE RULES ----
 let LANGPOOL_BASE = "";
 let pool = null;
 let target = null;
@@ -108,26 +103,110 @@ let roundScore = 100;   // kelime puanı
 let guessed = new Set();
 let mistakes = 0;
 
-let jokersLeft = 2;
 const MAX_JOKERS = 2;
 
 let flawless = true;
 let jokerUsed = false;
 let lock = false;
 
-// Best key per lang+diff
-function bestKey(){
-  return `italky_hangman_best::${lang}::${diff}`;
+/* =========================
+   ✅ USER-BASED BEST SCORE (Supabase + local fallback)
+   - key: `${lang}::${diff}`
+   - storage: profiles.hangman_best (jsonb)
+========================= */
+let USER_ID = "anon";
+let BEST_CACHE = null; // number|null
+
+async function ensureUserId(){
+  if(USER_ID && USER_ID !== "anon") return USER_ID;
+  try{
+    const { data:{ session } } = await supabase.auth.getSession();
+    USER_ID = session?.user?.id || "anon";
+  }catch{
+    USER_ID = "anon";
+  }
+  return USER_ID;
 }
-function getBest(){
-  return parseInt(localStorage.getItem(bestKey()) || "0", 10);
+function bestLocalKey(){
+  return `italky_hangman_best::${lang}::${diff}::${USER_ID || "anon"}`;
 }
-function setBest(v){
-  try{ localStorage.setItem(bestKey(), String(v)); }catch{}
+function bestMapKey(){
+  return `${lang}::${diff}`;
 }
 
-function paint(){
-  $("bestVal").textContent = String(getBest());
+async function getBest(){
+  if(BEST_CACHE != null) return BEST_CACHE;
+  await ensureUserId();
+
+  // 1) Supabase read best-effort
+  try{
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("hangman_best")
+      .eq("id", USER_ID)
+      .maybeSingle();
+
+    if(!error && data?.hangman_best && typeof data.hangman_best === "object"){
+      const v = Number(data.hangman_best[bestMapKey()] ?? 0);
+      BEST_CACHE = Number.isFinite(v) ? v : 0;
+      try{ localStorage.setItem(bestLocalKey(), String(BEST_CACHE)); }catch{}
+      return BEST_CACHE;
+    }
+  }catch{
+    // ignore
+  }
+
+  // 2) local fallback
+  try{
+    const v = parseInt(localStorage.getItem(bestLocalKey()) || "0", 10);
+    BEST_CACHE = Number.isFinite(v) ? v : 0;
+  }catch{
+    BEST_CACHE = 0;
+  }
+  return BEST_CACHE;
+}
+
+async function setBest(newVal){
+  await ensureUserId();
+  const nv = Math.max(0, Number(newVal)||0);
+  BEST_CACHE = nv;
+
+  // local always
+  try{ localStorage.setItem(bestLocalKey(), String(nv)); }catch{}
+
+  // Supabase best-effort (kolon/policy yoksa sessizce local devam)
+  try{
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("hangman_best")
+      .eq("id", USER_ID)
+      .maybeSingle();
+
+    if(error){
+      return;
+    }
+
+    const cur = (data?.hangman_best && typeof data.hangman_best === "object") ? { ...data.hangman_best } : {};
+    const key = bestMapKey();
+    const old = Number(cur[key] ?? 0);
+    if(nv <= old) return;
+
+    cur[key] = nv;
+
+    await supabase
+      .from("profiles")
+      .update({ hangman_best: cur })
+      .eq("id", USER_ID);
+  }catch{
+    // ignore
+  }
+}
+
+/* ========================= */
+
+async function paint(){
+  const b = await getBest();
+  $("bestVal").textContent = String(b);
   $("scoreVal").textContent = String(totalScore);
   $("roundVal").textContent = String(roundScore);
 }
@@ -221,48 +300,42 @@ $("mBtn").onclick = () => {
 
 function applyPenalty(){
   roundScore = Math.max(0, roundScore - 10);
-  paint();
 }
 
-function endRound(win){
+async function endRound(win){
   lock = true;
 
-  // round bitince kelimeyi seslendir
   speakWord(target.w);
 
   if(win){
-    // ✅ doğru: kelime puanı totalScore'a eklenir
     totalScore += roundScore;
 
-    // ✅ flawless & joker yoksa +1 life (max 9)
     let bonus = `+${roundScore} PUAN\nTOPLAM SKOR: ${totalScore}`;
     if(flawless && !jokerUsed && lives < MAX_LIVES){
       lives++;
       bonus += `\nKUSURSUZ: +1 CAN`;
     }
 
-    // ✅ Best score kontrol (lang+diff)
-    const b = getBest();
-    if(totalScore > b) setBest(totalScore);
+    const b = await getBest();
+    if(totalScore > b) await setBest(totalScore);
 
     renderHearts();
-    paint();
+    await paint();
 
     showModal("MİSYON BAŞARILI", "#00ff9d", bonus);
     return;
   }
 
-  // ❌ yanlış kelime: can gider, puan eklenmez
   lives--;
   renderHearts();
   $("man").classList.add("swing");
 
   const swingMs = 2200;
-  setTimeout(()=>{
+  setTimeout(async ()=>{
     $("man").classList.remove("swing");
     if(lives <= 0){
-      // ✅ game over: totalScore kalır, best zaten tutulur
-      showModal("GAME OVER", "#ff0033", `TOPLAM SKOR: ${totalScore}\nEN YÜKSEK: ${getBest()}`);
+      const b = await getBest();
+      showModal("GAME OVER", "#ff0033", `TOPLAM SKOR: ${totalScore}\nEN YÜKSEK: ${b}`);
     }else{
       showModal("DEŞİFRE EDİLEMEDİ", "#ff0033", "-1 CAN");
     }
@@ -285,21 +358,21 @@ function press(letter, btn){
     mistakes++;
     applyPenalty();
     updateMan();
+    paint(); // async içerde best yok; hızlı güncelleme
     if(mistakes >= getMistakeLimit()) endRound(false);
   }
 }
 
 function useJ(i){
   if(lock) return;
-  if(jokersLeft <= 0) return;
+  if(MAX_JOKERS <= 0) return;
 
   jokerUsed = true;
-  jokersLeft--;
 
-  // ✅ iki joker de çalışsın
   const el = (i===0) ? $("j0") : $("j1");
-  el.classList.add("spent");
+  if(el.classList.contains("spent")) return;
 
+  el.classList.add("spent");
   applyPenalty();
 
   const w = target.w.toUpperCase();
@@ -310,28 +383,30 @@ function useJ(i){
     if(btn) press(l, btn);
     else { guessed.add(l); renderWord(); }
   }
+  paint();
 }
 
 $("j0").onclick = ()=>useJ(0);
 $("j1").onclick = ()=>useJ(1);
 
-function newRound(){
+async function newRound(){
   lock = false;
   guessed = new Set();
   mistakes = 0;
 
-  // ✅ joker reset
-  jokersLeft = MAX_JOKERS;
   $("j0").classList.remove("spent");
   $("j1").classList.remove("spent");
 
   flawless = true;
   jokerUsed = false;
 
-  // ✅ yeni kelime puanı 100
   roundScore = 100;
 
   resetMan();
+
+  // BEST cache reset when lang/diff changes
+  BEST_CACHE = null;
+  await ensureUserId();
 
   const usedSet = createUsedSet(`used_hangman_${lang}`);
   const pickedW = pick(pool, 1, usedSet.used, usedSet.save, (x)=> (x?.w||"").length >= 3);
@@ -341,7 +416,7 @@ function newRound(){
     $("trText").textContent = "KELİME BULUNAMADI";
     $("matrix").innerHTML = "";
     $("kb").innerHTML = "";
-    paint();
+    await paint();
     return;
   }
 
@@ -351,7 +426,7 @@ function newRound(){
   renderWord();
   renderKeyboard();
   updateMan();
-  paint();
+  await paint();
 }
 
 // ---- Setup seçimleri ----
@@ -361,6 +436,10 @@ $("langGrid").addEventListener("click", (e)=>{
   [...$("langGrid").querySelectorAll(".pickCard")].forEach(x=>x.classList.remove("active"));
   c.classList.add("active");
   lang = c.dataset.lang;
+
+  // ✅ best cache reset for this scope
+  BEST_CACHE = null;
+  paint();
 });
 
 $("diffGrid").addEventListener("click", (e)=>{
@@ -369,6 +448,9 @@ $("diffGrid").addEventListener("click", (e)=>{
   [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
   c.classList.add("active");
   diff = parseInt(c.dataset.diff,10);
+
+  BEST_CACHE = null;
+  paint();
 });
 
 // ---- Start ----
@@ -392,16 +474,14 @@ $("startBtn").addEventListener("click", async ()=>{
     return;
   }
 
-  // ✅ yeni oyun başlangıcı
   lives = 3;
   totalScore = 0;
   renderHearts();
-  paint();
 
   $("setup").style.display = "none";
   $("setupMsg").textContent = "";
 
-  newRound();
+  await newRound();
 });
 
 // initial render
