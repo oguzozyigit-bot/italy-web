@@ -35,7 +35,6 @@
     }
     .grid::-webkit-scrollbar{ display:none; }
 
-    /* ✅ Kartlar artık LINK (A) */
     .card{
       display:flex;
       flex-direction:column;
@@ -104,6 +103,7 @@
       pointer-events:none;
     }
 
+    /* ✅ toast pageContent içinde kalacak */
     .toast{
       position: fixed; left:50%; top:18px;
       transform:translateX(-50%) translateY(-120px);
@@ -130,27 +130,28 @@
   <div class="wrap">
     <div class="title-area"><h2>Dil Dersi Seçimi Yapın</h2></div>
     <div class="grid" id="langGrid"></div>
+
+    <!-- ✅ toast artık burada (shell yutmaz) -->
+    <div class="toast" id="toast"></div>
   </div>
 </main>
-
-<div class="toast" id="toast"></div>
 
 <script type="module">
   import { mountShell } from "/js/ui_shell.js";
   import { supabase } from "/js/supabase_client.js";
 
-  mountShell(); // shell
+  mountShell();
 
   const $ = (id)=>document.getElementById(id);
   function toast(msg){
     const t = $("toast");
+    if(!t) return;
     t.textContent = String(msg||"");
     t.classList.add("show");
     clearTimeout(window.__to);
     window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
   }
 
-  // ✅ Koruma: bootPage yok, direkt session kontrol
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session){
     location.replace("/pages/login.html");
@@ -167,14 +168,13 @@
     { id:"umay",   flag:"🇨🇳", lang:"CHINESE",  local:"中文" }
   ];
 
-  // levels çek
   let LEVELS = {};
   try{
     const { data: prof, error } = await supabase
       .from("profiles")
       .select("levels")
       .eq("id", session.user.id)
-      .single();
+      .maybeSingle();   // ✅ single değil
 
     if(!error){
       LEVELS = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
@@ -196,20 +196,18 @@
       `;
     }).join("");
 
-    // ✅ extra garanti: clickte localStorage set + force navigation
     grid.querySelectorAll(".card").forEach(a=>{
       a.addEventListener("click", (ev)=>{
+        ev.preventDefault(); // ✅ tek navigasyon
         const tid = a.getAttribute("data-id");
         if(tid) localStorage.setItem("italky_teacher_pref", tid);
 
-        // kullanıcıya küçük feedback
         const lv = LEVELS?.[tid] || "";
         toast(lv ? "Ders planına geçiliyor..." : "Seviye tespit başlıyor...");
 
-        // ✅ force (bazı webviewlerde a yutulursa)
         const url = a.getAttribute("href");
         setTimeout(()=>{ window.location.href = url; }, 80);
-      }, { passive:true });
+      });
     });
   }
 
