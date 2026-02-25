@@ -14,7 +14,15 @@ try{
   document.documentElement.style.setProperty("--shellLift", footerH ? `${footerH + 10}px` : "0px");
 }catch{}
 
-// ---- LangPool base from config.js ----
+/* ===============================
+   SETTINGS (persist)
+================================ */
+const LS_LANG = "italky_hangman_lang";
+const LS_DIFF = "italky_hangman_diff";
+
+/* ===============================
+   Langpool base
+================================ */
 async function readLangpoolBase(){
   if(window.LANGPOOL_BASE) return String(window.LANGPOOL_BASE);
   const r = await fetch("/js/config.js", { cache:"no-store" });
@@ -87,7 +95,9 @@ function pick(pool, count, usedSet, saveUsed, filterFn){
   return chosen;
 }
 
-// ---- SCORE RULES ----
+/* ===============================
+   GAME STATE
+================================ */
 let LANGPOOL_BASE = "";
 let pool = null;
 let target = null;
@@ -98,8 +108,8 @@ let diff = 3;
 let lives = 3;
 const MAX_LIVES = 9;
 
-let totalScore = 0;     // biriken
-let roundScore = 100;   // kelime puanı
+let totalScore = 0;
+let roundScore = 100;
 let guessed = new Set();
 let mistakes = 0;
 
@@ -109,15 +119,17 @@ let flawless = true;
 let jokerUsed = false;
 let lock = false;
 
-/* =========================
-   ✅ USER-BASED BEST SCORE (Supabase + local fallback)
+/* ===============================
+   ✅ USER-BASED BEST SCORE
+   - Supabase: profiles.hangman_best jsonb
    - key: `${lang}::${diff}`
-   - storage: profiles.hangman_best (jsonb)
-========================= */
+   - local fallback always
+================================ */
 let USER_ID = "anon";
-let BEST_CACHE = null; // number|null
+let BEST_CACHE = null;
 
 async function ensureUserId(){
+  // ✅ en başta kilitle (anon->user geçişi rekoru “sıfırlar” hissini bitirir)
   if(USER_ID && USER_ID !== "anon") return USER_ID;
   try{
     const { data:{ session } } = await supabase.auth.getSession();
@@ -127,18 +139,15 @@ async function ensureUserId(){
   }
   return USER_ID;
 }
-function bestLocalKey(){
-  return `italky_hangman_best::${lang}::${diff}::${USER_ID || "anon"}`;
-}
-function bestMapKey(){
-  return `${lang}::${diff}`;
-}
+
+function bestMapKey(){ return `${lang}::${diff}`; }
+function bestLocalKey(){ return `italky_hangman_best::${bestMapKey()}::${USER_ID}`; }
 
 async function getBest(){
   if(BEST_CACHE != null) return BEST_CACHE;
   await ensureUserId();
 
-  // 1) Supabase read best-effort
+  // 1) Supabase
   try{
     const { data, error } = await supabase
       .from("profiles")
@@ -152,9 +161,7 @@ async function getBest(){
       try{ localStorage.setItem(bestLocalKey(), String(BEST_CACHE)); }catch{}
       return BEST_CACHE;
     }
-  }catch{
-    // ignore
-  }
+  }catch{}
 
   // 2) local fallback
   try{
@@ -169,12 +176,12 @@ async function getBest(){
 async function setBest(newVal){
   await ensureUserId();
   const nv = Math.max(0, Number(newVal)||0);
-  BEST_CACHE = nv;
 
   // local always
+  BEST_CACHE = nv;
   try{ localStorage.setItem(bestLocalKey(), String(nv)); }catch{}
 
-  // Supabase best-effort (kolon/policy yoksa sessizce local devam)
+  // supabase best-effort
   try{
     const { data, error } = await supabase
       .from("profiles")
@@ -182,9 +189,7 @@ async function setBest(newVal){
       .eq("id", USER_ID)
       .maybeSingle();
 
-    if(error){
-      return;
-    }
+    if(error) return;
 
     const cur = (data?.hangman_best && typeof data.hangman_best === "object") ? { ...data.hangman_best } : {};
     const key = bestMapKey();
@@ -197,13 +202,12 @@ async function setBest(newVal){
       .from("profiles")
       .update({ hangman_best: cur })
       .eq("id", USER_ID);
-  }catch{
-    // ignore
-  }
+  }catch{}
 }
 
-/* ========================= */
-
+/* ===============================
+   UI
+================================ */
 async function paint(){
   const b = await getBest();
   $("bestVal").textContent = String(b);
@@ -212,7 +216,6 @@ async function paint(){
 }
 
 function getMistakeLimit(){
-  // easy(3)=6, normal(4)=4, hard(5)=2
   if(diff===3) return 6;
   if(diff===4) return 4;
   return 2;
@@ -288,14 +291,24 @@ function showModal(title, color, bonus){
   $("modal").classList.add("on");
 }
 
-$("mBtn").onclick = () => {
-  $("modal").classList.remove("on");
+/* ===============================
+   ✅ NEW: “DEVAM” = reset + yeni oyun
+   - Skor 0
+   - Can 3
+   - Setup’a dönmez, sayfa yenilenmez
+================================ */
+async function resetAndStartNewGame(){
+  lock = false;
+  totalScore = 0;
+  lives = 3;
+  renderHearts();
+  await paint();
+  await newRound();
+}
 
-  if(lives <= 0){
-    location.reload();
-    return;
-  }
-  newRound();
+$("mBtn").onclick = async () => {
+  $("modal").classList.remove("on");
+  await resetAndStartNewGame();
 };
 
 function applyPenalty(){
@@ -304,7 +317,6 @@ function applyPenalty(){
 
 async function endRound(win){
   lock = true;
-
   speakWord(target.w);
 
   if(win){
@@ -322,6 +334,7 @@ async function endRound(win){
     renderHearts();
     await paint();
 
+    // modal göster (DEVAM = reset+new game)
     showModal("MİSYON BAŞARILI", "#00ff9d", bonus);
     return;
   }
@@ -333,11 +346,11 @@ async function endRound(win){
   const swingMs = 2200;
   setTimeout(async ()=>{
     $("man").classList.remove("swing");
+    const b = await getBest();
     if(lives <= 0){
-      const b = await getBest();
       showModal("GAME OVER", "#ff0033", `TOPLAM SKOR: ${totalScore}\nEN YÜKSEK: ${b}`);
     }else{
-      showModal("DEŞİFRE EDİLEMEDİ", "#ff0033", "-1 CAN");
+      showModal("DEŞİFRE EDİLEMEDİ", "#ff0033", `-1 CAN\nEN YÜKSEK: ${b}`);
     }
   }, swingMs);
 }
@@ -358,20 +371,19 @@ function press(letter, btn){
     mistakes++;
     applyPenalty();
     updateMan();
-    paint(); // async içerde best yok; hızlı güncelleme
+    // hızlı paint (best okumadan)
+    $("roundVal").textContent = String(roundScore);
     if(mistakes >= getMistakeLimit()) endRound(false);
   }
 }
 
 function useJ(i){
   if(lock) return;
-  if(MAX_JOKERS <= 0) return;
-
-  jokerUsed = true;
 
   const el = (i===0) ? $("j0") : $("j1");
   if(el.classList.contains("spent")) return;
 
+  jokerUsed = true;
   el.classList.add("spent");
   applyPenalty();
 
@@ -383,7 +395,7 @@ function useJ(i){
     if(btn) press(l, btn);
     else { guessed.add(l); renderWord(); }
   }
-  paint();
+  $("roundVal").textContent = String(roundScore);
 }
 
 $("j0").onclick = ()=>useJ(0);
@@ -401,12 +413,10 @@ async function newRound(){
   jokerUsed = false;
 
   roundScore = 100;
-
   resetMan();
 
-  // BEST cache reset when lang/diff changes
+  // ✅ Best cache reset ONLY for current lang/diff (but best itself not deleted)
   BEST_CACHE = null;
-  await ensureUserId();
 
   const usedSet = createUsedSet(`used_hangman_${lang}`);
   const pickedW = pick(pool, 1, usedSet.used, usedSet.save, (x)=> (x?.w||"").length >= 3);
@@ -429,15 +439,44 @@ async function newRound(){
   await paint();
 }
 
-// ---- Setup seçimleri ----
+/* ===============================
+   Setup + Auto-start
+================================ */
+function savePrefs(){
+  try{ localStorage.setItem(LS_LANG, lang); }catch{}
+  try{ localStorage.setItem(LS_DIFF, String(diff)); }catch{}
+}
+function loadPrefs(){
+  try{
+    const l = String(localStorage.getItem(LS_LANG)||"").trim().toLowerCase();
+    if(l) lang = l;
+  }catch{}
+  try{
+    const d = parseInt(localStorage.getItem(LS_DIFF)||"", 10);
+    if(d===3 || d===4 || d===5) diff = d;
+  }catch{}
+}
+
+function markSetupUI(){
+  // lang
+  [...$("langGrid").querySelectorAll(".pickCard")].forEach(x=>x.classList.remove("active"));
+  const lc = $("langGrid").querySelector(`.pickCard[data-lang="${lang}"]`);
+  lc?.classList.add("active");
+
+  // diff
+  [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
+  const dc = $("diffGrid").querySelector(`.pickCard.diff[data-diff="${diff}"]`);
+  dc?.classList.add("active");
+}
+
+// setup seçimleri
 $("langGrid").addEventListener("click", (e)=>{
   const c=e.target.closest(".pickCard");
   if(!c || !c.dataset.lang) return;
   [...$("langGrid").querySelectorAll(".pickCard")].forEach(x=>x.classList.remove("active"));
   c.classList.add("active");
   lang = c.dataset.lang;
-
-  // ✅ best cache reset for this scope
+  savePrefs();
   BEST_CACHE = null;
   paint();
 });
@@ -448,16 +487,17 @@ $("diffGrid").addEventListener("click", (e)=>{
   [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
   c.classList.add("active");
   diff = parseInt(c.dataset.diff,10);
-
+  savePrefs();
   BEST_CACHE = null;
   paint();
 });
 
-// ---- Start ----
+// Start
 $("startBtn").addEventListener("click", async ()=>{
   $("setupMsg").textContent = "Yükleniyor…";
 
   try{
+    await ensureUserId(); // ✅ USER_ID kilit
     LANGPOOL_BASE = await readLangpoolBase();
     if(!LANGPOOL_BASE){
       $("setupMsg").textContent = "LANGPOOL_BASE bulunamadı (/js/config.js).";
@@ -474,16 +514,53 @@ $("startBtn").addEventListener("click", async ()=>{
     return;
   }
 
-  lives = 3;
-  totalScore = 0;
-  renderHearts();
-
   $("setup").style.display = "none";
   $("setupMsg").textContent = "";
 
-  await newRound();
+  await resetAndStartNewGame();
 });
 
-// initial render
-renderHearts();
-paint();
+// ✅ Setup’a geri dönmek için: HANGMAN yazısına çift tık
+let lastTap = 0;
+document.querySelector(".title")?.addEventListener("click", ()=>{
+  const now = Date.now();
+  if(now - lastTap < 400){
+    $("setup").style.display = "flex";
+    $("setupMsg").textContent = "";
+    markSetupUI();
+  }
+  lastTap = now;
+});
+
+/* ===============================
+   BOOT
+================================ */
+(async function boot(){
+  await ensureUserId();
+
+  loadPrefs();
+  markSetupUI();
+
+  // Auto-start: dil/diff daha önce seçildiyse setup göstermeden başlat
+  // (pool yüklemesi hızlı değilse setup üzerinde “yükleniyor” göstereceğiz)
+  const hasPref = !!localStorage.getItem(LS_LANG) && !!localStorage.getItem(LS_DIFF);
+  if(hasPref){
+    $("setupMsg").textContent = "Yükleniyor…";
+    try{
+      LANGPOOL_BASE = await readLangpoolBase();
+      pool = await loadLangPoolDirect(lang, LANGPOOL_BASE);
+      if(pool?.items?.length){
+        $("setup").style.display = "none";
+        await resetAndStartNewGame();
+        return;
+      }
+    }catch{}
+    // fallback: setup açık kalsın
+    $("setupMsg").textContent = "Dil/Zorluk seçip başlat.";
+  }else{
+    $("setupMsg").textContent = "Dil ve zorluk seçip başlat.";
+  }
+
+  renderHearts();
+  await paint();
+})();
