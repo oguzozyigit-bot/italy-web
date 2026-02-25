@@ -6,11 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Profil</title>
 
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
+    /* Bu sayfa sadece shell içindeki #pageContent'i stiller. Body/html'e karışmaz. */
     #pageContent{
       padding: 16px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 22px);
       display:flex;
@@ -32,6 +36,7 @@
       font-weight: 900;
       margin: 0;
       letter-spacing: -0.3px;
+      color: rgba(255,255,255,0.92);
     }
     .list{ display:flex; flex-direction:column; gap: 10px; margin-top: 10px; }
 
@@ -62,7 +67,7 @@
       background: rgba(99,102,241,0.12);
       border: 1px solid rgba(99,102,241,0.35);
     }
-    .wallet .amt{ font-size: 20px; font-weight: 1000; letter-spacing: -0.3px; }
+    .wallet .amt{ font-size: 20px; font-weight: 1000; letter-spacing: -0.3px; color: rgba(255,255,255,0.92); }
 
     .btn{
       height: 44px; padding: 0 14px; border-radius: 16px;
@@ -99,6 +104,7 @@
 </head>
 
 <body>
+  <!-- ui_shell.js bunun içeriğini shellMain içine taşıyacak -->
   <div id="pageContent">
 
     <div class="panel">
@@ -178,8 +184,13 @@
     import { bootPage } from "/js/ui_guard.js";
     import { initProfilePage } from "/js/profile_page.js";
 
+    // ✅ shell önce: böylece arka plan ve yazı rengi oturur (beyaz ekran biter)
     mountShell();
+
+    // ✅ guard: login zorunlu
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+
+    // ✅ profil doldur
     await initProfilePage({ setHeaderTokens });
   </script>
 </body>
