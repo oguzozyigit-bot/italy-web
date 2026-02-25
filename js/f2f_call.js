@@ -1,10 +1,4 @@
 // FILE: /js/f2f_call.js
-// ✅ FIX: WalkieTalkie'de AI "sohbet" hissi YOK.
-// - cleanSpeechText (LLM ile düzeltme) KALDIRILDI -> lokal temizlik var
-// - translate_ai style:"fast" + strict -> sadece çeviri
-// - TTS Google-only: /api/tts ok:false => sessizce kapalı (toast spam yok)
-// - Oda boşken gelen mesaj gösterme zaten var
-
 import { LANG_POOL } from "/js/lang_pool_full.js";
 import { STORAGE_KEY } from "/js/config.js";
 import { shortDisplayName } from "/js/ui_shell.js";
@@ -25,7 +19,7 @@ const LANGS = Array.isArray(LANG_POOL) ? LANG_POOL : [
 ];
 const norm = (c)=>String(c||"").toLowerCase().trim();
 
-// UI
+/* UI */
 const chat = $("chat");
 const msgInput = $("msgInput");
 const sendBtn = $("sendBtn");
@@ -33,16 +27,13 @@ const micBtn = $("micBtn");
 const langSelect = $("langSelect");
 const peopleScroll = $("peopleScroll");
 const peopleCount = $("peopleCount");
-const exitBtn = $("exitBtn"); // varsa
+const exitBtn = $("exitBtn");
 
 if(!chat || !msgInput || !sendBtn || !micBtn || !peopleScroll || !peopleCount){
-  console.error("[F2F_CALL] Missing required elements", {
-    chat:!!chat, msgInput:!!msgInput, sendBtn:!!sendBtn, micBtn:!!micBtn,
-    peopleScroll:!!peopleScroll, peopleCount:!!peopleCount
-  });
+  console.error("[F2F_CALL] Missing required elements");
 }
 
-// Profile
+/* profile from cache */
 function getProfileFromCache(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -58,7 +49,7 @@ function getProfileFromCache(){
 }
 const MY = getProfileFromCache();
 
-// Lang select
+/* language select */
 if(langSelect){
   langSelect.innerHTML = LANGS.map(l=>{
     const c = norm(l.code);
@@ -72,7 +63,7 @@ if(langSelect){
   });
 }
 
-// Exit confirm
+/* exit confirm */
 const I18N = {
   tr: { confirm:"Sohbetten çıkmak istiyor musunuz?" },
   en: { confirm:"Do you want to leave the chat?" },
@@ -92,7 +83,7 @@ exitBtn?.addEventListener("click", ()=>{
   if(ok) location.href = "/pages/home.html";
 });
 
-// textarea grow + Enter send (Shift+Enter new line)
+/* textarea grow + Enter send */
 function growTA(){
   try{
     msgInput.style.height = "0px";
@@ -111,9 +102,7 @@ msgInput?.addEventListener("keydown",(e)=>{
   }
 });
 
-/* ===============================
-   Participants strip
-================================ */
+/* participants strip */
 const participants = new Map(); // key -> {name,pic}
 function chipName(name){
   const s = String(name||"").trim();
@@ -157,29 +146,21 @@ function upsertParticipant(key, name, pic){
   renderParticipants();
 }
 
-// self
+/* self */
 const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
 upsertParticipant(clientId, MY.name, MY.picture);
-
-// default count visible at least 1
 peopleCount.textContent = "1";
 
-/* ===============================
-   Local clean (NO AI)
-   - sohbet hissini bitirir
-================================ */
+/* local clean: NO AI */
 function localCleanText(text){
   let s = String(text||"").trim();
   if(!s) return s;
   s = s.replace(/\s+/g," ").trim();
-  // ufak dolgu temizliği
   s = s.replace(/\b(eee+|ııı+|umm+|hmm+)\b/gi, "").replace(/\s+/g," ").trim();
   return s;
 }
 
-/* ===============================
-   Chat bubbles
-================================ */
+/* bubbles */
 function addMessage(side, name, pic, text){
   const row = document.createElement("div");
   row.className = "msgRow " + (side === "right" ? "right" : "left");
@@ -215,9 +196,7 @@ function addMessage(side, name, pic, text){
   chat.scrollTop = chat.scrollHeight;
 }
 
-/* ===============================
-   Translate (STRICT, no-chat)
-================================ */
+/* translate strict (no chat) */
 async function translateAI(text, from, to){
   const t = String(text||"").trim();
   if(!t) return t;
@@ -232,7 +211,7 @@ async function translateAI(text, from, to){
       text: t,
       from_lang: src,
       to_lang: dst,
-      style: "fast",     // ✅ chat değil
+      style: "fast",
       provider: "auto",
       strict: true,
       no_extra: true
@@ -243,18 +222,13 @@ async function translateAI(text, from, to){
   return data?.translated ? String(data.translated).trim() : null;
 }
 
-/* ===============================
-   TTS (Google-only)
-   /api/tts -> ok:true audio_base64 OR ok:false (TTS_UNAVAILABLE)
-================================ */
+/* TTS google-only (ok:false => silent) */
 let audioObj=null, lastAudioAt=0, ttsWarnAt=0;
-let ttsEnabled = (localStorage.getItem("wt_tts_enabled") ?? "1") === "1"; // UI eklersen toggle edebilirsin
-
+let ttsEnabled = (localStorage.getItem("wt_tts_enabled") ?? "1") === "1";
 function stopAudio(){
   try{ if(audioObj){ audioObj.pause(); audioObj.currentTime=0; } }catch{}
   audioObj=null;
 }
-
 async function speakViaTTS(text, lang){
   if(!ttsEnabled) return;
   const t = String(text||"").trim();
@@ -270,21 +244,13 @@ async function speakViaTTS(text, lang){
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ text: t, lang: norm(lang), speaking_rate: 1, pitch: 0 })
     });
-
-    if(!res.ok){
-      if(Date.now() - ttsWarnAt > 4000){
-        ttsWarnAt = Date.now();
-        console.log("[TTS] HTTP", res.status);
-      }
-      return;
-    }
+    if(!res.ok) return;
 
     const data = await res.json().catch(()=>null);
     if(!data?.ok || !data.audio_base64){
-      if(Date.now() - ttsWarnAt > 4000){
+      if(Date.now() - ttsWarnAt > 5000){
         ttsWarnAt = Date.now();
-        // çok spam yapma
-        console.log("[TTS] disabled/unavailable");
+        console.log("[TTS] unavailable");
       }
       return;
     }
@@ -292,7 +258,7 @@ async function speakViaTTS(text, lang){
     const binary = atob(data.audio_base64);
     const bytes = new Uint8Array(binary.length);
     for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
-    const blob = new Blob([bytes], { type:"audio/mpeg" });
+    const blob = new Blob([bytes], {type:"audio/mpeg"});
     const url = URL.createObjectURL(blob);
 
     stopAudio();
@@ -300,14 +266,10 @@ async function speakViaTTS(text, lang){
     audioObj.onended = ()=>URL.revokeObjectURL(url);
     audioObj.onerror = ()=>URL.revokeObjectURL(url);
     await audioObj.play();
-  }catch{
-    // sessiz
-  }
+  }catch{}
 }
 
-/* ===============================
-   STT
-================================ */
+/* STT */
 function pickMime(){
   const cands = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
   for(const m of cands){
@@ -325,16 +287,21 @@ async function sttBlob(blob, lang){
   return String(j.text||"").trim();
 }
 
-/* ===============================
-   WS
-   NOTE: backend'in create/join/presence/message protokolü
-================================ */
+/* WS */
 let ws = null;
 let presenceKnown = false;
 let presenceCount = 1;
 
 function wsUrl(){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
+}
+
+function applyRoster(roster){
+  if(!Array.isArray(roster)) return;
+  for(const u of roster){
+    const k = String(u?.from || "").trim() || ("p_"+String(u?.from_name||"User"));
+    upsertParticipant(k, String(u?.from_name||"User"), String(u?.from_pic||""));
+  }
 }
 
 function connect(){
@@ -363,6 +330,11 @@ function connect(){
       const c = Number(msg.count||0);
       if(Number.isFinite(c) && c >= 0) presenceCount = c;
       peopleCount.textContent = String(Math.max(1, presenceCount));
+
+      // ✅ roster ile avatarlar anında
+      if(msg.roster) applyRoster(msg.roster);
+      // self garanti
+      upsertParticipant(clientId, MY.name, MY.picture);
       return;
     }
 
@@ -372,10 +344,7 @@ function connect(){
       return;
     }
 
-    // ✅ presence gelmeden mesaj yok
     if(!presenceKnown) return;
-
-    // ✅ tek kişiyken mesaj gösterme (sohbet hissi yok)
     if(presenceCount <= 1) return;
 
     if(msg.type === "message"){
@@ -397,10 +366,7 @@ function connect(){
         if(tr) shown = tr;
       }
 
-      // ✅ sadece mesaj göster, AI reply yok
       addMessage("left", fromName, fromPic, shown);
-
-      // ✅ tts (google-only)
       await speakViaTTS(shown, myLang);
     }
   };
@@ -409,9 +375,7 @@ function connect(){
 }
 connect();
 
-/* ===============================
-   SEND typed
-================================ */
+/* SEND typed */
 async function sendTyped(){
   const raw = String(msgInput?.value || "").trim();
   if(!raw) return;
@@ -421,9 +385,8 @@ async function sendTyped(){
 
   const cleaned = localCleanText(raw);
 
-  // always show right
+  // show self message right
   addMessage("right", MY.name, MY.picture, cleaned);
-
   upsertParticipant(clientId, MY.name, MY.picture);
   if(!presenceKnown) peopleCount.textContent = "1";
 
@@ -438,12 +401,9 @@ async function sendTyped(){
     }));
   }
 }
-
 sendBtn?.addEventListener("click", sendTyped);
 
-/* ===============================
-   MIC toggle
-================================ */
+/* MIC toggle */
 let recJob=null, isBusy=false;
 
 async function startRecord(){
