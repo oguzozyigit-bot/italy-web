@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Oyunlar</title>
   <link rel="icon" href="data:," />
+
+  <!-- ✅ Beyaz ekran fix (global kural) -->
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -116,7 +121,6 @@
     .bg-l{ background: var(--p-lav); }
     .bg-m{ background: var(--p-mint); }
 
-    /* ✅ 24h durum ikonu (büyük + parlak) */
     .statusDot{
       position:absolute;
       top: 10px;
@@ -145,7 +149,6 @@
       50%{ transform: scale(1.08); }
     }
 
-    /* Daha renkli ikon kapsülleri */
     .icon-node{
       width:46px;height:46px;
       border-radius: 16px;
@@ -171,7 +174,6 @@
     .g-name{ font-size: 13px; font-weight: 1000; color: #fff; margin-bottom: 2px; letter-spacing: -0.3px; }
     .g-desc{ font-size: 9.8px; font-weight: 800; color: rgba(255,255,255,0.58); }
 
-    /* Toast */
     .toast{
       position: fixed;
       left:50%;
@@ -192,6 +194,17 @@
       text-align:center;
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
+
+    /* ✅ transition overlay (beyaz ekranı örter) */
+    .navFade{
+      position: fixed; inset:0;
+      background: #02000f;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .16s ease;
+      z-index: 9999999;
+    }
+    .navFade.show{ opacity: 1; }
   </style>
 </head>
 
@@ -262,7 +275,8 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <div class="navFade" id="navFade" aria-hidden="true"></div>
 
-  <script type="module" src="/js/games_menu.js?v=3"></script>
+  <script type="module" src="/js/games_menu.js?v=4"></script>
 </body>
 </html>
