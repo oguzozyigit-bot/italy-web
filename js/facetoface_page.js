@@ -2,9 +2,10 @@
 // ✅ FINAL (TEK DOSYA): Bas -> kayıt başlar | tekrar bas -> durur & çevirir
 // ✅ 20 saniye auto-stop: mic kapanır + çeviri çalışır
 // ✅ Kayıt sırasında canlı yazı: her 4 sn /api/stt ile güncelle (WebView uyumlu)
-// ✅ Konuşma bitince: STT metni önce AI ile DÜZELT -> sonra ÇEVİR
+// ✅ Konuşma bitince: STT metni LOCAL temizlenir -> sonra STRICT ÇEVİR
 // ✅ Sesli komutla dil değiştir: /api/command_parse
 // ✅ Daktilo çeviri + TTS + hoparlör üst üste binmez
+// ✅ IMPORTANT: FaceToFace'te "chat" tarzı YOK. Sadece çeviri.
 
 import { LANG_POOL } from "/js/lang_pool_full.js";
 import { getSiteLang } from "/js/i18n.js";
@@ -473,7 +474,8 @@ async function parseCommand(text){
 }
 
 /* ===============================
-   TRANSLATE
+   TRANSLATE (STRICT)
+   NOTE: style:"fast" => chat vari cevap riskini keser
 ================================ */
 async function translateViaApi(text, source, target){
   const t = String(text||"").trim();
@@ -486,7 +488,15 @@ async function translateViaApi(text, source, target){
   const r = await fetch(`${API_BASE}/api/translate_ai`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text: t, from_lang: src, to_lang: dst, style:"chat", provider:"auto" })
+    body: JSON.stringify({
+      text: t,
+      from_lang: src,
+      to_lang: dst,
+      style: "fast",         // ✅ chat değil
+      provider: "auto",
+      strict: true,          // (backend ignore etse bile zarar yok)
+      no_extra: true          // (backend ignore etse bile zarar yok)
+    })
   });
   if(!r.ok) return null;
   const data = await r.json().catch(()=>null);
@@ -494,31 +504,26 @@ async function translateViaApi(text, source, target){
 }
 
 /* ===============================
-   AI CLEAN (before translate)
+   LOCAL CLEAN (NO AI)
+   - Chat hissini bitirir. Sadece düzenler.
 ================================ */
-async function cleanSpeechText(text, lang){
-  const t = String(text||"").trim();
-  if(!t) return t;
+function localCleanSpeechText(text){
+  let s = String(text||"").trim();
+  if(!s) return s;
 
-  try{
-    const r = await fetch(`${API_BASE}/api/translate_ai`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        text: t,
-        from_lang: normalizeApiLang(lang),
-        to_lang: normalizeApiLang(lang),
-        style: "chat",
-        provider: "auto"
-      })
-    });
-    if(!r.ok) return t;
-    const data = await r.json().catch(()=>null);
-    const out = String(data?.translated || "").trim();
-    return out || t;
-  }catch{
-    return t;
-  }
+  // normalize spaces
+  s = s.replace(/\s+/g, " ").trim();
+
+  // remove repeated tiny fillers (çok abartmadan)
+  s = s.replace(/\b(eee+|ııı+|umm+|hmm+)\b/gi, "").replace(/\s+/g, " ").trim();
+
+  // basic punctuation
+  if(!/[.!?…]$/.test(s)) s += ".";
+
+  // capitalize first letter (Latin)
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+
+  return s.trim();
 }
 
 /* ===============================
@@ -630,7 +635,7 @@ function mergeLiveText(oldText, newText){
 let recJob = null;           // { stream, mr, chunks, hardTimer, tickTimer, liveTimer }
 let recSide = null;
 let liveNode = null;         // { txt, bubble }
-let liveText = "";           // accumulated display
+let liveText = "";
 let liveLastSentAt = 0;
 
 async function startRecording(which){
@@ -651,7 +656,6 @@ async function startRecording(which){
 
   toast("🎙️ Kayıt başladı (tekrar bas → bitir)");
 
-  // live bubble
   liveNode = addBubble(which, "them", "…");
   liveText = "";
   liveLastSentAt = 0;
@@ -673,7 +677,7 @@ async function startRecording(which){
   }, 250);
 
   const hardTimer = setTimeout(()=>{
-    stopAndProcess(); // auto-stop
+    stopAndProcess();
   }, MAX_RECORD_MS);
 
   const liveTimer = setInterval(async ()=>{
@@ -702,23 +706,19 @@ async function stopAndProcess(){
 
   const which = recSide;
 
-  // stop timers
   try{ clearTimeout(recJob.hardTimer); }catch{}
   try{ clearInterval(recJob.tickTimer); }catch{}
   try{ clearInterval(recJob.liveTimer); }catch{}
   setTimerBadges(null);
 
-  // stop stream + recorder
   try{ recJob.stream.getTracks().forEach(t=>t.stop()); }catch{}
   try{ recJob.mr.stop(); }catch{}
 
   const blob = new Blob(recJob.chunks, { type: recJob.mr.mimeType || "audio/webm" });
 
-  // reset record state first (prevents stuck UI)
   recJob = null;
   recSide = null;
 
-  // mic kapanır
   setMicUI(which, false);
   setFrameState("idle", lastMicSide);
 
@@ -735,7 +735,6 @@ async function stopAndProcess(){
   const dst = (which==="top") ? botLang : topLang;
   const other = otherSide(which);
 
-  // final STT
   let text = "";
   try{
     text = await sttBlob(blob, normalizeApiLang(src));
@@ -754,18 +753,8 @@ async function stopAndProcess(){
     return;
   }
 
-  // ✅ AI ile düzelt
-  const cleaned = await cleanSpeechText(text, src);
-
-  // live bubble -> cleaned
-  try{
-    if(liveNode?.txt) liveNode.txt.textContent = cleaned;
-  }catch{}
-  liveNode = null;
-  liveText = "";
-
-  // Command? (cleaned)
-  const cmd = await parseCommand(cleaned);
+  // ✅ komut kontrolü RAW metinden (düzeltmeden önce)
+  const cmd = await parseCommand(text);
   if(cmd && cmd.is_command && cmd.target_lang){
     if(which === "top"){
       botLang = cmd.target_lang;
@@ -781,7 +770,15 @@ async function stopAndProcess(){
     return;
   }
 
-  // Translate (cleaned)
+  // ✅ LOCAL temizle (AI yok)
+  const cleaned = localCleanSpeechText(text);
+
+  try{
+    if(liveNode?.txt) liveNode.txt.textContent = cleaned;
+  }catch{}
+  liveNode = null;
+  liveText = "";
+
   const translated = await translateViaApi(cleaned, src, dst);
   if(!translated){
     addBubble(other, "me", "⚠️ Çeviri yapılamadı.");
@@ -853,7 +850,6 @@ function bindUI(){
     if(!insidePop && !isBtn) closeAllPop();
   }, { capture:true });
 
-  // Mic toggles
   $("topMic")?.addEventListener("click", async (e)=>{
     e.preventDefault(); e.stopPropagation();
     if(recJob) return await stopAndProcess();
