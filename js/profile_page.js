@@ -1,7 +1,6 @@
 // FILE: /js/profile_page.js
 import { supabase } from "/js/supabase_client.js";
 import { STORAGE_KEY } from "/js/config.js";
-import { shortDisplayName } from "/js/ui_shell.js";
 
 const $ = (id)=>document.getElementById(id);
 
@@ -37,23 +36,30 @@ function minutesToHM(mins){
   return `${h} saat ${r} dk`;
 }
 
-/* ✅ hitap adı türetme */
-export function deriveStudentCallName(fullName){
+/* ✅ İSTEDİĞİN KURAL:
+   - "Oğuz Özyiğit" -> "Oğuz Ö."
+   - "Huri Hüma Özyiğit" -> "Huri Hüma Ö."
+   - "Selimli Mustafa" -> "Selimli"  (tek isim gibi davran)
+*/
+export function shortDisplayName(fullName){
   const s = String(fullName || "").trim().replace(/\s+/g," ");
-  if(!s) return "Student";
-  const parts = s.split(" ");
-  if(parts.length === 1) return parts[0];
-  if(parts.length === 2) return parts[0];
-  const last = parts[parts.length - 1];
-  const rest = parts.slice(0, -1);
+  if(!s) return "Kullanıcı";
+  const parts = s.split(" ").filter(Boolean);
 
-  if(last.toLowerCase() === "özyiğit" || last.toLowerCase() === "ozyigit"){
-    return rest.join(" ");
+  if(parts.length === 1) return parts[0];         // Selimli
+  if(parts.length === 2){
+    const first = parts[0];
+    const last = parts[1];
+    return `${first} ${String(last[0]||"").toUpperCase()}.`; // Oğuz Ö.
   }
-  return rest.join(" ");
+
+  // 3+ kelime: son kelime soyad → baş harf
+  const last = parts[parts.length-1];
+  const firsts = parts.slice(0,-1).join(" ");
+  return `${firsts} ${String(last[0]||"").toUpperCase()}.`;   // Huri Hüma Ö.
 }
 
-/* member_no generator (aynı) */
+/* member_no generator */
 function randLetter(){
   const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   return A[Math.floor(Math.random()*A.length)];
@@ -107,29 +113,33 @@ async function safeLogout(){
 }
 
 async function copyText(text){
-  try{ await navigator.clipboard.writeText(text); toast("Kopyalandı"); }
-  catch{ toast("Kopyalanamadı"); }
+  try{
+    await navigator.clipboard.writeText(text);
+    toast("Kopyalandı");
+  }catch{
+    toast("Kopyalanamadı");
+  }
 }
 
 async function ensureProfile(user){
   const { data: p, error } = await supabase
     .from("profiles")
-    .select("id,email,full_name,tokens,member_no,created_at,last_login_at,levels,offline_langs,study_minutes,avatar_url")
+    .select("id,email,full_name,tokens,member_no,created_at,last_login_at,levels,offline_langs,study_minutes,picture")
     .eq("id", user.id)
     .maybeSingle();
 
   if(error) throw error;
   if(p) return p;
 
-  const metaName = (user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
-  const metaPic  = (user.user_metadata?.picture || user.user_metadata?.avatar_url || "").trim();
+  const metaName = String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
+  const metaPic  = String(user.user_metadata?.picture || user.user_metadata?.avatar_url || "").trim();
 
   const insert = {
     id:user.id,
     email:user.email,
     full_name: metaName,
-    avatar_url: metaPic || null,
-    tokens:400,
+    picture: metaPic || null,
+    tokens: 0,
     levels:{},
     offline_langs:[],
     study_minutes:{}
@@ -147,9 +157,10 @@ async function ensureProfile(user){
 
 async function ensureFullNameFromGoogle(userId, user, currentFullName){
   const cur = String(currentFullName || "").trim();
+  if(cur.length >= 2) return cur;
+
   const metaName = String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
-  if(cur.length >= 3) return cur;
-  if(metaName.length < 3) return cur;
+  if(metaName.length < 2) return cur;
 
   try{
     const { data, error } = await supabase
@@ -163,20 +174,20 @@ async function ensureFullNameFromGoogle(userId, user, currentFullName){
   return metaName.slice(0,64);
 }
 
-async function ensureAvatarFromGoogle(userId, user, current){
-  const cur = String(current||"").trim();
-  const metaPic = String(user.user_metadata?.picture || user.user_metadata?.avatar_url || "").trim();
+async function ensurePicture(userId, user, currentPic){
+  const cur = String(currentPic || "").trim();
   if(cur) return cur;
-  if(!metaPic) return "";
+  const metaPic = String(user.user_metadata?.picture || user.user_metadata?.avatar_url || "").trim();
+  if(!metaPic) return cur;
 
   try{
     const { data, error } = await supabase
       .from("profiles")
-      .update({ avatar_url: metaPic })
+      .update({ picture: metaPic })
       .eq("id", userId)
-      .select("avatar_url")
+      .select("picture")
       .single();
-    if(!error && data?.avatar_url) return data.avatar_url;
+    if(!error && data?.picture) return data.picture;
   }catch{}
   return metaPic;
 }
@@ -235,7 +246,7 @@ function renderLevels(profile, reqMap){
     const remainMin = Math.max(0, needMin - studiedMin);
 
     const right = `${lv} • ${minutesToHM(studiedMin)} • Kalan: ${minutesToHM(remainMin)}`;
-    if(list) list.appendChild(lineRow(label, right));
+    list?.appendChild(lineRow(label, right));
   }
 
   safeShow("levelsEmptyNote", !hasAny);
@@ -255,27 +266,6 @@ function renderOffline(profile){
   }
 }
 
-/* ✅ cache güncelle (header için) */
-function updateShellCache({ full_name, avatar_url, tokens }){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const base = raw ? JSON.parse(raw) : {};
-    const display_name = shortDisplayName(full_name);
-    const picture = avatar_url || base.picture || base.avatar || base.avatar_url || "";
-
-    const next = {
-      ...base,
-      full_name,
-      display_name,
-      name: display_name,
-      picture,
-      tokens: (tokens != null ? tokens : base.tokens)
-    };
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  }catch{}
-}
-
 export async function initProfilePage({ setHeaderTokens } = {}){
   try{
     const { data:{ session } } = await supabase.auth.getSession();
@@ -288,11 +278,11 @@ export async function initProfilePage({ setHeaderTokens } = {}){
 
     let profile = await ensureProfile(user);
 
-    // full_name + avatar google’dan
+    // full_name + picture google’dan otomatik
     profile.full_name = await ensureFullNameFromGoogle(user.id, user, profile.full_name);
-    profile.avatar_url = await ensureAvatarFromGoogle(user.id, user, profile.avatar_url);
+    profile.picture   = await ensurePicture(user.id, user, profile.picture);
 
-    // last_login_at
+    // last_login_at update (silent)
     try{
       await supabase.from("profiles")
         .update({ last_login_at: new Date().toISOString() })
@@ -305,6 +295,7 @@ export async function initProfilePage({ setHeaderTokens } = {}){
 
     safeText("pEmail", profile.email || user.email || "—");
     safeText("pName", profile.full_name || "—");
+
     safeText("memberNo", profile.member_no || "—");
     safeText("createdAt", fmtDT(profile.created_at));
     safeText("lastLogin", fmtDT(profile.last_login_at));
@@ -313,19 +304,29 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     safeText("tokenVal", String(tokens));
     if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
 
-    // ✅ header cache update: kısa isim + avatar + tokens
-    updateShellCache({ full_name: profile.full_name, avatar_url: profile.avatar_url, tokens });
+    // ✅ header'da kısaltılmış isim + avatar garantisi (shell id'leri)
+    try{
+      const headName = document.getElementById("userName");
+      if(headName) headName.textContent = shortDisplayName(profile.full_name || "Kullanıcı");
+
+      const headPic = document.getElementById("userPic");
+      if(headPic && profile.picture){
+        headPic.src = profile.picture;
+        headPic.referrerPolicy = "no-referrer";
+      }
+    }catch{}
 
     renderLevels(profile, reqMap);
     renderOffline(profile);
 
-    $("copyMemberBtn")?.addEventListener("click", ()=>copyText(profile.member_no || ""));
-    $("offlineDownloadBtn")?.addEventListener("click", ()=>location.href="/pages/offline.html");
-    $("buyTokensBtn")?.addEventListener("click", ()=>toast("Jeton yükleme yakında (Google Play)."));
-    $("logoutBtn")?.addEventListener("click", safeLogout);
+    $("copyMemberBtn") && ($("copyMemberBtn").onclick = ()=>copyText(profile.member_no || ""));
+    $("offlineDownloadBtn") && ($("offlineDownloadBtn").onclick = ()=>location.href="/pages/offline.html");
+    $("buyTokensBtn") && ($("buyTokensBtn").onclick = ()=>toast("Jeton yükleme yakında (Google Play)."));
 
-    $("deleteBtn")?.addEventListener("click", async ()=>{
-      const ok = confirm("Hesap silme talebi oluşturulsun mu?");
+    $("logoutBtn") && ($("logoutBtn").onclick = safeLogout);
+
+    $("deleteBtn") && ($("deleteBtn").onclick = async ()=>{
+      const ok = confirm("Hesap silme talebi oluşturulsun mu? 30 gün içinde giriş yaparsanız iptal edilir.");
       if(!ok) return;
       try{
         await supabase.rpc("request_account_deletion");
