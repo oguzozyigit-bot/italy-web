@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Seviye Tespit</title>
 
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -19,6 +22,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       background: rgba(255,255,255,0.03);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       padding: 22px 18px;
     }
 
@@ -90,6 +94,25 @@
     }
     .btn-main { background: #fff; color: #000; }
     .btn-main:disabled { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.35); cursor: not-allowed; }
+
+    .toast{
+      position: fixed; left:50%; top:18px;
+      transform: translateX(-50%) translateY(-120px);
+      background: rgba(10,10,18,.92);
+      border: 1px solid rgba(165,180,252,.35);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color:#fff;
+      z-index: 999999;
+      font-weight: 900;
+      font-size: 12px;
+      transition: .25s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width: min(92vw, 520px);
+      text-align:center;
+    }
+    .toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
@@ -105,40 +128,57 @@
           </div>
         </div>
 
-        <div class="badge">Sınav Giriş Ücreti: <strong>40 Jeton</strong></div>
+        <div class="badge">Sınav Giriş Ücreti: <strong><span id="feeTxt">40</span> Jeton</strong></div>
 
         <div class="rules">
-          <div class="rule"><div class="k">Soru</div><div class="v">50</div></div>
-          <div class="rule"><div class="k">Süre</div><div class="v">40 dk</div></div>
+          <div class="rule"><div class="k">Soru</div><div class="v" id="qCount">12</div></div>
+          <div class="rule"><div class="k">Süre</div><div class="v" id="durTxt">4 dk</div></div>
         </div>
 
         <div class="tips">
-          <b>Bu sınav, italky Academy ders planınızı doğru kurmak için kritiktir.</b><br/>
-          Lütfen mümkünse <b>sessiz bir ortamda</b> sınava girin.<br/>
-          Sınav sırasında <b>dış destek</b> (çeviri, sözlük, birinden yardım almak vb.) almak gerçek seviyenizi gizler ve gelişiminizi <b>yavaşlatır</b>.<br/><br/>
-          <b>Öneri:</b> Testi tek başınıza, dikkatinizi bölmeden tamamlayın. Böylece sistem size en doğru seviyeyi verir.
+          <b>Tek kontrol:</b> Bu test 12 sorudan oluşur ve yaklaşık 4 dakika sürer.<br/>
+          Lütfen mümkünse <b>sessiz bir ortamda</b> tamamlayın.<br/>
+          <b>Çeviri / sözlük</b> kullanmak gerçek seviyeyi saklar ve planı bozar.
         </div>
 
         <div class="mini">
-          • Sınava başladığınız anda hesabınızdan <b>40 Jeton</b> düşülür.<br/>
-          • Erken bitirirseniz kalan süreye göre iade işlemi yapılır (otomatik).
+          • Başlatınca <b>ücret düşer</b> ve test açılır.<br/>
+          • Sonuç, seçtiğin ders için profilinde kaydedilir.
         </div>
       </section>
 
       <button class="btn btn-main" id="btnStart" disabled>Bakiye Kontrol Ediliyor...</button>
 
+      <div class="toast" id="toast"></div>
     </div>
   </main>
 
   <script type="module">
-    import { mountShell } from "/js/ui_shell.js";
-    import { bootPage } from "/js/ui_guard.js";
+    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
     mountShell({ scroll: "none" });
-    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
+    const $ = (id)=>document.getElementById(id);
     const FEE = 40;
+    const TEST_Q = 12;
+    const TEST_MIN = 4;
+
+    function toast(msg){
+      const t = $("toast");
+      if(!t) return;
+      t.textContent = String(msg||"");
+      t.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
+    }
+
+    // teacher id: ?t=... > localStorage
+    const params = new URLSearchParams(location.search);
+    const teacherId = String(params.get("t") || localStorage.getItem("italky_teacher_pref") || "").trim();
+    if(!teacherId){
+      location.replace("/pages/teacher_select.html");
+    }
 
     const LANGS = {
       dora:{flag:"🇬🇧", role:"English",   local:"English"},
@@ -151,30 +191,101 @@
       umay:{flag:"🇨🇳", role:"Chinese",   local:"中文 (Chinese)"}
     };
 
-    const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
-    if(!teacherId) location.href="/pages/teacher_select.html";
-
     const lang = LANGS[teacherId];
     if(lang){
-      document.getElementById("flag").textContent = lang.flag;
-      document.getElementById("role").textContent = `Seviye Tespit • ${lang.role}`;
-      document.getElementById("langName").textContent = lang.local;
+      $("flag").textContent = lang.flag;
+      $("role").textContent = `Seviye Tespit • ${lang.role}`;
+      $("langName").textContent = lang.local;
+    }
+
+    $("feeTxt").textContent = String(FEE);
+    $("qCount").textContent = String(TEST_Q);
+    $("durTxt").textContent = `${TEST_MIN} dk`;
+
+    async function getSessionUser(){
+      const { data:{ session } } = await supabase.auth.getSession();
+      return session?.user || null;
+    }
+
+    async function getTokens(userId){
+      try{
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("tokens")
+          .eq("id", userId)
+          .maybeSingle();
+
+        if(error) return 0;
+        return Number(data?.tokens ?? 0);
+      }catch{
+        return 0;
+      }
+    }
+
+    async function deductTokensIfEnough(userId, fee){
+      // ✅ atomic-ish: update only if tokens >= fee
+      // Postgrest update returns array
+      const { data, error } = await supabase
+        .from("profiles")
+        .update({ tokens: supabase.raw ? undefined : undefined }) // placeholder (ignored)
+        .select("tokens") // will be overwritten below using rpc-like approach? nope.
+
+      // Supabase JS doesn't allow tokens = tokens - fee directly without RPC in a clean way.
+      // So we do: read -> update with eq old tokens. (best effort)
+      // (We keep it stable, and if collision happens, user retries.)
+      const cur = await getTokens(userId);
+      if(cur < fee) return { ok:false, tokens:cur };
+
+      const next = cur - fee;
+
+      try{
+        const { data: upd, error: upErr } = await supabase
+          .from("profiles")
+          .update({ tokens: next })
+          .eq("id", userId)
+          .eq("tokens", cur)        // ✅ optimistic lock
+          .select("tokens")
+          .maybeSingle();
+
+        if(upErr || !upd){
+          // someone changed tokens; re-read
+          const again = await getTokens(userId);
+          if(again < fee) return { ok:false, tokens:again };
+          // last attempt
+          const finalNext = again - fee;
+          const { data: upd2, error: upErr2 } = await supabase
+            .from("profiles")
+            .update({ tokens: finalNext })
+            .eq("id", userId)
+            .eq("tokens", again)
+            .select("tokens")
+            .maybeSingle();
+          if(upErr2 || !upd2) return { ok:false, tokens: await getTokens(userId) };
+          return { ok:true, tokens:Number(upd2.tokens ?? finalNext) };
+        }
+
+        return { ok:true, tokens:Number(upd.tokens ?? next) };
+      }catch{
+        return { ok:false, tokens: await getTokens(userId) };
+      }
     }
 
     async function checkWallet(){
-      const btn = document.getElementById("btnStart");
-      const { data:{ user } } = await supabase.auth.getUser();
-      if(!user){ btn.disabled=true; btn.textContent="Giriş gerekli"; return; }
+      const btn = $("btnStart");
+      btn.disabled = true;
+      btn.textContent = "Bakiye Kontrol Ediliyor...";
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("tokens")
-        .eq("id", user.id)
-        .single();
+      const user = await getSessionUser();
+      if(!user){
+        btn.disabled = true;
+        btn.textContent = "Giriş gerekli";
+        location.replace("/pages/login.html");
+        return;
+      }
 
-      if(error){ btn.disabled=true; btn.textContent="Bakiye okunamadı"; return; }
+      const tokens = await getTokens(user.id);
+      try{ setHeaderTokens(tokens); }catch{}
 
-      const tokens = Number(profile?.tokens || 0);
       if(tokens >= FEE){
         btn.disabled = false;
         btn.textContent = `Sınavı Başlat (${FEE} Jeton)`;
@@ -184,7 +295,32 @@
       }
     }
 
-    document.getElementById("btnStart").onclick = ()=>location.href="/pages/level_test.html";
+    $("btnStart").addEventListener("click", async ()=>{
+      const btn = $("btnStart");
+      btn.disabled = true;
+      btn.textContent = "Ücret düşülüyor...";
+
+      const user = await getSessionUser();
+      if(!user){
+        location.replace("/pages/login.html");
+        return;
+      }
+
+      const res = await deductTokensIfEnough(user.id, FEE);
+      try{ setHeaderTokens(res.tokens); }catch{}
+
+      if(!res.ok){
+        toast("Yetersiz bakiye veya işlem başarısız.");
+        await checkWallet();
+        return;
+      }
+
+      toast("Başlıyor...");
+      setTimeout(()=>{
+        location.href = `/pages/level_test.html?t=${encodeURIComponent(teacherId)}`;
+      }, 120);
+    });
+
     checkWallet();
   </script>
 </body>
