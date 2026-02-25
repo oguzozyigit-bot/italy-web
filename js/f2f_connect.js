@@ -16,13 +16,12 @@ function randCode(n=6){
 function wsUrl(room){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${encodeURIComponent(room)}`;
 }
-
 function setText(id, v){
   const el = $(id);
   if(el) el.textContent = String(v ?? "");
 }
 
-/* ===== Profile cache (sadece isim/pp; dili chatte seçecek) ===== */
+/* ===== Profile cache ===== */
 function getProfileFromCache(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -38,10 +37,12 @@ function getProfileFromCache(){
 }
 const ME = getProfileFromCache();
 
-/* ===== HOST: odanın backend’de gerçekten oluşması ===== */
+/* ===== WS: create & join_check ===== */
 async function createRoomOnBackend(room, timeoutMs=4500){
   return new Promise((resolve)=>{
     let done=false;
+    let ws;
+
     const finish=(ok)=>{
       if(done) return;
       done=true;
@@ -49,7 +50,6 @@ async function createRoomOnBackend(room, timeoutMs=4500){
       resolve(!!ok);
     };
 
-    let ws;
     try{ ws = new WebSocket(wsUrl(room)); }catch{ return finish(false); }
 
     const to = setTimeout(()=>finish(false), timeoutMs);
@@ -73,7 +73,7 @@ async function createRoomOnBackend(room, timeoutMs=4500){
           clearTimeout(to);
           return finish(true);
         }
-        // Bazı durumlarda room_created gelmese bile presence gelirse oda var demektir.
+        // room_created gelmese bile presence gelirse oda var
         if(msg.type === "presence"){
           clearTimeout(to);
           return finish(true);
@@ -82,14 +82,14 @@ async function createRoomOnBackend(room, timeoutMs=4500){
     };
 
     ws.onerror = ()=>{ clearTimeout(to); finish(false); };
-    ws.onclose = ()=>{ /* finish zaten */ };
   });
 }
 
-/* ===== JOIN CHECK: oda var mı? (guest) ===== */
 async function wsJoinCheck(room, timeoutMs=2500){
   return new Promise((resolve)=>{
     let done=false;
+    let ws;
+
     const finish=(ok)=>{
       if(done) return;
       done=true;
@@ -97,7 +97,6 @@ async function wsJoinCheck(room, timeoutMs=2500){
       resolve(!!ok);
     };
 
-    let ws;
     try{ ws = new WebSocket(wsUrl(room)); }catch{ return finish(false); }
 
     const to = setTimeout(()=>finish(false), timeoutMs);
@@ -115,7 +114,6 @@ async function wsJoinCheck(room, timeoutMs=2500){
     };
 
     ws.onerror = ()=>{ clearTimeout(to); finish(false); };
-    ws.onclose = ()=>{ /* finish zaten */ };
   });
 }
 
@@ -140,13 +138,11 @@ async function startScanner(){
 
   sc.classList.add("show");
 
-  // HTTPS şartı
   if(location.protocol !== "https:" && location.hostname !== "localhost"){
     setScanHint("Kamera için HTTPS gerekir. Kod girerek devam et.");
     return;
   }
 
-  // Android WebView/Chrome bazı cihazlarda BarcodeDetector yok → sadece kamera açmaya çalışma, mesaj ver.
   const hasBD = ("BarcodeDetector" in window);
 
   try{
@@ -210,15 +206,40 @@ async function startScanner(){
   }, 240);
 }
 
-/* ===== UI FLOW ===== */
+/* ===== MODE UI (tek kaynak: JS) ===== */
+function setMode(m){
+  $("hostPanel")?.classList.toggle("hide", m!=="host");
+  $("joinPanel")?.classList.toggle("hide", m!=="join");
+  $("cardHome")?.classList.toggle("hide", m!=="home");
+  $("cardActions")?.classList.toggle("hide", m!=="home");
+}
+
+function setUrlMode(mode, extra={}){
+  const u = new URL(location.href);
+  u.searchParams.set("mode", mode);
+  // join paramını temizle/kur
+  if(extra.join){
+    u.searchParams.set("join", extra.join);
+  }else{
+    u.searchParams.delete("join");
+  }
+  history.replaceState(null, "", u.toString());
+}
+
+let hostInitDone = false;
+
 async function initHostMode(){
+  if(hostInitDone) return;
+  hostInitDone = true;
+
   const room = normRoom(qs("room") || randCode(6));
   setText("roomCode", room);
 
-  // QR image (kod linki)
   const joinUrl = `https://italky.ai/pages/f2f_connect.html?mode=join&join=${encodeURIComponent(room)}`;
   const qr = $("qrImg");
-  if(qr) qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
+  if(qr){
+    qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
+  }
 
   setText("hostStatus", "Oda hazırlanıyor…");
 
@@ -236,13 +257,11 @@ async function initHostMode(){
   });
 
   $("btnGoCall")?.addEventListener("click", ()=>{
-    // Dil seçimi sohbet sayfasında: burada me_lang taşımıyoruz
     location.href = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`;
   });
 }
 
 function initJoinMode(){
-  // join param geldiyse doldur
   const join = qs("join");
   if(join && $("roomInput")){
     $("roomInput").value = normRoom(join);
@@ -271,24 +290,49 @@ function initJoinMode(){
       return;
     }
 
-    // ✅ oda var: sohbete geç
     location.href = `/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=guest`;
   });
 }
 
 /* ===== BOOT ===== */
 document.addEventListener("DOMContentLoaded", async ()=>{
-  // Scanner kapatma garanti
-  document.addEventListener("visibilitychange", ()=>{
-    if(document.hidden) stopScanner();
+  // Butonlar
+  $("goHost")?.addEventListener("click", async ()=>{
+    setUrlMode("host");
+    setMode("host");
+    hostInitDone = false;
+    await initHostMode();
   });
 
-  const mode = qs("mode") || (qs("join") ? "join" : "home");
+  $("goGuest")?.addEventListener("click", ()=>{
+    setUrlMode("join");
+    setMode("join");
+    initJoinMode();
+  });
 
-  // home mod: hiçbir şey yapma
+  $("btnBackHost")?.addEventListener("click", ()=>{
+    setUrlMode("home");
+    setMode("home");
+  });
+
+  $("btnBackJoin")?.addEventListener("click", ()=>{
+    setUrlMode("home");
+    setMode("home");
+    stopScanner();
+  });
+
+  // Sayfa açılış modu
+  const mode = qs("mode") || (qs("join") ? "join" : "home");
+  setMode(mode);
+
   if(mode === "host"){
     await initHostMode();
   }else if(mode === "join"){
     initJoinMode();
   }
+
+  // Scanner kapatma garanti
+  document.addEventListener("visibilitychange", ()=>{
+    if(document.hidden) stopScanner();
+  });
 });
