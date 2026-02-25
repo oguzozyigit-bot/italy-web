@@ -1,4 +1,10 @@
 // FILE: /js/f2f_call.js
+// ✅ FIX: WalkieTalkie'de AI "sohbet" hissi YOK.
+// - cleanSpeechText (LLM ile düzeltme) KALDIRILDI -> lokal temizlik var
+// - translate_ai style:"fast" + strict -> sadece çeviri
+// - TTS Google-only: /api/tts ok:false => sessizce kapalı (toast spam yok)
+// - Oda boşken gelen mesaj gösterme zaten var
+
 import { LANG_POOL } from "/js/lang_pool_full.js";
 import { STORAGE_KEY } from "/js/config.js";
 import { shortDisplayName } from "/js/ui_shell.js";
@@ -18,13 +24,6 @@ const LANGS = Array.isArray(LANG_POOL) ? LANG_POOL : [
   { code:"en", flag:"🇬🇧", name:"English" },
 ];
 const norm = (c)=>String(c||"").toLowerCase().trim();
-function langLabel(code){
-  const c = norm(code);
-  const item = LANGS.find(x=>norm(x.code)===c);
-  const flag = item?.flag || "🌐";
-  const name = item?.name || c.toUpperCase();
-  return `${flag} ${name}`;
-}
 
 // UI
 const chat = $("chat");
@@ -34,6 +33,7 @@ const micBtn = $("micBtn");
 const langSelect = $("langSelect");
 const peopleScroll = $("peopleScroll");
 const peopleCount = $("peopleCount");
+const exitBtn = $("exitBtn"); // varsa
 
 if(!chat || !msgInput || !sendBtn || !micBtn || !peopleScroll || !peopleCount){
   console.error("[F2F_CALL] Missing required elements", {
@@ -72,7 +72,7 @@ if(langSelect){
   });
 }
 
-// Exit confirm (same as before)
+// Exit confirm
 const I18N = {
   tr: { confirm:"Sohbetten çıkmak istiyor musunuz?" },
   en: { confirm:"Do you want to leave the chat?" },
@@ -87,7 +87,7 @@ function t(key){
   const pack = I18N[myLang] || I18N.en;
   return pack[key] || I18N.en[key] || "";
 }
-$("exitBtn")?.addEventListener("click", ()=>{
+exitBtn?.addEventListener("click", ()=>{
   const ok = confirm(t("confirm"));
   if(ok) location.href = "/pages/home.html";
 });
@@ -111,10 +111,11 @@ msgInput?.addEventListener("keydown",(e)=>{
   }
 });
 
-// ===== Participants strip (always show self + seen senders)
+/* ===============================
+   Participants strip
+================================ */
 const participants = new Map(); // key -> {name,pic}
 function chipName(name){
-  // "Oğuz Ö." -> "Oğuz.Ö"
   const s = String(name||"").trim();
   return s.replace(/\s+([A-ZÇĞİÖŞÜ])\./, ".$1").replace(/\s+/g," ");
 }
@@ -160,7 +161,25 @@ function upsertParticipant(key, name, pic){
 const clientId = (crypto?.randomUUID?.() || ("c_" + Math.random().toString(16).slice(2))).slice(0,18);
 upsertParticipant(clientId, MY.name, MY.picture);
 
-// ===== Chat bubbles
+// default count visible at least 1
+peopleCount.textContent = "1";
+
+/* ===============================
+   Local clean (NO AI)
+   - sohbet hissini bitirir
+================================ */
+function localCleanText(text){
+  let s = String(text||"").trim();
+  if(!s) return s;
+  s = s.replace(/\s+/g," ").trim();
+  // ufak dolgu temizliği
+  s = s.replace(/\b(eee+|ııı+|umm+|hmm+)\b/gi, "").replace(/\s+/g," ").trim();
+  return s;
+}
+
+/* ===============================
+   Chat bubbles
+================================ */
 function addMessage(side, name, pic, text){
   const row = document.createElement("div");
   row.className = "msgRow " + (side === "right" ? "right" : "left");
@@ -196,65 +215,120 @@ function addMessage(side, name, pic, text){
   chat.scrollTop = chat.scrollHeight;
 }
 
-// ===== API
+/* ===============================
+   Translate (STRICT, no-chat)
+================================ */
 async function translateAI(text, from, to){
+  const t = String(text||"").trim();
+  if(!t) return t;
+  const src = norm(from);
+  const dst = norm(to);
+  if(src === dst) return t;
+
   const res = await fetch(`${API_BASE}/api/translate_ai`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text, from_lang: from, to_lang: to, style:"chat", provider:"auto" })
+    body: JSON.stringify({
+      text: t,
+      from_lang: src,
+      to_lang: dst,
+      style: "fast",     // ✅ chat değil
+      provider: "auto",
+      strict: true,
+      no_extra: true
+    })
   });
   if(!res.ok) return null;
   const data = await res.json().catch(()=>null);
-  return data?.translated ? String(data.translated) : null;
+  return data?.translated ? String(data.translated).trim() : null;
 }
 
-let audioObj=null, lastAudioAt=0;
+/* ===============================
+   TTS (Google-only)
+   /api/tts -> ok:true audio_base64 OR ok:false (TTS_UNAVAILABLE)
+================================ */
+let audioObj=null, lastAudioAt=0, ttsWarnAt=0;
+let ttsEnabled = (localStorage.getItem("wt_tts_enabled") ?? "1") === "1"; // UI eklersen toggle edebilirsin
+
 function stopAudio(){
   try{ if(audioObj){ audioObj.pause(); audioObj.currentTime=0; } }catch{}
   audioObj=null;
 }
+
 async function speakViaTTS(text, lang){
+  if(!ttsEnabled) return;
+  const t = String(text||"").trim();
+  if(!t) return;
+
   const now = Date.now();
   if(now - lastAudioAt < 250) stopAudio();
   lastAudioAt = now;
 
-  const res = await fetch(`${API_BASE}/api/tts`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text, lang, speaking_rate: 1, pitch: 0 })
-  });
-  if(!res.ok) return;
+  try{
+    const res = await fetch(`${API_BASE}/api/tts`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ text: t, lang: norm(lang), speaking_rate: 1, pitch: 0 })
+    });
 
-  const data = await res.json().catch(()=>null);
-  if(!data?.ok || !data.audio_base64) return;
+    if(!res.ok){
+      if(Date.now() - ttsWarnAt > 4000){
+        ttsWarnAt = Date.now();
+        console.log("[TTS] HTTP", res.status);
+      }
+      return;
+    }
 
-  const binary = atob(data.audio_base64);
-  const bytes = new Uint8Array(binary.length);
-  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-  const blob = new Blob([bytes], {type:"audio/mpeg"});
-  const url = URL.createObjectURL(blob);
+    const data = await res.json().catch(()=>null);
+    if(!data?.ok || !data.audio_base64){
+      if(Date.now() - ttsWarnAt > 4000){
+        ttsWarnAt = Date.now();
+        // çok spam yapma
+        console.log("[TTS] disabled/unavailable");
+      }
+      return;
+    }
 
-  stopAudio();
-  audioObj = new Audio(url);
-  audioObj.onended = ()=>URL.revokeObjectURL(url);
-  audioObj.onerror = ()=>URL.revokeObjectURL(url);
-  await audioObj.play();
+    const binary = atob(data.audio_base64);
+    const bytes = new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type:"audio/mpeg" });
+    const url = URL.createObjectURL(blob);
+
+    stopAudio();
+    audioObj = new Audio(url);
+    audioObj.onended = ()=>URL.revokeObjectURL(url);
+    audioObj.onerror = ()=>URL.revokeObjectURL(url);
+    await audioObj.play();
+  }catch{
+    // sessiz
+  }
 }
 
-async function cleanSpeechText(text, lang){
-  const t = String(text||"").trim();
-  if(!t) return t;
-  const r = await fetch(`${API_BASE}/api/translate_ai`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text: t, from_lang: lang, to_lang: lang, style:"chat", provider:"auto" })
-  });
-  if(!r.ok) return t;
-  const data = await r.json().catch(()=>null);
-  return String(data?.translated||"").trim() || t;
+/* ===============================
+   STT
+================================ */
+function pickMime(){
+  const cands = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
+  for(const m of cands){
+    try{ if(MediaRecorder.isTypeSupported(m)) return m; }catch{}
+  }
+  return "";
+}
+async function sttBlob(blob, lang){
+  const fd = new FormData();
+  fd.append("file", blob, "speech.webm");
+  fd.append("lang", norm(lang));
+  const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
+  if(!r.ok) throw new Error(await r.text());
+  const j = await r.json();
+  return String(j.text||"").trim();
 }
 
-// ===== WS (message-only, but **do not show ANY incoming** until presence confirmed)
+/* ===============================
+   WS
+   NOTE: backend'in create/join/presence/message protokolü
+================================ */
 let ws = null;
 let presenceKnown = false;
 let presenceCount = 1;
@@ -288,8 +362,6 @@ function connect(){
       presenceKnown = true;
       const c = Number(msg.count||0);
       if(Number.isFinite(c) && c >= 0) presenceCount = c;
-
-      // UI count (always show)
       peopleCount.textContent = String(Math.max(1, presenceCount));
       return;
     }
@@ -300,22 +372,22 @@ function connect(){
       return;
     }
 
-    // ✅ kritik: presence gelmeden hiçbir gelen mesajı gösterme
+    // ✅ presence gelmeden mesaj yok
     if(!presenceKnown) return;
 
-    // ✅ tek kişiyken hiçbir gelen mesajı gösterme
+    // ✅ tek kişiyken mesaj gösterme (sohbet hissi yok)
     if(presenceCount <= 1) return;
 
     if(msg.type === "message"){
       const srcLang = norm(msg.lang || "en");
       const raw = String(msg.text||"").trim();
-      const fromName = String(msg.from_name||"Katılımcı").trim();
-      const fromPic = String(msg.from_pic||"").trim();
-      const fromId = String(msg.from||"").trim();
-
       if(!raw) return;
 
-      // sender in strip
+      const fromName = String(msg.from_name||"Katılımcı").trim();
+      const fromPic  = String(msg.from_pic||"").trim();
+      const fromId   = String(msg.from||"").trim();
+
+      // strip
       upsertParticipant(fromId || ("p_"+fromName), fromName, fromPic);
 
       // show in my language
@@ -325,7 +397,10 @@ function connect(){
         if(tr) shown = tr;
       }
 
+      // ✅ sadece mesaj göster, AI reply yok
       addMessage("left", fromName, fromPic, shown);
+
+      // ✅ tts (google-only)
       await speakViaTTS(shown, myLang);
     }
   };
@@ -334,7 +409,9 @@ function connect(){
 }
 connect();
 
-// ===== SEND typed: always show my own message immediately
+/* ===============================
+   SEND typed
+================================ */
 async function sendTyped(){
   const raw = String(msgInput?.value || "").trim();
   if(!raw) return;
@@ -342,43 +419,31 @@ async function sendTyped(){
   msgInput.value = "";
   growTA();
 
-  const cleaned = await cleanSpeechText(raw, myLang);
+  const cleaned = localCleanText(raw);
 
   // always show right
   addMessage("right", MY.name, MY.picture, cleaned);
 
-  // also keep self in strip + update count at least 1
   upsertParticipant(clientId, MY.name, MY.picture);
-  if(!presenceKnown){
-    // offline/unknown: show at least 1
-    peopleCount.textContent = "1";
-  }
+  if(!presenceKnown) peopleCount.textContent = "1";
 
   if(ws && ws.readyState === 1){
-    ws.send(JSON.stringify({ type:"message", text: cleaned }));
+    ws.send(JSON.stringify({
+      type:"message",
+      from: clientId,
+      from_name: MY.name,
+      from_pic: MY.picture || "",
+      lang: myLang,
+      text: cleaned
+    }));
   }
 }
 
 sendBtn?.addEventListener("click", sendTyped);
 
-// ===== MIC toggle (send as message-only)
-function pickMime(){
-  const cands = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
-  for(const m of cands){
-    try{ if(MediaRecorder.isTypeSupported(m)) return m; }catch{}
-  }
-  return "";
-}
-async function sttBlob(blob, lang){
-  const fd = new FormData();
-  fd.append("file", blob, "speech.webm");
-  fd.append("lang", lang);
-  const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
-  if(!r.ok) throw new Error(await r.text());
-  const j = await r.json();
-  return String(j.text||"").trim();
-}
-
+/* ===============================
+   MIC toggle
+================================ */
 let recJob=null, isBusy=false;
 
 async function startRecord(){
@@ -414,12 +479,19 @@ async function stopRecord(){
     const raw = await sttBlob(blob, myLang);
     if(!raw) return;
 
-    const cleaned = await cleanSpeechText(raw, myLang);
+    const cleaned = localCleanText(raw);
 
     addMessage("right", MY.name, MY.picture, cleaned);
 
     if(ws && ws.readyState === 1){
-      ws.send(JSON.stringify({ type:"message", text: cleaned }));
+      ws.send(JSON.stringify({
+        type:"message",
+        from: clientId,
+        from_name: MY.name,
+        from_pic: MY.picture || "",
+        lang: myLang,
+        text: cleaned
+      }));
     }
   }catch{}
   finally{ isBusy=false; }
@@ -429,6 +501,3 @@ micBtn?.addEventListener("click", ()=>{
   if(!recJob) return startRecord();
   return stopRecord();
 });
-
-// default count visible at least 1
-peopleCount.textContent = "1";
