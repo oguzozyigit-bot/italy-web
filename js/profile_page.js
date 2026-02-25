@@ -1,4 +1,9 @@
 // FILE: /js/profile_page.js
+// ✅ FIXED: profiles tablosunda "uuid" YOK → doğru kolon "id" (auth.users.id ile aynı)
+// ✅ RLS kuralı da auth.uid() = profiles.id olmalı
+// ✅ Profil ekranı: DB olmasa bile session'dan doldurur
+// ✅ Güvenli çıkış %100 çalışır (signOut patlasa bile)
+
 import { supabase } from "/js/supabase_client.js";
 import { STORAGE_KEY } from "/js/config.js";
 
@@ -28,7 +33,7 @@ function fmtDT(iso){
   }catch{ return "—"; }
 }
 
-/* ✅ İsim kısaltma: "Oğuz Ö." / "Huri Hüma Ö." */
+/* ✅ İsim kısaltma: "Oğuz Ö." / "Huri Hüma Ö." / "Mustafa" */
 export function shortDisplayName(fullName){
   const s = String(fullName || "").trim().replace(/\s+/g," ");
   if(!s) return "Kullanıcı";
@@ -110,41 +115,39 @@ function paintFromSession(user){
   }catch{}
 }
 
-/* ✅ DB’den çek (ASIL: uuid = auth.users.id) */
-async function tryLoadProfileByUUID(authUserId){
+/* ✅ DB’den çek (DOĞRU: profiles.id = auth.users.id) */
+async function tryLoadProfile(userId){
   try{
     const { data, error } = await supabase
       .from("profiles")
-      .select("id,uuid,email,full_name,tokens,member_no,created_at,last_login_at,levels,offline_langs,study_minutes,avatar_url,picture")
-      .eq("uuid", authUserId)
+      .select("id,email,full_name,avatar_url,tokens,member_no,created_at,last_login_at,levels,offline_langs,study_minutes,role")
+      .eq("id", userId)
       .maybeSingle();
-
     if(error) throw error;
     return data || null;
   }catch(e){
-    console.warn("[profiles.select uuid]", e);
+    console.warn("[profiles.select id]", e);
     return null;
   }
 }
 
-/* ✅ Yoksa oluştur (uuid zorunlu) */
+/* ✅ Yoksa oluştur (id zorunlu) */
 async function tryInsertProfile(user){
   try{
     const metaName = String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
     const metaPic  = String(user.user_metadata?.picture || user.user_metadata?.avatar_url || "").trim();
 
     const insert = {
-      uuid: user.id,                 // ✅ en kritik satır
+      id: user.id,                  // ✅ en kritik satır
       email: user.email || null,
       full_name: metaName || null,
-      avatar_url: metaPic || null,   // senin tabloda avatar_url görünüyor
+      avatar_url: metaPic || null,
       tokens: 0,
       levels: {},
       offline_langs: [],
       study_minutes: {}
     };
 
-    // id'yi burada göndermiyoruz; DB kendi üretiyor (id primary key uuid)
     const { data, error } = await supabase
       .from("profiles")
       .insert(insert)
@@ -187,7 +190,7 @@ function renderLevels(profile){
 }
 
 export async function initProfilePage({ setHeaderTokens } = {}){
-  // ✅ Butonları en baştan bağla (UI shell taşısa bile çalışsın)
+  // ✅ Butonları en baştan bağla
   const logoutBtn = $("logoutBtn");
   if(logoutBtn) logoutBtn.onclick = safeLogoutHard;
 
@@ -197,9 +200,6 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   const buyBtn = $("buyTokensBtn");
   if(buyBtn) buyBtn.onclick = ()=>toast("Jeton yükleme yakında (Google Play).");
 
-  const copyBtn = $("copyMemberBtn");
-  if(copyBtn) copyBtn.onclick = ()=>copyText(String($("memberNo")?.textContent || ""));
-
   // ✅ session
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session?.user){
@@ -208,20 +208,17 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   }
 
   const user = session.user;
-
-  // UI hemen dolsun
   paintFromSession(user);
 
-  // ✅ DB profile (uuid ile!)
-  let profile = await tryLoadProfileByUUID(user.id);
+  // ✅ DB profile
+  let profile = await tryLoadProfile(user.id);
   if(!profile){
     profile = await tryInsertProfile(user);
-    // tekrar çek (bazı RLS/trigger durumları için)
-    if(!profile) profile = await tryLoadProfileByUUID(user.id);
+    if(!profile) profile = await tryLoadProfile(user.id);
   }
 
+  // DB yoksa bile sayfa boş kalmasın
   if(!profile){
-    // RLS veya tablo problemi: sayfa yine de çalışsın
     safeText("memberNo", "—");
     safeText("createdAt", "—");
     safeText("lastLogin", "—");
@@ -229,7 +226,7 @@ export async function initProfilePage({ setHeaderTokens } = {}){
     if(typeof setHeaderTokens === "function") setHeaderTokens(0);
     renderLevels(null);
     renderOffline(null);
-    toast("Profil verisi alınamadı. (profiles RLS / uuid eşleşmesi kontrol edilmeli)");
+    toast("Profil verisi alınamadı. (profiles RLS: auth.uid() = id olmalı)");
     return;
   }
 
@@ -237,15 +234,12 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   safeText("pEmail", profile.email || user.email || "—");
   safeText("pName", profile.full_name || (user.user_metadata?.full_name || user.user_metadata?.name) || (user.email||"—"));
 
-  // member no yoksa üret ve uuid ile update et
+  // member no yoksa üret ve id ile update et
   let memberNo = profile.member_no;
   if(!memberNo){
     memberNo = genMemberNo();
     try{
-      await supabase
-        .from("profiles")
-        .update({ member_no: memberNo })
-        .eq("uuid", user.id); // ✅ kritik
+      await supabase.from("profiles").update({ member_no: memberNo }).eq("id", user.id);
     }catch(e){ console.warn("[member_no update]", e); }
   }
   safeText("memberNo", memberNo || "—");
@@ -257,18 +251,22 @@ export async function initProfilePage({ setHeaderTokens } = {}){
   safeText("tokenVal", String(tokens));
   if(typeof setHeaderTokens === "function") setHeaderTokens(tokens);
 
-  // ✅ header kısaltma + avatar (profile > metadata)
+  // ✅ header kısaltma + avatar
   try{
     const hn = document.getElementById("userName");
     if(hn) hn.textContent = shortDisplayName(profile.full_name || user.email || "Kullanıcı");
 
-    const pic = String(profile.avatar_url || profile.picture || user.user_metadata?.picture || user.user_metadata?.avatar_url || "");
+    const pic = String(profile.avatar_url || user.user_metadata?.picture || user.user_metadata?.avatar_url || "");
     const hp = document.getElementById("userPic");
     if(hp && pic){
       hp.src = pic;
       hp.referrerPolicy = "no-referrer";
     }
   }catch{}
+
+  // ✅ copy member no
+  const copyBtn = $("copyMemberBtn");
+  if(copyBtn) copyBtn.onclick = ()=>copyText(memberNo || "");
 
   renderLevels(profile);
   renderOffline(profile);
@@ -288,7 +286,4 @@ export async function initProfilePage({ setHeaderTokens } = {}){
       }
     };
   }
-
-  // copy artık doğru değeri kopyalar
-  if(copyBtn) copyBtn.onclick = ()=>copyText(memberNo || "");
 }
