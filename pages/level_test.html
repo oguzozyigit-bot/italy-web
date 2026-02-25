@@ -144,7 +144,7 @@
 <div class="wrap">
   <div class="topbar">
     <div class="chip" id="langChip">Seviye Sınavı</div>
-    <div class="chip" id="timerChip">40:00</div>
+    <div class="chip" id="timerChip">04:00</div>
   </div>
 
   <div class="card" id="qCard">
@@ -153,11 +153,11 @@
 
   <div class="nav">
     <button class="btn" id="btnPrev" disabled>GERİ</button>
-    <button class="btn" id="btnSkip" disabled>ATLA</button>
+    <button class="btn" id="btnSkip">ATLA</button>
     <button class="btn btn-primary" id="btnNext" disabled>İLERİ</button>
   </div>
 
-  <div class="note">Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.</div>
+  <div class="note">Bilmediğin soruyu <b>Atla</b>. Test toplam <b>12 soru</b>. Süre bitince otomatik biter.</div>
 </div>
 
 <div class="overlay" id="resultOverlay">
@@ -183,17 +183,13 @@
 
   function showError(title, detail){
     qCard.innerHTML = `<div class="errBox">${title}\n\n${detail || ""}</div>`;
-    btnPrev.disabled = btnSkip.disabled = btnNext.disabled = true;
+    btnPrev.disabled = true;
+    btnSkip.disabled = true;
+    btnNext.disabled = true;
   }
 
-  async function rpcWithTimeout(promise, ms=7000){
-    return await Promise.race([
-      promise,
-      new Promise((_,rej)=>setTimeout(()=>rej(new Error("RPC Timeout")), ms))
-    ]);
-  }
-
-  const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
+  const params = new URLSearchParams(location.search);
+  const teacherId = String(params.get("t") || localStorage.getItem("italky_teacher_pref") || "").trim();
   if(!teacherId) location.replace("/pages/teacher_select.html");
 
   const LANGTR = { dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca", sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince" };
@@ -202,6 +198,19 @@
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session) location.replace("/pages/login.html");
 
+  // 12 soru / 4 dk
+  const TOTAL_TIME = 4 * 60;
+  let remaining = TOTAL_TIME;
+  let timer = null;
+
+  function fmtTime(sec){
+    const m = String(Math.floor(sec/60)).padStart(2,"0");
+    const s = String(sec%60).padStart(2,"0");
+    return `${m}:${s}`;
+  }
+  function updateTimer(){ $("timerChip").textContent = fmtTime(remaining); }
+
+  // bank
   const BASE = "https://italky-api.onrender.com/assets/tests/";
   const map = { dora:"en_v1.json", ayda:"de_v1.json", jale:"fr_v1.json", ozan:"es_v1.json", sencer:"it_v1.json", sungur:"ru_v1.json", huma:"ja_v1.json", umay:"zh_v1.json" };
   const bankUrl = BASE + (map[teacherId] || "en_v1.json");
@@ -216,52 +225,26 @@
     throw e;
   }
 
-  const QUESTIONS = Array.isArray(bank?.questions) ? bank.questions : [];
-  if(QUESTIONS.length === 0){
+  const ALL = Array.isArray(bank?.questions) ? bank.questions : [];
+  if(ALL.length === 0){
     showError("Soru bankası boş geldi.", `URL: ${bankUrl}\nversion: ${bank?.version || "—"}`);
     throw new Error("empty bank");
   }
 
-  // start exam (40 jeton düşer)
-  let testId = null;
-  try{
-    const { data, error } = await rpcWithTimeout(
-      supabase.rpc("start_level_test", { p_teacher_id: teacherId }),
-      7000
-    );
-    if(error) throw error;
-    testId = data?.[0]?.test_id || null;
-  }catch(e){
-    showError("Sınav başlatılamadı.", `RPC: start_level_test\n${e?.message || e}`);
-    throw e;
+  // ✅ 12 soru seç: bank içinde karışıksa ilk 12 alır; istersen shuffle ekleriz
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
   }
+  const QUESTIONS = shuffle(ALL).slice(0, 12);
 
-  const TOTAL_TIME = 40*60;
-  const MAX_PASSES = 2;
-  let idx=0;
-  let remaining=TOTAL_TIME;
-  let timer=null;
-
+  // state
+  let idx = 0;
   const answers = Array(QUESTIONS.length).fill(null);
-  const passCount = Array(QUESTIONS.length).fill(0);
-  const skipped = Array(QUESTIONS.length).fill(false);
-
-  function fmtTime(sec){
-    const m = String(Math.floor(sec/60)).padStart(2,"0");
-    const s = String(sec%60).padStart(2,"0");
-    return `${m}:${s}`;
-  }
-  function updateTimer(){ $("timerChip").textContent = fmtTime(remaining); }
-
-  function nextIndex(from){
-    for(let i=from+1;i<QUESTIONS.length;i++){
-      if(passCount[i] < MAX_PASSES && answers[i] === null) return i;
-    }
-    for(let i=0;i<QUESTIONS.length;i++){
-      if(passCount[i] < MAX_PASSES && answers[i] === null) return i;
-    }
-    return -1;
-  }
 
   function render(){
     const q = QUESTIONS[idx];
@@ -270,154 +253,119 @@
       return;
     }
 
-    passCount[idx] = Math.min(MAX_PASSES, passCount[idx] + 1);
-
     const picked = answers[idx];
-    const status = picked!==null ? "Cevaplandı" : (skipped[idx] ? "Atlandı" : "Bekliyor");
-    const passInfo = `Tur: ${passCount[idx]}/${MAX_PASSES}`;
 
     qCard.innerHTML = `
       <div class="q-meta">
         <div class="meta">Soru ${idx+1}/${QUESTIONS.length} • ${q.level || "-"}</div>
-        <div class="meta">${status} • ${passInfo}</div>
+        <div class="meta">${picked!==null ? "Cevaplandı" : "Bekliyor"}</div>
       </div>
       <div class="q-text">${q.question || ""}</div>
       ${(q.options || []).map((opt,i)=>`<button class="opt ${picked===i?'sel':''}" data-i="${i}" type="button">${opt}</button>`).join("")}
-      <div class="note">Bilmediğin soruyu <b>Atla</b>. Süre varsa tekrar gelir.</div>
     `;
 
     qCard.querySelectorAll(".opt").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const i = Number(btn.getAttribute("data-i"));
         answers[idx] = i;
-        skipped[idx] = false;
         render();
       });
     });
 
     btnPrev.disabled = (idx===0);
-    btnSkip.disabled = false;
-    btnNext.disabled = false;
-    btnNext.textContent = (nextIndex(idx)===-1) ? "SINAVI TAMAMLA" : "İLERİ";
+    btnNext.disabled = (answers[idx] === null);
+    btnNext.textContent = (idx === QUESTIONS.length-1) ? "SINAVI TAMAMLA" : "İLERİ";
   }
 
-  function scoreWeighted(){
-    let w=0;
+  function calcScore(){
+    let correct = 0;
     for(let i=0;i<QUESTIONS.length;i++){
-      if(answers[i] === QUESTIONS[i].correct) w += Number(QUESTIONS[i].weight||0);
+      if(answers[i] === QUESTIONS[i].correct) correct++;
     }
-    return w;
+    return { correct, total: QUESTIONS.length };
   }
-  function computeLevel(w){
-    if(w>=175) return "C1";
-    if(w>=140) return "B2";
-    if(w>=105) return "B1";
-    if(w>=70)  return "A2";
+
+  function computeLevel(correct, total){
+    const p = total ? (correct/total) : 0;
+    if(p >= 0.90) return "C1";
+    if(p >= 0.75) return "B2";
+    if(p >= 0.60) return "B1";
+    if(p >= 0.40) return "A2";
     return "A1";
+  }
+
+  async function saveLevelToProfile(level){
+    const userId = session.user.id;
+
+    // mevcut levels çek (yoksa boş)
+    let levels = {};
+    try{
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("levels")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if(!error && data?.levels && typeof data.levels === "object"){
+        levels = data.levels;
+      }
+    }catch{}
+
+    levels[teacherId] = level;
+
+    // update
+    const { error: upErr } = await supabase
+      .from("profiles")
+      .update({
+        levels,
+        last_login_at: new Date().toISOString()
+      })
+      .eq("id", userId);
+
+    return !upErr;
   }
 
   async function finishExam(){
     if(timer) clearInterval(timer);
 
-    const w = scoreWeighted();
-    const level = computeLevel(w);
+    const { correct, total } = calcScore();
+    const level = computeLevel(correct, total);
 
-    const { data: finData, error: finErr } = await rpcWithTimeout(
-      supabase.rpc("finish_level_test", {
-        p_test_id: testId,
-        p_result_level: level,
-        p_remaining_seconds: remaining
-      }),
-      7000
-    );
-
-    if(finErr){
-      showError("Sonuç kaydedilemedi.", `RPC: finish_level_test\n${finErr.message}`);
-      return;
-    }
-
-    const tokensLeft = Number(finData?.[0]?.tokens_left ?? 0);
-
-    const nextMap = { A1:"A2", A2:"B1", B1:"B2", B2:"C1", C1:null };
-    const nextLevel = nextMap[level];
-
-    let text =
-`Şu anki seviyeniz ${level} düzeyindedir.
-
-İtalky Academy olarak hedefimiz sizi bir üst seviyeye taşımaktır.`;
-
-    if(nextLevel){
-      text += `
-
-Seviyenizi ${nextLevel} düzeyine çıkartmak için özel olarak hazırlanmış Akademi programımıza katılmanızı öneririz.
-
-Program boyunca yapay zeka eğitmenlerimizle düzenli dersler alacaksınız.
-Eğitmeninizin adını değiştirebilirsiniz.
-
-Her ders 15 dakika sürmektedir.
-Aynı gün birden fazla ders alabilirsiniz.
-Ders bitmeden lütfen dersi sonlandırmayın.
-Dersi bitirmeden çıkış yaparsanız aynı dersi tekrar almak zorunda kalırsınız.
-
-İtalky Academy ders programlarını uyguladığınız takdirde kısa sürede ileri seviyede yabancı dil bilgisine ulaşabilirsiniz.
-
-Program bitiminde tekrar seviye tespit sınavı yapılacaktır.`;
-    } else {
-      text += `
-
-Tebrikler! En üst seviyedesiniz.
-Akademi dersleriyle akıcılığınızı daha da güçlendirebilirsiniz.`;
-    }
-
-    if(tokensLeft <= 0){
-      text += `
-
-Derse katılabilmeniz için hesabınızda yeterli jeton bulunmamaktadır.
-Lütfen jeton yükleyerek eğitiminize devam edin.`;
-    }
+    const saved = await saveLevelToProfile(level);
 
     $("rLevel").textContent = `Seviye: ${level}`;
-    $("rText").textContent = text;
+    $("rText").textContent =
+`Doğru: ${correct}/${total}
+
+${saved ? "Sonuç profilinize kaydedildi." : "Sonuç kaydedilemedi. (profiles RLS / izin kontrolü)"}
+
+Bir üst seviyeye geçmek için Academy ders planını başlatabilirsiniz.`;
 
     $("resultOverlay").classList.add("show");
 
-    const goBtn = $("rGo");
-    if(tokensLeft <= 0){
-      goBtn.textContent = "Jeton Yükle";
-      goBtn.onclick = ()=>location.href="/pages/profile.html";
-    }else{
-      goBtn.textContent = "Derslere Başla";
-      goBtn.onclick = ()=>{
-        localStorage.setItem("italky_lesson_mins","15");
-        location.href="/pages/plan_select.html";
-      };
-    }
+    $("rGo").onclick = ()=>location.href="/pages/plan_select.html";
+    $("rLater").onclick = ()=>location.href="/pages/home.html";
   }
 
   btnPrev.onclick = ()=>{ if(idx>0){ idx--; render(); } };
   btnSkip.onclick = ()=>{
-    skipped[idx]=true; answers[idx]=null;
-    const ni = nextIndex(idx);
-    if(ni===-1) finishExam(); else { idx=ni; render(); }
+    // skip: cevap boş bırakılır, direkt ileri
+    if(idx < QUESTIONS.length-1){ idx++; render(); }
+    else finishExam();
   };
   btnNext.onclick = ()=>{
-    const ni = nextIndex(idx);
-    if(ni===-1) finishExam(); else { idx=ni; render(); }
+    if(idx < QUESTIONS.length-1){ idx++; render(); }
+    else finishExam();
   };
-
-  $("rLater").onclick = ()=>location.href="/pages/home.html";
 
   updateTimer();
   timer = setInterval(()=>{
     remaining--;
-    if(remaining<0) remaining=0;
+    if(remaining < 0) remaining = 0;
     updateTimer();
-    if(remaining===0) finishExam();
+    if(remaining === 0) finishExam();
   }, 1000);
 
-  // enable + first
-  btnSkip.disabled = false;
-  btnNext.disabled = false;
   render();
 </script>
 </body>
