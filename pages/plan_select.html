@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Ders Planı</title>
 
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -13,7 +16,6 @@
   <style>
     #pageContent{ height:100%; }
 
-    /* ✅ FIX: footer + safe-area kadar alt boşluk */
     .wrap{
       height:100%;
       padding: 12px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 22px);
@@ -151,6 +153,7 @@
       width: 110px;
     }
 
+    /* ✅ toast pageContent içinde kalacak */
     .toast{
       position: fixed;
       left:50%;
@@ -185,7 +188,7 @@
       </div>
 
       <div class="sub">
-        Dersler maksimum 15 dakika sürer. Ders erken biterse kalan süre iade edilir.
+        Dersler maksimum 15 dakika sürer.
       </div>
 
       <div class="kv">
@@ -227,18 +230,17 @@
       <button class="btn btn-main" id="btnStart" type="button">Dersi Başlat</button>
     </div>
 
+    <!-- ✅ toast artık içeride -->
+    <div class="toast" id="toast"></div>
+
   </div>
 </main>
 
-<div class="toast" id="toast"></div>
-
 <script type="module">
   import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
-  import { bootPage } from "/js/ui_guard.js";
   import { supabase } from "/js/supabase_client.js";
 
   mountShell({ scroll:"none" });
-  bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
   const $ = (id)=>document.getElementById(id);
   const warn = $("warnBox");
@@ -246,14 +248,18 @@
 
   function toast(msg){
     const t = $("toast");
+    if(!t) return;
     t.textContent = String(msg||"");
     t.classList.add("show");
     clearTimeout(window.__to);
     window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
   }
 
-  const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
+  // teacher id: ?t > localStorage
+  const params = new URLSearchParams(location.search);
+  const teacherId = String(params.get("t") || localStorage.getItem("italky_teacher_pref") || "").trim();
   if(!teacherId) location.replace("/pages/teacher_select.html");
+  localStorage.setItem("italky_teacher_pref", teacherId);
 
   const COACH = {
     dora:   { name:"Dora",   style:"disciplined" },
@@ -265,7 +271,6 @@
     sungur: { name:"Sungur", style:"disciplined" },
     umay:   { name:"Umay",   style:"expert" }
   };
-
   const def = COACH[teacherId] || { name:"Dora", style:"friendly" };
 
   let gender = "female";
@@ -277,17 +282,24 @@
   pickGender("female");
   $("teacherName").value = def.name;
 
+  // session gate (bootPage yok)
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session) location.replace("/pages/login.html");
+  const userId = session.user.id;
 
-  const { data: prof, error } = await supabase
-    .from("profiles")
-    .select("tokens, teacher_prefs, full_name")
-    .eq("id", session.user.id)
-    .single();
+  // profiles read (maybeSingle)
+  let prof = null;
+  try{
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("tokens, teacher_prefs, full_name")
+      .eq("id", userId)
+      .maybeSingle();
+    if(!error) prof = data || null;
+  }catch{}
 
   const tokens = Number(prof?.tokens ?? 0);
-  setHeaderTokens(tokens);
+  try{ setHeaderTokens(tokens); }catch{}
 
   const fn = String(prof?.full_name || "").trim();
   $("studentHitap").value = fn ? (fn.split(/\s+/)[0] || fn).slice(0,16) : "";
@@ -316,39 +328,46 @@ Lütfen jeton yükleyerek eğitiminize devam edin.`;
   });
 
   btnStart.onclick = async ()=>{
-    const { data: p2 } = await supabase.from("profiles").select("tokens, teacher_prefs").eq("id", session.user.id).single();
-    const nowTokens = Number(p2?.tokens ?? 0);
-    if(nowTokens <= 0){
-      showNoTokens();
-      return;
+    // token kontrol (yeniden)
+    let nowTokens = tokens;
+    try{
+      const { data } = await supabase.from("profiles").select("tokens, teacher_prefs").eq("id", userId).maybeSingle();
+      nowTokens = Number(data?.tokens ?? 0);
+      if(nowTokens <= 0){
+        showNoTokens();
+        return;
+      }
+
+      const teacher_name = ($("teacherName").value || "").trim().slice(0,16) || def.name;
+      const student_hitap = ($("studentHitap").value || "").trim().slice(0,16);
+
+      if(student_hitap && student_hitap.length < 3){
+        warn.style.display="block";
+        warn.textContent = "Hitap alanı en az 3 karakter olmalı (örn: Oğuz).";
+        return;
+      }
+      warn.style.display="none";
+
+      const currentPrefs = (data?.teacher_prefs && typeof data.teacher_prefs==="object") ? { ...data.teacher_prefs } : {};
+      currentPrefs[teacherId] = { teacher_name, gender, style: def.style, student_hitap };
+
+      const { error: upErr } = await supabase
+        .from("profiles")
+        .update({ teacher_prefs: currentPrefs })
+        .eq("id", userId);
+
+      if(upErr){
+        toast("Kaydedilemedi");
+        return;
+      }
+
+      localStorage.setItem("italky_lesson_mins","15");
+      toast("Hazır! Derse geçiyorsun…");
+      setTimeout(()=>location.href="/pages/teacher_course.html", 250);
+
+    }catch{
+      toast("Bir hata oldu");
     }
-
-    const teacher_name = ($("teacherName").value || "").trim().slice(0,16) || def.name;
-    const student_hitap = ($("studentHitap").value || "").trim().slice(0,16);
-
-    if(student_hitap && student_hitap.length < 3){
-      warn.style.display="block";
-      warn.textContent = "Hitap alanı en az 3 karakter olmalı (örn: Oğuz).";
-      return;
-    }
-    warn.style.display="none";
-
-    const nextPrefs = (p2?.teacher_prefs && typeof p2.teacher_prefs==="object") ? { ...p2.teacher_prefs } : {};
-    nextPrefs[teacherId] = { teacher_name, gender, style: def.style, student_hitap };
-
-    const { error: upErr } = await supabase
-      .from("profiles")
-      .update({ teacher_prefs: nextPrefs })
-      .eq("id", session.user.id);
-
-    if(upErr){
-      toast("Kaydedilemedi");
-      return;
-    }
-
-    localStorage.setItem("italky_lesson_mins","15");
-    toast("Hazır! Derse geçiyorsun…");
-    setTimeout(()=>location.href="/pages/teacher_course.html", 250);
   };
 </script>
 </body>
