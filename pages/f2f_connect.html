@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • Connect</title>
+  <title>italkyAI • Walkie Talkie</title>
 
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
@@ -21,15 +21,19 @@
       --r: 22px;
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    #pageContent{ padding: 14px 14px calc(var(--footerH,92px) + env(safe-area-inset-bottom) + 18px); }
     .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+
     .card{
       border:1px solid var(--border);
       border-radius:var(--r);
       background:var(--card);
       padding:16px;
       box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
-    .h1{ margin:0 0 6px; font-size:18px; font-weight:1000; }
+    .h1{ margin:0 0 6px; font-size:18px; font-weight:1000; color:#fff; }
     .p{ margin:0; color:var(--muted); font-size:12.5px; line-height:1.45; }
 
     .btn{
@@ -54,22 +58,147 @@
     .btn span{ position:relative; z-index:2; }
     @keyframes spin{ to{ transform: rotate(360deg);} }
     .btn:active{ transform: scale(.985); }
+
+    /* panels */
+    .hide{ display:none !important; }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .mini{ margin-top:10px; color:rgba(255,255,255,0.60); font-size:11.5px; font-weight:800; line-height:1.35; }
+
+    .qrbox{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      padding:12px; border-radius:18px; border:1px solid rgba(255,255,255,0.12);
+      background:rgba(0,0,0,0.22);
+    }
+    .qrimg{
+      width:220px;height:220px;border-radius:16px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.04);
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    .code{
+      font-family:"Space Grotesk", ui-monospace, monospace;
+      font-weight:900; letter-spacing:3px; font-size:18px; color:#fff;
+    }
+    .input{
+      width:100%;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(0,0,0,0.25);
+      color:#fff;
+      border-radius:16px;
+      padding:12px 12px;
+      font-weight:900;
+      letter-spacing:2px;
+      text-transform:uppercase;
+    }
+
+    /* scanner overlay */
+    .scanner{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display:none;
+      z-index: 6000;
+      padding: calc(14px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+    }
+    .scanner.show{ display:block; }
+    .scanCard{
+      height: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.06);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .scanTop{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 12px;
+      border-bottom:1px solid rgba(255,255,255,0.10);
+      font-weight:1000;
+      color:#fff;
+    }
+    video{ width:100%; height:100%; object-fit:cover; background:#000; }
+    .scanHint{ padding:10px 12px; color:rgba(255,255,255,0.7); font-size:12px; font-weight:800; border-top:1px solid rgba(255,255,255,0.10); }
   </style>
 </head>
 
 <body>
   <div id="pageContent">
     <div class="wrap">
-      <div class="card">
+
+      <!-- HOME CARD -->
+      <div class="card" id="cardHome">
         <p class="h1">Walkie Talkie</p>
         <p class="p">Sınırsız katılımcı. Kod/QR ile girilir. Herkes kendi dilini seçer.</p>
       </div>
 
-      <div class="card">
+      <div class="card" id="cardActions">
         <button class="btn btnPrimary" id="goHost"><span>Sohbeti Başlat</span></button>
         <div style="height:10px"></div>
         <button class="btn btnGhost" id="goGuest"><span>Sohbete Bağlan</span></button>
       </div>
+
+      <!-- HOST PANEL -->
+      <div class="card hide" id="hostPanel">
+        <p class="h1">Sohbeti Başlat</p>
+        <p class="p">Partner QR okutur veya kodu girer. Oda hazır olunca görüşmeye geçersiniz.</p>
+
+        <div class="mini" id="hostStatus">—</div>
+
+        <div class="qrbox" style="margin-top:12px;">
+          <div class="qrimg"><img id="qrImg" alt="QR" width="220" height="220"/></div>
+
+          <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px">
+            <div class="mini">Kod:</div>
+            <div class="code" id="roomCode">------</div>
+
+            <div class="row">
+              <button class="btn btnGhost" id="btnCopy"><span>Kodu Kopyala</span></button>
+              <button class="btn btnGhost" id="btnBackHost"><span>Geri</span></button>
+            </div>
+
+            <button class="btn btnPrimary" id="btnGoCall"><span>Devam Et</span></button>
+            <div class="mini">Devam Et ile konuşma ekranına geçersin.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JOIN PANEL -->
+      <div class="card hide" id="joinPanel">
+        <p class="h1">Sohbete Bağlan</p>
+        <p class="p">QR okuyabilirsen QR oku. Olmazsa Foto ile QR seç veya kod gir.</p>
+
+        <div class="row">
+          <button class="btn btnPrimary" id="btnScan"><span>QR Oku</span></button>
+          <button class="btn btnGhost" id="btnPickQR"><span>Foto ile QR Seç</span></button>
+          <button class="btn btnGhost" id="btnBackJoin"><span>Geri</span></button>
+        </div>
+
+        <div class="mini" id="joinHint">—</div>
+
+        <div class="mini" style="margin-top:10px;">Kod ile bağlan:</div>
+        <input class="input" id="roomInput" placeholder="KOD (örn: X8K4PZ)" maxlength="8"/>
+
+        <div class="row">
+          <button class="btn btnPrimary" id="btnJoin"><span>Bağlan</span></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scanner -->
+  <div class="scanner" id="scanner">
+    <div class="scanCard">
+      <div class="scanTop">
+        <div>QR Oku</div>
+        <button class="btn btnGhost" id="scanClose"><span>Kapat</span></button>
+      </div>
+      <div style="flex:1;position:relative">
+        <video id="scanVideo" playsinline></video>
+      </div>
+      <div class="scanHint" id="scanHint">Kamerayı QR koda tut. (Destek yoksa Foto ile QR seç / Kod gir)</div>
     </div>
   </div>
 
@@ -78,10 +207,34 @@
     mountShell();
   </script>
 
+  <script type="module" src="/js/f2f_connect.js?v=WT_CONNECT_V4"></script>
+
   <script type="module">
-    const go=(u)=>{ try{location.assign(u);}catch{location.href=u;} };
-    document.getElementById("goHost").onclick  = ()=>go("/pages/f2f_host.html");
-    document.getElementById("goGuest").onclick = ()=>go("/pages/f2f_join.html");
+    // UI mode routing (tek sayfa)
+    const qs = (k)=>new URLSearchParams(location.search).get(k);
+    const setMode = (m)=>{
+      document.getElementById("hostPanel").classList.toggle("hide", m!=="host");
+      document.getElementById("joinPanel").classList.toggle("hide", m!=="join");
+      document.getElementById("cardHome").classList.toggle("hide", m!=="home");
+      document.getElementById("cardActions").classList.toggle("hide", m!=="home");
+    };
+
+    const mode = qs("mode") || (qs("join") ? "join" : "home");
+    setMode(mode);
+
+    document.getElementById("goHost").onclick  = ()=>{ history.replaceState(null,"", "/pages/f2f_connect.html?mode=host"); setMode("host"); };
+    document.getElementById("goGuest").onclick = ()=>{ history.replaceState(null,"", "/pages/f2f_connect.html?mode=join"); setMode("join"); };
+
+    document.getElementById("btnBackHost").onclick = ()=>{ history.replaceState(null,"", "/pages/f2f_connect.html"); setMode("home"); };
+    document.getElementById("btnBackJoin").onclick = ()=>{ history.replaceState(null,"", "/pages/f2f_connect.html"); setMode("home"); };
+
+    // join param varsa input’a bas
+    const join = qs("join");
+    if(join && document.getElementById("roomInput")){
+      document.getElementById("roomInput").value = String(join).toUpperCase();
+      const hint = document.getElementById("joinHint");
+      if(hint) hint.textContent = "QR/kod alındı ✅ Bağlan’a bas.";
+    }
   </script>
 </body>
 </html>
