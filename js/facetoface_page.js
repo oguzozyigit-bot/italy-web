@@ -428,8 +428,13 @@ async function playAudioBlob(blob){
 }
 
 /* ===============================
-   TTS
+   TTS (GOOGLE-ONLY)
+   Backend /api/tts artık:
+   - ok:true  -> audio_base64 gelir (google)
+   - ok:false -> TTS_UNAVAILABLE (google kapalı)  ✅ OpenAI fallback yok
 ================================ */
+let ttsWarnAt = 0;
+
 async function speakLocal(text, langCode){
   const t = String(text||"").trim();
   if(!t) return;
@@ -440,22 +445,47 @@ async function speakLocal(text, langCode){
 
   const lang = normalizeApiLang(langCode);
 
-  const res = await fetch(`${API_BASE}/api/tts`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    credentials:"include",
-    body: JSON.stringify({ text: t, lang, speaking_rate: 1, pitch: 0 })
-  });
+  try{
+    const res = await fetch(`${API_BASE}/api/tts`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      credentials:"include",
+      body: JSON.stringify({ text: t, lang, speaking_rate: 1, pitch: 0 })
+    });
 
-  if(!res.ok){ toast("🔇 TTS HTTP " + res.status); return; }
-  const data = await res.json().catch(()=>null);
-  if(!data?.ok || !data.audio_base64){ toast("🔇 TTS invalid"); return; }
+    // HTTP hata: sessiz geç (çok spam olmasın)
+    if(!res.ok){
+      if(Date.now() - ttsWarnAt > 4000){
+        ttsWarnAt = Date.now();
+        toast("🔇 Ses şu an kapalı");
+      }
+      return;
+    }
 
-  const bin = atob(data.audio_base64);
-  const bytes = new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    const data = await res.json().catch(()=>null);
 
-  await playAudioBlob(new Blob([bytes], {type:"audio/mpeg"}));
+    // ✅ Google yoksa: ok:false gelir → sessizce çık
+    if(!data || data.ok !== true || !data.audio_base64){
+      // sadece arada bir uyar
+      if(Date.now() - ttsWarnAt > 4000){
+        ttsWarnAt = Date.now();
+        toast("🔇 Ses şu an kapalı");
+      }
+      return;
+    }
+
+    const bin = atob(data.audio_base64);
+    const bytes = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+
+    await playAudioBlob(new Blob([bytes], {type:"audio/mpeg"}));
+
+  }catch{
+    if(Date.now() - ttsWarnAt > 4000){
+      ttsWarnAt = Date.now();
+      toast("🔇 Ses şu an kapalı");
+    }
+  }
 }
 
 /* ===============================
