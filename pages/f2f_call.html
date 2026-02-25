@@ -17,11 +17,10 @@
     :root{
       --frameW: min(480px, calc(100vw - 18px));
       --topH: 74px;
+      --roomH: 44px;
       --peopleH: 56px;
-      --roomH: 40px;
       --dockH: 78px;
       --sigH: 34px;
-      --gap: 10px;
 
       --bg:#030014;
       --text: rgba(255,255,255,.92);
@@ -75,7 +74,7 @@
       }
     }
 
-    /* ===== TOP BAR ===== */
+    /* TOP BAR */
     .topbar{
       position: sticky;
       top: 0;
@@ -154,7 +153,50 @@
     }
     .exitBtn:active{ transform: scale(.96); }
 
-    /* ===== PARTICIPANTS STRIP ===== */
+    /* ✅ ROOM CODE BAR */
+    .roomBar{
+      height: var(--roomH);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,.20);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .roomLeft{
+      display:flex; align-items:center; gap:10px; min-width:0;
+      font-weight: 1000;
+      letter-spacing: .6px;
+      color: rgba(255,255,255,.82);
+    }
+    .roomPill{
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color:#fff;
+      max-width: 240px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .copyBtn{
+      width:42px;height:42px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; user-select:none;
+      flex: 0 0 auto;
+    }
+    .copyBtn:active{ transform: scale(.96); }
+    .copyBtn svg{ width:18px;height:18px; stroke: rgba(255,255,255,.9); fill:none; stroke-width:2.2; }
+
+    /* PARTICIPANTS STRIP */
     .peopleBar{
       height: var(--peopleH);
       display:flex;
@@ -214,69 +256,11 @@
       text-overflow:ellipsis;
     }
 
-    /* ✅ ROOM PILL */
-    .roomBar{
-      height: var(--roomH);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding: 6px 10px;
-      background: rgba(0,0,0,.18);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      z-index: 2400;
-    }
-    .roomPill{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width: 0;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      backdrop-filter: blur(10px);
-      font-weight: 1000;
-      font-size: 12px;
-      color: rgba(255,255,255,.88);
-      letter-spacing: .8px;
-      overflow:hidden;
-    }
-    .roomPill .code{
-      font-family: ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace;
-      font-weight: 1000;
-      letter-spacing: 2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 220px;
-      opacity: .95;
-    }
-    .copyBtn{
-      width:36px; height:36px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer; user-select:none;
-      flex: 0 0 auto;
-    }
-    .copyBtn:active{ transform: scale(.96); }
-    .copyBtn svg{
-      width:18px; height:18px;
-      stroke: rgba(255,255,255,.88);
-      fill:none;
-      stroke-width:2;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-      opacity:.95;
-    }
-
-    /* ===== CHAT AREA ===== */
+    /* CHAT AREA */
     #chat.chat-area{
       position: absolute;
       left: 0; right: 0;
-      top: calc(var(--topH) + var(--peopleH) + var(--roomH));
+      top: calc(var(--topH) + var(--roomH) + var(--peopleH));
       bottom: calc(var(--dockH) + var(--sigH) + env(safe-area-inset-bottom));
       padding: 14px 12px;
 
@@ -295,12 +279,7 @@
     #chat.chat-area::-webkit-scrollbar{ display:none; }
     #chat.chat-area::before{ content:""; flex:1 0 auto; }
 
-    .msgRow{
-      display:flex;
-      gap:10px;
-      align-items:flex-end;
-      max-width: 92%;
-    }
+    .msgRow{ display:flex; gap:10px; align-items:flex-end; max-width: 92%; }
     .msgRow.left{ align-self:flex-start; }
     .msgRow.right{ align-self:flex-end; flex-direction: row-reverse; }
 
@@ -351,7 +330,7 @@
       text-align:right;
     }
 
-    /* ===== INPUT DOCK ===== */
+    /* INPUT DOCK */
     .input-dock{
       position: fixed;
       left: 50%;
@@ -377,7 +356,6 @@
       border-radius: 26px;
       padding: 8px;
     }
-
     #msgInput{
       flex: 1 1 auto;
       min-width:0;
@@ -394,7 +372,6 @@
       overflow:hidden;
       max-height: 120px;
     }
-
     .icon-btn, .send-btn{
       width:42px; height:42px;
       border-radius:16px;
@@ -404,7 +381,6 @@
       cursor:pointer; user-select:none;
       flex-shrink:0;
     }
-
     .icon-btn svg, .send-btn svg{
       width:21px; height:21px;
       stroke: rgba(255,255,255,.88);
@@ -414,7 +390,6 @@
       stroke-linejoin:round;
       opacity:.95;
     }
-
     .icon-btn.listening{
       border-color: rgba(79,70,229,.45);
       background: rgba(79,70,229,.16);
@@ -435,7 +410,7 @@
       100%{ transform: scale(0.92); opacity:.75; }
     }
 
-    /* ===== SIGNATURE only ===== */
+    /* SIGNATURE */
     .signatureBar{
       position: fixed;
       left: 50%;
@@ -486,24 +461,23 @@
       </div>
     </div>
 
-    <!-- Katılımcılar şeridi -->
-    <div class="peopleBar">
-      <div class="peopleCount" id="peopleCount">1</div>
-      <div class="peopleScroll" id="peopleScroll"></div>
-    </div>
-
-    <!-- ✅ ODA KODU PILL -->
-    <div class="roomBar">
-      <div class="roomPill" title="Oda Kodu">
-        <span style="opacity:.70;">KOD:</span>
-        <span class="code" id="roomCodePill">------</span>
+    <!-- ✅ ODA KODU BAR -->
+    <div class="roomBar" id="roomBar" style="display:none">
+      <div class="roomLeft">
+        <div style="opacity:.7">KOD:</div>
+        <div class="roomPill" id="roomPill">—</div>
       </div>
-      <button class="copyBtn" id="copyRoomBtn" title="Kodu Kopyala" aria-label="Kodu Kopyala">
+      <button class="copyBtn" id="copyRoomBtn" title="Kodu kopyala" aria-label="Kodu kopyala">
         <svg viewBox="0 0 24 24">
           <rect x="9" y="9" width="10" height="10" rx="2"></rect>
           <path d="M7 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1"></path>
         </svg>
       </button>
+    </div>
+
+    <div class="peopleBar">
+      <div class="peopleCount" id="peopleCount">1</div>
+      <div class="peopleScroll" id="peopleScroll"></div>
     </div>
 
     <div class="chat-area" id="chat"></div>
@@ -534,33 +508,29 @@
 
   </div>
 
-  <!-- ✅ Room pill doldurma + kopyalama -->
-  <script>
-    (function(){
-      try{
-        const p = new URLSearchParams(location.search);
-        const room = String(p.get("room")||"").trim().toUpperCase();
-        const el = document.getElementById("roomCodePill");
-        if(el) el.textContent = room || "------";
+  <script type="module">
+    // room pill (UI only)
+    const p = new URLSearchParams(location.search);
+    const room = String(p.get("room")||"").trim().toUpperCase();
+    const bar = document.getElementById("roomBar");
+    const pill = document.getElementById("roomPill");
+    const copy = document.getElementById("copyRoomBtn");
 
-        const btn = document.getElementById("copyRoomBtn");
-        if(btn){
-          btn.addEventListener("click", async ()=>{
-            if(!room) return;
-            try{
-              await navigator.clipboard.writeText(room);
-              btn.style.transform = "scale(.96)";
-              setTimeout(()=>btn.style.transform="", 120);
-            }catch{
-              alert("Kod: " + room);
-            }
-          });
+    if(room && bar && pill){
+      bar.style.display = "flex";
+      pill.textContent = room;
+      copy?.addEventListener("click", async ()=>{
+        try{
+          await navigator.clipboard.writeText(room);
+          copy.style.opacity = "0.75";
+          setTimeout(()=>copy.style.opacity="1", 500);
+        }catch{
+          alert("Kod: " + room);
         }
-      }catch{}
-    })();
+      });
+    }
   </script>
 
-  <!-- WalkieTalkie script -->
   <script type="module" src="/js/f2f_call.js?v=CHAT_WT_FINAL_002"></script>
 </body>
 </html>
