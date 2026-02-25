@@ -13,7 +13,6 @@ function randCode(n=6){
   let s=""; for(let i=0;i<n;i++) s += a[Math.floor(Math.random()*a.length)];
   return s;
 }
-
 function wsUrl(room){
   return `${API_BASE.replace("https://","wss://")}/api/f2f/ws/${room}`;
 }
@@ -21,12 +20,13 @@ function wsUrl(room){
 function getProfileFromCache(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return { name:"Kullanıcı", picture:"", lang:(localStorage.getItem("f2f_my_lang")||"tr") };
+    const lang = (localStorage.getItem("f2f_my_lang") || "tr");
+    if(!raw) return { name:"Kullanıcı", picture:"", lang };
+
     const u = JSON.parse(raw);
     const full = u.display_name || u.full_name || u.name || "";
     const name = shortDisplayName(full || "Kullanıcı");
     const picture = u.picture || u.avatar || u.avatar_url || "";
-    const lang = localStorage.getItem("f2f_my_lang") || "tr";
     return { name, picture, lang };
   }catch{
     return { name:"Kullanıcı", picture:"", lang:(localStorage.getItem("f2f_my_lang")||"tr") };
@@ -34,7 +34,7 @@ function getProfileFromCache(){
 }
 
 /* ===============================
-   WS JOIN CHECK (oda var mı?)
+   WS JOIN CHECK
 ================================ */
 async function wsJoinCheck(room, timeoutMs=2500){
   return new Promise((resolve)=>{
@@ -52,7 +52,6 @@ async function wsJoinCheck(room, timeoutMs=2500){
     const to = setTimeout(()=>finish(false), timeoutMs);
 
     ws.onopen = ()=>{
-      // backend join_check destekliyorsa room_ok/room_not_found döner
       try{ ws.send(JSON.stringify({ type:"join_check", room })); }catch{}
     };
     ws.onmessage = (ev)=>{
@@ -68,9 +67,7 @@ async function wsJoinCheck(room, timeoutMs=2500){
 }
 
 /* ===============================
-   HOST: Odayı gerçekten oluştur
-   - room_created gelirse ✅
-   - gelmezse FAIL (artık "open oldu diye true" yok)
+   HOST CREATE (must receive room_created)
 ================================ */
 async function createRoomOnBackend(room){
   return new Promise((resolve)=>{
@@ -87,7 +84,7 @@ async function createRoomOnBackend(room){
       ws.send(JSON.stringify({
         type: "create",
         room,
-        from: "host",
+        from: "host",              // host panelde sabit olabilir
         from_name: me.name,
         from_pic: me.picture || "",
         me_lang: (me.lang || "tr")
@@ -97,7 +94,7 @@ async function createRoomOnBackend(room){
     ws.onmessage = (ev)=>{
       try{
         const msg = JSON.parse(ev.data);
-        if(msg.type === "room_created" || msg.type === "room_ok"){
+        if(msg.type === "room_created"){
           clearTimeout(to);
           try{ ws.close(); }catch{}
           resolve(true);
@@ -110,79 +107,13 @@ async function createRoomOnBackend(room){
       try{ ws.close(); }catch{}
       resolve(false);
     };
-
-    ws.onclose = ()=>{
-      // timeout resolve edecek
-    };
   });
 }
 
 /* ===============================
-   HOST PAGE
+   QR IMAGE DECODE FALLBACK
 ================================ */
-async function initHost(){
-  const room = (qs("room") || randCode(6)).toUpperCase();
-
-  $("roomCode") && ($("roomCode").textContent = room);
-
-  // ✅ QR link: aynı sayfaya join ile dönsün (f2f_join.html yoksa sorun biter)
-  const joinUrl = `https://italky.ai/pages/f2f_connect.html?join=${encodeURIComponent(room)}`;
-  if($("qrImg")){
-    $("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
-  }
-
-  const statusEl = $("hostStatus");
-  if(statusEl) statusEl.textContent = "Oda hazırlanıyor…";
-
-  const created = await createRoomOnBackend(room);
-  if(statusEl) statusEl.textContent = created ? "Oda hazır ✅" : "Oda oluşturulamadı ❌ (backend)";
-
-  $("btnCopy")?.addEventListener("click", async ()=>{
-    try{
-      await navigator.clipboard.writeText(room);
-      $("btnCopy").textContent = "Kopyalandı ✅";
-      setTimeout(()=> $("btnCopy").textContent="Kodu Kopyala", 900);
-    }catch{
-      alert("Kod: " + room);
-    }
-  });
-
-  // Host call
-  $("btnGoCall")?.addEventListener("click", ()=>{
-    go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`);
-  });
-
-  $("btnBack")?.addEventListener("click", ()=> go("/pages/f2f_connect.html"));
-}
-
-/* ===============================
-   JOIN PAGE (QR + Code)
-================================ */
-let scanStream=null;
-let scanTimer=null;
-let detector=null;
-
-async function stopScanner(){
-  try{ if(scanTimer) clearInterval(scanTimer); }catch{}
-  scanTimer = null;
-  detector = null;
-  try{ scanStream?.getTracks?.().forEach(t=>t.stop()); }catch{}
-  scanStream = null;
-  $("scanner")?.classList.remove("show");
-}
-
-function setScanHint(msg){
-  const el = $("scanHint");
-  if(el) el.textContent = msg;
-}
-function setJoinHint(msg){
-  const el = $("joinHint");
-  if(el) el.textContent = msg;
-}
-
-/* --- Image QR decode fallback (BarcodeDetector yoksa) --- */
 async function decodeQrFromImageFile(file){
-  // api.qrserver.com read-qr-code endpoint
   const fd = new FormData();
   fd.append("file", file);
   const r = await fetch("https://api.qrserver.com/v1/read-qr-code/", { method:"POST", body: fd });
@@ -192,6 +123,25 @@ async function decodeQrFromImageFile(file){
   return txt ? String(txt) : null;
 }
 
+/* ===============================
+   CAMERA SCANNER (BarcodeDetector varsa)
+================================ */
+let scanStream=null;
+let scanTimer=null;
+let detector=null;
+
+async function stopScanner(){
+  try{ if(scanTimer) clearInterval(scanTimer); }catch{}
+  scanTimer=null;
+  detector=null;
+  try{ scanStream?.getTracks?.().forEach(t=>t.stop()); }catch{}
+  scanStream=null;
+  $("scanner")?.classList.remove("show");
+}
+
+function setScanHint(msg){ const el=$("scanHint"); if(el) el.textContent = msg; }
+function setJoinHint(msg){ const el=$("joinHint"); if(el) el.textContent = msg; }
+
 async function startScanner(){
   const sc = $("scanner");
   const vid = $("scanVideo");
@@ -199,40 +149,29 @@ async function startScanner(){
 
   sc.classList.add("show");
 
-  // HTTPS check
   if(location.protocol !== "https:" && location.hostname !== "localhost"){
     setScanHint("Kamera için HTTPS gerekir. Kod gir.");
     return;
   }
 
-  // Camera preview
-  try{
-    vid.setAttribute("playsinline","");
-    vid.muted = true;
-    vid.autoplay = true;
-  }catch{}
-
   setScanHint("Kamera izni istenebilir…");
 
-  // Try camera
   const tries = [
     { video: { facingMode: { ideal: "environment" } }, audio:false },
     { video: { facingMode: "environment" }, audio:false },
     { video: true, audio:false }
   ];
 
-  scanStream = null;
+  scanStream=null;
   for(const cons of tries){
     try{
       scanStream = await navigator.mediaDevices.getUserMedia(cons);
       break;
-    }catch(e){
-      // keep trying
-    }
+    }catch{}
   }
 
   if(!scanStream){
-    setScanHint("Kamera açılamadı. (WebView izinleri) Kod gir veya Foto ile QR seç.");
+    setScanHint("Kamera açılamadı. Kod gir veya Foto ile QR seç.");
     return;
   }
 
@@ -244,38 +183,73 @@ async function startScanner(){
     return;
   }
 
-  const hasBD = ("BarcodeDetector" in window);
-
-  // ✅ BarcodeDetector varsa canlı çöz
-  if(hasBD){
-    setScanHint("QR koda tut. Okuyunca otomatik dolar.");
-    try{ detector = new BarcodeDetector({ formats:["qr_code"] }); }catch{ detector=null; }
-
-    scanTimer = setInterval(async ()=>{
-      if(!detector) return;
-      try{
-        const barcodes = await detector.detect(vid);
-        if(barcodes?.length){
-          const raw = barcodes[0].rawValue || "";
-          const u = new URL(raw, location.origin);
-          const j = u.searchParams.get("join");
-          if(j){
-            $("roomInput").value = String(j).toUpperCase();
-            await stopScanner();
-            setJoinHint("QR okundu ✅ Bağlan’a bas.");
-          }
-        }
-      }catch{}
-    }, 240);
-
+  if(!("BarcodeDetector" in window)){
+    setScanHint("Bu cihaz canlı QR okumayı desteklemiyor. Foto ile QR seç veya kod gir.");
     return;
   }
 
-  // ✅ BarcodeDetector yoksa: kamerayı göster ama “Foto ile QR” fallback
-  setScanHint("Bu cihaz canlı QR okumayı desteklemiyor. Foto ile QR seç veya kod gir.");
+  try{
+    detector = new BarcodeDetector({ formats:["qr_code"] });
+  }catch{
+    detector = null;
+    setScanHint("QR okuyucu başlatılamadı. Foto ile QR seç veya kod gir.");
+    return;
+  }
+
+  setScanHint("QR koda tut. Okuyunca otomatik dolar.");
+
+  scanTimer = setInterval(async ()=>{
+    if(!detector) return;
+    try{
+      const barcodes = await detector.detect(vid);
+      if(barcodes?.length){
+        const raw = barcodes[0].rawValue || "";
+        const u = new URL(raw, location.origin);
+        const code = u.searchParams.get("join");
+        if(code){
+          $("roomInput").value = String(code).toUpperCase();
+          await stopScanner();
+          setJoinHint("QR okundu ✅ Bağlan’a bas.");
+        }
+      }
+    }catch{}
+  }, 240);
 }
 
-/* --- Join by code --- */
+/* ===============================
+   HOST INIT
+================================ */
+async function initHost(){
+  const room = (qs("room") || randCode(6)).toUpperCase();
+
+  $("roomCode").textContent = room;
+
+  // QR: aynı sayfaya join ile dön
+  const joinUrl = `https://italky.ai/pages/f2f_connect.html?join=${encodeURIComponent(room)}`;
+  $("qrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(joinUrl)}`;
+
+  $("hostStatus").textContent = "Oda hazırlanıyor…";
+  const created = await createRoomOnBackend(room);
+  $("hostStatus").textContent = created ? "Oda hazır ✅" : "Oda oluşturulamadı ❌";
+
+  $("btnCopy")?.addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(room);
+      $("btnCopy").querySelector("span").textContent = "Kopyalandı ✅";
+      setTimeout(()=> $("btnCopy").querySelector("span").textContent="Kodu Kopyala", 900);
+    }catch{
+      alert("Kod: " + room);
+    }
+  });
+
+  $("btnGoCall")?.addEventListener("click", ()=>{
+    go(`/pages/f2f_call.html?room=${encodeURIComponent(room)}&role=host`);
+  });
+}
+
+/* ===============================
+   JOIN INIT
+================================ */
 async function joinFlow(){
   const code = String($("roomInput")?.value || "").trim().toUpperCase();
   if(code.length < 4){
@@ -296,15 +270,17 @@ async function joinFlow(){
   go(`/pages/f2f_call.html?room=${encodeURIComponent(code)}&role=guest`);
 }
 
-/* --- init join page --- */
 function initJoin(){
-  const j = qs("join");
-  if(j && $("roomInput")) $("roomInput").value = String(j).toUpperCase();
+  const join = qs("join");
+  if(join && $("roomInput")){
+    $("roomInput").value = String(join).toUpperCase();
+    setJoinHint("QR/kod alındı ✅ Bağlan’a bas.");
+  }
 
-  $("btnScan")?.addEventListener("click", ()=> startScanner());
-  $("scanClose")?.addEventListener("click", ()=> stopScanner());
+  $("btnScan")?.addEventListener("click", startScanner);
+  $("scanClose")?.addEventListener("click", stopScanner);
+  $("btnJoin")?.addEventListener("click", joinFlow);
 
-  // ✅ “Foto ile QR seç” butonu varsa bağla (HTML’e eklemeni öneririm)
   $("btnPickQR")?.addEventListener("click", async ()=>{
     try{
       const inp = document.createElement("input");
@@ -339,18 +315,31 @@ function initJoin(){
     }
   });
 
-  $("btnJoin")?.addEventListener("click", joinFlow);
-  $("btnBack")?.addEventListener("click", ()=> go("/pages/f2f_connect.html"));
-
-  // Page hide => camera stop
-  document.addEventListener("visibilitychange", ()=>{
-    if(document.hidden) stopScanner();
-  });
+  document.addEventListener("visibilitychange", ()=>{ if(document.hidden) stopScanner(); });
 }
 
-/* ---------- BOOT ---------- */
+/* ===============================
+   BOOT
+================================ */
 document.addEventListener("DOMContentLoaded", ()=>{
-  // host vs join sayfası ayrımı HTML’deki elemanlarla
-  if($("roomCode") && $("qrImg")) initHost();
-  if($("roomInput") && $("btnJoin")) initJoin();
+  // Host panel açık mı?
+  if($("hostPanel") && !$("hostPanel").classList.contains("hide")){
+    initHost();
+  }
+  // Join panel açık mı?
+  if($("joinPanel") && !$("joinPanel").classList.contains("hide")){
+    initJoin();
+  }
+
+  // Panel değişince init tekrar çalışsın (mode switch)
+  // (Home JS'in history.replaceState ile yaptığı switch sonrası)
+  const obs = new MutationObserver(()=>{
+    if($("hostPanel") && !$("hostPanel").classList.contains("hide")){
+      if(!$("roomCode").textContent || $("roomCode").textContent.includes("-")) initHost();
+    }
+    if($("joinPanel") && !$("joinPanel").classList.contains("hide")){
+      initJoin();
+    }
+  });
+  obs.observe(document.body, { attributes:true, childList:true, subtree:true });
 });
