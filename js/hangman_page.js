@@ -1,4 +1,12 @@
 // FILE: /js/hangman_page.js
+// ✅ FINAL HANGMAN
+// ✅ Can sistemi: başlangıç 3, max 9
+// ✅ Joker kullanmaz + hata yapmazsa +1 can
+// ✅ Adam asılırsa -1 can
+// ✅ Can bitince oyun biter -> "Devam etmek istiyor musunuz?" sorulur -> evet: yeni oyun (skor=0, can=3) -> hayır: oyun biter ekranda kalır
+// ✅ Yanlış harf / joker = yeni oyun değildir, aynı kelimenin turudur
+// ✅ Best Score: kullanıcı bazlı (Supabase profiles.hangman_best) + local fallback
+
 import { mountShell } from "/js/ui_shell.js";
 import { supabase } from "/js/supabase_client.js";
 
@@ -106,6 +114,7 @@ let lang = "en";
 let diff = 3;
 
 let lives = 3;
+const START_LIVES = 3;
 const MAX_LIVES = 9;
 
 let totalScore = 0;
@@ -113,10 +122,8 @@ let roundScore = 100;
 let guessed = new Set();
 let mistakes = 0;
 
-const MAX_JOKERS = 2;
-
-let flawless = true;
-let jokerUsed = false;
+let flawless = true;   // bu kelime boyunca hiç hata yapılmadı mı?
+let jokerUsed = false; // bu kelimede joker kullanıldı mı?
 let lock = false;
 
 /* ===============================
@@ -129,7 +136,6 @@ let USER_ID = "anon";
 let BEST_CACHE = null;
 
 async function ensureUserId(){
-  // ✅ en başta kilitle (anon->user geçişi rekoru “sıfırlar” hissini bitirir)
   if(USER_ID && USER_ID !== "anon") return USER_ID;
   try{
     const { data:{ session } } = await supabase.auth.getSession();
@@ -177,11 +183,9 @@ async function setBest(newVal){
   await ensureUserId();
   const nv = Math.max(0, Number(newVal)||0);
 
-  // local always
   BEST_CACHE = nv;
   try{ localStorage.setItem(bestLocalKey(), String(nv)); }catch{}
 
-  // supabase best-effort
   try{
     const { data, error } = await supabase
       .from("profiles")
@@ -216,6 +220,7 @@ async function paint(){
 }
 
 function getMistakeLimit(){
+  // easy(3)=6, normal(4)=4, hard(5)=2
   if(diff===3) return 6;
   if(diff===4) return 4;
   return 2;
@@ -285,137 +290,36 @@ function speakWord(text){
 function showModal(title, color, bonus){
   $("mTitle").textContent = title;
   $("mTitle").style.color = color;
-  $("mWord").textContent = target.w.toUpperCase();
-  $("mTr").textContent = `(${target.tr || "—"})`;
+  $("mWord").textContent = target?.w ? target.w.toUpperCase() : "";
+  $("mTr").textContent = target?.tr ? `(${target.tr || "—"})` : "";
   $("mBonus").textContent = bonus || "";
   $("modal").classList.add("on");
 }
 
 /* ===============================
-   ✅ NEW: “DEVAM” = reset + yeni oyun
-   - Skor 0
-   - Can 3
-   - Setup’a dönmez, sayfa yenilenmez
+   GAME FLOW
 ================================ */
-async function resetAndStartNewGame(){
-  lock = false;
-  totalScore = 0;
-  lives = 3;
-  renderHearts();
-  await paint();
-  await newRound();
-}
-
-$("mBtn").onclick = async () => {
-  $("modal").classList.remove("on");
-  await resetAndStartNewGame();
-};
-
 function applyPenalty(){
   roundScore = Math.max(0, roundScore - 10);
-}
-
-async function endRound(win){
-  lock = true;
-  speakWord(target.w);
-
-  if(win){
-    totalScore += roundScore;
-
-    let bonus = `+${roundScore} PUAN\nTOPLAM SKOR: ${totalScore}`;
-    if(flawless && !jokerUsed && lives < MAX_LIVES){
-      lives++;
-      bonus += `\nKUSURSUZ: +1 CAN`;
-    }
-
-    const b = await getBest();
-    if(totalScore > b) await setBest(totalScore);
-
-    renderHearts();
-    await paint();
-
-    // modal göster (DEVAM = reset+new game)
-    showModal("MİSYON BAŞARILI", "#00ff9d", bonus);
-    return;
-  }
-
-  lives--;
-  renderHearts();
-  $("man").classList.add("swing");
-
-  const swingMs = 2200;
-  setTimeout(async ()=>{
-    $("man").classList.remove("swing");
-    const b = await getBest();
-    if(lives <= 0){
-      showModal("GAME OVER", "#ff0033", `TOPLAM SKOR: ${totalScore}\nEN YÜKSEK: ${b}`);
-    }else{
-      showModal("DEŞİFRE EDİLEMEDİ", "#ff0033", `-1 CAN\nEN YÜKSEK: ${b}`);
-    }
-  }, swingMs);
-}
-
-function press(letter, btn){
-  if(lock) return;
-  if(guessed.has(letter)) return;
-
-  const w = target.w.toUpperCase();
-  if(w.includes(letter)){
-    guessed.add(letter);
-    btn.classList.add("hit");
-    renderWord();
-    if(w.split("").every(ch => guessed.has(ch))) endRound(true);
-  }else{
-    btn.classList.add("miss");
-    flawless = false;
-    mistakes++;
-    applyPenalty();
-    updateMan();
-    // hızlı paint (best okumadan)
-    $("roundVal").textContent = String(roundScore);
-    if(mistakes >= getMistakeLimit()) endRound(false);
-  }
-}
-
-function useJ(i){
-  if(lock) return;
-
-  const el = (i===0) ? $("j0") : $("j1");
-  if(el.classList.contains("spent")) return;
-
-  jokerUsed = true;
-  el.classList.add("spent");
-  applyPenalty();
-
-  const w = target.w.toUpperCase();
-  const rem = w.split("").filter(ch => !guessed.has(ch));
-  if(rem.length){
-    const l = rem[0];
-    const btn = $("kb").querySelector(`.key[data-k="${l}"]`);
-    if(btn) press(l, btn);
-    else { guessed.add(l); renderWord(); }
-  }
   $("roundVal").textContent = String(roundScore);
 }
-
-$("j0").onclick = ()=>useJ(0);
-$("j1").onclick = ()=>useJ(1);
 
 async function newRound(){
   lock = false;
   guessed = new Set();
   mistakes = 0;
 
+  // joker reset
   $("j0").classList.remove("spent");
   $("j1").classList.remove("spent");
 
   flawless = true;
   jokerUsed = false;
-
   roundScore = 100;
+
   resetMan();
 
-  // ✅ Best cache reset ONLY for current lang/diff (but best itself not deleted)
+  // best cache refresh for this lang+diff
   BEST_CACHE = null;
 
   const usedSet = createUsedSet(`used_hangman_${lang}`);
@@ -439,6 +343,127 @@ async function newRound(){
   await paint();
 }
 
+async function startNewGame(){
+  // ✅ yeni oyun sadece can bitince
+  totalScore = 0;
+  lives = START_LIVES;
+  renderHearts();
+  await paint();
+  await newRound();
+}
+
+async function endRound(win){
+  lock = true;
+  speakWord(target.w);
+
+  if(win){
+    totalScore += roundScore;
+
+    let bonusText = `+${roundScore} PUAN\nTOPLAM SKOR: ${totalScore}`;
+
+    // ✅ Kusursuz + Joker yoksa +1 can (max 9)
+    if(flawless && !jokerUsed && lives < MAX_LIVES){
+      lives++;
+      bonusText += `\nKUSURSUZ: +1 CAN`;
+    }
+
+    const b = await getBest();
+    if(totalScore > b) await setBest(totalScore);
+
+    renderHearts();
+    await paint();
+
+    showModal("MİSYON BAŞARILI", "#00ff9d", bonusText);
+
+    // ✅ DEVAM: yeni kelime (yeni oyun değil)
+    $("mBtn").textContent = "DEVAM";
+    $("mBtn").onclick = async ()=>{
+      $("modal").classList.remove("on");
+      await newRound();
+    };
+    return;
+  }
+
+  // ❌ kelime kaybedildi: -1 can
+  lives--;
+  renderHearts();
+  $("man").classList.add("swing");
+
+  setTimeout(async ()=>{
+    $("man").classList.remove("swing");
+
+    if(lives <= 0){
+      // 💀 oyun bitti, sor
+      const best = await getBest();
+      const want = confirm(`Oyun bitti.\n\nSkor: ${totalScore}\nRekor: ${best}\n\nDevam etmek istiyor musunuz?`);
+      if(want){
+        await startNewGame();
+        return;
+      }
+
+      // kabul etmezse oyun biter ekranda kalsın
+      showModal("GAME OVER", "#ff0033", `TOPLAM SKOR: ${totalScore}\nEN YÜKSEK: ${best}`);
+      $("mBtn").textContent = "YENİ OYUN";
+      $("mBtn").onclick = async ()=>{
+        $("modal").classList.remove("on");
+        await startNewGame();
+      };
+      return;
+    }
+
+    // can var: yeni kelimeye geç
+    showModal("DEŞİFRE EDİLEMEDİ", "#ff0033", "-1 CAN");
+    $("mBtn").textContent = "DEVAM";
+    $("mBtn").onclick = async ()=>{
+      $("modal").classList.remove("on");
+      await newRound();
+    };
+  }, 2200);
+}
+
+function press(letter, btn){
+  if(lock) return;
+  if(guessed.has(letter)) return;
+
+  const w = target.w.toUpperCase();
+  if(w.includes(letter)){
+    guessed.add(letter);
+    btn.classList.add("hit");
+    renderWord();
+    if(w.split("").every(ch => guessed.has(ch))) endRound(true);
+  }else{
+    btn.classList.add("miss");
+    flawless = false;
+    mistakes++;
+    applyPenalty();
+    updateMan();
+    if(mistakes >= getMistakeLimit()) endRound(false);
+  }
+}
+
+function useJ(i){
+  if(lock) return;
+
+  const el = (i===0) ? $("j0") : $("j1");
+  if(el.classList.contains("spent")) return;
+
+  jokerUsed = true;
+  el.classList.add("spent");
+  applyPenalty();
+
+  const w = target.w.toUpperCase();
+  const rem = w.split("").filter(ch => !guessed.has(ch));
+  if(rem.length){
+    const l = rem[0];
+    const btn = $("kb").querySelector(`.key[data-k="${l}"]`);
+    if(btn) press(l, btn);
+    else { guessed.add(l); renderWord(); }
+  }
+}
+
+$("j0").onclick = ()=>useJ(0);
+$("j1").onclick = ()=>useJ(1);
+
 /* ===============================
    Setup + Auto-start
 ================================ */
@@ -446,6 +471,7 @@ function savePrefs(){
   try{ localStorage.setItem(LS_LANG, lang); }catch{}
   try{ localStorage.setItem(LS_DIFF, String(diff)); }catch{}
 }
+
 function loadPrefs(){
   try{
     const l = String(localStorage.getItem(LS_LANG)||"").trim().toLowerCase();
@@ -458,18 +484,13 @@ function loadPrefs(){
 }
 
 function markSetupUI(){
-  // lang
   [...$("langGrid").querySelectorAll(".pickCard")].forEach(x=>x.classList.remove("active"));
-  const lc = $("langGrid").querySelector(`.pickCard[data-lang="${lang}"]`);
-  lc?.classList.add("active");
+  $("langGrid").querySelector(`.pickCard[data-lang="${lang}"]`)?.classList.add("active");
 
-  // diff
   [...$("diffGrid").querySelectorAll(".pickCard.diff")].forEach(x=>x.classList.remove("active"));
-  const dc = $("diffGrid").querySelector(`.pickCard.diff[data-diff="${diff}"]`);
-  dc?.classList.add("active");
+  $("diffGrid").querySelector(`.pickCard.diff[data-diff="${diff}"]`)?.classList.add("active");
 }
 
-// setup seçimleri
 $("langGrid").addEventListener("click", (e)=>{
   const c=e.target.closest(".pickCard");
   if(!c || !c.dataset.lang) return;
@@ -492,12 +513,11 @@ $("diffGrid").addEventListener("click", (e)=>{
   paint();
 });
 
-// Start
 $("startBtn").addEventListener("click", async ()=>{
   $("setupMsg").textContent = "Yükleniyor…";
 
   try{
-    await ensureUserId(); // ✅ USER_ID kilit
+    await ensureUserId();
     LANGPOOL_BASE = await readLangpoolBase();
     if(!LANGPOOL_BASE){
       $("setupMsg").textContent = "LANGPOOL_BASE bulunamadı (/js/config.js).";
@@ -517,10 +537,10 @@ $("startBtn").addEventListener("click", async ()=>{
   $("setup").style.display = "none";
   $("setupMsg").textContent = "";
 
-  await resetAndStartNewGame();
+  await startNewGame();
 });
 
-// ✅ Setup’a geri dönmek için: HANGMAN yazısına çift tık
+// Setup’a geri dön: HANGMAN yazısına çift tık
 let lastTap = 0;
 document.querySelector(".title")?.addEventListener("click", ()=>{
   const now = Date.now();
@@ -537,12 +557,10 @@ document.querySelector(".title")?.addEventListener("click", ()=>{
 ================================ */
 (async function boot(){
   await ensureUserId();
-
   loadPrefs();
   markSetupUI();
 
-  // Auto-start: dil/diff daha önce seçildiyse setup göstermeden başlat
-  // (pool yüklemesi hızlı değilse setup üzerinde “yükleniyor” göstereceğiz)
+  // Auto-start: daha önce seçim varsa setup'ı atla
   const hasPref = !!localStorage.getItem(LS_LANG) && !!localStorage.getItem(LS_DIFF);
   if(hasPref){
     $("setupMsg").textContent = "Yükleniyor…";
@@ -551,11 +569,10 @@ document.querySelector(".title")?.addEventListener("click", ()=>{
       pool = await loadLangPoolDirect(lang, LANGPOOL_BASE);
       if(pool?.items?.length){
         $("setup").style.display = "none";
-        await resetAndStartNewGame();
+        await startNewGame();
         return;
       }
     }catch{}
-    // fallback: setup açık kalsın
     $("setupMsg").textContent = "Dil/Zorluk seçip başlat.";
   }else{
     $("setupMsg").textContent = "Dil ve zorluk seçip başlat.";
