@@ -5,16 +5,25 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>italkyAI • Seviye Sınavı</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+<meta name="theme-color" content="#02000f">
+<style>html,body{background:#02000f !important;}</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
 <style>
   :root{
     --bg:#02000f;
     --card: rgba(255,255,255,0.04);
     --border: rgba(255,255,255,0.10);
     --muted: rgba(255,255,255,0.65);
+    --ai: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
   }
-  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
   html,body{ margin:0; width:100%; height:100dvh; overflow:hidden; background:var(--bg); font-family:Outfit,sans-serif; color:#fff; }
+
   .bg{
     position:fixed; inset:-10%;
     background:
@@ -24,12 +33,13 @@
     filter: blur(60px);
     pointer-events:none;
   }
+
   .wrap{
     position:relative;
     max-width:480px;
     height:100%;
     margin:0 auto;
-    padding: 12px 14px 18px;
+    padding: 12px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 14px);
     display:flex;
     flex-direction:column;
     gap:12px;
@@ -38,7 +48,8 @@
     border-left: 1px solid rgba(255,255,255,0.06);
     border-right: 1px solid rgba(255,255,255,0.06);
   }
-  .topbar{ display:flex; justify-content:space-between; gap:10px; }
+
+  .topbar{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
   .chip{
     padding: 8px 12px;
     border-radius: 999px;
@@ -49,6 +60,8 @@
     font-size:12px;
     white-space:nowrap;
   }
+  .chip.timer{ color:#fff; border-color: rgba(255,255,255,0.12); }
+
   .card{
     flex:1;
     border-radius: 28px;
@@ -56,10 +69,14 @@
     background: var(--card);
     padding: 16px 14px;
     overflow:auto;
+    -webkit-overflow-scrolling: touch;
   }
+  .card::-webkit-scrollbar{ display:none; }
+
   .q-meta{ display:flex; justify-content:space-between; gap:10px; margin-bottom:10px; }
   .meta{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.55); }
   .q-text{ font-size: 18px; font-weight:1000; line-height:1.3; margin: 6px 0 14px; white-space:pre-wrap; }
+
   .opt{
     width:100%;
     padding: 14px;
@@ -73,7 +90,9 @@
     cursor:pointer;
     white-space:pre-wrap;
   }
+  .opt:active{ transform: scale(.99); }
   .opt.sel{ background: rgba(99,102,241,0.55); border-color: rgba(99,102,241,0.75); }
+
   .nav{ display:flex; gap:10px; }
   .btn{
     flex:1;
@@ -87,6 +106,7 @@
   }
   .btn-primary{ background:#fff; color:#000; border:none; }
   .btn:disabled{ opacity:.35; cursor:not-allowed; }
+
   .note{ font-size:12px; color:var(--muted); font-weight:800; line-height:1.45; }
 
   .errBox{
@@ -138,13 +158,14 @@
   .rBtns{ display:flex; gap:10px; margin-top: 12px; }
 </style>
 </head>
+
 <body>
 <div class="bg"></div>
 
 <div class="wrap">
   <div class="topbar">
     <div class="chip" id="langChip">Seviye Sınavı</div>
-    <div class="chip" id="timerChip">04:00</div>
+    <div class="chip timer" id="timerChip">40:00</div>
   </div>
 
   <div class="card" id="qCard">
@@ -153,21 +174,23 @@
 
   <div class="nav">
     <button class="btn" id="btnPrev" disabled>GERİ</button>
-    <button class="btn" id="btnSkip">ATLA</button>
+    <button class="btn" id="btnSkip" disabled>ATLA</button>
     <button class="btn btn-primary" id="btnNext" disabled>İLERİ</button>
   </div>
 
-  <div class="note">Bilmediğin soruyu <b>Atla</b>. Test toplam <b>12 soru</b>. Süre bitince otomatik biter.</div>
+  <div class="note">
+    Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.
+  </div>
 </div>
 
 <div class="overlay" id="resultOverlay">
   <div class="resultCard">
-    <div class="rTitle">italky Academy • Sonuç</div>
+    <div class="rTitle">italkyAI • Sonuç</div>
     <div class="rLevel" id="rLevel">—</div>
     <div class="rText" id="rText">—</div>
     <div class="rBtns">
-      <button class="btn btn-primary" id="rGo">Derslere Başla</button>
-      <button class="btn" id="rLater">Şimdi Değil</button>
+      <button class="btn btn-primary" id="rGo">Tamam</button>
+      <button class="btn" id="rLater">Kapat</button>
     </div>
   </div>
 </div>
@@ -183,25 +206,74 @@
 
   function showError(title, detail){
     qCard.innerHTML = `<div class="errBox">${title}\n\n${detail || ""}</div>`;
-    btnPrev.disabled = true;
-    btnSkip.disabled = true;
-    btnNext.disabled = true;
+    btnPrev.disabled = btnSkip.disabled = btnNext.disabled = true;
   }
 
-  const params = new URLSearchParams(location.search);
-  const teacherId = String(params.get("t") || localStorage.getItem("italky_teacher_pref") || "").trim();
-  if(!teacherId) location.replace("/pages/teacher_select.html");
+  function qs(k){ return new URLSearchParams(location.search).get(k); }
 
-  const LANGTR = { dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca", sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince" };
-  $("langChip").textContent = `${LANGTR[teacherId] || "Dil"} • Seviye Sınavı`;
+  const testId = String(qs("test_id") || "").trim();
+  const lang = String(qs("lang") || "").trim().toLowerCase();
+
+  if(!testId){
+    showError("Test ID yok.", "Bu sayfa level_test_hub’dan açılmalı.");
+    throw new Error("missing test_id");
+  }
 
   const { data:{ session } } = await supabase.auth.getSession();
-  if(!session) location.replace("/pages/login.html");
+  if(!session?.user){
+    location.replace("/pages/login.html");
+  }
 
-  // 12 soru / 4 dk
-  const TOTAL_TIME = 4 * 60;
+  // ✅ Test kaydını DB’den çek
+  // Beklenen kolonlar: id, user_id, language_code, questions(jsonb), started_at, status
+  let testRow = null;
+  try{
+    const { data, error } = await supabase
+      .from("level_tests")
+      .select("id, user_id, language_code, questions, started_at, status")
+      .eq("id", testId)
+      .single();
+
+    if(error) throw error;
+    testRow = data;
+  }catch(e){
+    showError("Test okunamadı.", String(e?.message || e));
+    throw e;
+  }
+
+  const langCode = String(testRow?.language_code || lang || "en").toLowerCase();
+  $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
+
+  // ✅ Sorular
+  const QUESTIONS = Array.isArray(testRow?.questions) ? testRow.questions : (Array.isArray(testRow?.questions?.questions) ? testRow.questions.questions : []);
+  if(!QUESTIONS.length){
+    showError(
+      "Soru listesi boş.",
+      "level_tests.questions alanı boş geliyor.\nstart_level_test fonksiyonu questions üretip bu alana yazmalı."
+    );
+    throw new Error("empty questions");
+  }
+
+  // --- TIMER (40 dk) ---
+  const TOTAL_TIME = 40*60;
+  const MAX_PASSES = 2;
+
   let remaining = TOTAL_TIME;
   let timer = null;
+
+  // Eğer started_at varsa, kalan süreyi hesapla (sayfa yenilenince bozulmasın)
+  try{
+    const startedAt = testRow?.started_at ? new Date(testRow.started_at).getTime() : null;
+    if(startedAt){
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      remaining = Math.max(0, TOTAL_TIME - elapsed);
+    }
+  }catch{}
+
+  const answers = Array(QUESTIONS.length).fill(null);
+  const passCount = Array(QUESTIONS.length).fill(0);
+  const skipped = Array(QUESTIONS.length).fill(false);
+  let idx = 0;
 
   function fmtTime(sec){
     const m = String(Math.floor(sec/60)).padStart(2,"0");
@@ -210,41 +282,15 @@
   }
   function updateTimer(){ $("timerChip").textContent = fmtTime(remaining); }
 
-  // bank
-  const BASE = "https://italky-api.onrender.com/assets/tests/";
-  const map = { dora:"en_v1.json", ayda:"de_v1.json", jale:"fr_v1.json", ozan:"es_v1.json", sencer:"it_v1.json", sungur:"ru_v1.json", huma:"ja_v1.json", umay:"zh_v1.json" };
-  const bankUrl = BASE + (map[teacherId] || "en_v1.json");
-
-  let bank=null;
-  try{
-    const res = await fetch(bankUrl, { cache:"no-store" });
-    if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-    bank = await res.json();
-  }catch(e){
-    showError("Soru bankası indirilemedi.", `URL: ${bankUrl}\nHata: ${e?.message || e}`);
-    throw e;
-  }
-
-  const ALL = Array.isArray(bank?.questions) ? bank.questions : [];
-  if(ALL.length === 0){
-    showError("Soru bankası boş geldi.", `URL: ${bankUrl}\nversion: ${bank?.version || "—"}`);
-    throw new Error("empty bank");
-  }
-
-  // ✅ 12 soru seç: bank içinde karışıksa ilk 12 alır; istersen shuffle ekleriz
-  function shuffle(arr){
-    const a = arr.slice();
-    for(let i=a.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [a[i],a[j]] = [a[j],a[i]];
+  function nextIndex(from){
+    for(let i=from+1;i<QUESTIONS.length;i++){
+      if(passCount[i] < MAX_PASSES && answers[i] === null) return i;
     }
-    return a;
+    for(let i=0;i<QUESTIONS.length;i++){
+      if(passCount[i] < MAX_PASSES && answers[i] === null) return i;
+    }
+    return -1;
   }
-  const QUESTIONS = shuffle(ALL).slice(0, 12);
-
-  // state
-  let idx = 0;
-  const answers = Array(QUESTIONS.length).fill(null);
 
   function render(){
     const q = QUESTIONS[idx];
@@ -253,119 +299,111 @@
       return;
     }
 
-    const picked = answers[idx];
+    passCount[idx] = Math.min(MAX_PASSES, passCount[idx] + 1);
 
+    const picked = answers[idx];
+    const status = picked!==null ? "Cevaplandı" : (skipped[idx] ? "Atlandı" : "Bekliyor");
+    const passInfo = `Tur: ${passCount[idx]}/${MAX_PASSES}`;
+
+    const opts = Array.isArray(q.options) ? q.options : [];
     qCard.innerHTML = `
       <div class="q-meta">
         <div class="meta">Soru ${idx+1}/${QUESTIONS.length} • ${q.level || "-"}</div>
-        <div class="meta">${picked!==null ? "Cevaplandı" : "Bekliyor"}</div>
+        <div class="meta">${status} • ${passInfo}</div>
       </div>
       <div class="q-text">${q.question || ""}</div>
-      ${(q.options || []).map((opt,i)=>`<button class="opt ${picked===i?'sel':''}" data-i="${i}" type="button">${opt}</button>`).join("")}
+      ${opts.map((opt,i)=>`<button class="opt ${picked===i?'sel':''}" data-i="${i}" type="button">${opt}</button>`).join("")}
     `;
 
     qCard.querySelectorAll(".opt").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const i = Number(btn.getAttribute("data-i"));
         answers[idx] = i;
+        skipped[idx] = false;
         render();
       });
     });
 
     btnPrev.disabled = (idx===0);
-    btnNext.disabled = (answers[idx] === null);
-    btnNext.textContent = (idx === QUESTIONS.length-1) ? "SINAVI TAMAMLA" : "İLERİ";
+    btnSkip.disabled = false;
+    btnNext.disabled = false;
+    btnNext.textContent = (nextIndex(idx)===-1) ? "SINAVI TAMAMLA" : "İLERİ";
   }
 
-  function calcScore(){
+  function scoreRaw(){
     let correct = 0;
+    let total = 0;
     for(let i=0;i<QUESTIONS.length;i++){
-      if(answers[i] === QUESTIONS[i].correct) correct++;
+      const q = QUESTIONS[i];
+      if(answers[i] === null) continue;
+      total++;
+      if(answers[i] === q.correct) correct++;
     }
-    return { correct, total: QUESTIONS.length };
+    return { correct, total };
   }
 
-  function computeLevel(correct, total){
-    const p = total ? (correct/total) : 0;
-    if(p >= 0.90) return "C1";
-    if(p >= 0.75) return "B2";
-    if(p >= 0.60) return "B1";
+  // Basit seviye hesap (backend de ayrıca yapabilir)
+  function computeLevelFromPercent(p){
+    if(p >= 0.85) return "C1";
+    if(p >= 0.70) return "B2";
+    if(p >= 0.55) return "B1";
     if(p >= 0.40) return "A2";
     return "A1";
-  }
-
-  async function saveLevelToProfile(level){
-    const userId = session.user.id;
-
-    // mevcut levels çek (yoksa boş)
-    let levels = {};
-    try{
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("levels")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if(!error && data?.levels && typeof data.levels === "object"){
-        levels = data.levels;
-      }
-    }catch{}
-
-    levels[teacherId] = level;
-
-    // update
-    const { error: upErr } = await supabase
-      .from("profiles")
-      .update({
-        levels,
-        last_login_at: new Date().toISOString()
-      })
-      .eq("id", userId);
-
-    return !upErr;
   }
 
   async function finishExam(){
     if(timer) clearInterval(timer);
 
-    const { correct, total } = calcScore();
-    const level = computeLevel(correct, total);
+    const { correct, total } = scoreRaw();
+    const percent = total ? (correct/total) : 0;
+    const level = computeLevelFromPercent(percent);
 
-    const saved = await saveLevelToProfile(level);
+    // ✅ RPC: finish_level_test
+    // Beklenen paramlar: p_test_id, p_answers, p_remaining_seconds
+    const { data, error } = await supabase.rpc("finish_level_test", {
+      p_test_id: testId,
+      p_answers: answers,
+      p_remaining_seconds: remaining
+    });
+
+    if(error){
+      showError("Sonuç kaydedilemedi.", error.message || String(error));
+      return;
+    }
 
     $("rLevel").textContent = `Seviye: ${level}`;
     $("rText").textContent =
-`Doğru: ${correct}/${total}
+`Doğru: ${correct} / ${total}
+Başarı: %${Math.round(percent*100)}
 
-${saved ? "Sonuç profilinize kaydedildi." : "Sonuç kaydedilemedi. (profiles RLS / izin kontrolü)"}
-
-Bir üst seviyeye geçmek için Academy ders planını başlatabilirsiniz.`;
+Sonuç profilinize işlenmiştir (profiles.levels).`;
 
     $("resultOverlay").classList.add("show");
-
-    $("rGo").onclick = ()=>location.href="/pages/plan_select.html";
+    $("rGo").onclick = ()=>location.href="/pages/profile.html";
     $("rLater").onclick = ()=>location.href="/pages/home.html";
   }
 
   btnPrev.onclick = ()=>{ if(idx>0){ idx--; render(); } };
   btnSkip.onclick = ()=>{
-    // skip: cevap boş bırakılır, direkt ileri
-    if(idx < QUESTIONS.length-1){ idx++; render(); }
-    else finishExam();
+    skipped[idx]=true; answers[idx]=null;
+    const ni = nextIndex(idx);
+    if(ni===-1) finishExam(); else { idx=ni; render(); }
   };
   btnNext.onclick = ()=>{
-    if(idx < QUESTIONS.length-1){ idx++; render(); }
-    else finishExam();
+    const ni = nextIndex(idx);
+    if(ni===-1) finishExam(); else { idx=ni; render(); }
   };
 
   updateTimer();
   timer = setInterval(()=>{
     remaining--;
-    if(remaining < 0) remaining = 0;
+    if(remaining<0) remaining=0;
     updateTimer();
-    if(remaining === 0) finishExam();
+    if(remaining===0) finishExam();
   }, 1000);
 
+  btnSkip.disabled = false;
+  btnNext.disabled = false;
   render();
 </script>
 </body>
