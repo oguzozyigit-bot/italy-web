@@ -18,14 +18,13 @@
       --bg:#02000f;
       --card: rgba(255,255,255,0.05);
       --border: rgba(255,255,255,0.12);
-      --muted: rgba(255,255,255,0.62);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
     body{ margin:0; font-family:Outfit,system-ui,sans-serif; color:#fff; }
     #pageContent{
       padding: 14px 12px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 10px);
       min-height: 100%;
-      touch-action: pan-y; /* scroll serbest */
+      touch-action: pan-y;
     }
     .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
 
@@ -68,11 +67,11 @@
 
     .grid{
       display:grid;
-      grid-template-columns: 1fr 1fr; /* ✅ tek satır 2 dil */
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    /* ✅ button kart: WebView’de en stabil */
+    /* ✅ WebView-friendly button */
     .cardBtn{
       -webkit-appearance:none;
       appearance:none;
@@ -98,8 +97,8 @@
       position:relative;
       overflow:hidden;
 
-      touch-action: manipulation;     /* ✅ click gecikmesi/ghost fix */
-      pointer-events: auto !important; /* ✅ garanti */
+      touch-action: manipulation;
+      pointer-events: auto !important;
     }
     .cardBtn:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
     .cardBtn[aria-busy="true"]{ opacity:.55; pointer-events:none !important; }
@@ -152,7 +151,7 @@
       <section class="hero">
         <div class="heroTop">
           <h1 class="hTitle">Seviye Tespit Sınavı</h1>
-          <div class="pill">Süre: 40 dk • Ücret: 5 Jeton</div>
+          <div class="pill">Süre: 40 dk</div>
         </div>
         <p class="heroText">
           Lütfen sessiz ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
@@ -185,11 +184,10 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1200);
     }
 
-    // ✅ 32 dil (tek kalmasın)
+    // ✅ 34 dil (tek kart kalmaz)
     const TOP = ["en","de","fr","es","it","ru"];
 
     const ALL = [
-      // Top 6
       { code:"en", name:"English", flag:"🇬🇧" },
       { code:"de", name:"German", flag:"🇩🇪" },
       { code:"fr", name:"French", flag:"🇫🇷" },
@@ -197,51 +195,46 @@
       { code:"it", name:"Italian", flag:"🇮🇹" },
       { code:"ru", name:"Russian", flag:"🇷🇺" },
 
-      // Avrupa
-      { code:"pt", name:"Portuguese", flag:"🇵🇹" },
-      { code:"nl", name:"Dutch", flag:"🇳🇱" },
-      { code:"sv", name:"Swedish", flag:"🇸🇪" },
-      { code:"no", name:"Norwegian", flag:"🇳🇴" },
-      { code:"da", name:"Danish", flag:"🇩🇰" },
-      { code:"fi", name:"Finnish", flag:"🇫🇮" },
-      { code:"pl", name:"Polish", flag:"🇵🇱" },
-      { code:"cs", name:"Czech", flag:"🇨🇿" },
-      { code:"sk", name:"Slovak", flag:"🇸🇰" },
-      { code:"hu", name:"Hungarian", flag:"🇭🇺" },
-      { code:"ro", name:"Romanian", flag:"🇷🇴" },
-      { code:"bg", name:"Bulgarian", flag:"🇧🇬" },
-      { code:"el", name:"Greek", flag:"🇬🇷" },
-      { code:"uk", name:"Ukrainian", flag:"🇺🇦" },
-
-      // Türk dilleri
-      { code:"tr", name:"Turkish", flag:"🇹🇷" },
-      { code:"az", name:"Azerbaijani", flag:"🇦🇿" },
-      { code:"kk", name:"Kazakh", flag:"🇰🇿" },
-      { code:"ky", name:"Kyrgyz", flag:"🇰🇬" },
-      { code:"uz", name:"Uzbek", flag:"🇺🇿" },
-      { code:"tk", name:"Turkmen", flag:"🇹🇲" },   // ✅ eklendi (32 tamam)
-      { code:"ug", name:"Uyghur", flag:"🇨🇳" },     // ✅ eklendi (32 tamam) (bayrak temsilî)
-
-      // Ortadoğu
       { code:"ar", name:"Arabic", flag:"🇸🇦" },
-      { code:"he", name:"Hebrew", flag:"🇮🇱" },
+      { code:"az", name:"Azerbaijani", flag:"🇦🇿" },
+      { code:"bg", name:"Bulgarian", flag:"🇧🇬" },
+      { code:"cs", name:"Czech", flag:"🇨🇿" },
+      { code:"da", name:"Danish", flag:"🇩🇰" },
+      { code:"el", name:"Greek", flag:"🇬🇷" },
       { code:"fa", name:"Persian", flag:"🇮🇷" },
-
-      // Uzak Doğu
-      { code:"zh", name:"Chinese", flag:"🇨🇳" },
+      { code:"fi", name:"Finnish", flag:"🇫🇮" },
+      { code:"he", name:"Hebrew", flag:"🇮🇱" },
+      { code:"hu", name:"Hungarian", flag:"🇭🇺" },
       { code:"ja", name:"Japanese", flag:"🇯🇵" },
+      { code:"kk", name:"Kazakh", flag:"🇰🇿" },
       { code:"ko", name:"Korean", flag:"🇰🇷" },
-      { code:"th", name:"Thai", flag:"🇹🇭" },       // ✅ eklendi (32 tamam)
-      { code:"vi", name:"Vietnamese", flag:"🇻🇳" }  // ✅ eklendi (32 tamam)
+      { code:"ky", name:"Kyrgyz", flag:"🇰🇬" },
+      { code:"nl", name:"Dutch", flag:"🇳🇱" },
+      { code:"no", name:"Norwegian", flag:"🇳🇴" },
+      { code:"pl", name:"Polish", flag:"🇵🇱" },
+      { code:"pt", name:"Portuguese", flag:"🇵🇹" },
+      { code:"ro", name:"Romanian", flag:"🇷🇴" },
+      { code:"sk", name:"Slovak", flag:"🇸🇰" },
+      { code:"sv", name:"Swedish", flag:"🇸🇪" },
+      { code:"th", name:"Thai", flag:"🇹🇭" },
+      { code:"tr", name:"Turkish", flag:"🇹🇷" },
+      { code:"tk", name:"Turkmen", flag:"🇹🇲" },
+      { code:"uk", name:"Ukrainian", flag:"🇺🇦" },
+      { code:"ug", name:"Uyghur", flag:"🇨🇳" }, // temsilî
+      { code:"uz", name:"Uzbek", flag:"🇺🇿" },
+      { code:"vi", name:"Vietnamese", flag:"🇻🇳" },
+      { code:"zh", name:"Chinese", flag:"🇨🇳" },
+
+      // ✅ tek kart kalmaması için 2 ekstra
+      { code:"id", name:"Indonesian", flag:"🇮🇩" },
+      { code:"ms", name:"Malay", flag:"🇲🇾" }
     ];
 
-    // ✅ Auth
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session?.user){
       location.replace("/pages/login.html");
     }
 
-    // ✅ levels
     let levels = {};
     try{
       const { data: prof } = await supabase
@@ -285,13 +278,13 @@
       const code = String(langCode||"").trim().toLowerCase();
       if(!code) return;
 
-      el?.setAttribute?.("aria-busy","true");
+      try{ el?.setAttribute?.("aria-busy","true"); }catch{}
       toast("Sınav başlatılıyor…");
 
       const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
 
       if(error){
-        el?.removeAttribute?.("aria-busy");
+        try{ el?.removeAttribute?.("aria-busy"); }catch{}
         toast(error.message || "Başlatılamadı");
         return;
       }
@@ -300,7 +293,7 @@
       const testId = row?.id || row?.test_id || null;
 
       if(!testId){
-        el?.removeAttribute?.("aria-busy");
+        try{ el?.removeAttribute?.("aria-busy"); }catch{}
         toast("test_id gelmedi");
         return;
       }
@@ -308,27 +301,32 @@
       location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
     }
 
-    // ✅ WebView click fix: click + pointerup + touchend
-    function bind(el){
-      const code = el.getAttribute("data-code");
+    // ✅ WebView click killer: capture + çoklu event
+    function hardBind(btn){
       const run = (ev)=>{
-        try{ ev.preventDefault(); ev.stopPropagation(); }catch{}
-        startTest(code, el);
+        try{
+          ev.preventDefault();
+          ev.stopPropagation();
+          ev.stopImmediatePropagation?.();
+        }catch{}
+        startTest(btn.getAttribute("data-code"), btn);
       };
-      el.addEventListener("click", run, { passive:false });
-      el.addEventListener("pointerup", run, { passive:false });
-      el.addEventListener("touchend", run, { passive:false });
+
+      btn.addEventListener("pointerdown", run, { passive:false, capture:true });
+      btn.addEventListener("pointerup",   run, { passive:false, capture:true });
+      btn.addEventListener("touchstart",  run, { passive:false, capture:true });
+      btn.addEventListener("touchend",    run, { passive:false, capture:true });
+      btn.addEventListener("click",       run, { passive:false, capture:true });
     }
 
-    grid.querySelectorAll(".cardBtn").forEach(bind);
+    grid.querySelectorAll(".cardBtn").forEach(hardBind);
 
-    // ✅ ekstra: container tıklamayı yutuyorsa delegasyon (son çare)
-    grid.addEventListener("click", (e)=>{
+    // ✅ son çare delegasyon (overlay yutsa bile)
+    document.addEventListener("click", (e)=>{
       const btn = e.target?.closest?.(".cardBtn");
       if(!btn) return;
-      // bind zaten var ama bazı webviewlerde ilk handler çalışmayabiliyor
       startTest(btn.getAttribute("data-code"), btn);
-    }, { passive:false });
+    }, { passive:false, capture:true });
   </script>
 </body>
 </html>
