@@ -198,6 +198,8 @@
 <script type="module">
   import { supabase } from "/js/supabase_client.js";
 
+  const API_BASE = "https://italky-api.onrender.com"; // ✅ questions üretecek backend
+
   const $ = (id)=>document.getElementById(id);
   const qCard = $("qCard");
   const btnPrev = $("btnPrev");
@@ -212,7 +214,7 @@
   function qs(k){ return new URLSearchParams(location.search).get(k); }
 
   const testId = String(qs("test_id") || "").trim();
-  const lang = String(qs("lang") || "").trim().toLowerCase();
+  const langParam = String(qs("lang") || "").trim().toLowerCase();
 
   if(!testId){
     showError("Test ID yok.", "Bu sayfa level_test_hub’dan açılmalı.");
@@ -224,34 +226,71 @@
     location.replace("/pages/login.html");
   }
 
-  // ✅ Test kaydını DB’den çek
-  // Beklenen kolonlar: id, user_id, language_code, questions(jsonb), started_at, status
-  let testRow = null;
-  try{
+  async function loadTestRow(){
     const { data, error } = await supabase
       .from("level_tests")
       .select("id, user_id, language_code, questions, started_at, status")
       .eq("id", testId)
       .single();
-
     if(error) throw error;
-    testRow = data;
+    return data;
+  }
+
+  function extractQuestions(testRow){
+    // kabul: jsonb = {questions:[...]} veya direkt array
+    if(Array.isArray(testRow?.questions)) return testRow.questions;
+    if(Array.isArray(testRow?.questions?.questions)) return testRow.questions.questions;
+    return [];
+  }
+
+  async function generateQuestionsOnBackend(testRow){
+    const lang = String(testRow?.language_code || langParam || "en").toLowerCase();
+    const r = await fetch(`${API_BASE}/api/level_test/generate`, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ test_id: testId, lang })
+    });
+    if(!r.ok){
+      const t = await r.text().catch(()=> "");
+      throw new Error(`generate_failed HTTP ${r.status}\n${t}`);
+    }
+    return true;
+  }
+
+  // ✅ 1) test satırı
+  let testRow = null;
+  try{
+    testRow = await loadTestRow();
   }catch(e){
     showError("Test okunamadı.", String(e?.message || e));
     throw e;
   }
 
-  const langCode = String(testRow?.language_code || lang || "en").toLowerCase();
+  const langCode = String(testRow?.language_code || langParam || "en").toLowerCase();
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  // ✅ Sorular
-  const QUESTIONS = Array.isArray(testRow?.questions) ? testRow.questions : (Array.isArray(testRow?.questions?.questions) ? testRow.questions.questions : []);
+  // ✅ 2) questions yoksa: backend üret + yeniden çek
+  let QUESTIONS = extractQuestions(testRow);
+
+  if(!QUESTIONS.length){
+    // kullanıcıya “hazırlanıyor” yaz
+    qCard.innerHTML = `<div class="errBox" style="border-color:rgba(165,180,252,0.35);background:rgba(99,102,241,0.10)">Sorular hazırlanıyor…\n\nBu ilk açılışta 2-8 saniye sürebilir.</div>`;
+    try{
+      await generateQuestionsOnBackend(testRow);
+      testRow = await loadTestRow();
+      QUESTIONS = extractQuestions(testRow);
+    }catch(e){
+      showError("Sorular üretilemedi.", String(e?.message || e));
+      throw e;
+    }
+  }
+
   if(!QUESTIONS.length){
     showError(
-      "Soru listesi boş.",
-      "level_tests.questions alanı boş geliyor.\nstart_level_test fonksiyonu questions üretip bu alana yazmalı."
+      "Soru listesi hâlâ boş.",
+      "Backend soruları level_tests.questions alanına yazamadı.\n\nKontrol:\n- italky-api /api/level_test/generate çalışıyor mu?\n- Service Role ile update atabiliyor mu?\n- level_tests.questions kolon tipi jsonb mi?"
     );
-    throw new Error("empty questions");
+    throw new Error("empty questions after generate");
   }
 
   // --- TIMER (40 dk) ---
@@ -261,7 +300,7 @@
   let remaining = TOTAL_TIME;
   let timer = null;
 
-  // Eğer started_at varsa, kalan süreyi hesapla (sayfa yenilenince bozulmasın)
+  // started_at varsa süreyi kaldığı yerden devam ettir
   try{
     const startedAt = testRow?.started_at ? new Date(testRow.started_at).getTime() : null;
     if(startedAt){
@@ -337,12 +376,13 @@
       const q = QUESTIONS[i];
       if(answers[i] === null) continue;
       total++;
-      if(answers[i] === q.correct) correct++;
+      // destek: correct_index veya correct
+      const corr = (q.correct_index != null) ? q.correct_index : q.correct;
+      if(answers[i] === corr) correct++;
     }
     return { correct, total };
   }
 
-  // Basit seviye hesap (backend de ayrıca yapabilir)
   function computeLevelFromPercent(p){
     if(p >= 0.85) return "C1";
     if(p >= 0.70) return "B2";
@@ -358,9 +398,8 @@
     const percent = total ? (correct/total) : 0;
     const level = computeLevelFromPercent(percent);
 
-    // ✅ RPC: finish_level_test
-    // Beklenen paramlar: p_test_id, p_answers, p_remaining_seconds
-    const { data, error } = await supabase.rpc("finish_level_test", {
+    // ✅ RPC: finish_level_test (senin DB’de var)
+    const { error } = await supabase.rpc("finish_level_test", {
       p_test_id: testId,
       p_answers: answers,
       p_remaining_seconds: remaining
@@ -376,7 +415,7 @@
 `Doğru: ${correct} / ${total}
 Başarı: %${Math.round(percent*100)}
 
-Sonuç profilinize işlenmiştir (profiles.levels).`;
+Sonuç profilinize işlendi.`;
 
     $("resultOverlay").classList.add("show");
     $("rGo").onclick = ()=>location.href="/pages/profile.html";
