@@ -1,0 +1,127 @@
+<!-- FILE: /pages/level_test_required.html -->
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>italkyAI • Seviye Gerekli</title>
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none;}
+    #pageContent{ min-height:100%; padding: 14px 14px calc(var(--footerH,92px) + env(safe-area-inset-bottom) + 14px); }
+    .wrap{ max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+    .card{
+      border-radius:26px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      padding: 16px 14px;
+    }
+    .title{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:18px; font-weight:1000; margin:0 0 8px; }
+    .txt{ font-size:12px; font-weight:900; color: rgba(255,255,255,0.72); line-height:1.55; margin:0; }
+    .btn{
+      height:56px; border-radius:18px; border:none;
+      background:#fff; color:#000; font-weight:1000; font-size:15px;
+      cursor:pointer;
+    }
+    .btn:disabled{ opacity:.35; cursor:not-allowed; }
+    .ghost{
+      height:52px; border-radius:18px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff; font-weight:1000;
+    }
+    .toast{
+      position: fixed; left:50%; top:18px;
+      transform: translateX(-50%) translateY(-120px);
+      background: rgba(10,10,18,0.95);
+      border: 1px solid rgba(165,180,252,0.35);
+      padding: 10px 14px; border-radius: 999px; color:#fff;
+      z-index: 999999; font-weight: 1000; font-size: 12px;
+      transition: .25s; backdrop-filter: blur(12px);
+      pointer-events:none; max-width: min(92vw, 520px); text-align:center;
+    }
+    .toast.show{ transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <main id="pageContent">
+    <div class="wrap">
+      <div class="card">
+        <h1 class="title" id="tTitle">Seviyenizi tespit etmedik</h1>
+        <p class="txt" id="tDesc">
+          Bu derse katılabilmeniz için önce seviye tespit sınavına katılmanız gerekir.
+        </p>
+      </div>
+
+      <button class="btn" id="btnGo">Seviye Tespit Sınavına Katıl</button>
+      <button class="ghost" id="btnBack">Geri</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { supabase } from "/js/supabase_client.js";
+
+    mountShell({ scroll:"auto" });
+
+    const $ = (id)=>document.getElementById(id);
+    const p = new URLSearchParams(location.search);
+    const lang = String(p.get("lang") || "en").trim().toLowerCase();
+
+    const NAME = {
+      en:"İngilizce", de:"Almanca", fr:"Fransızca", es:"İspanyolca",
+      it:"İtalyanca", ru:"Rusça", ja:"Japonca", zh:"Çince", tr:"Türkçe"
+    };
+
+    $("tTitle").textContent = `Henüz ${NAME[lang] || lang.toUpperCase()} dil seviyenizi tespit etmedik`;
+    $("tDesc").textContent =
+`Bu derse katılabilmek için seviye tespit sınavına katılınız.
+Sınav ücreti 5 jetondur.`;
+
+    function toast(msg){
+      const t=$("toast"); if(!t) return;
+      t.textContent=String(msg||"");
+      t.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to=setTimeout(()=>t.classList.remove("show"),1600);
+    }
+
+    $("btnBack").onclick = ()=>history.back();
+
+    $("btnGo").onclick = async ()=>{
+      $("btnGo").disabled = true;
+      toast("Sınav başlatılıyor…");
+
+      const { data, error } = await supabase.rpc("start_level_test", { p_language_code: lang });
+
+      if(error){
+        $("btnGo").disabled = false;
+        if(String(error.message||"").toLowerCase().includes("not enough tokens")){
+          toast("Jeton yetersiz. Jeton yüklemeniz gerekir.");
+          setTimeout(()=>location.href="/pages/profile.html", 600);
+          return;
+        }
+        toast(error.message || "Başlatılamadı");
+        return;
+      }
+
+      const row = Array.isArray(data) ? (data[0] || null) : data;
+      const testId = row?.id || row?.test_id || null;
+      if(!testId){
+        $("btnGo").disabled = false;
+        toast("test_id gelmedi");
+        return;
+      }
+
+      location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(lang)}`;
+    };
+  </script>
+</body>
+</html>
