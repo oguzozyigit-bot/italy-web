@@ -65,15 +65,10 @@
     }
     .heroText b{ color:#fff; }
 
-    /* ✅ 2 sütun kesin */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
+    /* 2 sütun */
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    /* ✅ button ile tıklama %100 */
-    .card{
+    button.card{
       border-radius: 22px;
       border: 1px solid var(--border);
       background: var(--card);
@@ -99,7 +94,7 @@
       outline:none;
       color:#fff;
     }
-    .card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
+    button.card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
 
     .flag{
       font-size: 26px;
@@ -182,8 +177,7 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // ✅ Dil listesi: 32 adet (tek kart kalmaz)
-    // Üstte sabit: EN FR DE ES IT RU, sonra alfabetik (Latin)
+    // 34 dil (tek kart kalmaz). Üst sıra sabit: EN FR DE ES IT RU
     const TOP = ["en","fr","de","es","it","ru"];
     const LANGS = [
       { code:"en", name:"English",      flag:"🇬🇧" },
@@ -202,6 +196,7 @@
 
       { code:"ar", name:"Arabic",       flag:"🇸🇦" },
       { code:"fa", name:"Persian",      flag:"🇮🇷" },
+      { code:"he", name:"Hebrew",       flag:"🇮🇱" },
 
       { code:"nl", name:"Dutch",        flag:"🇳🇱" },
       { code:"sv", name:"Swedish",      flag:"🇸🇪" },
@@ -219,6 +214,8 @@
       { code:"sr", name:"Serbian",      flag:"🇷🇸" },
       { code:"hr", name:"Croatian",     flag:"🇭🇷" },
 
+      { code:"pt", name:"Portuguese",   flag:"🇵🇹" },
+
       { code:"zh", name:"Chinese",      flag:"🇨🇳" },
       { code:"ja", name:"Japanese",     flag:"🇯🇵" },
       { code:"ko", name:"Korean",       flag:"🇰🇷" },
@@ -234,20 +231,17 @@
       return [...top, ...rest];
     }
 
-    // ✅ session check: redirect YOK. (Sayfa “kendi kendine çıkmasın”)
+    // ✅ session: redirect YOK
     let userId = null;
     try{
       const { data:{ session } } = await supabase.auth.getSession();
       userId = session?.user?.id || null;
-      if(!userId){
-        toast("Giriş bulunamadı. Tekrar giriş yap.");
-        // sayfada kal
-      }
+      if(!userId) toast("Giriş bulunamadı. Tekrar giriş yap.");
     }catch{
       toast("Oturum okunamadı.");
     }
 
-    // profile levels
+    // levels
     let levels = {};
     if(userId){
       try{
@@ -276,27 +270,33 @@
     const ordered = orderLangs();
     grid.innerHTML = ordered.map(cardHtml).join("");
 
-    // ✅ tıklama: pointerup (WebView’de en sağlam)
-    grid.querySelectorAll(".card").forEach(btn=>{
-      btn.addEventListener("pointerup", async ()=>{
-        const code = String(btn.getAttribute("data-code") || "").trim();
-        if(!code) return;
+    // ✅ ghost-tap / double fire engeli
+    let __busy = false;
+    let __lastTapAt = 0;
 
-        if(!userId){
-          toast("Giriş gerekli.");
-          return;
-        }
+    async function startTest(code, btn){
+      if(__busy) return;
+      const now = Date.now();
+      if(now - __lastTapAt < 650) return;
+      __lastTapAt = now;
 
-        btn.disabled = true;
+      if(!userId){
+        toast("Giriş gerekli.");
+        return;
+      }
+
+      __busy = true;
+      btn.disabled = true;
+
+      try{
         toast("Sınav başlatılıyor…");
-
-        // RPC
         const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
 
         if(error){
           console.log("RPC ERROR:", error);
           toast(error.message || "Başlatılamadı");
           btn.disabled = false;
+          __busy = false;
           return;
         }
 
@@ -307,12 +307,32 @@
           console.log("RPC DATA:", data);
           toast("test_id gelmedi");
           btn.disabled = false;
+          __busy = false;
           return;
         }
 
-        // ✅ sayfaya geç
         location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
-      }, { passive:true });
+      }catch(e){
+        console.log("RPC EX:", e);
+        toast("Başlatılamadı");
+        btn.disabled = false;
+      }finally{
+        __busy = false;
+      }
+    }
+
+    // ✅ click + touchend (dedupe ile)
+    grid.querySelectorAll(".card").forEach(btn=>{
+      const handler = (ev)=>{
+        ev.preventDefault();
+        ev.stopPropagation();
+        const code = String(btn.getAttribute("data-code") || "").trim();
+        if(!code) return;
+        startTest(code, btn);
+      };
+
+      btn.addEventListener("click", handler, { passive:false });
+      btn.addEventListener("touchend", handler, { passive:false });
     });
   </script>
 </body>
