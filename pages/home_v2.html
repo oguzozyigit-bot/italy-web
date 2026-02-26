@@ -1,21 +1,155 @@
-<div class="main-container" style="text-align: center; padding-top: 20vh;">
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+    <title>italky Academy • Universal STEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
     
-    <div id="aiStatus" style="color: #6366f1; font-weight: 700; margin-bottom: 20px;">
-        italkyAI Çevrimiçi • STEM Modu Aktif
+    <style>
+        /* Academy'ye Özel Ek Stil */
+        .academy-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100dvh - 180px); /* Header ve Footer arası merkezleme */
+        }
+
+        .status-badge {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 900;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            background: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #2ecc71;
+        }
+
+        /* Ana Çözücü Butonu */
+        .solver-btn {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        .solver-btn:active { transform: scale(0.9); }
+
+        .solver-btn::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            background: var(--ai-gradient);
+            z-index: -1;
+            opacity: 0.2;
+            filter: blur(15px);
+        }
+
+        .solver-icon { font-size: 54px; margin-bottom: 10px; }
+        .solver-label { font-weight: 900; font-size: 14px; letter-spacing: 1px; }
+
+        .hint-text {
+            margin-top: 40px;
+            text-align: center;
+            max-width: 260px;
+        }
+
+        .hint-text h2 { font-size: 20px; font-weight: 900; margin: 0 0 10px; }
+        .hint-text p { font-size: 13px; opacity: 0.5; line-height: 1.5; margin: 0; }
+
+        /* Analiz Animasyonu (Gizli) */
+        #loadingOverlay {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pulse {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="pageContent">
+        <div class="academy-container">
+            
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                italkyAI STEM Engine Active
+            </div>
+
+            <div class="solver-btn" id="startSolver">
+                <div class="solver-icon">📸</div>
+                <div class="solver-label">SORU ÇÖZ</div>
+                <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none;">
+            </div>
+
+            <div class="hint-text">
+                <h2>Evrensel Zeka</h2>
+                <p>Matematik, Fizik, Kimya veya Biyoloji sorusunun fotoğrafını çek. italkyAI anında analiz etsin.</p>
+            </div>
+
+            <div id="loadingOverlay">
+                <div class="pulse"></div>
+                <div style="font-weight: 900; font-size: 12px; color: #a5b4fc;">SORU ANALİZ EDİLİYOR...</div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="solve-circle" onclick="openCamera()" style="
-        width: 200px; height: 200px; 
-        border: 4px solid #6366f1; 
-        border-radius: 50%; 
-        margin: 0 auto;
-        display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 0 50px rgba(99, 102, 241, 0.3);
-        cursor: pointer;">
-        <span style="font-size: 50px;">📸</span>
-    </div>
-    
-    <h2 style="margin-top: 30px; font-weight: 900;">SORU ÇÖZ</h2>
-    <p style="opacity: 0.5; font-size: 14px;">Fotoğrafını çek, adım adım çözümünü gör.</p>
+    <script type="module">
+        import { mountShell } from "/js/ui_shell.js";
+        
+        // Shell'i giydir
+        mountShell({ scroll: "auto" });
 
-</div>
+        const btn = document.getElementById('startSolver');
+        const input = document.getElementById('camInput');
+        const loading = document.getElementById('loadingOverlay');
+
+        btn.onclick = () => input.click();
+
+        input.onchange = (e) => {
+            if(e.target.files.length > 0) {
+                // Görsel seçildiğinde arayüzü güncelle
+                btn.style.display = 'none';
+                loading.style.display = 'block';
+                
+                // Burada backend'e (Gemini/OpenAI) gönderme işlemi başlayacak
+                console.log("Dosya hazır, analiz başlıyor...");
+            }
+        };
+    </script>
+</body>
+</html>
