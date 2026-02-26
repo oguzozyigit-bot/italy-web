@@ -18,7 +18,7 @@
       --bg:#02000f;
       --card: rgba(255,255,255,0.04);
       --border: rgba(255,255,255,0.10);
-      --muted: rgba(255,255,255,0.62);
+      --muted: rgba(255,255,255,0.66);
       --ai: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -27,81 +27,57 @@
     /* shell mount alanı */
     #pageContent{
       height: 100%;
-      padding: 14px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 16px);
+      padding: 14px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 10px);
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
       overflow:hidden;
     }
 
+    /* ✅ üst bilgi: kısa + kompakt */
     .hero{
-      border-radius: 26px;
+      border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.03);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      padding: 14px 14px;
+      padding: 12px 12px;
     }
-    .hTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .hTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
     .hTitle{
-      font-family:"Space Grotesk",system-ui,sans-serif;
-      font-size:18px;
-      font-weight:1000;
       margin:0;
-      letter-spacing:-0.3px;
-    }
-    .hSub{
-      margin:6px 0 0;
-      font-size:12px;
-      font-weight:900;
-      color: var(--muted);
-      line-height:1.45;
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-size:16px;
+      font-weight:1000;
+      letter-spacing:-0.2px;
     }
     .chip{
-      padding:8px 12px;
+      padding:7px 10px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       font-weight:1000;
-      font-size:12px;
+      font-size:11px;
       color: rgba(255,255,255,0.86);
       white-space:nowrap;
+      flex:0 0 auto;
     }
     .chip b{ background: var(--ai); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
-    .controls{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .search{
-      flex:1;
-      min-width: 180px;
-      height:44px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      color:#fff;
+    .hSub{
+      margin:8px 0 0;
+      font-size:11.5px;
       font-weight:900;
-      padding: 0 12px;
-      outline:none;
+      color: var(--muted);
+      line-height:1.45;
     }
-    .btn{
-      height:44px;
-      padding: 0 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:1000;
-      cursor:pointer;
-      user-select:none;
-      white-space:nowrap;
-    }
-    .btn:active{ transform: scale(.99); }
 
+    /* ✅ grid artık tüm alanı doldurur (altta boşluk kalmasın) */
     .grid{
       flex:1;
       min-height:0;
@@ -118,7 +94,7 @@
     }
 
     .langCard{
-      border-radius: 22px;
+      border-radius: 20px;
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(255,255,255,0.03);
       backdrop-filter: blur(16px);
@@ -130,20 +106,20 @@
       gap:8px;
       cursor:pointer;
       user-select:none;
-      min-height: 118px;
+      min-height: 112px;
       position:relative;
       overflow:hidden;
     }
     .langCard:active{ transform: scale(.985); background: rgba(255,255,255,0.06); }
 
     .flagBox{
-      width:54px;height:54px;
+      width:52px;height:52px;
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       display:flex; align-items:center; justify-content:center;
       box-shadow: 0 18px 44px rgba(0,0,0,0.22);
-      font-size: 26px;
+      font-size: 25px;
     }
     .langName{
       font-size: 12px;
@@ -191,24 +167,20 @@
 
 <body>
   <div id="pageContent">
+
     <div class="hero">
       <div class="hTop">
-        <div>
-          <h1 class="hTitle">Seviye Tespit Sınavı</h1>
-          <p class="hSub">Tüm diller için seviye tespit. Dilini seç → sınava gir → sonuç profiline işlenir.</p>
-        </div>
+        <h1 class="hTitle">Seviye Tespit Sınavı</h1>
         <div class="chip">Süre: <b>40 dk</b></div>
       </div>
-
-      <div style="height:10px"></div>
-
-      <div class="controls">
-        <input class="search" id="q" placeholder="Dil ara… (English, Türkçe, Deutsch)" />
-        <button class="btn" id="btnReset">Sıfırla</button>
+      <div class="hSub">
+        Lütfen sessiz ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
+        Sınav soruları dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
       </div>
     </div>
 
     <div class="grid" id="grid"></div>
+
   </div>
 
   <div class="toast" id="toast"></div>
@@ -225,17 +197,17 @@
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1200);
     }
 
-    // ✅ auth guard
+    // auth guard
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session?.user){
       location.replace("/pages/login.html");
       throw new Error("no session");
     }
 
-    // ✅ profilden levels oku (levels[langCode] = "A1" gibi)
+    // profilden levels oku (levels[langCode] = "A1")
     let LEVELS = {};
     try{
       const { data: prof, error } = await supabase
@@ -248,7 +220,6 @@
       }
     }catch{}
 
-    // ✅ İlk 5 + TR en başta, kalanlar alfabetik
     const FIRST = [
       { code:"tr", name:"Türkçe", flag:"🇹🇷" },
       { code:"en", name:"English", flag:"🇬🇧" },
@@ -258,8 +229,6 @@
       { code:"it", name:"Italiano", flag:"🇮🇹" },
     ];
 
-    // ✅ 81 hedef için geniş liste (eksikler için de çalışır)
-    // Not: Flag bazı dillerde “dil bayrağı” net olmayabilir; burada en yaygın ülke bayrağı kullanıldı.
     const ALL = [
       {code:"af",name:"Afrikaans",flag:"🇿🇦"},
       {code:"sq",name:"Shqip",flag:"🇦🇱"},
@@ -296,12 +265,10 @@
       {code:"ga",name:"Gaeilge",flag:"🇮🇪"},
       {code:"it",name:"Italiano",flag:"🇮🇹"},
       {code:"ja",name:"日本語",flag:"🇯🇵"},
-      {code:"jv",name:"Basa Jawa",flag:"🇮🇩"},
       {code:"kn",name:"ಕನ್ನಡ",flag:"🇮🇳"},
       {code:"kk",name:"Қазақша",flag:"🇰🇿"},
       {code:"km",name:"ខ្មែរ",flag:"🇰🇭"},
       {code:"ko",name:"한국어",flag:"🇰🇷"},
-      {code:"ku",name:"Kurdî",flag:"🇹🇷"},
       {code:"ky",name:"Кыргызча",flag:"🇰🇬"},
       {code:"lo",name:"ລາວ",flag:"🇱🇦"},
       {code:"lv",name:"Latviešu",flag:"🇱🇻"},
@@ -324,7 +291,6 @@
       {code:"sk",name:"Slovenčina",flag:"🇸🇰"},
       {code:"sl",name:"Slovenščina",flag:"🇸🇮"},
       {code:"so",name:"Soomaali",flag:"🇸🇴"},
-      {code:"es",name:"Español",flag:"🇪🇸"},
       {code:"sw",name:"Kiswahili",flag:"🇰🇪"},
       {code:"sv",name:"Svenska",flag:"🇸🇪"},
       {code:"ta",name:"தமிழ்",flag:"🇮🇳"},
@@ -336,17 +302,14 @@
       {code:"uz",name:"O‘zbek",flag:"🇺🇿"},
       {code:"vi",name:"Tiếng Việt",flag:"🇻🇳"},
       {code:"cy",name:"Cymraeg",flag:"🏴"},
-      {code:"xh",name:"isiXhosa",flag:"🇿🇦"},
       {code:"yo",name:"Yorùbá",flag:"🇳🇬"},
       {code:"zu",name:"isiZulu",flag:"🇿🇦"},
     ];
 
-    // FIRST'i koru, ALL'den tekrarları çıkar, sonra alfabetik sırala
     const firstCodes = new Set(FIRST.map(x=>x.code));
     const rest = ALL.filter(x=>!firstCodes.has(x.code))
       .sort((a,b)=>a.name.localeCompare(b.name, "tr", { sensitivity:"base" }));
 
-    // 81 hedef: FIRST + rest’ten ilk (81 - FIRST.length)
     const TARGET_COUNT = 81;
     const LIST = [...FIRST, ...rest].slice(0, TARGET_COUNT);
 
@@ -355,15 +318,12 @@
       return (typeof v === "string" && v.trim()) ? v.trim() : "";
     }
 
-    function render(filter=""){
-      const q = String(filter||"").trim().toLowerCase();
-      const items = !q ? LIST : LIST.filter(x=>{
-        return x.code.includes(q) || x.name.toLowerCase().includes(q);
-      });
-
-      $("grid").innerHTML = items.map(x=>{
+    function render(){
+      $("grid").innerHTML = LIST.map(x=>{
         const lvl = levelFor(x.code);
-        const status = lvl ? `Seviyeniz: <span class="lvl">${lvl}</span>` : "Henüz sınava katılmadınız";
+        const status = lvl
+          ? `Seviyeniz: <span class="lvl">${lvl}</span>`
+          : `Henüz sınava katılmadınız`;
         return `
           <div class="langCard" data-code="${x.code}">
             <div class="flagBox">${x.flag || "🌐"}</div>
@@ -379,19 +339,12 @@
           if(!code) return;
           localStorage.setItem("italky_level_lang", code);
           toast("Sınav sayfasına geçiliyor…");
-          // ✅ intro sayfasına lang paramıyla
           setTimeout(()=>location.href = `/pages/level_test_intro.html?lang=${encodeURIComponent(code)}`, 120);
         }, { passive:true });
       });
     }
 
-    $("q").addEventListener("input", ()=>render($("q").value));
-    $("btnReset").addEventListener("click", ()=>{
-      $("q").value = "";
-      render("");
-    });
-
-    render("");
+    render();
   </script>
 </body>
 </html>
