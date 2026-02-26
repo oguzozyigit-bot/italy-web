@@ -19,19 +19,12 @@
     --card: rgba(255,255,255,0.04);
     --border: rgba(255,255,255,0.10);
     --muted: rgba(255,255,255,0.65);
-    --ai: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-  html,body{ margin:0; width:100%; height:100dvh; overflow:hidden; background:var(--bg); font-family:Outfit,sans-serif; color:#fff; }
 
-  .bg{
-    position:fixed; inset:-10%;
-    background:
-      radial-gradient(circle at 20% 20%, rgba(79,70,229,.38) 0%, transparent 40%),
-      radial-gradient(circle at 80% 80%, rgba(168,85,247,.28) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(30,0,60,1) 0%, #02000f 100%);
-    filter: blur(60px);
-    pointer-events:none;
+  /* ui_shell body zaten fixed/hidden yönetiyor. Biz sadece içeriği yönetiyoruz. */
+  #pageContent{
+    height: 100%;
   }
 
   .wrap{
@@ -39,14 +32,20 @@
     max-width:480px;
     height:100%;
     margin:0 auto;
-    padding: 12px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 14px);
+
+    /* ✅ ui_shell main-content zaten footer için padding veriyor.
+       Burada footer padding EKLEME (çifte boşluk olur). */
+    padding: 12px 14px 14px;
+
     display:flex;
     flex-direction:column;
     gap:12px;
-    background: rgba(10,10,30,0.40);
-    backdrop-filter: blur(30px);
-    border-left: 1px solid rgba(255,255,255,0.06);
-    border-right: 1px solid rgba(255,255,255,0.06);
+
+    background: rgba(10,10,30,0.18);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 26px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
   }
 
   .topbar{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
@@ -64,7 +63,7 @@
 
   .card{
     flex:1;
-    border-radius: 28px;
+    border-radius: 22px;
     border: 1px solid var(--border);
     background: var(--card);
     padding: 16px 14px;
@@ -121,6 +120,18 @@
     white-space: pre-wrap;
   }
 
+  .infoBox{
+    border-radius: 18px;
+    border: 1px solid rgba(165,180,252,0.35);
+    background: rgba(99,102,241,0.10);
+    padding: 12px 12px;
+    color: rgba(255,255,255,0.92);
+    font-weight: 900;
+    font-size: 12px;
+    line-height: 1.45;
+    white-space: pre-wrap;
+  }
+
   /* RESULT OVERLAY */
   .overlay{
     position:fixed; inset:0;
@@ -160,45 +171,49 @@
 </head>
 
 <body>
-<div class="bg"></div>
+  <main id="pageContent">
+    <div class="wrap">
+      <div class="topbar">
+        <div class="chip" id="langChip">Seviye Sınavı</div>
+        <div class="chip timer" id="timerChip">40:00</div>
+      </div>
 
-<div class="wrap">
-  <div class="topbar">
-    <div class="chip" id="langChip">Seviye Sınavı</div>
-    <div class="chip timer" id="timerChip">40:00</div>
-  </div>
+      <div class="card" id="qCard">
+        <div class="q-text">Yükleniyor…</div>
+      </div>
 
-  <div class="card" id="qCard">
-    <div class="q-text">Yükleniyor…</div>
-  </div>
+      <div class="nav">
+        <button class="btn" id="btnPrev" disabled>GERİ</button>
+        <button class="btn" id="btnSkip" disabled>ATLA</button>
+        <button class="btn btn-primary" id="btnNext" disabled>İLERİ</button>
+      </div>
 
-  <div class="nav">
-    <button class="btn" id="btnPrev" disabled>GERİ</button>
-    <button class="btn" id="btnSkip" disabled>ATLA</button>
-    <button class="btn btn-primary" id="btnNext" disabled>İLERİ</button>
-  </div>
+      <div class="note">
+        Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.
+      </div>
+    </div>
+  </main>
 
-  <div class="note">
-    Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.
-  </div>
-</div>
-
-<div class="overlay" id="resultOverlay">
-  <div class="resultCard">
-    <div class="rTitle">italkyAI • Sonuç</div>
-    <div class="rLevel" id="rLevel">—</div>
-    <div class="rText" id="rText">—</div>
-    <div class="rBtns">
-      <button class="btn btn-primary" id="rGo">Tamam</button>
-      <button class="btn" id="rLater">Kapat</button>
+  <div class="overlay" id="resultOverlay">
+    <div class="resultCard">
+      <div class="rTitle">italkyAI • Sonuç</div>
+      <div class="rLevel" id="rLevel">—</div>
+      <div class="rText" id="rText">—</div>
+      <div class="rBtns">
+        <button class="btn btn-primary" id="rGo">Tamam</button>
+        <button class="btn" id="rLater">Kapat</button>
+      </div>
     </div>
   </div>
-</div>
 
 <script type="module">
+  import { mountShell } from "/js/ui_shell.js";
   import { supabase } from "/js/supabase_client.js";
 
-  const API_BASE = "https://italky-api.onrender.com"; // ✅ questions üretecek backend
+  // ✅ ÜST/ALT bar
+  mountShell({ scroll: "none" });
+
+  const API_BASE = "https://italky-api.onrender.com"; // ✅ burada endpoint olacak
 
   const $ = (id)=>document.getElementById(id);
   const qCard = $("qCard");
@@ -210,7 +225,9 @@
     qCard.innerHTML = `<div class="errBox">${title}\n\n${detail || ""}</div>`;
     btnPrev.disabled = btnSkip.disabled = btnNext.disabled = true;
   }
-
+  function showInfo(msg){
+    qCard.innerHTML = `<div class="infoBox">${msg}</div>`;
+  }
   function qs(k){ return new URLSearchParams(location.search).get(k); }
 
   const testId = String(qs("test_id") || "").trim();
@@ -237,27 +254,31 @@
   }
 
   function extractQuestions(testRow){
-    // kabul: jsonb = {questions:[...]} veya direkt array
     if(Array.isArray(testRow?.questions)) return testRow.questions;
     if(Array.isArray(testRow?.questions?.questions)) return testRow.questions.questions;
     return [];
   }
 
-  async function generateQuestionsOnBackend(testRow){
+  async function generateQuestions(testRow){
     const lang = String(testRow?.language_code || langParam || "en").toLowerCase();
+
     const r = await fetch(`${API_BASE}/api/level_test/generate`, {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ test_id: testId, lang })
     });
+
     if(!r.ok){
       const t = await r.text().catch(()=> "");
       throw new Error(`generate_failed HTTP ${r.status}\n${t}`);
     }
+
+    const j = await r.json().catch(()=>null);
+    if(!j?.ok) throw new Error(`generate_failed: ${JSON.stringify(j)}`);
     return true;
   }
 
-  // ✅ 1) test satırı
+  // 1) test satırı
   let testRow = null;
   try{
     testRow = await loadTestRow();
@@ -269,14 +290,12 @@
   const langCode = String(testRow?.language_code || langParam || "en").toLowerCase();
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  // ✅ 2) questions yoksa: backend üret + yeniden çek
+  // 2) questions yoksa: backend üret + yeniden çek
   let QUESTIONS = extractQuestions(testRow);
-
   if(!QUESTIONS.length){
-    // kullanıcıya “hazırlanıyor” yaz
-    qCard.innerHTML = `<div class="errBox" style="border-color:rgba(165,180,252,0.35);background:rgba(99,102,241,0.10)">Sorular hazırlanıyor…\n\nBu ilk açılışta 2-8 saniye sürebilir.</div>`;
+    showInfo("Sorular hazırlanıyor…\n\nİlk açılışta 2–8 saniye sürebilir.");
     try{
-      await generateQuestionsOnBackend(testRow);
+      await generateQuestions(testRow);
       testRow = await loadTestRow();
       QUESTIONS = extractQuestions(testRow);
     }catch(e){
@@ -288,9 +307,9 @@
   if(!QUESTIONS.length){
     showError(
       "Soru listesi hâlâ boş.",
-      "Backend soruları level_tests.questions alanına yazamadı.\n\nKontrol:\n- italky-api /api/level_test/generate çalışıyor mu?\n- Service Role ile update atabiliyor mu?\n- level_tests.questions kolon tipi jsonb mi?"
+      "Backend soruları level_tests.questions alanına yazamadı.\n\nKontrol:\n- italky-api /api/level_test/generate var mı?\n- Service role ile update atabiliyor mu?\n- level_tests.questions jsonb mi?"
     );
-    throw new Error("empty questions after generate");
+    throw new Error("empty questions");
   }
 
   // --- TIMER (40 dk) ---
@@ -300,7 +319,7 @@
   let remaining = TOTAL_TIME;
   let timer = null;
 
-  // started_at varsa süreyi kaldığı yerden devam ettir
+  // started_at varsa: devam
   try{
     const startedAt = testRow?.started_at ? new Date(testRow.started_at).getTime() : null;
     if(startedAt){
@@ -376,7 +395,6 @@
       const q = QUESTIONS[i];
       if(answers[i] === null) continue;
       total++;
-      // destek: correct_index veya correct
       const corr = (q.correct_index != null) ? q.correct_index : q.correct;
       if(answers[i] === corr) correct++;
     }
@@ -398,7 +416,6 @@
     const percent = total ? (correct/total) : 0;
     const level = computeLevelFromPercent(percent);
 
-    // ✅ RPC: finish_level_test (senin DB’de var)
     const { error } = await supabase.rpc("finish_level_test", {
       p_test_id: testId,
       p_answers: answers,
