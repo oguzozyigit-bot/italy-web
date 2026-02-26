@@ -308,8 +308,8 @@
           return;
         }
 
-        const row = Array.isArray(data) ? (data[0] || null) : data;
-        const testId = row?.id || row?.test_id || null;
+        const row = Array.isArray(data) ? data[0] : data;
+        const testId = row?.test_id;
 
         if(!testId){
           console.log("RPC DATA:", data);
