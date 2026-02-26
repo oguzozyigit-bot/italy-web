@@ -1,0 +1,397 @@
+<!-- FILE: /pages/level_test_hub.html -->
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>italkyAI • Seviye Tespit Sınavı</title>
+
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#02000f;
+      --card: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.10);
+      --muted: rgba(255,255,255,0.62);
+      --ai: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    html,body{ margin:0; height:100dvh; overflow:hidden; font-family:Outfit,system-ui,sans-serif; color:#fff; }
+
+    /* shell mount alanı */
+    #pageContent{
+      height: 100%;
+      padding: 14px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 16px);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      overflow:hidden;
+    }
+
+    .hero{
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 14px 14px;
+    }
+    .hTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .hTitle{
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-size:18px;
+      font-weight:1000;
+      margin:0;
+      letter-spacing:-0.3px;
+    }
+    .hSub{
+      margin:6px 0 0;
+      font-size:12px;
+      font-weight:900;
+      color: var(--muted);
+      line-height:1.45;
+    }
+    .chip{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-weight:1000;
+      font-size:12px;
+      color: rgba(255,255,255,0.86);
+      white-space:nowrap;
+    }
+    .chip b{ background: var(--ai); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .search{
+      flex:1;
+      min-width: 180px;
+      height:44px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      color:#fff;
+      font-weight:900;
+      padding: 0 12px;
+      outline:none;
+    }
+    .btn{
+      height:44px;
+      padding: 0 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:active{ transform: scale(.99); }
+
+    .grid{
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding-bottom: 2px;
+    }
+    .grid::-webkit-scrollbar{ display:none; }
+
+    @media(max-width:420px){
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .langCard{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 12px 10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      user-select:none;
+      min-height: 118px;
+      position:relative;
+      overflow:hidden;
+    }
+    .langCard:active{ transform: scale(.985); background: rgba(255,255,255,0.06); }
+
+    .flagBox{
+      width:54px;height:54px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 18px 44px rgba(0,0,0,0.22);
+      font-size: 26px;
+    }
+    .langName{
+      font-size: 12px;
+      font-weight: 1000;
+      text-align:center;
+      line-height:1.1;
+      color: rgba(255,255,255,0.92);
+    }
+    .status{
+      font-size: 10px;
+      font-weight: 900;
+      text-align:center;
+      color: rgba(255,255,255,0.62);
+      line-height:1.15;
+    }
+    .status .lvl{
+      font-weight: 1000;
+      background: var(--ai);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .toast{
+      position: fixed;
+      left:50%;
+      top:18px;
+      transform:translateX(-50%) translateY(-120px);
+      background:rgba(10,10,18,.92);
+      border:1px solid rgba(165,180,252,.35);
+      padding:10px 14px;
+      border-radius:999px;
+      color:#fff;
+      z-index:999999;
+      font-weight:900;
+      font-size:12px;
+      transition:.28s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw,520px);
+      text-align:center;
+    }
+    .toast.show{ transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+
+<body>
+  <div id="pageContent">
+    <div class="hero">
+      <div class="hTop">
+        <div>
+          <h1 class="hTitle">Seviye Tespit Sınavı</h1>
+          <p class="hSub">Tüm diller için seviye tespit. Dilini seç → sınava gir → sonuç profiline işlenir.</p>
+        </div>
+        <div class="chip">Süre: <b>40 dk</b></div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="controls">
+        <input class="search" id="q" placeholder="Dil ara… (English, Türkçe, Deutsch)" />
+        <button class="btn" id="btnReset">Sıfırla</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { supabase } from "/js/supabase_client.js";
+
+    mountShell({ scroll:"none" });
+
+    const $ = (id)=>document.getElementById(id);
+    function toast(msg){
+      const t = $("toast");
+      t.textContent = String(msg||"");
+      t.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
+    }
+
+    // ✅ auth guard
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(!session?.user){
+      location.replace("/pages/login.html");
+      throw new Error("no session");
+    }
+
+    // ✅ profilden levels oku (levels[langCode] = "A1" gibi)
+    let LEVELS = {};
+    try{
+      const { data: prof, error } = await supabase
+        .from("profiles")
+        .select("levels")
+        .eq("id", session.user.id)
+        .single();
+      if(!error){
+        LEVELS = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
+      }
+    }catch{}
+
+    // ✅ İlk 5 + TR en başta, kalanlar alfabetik
+    const FIRST = [
+      { code:"tr", name:"Türkçe", flag:"🇹🇷" },
+      { code:"en", name:"English", flag:"🇬🇧" },
+      { code:"de", name:"Deutsch", flag:"🇩🇪" },
+      { code:"fr", name:"Français", flag:"🇫🇷" },
+      { code:"es", name:"Español", flag:"🇪🇸" },
+      { code:"it", name:"Italiano", flag:"🇮🇹" },
+    ];
+
+    // ✅ 81 hedef için geniş liste (eksikler için de çalışır)
+    // Not: Flag bazı dillerde “dil bayrağı” net olmayabilir; burada en yaygın ülke bayrağı kullanıldı.
+    const ALL = [
+      {code:"af",name:"Afrikaans",flag:"🇿🇦"},
+      {code:"sq",name:"Shqip",flag:"🇦🇱"},
+      {code:"am",name:"Amharic",flag:"🇪🇹"},
+      {code:"ar",name:"العربية",flag:"🇸🇦"},
+      {code:"hy",name:"Հայերեն",flag:"🇦🇲"},
+      {code:"az",name:"Azərbaycanca",flag:"🇦🇿"},
+      {code:"eu",name:"Euskara",flag:"🇪🇸"},
+      {code:"bn",name:"বাংলা",flag:"🇧🇩"},
+      {code:"bs",name:"Bosanski",flag:"🇧🇦"},
+      {code:"bg",name:"Български",flag:"🇧🇬"},
+      {code:"ca",name:"Català",flag:"🇪🇸"},
+      {code:"zh",name:"中文",flag:"🇨🇳"},
+      {code:"hr",name:"Hrvatski",flag:"🇭🇷"},
+      {code:"cs",name:"Čeština",flag:"🇨🇿"},
+      {code:"da",name:"Dansk",flag:"🇩🇰"},
+      {code:"nl",name:"Nederlands",flag:"🇳🇱"},
+      {code:"en",name:"English",flag:"🇬🇧"},
+      {code:"et",name:"Eesti",flag:"🇪🇪"},
+      {code:"fi",name:"Suomi",flag:"🇫🇮"},
+      {code:"fr",name:"Français",flag:"🇫🇷"},
+      {code:"gl",name:"Galego",flag:"🇪🇸"},
+      {code:"ka",name:"ქართული",flag:"🇬🇪"},
+      {code:"de",name:"Deutsch",flag:"🇩🇪"},
+      {code:"el",name:"Ελληνικά",flag:"🇬🇷"},
+      {code:"gu",name:"ગુજરાતી",flag:"🇮🇳"},
+      {code:"ht",name:"Kreyòl",flag:"🇭🇹"},
+      {code:"ha",name:"Hausa",flag:"🇳🇬"},
+      {code:"he",name:"עברית",flag:"🇮🇱"},
+      {code:"hi",name:"हिन्दी",flag:"🇮🇳"},
+      {code:"hu",name:"Magyar",flag:"🇭🇺"},
+      {code:"is",name:"Íslenska",flag:"🇮🇸"},
+      {code:"id",name:"Bahasa Indonesia",flag:"🇮🇩"},
+      {code:"ga",name:"Gaeilge",flag:"🇮🇪"},
+      {code:"it",name:"Italiano",flag:"🇮🇹"},
+      {code:"ja",name:"日本語",flag:"🇯🇵"},
+      {code:"jv",name:"Basa Jawa",flag:"🇮🇩"},
+      {code:"kn",name:"ಕನ್ನಡ",flag:"🇮🇳"},
+      {code:"kk",name:"Қазақша",flag:"🇰🇿"},
+      {code:"km",name:"ខ្មែរ",flag:"🇰🇭"},
+      {code:"ko",name:"한국어",flag:"🇰🇷"},
+      {code:"ku",name:"Kurdî",flag:"🇹🇷"},
+      {code:"ky",name:"Кыргызча",flag:"🇰🇬"},
+      {code:"lo",name:"ລາວ",flag:"🇱🇦"},
+      {code:"lv",name:"Latviešu",flag:"🇱🇻"},
+      {code:"lt",name:"Lietuvių",flag:"🇱🇹"},
+      {code:"mk",name:"Македонски",flag:"🇲🇰"},
+      {code:"ms",name:"Bahasa Melayu",flag:"🇲🇾"},
+      {code:"ml",name:"മലയാളം",flag:"🇮🇳"},
+      {code:"mr",name:"मराठी",flag:"🇮🇳"},
+      {code:"mn",name:"Монгол",flag:"🇲🇳"},
+      {code:"ne",name:"नेपाली",flag:"🇳🇵"},
+      {code:"no",name:"Norsk",flag:"🇳🇴"},
+      {code:"fa",name:"فارسی",flag:"🇮🇷"},
+      {code:"pl",name:"Polski",flag:"🇵🇱"},
+      {code:"pt",name:"Português",flag:"🇵🇹"},
+      {code:"pa",name:"ਪੰਜਾਬੀ",flag:"🇮🇳"},
+      {code:"ro",name:"Română",flag:"🇷🇴"},
+      {code:"ru",name:"Русский",flag:"🇷🇺"},
+      {code:"sr",name:"Српски",flag:"🇷🇸"},
+      {code:"si",name:"සිංහල",flag:"🇱🇰"},
+      {code:"sk",name:"Slovenčina",flag:"🇸🇰"},
+      {code:"sl",name:"Slovenščina",flag:"🇸🇮"},
+      {code:"so",name:"Soomaali",flag:"🇸🇴"},
+      {code:"es",name:"Español",flag:"🇪🇸"},
+      {code:"sw",name:"Kiswahili",flag:"🇰🇪"},
+      {code:"sv",name:"Svenska",flag:"🇸🇪"},
+      {code:"ta",name:"தமிழ்",flag:"🇮🇳"},
+      {code:"te",name:"తెలుగు",flag:"🇮🇳"},
+      {code:"th",name:"ไทย",flag:"🇹🇭"},
+      {code:"tr",name:"Türkçe",flag:"🇹🇷"},
+      {code:"uk",name:"Українська",flag:"🇺🇦"},
+      {code:"ur",name:"اردو",flag:"🇵🇰"},
+      {code:"uz",name:"O‘zbek",flag:"🇺🇿"},
+      {code:"vi",name:"Tiếng Việt",flag:"🇻🇳"},
+      {code:"cy",name:"Cymraeg",flag:"🏴"},
+      {code:"xh",name:"isiXhosa",flag:"🇿🇦"},
+      {code:"yo",name:"Yorùbá",flag:"🇳🇬"},
+      {code:"zu",name:"isiZulu",flag:"🇿🇦"},
+    ];
+
+    // FIRST'i koru, ALL'den tekrarları çıkar, sonra alfabetik sırala
+    const firstCodes = new Set(FIRST.map(x=>x.code));
+    const rest = ALL.filter(x=>!firstCodes.has(x.code))
+      .sort((a,b)=>a.name.localeCompare(b.name, "tr", { sensitivity:"base" }));
+
+    // 81 hedef: FIRST + rest’ten ilk (81 - FIRST.length)
+    const TARGET_COUNT = 81;
+    const LIST = [...FIRST, ...rest].slice(0, TARGET_COUNT);
+
+    function levelFor(code){
+      const v = LEVELS?.[code];
+      return (typeof v === "string" && v.trim()) ? v.trim() : "";
+    }
+
+    function render(filter=""){
+      const q = String(filter||"").trim().toLowerCase();
+      const items = !q ? LIST : LIST.filter(x=>{
+        return x.code.includes(q) || x.name.toLowerCase().includes(q);
+      });
+
+      $("grid").innerHTML = items.map(x=>{
+        const lvl = levelFor(x.code);
+        const status = lvl ? `Seviyeniz: <span class="lvl">${lvl}</span>` : "Henüz sınava katılmadınız";
+        return `
+          <div class="langCard" data-code="${x.code}">
+            <div class="flagBox">${x.flag || "🌐"}</div>
+            <div class="langName">${x.name}</div>
+            <div class="status">${status}</div>
+          </div>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".langCard").forEach(card=>{
+        card.addEventListener("click", ()=>{
+          const code = card.getAttribute("data-code");
+          if(!code) return;
+          localStorage.setItem("italky_level_lang", code);
+          toast("Sınav sayfasına geçiliyor…");
+          // ✅ intro sayfasına lang paramıyla
+          setTimeout(()=>location.href = `/pages/level_test_intro.html?lang=${encodeURIComponent(code)}`, 120);
+        }, { passive:true });
+      });
+    }
+
+    $("q").addEventListener("input", ()=>render($("q").value));
+    $("btnReset").addEventListener("click", ()=>{
+      $("q").value = "";
+      render("");
+    });
+
+    render("");
+  </script>
+</body>
+</html>
