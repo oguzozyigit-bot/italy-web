@@ -22,25 +22,22 @@
       --ai: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+
     #pageContent{
-      padding: 14px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 12px);
+      padding: 12px 10px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 10px);
       min-height: 100%;
     }
-
-    .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+    .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:10px; }
 
     .hero{
-      border-radius: 24px;
+      border-radius: 22px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      padding: 14px 14px;
+      padding: 12px 12px;
     }
-    .heroTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom: 8px;
-    }
+    .heroTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 6px; }
     .hTitle{
       font-family:"Space Grotesk",system-ui,sans-serif;
       font-weight: 1000;
@@ -49,7 +46,7 @@
       color:#fff;
     }
     .pill{
-      padding: 8px 12px;
+      padding: 7px 10px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
@@ -71,6 +68,7 @@
       display:grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
+      align-items: stretch;
     }
     @media(max-width:420px){
       .grid{ grid-template-columns: repeat(2, 1fr); }
@@ -98,25 +96,30 @@
     }
     .card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
 
-    .flag{
-      font-size: 26px;
-      line-height: 1;
-      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
+    .badgeCode{
+      width:44px;height:44px;border-radius:16px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.18);
+      display:flex;align-items:center;justify-content:center;
+      font-weight: 1000;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.90);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.22);
     }
+
     .name{
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 1000;
       color:#fff;
       letter-spacing: -0.2px;
+      line-height: 1.1;
     }
     .status{
       font-size: 11px;
       font-weight: 900;
       color: rgba(255,255,255,0.60);
     }
-    .status.ok{
-      color: rgba(165,180,252,0.95);
-    }
+    .status.ok{ color: rgba(165,180,252,0.95); }
 
     .toast{
       position: fixed;
@@ -166,6 +169,7 @@
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
+    import { getSiteLang } from "/js/i18n.js";
 
     mountShell({ scroll:"auto" });
 
@@ -187,7 +191,15 @@
       location.replace("/pages/login.html");
     }
 
-    // load profile levels (JSONB)
+    // ✅ UI dili (site lang)
+    const UI_LANG = (()=>{
+      try{
+        const l = String(getSiteLang?.() || "").toLowerCase().trim();
+        return l || "tr";
+      }catch{ return "tr"; }
+    })();
+
+    // ✅ levels (profiles.levels JSONB) -> { "en":"A2", "de":"B1", ... }
     let levels = {};
     try{
       const { data: prof } = await supabase
@@ -198,55 +210,62 @@
       levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
     }catch{}
 
-    // load langs catalog
-    let catalog = null;
-    try{
-      const r = await fetch("/assets/langs_80.json?v=1", { cache:"no-store" });
-      catalog = await r.json();
-    }catch(e){
-      toast("Dil listesi yüklenemedi");
-      catalog = { langs: [], top: [] };
+    // ✅ 80 dil listesi: AI’den üretmeye gerek yok aslında;
+    // Burada direkt sabit 80 ISO kod kullanıyoruz (AI yok, stabil).
+    // İsimleri ise Intl.DisplayNames ile cihaz diline göre yazıyoruz.
+    const TOP = ["tr","en","de","fr","es"]; // ilk 5
+    const CODES = [
+      ...TOP,
+      "it","pt","nl","sv","no","da","fi","pl","cs","sk","hu","ro","bg","el","uk","ru",
+      "ar","he","fa","ur","hi","bn","id","ms","vi","th","zh","ja","ko",
+      "az","hy","ka","kk","ky","uz","tk","tg",
+      "sr","hr","bs","sl","mk","sq",
+      "et","lv","lt","af","sw","am","ca","eu","gl","is","ga","cy","fil","mn","ne","si","ta","te","mr","gu",
+      "la","eo","my","km","lo","ps","so","zu","xh","yo","ig","ha","rw","sn","st","tn","ss","ts"
+    ].slice(0, 80);
+
+    function latinName(code){
+      // Intl.DisplayNames Latin olur; bazı diller yerel script dönebilir.
+      // Kullanıcı “latin” istediği için: en-US fallback ile romanizasyon hissi verir.
+      try{
+        const dn = new Intl.DisplayNames([UI_LANG, "en"], { type:"language" });
+        return dn.of(code) || code.toUpperCase();
+      }catch{
+        return code.toUpperCase();
+      }
     }
 
-    const topCodes = Array.isArray(catalog?.top) ? catalog.top : [];
-    const langs = Array.isArray(catalog?.langs) ? catalog.langs : [];
+    // alfabetik (name)
+    const REST = CODES.filter(c=>!TOP.includes(c)).sort((a,b)=>latinName(a).localeCompare(latinName(b), "en", { sensitivity:"base" }));
+    const ORDERED = [...TOP, ...REST];
 
-    // order: top first, then alpha by name
-    const map = new Map(langs.map(x=>[String(x.code), x]));
-    const top = topCodes.map(c=>map.get(String(c))).filter(Boolean);
+    function codeBadge(code){
+      return String(code||"").toUpperCase();
+    }
 
-    const rest = langs
-      .filter(x=>!topCodes.includes(String(x.code)))
-      .sort((a,b)=>String(a.name).localeCompare(String(b.name), "en", { sensitivity:"base" }));
-
-    const ordered = [...top, ...rest];
-
-    function cardHtml(l){
-      const code = String(l.code);
-      const name = String(l.name || code.toUpperCase());
-      const flag = String(l.flag || "🌐");
+    function cardHtml(code){
+      const name = latinName(code);
       const lv = (levels && typeof levels === "object") ? (levels[code] || "") : "";
       const status = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
       const cls = lv ? "status ok" : "status";
       return `
         <div class="card" data-code="${code}">
-          <div class="flag">${flag}</div>
+          <div class="badgeCode">${codeBadge(code)}</div>
           <div class="name">${name}</div>
           <div class="${cls}">${status}</div>
         </div>
       `;
     }
 
-    grid.innerHTML = ordered.map(cardHtml).join("");
+    grid.innerHTML = ORDERED.map(cardHtml).join("");
 
     grid.querySelectorAll(".card").forEach(el=>{
       el.addEventListener("click", async ()=>{
-        const code = String(el.getAttribute("data-code") || "").trim();
+        const code = String(el.getAttribute("data-code") || "").trim().toLowerCase();
         if(!code) return;
 
         toast("Sınav başlatılıyor…");
 
-        // ✅ 5 jeton düşen RPC
         const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
 
         if(error){
@@ -254,7 +273,6 @@
           return;
         }
 
-        // data bazen array döner
         const row = Array.isArray(data) ? (data[0] || null) : data;
         const testId = row?.id || row?.test_id || null;
 
@@ -263,7 +281,6 @@
           return;
         }
 
-        // level_test.html tarafı test_id üzerinden soruları/akıșı yürütecek
         location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
       }, { passive:true });
     });
