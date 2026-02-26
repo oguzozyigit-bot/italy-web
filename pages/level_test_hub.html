@@ -21,9 +21,11 @@
       --muted: rgba(255,255,255,0.62);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    body{ margin:0; font-family:Outfit,system-ui,sans-serif; color:#fff; }
     #pageContent{
       padding: 14px 12px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 10px);
       min-height: 100%;
+      touch-action: pan-y; /* scroll serbest */
     }
     .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
 
@@ -66,11 +68,15 @@
 
     .grid{
       display:grid;
-      grid-template-columns: 1fr 1fr; /* ✅ tek satırda iki dil */
+      grid-template-columns: 1fr 1fr; /* ✅ tek satır 2 dil */
       gap: 10px;
     }
 
+    /* ✅ button kart: WebView’de en stabil */
     .cardBtn{
+      -webkit-appearance:none;
+      appearance:none;
+      width:100%;
       border-radius: 20px;
       border: 1px solid var(--border);
       background: var(--card);
@@ -87,13 +93,16 @@
 
       cursor:pointer;
       user-select:none;
-      transition: transform .18s ease, background .18s ease, opacity .18s ease;
+      transition: transform .12s ease, background .12s ease, opacity .12s ease;
       text-align:center;
       position:relative;
       overflow:hidden;
+
+      touch-action: manipulation;     /* ✅ click gecikmesi/ghost fix */
+      pointer-events: auto !important; /* ✅ garanti */
     }
     .cardBtn:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
-    .cardBtn[aria-busy="true"]{ opacity:.55; pointer-events:none; }
+    .cardBtn[aria-busy="true"]{ opacity:.55; pointer-events:none !important; }
 
     .flag{
       font-size: 26px;
@@ -126,7 +135,7 @@
       z-index: 999999;
       font-weight: 1000;
       font-size: 12px;
-      transition: .25s;
+      transition: .18s;
       backdrop-filter: blur(12px);
       pointer-events:none;
       max-width: min(92vw, 520px);
@@ -173,15 +182,14 @@
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1200);
     }
 
-    // ✅ 30 dil: popülerler üstte, sonra alfabetik
-    // Not: Türkçe üstte yok (istediğin gibi). İstersen listede yine dursun diye alta ekledim.
+    // ✅ 32 dil (tek kalmasın)
     const TOP = ["en","de","fr","es","it","ru"];
 
     const ALL = [
-      // Popülerler
+      // Top 6
       { code:"en", name:"English", flag:"🇬🇧" },
       { code:"de", name:"German", flag:"🇩🇪" },
       { code:"fr", name:"French", flag:"🇫🇷" },
@@ -205,12 +213,14 @@
       { code:"el", name:"Greek", flag:"🇬🇷" },
       { code:"uk", name:"Ukrainian", flag:"🇺🇦" },
 
-      // Türk dilleri / yakın
+      // Türk dilleri
       { code:"tr", name:"Turkish", flag:"🇹🇷" },
       { code:"az", name:"Azerbaijani", flag:"🇦🇿" },
       { code:"kk", name:"Kazakh", flag:"🇰🇿" },
       { code:"ky", name:"Kyrgyz", flag:"🇰🇬" },
       { code:"uz", name:"Uzbek", flag:"🇺🇿" },
+      { code:"tk", name:"Turkmen", flag:"🇹🇲" },   // ✅ eklendi (32 tamam)
+      { code:"ug", name:"Uyghur", flag:"🇨🇳" },     // ✅ eklendi (32 tamam) (bayrak temsilî)
 
       // Ortadoğu
       { code:"ar", name:"Arabic", flag:"🇸🇦" },
@@ -220,7 +230,9 @@
       // Uzak Doğu
       { code:"zh", name:"Chinese", flag:"🇨🇳" },
       { code:"ja", name:"Japanese", flag:"🇯🇵" },
-      { code:"ko", name:"Korean", flag:"🇰🇷" }
+      { code:"ko", name:"Korean", flag:"🇰🇷" },
+      { code:"th", name:"Thai", flag:"🇹🇭" },       // ✅ eklendi (32 tamam)
+      { code:"vi", name:"Vietnamese", flag:"🇻🇳" }  // ✅ eklendi (32 tamam)
     ];
 
     // ✅ Auth
@@ -229,7 +241,7 @@
       location.replace("/pages/login.html");
     }
 
-    // ✅ Kullanıcının mevcut seviyeleri (profiles.levels içine language_code ile yazacağız)
+    // ✅ levels
     let levels = {};
     try{
       const { data: prof } = await supabase
@@ -243,11 +255,9 @@
     function orderedList(){
       const map = new Map(ALL.map(x=>[x.code, x]));
       const top = TOP.map(c=>map.get(c)).filter(Boolean);
-
       const rest = ALL
         .filter(x=>!TOP.includes(x.code))
         .sort((a,b)=>String(a.name).localeCompare(String(b.name), "en", { sensitivity:"base" }));
-
       return [...top, ...rest];
     }
 
@@ -261,11 +271,11 @@
       const cls = lv ? "status ok" : "status";
 
       return `
-        <div class="cardBtn" role="button" tabindex="0" data-code="${code}">
+        <button class="cardBtn" type="button" data-code="${code}">
           <div class="flag">${flag}</div>
           <div class="name">${name}</div>
           <div class="${cls}">${status}</div>
-        </div>
+        </button>
       `;
     }
 
@@ -278,7 +288,6 @@
       el?.setAttribute?.("aria-busy","true");
       toast("Sınav başlatılıyor…");
 
-      // ✅ 5 jeton düşen RPC: start_level_test(p_language_code)
       const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
 
       if(error){
@@ -299,16 +308,27 @@
       location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
     }
 
-    grid.querySelectorAll(".cardBtn").forEach(el=>{
+    // ✅ WebView click fix: click + pointerup + touchend
+    function bind(el){
       const code = el.getAttribute("data-code");
-      el.addEventListener("click", ()=> startTest(code, el));
-      el.addEventListener("keydown", (e)=>{
-        if(e.key === "Enter" || e.key === " "){
-          e.preventDefault();
-          startTest(code, el);
-        }
-      });
-    });
+      const run = (ev)=>{
+        try{ ev.preventDefault(); ev.stopPropagation(); }catch{}
+        startTest(code, el);
+      };
+      el.addEventListener("click", run, { passive:false });
+      el.addEventListener("pointerup", run, { passive:false });
+      el.addEventListener("touchend", run, { passive:false });
+    }
+
+    grid.querySelectorAll(".cardBtn").forEach(bind);
+
+    // ✅ ekstra: container tıklamayı yutuyorsa delegasyon (son çare)
+    grid.addEventListener("click", (e)=>{
+      const btn = e.target?.closest?.(".cardBtn");
+      if(!btn) return;
+      // bind zaten var ama bazı webviewlerde ilk handler çalışmayabiliyor
+      startTest(btn.getAttribute("data-code"), btn);
+    }, { passive:false });
   </script>
 </body>
 </html>
