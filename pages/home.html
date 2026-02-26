@@ -20,22 +20,25 @@
       --bg-void: #02000f;
 
       /* ✅ header/footer ölçü */
-      --footerH: 86px;                         /* JS günceller */
+      --footerH: 96px; /* JS günceller */
       --safeB: env(safe-area-inset-bottom, 0px);
 
-      /* ✅ kompakt layout */
-      --contentPadTop: 10px;
+      /* ✅ AUTO-FIT katsayısı (JS 0.78–1.00 arası ayarlar) */
+      --compactK: 1;
+
+      /* ✅ kompakt layout (katsayı ile) */
+      --contentPadTop: calc(10px * var(--compactK));
       --contentPadX: 18px;
-      --contentGap: 10px;
+      --contentGap: calc(10px * var(--compactK));
 
-      /* ✅ otomatik ölçek (her telefona göre) */
-      --tileMinH: clamp(54px, 6.2vh, 72px);
-      --tileTitle: clamp(14px, 2.0vh, 16px);
-      --tileSub: clamp(9px, 1.35vh, 10px);
-      --iconBox: clamp(30px, 3.8vh, 36px);
+      /* ✅ otomatik ölçek (katsayı ile) */
+      --tileMinH: calc(clamp(54px, 6.2vh, 72px) * var(--compactK));
+      --tileTitle: calc(clamp(14px, 2.0vh, 16px) * var(--compactK));
+      --tileSub: calc(clamp(9px, 1.35vh, 10px) * var(--compactK));
+      --iconBox: calc(clamp(30px, 3.8vh, 36px) * var(--compactK));
 
-      --orbW: clamp(100px, 13vh, 110px);
-      --orbCore: clamp(74px, 9.8vh, 82px);
+      --orbW: calc(clamp(100px, 13vh, 110px) * var(--compactK));
+      --orbCore: calc(clamp(74px, 9.8vh, 82px) * var(--compactK));
     }
 
     html, body{
@@ -54,7 +57,7 @@
       border-right: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* PREMIUM HEADER (aynı) */
+    /* PREMIUM HEADER */
     .premium-header{
       padding: calc(45px + env(safe-area-inset-top)) 18px 15px;
       display:flex; align-items:flex-start; justify-content:space-between;
@@ -93,7 +96,7 @@
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-    /* ✅ PAGE CONTENT (scroll yok, otomatik sığdır) */
+    /* ✅ PAGE CONTENT (scroll yok, footer’a taşmaz) */
     #pageContent{
       flex: 1;
       min-height:0;
@@ -106,7 +109,7 @@
       overflow:hidden;
     }
 
-    /* FaceToFace (aynı vibe, ölçekli) */
+    /* FaceToFace */
     .portal-zone{
       flex: 0 0 auto;
       display:flex; flex-direction:column;
@@ -165,11 +168,11 @@
       min-height: var(--tileMinH);
       background: rgba(255,255,255,0.05);
       border-radius: 24px;
-      padding: 12px 16px;
+      padding: calc(12px * var(--compactK)) calc(16px * var(--compactK));
       border: 1px solid rgba(255,255,255,0.1);
       display:flex;
       align-items:center;
-      gap: 14px;
+      gap: calc(14px * var(--compactK));
       cursor:pointer;
       user-select:none;
     }
@@ -177,7 +180,6 @@
     .academy-text h2 span{ background: var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .academy-text p{ margin:0; font-size: var(--tileSub); font-weight:800; color: rgba(255,255,255,0.4); }
 
-    /* icon box helper */
     .iconBox{
       width: var(--iconBox);
       height: var(--iconBox);
@@ -190,7 +192,7 @@
     }
 
     /* Academy logo */
-    .spectrum-logo{ gap:3.5px; display:flex; align-items:center; height: 30px; }
+    .spectrum-logo{ gap:3.5px; display:flex; align-items:center; height: 30px; transform: scale(var(--compactK)); transform-origin:left center; }
     .bar{ width:3.5px; border-radius:10px; animation: barMove 1.2s infinite ease-in-out; }
     .bar-1{ height:10px; background:#ff0000; animation-delay:.1s; }
     .bar-2{ height:18px; background:#ff7f00; animation-delay:.3s; }
@@ -216,14 +218,14 @@
       animation: ripple2 1.35s linear infinite;
       animation-delay:.55s;
     }
-    .practice-logo span{ position:relative; font-weight:1000; font-size: 15px; opacity:.95; }
+    .practice-logo span{ position:relative; font-weight:1000; font-size: calc(15px * var(--compactK)); opacity:.95; }
 
     /* Seviye Tespit */
     .level-logo:after{
       content:"✓";
       position:relative;
       font-weight:1000;
-      font-size: 16px;
+      font-size: calc(16px * var(--compactK));
       opacity:.95;
     }
     .level-logo:before{
@@ -242,10 +244,10 @@
       background: radial-gradient(circle, rgba(34,197,94,.35), rgba(34,197,94,0));
       animation:bounceGlow 1.1s ease-in-out infinite;
     }
-    .learn-logo span{ position:relative; font-weight:900; font-size:16px; opacity:.95; }
+    .learn-logo span{ position:relative; font-weight:900; font-size: calc(16px * var(--compactK)); opacity:.95; }
 
     /* WalkieTalkie */
-    .walkie-logo{ display:flex; align-items:center; gap:6px; height:32px; }
+    .walkie-logo{ display:flex; align-items:center; gap:6px; height:32px; transform: scale(var(--compactK)); transform-origin:left center; }
     .pulse-dot{
       width:8px;height:8px;border-radius:99px;
       background:#00f3ff;
@@ -288,6 +290,7 @@
       font-weight:900;
       color:#fff;
       opacity:.95;
+      font-size: calc(14px * var(--compactK));
     }
 
     /* Offline */
@@ -302,6 +305,7 @@
       position:absolute; inset:0;
       display:flex; align-items:center; justify-content:center;
       font-weight:900; color:#fff; opacity:.92;
+      font-size: calc(14px * var(--compactK));
     }
 
     @keyframes rotateOrbit{ from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -353,7 +357,7 @@
 <body>
   <div class="app-viewport">
 
-    <header class="premium-header">
+    <header class="premium-header" id="hdr">
       <div class="brand-group" id="brandHome" style="cursor:pointer;">
         <h1><span>italky</span><span class="ai">AI</span></h1>
         <div class="brand-slogan">BE FREE</div>
@@ -370,8 +374,7 @@
 
     <div id="pageContent">
 
-      <!-- En üst: FaceToFace sabit -->
-      <div class="portal-zone" data-href="/facetoface.html">
+      <div class="portal-zone" data-href="/facetoface.html" id="faceZone">
         <div class="neural-orb">
           <div class="ai-ring"></div>
           <div class="orbit-energy"><div class="e-ball ball-l"></div><div class="e-ball ball-b"></div></div>
@@ -389,10 +392,8 @@
         </div>
       </div>
 
-      <!-- ✅ scroll yok: kalan alanı tiles dağıtır -->
-      <div class="tiles">
+      <div class="tiles" id="tiles">
 
-        <!-- 1) italky Academy -->
         <div class="academy-pro" data-href="/pages/teacher_select.html">
           <div class="spectrum-logo">
             <div class="bar bar-1"></div><div class="bar bar-2"></div><div class="bar bar-3"></div>
@@ -401,25 +402,21 @@
           <div class="academy-text"><h2>italky <span>Academy</span></h2><p>YAPAY ZEKA İLE DİL EĞİTİMİ</p></div>
         </div>
 
-        <!-- 2) AI ile Pratik Yap -->
         <div class="academy-pro" data-href="/pages/practice_ai.html">
           <div class="iconBox practice-logo"><span>AI</span></div>
           <div class="academy-text"><h2>AI ile <span>Pratik Yap</span></h2><p>DİL PRATİĞİ • TEK KİŞİ</p></div>
         </div>
 
-        <!-- 3) Seviye Tespit Sınavı -->
         <div class="academy-pro" data-href="/pages/level_test_hub.html">
           <div class="iconBox level-logo"></div>
           <div class="academy-text"><h2>Seviye <span>Tespit Sınavı</span></h2><p>TÜM DİLLER • GERÇEK SINAV</p></div>
         </div>
 
-        <!-- 4) Eğlenerek Öğren -->
         <div class="academy-pro" data-href="/pages/game.html">
           <div class="iconBox learn-logo"><span>🎯</span></div>
           <div class="academy-text"><h2>Eğlenerek <span>Öğren</span></h2><p>OYUNLARLA PRATİK YAP</p></div>
         </div>
 
-        <!-- 5) Walkie Talkie -->
         <div class="academy-pro" data-href="/pages/f2f_connect.html">
           <div class="walkie-logo">
             <div class="pulse-dot"></div>
@@ -428,13 +425,11 @@
           <div class="academy-text"><h2>Walkie<span>Talkie</span></h2><p>TOPLANTI SALONU</p></div>
         </div>
 
-        <!-- 6) Metinden Çeviri -->
         <div class="academy-pro" data-href="/pages/text_translate.html">
           <div class="iconBox text-logo"></div>
           <div class="academy-text"><h2>Metinden <span>Çeviri</span></h2><p>AI DESTEKLİ METİN</p></div>
         </div>
 
-        <!-- 7) Offline Çeviri -->
         <div class="academy-pro" data-href="/facetoface_offline.html">
           <div class="iconBox offline-logo"></div>
           <div class="academy-text"><h2>Offline <span>Çeviri</span></h2><p>İNDİRİLEN DİL PAKETLERİ</p></div>
@@ -443,7 +438,7 @@
       </div>
     </div>
 
-    <footer class="premium-footer">
+    <footer class="premium-footer" id="ftr">
       <nav class="footer-nav">
         <a href="/pages/about.html">Hakkımızda</a>
         <a href="/pages/faq.html">SSS</a>
@@ -505,19 +500,72 @@
       }
     }
 
-    /* ✅ footer yüksekliğini gerçek ölç (boşluğu otomatik dengeler) */
+    /* ✅ footer ölç + taşma varsa otomatik küçült (scroll yok) */
     (function(){
-      function setFooterH(){
+      function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+      function measureFooter(){
+        const f = document.getElementById("ftr");
+        if(!f) return 96;
+        const h = Math.round(f.getBoundingClientRect().height || 0);
+        if(h > 0) document.documentElement.style.setProperty("--footerH", h + "px");
+        return h || 96;
+      }
+
+      function autoFit(){
         try{
-          const f = document.querySelector(".premium-footer");
-          if(!f) return;
-          const h = Math.round(f.getBoundingClientRect().height || 0);
-          if(h > 0) document.documentElement.style.setProperty("--footerH", h + "px");
+          const hdr = document.getElementById("hdr");
+          const face = document.getElementById("faceZone");
+          const tiles = document.getElementById("tiles");
+          const ftr = document.getElementById("ftr");
+          if(!hdr || !face || !tiles || !ftr) return;
+
+          const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+          const footerH = measureFooter();
+          const safeB = 0; // env(...) zaten padding’te var, burada hesap karmaşası olmasın
+
+          const headerH = hdr.getBoundingClientRect().height || 0;
+
+          // content padding’leri yaklaşık (top + bottom)
+          const padTop = 10;          // base
+          const padBottom = footerH + safeB + 10;
+
+          // face + tiles toplam ihtiyacı
+          const faceH = face.getBoundingClientRect().height || 0;
+
+          // tiles içindeki kartların doğal toplamı
+          let tilesNeed = 0;
+          const cards = tiles.querySelectorAll(".academy-pro");
+          cards.forEach(c=> tilesNeed += (c.getBoundingClientRect().height || 0));
+          // gap’ler
+          const gap = 10;
+          tilesNeed += gap * (Math.max(0, cards.length - 1));
+
+          const totalNeed = headerH + padTop + faceH + gap + tilesNeed + padBottom;
+
+          // yeterli alan varsa 1
+          if(totalNeed <= vh + 2){
+            document.documentElement.style.setProperty("--compactK", "1");
+            return;
+          }
+
+          // oranı hesapla (0.78–1 arası)
+          const k = clamp(vh / totalNeed, 0.78, 0.98);
+          document.documentElement.style.setProperty("--compactK", String(k));
         }catch{}
       }
-      window.addEventListener("load", ()=>{ loadUser(); setFooterH(); });
-      window.addEventListener("resize", setFooterH);
-      setTimeout(setFooterH, 120);
+
+      window.addEventListener("load", ()=>{
+        loadUser();
+        measureFooter();
+        setTimeout(autoFit, 80);
+        setTimeout(autoFit, 220);
+      });
+      window.addEventListener("resize", ()=>{
+        measureFooter();
+        autoFit();
+      });
     })();
   </script>
 </body>
