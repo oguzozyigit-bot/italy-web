@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Final Pro Hub</title>
 
+  <!-- ✅ beyaz flash fix -->
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
 
@@ -20,11 +21,9 @@
 
       /* JS set eder */
       --appH: 100vh;
-      --safeT: 0px;
-      --safeB: 0px;
 
-      /* içerik ölçeği */
-      --contentScale: 1;
+      /* ✅ sadece Y ölçeği (eni KESİNLİKLE küçültme) */
+      --contentScaleY: 1;
 
       --gap: 10px;
     }
@@ -38,7 +37,7 @@
 
     .app-viewport{
       width:100%; max-width:430px;
-      height: var(--appH);  /* ✅ gerçek px */
+      height: var(--appH);
       margin:0 auto;
       display:flex; flex-direction:column;
       position:relative;
@@ -49,9 +48,9 @@
       overflow:hidden;
     }
 
-    /* HEADER */
+    /* HEADER (diğer sayfalarla aynı mantık: env(safe-area-inset-top) kullan) */
     .premium-header{
-      padding: calc(45px + var(--safeT)) 18px 15px;
+      padding: calc(45px + env(safe-area-inset-top)) 18px 15px;
       display:flex; align-items:flex-start; justify-content:space-between;
       border-bottom:1px solid rgba(255,255,255,0.08);
       background: rgba(0,0,0,0.2);
@@ -87,7 +86,7 @@
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-    /* FOOTER (sabit ve asla taşmaz) */
+    /* FOOTER (sabit) */
     .premium-footer{
       position:absolute;
       left:0; right:0; bottom:0;
@@ -96,7 +95,7 @@
       background: rgba(0,0,0,0.3);
       backdrop-filter: blur(20px);
       border-top:1px solid rgba(255,255,255,0.08);
-      padding: 10px 10px calc(10px + var(--safeB));
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
       box-sizing:border-box;
       z-index: 50;
     }
@@ -119,7 +118,7 @@
       text-align:center;
     }
 
-    /* CONTENT WRAP: footer alanını JS ayıracak */
+    /* CONTENT */
     #pageContent{
       flex:1;
       min-height:0;
@@ -130,11 +129,12 @@
       z-index: 10;
     }
 
-    /* ✅ Ölçeklenen blok */
+    /* ✅ Y ekseninde sıkışan blok (GENİŞLİK SABİT) */
     #contentScaled{
-      transform: scale(var(--contentScale));
+      width:100%;
+      transform: scale3d(1, var(--contentScaleY), 1);
       transform-origin: top center;
-      width: 100%;
+      will-change: transform;
     }
 
     /* FaceToFace */
@@ -174,8 +174,12 @@
       display:flex;
       flex-direction:column;
       gap: var(--gap);
+      width:100%;
     }
+
+    /* ✅ butonlar ENİ TAM kullansın */
     .academy-pro{
+      width:100%;
       min-height: 60px;
       background: rgba(255,255,255,0.05);
       border-radius: 24px;
@@ -183,7 +187,9 @@
       border: 1px solid rgba(255,255,255,0.1);
       display:flex; align-items:center; gap: 14px;
       cursor:pointer; user-select:none;
+      box-sizing:border-box;
     }
+    .academy-text{ min-width:0; }
     .academy-text h2{ margin:0; font-size: 15px; font-weight:900; color:#fff; }
     .academy-text h2 span{ background: var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .academy-text p{ margin:0; font-size: 10px; font-weight:800; color: rgba(255,255,255,0.4); }
@@ -199,7 +205,7 @@
     }
 
     /* Academy logo */
-    .spectrum-logo{ gap:3.5px; display:flex; align-items:center; height: 30px; }
+    .spectrum-logo{ gap:3.5px; display:flex; align-items:center; height: 30px; flex:0 0 auto; }
     .bar{ width:3.5px; border-radius:10px; animation: barMove 1.2s infinite ease-in-out; }
     .bar-1{ height:10px; background:#ff0000; animation-delay:.1s; }
     .bar-2{ height:18px; background:#ff7f00; animation-delay:.3s; }
@@ -237,7 +243,7 @@
     .learn-logo span{ position:relative; font-weight:900; font-size:16px; opacity:.95; }
 
     /* Walkie */
-    .walkie-logo{ display:flex; align-items:center; gap:6px; height:32px; }
+    .walkie-logo{ display:flex; align-items:center; gap:6px; height:32px; flex:0 0 auto; }
     .pulse-dot{
       width:8px;height:8px;border-radius:99px;
       background:#00f3ff; box-shadow:0 0 12px rgba(0,243,255,.55);
@@ -310,7 +316,6 @@
     </header>
 
     <div id="pageContent">
-      <!-- ✅ Ölçeklenen blok -->
       <div id="contentScaled">
 
         <div class="portal-zone" data-href="/facetoface.html">
@@ -388,10 +393,8 @@
       if(!url) return;
       try{ window.location.assign(url); }catch{ window.location.href = url; }
     }
-
     document.getElementById("brandHome")?.addEventListener("click", ()=>go("/pages/home.html"));
     document.getElementById("profileBtn")?.addEventListener("click", ()=>go("/pages/profile.html"));
-
     document.querySelectorAll("[data-href]").forEach(el=>{
       const url = el.getAttribute("data-href");
       const handler = (e)=>{ e.preventDefault(); e.stopPropagation(); go(url); };
@@ -414,13 +417,10 @@
           const raw = localStorage.getItem(k);
           if(!raw) continue;
           const u = JSON.parse(raw);
-
           const full = u.full_name || u.fullname || u.name || u.display_name || u.email || "Kullanıcı";
           document.getElementById("userName").textContent = pickFirstName(full) || "Kullanıcı";
-
           const tk = (u.tokens ?? u.token ?? u.jeton ?? null);
           document.getElementById("headerJeton").textContent = (tk != null) ? String(tk) : "—";
-
           const pic = u.picture || u.avatar || u.avatar_url || u.photo || "";
           if(pic){
             const img = document.getElementById("userPic");
@@ -437,13 +437,12 @@
       const app = document.getElementById("app");
       const hdr = document.getElementById("hdr");
       const ftr = document.getElementById("ftr");
-      const contentScaled = document.getElementById("contentScaled");
-      const pageContent = document.getElementById("pageContent");
+      const scaled = document.getElementById("contentScaled");
+      const page = document.getElementById("pageContent");
 
       function setVar(k,v){ root.style.setProperty(k,v); }
 
       function lockAppHeight(){
-        // ✅ WebView stabil px
         const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
         setVar("--appH", h + "px");
       }
@@ -452,29 +451,27 @@
         lockAppHeight();
         loadUser();
 
-        // footer/header ölç
+        // ölç
         const headerH = Math.round(hdr.getBoundingClientRect().height || 0);
         const footerH = Math.round(ftr.getBoundingClientRect().height || 0);
 
-        // pageContent'a “footer kadar” alan bıraktır
-        pageContent.style.paddingBottom = (footerH + 10) + "px";
+        // footer kadar alt boşluk ayır
+        page.style.paddingBottom = (footerH + 10) + "px";
 
         // kullanılabilir yükseklik
         const appH = Math.round(app.getBoundingClientRect().height || 0);
-        const available = Math.max(100, appH - headerH - footerH - 20);
+        const available = Math.max(120, appH - headerH - footerH - 20);
 
-        // içerik doğal yüksekliği
-        // (scale uygulamadan önce 1’e çek)
-        setVar("--contentScale","1");
-        // küçük gecikme ile ölç (font/blur)
+        // önce scaleY=1 ölç
+        setVar("--contentScaleY", "1");
         requestAnimationFrame(()=>{
-          const natural = Math.round(contentScaled.getBoundingClientRect().height || 0);
+          const natural = Math.round(scaled.getBoundingClientRect().height || 0);
 
           let s = 1;
           if(natural > available){
-            s = Math.max(0.72, Math.min(1, available / natural)); // 0.72 altına düşme
+            s = Math.max(0.78, Math.min(1, available / natural)); // ✅ çok ezme
           }
-          setVar("--contentScale", String(s));
+          setVar("--contentScaleY", String(s));
         });
       }
 
