@@ -9,19 +9,14 @@
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
 
-  <!-- ✅ KRİTİK: onboarding.js cache kır (eski bozuk script yüzünden clickler bağlanmıyor) -->
-  <script src="/js/onboarding.js?v=SAFE_002"></script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#02000f;
       --card: rgba(255,255,255,0.05);
       --border: rgba(255,255,255,0.12);
-      --muted: rgba(255,255,255,0.62);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
     #pageContent{
@@ -38,17 +33,8 @@
       -webkit-backdrop-filter: blur(16px);
       padding: 14px 14px;
     }
-    .heroTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom: 8px;
-    }
-    .hTitle{
-      font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight: 1000;
-      font-size: 16px;
-      margin:0;
-      color:#fff;
-    }
+    .heroTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 8px; }
+    .hTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-weight:1000; font-size:16px; margin:0; color:#fff; }
     .pill{
       padding: 8px 12px;
       border-radius: 999px;
@@ -68,7 +54,6 @@
     }
     .heroText b{ color:#fff; }
 
-    /* 2 sütun */
     .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     button.card{
@@ -80,47 +65,25 @@
       padding: 14px 12px;
       min-height: 98px;
 
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
       gap:6px;
-
-      cursor:pointer;
-      user-select:none;
+      cursor:pointer; user-select:none;
       transition: transform .18s ease, background .18s ease;
       text-align:center;
 
       width:100%;
-      appearance:none;
-      -webkit-appearance:none;
-      outline:none;
+      appearance:none; -webkit-appearance:none;
       color:#fff;
     }
     button.card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
 
-    .flag{
-      font-size: 26px;
-      line-height: 1;
-      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
-    }
-    .name{
-      font-size: 14px;
-      font-weight: 1000;
-      color:#fff;
-      letter-spacing: -0.2px;
-    }
-    .status{
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.60);
-    }
+    .flag{ font-size: 26px; line-height: 1; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28)); }
+    .name{ font-size: 14px; font-weight: 1000; color:#fff; }
+    .status{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.60); }
     .status.ok{ color: rgba(165,180,252,0.95); }
 
     .toast{
-      position: fixed;
-      left:50%;
-      top:18px;
+      position: fixed; left:50%; top:18px;
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,0.95);
       border: 1px solid rgba(165,180,252,0.35);
@@ -151,7 +114,7 @@
         </div>
         <p class="heroText">
           Lütfen <b>sessiz</b> ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
-          Sınav soruları dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
+          Sorular dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
         </p>
       </section>
 
@@ -180,10 +143,8 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // ✅ Üst sıra sabit: EN FR DE ES IT RU
     const TOP = ["en","fr","de","es","it","ru"];
 
-    // ✅ Tam 34 dil (tek kart kalmaz)
     const LANGS = [
       { code:"en", name:"English",      flag:"🇬🇧" },
       { code:"fr", name:"French",       flag:"🇫🇷" },
@@ -201,6 +162,7 @@
 
       { code:"ar", name:"Arabic",       flag:"🇸🇦" },
       { code:"fa", name:"Persian",      flag:"🇮🇷" },
+      { code:"he", name:"Hebrew",       flag:"🇮🇱" },
 
       { code:"nl", name:"Dutch",        flag:"🇳🇱" },
       { code:"sv", name:"Swedish",      flag:"🇸🇪" },
@@ -224,8 +186,6 @@
       { code:"ja", name:"Japanese",     flag:"🇯🇵" },
       { code:"ko", name:"Korean",       flag:"🇰🇷" },
       { code:"th", name:"Thai",         flag:"🇹🇭" },
-
-      { code:"hi", name:"Hindi",        flag:"🇮🇳" },   /* ✅ 34’ü tamamlar */
     ];
 
     function orderLangs(){
@@ -237,7 +197,6 @@
       return [...top, ...rest];
     }
 
-    // auth (redirect yok)
     let userId = null;
     try{
       const { data:{ session } } = await supabase.auth.getSession();
@@ -247,7 +206,6 @@
       toast("Oturum okunamadı.");
     }
 
-    // levels
     let levels = {};
     if(userId){
       try{
@@ -276,34 +234,32 @@
     const ordered = orderLangs();
     grid.innerHTML = ordered.map(cardHtml).join("");
 
-    // ✅ tek tık / ghost engeli
-    let busy = false;
-    let lastTapAt = 0;
+    let __busy = false;
+    let __lastTapAt = 0;
 
     async function startTest(code, btn){
-      if(busy) return;
+      if(__busy) return;
       const now = Date.now();
-      if(now - lastTapAt < 650) return;
-      lastTapAt = now;
+      if(now - __lastTapAt < 650) return;
+      __lastTapAt = now;
 
       if(!userId){
         toast("Giriş gerekli.");
         return;
       }
 
-      busy = true;
+      __busy = true;
       btn.disabled = true;
 
       try{
         toast("Sınav başlatılıyor…");
-
         const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
 
         if(error){
           console.log("RPC ERROR:", error);
           toast(error.message || "Başlatılamadı");
           btn.disabled = false;
-          busy = false;
+          __busy = false;
           return;
         }
 
@@ -314,7 +270,7 @@
           console.log("RPC DATA:", data);
           toast("test_id gelmedi");
           btn.disabled = false;
-          busy = false;
+          __busy = false;
           return;
         }
 
@@ -324,11 +280,10 @@
         toast("Başlatılamadı");
         btn.disabled = false;
       }finally{
-        busy = false;
+        __busy = false;
       }
     }
 
-    // ✅ click + touchend
     grid.querySelectorAll(".card").forEach(btn=>{
       const handler = (ev)=>{
         ev.preventDefault();
