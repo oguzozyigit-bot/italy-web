@@ -22,7 +22,6 @@
   }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
 
-  /* ui_shell body zaten fixed/hidden yönetiyor. Biz sadece içeriği yönetiyoruz. */
   #pageContent{ height: 100%; }
 
   .wrap{
@@ -30,14 +29,10 @@
     max-width:480px;
     height:100%;
     margin:0 auto;
-
-    /* ✅ ui_shell main-content zaten footer için padding veriyor. burada tekrar ekleme */
     padding: 12px 14px 14px;
-
     display:flex;
     flex-direction:column;
     gap:12px;
-
     background: rgba(10,10,30,0.18);
     border: 1px solid rgba(255,255,255,0.06);
     border-radius: 26px;
@@ -129,7 +124,6 @@
     white-space: pre-wrap;
   }
 
-  /* RESULT OVERLAY */
   .overlay{
     position:fixed; inset:0;
     background: rgba(0,0,0,0.60);
@@ -207,7 +201,6 @@
   import { mountShell } from "/js/ui_shell.js";
   import { supabase } from "/js/supabase_client.js";
 
-  // ✅ ÜST/ALT bar
   mountShell({ scroll: "none" });
 
   const API_BASE = "https://italky-api.onrender.com";
@@ -256,48 +249,20 @@
     return [];
   }
 
-  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
-
-  // ✅ generate spam kilidi (aynı test için tek sefer)
-  const GEN_LOCK_KEY = `lt_gen_lock_${testId}`;
-  function hasGenLock(){
-    try{
-      const raw = localStorage.getItem(GEN_LOCK_KEY);
-      if(!raw) return false;
-      const ts = Number(raw || 0);
-      // 2 dk içinde tekrar deneme yok
-      return (Date.now() - ts) < 120000;
-    }catch{ return false; }
-  }
-  function setGenLock(){
-    try{ localStorage.setItem(GEN_LOCK_KEY, String(Date.now())); }catch{}
-  }
-  function clearGenLock(){
-    try{ localStorage.removeItem(GEN_LOCK_KEY); }catch{}
-  }
-
   async function generateQuestions(testRow){
     const lang = String(testRow?.language_code || langParam || "en").toLowerCase();
-
-    // ✅ CORS için: credentials OMIT
-    const r = await fetch(`${API_BASE}/api/level_test/generate`, {
+    const r = await fetch(`${API_BASE}/api/level_test/generate`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      credentials: "omit",
       body: JSON.stringify({ test_id: testId, lang })
     });
-
-    if(!r.ok){
-      const t = await r.text().catch(()=> "");
-      throw new Error(`generate_failed HTTP ${r.status}\n${t}`);
-    }
-
     const j = await r.json().catch(()=>null);
-    if(!j?.ok) throw new Error(`generate_failed: ${JSON.stringify(j)}`);
+    if(!r.ok || !j?.ok){
+      throw new Error(j?.detail || `generate_failed HTTP ${r.status}`);
+    }
     return true;
   }
 
-  // 1) test satırı
   let testRow = null;
   try{
     testRow = await loadTestRow();
@@ -309,74 +274,35 @@
   const langCode = String(testRow?.language_code || langParam || "en").toLowerCase();
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  // 2) questions yoksa: backend üret + yeniden çek
   let QUESTIONS = extractQuestions(testRow);
 
   if(!QUESTIONS.length){
-    showInfo("Sorular hazırlanıyor…\n\nİlk açılışta 2–8 saniye sürebilir.");
-
-    // ✅ Kilit varsa spam yapma
-    if(hasGenLock()){
-      // sadece tekrar çekmeyi dene (belki hazır oldu)
-      await sleep(800);
-    }else{
-      setGenLock();
-      try{
-        // ✅ Retry: 3 deneme (CORS veya geçici 502 vs.)
-        let ok = false;
-        let lastErr = null;
-
-        for(let attempt=1; attempt<=3; attempt++){
-          try{
-            await generateQuestions(testRow);
-            ok = true;
-            break;
-          }catch(err){
-            lastErr = err;
-            await sleep(600 * attempt);
-          }
-        }
-
-        if(!ok){
-          clearGenLock();
-          throw lastErr || new Error("generate_failed");
-        }
-      }catch(e){
-        showError("Sorular üretilemedi.", String(e?.message || e));
-        throw e;
-      }
-    }
-
-    // ✅ DB tekrar oku (sorular yazıldıysa gelir)
+    showInfo("Sorular hazırlanıyor…\n\nİlk açılışta 2–15 saniye sürebilir.");
     try{
+      await generateQuestions(testRow);
       testRow = await loadTestRow();
       QUESTIONS = extractQuestions(testRow);
     }catch(e){
-      showError("Test yeniden okunamadı.", String(e?.message || e));
+      showError("Sorular üretilemedi.", String(e?.message || e));
       throw e;
     }
   }
 
   if(!QUESTIONS.length){
-    showError(
-      "Soru listesi hâlâ boş.",
-      "Backend soruları level_tests.questions alanına yazamadı.\n\nKontrol:\n- italky-api /api/level_test/generate çalışıyor mu?\n- CORS allow-origin geliyor mu?\n- level_tests.questions jsonb mi?"
-    );
+    showError("Soru listesi boş.", "generate çalıştı ama DB’ye yazılamadı.");
     throw new Error("empty questions");
   }
 
-  // --- TIMER (40 dk) ---
   const TOTAL_TIME = 40*60;
   const MAX_PASSES = 2;
 
   let remaining = TOTAL_TIME;
   let timer = null;
 
-  // started_at varsa: devam
   try{
     const startedAt = testRow?.started_at ? new Date(testRow.started_at).getTime() : null;
     if(startedAt){
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      const elapsed = Math.floor((Date.now() - startedAt)/1000);
       remaining = Math.max(0, TOTAL_TIME - elapsed);
     }
   }catch{}
@@ -405,10 +331,7 @@
 
   function render(){
     const q = QUESTIONS[idx];
-    if(!q){
-      showError("Soru bulunamadı.", `idx=${idx}\nquestions=${QUESTIONS.length}`);
-      return;
-    }
+    if(!q){ showError("Soru yok.", `idx=${idx}`); return; }
 
     passCount[idx] = Math.min(MAX_PASSES, passCount[idx] + 1);
 
@@ -445,9 +368,9 @@
     let correct = 0;
     let total = 0;
     for(let i=0;i<QUESTIONS.length;i++){
-      const q = QUESTIONS[i];
       if(answers[i] === null) continue;
       total++;
+      const q = QUESTIONS[i];
       const corr = (q.correct_index != null) ? q.correct_index : q.correct;
       if(answers[i] === corr) correct++;
     }
@@ -511,8 +434,6 @@ Sonuç profilinize işlendi.`;
     if(remaining===0) finishExam();
   }, 1000);
 
-  btnSkip.disabled = false;
-  btnNext.disabled = false;
   render();
 </script>
 </body>
