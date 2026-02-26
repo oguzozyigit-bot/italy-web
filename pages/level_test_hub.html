@@ -9,6 +9,9 @@
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
 
+  <!-- ✅ KRİTİK: onboarding.js cache kır (eski bozuk script yüzünden clickler bağlanmıyor) -->
+  <script src="/js/onboarding.js?v=SAFE_002"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -177,8 +180,10 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // 34 dil (tek kart kalmaz). Üst sıra sabit: EN FR DE ES IT RU
+    // ✅ Üst sıra sabit: EN FR DE ES IT RU
     const TOP = ["en","fr","de","es","it","ru"];
+
+    // ✅ Tam 34 dil (tek kart kalmaz)
     const LANGS = [
       { code:"en", name:"English",      flag:"🇬🇧" },
       { code:"fr", name:"French",       flag:"🇫🇷" },
@@ -196,7 +201,6 @@
 
       { code:"ar", name:"Arabic",       flag:"🇸🇦" },
       { code:"fa", name:"Persian",      flag:"🇮🇷" },
-      { code:"he", name:"Hebrew",       flag:"🇮🇱" },
 
       { code:"nl", name:"Dutch",        flag:"🇳🇱" },
       { code:"sv", name:"Swedish",      flag:"🇸🇪" },
@@ -220,6 +224,8 @@
       { code:"ja", name:"Japanese",     flag:"🇯🇵" },
       { code:"ko", name:"Korean",       flag:"🇰🇷" },
       { code:"th", name:"Thai",         flag:"🇹🇭" },
+
+      { code:"hi", name:"Hindi",        flag:"🇮🇳" },   /* ✅ 34’ü tamamlar */
     ];
 
     function orderLangs(){
@@ -231,7 +237,7 @@
       return [...top, ...rest];
     }
 
-    // ✅ session: redirect YOK
+    // auth (redirect yok)
     let userId = null;
     try{
       const { data:{ session } } = await supabase.auth.getSession();
@@ -270,33 +276,34 @@
     const ordered = orderLangs();
     grid.innerHTML = ordered.map(cardHtml).join("");
 
-    // ✅ ghost-tap / double fire engeli
-    let __busy = false;
-    let __lastTapAt = 0;
+    // ✅ tek tık / ghost engeli
+    let busy = false;
+    let lastTapAt = 0;
 
     async function startTest(code, btn){
-      if(__busy) return;
+      if(busy) return;
       const now = Date.now();
-      if(now - __lastTapAt < 650) return;
-      __lastTapAt = now;
+      if(now - lastTapAt < 650) return;
+      lastTapAt = now;
 
       if(!userId){
         toast("Giriş gerekli.");
         return;
       }
 
-      __busy = true;
+      busy = true;
       btn.disabled = true;
 
       try{
         toast("Sınav başlatılıyor…");
+
         const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
 
         if(error){
           console.log("RPC ERROR:", error);
           toast(error.message || "Başlatılamadı");
           btn.disabled = false;
-          __busy = false;
+          busy = false;
           return;
         }
 
@@ -307,7 +314,7 @@
           console.log("RPC DATA:", data);
           toast("test_id gelmedi");
           btn.disabled = false;
-          __busy = false;
+          busy = false;
           return;
         }
 
@@ -317,11 +324,11 @@
         toast("Başlatılamadı");
         btn.disabled = false;
       }finally{
-        __busy = false;
+        busy = false;
       }
     }
 
-    // ✅ click + touchend (dedupe ile)
+    // ✅ click + touchend
     grid.querySelectorAll(".card").forEach(btn=>{
       const handler = (ev)=>{
         ev.preventDefault();
@@ -330,7 +337,6 @@
         if(!code) return;
         startTest(code, btn);
       };
-
       btn.addEventListener("click", handler, { passive:false });
       btn.addEventListener("touchend", handler, { passive:false });
     });
