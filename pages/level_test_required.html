@@ -54,7 +54,7 @@
       <div class="card">
         <h1 class="title" id="tTitle">Seviyenizi tespit etmedik</h1>
         <p class="txt" id="tDesc">
-          Bu derse katılabilmeniz için önce seviye tespit sınavına katılmanız gerekir.
+          Bu derse katılabilmeniz için öncelikle seviye tespit sınavına katılmanız gerekir.
         </p>
       </div>
 
@@ -83,7 +83,8 @@
     $("tTitle").textContent = `Henüz ${NAME[lang] || lang.toUpperCase()} dil seviyenizi tespit etmedik`;
     $("tDesc").textContent =
 `Bu derse katılabilmek için seviye tespit sınavına katılınız.
-Sınav ücreti 5 jetondur.`;
+ Lütfen sessiz ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.
+ Sorular dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.`;
 
     function toast(msg){
       const t=$("toast"); if(!t) return;
