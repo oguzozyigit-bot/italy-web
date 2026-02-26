@@ -15,15 +15,29 @@
 
   <style>
     :root{
+      --bg:#02000f;
       --card: rgba(255,255,255,0.05);
       --border: rgba(255,255,255,0.12);
+      --muted: rgba(255,255,255,0.62);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+
+    /* ✅ ui_shell main-content zaten padding+scroll veriyor.
+       Burada ekstra padding verme (çifte padding / boşluk yapar). */
     #pageContent{
-      padding: 14px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 12px);
+      padding: 0 !important;
+      margin: 0 !important;
       min-height: 100%;
     }
-    .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+
+    .wrap{
+      max-width:560px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding: 4px 0 2px; /* mini üst boşluk */
+    }
 
     .hero{
       border-radius: 24px;
@@ -33,8 +47,17 @@
       -webkit-backdrop-filter: blur(16px);
       padding: 14px 14px;
     }
-    .heroTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 8px; }
-    .hTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-weight:1000; font-size:16px; margin:0; color:#fff; }
+    .heroTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom: 8px;
+    }
+    .hTitle{
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-weight: 1000;
+      font-size: 16px;
+      margin:0;
+      color:#fff;
+    }
     .pill{
       padding: 8px 12px;
       border-radius: 999px;
@@ -54,7 +77,12 @@
     }
     .heroText b{ color:#fff; }
 
-    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    /* ✅ 2 sütun sabit (tek kart kalmaz çünkü 34 dil) */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
     button.card{
       border-radius: 22px;
@@ -65,25 +93,48 @@
       padding: 14px 12px;
       min-height: 98px;
 
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
       gap:6px;
-      cursor:pointer; user-select:none;
+
+      cursor:pointer;
+      user-select:none;
       transition: transform .18s ease, background .18s ease;
       text-align:center;
 
       width:100%;
-      appearance:none; -webkit-appearance:none;
+      appearance:none;
+      -webkit-appearance:none;
+      outline:none;
       color:#fff;
     }
     button.card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
+    button.card:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
 
-    .flag{ font-size: 26px; line-height: 1; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28)); }
-    .name{ font-size: 14px; font-weight: 1000; color:#fff; }
-    .status{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.60); }
+    .flag{
+      font-size: 26px;
+      line-height: 1;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
+    }
+    .name{
+      font-size: 14px;
+      font-weight: 1000;
+      color:#fff;
+      letter-spacing: -0.2px;
+    }
+    .status{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.60);
+    }
     .status.ok{ color: rgba(165,180,252,0.95); }
 
     .toast{
-      position: fixed; left:50%; top:18px;
+      position: fixed;
+      left:50%;
+      top:18px;
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,0.95);
       border: 1px solid rgba(165,180,252,0.35);
@@ -114,7 +165,7 @@
         </div>
         <p class="heroText">
           Lütfen <b>sessiz</b> ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
-          Sorular dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
+          Sınav soruları dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
         </p>
       </section>
 
@@ -129,6 +180,7 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
+    // ✅ ui_shell scroll'u aç (main-content scroll)
     mountShell({ scroll:"auto" });
 
     const $ = (id)=>document.getElementById(id);
@@ -143,8 +195,8 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
+    // ✅ teacher_select ile BİREBİR aynı 34 dil
     const TOP = ["en","fr","de","es","it","ru"];
-
     const LANGS = [
       { code:"en", name:"English",      flag:"🇬🇧" },
       { code:"fr", name:"French",       flag:"🇫🇷" },
@@ -197,29 +249,26 @@
       return [...top, ...rest];
     }
 
-    let userId = null;
-    try{
-      const { data:{ session } } = await supabase.auth.getSession();
-      userId = session?.user?.id || null;
-      if(!userId) toast("Giriş bulunamadı. Tekrar giriş yap.");
-    }catch{
-      toast("Oturum okunamadı.");
+    // auth
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(!session?.user){
+      location.replace("/pages/login.html");
     }
+    const userId = session.user.id;
 
+    // levels (profiles.levels JSONB)
     let levels = {};
-    if(userId){
-      try{
-        const { data: prof } = await supabase
-          .from("profiles")
-          .select("levels")
-          .eq("id", userId)
-          .maybeSingle();
-        levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
-      }catch{}
-    }
+    try{
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("levels")
+        .eq("id", userId)
+        .maybeSingle();
+      levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
+    }catch{}
 
     function cardHtml(l){
-      const lv = (levels && typeof levels === "object") ? (levels[l.code] || "") : "";
+      const lv = levels?.[l.code] || "";
       const status = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
       const cls = lv ? "status ok" : "status";
       return `
@@ -234,21 +283,17 @@
     const ordered = orderLangs();
     grid.innerHTML = ordered.map(cardHtml).join("");
 
-    let __busy = false;
-    let __lastTapAt = 0;
+    // ✅ tık koruması
+    let busy = false;
+    let lastTap = 0;
 
     async function startTest(code, btn){
-      if(__busy) return;
+      if(busy) return;
       const now = Date.now();
-      if(now - __lastTapAt < 650) return;
-      __lastTapAt = now;
+      if(now - lastTap < 650) return;
+      lastTap = now;
 
-      if(!userId){
-        toast("Giriş gerekli.");
-        return;
-      }
-
-      __busy = true;
+      busy = true;
       btn.disabled = true;
 
       try{
@@ -259,7 +304,7 @@
           console.log("RPC ERROR:", error);
           toast(error.message || "Başlatılamadı");
           btn.disabled = false;
-          __busy = false;
+          busy = false;
           return;
         }
 
@@ -270,7 +315,7 @@
           console.log("RPC DATA:", data);
           toast("test_id gelmedi");
           btn.disabled = false;
-          __busy = false;
+          busy = false;
           return;
         }
 
@@ -280,20 +325,19 @@
         toast("Başlatılamadı");
         btn.disabled = false;
       }finally{
-        __busy = false;
+        busy = false;
       }
     }
 
+    // ✅ click tek başına yeter (touchend double-fire istemiyoruz)
     grid.querySelectorAll(".card").forEach(btn=>{
-      const handler = (ev)=>{
+      btn.addEventListener("click", (ev)=>{
         ev.preventDefault();
         ev.stopPropagation();
-        const code = String(btn.getAttribute("data-code") || "").trim();
+        const code = String(btn.getAttribute("data-code")||"").trim();
         if(!code) return;
         startTest(code, btn);
-      };
-      btn.addEventListener("click", handler, { passive:false });
-      btn.addEventListener("touchend", handler, { passive:false });
+      }, { passive:false });
     });
   </script>
 </body>
