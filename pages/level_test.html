@@ -14,149 +14,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
 <style>
-  :root{
-    --bg:#02000f;
-    --card: rgba(255,255,255,0.04);
-    --border: rgba(255,255,255,0.10);
-    --muted: rgba(255,255,255,0.65);
-  }
+  :root{ --bg:#02000f; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.10); --muted: rgba(255,255,255,0.65); }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-
   #pageContent{ height: 100%; }
-
-  .wrap{
-    position:relative;
-    max-width:480px;
-    height:100%;
-    margin:0 auto;
-    padding: 12px 14px 14px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    background: rgba(10,10,30,0.18);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 26px;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-  }
-
+  .wrap{ position:relative; max-width:480px; height:100%; margin:0 auto; padding: 12px 14px 14px; display:flex; flex-direction:column; gap:12px; background: rgba(10,10,30,0.18); border: 1px solid rgba(255,255,255,0.06); border-radius: 26px; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
   .topbar{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
-  .chip{
-    padding: 8px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: rgba(0,0,0,0.22);
-    color: rgba(165,180,252,0.92);
-    font-weight:1000;
-    font-size:12px;
-    white-space:nowrap;
-  }
+  .chip{ padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border); background: rgba(0,0,0,0.22); color: rgba(165,180,252,0.92); font-weight:1000; font-size:12px; white-space:nowrap; }
   .chip.timer{ color:#fff; border-color: rgba(255,255,255,0.12); }
-
-  .card{
-    flex:1;
-    border-radius: 22px;
-    border: 1px solid var(--border);
-    background: var(--card);
-    padding: 16px 14px;
-    overflow:auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  .card{ flex:1; border-radius: 22px; border: 1px solid var(--border); background: var(--card); padding: 16px 14px; overflow:auto; -webkit-overflow-scrolling: touch; }
   .card::-webkit-scrollbar{ display:none; }
-
   .q-meta{ display:flex; justify-content:space-between; gap:10px; margin-bottom:10px; }
   .meta{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.55); }
   .q-text{ font-size: 18px; font-weight:1000; line-height:1.3; margin: 6px 0 14px; white-space:pre-wrap; }
-
-  .opt{
-    width:100%;
-    padding: 14px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(0,0,0,0.22);
-    color:#fff;
-    font-weight: 900;
-    text-align:left;
-    margin-bottom:10px;
-    cursor:pointer;
-    white-space:pre-wrap;
-  }
+  .opt{ width:100%; padding: 14px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.22); color:#fff; font-weight: 900; text-align:left; margin-bottom:10px; cursor:pointer; white-space:pre-wrap; }
   .opt:active{ transform: scale(.99); }
   .opt.sel{ background: rgba(99,102,241,0.55); border-color: rgba(99,102,241,0.75); }
-
   .nav{ display:flex; gap:10px; }
-  .btn{
-    flex:1;
-    height: 52px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.06);
-    color:#fff;
-    font-weight:1000;
-    cursor:pointer;
-  }
+  .btn{ flex:1; height: 52px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; font-weight:1000; cursor:pointer; }
   .btn-primary{ background:#fff; color:#000; border:none; }
   .btn:disabled{ opacity:.35; cursor:not-allowed; }
-
   .note{ font-size:12px; color:var(--muted); font-weight:800; line-height:1.45; }
-
-  .errBox{
-    border-radius: 18px;
-    border: 1px solid rgba(255,90,140,0.35);
-    background: rgba(255,0,90,0.10);
-    padding: 12px 12px;
-    color: rgba(255,255,255,0.92);
-    font-weight: 900;
-    font-size: 12px;
-    line-height: 1.45;
-    white-space: pre-wrap;
-  }
-
-  .infoBox{
-    border-radius: 18px;
-    border: 1px solid rgba(165,180,252,0.35);
-    background: rgba(99,102,241,0.10);
-    padding: 12px 12px;
-    color: rgba(255,255,255,0.92);
-    font-weight: 900;
-    font-size: 12px;
-    line-height: 1.45;
-    white-space: pre-wrap;
-  }
-
-  .overlay{
-    position:fixed; inset:0;
-    background: rgba(0,0,0,0.60);
-    backdrop-filter: blur(10px);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-    z-index:999999;
-  }
+  .errBox{ border-radius: 18px; border: 1px solid rgba(255,90,140,0.35); background: rgba(255,0,90,0.10); padding: 12px 12px; color: rgba(255,255,255,0.92); font-weight: 900; font-size: 12px; line-height: 1.45; white-space: pre-wrap; }
+  .infoBox{ border-radius: 18px; border: 1px solid rgba(165,180,252,0.35); background: rgba(99,102,241,0.10); padding: 12px 12px; color: rgba(255,255,255,0.92); font-weight: 900; font-size: 12px; line-height: 1.45; white-space: pre-wrap; }
+  .overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.60); backdrop-filter: blur(10px); display:none; align-items:center; justify-content:center; padding:16px; z-index:999999; }
   .overlay.show{ display:flex; }
-  .resultCard{
-    width:min(520px, 100%);
-    border-radius: 28px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(10,10,18,0.92);
-    padding: 16px;
-  }
+  .resultCard{ width:min(520px, 100%); border-radius: 28px; border: 1px solid rgba(255,255,255,0.12); background: rgba(10,10,18,0.92); padding: 16px; }
   .rTitle{ font-size:16px; font-weight:1000; color:#fff; margin: 4px 0 10px; }
-  .rLevel{
-    font-size:28px;
-    font-weight:1000;
-    color:#a5b4fc;
-    margin: 0 0 10px;
-    letter-spacing:-0.5px;
-  }
-  .rText{
-    font-size:13px;
-    font-weight:900;
-    color: rgba(255,255,255,0.78);
-    line-height:1.55;
-    white-space:pre-wrap;
-  }
+  .rLevel{ font-size:28px; font-weight:1000; color:#a5b4fc; margin: 0 0 10px; letter-spacing:-0.5px; }
+  .rText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.55; white-space:pre-wrap; }
   .rBtns{ display:flex; gap:10px; margin-top: 12px; }
 </style>
 </head>
@@ -169,9 +54,7 @@
         <div class="chip timer" id="timerChip">40:00</div>
       </div>
 
-      <div class="card" id="qCard">
-        <div class="q-text">Yükleniyor…</div>
-      </div>
+      <div class="card" id="qCard"><div class="q-text">Yükleniyor…</div></div>
 
       <div class="nav">
         <button class="btn" id="btnPrev" disabled>GERİ</button>
@@ -179,9 +62,7 @@
         <button class="btn btn-primary" id="btnNext" disabled>İLERİ</button>
       </div>
 
-      <div class="note">
-        Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.
-      </div>
+      <div class="note">Bilmediğin soruyu <b>Atla</b>. Süre varsa atladıkların tekrar gelir. Her soru en fazla <b>2 tur</b> gösterilir.</div>
     </div>
   </main>
 
@@ -215,81 +96,59 @@
     qCard.innerHTML = `<div class="errBox">${title}\n\n${detail || ""}</div>`;
     btnPrev.disabled = btnSkip.disabled = btnNext.disabled = true;
   }
-  function showInfo(msg){
-    qCard.innerHTML = `<div class="infoBox">${msg}</div>`;
-  }
+  function showInfo(msg){ qCard.innerHTML = `<div class="infoBox">${msg}</div>`; }
   function qs(k){ return new URLSearchParams(location.search).get(k); }
 
-  const testId = String(qs("test_id") || "").trim();
-  const langParam = String(qs("lang") || "").trim().toLowerCase();
+  const testId = String(qs("test_id")||"").trim();
+  const langParam = String(qs("lang")||"").trim().toLowerCase();
 
   if(!testId){
-    showError("Test ID yok.", "Bu sayfa level_test_hub’dan açılmalı.");
+    showError("Test ID yok.", "Bu sayfa Seviye Tespit sayfasından açılmalı.");
     throw new Error("missing test_id");
   }
 
   const { data:{ session } } = await supabase.auth.getSession();
-  if(!session?.user){
-    location.replace("/pages/login.html");
-  }
+  if(!session?.user) location.replace("/pages/login.html");
 
   async function loadTestRow(){
     const { data, error } = await supabase
       .from("level_tests")
-      .select("id, user_id, language_code, questions, started_at, status")
+      .select("id,user_id,language_code,questions,started_at,status")
       .eq("id", testId)
       .single();
     if(error) throw error;
     return data;
   }
-
-  function extractQuestions(testRow){
-    if(Array.isArray(testRow?.questions)) return testRow.questions;
-    if(Array.isArray(testRow?.questions?.questions)) return testRow.questions.questions;
+  function extractQuestions(row){
+    if(Array.isArray(row?.questions)) return row.questions;
+    if(Array.isArray(row?.questions?.questions)) return row.questions.questions;
     return [];
   }
-
-  async function generateQuestions(testRow){
-    const lang = String(testRow?.language_code || langParam || "en").toLowerCase();
+  async function generateQuestions(row){
+    const lang = String(row?.language_code || langParam || "en").toLowerCase();
     const r = await fetch(`${API_BASE}/api/level_test/generate`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ test_id: testId, lang })
     });
     const j = await r.json().catch(()=>null);
-    if(!r.ok || !j?.ok){
-      throw new Error(j?.detail || `generate_failed HTTP ${r.status}`);
-    }
+    if(!r.ok || !j?.ok) throw new Error(j?.detail || `generate_failed HTTP ${r.status}`);
     return true;
   }
 
-  let testRow = null;
-  try{
-    testRow = await loadTestRow();
-  }catch(e){
-    showError("Test okunamadı.", String(e?.message || e));
-    throw e;
-  }
-
+  let testRow = await loadTestRow();
   const langCode = String(testRow?.language_code || langParam || "en").toLowerCase();
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
   let QUESTIONS = extractQuestions(testRow);
-
   if(!QUESTIONS.length){
-    showInfo("Sorular hazırlanıyor…\n\nİlk açılışta 2–15 saniye sürebilir.");
-    try{
-      await generateQuestions(testRow);
-      testRow = await loadTestRow();
-      QUESTIONS = extractQuestions(testRow);
-    }catch(e){
-      showError("Sorular üretilemedi.", String(e?.message || e));
-      throw e;
-    }
+    showInfo("Sorular hazırlanıyor…\n\nYükleme süresi sistem yoğunluğuna göre değişebilir (15–120 sn).");
+    await generateQuestions(testRow);
+    testRow = await loadTestRow();
+    QUESTIONS = extractQuestions(testRow);
   }
-
   if(!QUESTIONS.length){
-    showError("Soru listesi boş.", "generate çalıştı ama DB’ye yazılamadı.");
+    showError("Sorular bulunamadı.", "generate ok döndü ama DB’ye yazılmamış.");
     throw new Error("empty questions");
   }
 
@@ -297,8 +156,6 @@
   const MAX_PASSES = 2;
 
   let remaining = TOTAL_TIME;
-  let timer = null;
-
   try{
     const startedAt = testRow?.started_at ? new Date(testRow.started_at).getTime() : null;
     if(startedAt){
@@ -364,35 +221,9 @@
     btnNext.textContent = (nextIndex(idx)===-1) ? "SINAVI TAMAMLA" : "İLERİ";
   }
 
-  function scoreRaw(){
-    let correct = 0;
-    let total = 0;
-    for(let i=0;i<QUESTIONS.length;i++){
-      if(answers[i] === null) continue;
-      total++;
-      const q = QUESTIONS[i];
-      const corr = (q.correct_index != null) ? q.correct_index : q.correct;
-      if(answers[i] === corr) correct++;
-    }
-    return { correct, total };
-  }
-
-  function computeLevelFromPercent(p){
-    if(p >= 0.85) return "C1";
-    if(p >= 0.70) return "B2";
-    if(p >= 0.55) return "B1";
-    if(p >= 0.40) return "A2";
-    return "A1";
-  }
-
   async function finishExam(){
-    if(timer) clearInterval(timer);
-
-    const { correct, total } = scoreRaw();
-    const percent = total ? (correct/total) : 0;
-    const level = computeLevelFromPercent(percent);
-
-    const { error } = await supabase.rpc("finish_level_test", {
+    // ✅ DB hesaplasın + 3 yere yazsın
+    const { data, error } = await supabase.rpc("finish_level_test", {
       p_test_id: testId,
       p_answers: answers,
       p_remaining_seconds: remaining
@@ -403,6 +234,12 @@
       return;
     }
 
+    const row = Array.isArray(data) ? (data[0] || null) : data;
+    const level = row?.result_level || "A1";
+    const correct = Number(row?.correct ?? 0);
+    const total = Number(row?.total ?? 0);
+    const percent = Number(row?.percent ?? 0);
+
     $("rLevel").textContent = `Seviye: ${level}`;
     $("rText").textContent =
 `Doğru: ${correct} / ${total}
@@ -411,7 +248,7 @@ Başarı: %${Math.round(percent*100)}
 Sonuç profilinize işlendi.`;
 
     $("resultOverlay").classList.add("show");
-    $("rGo").onclick = ()=>location.href="/pages/profile.html";
+    $("rGo").onclick = ()=>location.href="/pages/level_test_hub.html";
     $("rLater").onclick = ()=>location.href="/pages/home.html";
   }
 
@@ -427,11 +264,14 @@ Sonuç profilinize işlendi.`;
   };
 
   updateTimer();
-  timer = setInterval(()=>{
+  const timer = setInterval(()=>{
     remaining--;
     if(remaining<0) remaining=0;
     updateTimer();
-    if(remaining===0) finishExam();
+    if(remaining===0){
+      clearInterval(timer);
+      finishExam();
+    }
   }, 1000);
 
   render();
