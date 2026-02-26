@@ -18,44 +18,33 @@
       --bg:#02000f;
       --card: rgba(255,255,255,0.05);
       --border: rgba(255,255,255,0.12);
+      --muted: rgba(255,255,255,0.62);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    html,body{
-      margin:0;
-      width:100%;
-      height:100%;
-      overflow:auto;                 /* ✅ scroll garanti */
-      -webkit-overflow-scrolling:touch;
-      font-family:Outfit,system-ui,sans-serif;
-      color:#fff;
-      touch-action: pan-y;
-    }
 
-    /* ✅ pageContent scroll container */
+    /* ✅ shell varken scroll alanı pageContent olmalı */
+    html,body{ height:100%; }
     #pageContent{
-      min-height: 100dvh;
-      padding: 14px 12px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 10px);
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
-      position:relative;
-      z-index: 10;
-      pointer-events:auto;
+      height: 100%;
+      overflow: auto;                 /* ✅ scroll burada */
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 12px);
+      position: relative;
+      z-index: 5;                     /* ✅ overlay üstüne çık */
     }
+    #pageContent::-webkit-scrollbar{ display:none; }
 
     .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
 
     .hero{
-      border-radius: 22px;
+      border-radius: 24px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       padding: 14px 14px;
     }
-    .heroTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom: 6px;
-    }
+    .heroTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
     .hTitle{
       font-family:"Space Grotesk",system-ui,sans-serif;
       font-weight: 1000;
@@ -80,24 +69,23 @@
       line-height: 1.5;
       color: rgba(255,255,255,0.70);
     }
+    .heroText b{ color:#fff; }
 
+    /* ✅ 2 sütun kesin */
     .grid{
       display:grid;
-      grid-template-columns: 1fr 1fr; /* ✅ 2 sütun */
-      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
     }
 
-    .cardBtn{
-      -webkit-appearance:none;
-      appearance:none;
-      width:100%;
-      border-radius: 20px;
+    .card{
+      border-radius: 22px;
       border: 1px solid var(--border);
       background: var(--card);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       padding: 14px 12px;
-      min-height: 92px;
+      min-height: 110px;
 
       display:flex;
       flex-direction:column;
@@ -107,33 +95,15 @@
 
       cursor:pointer;
       user-select:none;
-      transition: transform .12s ease, background .12s ease, opacity .12s ease;
+      transition: transform .18s ease, background .18s ease;
       text-align:center;
-      position:relative;
-      overflow:hidden;
-
       touch-action: manipulation;
-      pointer-events: auto !important;
     }
-    .cardBtn:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
-    .cardBtn[aria-busy="true"]{ opacity:.55; pointer-events:none !important; }
+    .card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
 
-    .flag{
-      font-size: 26px;
-      line-height: 1;
-      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
-    }
-    .name{
-      font-size: 14px;
-      font-weight: 1000;
-      color:#fff;
-      letter-spacing: -0.2px;
-    }
-    .status{
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.60);
-    }
+    .flag{ font-size: 26px; line-height: 1; }
+    .name{ font-size: 14px; font-weight: 1000; color:#fff; }
+    .status{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.60); }
     .status.ok{ color: rgba(165,180,252,0.95); }
 
     .toast{
@@ -149,7 +119,7 @@
       z-index: 999999;
       font-weight: 1000;
       font-size: 12px;
-      transition: .18s;
+      transition: .25s;
       backdrop-filter: blur(12px);
       pointer-events:none;
       max-width: min(92vw, 520px);
@@ -169,8 +139,8 @@
           <div class="pill">Süre: 40 dk</div>
         </div>
         <p class="heroText">
-          Lütfen sessiz ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
-          Sorular dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
+          Lütfen <b>sessiz</b> ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
+          Sınav soruları dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
         </p>
       </section>
 
@@ -185,8 +155,60 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
-    // ✅ shell’i kur ama scroll kilidini biz açacağız
-    try{ mountShell({ scroll:"auto" }); }catch{}
+    // ✅ shell var (alt/üst bar)
+    mountShell({ scroll:"auto" });
+
+    /* =========================================================
+       ✅ FIX: ui_shell'in tıklamayı yiyen full-screen overlay'ini kapat
+       - Header/footer tıklanabilir kalır
+       - Sadece "tüm ekranı kaplayan ama içinde buton/link olmayan"
+         cam/overlay katmanlarına pointer-events:none verir.
+    ========================================================= */
+    function fixShellOverlay(){
+      try{
+        // body fixed/overflow kill'i bırakma (scroll #pageContent'te)
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "relative";
+
+        const vpW = window.innerWidth, vpH = window.innerHeight;
+
+        // full-screen fixed katmanları tarayıp "interaktif değilse" tıklamayı kapat
+        const nodes = Array.from(document.body.querySelectorAll("*"));
+        for(const el of nodes){
+          const cs = getComputedStyle(el);
+          if(cs.position !== "fixed") continue;
+
+          const r = el.getBoundingClientRect();
+          const covers =
+            r.width >= vpW * 0.92 &&
+            r.height >= vpH * 0.92 &&
+            r.left <= 2 && r.top <= 2;
+
+          if(!covers) continue;
+
+          // içinde tıklanabilir eleman varsa dokunma (header/footer olabilir)
+          const hasInteractive = el.querySelector("button,a,input,textarea,select");
+          if(hasInteractive) continue;
+
+          // ✅ bu cam katman: tıklamayı yutmasın
+          el.style.pointerEvents = "none";
+        }
+
+        // ✅ pageContent her zaman üstte
+        const pc = document.getElementById("pageContent");
+        if(pc){
+          pc.style.pointerEvents = "auto";
+          pc.style.zIndex = "5";
+          pc.style.overflow = "auto";
+        }
+      }catch(e){
+        console.warn("[fixShellOverlay]", e);
+      }
+    }
+
+    // shell DOM'u kurduktan sonra uygula
+    setTimeout(fixShellOverlay, 60);
+    window.addEventListener("resize", ()=>setTimeout(fixShellOverlay, 60));
 
     const $ = (id)=>document.getElementById(id);
     const grid = $("grid");
@@ -197,61 +219,26 @@
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 1200);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
     }
 
-    // ✅ ui_shell bazı sayfalarda body’yi kilitliyor → geri al
-    function forceUnlockScroll(){
-      try{
-        document.documentElement.style.overflow = "auto";
-        document.body.style.overflow = "auto";
-        document.documentElement.style.position = "";
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        document.body.style.bottom = "";
-        document.body.style.height = "";
-      }catch{}
-    }
-
-    // ✅ Full-screen görünmez blocker yakala → pointer-events kapat
-    function killFullScreenBlockers(){
-      try{
-        const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-
-        document.querySelectorAll("body *").forEach(el=>{
-          const cs = getComputedStyle(el);
-          if(cs.position !== "fixed") return;
-          if(cs.pointerEvents === "none") return;
-
-          const r = el.getBoundingClientRect();
-          const covers =
-            r.left <= 0 && r.top <= 0 &&
-            r.width >= vw - 2 &&
-            r.height >= vh - 2;
-
-          // sadece şüpheli “tam ekran overlay”leri kapat
-          if(covers){
-            el.style.pointerEvents = "none";
-          }
-        });
-      }catch{}
-    }
-
-    // ilk açılışta ve 1 sn sonra tekrar
-    forceUnlockScroll();
-    killFullScreenBlockers();
-    setTimeout(()=>{ forceUnlockScroll(); killFullScreenBlockers(); }, 450);
-    setTimeout(()=>{ forceUnlockScroll(); killFullScreenBlockers(); }, 1200);
-
-    // auth
     const { data:{ session } } = await supabase.auth.getSession();
-    if(!session?.user){
-      location.replace("/pages/login.html");
-    }
+    if(!session?.user) location.replace("/pages/login.html");
 
+    // 32 dil (tek kart kalmaz)
+    const LANGS = [
+      ["en","English","🇬🇧"], ["fr","French","🇫🇷"], ["de","German","🇩🇪"], ["es","Spanish","🇪🇸"],
+      ["it","Italian","🇮🇹"], ["ru","Russian","🇷🇺"],
+      ["ar","Arabic","🇸🇦"], ["az","Azerbaijani","🇦🇿"], ["tr","Turkish","🇹🇷"],
+      ["bg","Bulgarian","🇧🇬"], ["cs","Czech","🇨🇿"], ["da","Danish","🇩🇰"], ["el","Greek","🇬🇷"],
+      ["fi","Finnish","🇫🇮"], ["he","Hebrew","🇮🇱"], ["hi","Hindi","🇮🇳"], ["hu","Hungarian","🇭🇺"],
+      ["id","Indonesian","🇮🇩"], ["ja","Japanese","🇯🇵"], ["ko","Korean","🇰🇷"], ["nl","Dutch","🇳🇱"],
+      ["no","Norwegian","🇳🇴"], ["pl","Polish","🇵🇱"], ["pt","Portuguese","🇵🇹"], ["ro","Romanian","🇷🇴"],
+      ["sk","Slovak","🇸🇰"], ["sv","Swedish","🇸🇪"], ["th","Thai","🇹🇭"], ["uk","Ukrainian","🇺🇦"],
+      ["uz","Uzbek","🇺🇿"], ["vi","Vietnamese","🇻🇳"], ["zh","Chinese","🇨🇳"]
+    ];
+
+    // levels
     let levels = {};
     try{
       const { data: prof } = await supabase
@@ -262,121 +249,39 @@
       levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
     }catch{}
 
-    // ✅ 34 dil (tek kart kalmaz) – TOP: EN/DE/FR/ES/IT/RU
-    const TOP = ["en","de","fr","es","it","ru"];
-    const ALL = [
-      { code:"en", name:"English", flag:"🇬🇧" },
-      { code:"de", name:"German", flag:"🇩🇪" },
-      { code:"fr", name:"French", flag:"🇫🇷" },
-      { code:"es", name:"Spanish", flag:"🇪🇸" },
-      { code:"it", name:"Italian", flag:"🇮🇹" },
-      { code:"ru", name:"Russian", flag:"🇷🇺" },
-
-      { code:"ar", name:"Arabic", flag:"🇸🇦" },
-      { code:"az", name:"Azerbaijani", flag:"🇦🇿" },
-      { code:"bg", name:"Bulgarian", flag:"🇧🇬" },
-      { code:"cs", name:"Czech", flag:"🇨🇿" },
-      { code:"da", name:"Danish", flag:"🇩🇰" },
-      { code:"el", name:"Greek", flag:"🇬🇷" },
-      { code:"fa", name:"Persian", flag:"🇮🇷" },
-      { code:"fi", name:"Finnish", flag:"🇫🇮" },
-      { code:"he", name:"Hebrew", flag:"🇮🇱" },
-      { code:"hu", name:"Hungarian", flag:"🇭🇺" },
-      { code:"ja", name:"Japanese", flag:"🇯🇵" },
-      { code:"kk", name:"Kazakh", flag:"🇰🇿" },
-      { code:"ko", name:"Korean", flag:"🇰🇷" },
-      { code:"ky", name:"Kyrgyz", flag:"🇰🇬" },
-      { code:"nl", name:"Dutch", flag:"🇳🇱" },
-      { code:"no", name:"Norwegian", flag:"🇳🇴" },
-      { code:"pl", name:"Polish", flag:"🇵🇱" },
-      { code:"pt", name:"Portuguese", flag:"🇵🇹" },
-      { code:"ro", name:"Romanian", flag:"🇷🇴" },
-      { code:"sk", name:"Slovak", flag:"🇸🇰" },
-      { code:"sv", name:"Swedish", flag:"🇸🇪" },
-      { code:"th", name:"Thai", flag:"🇹🇭" },
-      { code:"tr", name:"Turkish", flag:"🇹🇷" },
-      { code:"tk", name:"Turkmen", flag:"🇹🇲" },
-      { code:"uk", name:"Ukrainian", flag:"🇺🇦" },
-      { code:"uz", name:"Uzbek", flag:"🇺🇿" },
-      { code:"vi", name:"Vietnamese", flag:"🇻🇳" },
-      { code:"zh", name:"Chinese", flag:"🇨🇳" },
-
-      { code:"id", name:"Indonesian", flag:"🇮🇩" },
-      { code:"ms", name:"Malay", flag:"🇲🇾" }
-    ];
-
-    function orderedList(){
-      const map = new Map(ALL.map(x=>[x.code, x]));
-      const top = TOP.map(c=>map.get(c)).filter(Boolean);
-      const rest = ALL
-        .filter(x=>!TOP.includes(x.code))
-        .sort((a,b)=>String(a.name).localeCompare(String(b.name), "en", { sensitivity:"base" }));
-      return [...top, ...rest];
-    }
-
-    function cardHtml(l){
-      const code = String(l.code);
-      const name = String(l.name || code.toUpperCase());
-      const flag = String(l.flag || "🌐");
-      const lv = (levels && typeof levels === "object") ? (levels[code] || "") : "";
-      const status = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
+    grid.innerHTML = LANGS.map(([code,name,flag])=>{
+      const lv = levels?.[code] || "";
+      const st = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
       const cls = lv ? "status ok" : "status";
       return `
-        <button class="cardBtn" type="button" data-code="${code}">
+        <div class="card" data-code="${code}">
           <div class="flag">${flag}</div>
           <div class="name">${name}</div>
-          <div class="${cls}">${status}</div>
-        </button>
+          <div class="${cls}">${st}</div>
+        </div>
       `;
-    }
+    }).join("");
 
-    grid.innerHTML = orderedList().map(cardHtml).join("");
+    // ✅ click bind (passive:false)
+    grid.querySelectorAll(".card").forEach(el=>{
+      el.addEventListener("click", async (e)=>{
+        e.preventDefault(); e.stopPropagation();
 
-    async function startTest(langCode, el){
-      const code = String(langCode||"").trim().toLowerCase();
-      if(!code) return;
+        const code = String(el.getAttribute("data-code")||"").trim();
+        if(!code) return;
 
-      try{ el?.setAttribute?.("aria-busy","true"); }catch{}
-      toast("Sınav başlatılıyor…");
+        toast("Sınav başlatılıyor…");
 
-      const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
+        const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
+        if(error){ toast(error.message || "Başlatılamadı"); return; }
 
-      if(error){
-        try{ el?.removeAttribute?.("aria-busy"); }catch{}
-        toast(error.message || "Başlatılamadı");
-        return;
-      }
+        const row = Array.isArray(data) ? (data[0] || null) : data;
+        const testId = row?.id || row?.test_id || null;
+        if(!testId){ toast("test_id gelmedi"); return; }
 
-      const row = Array.isArray(data) ? (data[0] || null) : data;
-      const testId = row?.id || row?.test_id || null;
-
-      if(!testId){
-        try{ el?.removeAttribute?.("aria-busy"); }catch{}
-        toast("test_id gelmedi");
-        return;
-      }
-
-      location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
-    }
-
-    // ✅ WebView tıklama garantisi
-    function hardBind(btn){
-      const run = (ev)=>{
-        try{
-          ev.preventDefault();
-          ev.stopPropagation();
-          ev.stopImmediatePropagation?.();
-        }catch{}
-        forceUnlockScroll();
-        killFullScreenBlockers();
-        startTest(btn.getAttribute("data-code"), btn);
-      };
-
-      btn.addEventListener("pointerdown", run, { passive:false, capture:true });
-      btn.addEventListener("touchstart",  run, { passive:false, capture:true });
-      btn.addEventListener("click",       run, { passive:false, capture:true });
-    }
-    grid.querySelectorAll(".cardBtn").forEach(hardBind);
+        location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
+      }, { passive:false });
+    });
   </script>
 </body>
 </html>
