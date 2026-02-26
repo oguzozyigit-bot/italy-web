@@ -31,13 +31,13 @@ html,body{
   color:#fff;
 }
 
-/* ✅ PAGE LAYOUT */
+/* ✅ Daha geniş: yan padding düşürüldü */
 #pageContent{
   height:100%;
   display:flex;
   flex-direction:column;
-  padding:14px 14px calc(8px + var(--safeB));
-  gap:12px;
+  padding: 12px 10px calc(8px + var(--safeB));
+  gap:10px;
 }
 
 /* HERO */
@@ -47,23 +47,20 @@ html,body{
   border:1px solid var(--border);
   background:var(--card);
   backdrop-filter:blur(18px);
-  padding:14px;
+  padding:12px;
 }
-
 .heroTop{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
   gap:10px;
 }
-
 .heroTitle{
   font-family:"Space Grotesk";
-  font-size:16px;
+  font-size:15px;
   font-weight:900;
   margin:0;
 }
-
 .chip{
   padding:6px 10px;
   border-radius:999px;
@@ -77,7 +74,6 @@ html,body{
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
-
 .heroSub{
   margin-top:8px;
   font-size:12px;
@@ -86,7 +82,7 @@ html,body{
   line-height:1.5;
 }
 
-/* ✅ GRID */
+/* GRID */
 .gridWrap{
   flex:1;
   min-height:0;
@@ -94,7 +90,6 @@ html,body{
   display:flex;
   flex-direction:column;
 }
-
 .grid{
   flex:1;
   min-height:0;
@@ -104,10 +99,10 @@ html,body{
   gap:10px;
   padding-bottom:6px;
 }
-
 .grid::-webkit-scrollbar{display:none;}
 
-@media(max-width:420px){
+/* ✅ Mobilde 2 kolon (kartlar daha geniş görünür) */
+@media(max-width:460px){
   .grid{grid-template-columns:repeat(2,1fr);}
 }
 
@@ -116,19 +111,18 @@ html,body{
   border-radius:18px;
   border:1px solid var(--border);
   background:var(--card);
-  padding:12px 8px;
+  padding:12px 10px;
   display:flex;
   flex-direction:column;
   align-items:center;
   gap:8px;
-  min-height:110px;
+  min-height:112px;
   cursor:pointer;
   text-align:center;
 }
-.langCard:active{transform:scale(.98)}
-
+.langCard:active{transform:scale(.985)}
 .flagBox{
-  width:50px;height:50px;
+  width:52px;height:52px;
   border-radius:16px;
   border:1px solid var(--border);
   display:flex;
@@ -136,18 +130,15 @@ html,body{
   justify-content:center;
   font-size:24px;
 }
-
 .langName{
   font-size:12px;
   font-weight:900;
 }
-
 .status{
   font-size:10px;
   font-weight:800;
   color:var(--muted);
 }
-
 .status .lvl{
   background:var(--ai);
   -webkit-background-clip:text;
@@ -187,6 +178,17 @@ if(!session?.user){
   location.replace("/pages/login.html");
 }
 
+function getUILang(){
+  // 1) varsa site dili
+  try{
+    const v = localStorage.getItem("italky_site_lang_v1");
+    if(v) return String(v).toLowerCase().slice(0,2);
+  }catch{}
+  // 2) tarayıcı dili
+  return String(navigator.language || "tr").toLowerCase().slice(0,2);
+}
+const UI = getUILang(); // "tr" veya "en" gibi
+
 let LEVELS = {};
 try{
   const { data } = await supabase
@@ -197,21 +199,110 @@ try{
   LEVELS = data?.levels || {};
 }catch{}
 
+/*
+  ✅ 80 dil listesi
+  - code: ISO base
+  - flag: emoji
+  - tr/en: Latin yazım
+*/
 const LANGS = [
-  {code:"tr",name:"Türkçe",flag:"🇹🇷"},
-  {code:"en",name:"English",flag:"🇬🇧"},
-  {code:"de",name:"Deutsch",flag:"🇩🇪"},
-  {code:"fr",name:"Français",flag:"🇫🇷"},
-  {code:"es",name:"Español",flag:"🇪🇸"},
-  {code:"it",name:"Italiano",flag:"🇮🇹"},
-  {code:"ru",name:"Русский",flag:"🇷🇺"},
-  {code:"ja",name:"日本語",flag:"🇯🇵"},
-  {code:"zh",name:"中文",flag:"🇨🇳"},
+  {code:"tr", flag:"🇹🇷", tr:"Türkçe", en:"Turkish"},
+  {code:"en", flag:"🇬🇧", tr:"İngilizce", en:"English"},
+  {code:"de", flag:"🇩🇪", tr:"Almanca", en:"German"},
+  {code:"fr", flag:"🇫🇷", tr:"Fransızca", en:"French"},
+  {code:"es", flag:"🇪🇸", tr:"İspanyolca", en:"Spanish"},
+  {code:"it", flag:"🇮🇹", tr:"İtalyanca", en:"Italian"},
+  {code:"ru", flag:"🇷🇺", tr:"Rusça", en:"Russian"},
+  {code:"ja", flag:"🇯🇵", tr:"Japonca", en:"Japanese"},
+  {code:"zh", flag:"🇨🇳", tr:"Çince", en:"Chinese"},
+  {code:"ko", flag:"🇰🇷", tr:"Korece", en:"Korean"},
+  {code:"ar", flag:"🇸🇦", tr:"Arapça", en:"Arabic"},
+  {code:"fa", flag:"🇮🇷", tr:"Farsça", en:"Persian"},
+  {code:"ur", flag:"🇵🇰", tr:"Urduca", en:"Urdu"},
+  {code:"hi", flag:"🇮🇳", tr:"Hintçe", en:"Hindi"},
+  {code:"bn", flag:"🇧🇩", tr:"Bengalce", en:"Bengali"},
+  {code:"pa", flag:"🇮🇳", tr:"Pencapça", en:"Punjabi"},
+  {code:"ta", flag:"🇮🇳", tr:"Tamilce", en:"Tamil"},
+  {code:"te", flag:"🇮🇳", tr:"Teluguca", en:"Telugu"},
+  {code:"mr", flag:"🇮🇳", tr:"Marathice", en:"Marathi"},
+  {code:"gu", flag:"🇮🇳", tr:"Guceratça", en:"Gujarati"},
+  {code:"id", flag:"🇮🇩", tr:"Endonezce", en:"Indonesian"},
+  {code:"ms", flag:"🇲🇾", tr:"Malayca", en:"Malay"},
+  {code:"vi", flag:"🇻🇳", tr:"Vietnamca", en:"Vietnamese"},
+  {code:"th", flag:"🇹🇭", tr:"Tayca", en:"Thai"},
+  {code:"tl", flag:"🇵🇭", tr:"Filipince", en:"Filipino"},
+  {code:"nl", flag:"🇳🇱", tr:"Felemenkçe", en:"Dutch"},
+  {code:"sv", flag:"🇸🇪", tr:"İsveççe", en:"Swedish"},
+  {code:"no", flag:"🇳🇴", tr:"Norveççe", en:"Norwegian"},
+  {code:"da", flag:"🇩🇰", tr:"Danca", en:"Danish"},
+  {code:"fi", flag:"🇫🇮", tr:"Fince", en:"Finnish"},
+  {code:"pl", flag:"🇵🇱", tr:"Lehçe", en:"Polish"},
+  {code:"cs", flag:"🇨🇿", tr:"Çekçe", en:"Czech"},
+  {code:"sk", flag:"🇸🇰", tr:"Slovakça", en:"Slovak"},
+  {code:"hu", flag:"🇭🇺", tr:"Macarca", en:"Hungarian"},
+  {code:"ro", flag:"🇷🇴", tr:"Romence", en:"Romanian"},
+  {code:"bg", flag:"🇧🇬", tr:"Bulgarca", en:"Bulgarian"},
+  {code:"el", flag:"🇬🇷", tr:"Yunanca", en:"Greek"},
+  {code:"uk", flag:"🇺🇦", tr:"Ukraynaca", en:"Ukrainian"},
+  {code:"he", flag:"🇮🇱", tr:"İbranice", en:"Hebrew"},
+  {code:"pt", flag:"🇵🇹", tr:"Portekizce", en:"Portuguese"},
+  {code:"sr", flag:"🇷🇸", tr:"Sırpça", en:"Serbian"},
+  {code:"hr", flag:"🇭🇷", tr:"Hırvatça", en:"Croatian"},
+  {code:"bs", flag:"🇧🇦", tr:"Boşnakça", en:"Bosnian"},
+  {code:"sq", flag:"🇦🇱", tr:"Arnavutça", en:"Albanian"},
+  {code:"sl", flag:"🇸🇮", tr:"Slovence", en:"Slovenian"},
+  {code:"mk", flag:"🇲🇰", tr:"Makedonca", en:"Macedonian"},
+  {code:"et", flag:"🇪🇪", tr:"Estonca", en:"Estonian"},
+  {code:"lv", flag:"🇱🇻", tr:"Letonca", en:"Latvian"},
+  {code:"lt", flag:"🇱🇹", tr:"Litvanca", en:"Lithuanian"},
+  {code:"ga", flag:"🇮🇪", tr:"İrlandaca", en:"Irish"},
+  {code:"cy", flag:"🏴", tr:"Galce", en:"Welsh"},
+  {code:"is", flag:"🇮🇸", tr:"İzlandaca", en:"Icelandic"},
+  {code:"mt", flag:"🇲🇹", tr:"Maltaca", en:"Maltese"},
+  {code:"af", flag:"🇿🇦", tr:"Afrikaans", en:"Afrikaans"},
+  {code:"sw", flag:"🇰🇪", tr:"Svahili", en:"Swahili"},
+  {code:"am", flag:"🇪🇹", tr:"Amharca", en:"Amharic"},
+  {code:"zu", flag:"🇿🇦", tr:"Zulu", en:"Zulu"},
+  {code:"xh", flag:"🇿🇦", tr:"Xhosa", en:"Xhosa"},
+  {code:"yo", flag:"🇳🇬", tr:"Yoruba", en:"Yoruba"},
+  {code:"ig", flag:"🇳🇬", tr:"İgbo", en:"Igbo"},
+  {code:"ha", flag:"🇳🇬", tr:"Hausa", en:"Hausa"},
+  {code:"so", flag:"🇸🇴", tr:"Somalice", en:"Somali"},
+  {code:"ne", flag:"🇳🇵", tr:"Nepalce", en:"Nepali"},
+  {code:"si", flag:"🇱🇰", tr:"Seylanca", en:"Sinhala"},
+  {code:"my", flag:"🇲🇲", tr:"Burmaca", en:"Burmese"},
+  {code:"km", flag:"🇰🇭", tr:"Kmerce", en:"Khmer"},
+  {code:"lo", flag:"🇱🇦", tr:"Laoca", en:"Lao"},
+  {code:"mn", flag:"🇲🇳", tr:"Moğolca", en:"Mongolian"},
+  {code:"kk", flag:"🇰🇿", tr:"Kazakça", en:"Kazakh"},
+  {code:"uz", flag:"🇺🇿", tr:"Özbekçe", en:"Uzbek"},
+  {code:"az", flag:"🇦🇿", tr:"Azerice", en:"Azerbaijani"},
+  {code:"ka", flag:"🇬🇪", tr:"Gürcüce", en:"Georgian"},
+  {code:"hy", flag:"🇦🇲", tr:"Ermenice", en:"Armenian"},
+  {code:"eu", flag:"🇪🇸", tr:"Baskça", en:"Basque"},
+  {code:"gl", flag:"🇪🇸", tr:"Galiçyaca", en:"Galician"},
+  {code:"ca", flag:"🇪🇸", tr:"Katalanca", en:"Catalan"},
+  {code:"la", flag:"🏛️", tr:"Latince", en:"Latin"},
+  {code:"eo", flag:"🌍", tr:"Esperanto", en:"Esperanto"},
 ];
+
+// ✅ alfabetik (TR/EN adına göre) ama ilk 5 sabit kalsın
+const pinned = new Set(["tr","en","de","fr","es"]);
+const rest = LANGS.filter(x=>!pinned.has(x.code));
+rest.sort((a,b)=>{
+  const A = (UI==="tr" ? a.tr : a.en).toLowerCase();
+  const B = (UI==="tr" ? b.tr : b.en).toLowerCase();
+  return A.localeCompare(B);
+});
+const ordered = LANGS.filter(x=>pinned.has(x.code)).concat(rest).slice(0,80);
+
+function label(l){
+  return (UI==="tr") ? l.tr : l.en;
+}
 
 function render(){
   const grid = document.getElementById("grid");
-  grid.innerHTML = LANGS.map(l=>{
+  grid.innerHTML = ordered.map(l=>{
     const lvl = LEVELS?.[l.code];
     const status = lvl
       ? `Seviyeniz: <span class="lvl">${lvl}</span>`
@@ -219,7 +310,7 @@ function render(){
     return `
       <div class="langCard" data-code="${l.code}">
         <div class="flagBox">${l.flag}</div>
-        <div class="langName">${l.name}</div>
+        <div class="langName">${label(l)}</div>
         <div class="status">${status}</div>
       </div>
     `;
