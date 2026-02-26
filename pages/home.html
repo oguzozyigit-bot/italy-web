@@ -19,52 +19,57 @@
       --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
       --bg-void: #02000f;
 
-      /* ✅ header/footer ölçü */
-      --footerH: 96px; /* JS günceller */
-      --safeB: env(safe-area-inset-bottom, 0px);
+      /* ✅ JS set eder */
+      --appH: 100vh;            /* gerçek px */
+      --footerH: 96px;          /* gerçek px */
+      --headerH: 120px;         /* gerçek px */
+      --safeT: 0px;
+      --safeB: 0px;
 
-      /* ✅ AUTO-FIT katsayısı (JS 0.78–1.00 arası ayarlar) */
-      --compactK: 1;
+      /* ✅ kompakt */
+      --contentGap: 10px;
+      --tileMinH: 60px;
+      --tileTitle: 15px;
+      --tileSub: 10px;
+      --iconBox: 34px;
 
-      /* ✅ kompakt layout (katsayı ile) */
-      --contentPadTop: calc(10px * var(--compactK));
-      --contentPadX: 18px;
-      --contentGap: calc(10px * var(--compactK));
-
-      /* ✅ otomatik ölçek (katsayı ile) */
-      --tileMinH: calc(clamp(54px, 6.2vh, 72px) * var(--compactK));
-      --tileTitle: calc(clamp(14px, 2.0vh, 16px) * var(--compactK));
-      --tileSub: calc(clamp(9px, 1.35vh, 10px) * var(--compactK));
-      --iconBox: calc(clamp(30px, 3.8vh, 36px) * var(--compactK));
-
-      --orbW: calc(clamp(100px, 13vh, 110px) * var(--compactK));
-      --orbCore: calc(clamp(74px, 9.8vh, 82px) * var(--compactK));
+      --orbW: 110px;
+      --orbCore: 82px;
     }
 
     html, body{
-      margin:0; padding:0; width:100%; height:100%;
+      margin:0; padding:0; width:100%;
+      height:100%;
       background: var(--bg-void);
-      font-family: 'Outfit', sans-serif;
-      overflow:hidden; color:#fff;
+      font-family:'Outfit', sans-serif;
+      overflow:hidden;
+      color:#fff;
     }
 
     .app-viewport{
-      width:100%; max-width:430px; height:100dvh; margin:0 auto;
-      display:flex; flex-direction:column; position:relative;
+      width:100%;
+      max-width:430px;
+      height: var(--appH); /* ✅ dVH yerine gerçek px */
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      position:relative;
       background: rgba(10, 10, 30, 0.4);
       backdrop-filter: blur(30px);
       border-left: 1px solid rgba(255,255,255,0.1);
       border-right: 1px solid rgba(255,255,255,0.1);
+      overflow:hidden;
     }
 
-    /* PREMIUM HEADER */
+    /* HEADER */
     .premium-header{
-      padding: calc(45px + env(safe-area-inset-top)) 18px 15px;
+      padding: calc(45px + var(--safeT)) 18px 15px; /* ✅ safe-top JS */
       display:flex; align-items:flex-start; justify-content:space-between;
       border-bottom:1px solid rgba(255,255,255,0.08);
       background: rgba(0,0,0,0.2);
       flex: 0 0 auto;
     }
+
     .brand-group h1{
       font-family:'Space Grotesk', sans-serif;
       font-size:26px; margin:0; font-weight:700;
@@ -96,16 +101,15 @@
     }
     .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-    /* ✅ PAGE CONTENT (scroll yok, footer’a taşmaz) */
+    /* ✅ CONTENT: footer’a göre hesaplı */
     #pageContent{
-      flex: 1;
+      flex:1;
       min-height:0;
       display:flex;
       flex-direction:column;
-      justify-content:flex-start;
-      padding: var(--contentPadTop) var(--contentPadX) calc(var(--footerH) + var(--safeB) + 10px);
-      box-sizing:border-box;
       gap: var(--contentGap);
+      padding: 10px 18px calc(var(--footerH) + var(--safeB) + 10px);
+      box-sizing:border-box;
       overflow:hidden;
     }
 
@@ -114,7 +118,8 @@
       flex: 0 0 auto;
       display:flex; flex-direction:column;
       align-items:center; justify-content:center;
-      cursor:pointer; padding: 4px 0;
+      cursor:pointer;
+      padding: 4px 0;
       user-select:none;
     }
     .neural-orb{
@@ -153,28 +158,29 @@
     .portal-info h1{ margin:0; font-size: 24px; font-weight:900; color:#fff; letter-spacing:-1px; }
     .portal-info p{ margin:2px 0 0; font-size:10px; font-weight:800; color: rgba(255,255,255,0.5); }
 
-    /* ✅ Tiles: kalan alanı eşit dağıtır */
+    /* Tiles: kalan alanı eşit böl */
     .tiles{
-      flex: 1;
+      flex:1;
       min-height:0;
       display:flex;
       flex-direction:column;
+      justify-content:space-between;
       gap: var(--contentGap);
-      justify-content: space-between;
+      overflow:hidden;
     }
 
     .academy-pro{
-      flex: 0 0 auto;
       min-height: var(--tileMinH);
       background: rgba(255,255,255,0.05);
       border-radius: 24px;
-      padding: calc(12px * var(--compactK)) calc(16px * var(--compactK));
+      padding: 12px 16px;
       border: 1px solid rgba(255,255,255,0.1);
       display:flex;
       align-items:center;
-      gap: calc(14px * var(--compactK));
+      gap: 14px;
       cursor:pointer;
       user-select:none;
+      overflow:hidden;
     }
     .academy-text h2{ margin:0; font-size: var(--tileTitle); font-weight:900; color:#fff; }
     .academy-text h2 span{ background: var(--ai-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
@@ -192,7 +198,7 @@
     }
 
     /* Academy logo */
-    .spectrum-logo{ gap:3.5px; display:flex; align-items:center; height: 30px; transform: scale(var(--compactK)); transform-origin:left center; }
+    .spectrum-logo{ gap:3.5px; display:flex; align-items:center; height: 30px; }
     .bar{ width:3.5px; border-radius:10px; animation: barMove 1.2s infinite ease-in-out; }
     .bar-1{ height:10px; background:#ff0000; animation-delay:.1s; }
     .bar-2{ height:18px; background:#ff7f00; animation-delay:.3s; }
@@ -218,16 +224,10 @@
       animation: ripple2 1.35s linear infinite;
       animation-delay:.55s;
     }
-    .practice-logo span{ position:relative; font-weight:1000; font-size: calc(15px * var(--compactK)); opacity:.95; }
+    .practice-logo span{ position:relative; font-weight:1000; font-size: 15px; opacity:.95; }
 
-    /* Seviye Tespit */
-    .level-logo:after{
-      content:"✓";
-      position:relative;
-      font-weight:1000;
-      font-size: calc(16px * var(--compactK));
-      opacity:.95;
-    }
+    /* Seviye */
+    .level-logo:after{ content:"✓"; position:relative; font-weight:1000; font-size:16px; opacity:.95; }
     .level-logo:before{
       content:"";
       position:absolute; inset:-30px;
@@ -236,7 +236,7 @@
       opacity:.75;
     }
 
-    /* Eğlenerek Öğren */
+    /* Eğlenerek */
     .learn-logo:before{
       content:"";
       position:absolute;
@@ -244,10 +244,10 @@
       background: radial-gradient(circle, rgba(34,197,94,.35), rgba(34,197,94,0));
       animation:bounceGlow 1.1s ease-in-out infinite;
     }
-    .learn-logo span{ position:relative; font-weight:900; font-size: calc(16px * var(--compactK)); opacity:.95; }
+    .learn-logo span{ position:relative; font-weight:900; font-size:16px; opacity:.95; }
 
-    /* WalkieTalkie */
-    .walkie-logo{ display:flex; align-items:center; gap:6px; height:32px; transform: scale(var(--compactK)); transform-origin:left center; }
+    /* Walkie */
+    .walkie-logo{ display:flex; align-items:center; gap:6px; height:32px; }
     .pulse-dot{
       width:8px;height:8px;border-radius:99px;
       background:#00f3ff;
@@ -275,7 +275,7 @@
       animation-delay:.55s;
     }
 
-    /* Metinden Çeviri */
+    /* Metinden */
     .text-logo:before{
       content:"";
       position:absolute; inset:-2px;
@@ -290,7 +290,6 @@
       font-weight:900;
       color:#fff;
       opacity:.95;
-      font-size: calc(14px * var(--compactK));
     }
 
     /* Offline */
@@ -305,7 +304,6 @@
       position:absolute; inset:0;
       display:flex; align-items:center; justify-content:center;
       font-weight:900; color:#fff; opacity:.92;
-      font-size: calc(14px * var(--compactK));
     }
 
     @keyframes rotateOrbit{ from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -318,7 +316,7 @@
     @keyframes ripple2{ 0%{transform:scale(.35);opacity:.9} 100%{transform:scale(1.25);opacity:0} }
     @keyframes spin{ to{ transform:rotate(360deg)} }
 
-    /* FOOTER */
+    /* FOOTER (asla taşmaz) */
     .premium-footer{
       position:absolute;
       left:0; right:0; bottom:0;
@@ -332,6 +330,7 @@
       border-top:1px solid rgba(255,255,255,0.08);
       padding-bottom: var(--safeB);
       box-sizing:border-box;
+      overflow:hidden;
     }
     .footer-nav{ display:flex; gap:20px; margin-bottom:8px; flex-wrap:wrap; justify-content:center; }
     .footer-nav a{
@@ -355,7 +354,7 @@
 </head>
 
 <body>
-  <div class="app-viewport">
+  <div class="app-viewport" id="app">
 
     <header class="premium-header" id="hdr">
       <div class="brand-group" id="brandHome" style="cursor:pointer;">
@@ -500,71 +499,91 @@
       }
     }
 
-    /* ✅ footer ölç + taşma varsa otomatik küçült (scroll yok) */
+    /* ✅ Gerçek ekran yüksekliği + safe-area ölçümü (WebView stabil) */
     (function(){
-      function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+      function setVar(name, val){ document.documentElement.style.setProperty(name, val); }
 
-      function measureFooter(){
-        const f = document.getElementById("ftr");
-        if(!f) return 96;
-        const h = Math.round(f.getBoundingClientRect().height || 0);
-        if(h > 0) document.documentElement.style.setProperty("--footerH", h + "px");
-        return h || 96;
+      function safeInsets(){
+        // CSS env() JS’te okunamaz; pratik çözüm: top/bottom 0 kabul.
+        // İstersen Android WebView’de statusbar farkı için ayrıca ölçüm ekleriz.
+        return { top: 0, bottom: 0 };
       }
 
-      function autoFit(){
-        try{
-          const hdr = document.getElementById("hdr");
-          const face = document.getElementById("faceZone");
-          const tiles = document.getElementById("tiles");
-          const ftr = document.getElementById("ftr");
-          if(!hdr || !face || !tiles || !ftr) return;
+      function lockAppHeight(){
+        const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        setVar("--appH", vh + "px");
+        const ins = safeInsets();
+        setVar("--safeT", ins.top + "px");
+        setVar("--safeB", ins.bottom + "px");
+      }
 
-          const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+      function measureBars(){
+        const hdr = document.getElementById("hdr");
+        const ftr = document.getElementById("ftr");
+        const hh = Math.round(hdr?.getBoundingClientRect().height || 0);
+        const fh = Math.round(ftr?.getBoundingClientRect().height || 0);
+        if(hh>0) setVar("--headerH", hh + "px");
+        if(fh>0) setVar("--footerH", fh + "px");
+      }
 
-          const footerH = measureFooter();
-          const safeB = 0; // env(...) zaten padding’te var, burada hesap karmaşası olmasın
+      function autoShrinkIfNeeded(){
+        const app = document.getElementById("app");
+        const hdr = document.getElementById("hdr");
+        const face = document.getElementById("faceZone");
+        const tiles = document.getElementById("tiles");
+        const ftr = document.getElementById("ftr");
+        if(!app || !hdr || !face || !tiles || !ftr) return;
 
-          const headerH = hdr.getBoundingClientRect().height || 0;
+        const appH = Math.round(app.getBoundingClientRect().height || 0);
+        const headerH = Math.round(hdr.getBoundingClientRect().height || 0);
+        const footerH = Math.round(ftr.getBoundingClientRect().height || 0);
+        const faceH = Math.round(face.getBoundingClientRect().height || 0);
 
-          // content padding’leri yaklaşık (top + bottom)
-          const padTop = 10;          // base
-          const padBottom = footerH + safeB + 10;
+        // tiles içeriği
+        const cards = tiles.querySelectorAll(".academy-pro");
+        let cardsH = 0;
+        cards.forEach(c=> cardsH += Math.round(c.getBoundingClientRect().height || 0));
+        const gap = 10;
+        const need = headerH + 10 + faceH + 10 + cardsH + gap*(Math.max(0,cards.length-1)) + footerH + 10;
 
-          // face + tiles toplam ihtiyacı
-          const faceH = face.getBoundingClientRect().height || 0;
+        if(need <= appH + 2){
+          // normal
+          setVar("--tileMinH", "60px");
+          setVar("--contentGap", "10px");
+          setVar("--orbW", "110px");
+          setVar("--orbCore", "82px");
+          setVar("--tileTitle", "15px");
+          setVar("--tileSub", "10px");
+          setVar("--iconBox", "34px");
+          return;
+        }
 
-          // tiles içindeki kartların doğal toplamı
-          let tilesNeed = 0;
-          const cards = tiles.querySelectorAll(".academy-pro");
-          cards.forEach(c=> tilesNeed += (c.getBoundingClientRect().height || 0));
-          // gap’ler
-          const gap = 10;
-          tilesNeed += gap * (Math.max(0, cards.length - 1));
+        // küçült (tamamen kontrollü)
+        setVar("--contentGap", "8px");
+        setVar("--tileMinH", "54px");
+        setVar("--orbW", "100px");
+        setVar("--orbCore", "74px");
+        setVar("--tileTitle", "14px");
+        setVar("--tileSub", "9px");
+        setVar("--iconBox", "30px");
+      }
 
-          const totalNeed = headerH + padTop + faceH + gap + tilesNeed + padBottom;
-
-          // yeterli alan varsa 1
-          if(totalNeed <= vh + 2){
-            document.documentElement.style.setProperty("--compactK", "1");
-            return;
-          }
-
-          // oranı hesapla (0.78–1 arası)
-          const k = clamp(vh / totalNeed, 0.78, 0.98);
-          document.documentElement.style.setProperty("--compactK", String(k));
-        }catch{}
+      function relayout(){
+        lockAppHeight();
+        measureBars();
+        // iki kez: fontlar/blur otursun
+        setTimeout(()=>{ measureBars(); autoShrinkIfNeeded(); }, 50);
+        setTimeout(()=>{ measureBars(); autoShrinkIfNeeded(); }, 160);
       }
 
       window.addEventListener("load", ()=>{
         loadUser();
-        measureFooter();
-        setTimeout(autoFit, 80);
-        setTimeout(autoFit, 220);
+        relayout();
       });
-      window.addEventListener("resize", ()=>{
-        measureFooter();
-        autoFit();
+
+      window.addEventListener("resize", relayout);
+      document.addEventListener("visibilitychange", ()=>{
+        if(document.visibilityState === "visible") relayout();
       });
     })();
   </script>
