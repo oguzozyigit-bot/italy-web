@@ -219,53 +219,36 @@
 
   // Dil isimleri (sonuçta doğru dil yazacak)
   const LANG_NAMES_TR = {
-    en: "İngilizce",
-    de: "Almanca",
-    fr: "Fransızca",
-    it: "İtalyanca",
-    ru: "Rusça",
-    es: "İspanyolca",
-    // istersen ileride ekleriz
-    zh: "Çince",
-    ja: "Japonca",
-    ko: "Korece",
-    ar: "Arapça",
-    el: "Yunanca",
-    cs: "Çekçe",
-    sr: "Sırpça",
-    sv: "İsveççe",
-    uk: "Ukraynaca",
-    fa: "Farsça",
-    pt: "Portekizce",
-    ro: "Romence",
-    hr: "Hırvatça",
-    th: "Tayca",
-    bg: "Bulgarca",
+    en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca",
+    zh:"Çince", ja:"Japonca", ko:"Korece", ar:"Arapça", el:"Yunanca", cs:"Çekçe", sr:"Sırpça", sv:"İsveççe",
+    uk:"Ukraynaca", fa:"Farsça", pt:"Portekizce", ro:"Romence", hr:"Hırvatça", th:"Tayca", bg:"Bulgarca"
   };
 
   async function loadTestRow(){
     const { data, error } = await supabase
       .from("level_tests")
-      .select("id, user_id, language_code, started_at, status")
+      .select("id, user_id, language_code, test_version, started_at, status")
       .eq("id", testId)
       .single();
     if(error) throw error;
     return data;
   }
 
-  // Storage’dan sabit test dosyası
-  async function loadStaticTest(lang){
+  // Storage’dan sabit test dosyası (version’lı)
+  async function loadStaticTest(lang, version){
     const L = normLang(lang);
-    // Senin doğruladığın çalışan url formatı:
-    const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${encodeURIComponent(L)}_v1.json`;
+    const v = Number(version || 1) || 1;
+
+    const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${encodeURIComponent(L)}_v${v}.json`;
     const r = await fetch(url, { cache:"no-store" });
 
     if(!r.ok){
       const t = await r.text().catch(()=> "");
-      throw new Error(`Static test file not found: ${L}_v1.json (HTTP ${r.status})\n${t}`);
+      throw new Error(`Static test file not found: ${L}_v${v}.json (HTTP ${r.status})\n${t}`);
     }
 
-    const j = await r.json();
+    const j = await r.json().catch(()=>null);
+    if(!j) return [];
     if(Array.isArray(j)) return j;
     if(j && Array.isArray(j.questions)) return j.questions;
     return [];
@@ -283,13 +266,14 @@
 
   const langCode = normLang(testRow?.language_code || langParamRaw || "en");
   const langNameTR = LANG_NAMES_TR[langCode] || langCode.toUpperCase();
+  const testVer = Number(testRow?.test_version || 1) || 1;
 
-  $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
+  $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı (v${testVer})`;
 
-  // 1) Soruları storage’dan al
+  // 1) Soruları storage’dan al (vX)
   let QUESTIONS = [];
   try{
-    QUESTIONS = await loadStaticTest(langCode);
+    QUESTIONS = await loadStaticTest(langCode, testVer);
   }catch(e){
     showError("Test dosyası yüklenemedi.", e?.message || String(e));
     throw e;
@@ -325,9 +309,6 @@
       remaining = Math.max(0, TOTAL_TIME - elapsed);
     }
   }catch{}
-
-  console.log("STATIC QUESTIONS:", QUESTIONS);
-  console.log("Is Array?", Array.isArray(QUESTIONS), "Length:", QUESTIONS.length);
 
   const answers = Array(QUESTIONS.length).fill(null);
   const passCount = Array(QUESTIONS.length).fill(0);
@@ -410,7 +391,7 @@
 
     $("rLevel").textContent = `Seviye: ${level}`;
     $("rText").textContent =
-`Dil: ${langNameTR}
+`Dil: ${langNameTR} (v${testVer})
 Doğru: ${correct} / ${total}
 Başarı: %${Math.round(percent*100)}
 
