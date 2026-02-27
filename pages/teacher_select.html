@@ -2,9 +2,9 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Dil Seçimi</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>italkyAI • Ders Seçimi</title>
 
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
@@ -15,167 +15,195 @@
 
   <style>
     :root{
-      --bg:#02000f;
+      --border: rgba(255,255,255,0.12);
       --card: rgba(255,255,255,0.05);
-      --bd: rgba(255,255,255,0.12);
-      --muted: rgba(255,255,255,0.65);
-      --ai: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+      --muted: rgba(255,255,255,0.70);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
 
-    /* ui_shell main-content içinde scroll zaten var; burada sadece iç layout */
     #pageContent{
-      min-height: 100%;
-      padding: 14px 14px 16px;
+      height: 100%;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding: 10px 12px;
     }
 
     .wrap{
-      max-width: 560px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 520px;
+      height: 100%;
       display:flex;
       flex-direction:column;
-      gap: 12px;
+      gap: 10px;
+      justify-content: space-between;
     }
 
     .hero{
-      border-radius: 24px;
-      border: 1px solid var(--bd);
+      border-radius: 22px;
+      border: 1px solid var(--border);
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      padding: 14px 14px;
+      padding: 12px 14px;
     }
+
     .heroTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom: 8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 6px;
     }
+
     .hTitle{
       font-family:"Space Grotesk",system-ui,sans-serif;
       font-weight: 1000;
       font-size: 16px;
+      letter-spacing: -0.2px;
       margin:0;
       color:#fff;
     }
+
     .pill{
-      padding: 8px 12px;
+      padding: 7px 10px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       font-weight: 1000;
       font-size: 12px;
-      color: rgba(255,255,255,0.88);
+      color: rgba(255,255,255,0.90);
       white-space: nowrap;
     }
+
     .heroText{
       margin:0;
       font-size: 12px;
       font-weight: 900;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.70);
+      line-height: 1.55;
+      color: rgba(255,255,255,0.72);
     }
     .heroText b{ color:#fff; }
 
-    /* ✅ 2 sütun */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
+    .list{
+      flex: 1;
+      min-height: 0;
+      display:flex;
+      flex-direction:column;
       gap: 10px;
+      justify-content: center;
     }
 
-    /* ✅ tıklama sorunu olmasın diye BUTON */
-    button.card{
-      width:100%;
-      min-height: 132px;
-
-      border-radius: 24px;
-      border: 1px solid var(--bd);
+    button.langCard{
+      width: 100%;
+      border-radius: 22px;
+      border: 1px solid var(--border);
       background: var(--card);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
 
-      padding: 14px 12px 12px;
+      padding: 14px 14px;
       display:flex;
-      flex-direction:column;
       align-items:center;
-      justify-content:center;
-      gap: 8px;
+      justify-content:space-between;
+      gap: 12px;
 
+      color:#fff;
       cursor:pointer;
       user-select:none;
-      transition: transform .18s ease, background .18s ease;
       appearance:none;
       -webkit-appearance:none;
-      color:#fff;
-      text-align:center;
-      position:relative;
-    }
-    button.card:active{
-      transform: scale(.985);
-      background: rgba(255,255,255,0.07);
-    }
-    button.card:disabled{
-      opacity: .55;
-      cursor: not-allowed;
-      transform:none;
+
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
     }
 
-    .mini{
-      position:absolute;
-      top: 10px;
-      right: 10px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.20);
-      font-size: 10px;
-      font-weight: 1000;
-      color: rgba(255,255,255,0.80);
-      max-width: 78%;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    button.langCard:active{
+      transform: scale(.988);
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(165,180,252,0.30);
     }
-    .mini.ok{
-      color: rgba(165,180,252,0.95);
-      border-color: rgba(165,180,252,0.25);
-      background: rgba(99,102,241,0.12);
+
+    .left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
     }
 
     .flagBox{
-      width: 54px; height: 54px;
-      border-radius: 18px;
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
-      display:flex; align-items:center; justify-content:center;
-      box-shadow: 0 16px 36px rgba(0,0,0,0.25);
+      flex: 0 0 auto;
+      overflow:hidden;
     }
+
     .flag{
-      font-size: 28px;
+      font-size: 22px;
       line-height: 1;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.28));
+      animation: floatFlag 2.2s ease-in-out infinite;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
     }
+    @keyframes floatFlag{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-2px);} }
+    button.langCard:nth-child(2) .flag{ animation-duration: 2.5s; }
+    button.langCard:nth-child(3) .flag{ animation-duration: 2.1s; }
+    button.langCard:nth-child(4) .flag{ animation-duration: 2.7s; }
+    button.langCard:nth-child(5) .flag{ animation-duration: 2.3s; }
+    button.langCard:nth-child(6) .flag{ animation-duration: 2.6s; }
 
-    .lang{
-      font-weight: 1000;
-      font-size: 12px;
-      letter-spacing: 2px;
-      color: rgba(255,255,255,0.75);
-      text-transform: uppercase;
-      margin-top: 2px;
+    .txt{
+      min-width: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
     }
-
-    .local{
+    .name{
+      font-size: 15px;
       font-weight: 1000;
-      font-size: 16px;
-      color:#fff;
       letter-spacing: -0.2px;
-      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sub{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.62);
+      line-height: 1.2;
+    }
+    .sub.ok{ color: rgba(165,180,252,0.95); }
+
+    .right{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex: 0 0 auto;
     }
 
-    .sub{
-      font-weight: 900;
-      font-size: 11px;
-      color: rgba(255,255,255,0.60);
+    .badge{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-size: 12px;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.88);
+      white-space: nowrap;
+    }
+
+    .chev{
+      width: 34px; height: 34px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.85);
     }
 
     .toast{
@@ -198,26 +226,31 @@
       text-align:center;
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
+
+    @media (max-height: 740px){
+      .hero{ padding: 10px 12px; }
+      button.langCard{ padding: 12px 12px; }
+      .flagBox{ width:40px; height:40px; }
+      .name{ font-size: 14px; }
+    }
   </style>
 </head>
 
 <body>
   <main id="pageContent">
     <div class="wrap">
-
       <section class="hero">
         <div class="heroTop">
-          <h1 class="hTitle">Dil Dersi Seçimi Yapın</h1>
-          <div class="pill">34 Dil</div>
+          <h1 class="hTitle">italky Academy • Ders Seçimi</h1>
+          <div class="pill">6 Dil</div>
         </div>
         <p class="heroText">
-          Seçtiğiniz dilde <b>seviye tespit</b> yaptıysanız doğrudan ders planına geçersiniz.<br/>
-          Yapmadıysanız önce sınava yönlendirilirsiniz.
+          Ders planına geçmek için önce <b>seviye tespit</b> yapılır.<br/>
+          Seviyen varsa direkt <b>Ders Planı</b> ekranına geçersin.
         </p>
       </section>
 
-      <section class="grid" id="langGrid"></section>
-
+      <section class="list" id="list"></section>
     </div>
   </main>
 
@@ -227,144 +260,107 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
-    mountShell({ scroll:"auto" });
+    mountShell({ scroll:"none" });
 
     const $ = (id)=>document.getElementById(id);
+    const list = $("list");
 
     function toast(msg){
       const t = $("toast");
-      if(!t) return;
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // ✅ 34 dil — üst sıra sabit: EN FR DE ES IT RU
-    const TOP = ["en","fr","de","es","it","ru"];
+    // ✅ 6 dil + teacher_id map (eski akışın bozulmasın)
     const LANGS = [
-      { code:"en", name:"English",      flag:"🇬🇧" },
-      { code:"fr", name:"French",       flag:"🇫🇷" },
-      { code:"de", name:"German",       flag:"🇩🇪" },
-      { code:"es", name:"Spanish",      flag:"🇪🇸" },
-      { code:"it", name:"Italian",      flag:"🇮🇹" },
-      { code:"ru", name:"Russian",      flag:"🇷🇺" },
-
-      { code:"tr", name:"Turkish",      flag:"🇹🇷" },
-      { code:"az", name:"Azerbaijani",  flag:"🇦🇿" },
-      { code:"kk", name:"Kazakh",       flag:"🇰🇿" },
-      { code:"ky", name:"Kyrgyz",       flag:"🇰🇬" },
-      { code:"uz", name:"Uzbek",        flag:"🇺🇿" },
-      { code:"tk", name:"Turkmen",      flag:"🇹🇲" },
-
-      { code:"ar", name:"Arabic",       flag:"🇸🇦" },
-      { code:"fa", name:"Persian",      flag:"🇮🇷" },
-      { code:"he", name:"Hebrew",       flag:"🇮🇱" },
-
-      { code:"nl", name:"Dutch",        flag:"🇳🇱" },
-      { code:"sv", name:"Swedish",      flag:"🇸🇪" },
-      { code:"no", name:"Norwegian",    flag:"🇳🇴" },
-      { code:"da", name:"Danish",       flag:"🇩🇰" },
-      { code:"fi", name:"Finnish",      flag:"🇫🇮" },
-      { code:"pl", name:"Polish",       flag:"🇵🇱" },
-      { code:"cs", name:"Czech",        flag:"🇨🇿" },
-      { code:"sk", name:"Slovak",       flag:"🇸🇰" },
-      { code:"hu", name:"Hungarian",    flag:"🇭🇺" },
-      { code:"ro", name:"Romanian",     flag:"🇷🇴" },
-      { code:"bg", name:"Bulgarian",    flag:"🇧🇬" },
-      { code:"el", name:"Greek",        flag:"🇬🇷" },
-      { code:"uk", name:"Ukrainian",    flag:"🇺🇦" },
-      { code:"sr", name:"Serbian",      flag:"🇷🇸" },
-      { code:"hr", name:"Croatian",     flag:"🇭🇷" },
-
-      { code:"pt", name:"Portuguese",   flag:"🇵🇹" },
-
-      { code:"zh", name:"Chinese",      flag:"🇨🇳" },
-      { code:"ja", name:"Japanese",     flag:"🇯🇵" },
-      { code:"ko", name:"Korean",       flag:"🇰🇷" },
-      { code:"th", name:"Thai",         flag:"🇹🇭" },
+      { code:"en", name:"English",  flag:"🇬🇧", teacher:"dora"   },
+      { code:"de", name:"German",   flag:"🇩🇪", teacher:"ayda"   },
+      { code:"fr", name:"French",   flag:"🇫🇷", teacher:"jale"   },
+      { code:"it", name:"Italian",  flag:"🇮🇹", teacher:"sencer" },
+      { code:"ru", name:"Russian",  flag:"🇷🇺", teacher:"sungur" },
+      { code:"es", name:"Spanish",  flag:"🇪🇸", teacher:"ozan"   },
     ];
 
-    function orderLangs(){
-      const map = new Map(LANGS.map(x=>[x.code,x]));
-      const top = TOP.map(c=>map.get(c)).filter(Boolean);
-      const rest = LANGS
-        .filter(x=>!TOP.includes(x.code))
-        .sort((a,b)=>a.name.localeCompare(b.name, "en", { sensitivity:"base" }));
-      return [...top, ...rest];
-    }
-
-    // ✅ session
     const { data:{ session } } = await supabase.auth.getSession();
-    if(!session?.user){
+    const userId = session?.user?.id || null;
+    if(!userId){
       location.replace("/pages/login.html");
     }
 
-    // ✅ profilden levels oku
+    // seviyeler (profiles.levels jsonb)
     let levels = {};
     try{
       const { data: prof } = await supabase
         .from("profiles")
         .select("levels")
-        .eq("id", session.user.id)
+        .eq("id", userId)
         .maybeSingle();
-
       levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
-    }catch{
-      levels = {};
-    }
+    }catch{}
 
-    const grid = $("langGrid");
-    const ordered = orderLangs();
-
-    grid.innerHTML = ordered.map(l=>{
-      const lv = levels?.[l.code] || "";
-      const mini = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
-      const miniCls = lv ? "mini ok" : "mini";
-
+    function cardHtml(l){
+      const lv = (levels && typeof levels === "object") ? (levels[l.code] || "") : "";
+      const sub = lv ? `Seviyeniz: ${lv} • Ders planına geç` : "Seviye yok • Sınava yönlendir";
+      const subCls = lv ? "sub ok" : "sub";
       return `
-        <button class="card" type="button" data-code="${l.code}">
-          <div class="${miniCls}">${mini}</div>
-          <div class="flagBox"><div class="flag">${l.flag}</div></div>
-          <div class="lang">${l.code}</div>
-          <div class="local">${l.name}</div>
-          <div class="sub">${lv ? "Ders planı açılır" : "Önce sınav gerekir"}</div>
+        <button class="langCard" type="button" data-code="${l.code}" data-teacher="${l.teacher}">
+          <div class="left">
+            <div class="flagBox"><div class="flag">${l.flag}</div></div>
+            <div class="txt">
+              <div class="name">${l.name}</div>
+              <div class="${subCls}">${sub}</div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="badge">${l.code.toUpperCase()}</div>
+            <div class="chev">›</div>
+          </div>
         </button>
       `;
-    }).join("");
+    }
 
-    // ✅ double-tap / spam engeli
+    list.innerHTML = LANGS.map(cardHtml).join("");
+
     let busy = false;
     let lastTap = 0;
 
-    function go(url){
-      try{ location.assign(url); }catch{ location.href=url; }
+    async function goNext(code, teacher){
+      // localStorage preference (eski sayfalar bunu kullanıyor olabilir)
+      try{ localStorage.setItem("italky_teacher_pref", teacher); }catch{}
+
+      const lv = (levels && typeof levels === "object") ? (levels[code] || "") : "";
+      if(lv){
+        // ✅ seviyesi varsa ders planına
+        location.href = `/pages/plan_select.html?t=${encodeURIComponent(teacher)}&lang=${encodeURIComponent(code)}&level=${encodeURIComponent(lv)}`;
+        return;
+      }
+
+      // ❗ seviye yoksa ara sayfa
+      location.href = `/pages/level_required.html?lang=${encodeURIComponent(code)}&t=${encodeURIComponent(teacher)}&next=${encodeURIComponent("plan_select")}`;
     }
 
-    grid.querySelectorAll(".card").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const now = Date.now();
+    list.querySelectorAll(".langCard").forEach(btn=>{
+      const handler = async (ev)=>{
+        ev.preventDefault(); ev.stopPropagation();
         if(busy) return;
-        if(now - lastTap < 500) return;
+        const now = Date.now();
+        if(now - lastTap < 650) return;
         lastTap = now;
-
-        const code = String(btn.getAttribute("data-code")||"").trim();
-        if(!code) return;
-
-        // ✅ seçimi kaydet
-        localStorage.setItem("italky_language_code", code);
-
-        const lv = levels?.[code] || "";
         busy = true;
 
-        if(lv){
-          toast("Ders planına geçiliyor…");
-          setTimeout(()=>go(`/pages/plan_select.html?lang=${encodeURIComponent(code)}`), 120);
-        }else{
-          toast("Önce seviye tespit…");
-          setTimeout(()=>go(`/pages/academy_level_required.html?lang=${encodeURIComponent(code)}`), 120);
+        const code = String(btn.getAttribute("data-code")||"").trim();
+        const teacher = String(btn.getAttribute("data-teacher")||"").trim();
+        try{
+          toast("Kontrol ediliyor…");
+          await goNext(code, teacher);
+        }finally{
+          busy = false;
         }
-      }, { passive:true });
+      };
+      btn.addEventListener("click", handler, { passive:false });
+      btn.addEventListener("touchend", handler, { passive:false });
     });
   </script>
 </body>
