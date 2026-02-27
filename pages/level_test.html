@@ -119,11 +119,28 @@
     if(error) throw error;
     return data;
   }
-  function extractQuestions(row){
-    if(Array.isArray(row?.questions)) return row.questions;
-    if(Array.isArray(row?.questions?.questions)) return row.questions.questions;
-    return [];
+  function extractQuestions(testRow){
+  let q = testRow?.questions;
+
+  if(!q) return [];
+
+  // Eğer json string olarak geldiyse parse et
+  if(typeof q === "string"){
+    try{
+      q = JSON.parse(q);
+    }catch(e){
+      return [];
+    }
   }
+
+  // Direkt array ise
+  if(Array.isArray(q)) return q;
+
+  // { questions: [...] } formatı ise
+  if(q && Array.isArray(q.questions)) return q.questions;
+
+  return [];
+}
   async function generateQuestions(row){
     const lang = String(row?.language_code || langParam || "en").toLowerCase();
     const r = await fetch(`${API_BASE}/api/level_test/generate`,{
