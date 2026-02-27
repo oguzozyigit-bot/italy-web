@@ -210,11 +210,37 @@
     throw new Error("no session");
   }
 
-  // alias düzeltmeleri (hub’da kullandıkların)
+  // alias düzeltmeleri
   const LANG_ALIASES = { cn:"zh", jp:"ja", kr:"ko", sa:"ar", gr:"el", cz:"cs", rs:"sr", se:"sv", ua:"uk", ir:"fa" };
   const normLang = (l)=>{
     const x = String(l || "en").trim().toLowerCase();
     return LANG_ALIASES[x] || x;
+  };
+
+  // Dil isimleri (sonuçta doğru dil yazacak)
+  const LANG_NAMES_TR = {
+    en: "İngilizce",
+    de: "Almanca",
+    fr: "Fransızca",
+    it: "İtalyanca",
+    ru: "Rusça",
+    es: "İspanyolca",
+    // istersen ileride ekleriz
+    zh: "Çince",
+    ja: "Japonca",
+    ko: "Korece",
+    ar: "Arapça",
+    el: "Yunanca",
+    cs: "Çekçe",
+    sr: "Sırpça",
+    sv: "İsveççe",
+    uk: "Ukraynaca",
+    fa: "Farsça",
+    pt: "Portekizce",
+    ro: "Romence",
+    hr: "Hırvatça",
+    th: "Tayca",
+    bg: "Bulgarca",
   };
 
   async function loadTestRow(){
@@ -227,15 +253,18 @@
     return data;
   }
 
-  // ✅ Storage’dan sabit test dosyası
+  // Storage’dan sabit test dosyası
   async function loadStaticTest(lang){
     const L = normLang(lang);
+    // Senin doğruladığın çalışan url formatı:
     const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${encodeURIComponent(L)}_v1.json`;
     const r = await fetch(url, { cache:"no-store" });
+
     if(!r.ok){
       const t = await r.text().catch(()=> "");
       throw new Error(`Static test file not found: ${L}_v1.json (HTTP ${r.status})\n${t}`);
     }
+
     const j = await r.json();
     if(Array.isArray(j)) return j;
     if(j && Array.isArray(j.questions)) return j.questions;
@@ -253,9 +282,11 @@
   }
 
   const langCode = normLang(testRow?.language_code || langParamRaw || "en");
+  const langNameTR = LANG_NAMES_TR[langCode] || langCode.toUpperCase();
+
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  // ✅ 1) Soruları storage’dan al
+  // 1) Soruları storage’dan al
   let QUESTIONS = [];
   try{
     QUESTIONS = await loadStaticTest(langCode);
@@ -269,7 +300,7 @@
     throw new Error("empty static questions");
   }
 
-  // ✅ 2) DB’ye güvenli şekilde yaz (RLS takılmasın)
+  // 2) DB’ye yaz (RLS takılmasın)
   try{
     const { error: attErr } = await supabase.rpc("attach_level_test_questions", {
       p_test_id: testId,
@@ -295,7 +326,6 @@
     }
   }catch{}
 
-  // debug
   console.log("STATIC QUESTIONS:", QUESTIONS);
   console.log("Is Array?", Array.isArray(QUESTIONS), "Length:", QUESTIONS.length);
 
@@ -380,7 +410,8 @@
 
     $("rLevel").textContent = `Seviye: ${level}`;
     $("rText").textContent =
-`Doğru: ${correct} / ${total}
+`Dil: ${langNameTR}
+Doğru: ${correct} / ${total}
 Başarı: %${Math.round(percent*100)}
 
 Sonuç profilinize işlendi.`;
@@ -411,7 +442,6 @@ Sonuç profilinize işlendi.`;
     }
   }, 1000);
 
-  // hazır
   render();
 </script>
 </body>
