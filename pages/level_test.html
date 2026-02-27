@@ -254,7 +254,7 @@
 
     // kabul: {questions:[...]} veya direkt [...]
     if(Array.isArray(j)) return j;
-    if(Array.isArray(j.questions)) return j.questions;
+    if(Array.isArray(j.)) return j.;
     return [];
   }
 
@@ -272,9 +272,13 @@
   const langCode = normLang(testRow?.language_code || langParamRaw || "en");
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  let QUESTIONS = [];
+  let  = [];
   try{
-    QUESTIONS = await loadStaticTest(langCode);
+    await supabase.rpc("attach_level_test_questions", {
+  p_test_id: testId,
+  p_questions: QUESTIONS,
+  p_language_code: langCode
+});
   }catch(e){
     showError("Test dosyası yüklenemedi.", e?.message || String(e));
     throw e;
