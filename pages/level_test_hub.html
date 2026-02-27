@@ -21,13 +21,12 @@
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
 
-    /* ui_shell main-content zaten var, biz içeride scroll istemiyoruz */
     #pageContent{
       height: 100%;
       display:flex;
       align-items:stretch;
       justify-content:center;
-      padding: 10px 12px; /* ✅ kenarlar az */
+      padding: 10px 12px;
     }
 
     .wrap{
@@ -37,7 +36,7 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
-      justify-content: space-between; /* ✅ üst-alt bar arasında ortalar */
+      justify-content: space-between;
     }
 
     .hero{
@@ -50,10 +49,7 @@
     }
 
     .heroTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
       margin-bottom: 6px;
     }
 
@@ -86,14 +82,13 @@
     }
     .heroText b{ color:#fff; }
 
-    /* ✅ 6 kart tek kolon – kaydırmasız sığması için esnek yükseklik */
     .list{
       flex: 1;
       min-height: 0;
       display:flex;
       flex-direction:column;
       gap: 10px;
-      justify-content: center; /* ✅ tam ortaya yakın */
+      justify-content: center;
     }
 
     button.langCard{
@@ -124,77 +119,39 @@
       background: rgba(255,255,255,0.07);
       border-color: rgba(165,180,252,0.30);
     }
+    button.langCard:disabled{ opacity:.55; cursor:not-allowed; }
 
-    .left{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-      min-width: 0;
-    }
+    .left{ display:flex; align-items:center; gap: 12px; min-width: 0; }
 
     .flagBox{
-      width: 42px;
-      height: 42px;
+      width: 42px; height: 42px;
       border-radius: 16px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display:flex; align-items:center; justify-content:center;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
       flex: 0 0 auto;
-      position:relative;
       overflow:hidden;
     }
 
-    /* ✅ bayrak mini “yüzer” animasyon */
     .flag{
       font-size: 22px;
       line-height: 1;
-      transform: translateY(0);
       animation: floatFlag 2.2s ease-in-out infinite;
       filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
     }
-    @keyframes floatFlag{
-      0%,100%{ transform: translateY(0); }
-      50%{ transform: translateY(-2px); }
-    }
-
-    /* her kartta ufak fark */
+    @keyframes floatFlag{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-2px);} }
     button.langCard:nth-child(2) .flag{ animation-duration: 2.5s; }
     button.langCard:nth-child(3) .flag{ animation-duration: 2.1s; }
     button.langCard:nth-child(4) .flag{ animation-duration: 2.7s; }
     button.langCard:nth-child(5) .flag{ animation-duration: 2.3s; }
     button.langCard:nth-child(6) .flag{ animation-duration: 2.6s; }
 
-    .txt{
-      min-width: 0;
-      display:flex;
-      flex-direction:column;
-      gap: 2px;
-    }
-    .name{
-      font-size: 15px;
-      font-weight: 1000;
-      letter-spacing: -0.2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .sub{
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.62);
-      line-height: 1.2;
-    }
+    .txt{ min-width: 0; display:flex; flex-direction:column; gap: 2px; }
+    .name{ font-size: 15px; font-weight: 1000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.62); line-height: 1.2; }
     .sub.ok{ color: rgba(165,180,252,0.95); }
 
-    .right{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex: 0 0 auto;
-    }
-
+    .right{ display:flex; align-items:center; gap: 10px; flex: 0 0 auto; }
     .badge{
       padding: 7px 10px;
       border-radius: 999px;
@@ -205,7 +162,6 @@
       color: rgba(255,255,255,0.88);
       white-space: nowrap;
     }
-
     .chev{
       width: 34px; height: 34px;
       border-radius: 14px;
@@ -237,7 +193,6 @@
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
 
-    /* ✅ çok küçük ekranlarda kartları biraz sıkıştır */
     @media (max-height: 740px){
       .hero{ padding: 10px 12px; }
       button.langCard{ padding: 12px 12px; }
@@ -273,7 +228,6 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
-    // ✅ scroll istemiyoruz
     mountShell({ scroll:"none" });
 
     const $ = (id)=>document.getElementById(id);
@@ -284,10 +238,9 @@
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1700);
     }
 
-    // ✅ 6 DİL
     const LANGS = [
       { code:"en", name:"English",   flag:"🇬🇧" },
       { code:"de", name:"German",    flag:"🇩🇪" },
@@ -303,7 +256,6 @@
       location.replace("/pages/login.html");
     }
 
-    // levels
     let levels = {};
     try{
       const { data: prof } = await supabase
@@ -338,6 +290,24 @@
 
     list.innerHTML = LANGS.map(cardHtml).join("");
 
+    function extractTestId(data){
+      // 1) scalar uuid
+      if(typeof data === "string" && data.length > 10) return data;
+
+      // 2) array/table
+      if(Array.isArray(data)){
+        const row = data[0] || null;
+        return row?.test_id || row?.id || null;
+      }
+
+      // 3) object
+      if(data && typeof data === "object"){
+        return data.test_id || data.id || null;
+      }
+
+      return null;
+    }
+
     let busy = false;
     let lastTap = 0;
 
@@ -352,20 +322,23 @@
 
       try{
         toast("Sınav başlatılıyor…");
-        const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
+
+        const { data, error } = await supabase.rpc("start_level_test", {
+          p_language_code: code
+        });
 
         if(error){
+          console.log("RPC ERROR:", error);
           toast(error.message || "Başlatılamadı");
           btn.disabled = false;
           busy = false;
           return;
         }
 
-        const row = Array.isArray(data) ? (data[0] || null) : data;
-        const testId = row?.test_id || row?.id || null;
-
+        const testId = extractTestId(data);
         if(!testId){
-          toast("test_id gelmedi");
+          console.log("RPC DATA (no test_id):", data);
+          toast("test_id gelmedi (rpc dönüşünü kontrol et)");
           btn.disabled = false;
           busy = false;
           return;
@@ -373,6 +346,7 @@
 
         location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
       }catch(e){
+        console.log("RPC EX:", e);
         toast("Başlatılamadı");
         btn.disabled = false;
       }finally{
