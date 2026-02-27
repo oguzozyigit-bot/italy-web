@@ -210,6 +210,7 @@
     throw new Error("no session");
   }
 
+  // alias düzeltmeleri
   const LANG_ALIASES = { cn:"zh", jp:"ja", kr:"ko", sa:"ar", gr:"el", cz:"cs", rs:"sr", se:"sv", ua:"uk", ir:"fa" };
   const normLang = (l)=>{
     const x = String(l || "en").trim().toLowerCase();
@@ -228,51 +229,135 @@
     return data;
   }
 
-  // ✅ Şık metninden A/B/C/D etiketlerini temizler
-  function cleanOptionText(s){
+  // ---------- OPTION CLEAN (A/B/C/D sök) ----------
+  function stripChoiceLabel(s){
     let t = String(s ?? "").trim();
-    t = t.replace(/^\(?\s*[A-D]\s*\)?\s*[\.\:\-\)\]]\s*/i, "");
-    t = t.replace(/^\(?\s*[A-D]\s*\)?\s*\/\s*/i, "");
-    t = t.replace(/^(option|choice)\s*[A-D]\s*[\:\-\)\.]\s*/i, "");
+    // "A) xxx", "A. xxx", "A - xxx", "(A) xxx", "A: xxx"
+    t = t.replace(/^\(?\s*[A-D]\s*[\)\.\:\-]\s*/i, "");
+    t = t.replace(/^\(?\s*[A-D]\s*\)\s*/i, "");
+    t = t.replace(/^\s*[A-D]\s+\s*/i, "");
+    // "A )"
+    t = t.replace(/^\s*[A-D]\s*\)\s*/i, "");
     return t.trim();
   }
 
-  // ✅ options + correct_index birlikte karıştır (DB’ye de aynı gitsin)
-  function shuffleWithCorrectIndex(q){
-    const optionsRaw = Array.isArray(q?.options) ? q.options : [];
-    const correct = (q?.correct_index != null) ? Number(q.correct_index) : (q?.correct != null ? Number(q.correct) : 0);
-
-    const options = optionsRaw.map(cleanOptionText);
-    const idxs = options.map((_,i)=>i);
-
-    for(let i=idxs.length-1;i>0;i--){
+  function shuffleIdx(n){
+    const a = Array.from({length:n}, (_,i)=>i);
+    for(let i=a.length-1;i>0;i--){
       const j = Math.floor(Math.random()*(i+1));
-      [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+      [a[i],a[j]]=[a[j],a[i]];
     }
-
-    const newOptions = idxs.map(i=>options[i]);
-    const newCorrect = idxs.indexOf(correct);
-
-    return { options: newOptions, correct_index: (newCorrect >= 0 ? newCorrect : 0) };
+    return a;
   }
 
-  async function loadStaticTest(lang, version){
-    const L = normLang(lang);
-    const v = Number(version || 1) || 1;
+  function normalizeOneQuestion(q){
+    const out = { ...q };
+    const opts = Array.isArray(q?.options) ? q.options.map(stripChoiceLabel) : [];
+    const corr = (q?.correct_index != null) ? Number(q.correct_index) : Number(q.correct ?? 0);
 
-    const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${encodeURIComponent(L)}_v${v}.json`;
-    const r = await fetch(url, { cache:"no-store" });
+    if(opts.length === 4 && Number.isFinite(corr) && corr>=0 && corr<=3){
+      const order = shuffleIdx(4);
+      const newOpts = order.map(i=>opts[i]);
+      const newCorrect = order.indexOf(corr);
 
-    if(!r.ok){
-      const t = await r.text().catch(()=> "");
-      throw new Error(`Static test file not found: ${L}_v${v}.json (HTTP ${r.status})\n${t}`);
+      out.options = newOpts;
+      out.correct_index = newCorrect;
+      delete out.correct;
+      return out;
     }
 
-    const j = await r.json().catch(()=>null);
-    if(!j) return [];
+    // fallback
+    out.options = opts;
+    out.correct_index = (Number.isFinite(corr) ? corr : 0);
+    delete out.correct;
+    return out;
+  }
+
+  // ---------- STORAGE LOAD (v1..v5) ----------
+  async function fetchJson(url){
+    const r = await fetch(url, { cache:"no-store" });
+    if(!r.ok){
+      const t = await r.text().catch(()=> "");
+      throw new Error(`HTTP ${r.status}\n${t}`);
+    }
+    return await r.json();
+  }
+
+  async function loadFile(lang, v){
+    const L = normLang(lang);
+    const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${encodeURIComponent(L)}_v${v}.json`;
+    const j = await fetchJson(url);
     if(Array.isArray(j)) return j;
     if(j && Array.isArray(j.questions)) return j.questions;
     return [];
+  }
+
+  function qKey(q){
+    const qq = String(q?.question||"").trim().toLowerCase().replace(/\s+/g," ");
+    const opts = (Array.isArray(q?.options) ? q.options : [])
+      .map(x=>String(x||"").trim().toLowerCase().replace(/\s+/g," "))
+      .join("|");
+    const lvl = String(q?.level||"").trim().toUpperCase();
+    return `${lvl}::${qq}::${opts}`;
+  }
+
+  function poolUnique(all){
+    const seen = new Set();
+    const out = [];
+    for(const q of all){
+      if(!q || !q.question || !Array.isArray(q.options) || q.options.length !== 4) continue;
+      const k = qKey(q);
+      if(seen.has(k)) continue;
+      seen.add(k);
+      out.push(q);
+    }
+    return out;
+  }
+
+  function pickByLevel(pool, level, need){
+    const arr = pool.filter(q=>String(q.level||"").toUpperCase() === level);
+    // shuffle
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr.slice(0, need);
+  }
+
+  function buildFinal50(pool){
+    const levels = ["A1","A2","B1","B2","C1"];
+    const chosen = [];
+    const usedKeys = new Set();
+
+    // 10 each
+    for(const lv of levels){
+      const block = pickByLevel(pool, lv, 10);
+      for(const q of block){
+        const k = qKey(q);
+        if(usedKeys.has(k)) continue;
+        usedKeys.add(k);
+        chosen.push(q);
+      }
+    }
+
+    // If any level shortage, fill from remaining pool (still unique) until 50
+    if(chosen.length < 50){
+      const rest = pool.slice();
+      // shuffle rest
+      for(let i=rest.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [rest[i],rest[j]]=[rest[j],rest[i]];
+      }
+      for(const q of rest){
+        if(chosen.length >= 50) break;
+        const k = qKey(q);
+        if(usedKeys.has(k)) continue;
+        usedKeys.add(k);
+        chosen.push(q);
+      }
+    }
+
+    return chosen.slice(0, 50);
   }
 
   showInfo("Test yükleniyor…");
@@ -287,35 +372,44 @@
 
   const langCode = normLang(testRow?.language_code || langParamRaw || "en");
   const langNameTR = LANG_NAMES_TR[langCode] || langCode.toUpperCase();
+
+  // test_version DB’den geliyorsa gösterelim (ama havuz seçiminde zorunlu değil)
   const testVer = Number(testRow?.test_version || 1) || 1;
+  $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı (v${testVer})`;
-
-  // 1) Soruları storage’dan al
-  let QUESTIONS = [];
+  // 1) Havuzu indir
+  let poolAll = [];
   try{
-    QUESTIONS = await loadStaticTest(langCode, testVer);
+    showInfo("Sorular hazırlanıyor…\n\nTest havuzu yükleniyor (v1–v5).");
+    const files = await Promise.all([1,2,3,4,5].map(v=>loadFile(langCode, v).catch(()=>[])));
+    poolAll = files.flat();
   }catch(e){
-    showError("Test dosyası yüklenemedi.", e?.message || String(e));
+    showError("Havuz indirilemedi.", e?.message || String(e));
     throw e;
   }
 
-  if(!Array.isArray(QUESTIONS) || QUESTIONS.length === 0){
-    showError("Test soruları boş.", "JSON dosyasında questions array yok.");
-    throw new Error("empty static questions");
+  // 2) Normalize + dedupe
+  poolAll = poolAll.map(normalizeOneQuestion);
+  const pool = poolUnique(poolAll);
+
+  if(pool.length < 50){
+    showError(
+      "Havuz yetersiz.",
+      `Bu dil için benzersiz soru sayısı: ${pool.length}\nEn az 50 olmalı.\n\nÇözüm:\n- v6 ekle\n- veya soruları yeniden üret.`
+    );
+    throw new Error("pool < 50");
   }
 
-  // 2) ✅ her soruda options + correct_index beraber karıştır + A/B/C/D etiketini temizle
-  QUESTIONS = QUESTIONS.map(q=>{
-    const packed = shuffleWithCorrectIndex(q);
-    return {
-      ...q,
-      options: packed.options,
-      correct_index: packed.correct_index
-    };
-  });
+  // 3) Final 50
+  let QUESTIONS = buildFinal50(pool);
+  QUESTIONS = QUESTIONS.map(normalizeOneQuestion); // son kez garanti
 
-  // 3) DB’ye yaz
+  if(QUESTIONS.length < 50){
+    showError("50 soru oluşturulamadı.", `Seçilen: ${QUESTIONS.length}\nHavuz: ${pool.length}`);
+    throw new Error("final < 50");
+  }
+
+  // 4) DB’ye yaz (RLS takılmasın)
   try{
     const { error: attErr } = await supabase.rpc("attach_level_test_questions", {
       p_test_id: testId,
@@ -328,7 +422,7 @@
     throw e;
   }
 
-  // --- TIMER ---
+  // --- TIMER (40 dk) ---
   const TOTAL_TIME = 40*60;
   const MAX_PASSES = 2;
 
@@ -400,6 +494,12 @@
 
   let timer = null;
 
+  function mustAnswerWarn(){
+    // küçük, net uyarı
+    showInfo("Lütfen bir şık seçin.\n\n(Şık seçmeden İleri’ye geçemezsiniz.)");
+    setTimeout(()=>render(), 550);
+  }
+
   async function finishExam(){
     try{ if(timer) clearInterval(timer); }catch{}
 
@@ -422,7 +522,7 @@
 
     $("rLevel").textContent = `Seviye: ${level}`;
     $("rText").textContent =
-`Dil: ${langNameTR} (v${testVer})
+`Dil: ${langNameTR}
 Doğru: ${correct} / ${total}
 Başarı: %${Math.round(percent*100)}
 
@@ -434,12 +534,29 @@ Sonuç profilinize işlendi.`;
   }
 
   btnPrev.onclick = ()=>{ if(idx>0){ idx--; render(); } };
+
   btnSkip.onclick = ()=>{
-    skipped[idx]=true; answers[idx]=null;
+    // 2. turda atlatma yok
+    if(passCount[idx] >= 2){
+      showInfo("Bu soru ikinci kez geldi.\n\nLütfen cevap veriniz.");
+      setTimeout(()=>render(), 650);
+      return;
+    }
+
+    skipped[idx]=true;
+    answers[idx]=null;
+
     const ni = nextIndex(idx);
     if(ni===-1) finishExam(); else { idx=ni; render(); }
   };
+
   btnNext.onclick = ()=>{
+    // şık seçmeden ilerleme yok
+    if(answers[idx] === null){
+      mustAnswerWarn();
+      return;
+    }
+
     const ni = nextIndex(idx);
     if(ni===-1) finishExam(); else { idx=ni; render(); }
   };
@@ -454,6 +571,7 @@ Sonuç profilinize işlendi.`;
     }
   }, 1000);
 
+  // hazır
   render();
 </script>
 </body>
