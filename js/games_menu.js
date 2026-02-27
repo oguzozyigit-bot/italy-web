@@ -6,6 +6,7 @@ import { ensureAuthAndCacheUser } from "/js/auth.js";
 const $ = (id)=>document.getElementById(id);
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
 let userId = null;
 let tokensCache = null;
 let busy = false;
@@ -34,13 +35,68 @@ function fadeNavigate(url){
     fade.style.zIndex = "9999999";
     document.body.appendChild(fade);
   }
-
   fade.style.opacity = "1";
-
   setTimeout(()=>{
     try{ location.assign(url); }
     catch{ location.href = url; }
   }, 120);
+}
+
+/* ---------------- GAME LANG + LEVEL GATE ---------------- */
+function getGameLang(){
+  return String(localStorage.getItem("italky_game_lang") || "").trim().toLowerCase();
+}
+
+// alias: senin kısa kodları normalize edelim (olur da gelir)
+const LANG_ALIASES = {
+  cn:"zh", jp:"ja", kr:"ko", sa:"ar", gr:"el", cz:"cs", rs:"sr", se:"sv", ua:"uk", ir:"fa"
+};
+function normLang(code){
+  const c = String(code || "").trim().toLowerCase();
+  return LANG_ALIASES[c] || c;
+}
+
+async function loadLevels(){
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("levels")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if(error) throw error;
+  const levels = (data?.levels && typeof data.levels === "object") ? data.levels : {};
+  return levels;
+}
+
+async function ensureGameAllowed(){
+  const gl = normLang(getGameLang());
+  if(!gl){
+    // Kullanıcı önce dili seçsin
+    localStorage.setItem("italky_game_next", "/pages/game.html");
+    fadeNavigate("/pages/game_lang.html");
+    return { ok:false, reason:"no_lang" };
+  }
+
+  let levels = {};
+  try{
+    levels = await loadLevels();
+  }catch{
+    // profil okunamadıysa bile güvenlik gereği engelle
+    toast("Profil okunamadı. Tekrar deneyin.");
+    return { ok:false, reason:"levels_read_failed" };
+  }
+
+  const lv = String(levels?.[gl] || "").trim();
+  if(!lv){
+    // Seviye yoksa oyun yok → sınava
+    toast("Oyunlar için önce seviye tespit gerekli.");
+    setTimeout(()=>fadeNavigate("/pages/level_test_hub.html"), 250);
+    return { ok:false, reason:"no_level" };
+  }
+
+  // seviye var: devam
+  localStorage.setItem("italky_game_level", lv);
+  return { ok:true, lang: gl, level: lv };
 }
 
 /* ---------------- 24h PASS ---------------- */
@@ -67,7 +123,7 @@ function setDot(gameId, on){
 
 function refreshDots(){
   document.querySelectorAll(".game-module[data-game]").forEach(card=>{
-    const g = card.getAttribute("data-game");
+    const g = String(card.getAttribute("data-game") || "").trim();
     if(!g) return;
     setDot(g, isPassActive(g));
   });
@@ -107,9 +163,7 @@ async function init(){
   userId = session.user.id;
 
   const cached = await ensureAuthAndCacheUser().catch(()=>null);
-  if(cached?.tokens != null){
-    setHeaderTokens(cached.tokens);
-  }
+  if(cached?.tokens != null) setHeaderTokens(cached.tokens);
 
   try{
     tokensCache = await loadTokens();
@@ -135,12 +189,23 @@ async function init(){
       if(busy) return;
       busy = true;
 
-      const gameId = card.getAttribute("data-game");
-      const url = card.getAttribute("data-url");
+      const gameId = String(card.getAttribute("data-game") || "").trim();
+      let url = String(card.getAttribute("data-url") || "").trim();
       if(!gameId || !url){
         busy = false;
         return;
       }
+
+      // ✅ SEVİYE GATE (en başta!)
+      const gate = await ensureGameAllowed();
+      if(!gate.ok){
+        busy = false;
+        return;
+      }
+
+      // Oyuna dil paramı ekle (istersen oyun sayfalarında kullanırsın)
+      const gl = encodeURIComponent(gate.lang);
+      url += (url.includes("?") ? "&" : "?") + `glang=${gl}`;
 
       // 24h pass varsa direkt gir
       if(isPassActive(gameId)){
@@ -172,7 +237,6 @@ async function init(){
         setDot(gameId, true);
 
         toast("24 saatlik giriş hakkı aktif.");
-
         setTimeout(()=>fadeNavigate(url), 200);
 
       }catch(e){
