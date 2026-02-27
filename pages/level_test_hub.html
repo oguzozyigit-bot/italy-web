@@ -15,73 +15,211 @@
 
   <style>
     :root{
-      --card: rgba(255,255,255,0.05);
       --border: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.05);
+      --muted: rgba(255,255,255,0.70);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    #pageContent{ padding: 14px 14px 12px; }
 
-    .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+    /* ui_shell main-content zaten var, biz içeride scroll istemiyoruz */
+    #pageContent{
+      height: 100%;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding: 10px 12px; /* ✅ kenarlar az */
+    }
+
+    .wrap{
+      width: 100%;
+      max-width: 520px;
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      justify-content: space-between; /* ✅ üst-alt bar arasında ortalar */
+    }
 
     .hero{
-      border-radius: 24px;
+      border-radius: 22px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      padding: 14px;
+      padding: 12px 14px;
     }
-    .heroTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 8px; }
+
+    .heroTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 6px;
+    }
+
     .hTitle{
       font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight: 1000; font-size: 16px; margin:0; color:#fff;
+      font-weight: 1000;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+      margin:0;
+      color:#fff;
     }
+
     .pill{
-      padding: 8px 12px; border-radius: 999px;
+      padding: 7px 10px;
+      border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
-      font-weight: 1000; font-size: 12px; color: rgba(255,255,255,0.88);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(255,255,255,0.90);
       white-space: nowrap;
     }
+
     .heroText{
-      margin:0; font-size: 12px; font-weight: 900; line-height: 1.5;
-      color: rgba(255,255,255,0.70);
+      margin:0;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.72);
     }
     .heroText b{ color:#fff; }
 
-    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    /* ✅ 6 kart tek kolon – kaydırmasız sığması için esnek yükseklik */
+    .list{
+      flex: 1;
+      min-height: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      justify-content: center; /* ✅ tam ortaya yakın */
+    }
 
-    button.card{
+    button.langCard{
+      width: 100%;
       border-radius: 22px;
       border: 1px solid var(--border);
       background: var(--card);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      padding: 14px 12px;
-      min-height: 98px;
 
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      gap:6px;
+      padding: 14px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
 
-      width:100%;
+      color:#fff;
       cursor:pointer;
       user-select:none;
-      text-align:center;
-      color:#fff;
+      appearance:none;
+      -webkit-appearance:none;
 
-      appearance:none; -webkit-appearance:none;
-      transition: transform .18s ease, background .18s ease;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
     }
-    button.card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
 
-    .flag{ font-size: 26px; line-height: 1; }
-    .name{ font-size: 14px; font-weight: 1000; }
-    .status{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.60); }
-    .status.ok{ color: rgba(165,180,252,0.95); }
+    button.langCard:active{
+      transform: scale(.988);
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(165,180,252,0.30);
+    }
+
+    .left{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .flagBox{
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      flex: 0 0 auto;
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* ✅ bayrak mini “yüzer” animasyon */
+    .flag{
+      font-size: 22px;
+      line-height: 1;
+      transform: translateY(0);
+      animation: floatFlag 2.2s ease-in-out infinite;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
+    }
+    @keyframes floatFlag{
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-2px); }
+    }
+
+    /* her kartta ufak fark */
+    button.langCard:nth-child(2) .flag{ animation-duration: 2.5s; }
+    button.langCard:nth-child(3) .flag{ animation-duration: 2.1s; }
+    button.langCard:nth-child(4) .flag{ animation-duration: 2.7s; }
+    button.langCard:nth-child(5) .flag{ animation-duration: 2.3s; }
+    button.langCard:nth-child(6) .flag{ animation-duration: 2.6s; }
+
+    .txt{
+      min-width: 0;
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+    }
+    .name{
+      font-size: 15px;
+      font-weight: 1000;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sub{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.62);
+      line-height: 1.2;
+    }
+    .sub.ok{ color: rgba(165,180,252,0.95); }
+
+    .right{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+
+    .badge{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-size: 12px;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.88);
+      white-space: nowrap;
+    }
+
+    .chev{
+      width: 34px; height: 34px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.85);
+    }
 
     .toast{
-      position: fixed; left:50%; top:18px;
+      position: fixed;
+      left:50%;
+      top:18px;
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,0.95);
       border: 1px solid rgba(165,180,252,0.35);
@@ -98,24 +236,34 @@
       text-align:center;
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
+
+    /* ✅ çok küçük ekranlarda kartları biraz sıkıştır */
+    @media (max-height: 740px){
+      .hero{ padding: 10px 12px; }
+      button.langCard{ padding: 12px 12px; }
+      .flagBox{ width:40px; height:40px; }
+      .name{ font-size: 14px; }
+    }
   </style>
 </head>
 
 <body>
   <main id="pageContent">
     <div class="wrap">
+
       <section class="hero">
         <div class="heroTop">
           <h1 class="hTitle">Seviye Tespit Sınavı</h1>
           <div class="pill">Süre: 40 dk</div>
         </div>
         <p class="heroText">
-          Lütfen <b>sessiz</b> ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
-          Sorular dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
+          Bu sınav, <b>gerçek seviye tespit</b> standardına göre hazırlanmıştır.<br/>
+          Lütfen <b>sessiz</b> ve dikkatinizin dağılmayacağı bir ortamda başlayın.
         </p>
       </section>
 
-      <section class="grid" id="grid"></section>
+      <section class="list" id="list"></section>
+
     </div>
   </main>
 
@@ -125,10 +273,11 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
-    mountShell({ scroll:"auto" });
+    // ✅ scroll istemiyoruz
+    mountShell({ scroll:"none" });
 
     const $ = (id)=>document.getElementById(id);
-    const grid = $("grid");
+    const list = $("list");
 
     function toast(msg){
       const t = $("toast");
@@ -138,7 +287,7 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // ✅ SADECE 6 DİL
+    // ✅ 6 DİL
     const LANGS = [
       { code:"en", name:"English",   flag:"🇬🇧" },
       { code:"de", name:"German",    flag:"🇩🇪" },
@@ -148,10 +297,8 @@
       { code:"es", name:"Spanish",   flag:"🇪🇸" },
     ];
 
-    // session
-    let userId = null;
     const { data:{ session } } = await supabase.auth.getSession();
-    userId = session?.user?.id || null;
+    const userId = session?.user?.id || null;
     if(!userId){
       location.replace("/pages/login.html");
     }
@@ -169,20 +316,28 @@
 
     function cardHtml(l){
       const lv = (levels && typeof levels === "object") ? (levels[l.code] || "") : "";
-      const status = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
-      const cls = lv ? "status ok" : "status";
+      const sub = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
+      const subCls = lv ? "sub ok" : "sub";
+
       return `
-        <button class="card" type="button" data-code="${l.code}">
-          <div class="flag">${l.flag}</div>
-          <div class="name">${l.name}</div>
-          <div class="${cls}">${status}</div>
+        <button class="langCard" type="button" data-code="${l.code}">
+          <div class="left">
+            <div class="flagBox"><div class="flag">${l.flag}</div></div>
+            <div class="txt">
+              <div class="name">${l.name}</div>
+              <div class="${subCls}">${sub}</div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="badge">${l.code.toUpperCase()}</div>
+            <div class="chev">›</div>
+          </div>
         </button>
       `;
     }
 
-    grid.innerHTML = LANGS.map(cardHtml).join("");
+    list.innerHTML = LANGS.map(cardHtml).join("");
 
-    // dedupe
     let busy = false;
     let lastTap = 0;
 
@@ -225,7 +380,7 @@
       }
     }
 
-    grid.querySelectorAll(".card").forEach(btn=>{
+    list.querySelectorAll(".langCard").forEach(btn=>{
       const handler = (ev)=>{
         ev.preventDefault();
         ev.stopPropagation();
