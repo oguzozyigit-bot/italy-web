@@ -15,92 +15,216 @@
 
   <style>
     :root{
-      --border: rgba(255,255,255,0.12);
+      --bg:#02000f;
       --card: rgba(255,255,255,0.05);
-      --muted: rgba(255,255,255,0.72);
+      --border: rgba(255,255,255,0.12);
+      --muted: rgba(255,255,255,0.62);
+      --ai: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    #pageContent{ height:100%; }
 
-    #pageContent{
-      height: 100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 10px 12px;
-    }
-
-    .box{
-      width:100%;
-      max-width:520px;
-      border-radius: 24px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 16px;
+    .wrap{
+      height:100%;
       display:flex;
       flex-direction:column;
+      gap:12px;
+      padding: 12px 14px;
+      max-width: 520px;
+      margin:0 auto;
+    }
+
+    /* üst blok */
+    .hero{
+      flex: 1;
+      min-height: 0;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(10,10,18,0.26);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 14px;
+      position: relative;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
       gap: 12px;
     }
 
-    .title{
-      font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight:1000;
-      font-size: 18px;
-      margin:0;
-      color:#fff;
-      letter-spacing:-0.3px;
+    /* animasyon katmanı */
+    .fx{
+      position:absolute; inset:0;
+      pointer-events:none;
+      opacity: 1;
+    }
+    .fx::before{
+      content:"";
+      position:absolute; inset:-40%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,.30) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,.22) 0%, transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(168,85,247,.20) 0%, transparent 45%);
+      filter: blur(40px);
+      animation: drift 10s ease-in-out infinite alternate;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-10px,-6px,0) scale(1); }
+      to{ transform: translate3d(10px,8px,0) scale(1.06); }
     }
 
-    .desc{
-      margin:0;
-      font-size: 12px;
-      font-weight: 900;
-      line-height: 1.55;
-      color: rgba(255,255,255,0.76);
+    /* partiküller */
+    .spark{
+      position:absolute;
+      width: 8px; height:8px;
+      border-radius: 99px;
+      background: rgba(165,180,252,.95);
+      box-shadow: 0 0 16px rgba(165,180,252,.55);
+      opacity:.55;
+      animation: floaty 6.5s ease-in-out infinite;
     }
-    .desc b{ color:#fff; }
+    .spark.s2{ width:10px;height:10px; opacity:.35; animation-duration: 8.2s; background: rgba(236,72,153,.9); box-shadow: 0 0 16px rgba(236,72,153,.45); }
+    .spark.s3{ width:6px;height:6px; opacity:.45; animation-duration: 7.4s; background: rgba(99,102,241,.9); box-shadow: 0 0 16px rgba(99,102,241,.45); }
+    @keyframes floaty{
+      0%{ transform: translateY(10px); }
+      50%{ transform: translateY(-14px); }
+      100%{ transform: translateY(10px); }
+    }
 
-    .row{
+    /* başlık alanı */
+    .top{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 10px;
-      padding: 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
+      gap:10px;
+      position:relative;
+      z-index: 2;
     }
-    .lang{
-      font-weight:1000;
-      font-size: 14px;
-      color:#fff;
-    }
-    .mini{
-      font-weight:900;
+    .pill{
+      padding: 8px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.22);
+      font-weight: 1000;
       font-size: 12px;
-      color: rgba(255,255,255,0.75);
-      white-space: nowrap;
+      color: rgba(255,255,255,0.90);
+      white-space:nowrap;
+    }
+    .title{
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 1000;
+      margin:0;
+      color:#fff;
+      letter-spacing: -.2px;
     }
 
+    /* orta: dil kartı */
+    .langCard{
+      position:relative;
+      z-index:2;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      padding: 14px;
+      display:flex;
+      align-items:center;
+      gap: 12px;
+    }
+    .flagRing{
+      width: 64px; height:64px;
+      border-radius: 22px;
+      padding: 2px;
+      background: var(--ai);
+      flex: 0 0 auto;
+      position:relative;
+      overflow:hidden;
+      animation: ringSpin 8s linear infinite;
+    }
+    @keyframes ringSpin{
+      from{ filter: hue-rotate(0deg); }
+      to{ filter: hue-rotate(25deg); }
+    }
+    .flagInner{
+      width:100%; height:100%;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.10);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 30px;
+      animation: pop 2.2s ease-in-out infinite;
+    }
+    @keyframes pop{
+      0%,100%{ transform: scale(1); }
+      50%{ transform: scale(1.06); }
+    }
+    .langMeta{ min-width:0; }
+    .langName{
+      font-size: 20px;
+      font-weight: 1000;
+      margin:0;
+      color:#fff;
+      letter-spacing: -.4px;
+    }
+    .langCode{
+      margin-top: 3px;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(165,180,252,0.92);
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+    }
+
+    /* mesaj */
+    .msg{
+      position:relative;
+      z-index:2;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      padding: 12px 12px;
+      color: rgba(255,255,255,0.78);
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+    .msg b{ color:#fff; }
+    .msg .hl{
+      background: var(--ai);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    /* butonlar */
+    .actions{
+      position:relative;
+      z-index:2;
+      display:flex;
+      gap:10px;
+    }
     .btn{
+      flex:1;
       height: 54px;
       border-radius: 18px;
-      border: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
       font-weight: 1000;
       font-size: 14px;
       cursor:pointer;
+      transition: transform .18s ease, opacity .18s ease;
     }
-    .btn-primary{
+    .btn:active{ transform: scale(.985); }
+    .btn.primary{
       background:#fff;
       color:#000;
+      border:none;
     }
-    .btn-primary:disabled{
-      background: rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.35);
-      cursor:not-allowed;
-    }
+    .btn:disabled{ opacity:.4; cursor:not-allowed; }
 
+    /* toast */
     .toast{
       position: fixed;
       left:50%;
@@ -126,22 +250,45 @@
 
 <body>
   <main id="pageContent">
-    <div class="box">
-      <h1 class="title">Seviye tespit gerekli</h1>
-      <p class="desc" id="desc">
-        Bu derse/pratiğe başlamadan önce <b>Seviye Tespit Sınavı</b>na katılmalısınız.
-      </p>
+    <div class="wrap">
+      <section class="hero">
+        <div class="fx">
+          <div class="spark" style="left:14%; top:22%"></div>
+          <div class="spark s2" style="left:78%; top:18%"></div>
+          <div class="spark s3" style="left:62%; top:72%"></div>
+          <div class="spark s2" style="left:20%; top:78%"></div>
+        </div>
 
-      <div class="row">
-        <div class="lang" id="langName">Dil: —</div>
-        <div class="mini">Süre: 40 dk</div>
-      </div>
+        <div class="top">
+          <h1 class="title">Seviye Tespit Gerekli</h1>
+          <div class="pill">Süre: 40 dk</div>
+        </div>
 
-      <button class="btn btn-primary" id="btnGo" disabled>Seviye Tespit Sınavına Katıl</button>
+        <div class="langCard">
+          <div class="flagRing">
+            <div class="flagInner" id="flag">🏁</div>
+          </div>
+          <div class="langMeta">
+            <p class="langName" id="langName">Dil</p>
+            <div class="langCode" id="langCode">—</div>
+          </div>
+        </div>
+
+        <div class="msg" id="msgBox">
+          <span class="hl" id="hlLang">Bu dil</span> için henüz <b>seviye tespit sınavına</b> katılmadınız.<br/>
+          Bu derse devam edebilmek için önce sınava katılın. Test sonuçları:
+          <b>Profil</b>, <b>Seviye Tespit</b> ve <b>Academy</b> sayfalarında otomatik görünür.
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="btnBack" type="button">Geri</button>
+          <button class="btn primary" id="btnStart" type="button">Seviye Tespit Sınavına Katıl</button>
+        </div>
+      </section>
     </div>
-  </main>
 
-  <div class="toast" id="toast"></div>
+    <div class="toast" id="toast"></div>
+  </main>
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
@@ -153,66 +300,97 @@
 
     function toast(msg){
       const t = $("toast");
+      if(!t) return;
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    const qs = (k)=> new URLSearchParams(location.search).get(k);
-    const lang = String(qs("lang")||"en").toLowerCase();
-    const teacher = String(qs("t")||"").trim();
-    const next = String(qs("next")||"").trim();
+    const params = new URLSearchParams(location.search);
+    const langRaw = (params.get("lang") || "en").trim().toLowerCase();
+    const next = (params.get("next") || "").trim();       // örn: plan_select
+    const teacher = (params.get("t") || "").trim();       // örn: ayda
+    const nextUrl = next ? `/pages/${next}.html` : "";
 
-    const NAME = {
-      en:"English", de:"German", fr:"French", it:"Italian", ru:"Russian", es:"Spanish"
+    // alias (senin kod standardına)
+    const ALIAS = { cn:"zh", jp:"ja", kr:"ko", sa:"ar", gr:"el", cz:"cs", rs:"sr", se:"sv", ua:"uk", ir:"fa" };
+    const code = ALIAS[langRaw] || langRaw;
+
+    // 6 dil (yeni strateji)
+    const LANGS = {
+      en:{ name:"English",   flag:"🇬🇧" },
+      de:{ name:"German",    flag:"🇩🇪" },
+      fr:{ name:"French",    flag:"🇫🇷" },
+      it:{ name:"Italian",   flag:"🇮🇹" },
+      ru:{ name:"Russian",   flag:"🇷🇺" },
+      es:{ name:"Spanish",   flag:"🇪🇸" },
     };
 
-    $("langName").textContent = `Dil: ${NAME[lang] || lang.toUpperCase()}`;
-    $("desc").innerHTML =
-      `Henüz <b>${NAME[lang] || lang.toUpperCase()}</b> dil seviyenizi tespit etmedik.<br/>Bu derse devam etmek için önce sınava katılın.`;
+    const info = LANGS[code] || { name: code.toUpperCase(), flag:"🏁" };
+    $("flag").textContent = info.flag;
+    $("langName").textContent = info.name;
+    $("langCode").textContent = code.toUpperCase();
+    $("hlLang").textContent = info.name;
 
+    // session şart
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session?.user){
       location.replace("/pages/login.html");
     }
 
-    const btn = $("btnGo");
-    btn.disabled = false;
+    $("btnBack").addEventListener("click", ()=>{
+      // önce teacher_select'e dönmek daha mantıklı
+      if (teacher) location.href = "/pages/teacher_select.html";
+      else location.href = "/pages/home.html";
+    });
 
-    let busy=false;
-    btn.addEventListener("click", async ()=>{
-      if(busy) return;
-      busy=true;
-      btn.disabled=true;
-      try{
-        toast("Sınav başlatılıyor…");
-        const { data, error } = await supabase.rpc("start_level_test", { p_language_code: lang });
-        if(error){
-          toast(error.message || "Başlatılamadı");
-          btn.disabled=false;
-          busy=false;
+    // ücret (ekranda yazmıyoruz ama buton davranışı aynı)
+    const FEE = 1;
+
+    async function startTest(){
+      const btn = $("btnStart");
+      btn.disabled = true;
+      toast("Sınav başlatılıyor…");
+
+      const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
+
+      if(error){
+        // en sık: Not enough tokens / Not authenticated
+        const msg = (error.message || "").toLowerCase();
+
+        if(msg.includes("not enough") || msg.includes("yetersiz")){
+          toast("Jeton yetersiz. Jeton yükleyip tekrar deneyin.");
+          setTimeout(()=>location.href="/pages/profile.html", 900);
+          btn.disabled = false;
           return;
         }
-        const row = Array.isArray(data) ? (data[0]||null) : data;
-        const testId = row?.test_id || row?.id || null;
-        if(!testId){
-          toast("test_id gelmedi");
-          btn.disabled=false;
-          busy=false;
+
+        if(msg.includes("not authenticated")){
+          toast("Giriş gerekli.");
+          setTimeout(()=>location.href="/pages/login.html", 800);
           return;
         }
 
-        // teacher_select akışı için teacher paramını koru
-        const extra = teacher ? `&t=${encodeURIComponent(teacher)}&next=${encodeURIComponent(next)}` : "";
-        location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(lang)}${extra}`;
-      }catch(e){
-        toast("Başlatılamadı");
-        btn.disabled=false;
-      }finally{
-        busy=false;
+        toast(error.message || "Başlatılamadı");
+        btn.disabled = false;
+        return;
       }
-    }, { passive:false });
+
+      const row = Array.isArray(data) ? (data[0] || null) : data;
+      const testId = row?.test_id || row?.id || null;
+
+      if(!testId){
+        toast("test_id alınamadı");
+        btn.disabled = false;
+        return;
+      }
+
+      // sınav sayfası
+      location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
+    }
+
+    $("btnStart").addEventListener("click", startTest, { passive:true });
   </script>
 </body>
 </html>
