@@ -16,8 +16,6 @@
 <style>
   :root{ --bg:#02000f; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.10); --muted: rgba(255,255,255,0.65); }
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-
-  /* ui_shell body zaten fixed/hidden yönetiyor. Biz sadece içeriği yönetiyoruz. */
   #pageContent{ height: 100%; }
 
   .wrap{
@@ -182,8 +180,6 @@
 
   mountShell({ scroll: "none" });
 
-  const API_BASE = "https://italky-api.onrender.com";
-
   const $ = (id)=>document.getElementById(id);
   const qCard = $("qCard");
   const btnPrev = $("btnPrev");
@@ -198,124 +194,95 @@
     qCard.innerHTML = `<div class="infoBox">${msg}</div>`;
   }
   function qs(k){ return new URLSearchParams(location.search).get(k); }
-  function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
 
   const testId = String(qs("test_id")||"").trim();
-  const langParam = String(qs("lang")||"").trim().toLowerCase();
+  const langParamRaw = String(qs("lang")||"").trim().toLowerCase();
 
   if(!testId){
     showError("Test ID yok.", "Bu sayfa Seviye Tespit sayfasından açılmalı.");
     throw new Error("missing test_id");
   }
 
+  // session gerekli
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session?.user){
     location.replace("/pages/login.html");
+    throw new Error("no session");
+  }
+
+  // ✅ language code alias düzeltmeleri
+  const LANG_ALIASES = {
+    cn: "zh",
+    jp: "ja",
+    kr: "ko",
+    sa: "ar",
+    gr: "el",
+    cz: "cs",
+    rs: "sr",
+    se: "sv",
+    ua: "uk",
+    ir: "fa",
+  };
+
+  function normLang(l){
+    const x = String(l || "en").trim().toLowerCase();
+    return LANG_ALIASES[x] || x;
   }
 
   async function loadTestRow(){
     const { data, error } = await supabase
       .from("level_tests")
-      .select("id,user_id,language_code,questions,started_at,status")
+      .select("id, user_id, language_code, started_at, status")
       .eq("id", testId)
       .single();
     if(error) throw error;
     return data;
   }
 
-  function extractQuestions(testRow){
-    let q = testRow?.questions;
-    if(!q) return [];
+  // ✅ Storage’dan sabit test dosyasını çek
+  async function loadStaticTest(lang){
+    const L = normLang(lang);
+    const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${encodeURIComponent(L)}_v1.json`;
 
-    // json string geldiyse parse
-    if(typeof q === "string"){
-      try{ q = JSON.parse(q); }catch{ return []; }
+    const r = await fetch(url, { cache: "no-store" });
+    if(!r.ok){
+      const t = await r.text().catch(()=> "");
+      throw new Error(`Static test file not found: ${L}_v1.json\nHTTP ${r.status}\n${t}`);
     }
+    const j = await r.json().catch(()=>null);
+    if(!j) return [];
 
-    // direkt array
-    if(Array.isArray(q)) return q;
-
-    // {questions:[...]}
-    if(q && Array.isArray(q.questions)) return q.questions;
-
-    // bazen jsonb object içinde nested gelebilir
-    if(q && q.questions && Array.isArray(q.questions.questions)) return q.questions.questions;
-
+    // kabul: {questions:[...]} veya direkt [...]
+    if(Array.isArray(j)) return j;
+    if(Array.isArray(j.questions)) return j.questions;
     return [];
   }
 
-  async function generateQuestions(row){
-    const lang = String(row?.language_code || langParam || "en").toLowerCase();
-    const r = await fetch(`${API_BASE}/api/level_test/generate`,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ test_id: testId, lang })
-    });
-    const j = await r.json().catch(()=>null);
-    if(!r.ok || !j?.ok) throw new Error(j?.detail || `generate_failed HTTP ${r.status}`);
-    return true;
-  }
+  // --- start ---
+  showInfo("Test yükleniyor…");
 
-  // 1) test satırı
   let testRow = null;
   try{
     testRow = await loadTestRow();
   }catch(e){
-    showError("Test okunamadı.", String(e?.message || e));
+    showError("Test okunamadı.", e?.message || String(e));
     throw e;
   }
 
-  const langCode = String(testRow?.language_code || langParam || "en").toLowerCase();
+  const langCode = normLang(testRow?.language_code || langParamRaw || "en");
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  // 2) soruları çek / üret / bekle
   let QUESTIONS = [];
-
-// Storage’dan sabit test dosyasını çek
-async function loadStaticTest(lang){
-  const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${lang}_v1.json`;
-
-  const r = await fetch(url);
-  if(!r.ok) throw new Error("Static test file not found");
-
-  const j = await r.json();
-
-  if(Array.isArray(j)) return j;
-  if(Array.isArray(j.questions)) return j.questions;
-
-  return [];
-}
-
-try{
-  QUESTIONS = await loadStaticTest(langCode);
-}catch(e){
-  showError("Test dosyası yüklenemedi", e.message);
-  throw e;
-}
-
-if(!QUESTIONS.length){
-  showError("Test soruları boş", "JSON dosyasında soru yok.");
-  throw new Error("empty static questions");
-}
-
-    // ✅ DB’ye yazılmasını bekle (poll)
-    const started = Date.now();
-    const MAX_WAIT_MS = 120000; // 120 sn
-    while(Date.now() - started < MAX_WAIT_MS){
-      await sleep(1500);
-      try{
-        testRow = await loadTestRow();
-        QUESTIONS = extractQuestions(testRow);
-        if(QUESTIONS.length) break;
-      }catch{}
-      const secs = Math.ceil((MAX_WAIT_MS - (Date.now()-started))/1000);
-      showInfo(`Sorular hazırlanıyor…\n\nYükleme süresi sistem yoğunluğuna göre değişebilir (15–120 sn).\nKalan: ~${secs} sn`);
-    }
+  try{
+    QUESTIONS = await loadStaticTest(langCode);
+  }catch(e){
+    showError("Test dosyası yüklenemedi.", e?.message || String(e));
+    throw e;
   }
 
-  if(!QUESTIONS.length){
-    showError("Sorular bulunamadı.", "generate ok döndü ama DB’ye yazılmamış / gecikmiş olabilir.");
-    throw new Error("empty questions");
+  if(!Array.isArray(QUESTIONS) || QUESTIONS.length === 0){
+    showError("Test soruları boş.", "JSON dosyasında questions array yok.");
+    throw new Error("empty static questions");
   }
 
   // --- TIMER (40 dk) ---
@@ -331,9 +298,9 @@ if(!QUESTIONS.length){
     }
   }catch{}
 
-  // ✅ DEBUG (senin istediğin): answers satırının hemen üstü
-  console.log("QUESTIONS:", QUESTIONS);
-  console.log("Is Array?", Array.isArray(QUESTIONS), "Length:", QUESTIONS?.length);
+  // ✅ debug
+  console.log("STATIC QUESTIONS:", QUESTIONS);
+  console.log("Is Array?", Array.isArray(QUESTIONS), "Length:", QUESTIONS.length);
 
   const answers = Array(QUESTIONS.length).fill(null);
   const passCount = Array(QUESTIONS.length).fill(0);
@@ -397,7 +364,6 @@ if(!QUESTIONS.length){
   async function finishExam(){
     try{ if(timer) clearInterval(timer); }catch{}
 
-    // ✅ DB hesaplasın + 3 yere yazsın
     const { data, error } = await supabase.rpc("finish_level_test", {
       p_test_id: testId,
       p_answers: answers,
