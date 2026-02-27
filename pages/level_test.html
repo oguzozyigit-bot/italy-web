@@ -269,16 +269,34 @@
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
   // 2) soruları çek / üret / bekle
-  let QUESTIONS = extractQuestions(testRow);
+  let QUESTIONS = [];
 
-  if(!QUESTIONS.length){
-    showInfo("Sorular hazırlanıyor…\n\nYükleme süresi sistem yoğunluğuna göre değişebilir (15–120 sn).");
-    try{
-      await generateQuestions(testRow);
-    }catch(e){
-      showError("Sorular üretilemedi.", String(e?.message || e));
-      throw e;
-    }
+// Storage’dan sabit test dosyasını çek
+async function loadStaticTest(lang){
+  const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${lang}_v1.json`;
+
+  const r = await fetch(url);
+  if(!r.ok) throw new Error("Static test file not found");
+
+  const j = await r.json();
+
+  if(Array.isArray(j)) return j;
+  if(Array.isArray(j.questions)) return j.questions;
+
+  return [];
+}
+
+try{
+  QUESTIONS = await loadStaticTest(langCode);
+}catch(e){
+  showError("Test dosyası yüklenemedi", e.message);
+  throw e;
+}
+
+if(!QUESTIONS.length){
+  showError("Test soruları boş", "JSON dosyasında soru yok.");
+  throw new Error("empty static questions");
+}
 
     // ✅ DB’ye yazılmasını bekle (poll)
     const started = Date.now();
