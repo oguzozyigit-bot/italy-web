@@ -1,0 +1,711 @@
+<!-- FILE: /pages/practice_ai_session.html -->
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>italkyAI • AI Pratik Oturumu</title>
+
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --border: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.05);
+      --muted: rgba(255,255,255,0.70);
+      --ok: rgba(34,197,94,0.95);
+      --bad: rgba(255,90,140,0.95);
+      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    #pageContent{ height:100%; }
+
+    .wrap{
+      position:relative;
+      max-width:480px;
+      height:100%;
+      margin:0 auto;
+      padding: 12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      background: rgba(10,10,30,0.18);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 26px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .topbar{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
+    .chip{
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.92);
+      font-weight:1000;
+      font-size:12px;
+      white-space:nowrap;
+      display:flex; gap:8px; align-items:center;
+    }
+    .chip .ai{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      font-weight:1000;
+    }
+
+    .panel{
+      flex:1;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      overflow:hidden;
+    }
+
+    .titleRow{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .h{
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-weight:1000;
+      font-size:14px;
+      margin:0;
+      color:#fff;
+      letter-spacing:-.2px;
+    }
+    .lvl{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(165,180,252,0.95);
+      white-space: nowrap;
+    }
+
+    .sentenceBox{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      padding: 12px;
+      min-height: 96px;
+    }
+    .sentence{
+      font-size: 16px;
+      font-weight: 1000;
+      line-height: 1.35;
+      color:#fff;
+      white-space: pre-wrap;
+    }
+    .hint{
+      margin-top: 6px;
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.62);
+      line-height:1.35;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .btn{
+      height: 52px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      padding: 0 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+    }
+    .btn:disabled{ opacity:.35; cursor:not-allowed; }
+
+    .btn-primary{
+      background:#fff;
+      color:#000;
+      border:none;
+    }
+
+    .mic{
+      width: 52px; min-width:52px;
+      height: 52px;
+      border-radius: 18px;
+      border: none;
+      background: var(--aiGrad);
+      color:#000;
+      font-weight:1000;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 10px 30px rgba(99,102,241,0.25);
+    }
+    .mic:active{ transform: scale(.99); }
+    .mic.rec{
+      background: linear-gradient(135deg, rgba(255,90,140,1) 0%, rgba(236,72,153,1) 60%, rgba(165,180,252,1) 100%);
+    }
+
+    .statusBox{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.14);
+      padding: 12px;
+      min-height: 84px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .statusBox::-webkit-scrollbar{ display:none; }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 8px;
+    }
+    .k{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.55);
+      letter-spacing:.5px;
+      text-transform: uppercase;
+    }
+    .v{
+      font-size: 12px;
+      font-weight: 1000;
+      color:#fff;
+    }
+    .v.ok{ color: var(--ok); }
+    .v.bad{ color: var(--bad); }
+
+    .trans{
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.82);
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    .trans .muted{ color: rgba(255,255,255,0.60); }
+
+    .note{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.45;
+    }
+
+    .toast{
+      position: fixed;
+      left:50%;
+      top:18px;
+      transform: translateX(-50%) translateY(-120px);
+      background: rgba(10,10,18,0.95);
+      border: 1px solid rgba(165,180,252,0.35);
+      padding: 10px 14px;
+      border-radius: 999px;
+      color:#fff;
+      z-index: 999999;
+      font-weight: 1000;
+      font-size: 12px;
+      transition: .25s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width: min(92vw, 520px);
+      text-align:center;
+    }
+    .toast.show{ transform: translateX(-50%) translateY(0); }
+
+    /* küçük ekran sıkıştır */
+    @media (max-height: 740px){
+      .sentence{ font-size: 15px; }
+      .sentenceBox{ min-height: 86px; }
+      .btn{ height: 50px; }
+      .mic{ width:50px; min-width:50px; height:50px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main id="pageContent">
+    <div class="wrap">
+      <div class="topbar">
+        <div class="chip" id="chipLeft"><span class="ai">AI</span> Pratik</div>
+        <div class="chip" id="chipRight">—</div>
+      </div>
+
+      <section class="panel">
+        <div class="titleRow">
+          <h2 class="h" id="langTitle">—</h2>
+          <div class="lvl" id="levelPill">—</div>
+        </div>
+
+        <div class="sentenceBox">
+          <div class="sentence" id="sentence">Yükleniyor…</div>
+          <div class="hint" id="hint">Önce sesi dinle, sonra mikrofona basıp tekrar et.</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="btnPlay" type="button">🔊 Dinlet</button>
+          <button class="mic" id="btnRec" type="button" title="Kayıt">🎙️</button>
+          <button class="btn btn-primary" id="btnNext" type="button" disabled>Sonraki</button>
+        </div>
+
+        <div class="statusBox">
+          <div class="row">
+            <div class="k">Tanıma</div>
+            <div class="v" id="sttStatus">Hazır</div>
+          </div>
+          <div class="row">
+            <div class="k">Benzerlik</div>
+            <div class="v" id="simStatus">—</div>
+          </div>
+          <div class="trans" id="transBox">
+            <span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="btnMeaning" type="button">📝 Anlam</button>
+          <button class="btn" id="btnRepeat" type="button">↻ Tekrar</button>
+          <button class="btn" id="btnExit" type="button">Çık</button>
+        </div>
+
+        <div class="note" id="note">
+          • Seviye bazlı eşik uygulanır. Ses benzerliği yeterliyse “Sonraki” açılır.<br/>
+          • Bu ekranın maliyeti düşük: sadece STT/TTS istekleri var.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { supabase } from "/js/supabase_client.js";
+
+    mountShell({ scroll:"none" });
+
+    const API_BASE = "https://italky-api.onrender.com";
+
+    const $ = (id)=>document.getElementById(id);
+    const toastEl = $("toast");
+
+    function toast(msg){
+      toastEl.textContent = String(msg||"");
+      toastEl.classList.add("show");
+      clearTimeout(window.__to);
+      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 1600);
+    }
+
+    function qs(k){ return new URLSearchParams(location.search).get(k); }
+
+    // params
+    const lang = String(qs("lang") || "en").trim().toLowerCase();
+    const teacher = String(qs("t") || "").trim();
+    const level = String(qs("level") || "").trim().toUpperCase(); // A1..C1
+
+    // ui labels
+    const LANG_META = {
+      en:{ name:"English",  flag:"🇬🇧" },
+      de:{ name:"German",   flag:"🇩🇪" },
+      fr:{ name:"French",   flag:"🇫🇷" },
+      it:{ name:"Italian",  flag:"🇮🇹" },
+      ru:{ name:"Russian",  flag:"🇷🇺" },
+      es:{ name:"Spanish",  flag:"🇪🇸" },
+    };
+    const meta = LANG_META[lang] || { name: lang.toUpperCase(), flag:"🌍" };
+
+    $("chipRight").textContent = `${meta.flag} ${lang.toUpperCase()}`;
+    $("langTitle").textContent = `${meta.name} • Konuşma Pratiği`;
+    $("levelPill").textContent = level ? `Seviye: ${level}` : "Seviye: —";
+
+    // auth check
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(!session?.user){
+      location.replace("/pages/login.html");
+      throw new Error("no session");
+    }
+
+    // ---- Phrase pool (şimdilik gömülü; sonra storage’dan 1000’lik pool çekeriz) ----
+    // Her dil için minimum set; seviyeye göre seçilecek.
+    const POOL = {
+      en:{
+        A1:["I live in a small house.","I drink coffee every morning.","Where is the bus stop?","I like to read books.","My name is Oğuz."],
+        A2:["I went to the market yesterday.","Can you help me, please?","I am learning English these days.","We will meet at seven o’clock.","I usually cook at home."],
+        B1:["I’ve been working here for two years.","If I had time, I would travel more.","Could you tell me how to get there?","I’m trying to improve my pronunciation.","I didn’t expect it to be so difficult."],
+        B2:["I wish I had studied earlier.","The reason I’m late is the traffic.","I’d rather stay home than go out tonight.","I’m looking forward to hearing from you.","This topic is more complex than it seems."],
+        C1:["Although it sounds simple, it requires careful planning.","I can’t recall exactly how it happened.","It’s essential to consider the long-term impact.","I’m not convinced that this approach will work.","Let’s clarify the assumptions before we proceed."]
+      },
+      fr:{
+        A1:["Je vais à l’école tous les jours.","Où est la station de métro ?","J’aime boire du thé.","Je m’appelle Oğuz.","C’est une bonne idée."],
+        A2:["Hier, je suis allé au marché.","Peux-tu m’aider, s’il te plaît ?","Je suis en train d’apprendre le français.","On se voit à sept heures.","Je cuisine souvent à la maison."],
+        B1:["Je travaille ici depuis deux ans.","Si j’avais le temps, je voyagerais plus.","Peux-tu m’expliquer comment y aller ?","J’essaie d’améliorer ma prononciation.","Je ne m’attendais pas à ça."],
+        B2:["J’aimerais mieux rester à la maison ce soir.","La raison, c’est qu’il y avait des embouteillages.","Je suis impatient d’avoir de tes nouvelles.","Ce sujet est plus complexe qu’il n’y paraît.","Il faut trouver une solution rapidement."],
+        C1:["Même si cela paraît simple, il faut bien s’organiser.","Il est essentiel d’évaluer les conséquences à long terme.","Je ne suis pas convaincu que cette méthode soit efficace.","Clarifions les hypothèses avant de continuer.","Je n’arrive pas à me souvenir des détails."]
+      },
+      de:{
+        A1:["Ich wohne in einem kleinen Haus.","Wo ist die Bushaltestelle?","Ich trinke jeden Morgen Kaffee.","Mein Name ist Oğuz.","Das ist sehr gut."],
+        A2:["Gestern bin ich zum Markt gegangen.","Kannst du mir bitte helfen?","Ich lerne gerade Deutsch.","Wir treffen uns um sieben Uhr.","Ich koche oft zu Hause."],
+        B1:["Ich arbeite seit zwei Jahren hier.","Wenn ich Zeit hätte, würde ich mehr reisen.","Kannst du mir erklären, wie ich dahin komme?","Ich versuche, meine Aussprache zu verbessern.","Ich habe nicht damit gerechnet."],
+        B2:["Ich wäre lieber zu Hause geblieben.","Der Grund ist der starke Verkehr.","Ich freue mich darauf, von dir zu hören.","Dieses Thema ist komplizierter, als es scheint.","Wir müssen schnell eine Lösung finden."],
+        C1:["Auch wenn es einfach klingt, erfordert es gute Planung.","Es ist wichtig, die langfristigen Folgen zu berücksichtigen.","Ich bin nicht überzeugt, dass dieser Ansatz funktioniert.","Lass uns die Annahmen zuerst klären.","Ich kann mich nicht genau erinnern, wie es passiert ist."]
+      },
+      it:{
+        A1:["Vivo in una piccola casa.","Dov’è la fermata dell’autobus?","Bevo caffè ogni mattina.","Mi chiamo Oğuz.","È una buona idea."],
+        A2:["Ieri sono andato al mercato.","Puoi aiutarmi, per favore?","Sto imparando l’italiano.","Ci vediamo alle sette.","Cucino spesso a casa."],
+        B1:["Lavoro qui da due anni.","Se avessi tempo, viaggerei di più.","Puoi spiegarmi come arrivare lì?","Cerco di migliorare la pronuncia.","Non me lo aspettavo."],
+        B2:["Preferirei restare a casa stasera.","Il motivo è il traffico.","Non vedo l’ora di avere tue notizie.","Questo argomento è più complesso di quanto sembri.","Dobbiamo trovare una soluzione in fretta."],
+        C1:["Anche se sembra semplice, richiede una buona pianificazione.","È essenziale considerare l’impatto a lungo termine.","Non sono convinto che questo approccio funzioni.","Chiariamo le ipotesi prima di continuare.","Non ricordo esattamente come sia successo."]
+      },
+      es:{
+        A1:["Vivo en una casa pequeña.","¿Dónde está la parada de autobús?","Bebo café cada mañana.","Me llamo Oğuz.","Es una buena idea."],
+        A2:["Ayer fui al mercado.","¿Puedes ayudarme, por favor?","Estoy aprendiendo español.","Nos vemos a las siete.","Cocino a menudo en casa."],
+        B1:["He estado trabajando aquí durante dos años.","Si tuviera tiempo, viajaría más.","¿Podrías decirme cómo llegar allí?","Estoy intentando mejorar mi pronunciación.","No me lo esperaba."],
+        B2:["Preferiría quedarme en casa esta noche.","La razón es el tráfico.","Tengo ganas de saber de ti.","Este tema es más complejo de lo que parece.","Necesitamos encontrar una solución pronto."],
+        C1:["Aunque suene simple, requiere una planificación cuidadosa.","Es esencial considerar el impacto a largo plazo.","No estoy convencido de que este enfoque funcione.","Aclaremos las suposiciones antes de seguir.","No recuerdo exactamente cómo ocurrió."]
+      },
+      ru:{
+        A1:["Я живу в маленьком доме.","Где автобусная остановка?","Я пью кофе каждое утро.","Меня зовут Оğuz.","Это хорошая идея."],
+        A2:["Вчера я ходил на рынок.","Ты можешь мне помочь, пожалуйста?","Я сейчас учу русский язык.","Увидимся в семь часов.","Я часто готовлю дома."],
+        B1:["Я работаю здесь уже два года.","Если бы у меня было время, я бы больше путешествовал.","Ты можешь объяснить, как туда добраться?","Я пытаюсь улучшить произношение.","Я этого не ожидал."],
+        B2:["Я бы предпочёл остаться дома сегодня вечером.","Причина — пробки.","Я с нетерпением жду твоего ответа.","Эта тема сложнее, чем кажется.","Нам нужно быстро найти решение."],
+        C1:["Хотя это звучит просто, это требует тщательного планирования.","Важно учитывать долгосрочные последствия.","Я не уверен, что этот подход сработает.","Давай уточним предположения перед тем как продолжить.","Я не могу точно вспомнить, как это произошло."]
+      }
+    };
+
+    function pickLevel(lv){
+      if(["A1","A2","B1","B2","C1"].includes(lv)) return lv;
+      return "A1";
+    }
+    const lv = pickLevel(level || "A1");
+
+    // thresholds by level
+    const THRESH = { A1:0.72, A2:0.75, B1:0.78, B2:0.82, C1:0.85 };
+
+    // state
+    let current = "";
+    let lastRecognized = "";
+    let lastSimilarity = 0;
+
+    function randItem(arr){
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+    function nextSentence(){
+      const pool = POOL[lang] || POOL.en;
+      const arr = pool[lv] || pool.A1;
+      current = randItem(arr);
+      lastRecognized = "";
+      lastSimilarity = 0;
+      $("sentence").textContent = current;
+      $("sttStatus").textContent = "Hazır";
+      $("simStatus").textContent = "—";
+      $("simStatus").className = "v";
+      $("btnNext").disabled = true;
+      $("transBox").innerHTML = `<span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>`;
+    }
+
+    // ---- Similarity (normalized) ----
+    function normText(s){
+      return String(s||"")
+        .toLowerCase()
+        .replace(/[\u0300-\u036f]/g, "") // combining marks
+        .replace(/[^\p{L}\p{N}\s']/gu, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function levenshtein(a, b){
+      a = normText(a); b = normText(b);
+      const m = a.length, n = b.length;
+      if(!m && !n) return 0;
+      const dp = Array.from({length:m+1}, ()=>Array(n+1).fill(0));
+      for(let i=0;i<=m;i++) dp[i][0]=i;
+      for(let j=0;j<=n;j++) dp[0][j]=j;
+      for(let i=1;i<=m;i++){
+        for(let j=1;j<=n;j++){
+          const cost = a[i-1]===b[j-1] ? 0 : 1;
+          dp[i][j] = Math.min(
+            dp[i-1][j] + 1,
+            dp[i][j-1] + 1,
+            dp[i-1][j-1] + cost
+          );
+        }
+      }
+      return dp[m][n];
+    }
+
+    function similarity(a, b){
+      a = normText(a); b = normText(b);
+      if(!a && !b) return 1;
+      const dist = levenshtein(a,b);
+      const maxLen = Math.max(a.length, b.length) || 1;
+      return Math.max(0, 1 - (dist / maxLen));
+    }
+
+    function setSimilarityUI(sim){
+      lastSimilarity = sim;
+      const t = THRESH[lv] ?? 0.75;
+      const pct = Math.round(sim * 100);
+      if(sim >= t){
+        $("simStatus").textContent = `%${pct} • Başarılı`;
+        $("simStatus").className = "v ok";
+        $("btnNext").disabled = false;
+      }else{
+        $("simStatus").textContent = `%${pct} • Tekrar`;
+        $("simStatus").className = "v bad";
+        $("btnNext").disabled = true;
+      }
+    }
+
+    // ---- TTS (backend) ----
+    async function ttsSpeak(text){
+      // Bu endpoint projenizde farklı payload bekliyor olabilir.
+      // O yüzden 2 deneme yapıyoruz.
+      const payload1 = { text, lang };
+      const payload2 = { input: text, lang };
+
+      async function tryReq(payload){
+        const r = await fetch(`${API_BASE}/api/tts`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        // bazı implementasyonlar json döndürür, bazıları audio bytes döndürür:
+        const ct = (r.headers.get("content-type") || "").toLowerCase();
+
+        if(!r.ok){
+          const t = await r.text().catch(()=> "");
+          throw new Error(`TTS HTTP ${r.status} ${t}`);
+        }
+
+        if(ct.includes("application/json")){
+          const j = await r.json().catch(()=>null);
+          // j.url / j.audio_base64 gibi olabilir
+          if(j?.url){
+            const audio = new Audio(j.url);
+            await audio.play();
+            return true;
+          }
+          if(j?.audio_base64){
+            const src = "data:audio/mpeg;base64," + j.audio_base64;
+            const audio = new Audio(src);
+            await audio.play();
+            return true;
+          }
+          // json ama tanınmadı
+          throw new Error("TTS json format unknown");
+        } else {
+          // audio blob
+          const blob = await r.blob();
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          await audio.play();
+          audio.onended = ()=>URL.revokeObjectURL(url);
+          return true;
+        }
+      }
+
+      try{
+        await tryReq(payload1);
+      }catch(e1){
+        await tryReq(payload2);
+      }
+    }
+
+    // ---- STT (record -> backend) ----
+    let mediaStream = null;
+    let recorder = null;
+    let chunks = [];
+    let recording = false;
+
+    async function ensureMic(){
+      if(mediaStream) return mediaStream;
+      mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      return mediaStream;
+    }
+
+    function pickMime(){
+      const candidates = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/ogg;codecs=opus",
+        "audio/ogg"
+      ];
+      for(const c of candidates){
+        if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) return c;
+      }
+      return "";
+    }
+
+    async function sttSend(blob){
+      const fd = new FormData();
+      // backend genelde file bekler: "file" veya "audio"
+      fd.append("file", blob, "speech.webm");
+      fd.append("lang", lang);
+
+      const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
+      if(!r.ok){
+        const t = await r.text().catch(()=> "");
+        throw new Error(`STT HTTP ${r.status} ${t}`);
+      }
+      const j = await r.json().catch(()=>null);
+      // beklenen: {text:"..."} veya {transcript:"..."}
+      const text = (j?.text || j?.transcript || j?.result || "").toString().trim();
+      if(!text) throw new Error("STT boş döndü");
+      return text;
+    }
+
+    async function startRec(){
+      await ensureMic();
+      chunks = [];
+      const mime = pickMime();
+      recorder = new MediaRecorder(mediaStream, mime ? { mimeType: mime } : undefined);
+
+      recorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) chunks.push(e.data); };
+      recorder.onstop = async ()=>{
+        try{
+          const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" });
+          $("sttStatus").textContent = "Çözümleniyor…";
+          const text = await sttSend(blob);
+          lastRecognized = text;
+          $("sttStatus").textContent = text;
+          const sim = similarity(text, current);
+          setSimilarityUI(sim);
+        }catch(err){
+          $("sttStatus").textContent = "STT hata";
+          toast(err?.message || String(err));
+          $("btnNext").disabled = true;
+          $("simStatus").textContent = "—";
+          $("simStatus").className = "v";
+        } finally {
+          recording = false;
+          $("btnRec").classList.remove("rec");
+          $("btnRec").textContent = "🎙️";
+        }
+      };
+
+      recording = true;
+      $("btnRec").classList.add("rec");
+      $("btnRec").textContent = "⏺";
+      $("sttStatus").textContent = "Dinliyorum…";
+      $("simStatus").textContent = "—";
+      $("simStatus").className = "v";
+      $("btnNext").disabled = true;
+
+      recorder.start();
+    }
+
+    function stopRec(){
+      try{
+        if(recorder && recorder.state !== "inactive") recorder.stop();
+      }catch{}
+    }
+
+    // ---- Meaning (optional) ----
+    async function translateMeaning(){
+      // Maliyeti artırmamak için “isteğe bağlı” yaptık.
+      // /api/translate_ai kullanıyoruz. Eğer hata olursa, sadece gizle.
+      const payload = { text: current, source_lang: lang, target_lang: "tr" };
+
+      try{
+        $("transBox").innerHTML = `<span class="muted">Çeviriliyor…</span>`;
+        const r = await fetch(`${API_BASE}/api/translate_ai`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+        if(!r.ok){
+          const t = await r.text().catch(()=> "");
+          throw new Error(`Translate HTTP ${r.status} ${t}`);
+        }
+        const j = await r.json().catch(()=>null);
+        const out = (j?.text || j?.translation || j?.result || "").toString().trim();
+        if(!out) throw new Error("Çeviri boş döndü");
+        $("transBox").textContent = out;
+      }catch(e){
+        $("transBox").innerHTML = `<span class="muted">Çeviri şu an kullanılamıyor.</span>`;
+        toast(e?.message || String(e));
+      }
+    }
+
+    // ---- UI hooks ----
+    $("btnPlay").onclick = async ()=>{
+      try{
+        $("btnPlay").disabled = true;
+        toast("Ses hazırlanıyor…");
+        await ttsSpeak(current);
+      }catch(e){
+        toast(e?.message || String(e));
+      }finally{
+        $("btnPlay").disabled = false;
+      }
+    };
+
+    $("btnRepeat").onclick = async ()=>{
+      // tekrar dinlet + reset
+      try{
+        $("btnNext").disabled = true;
+        $("sttStatus").textContent = "Hazır";
+        $("simStatus").textContent = "—";
+        $("simStatus").className = "v";
+        await ttsSpeak(current);
+      }catch(e){
+        toast(e?.message || String(e));
+      }
+    };
+
+    $("btnMeaning").onclick = ()=>translateMeaning();
+
+    $("btnRec").onclick = async ()=>{
+      try{
+        if(!recording){
+          await startRec();
+        }else{
+          stopRec();
+        }
+      }catch(e){
+        recording = false;
+        $("btnRec").classList.remove("rec");
+        $("btnRec").textContent = "🎙️";
+        toast(e?.message || String(e));
+      }
+    };
+
+    $("btnNext").onclick = ()=>{
+      nextSentence();
+    };
+
+    $("btnExit").onclick = ()=>{
+      location.href = "/pages/practice_ai.html";
+    };
+
+    // init
+    nextSentence();
+    // otomatik ilk dinletme (istersen kapatırız)
+    setTimeout(()=>{ $("btnPlay").click(); }, 350);
+  </script>
+</body>
+</html>
