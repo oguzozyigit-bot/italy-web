@@ -210,24 +210,12 @@
     throw new Error("no session");
   }
 
-  // ✅ language code alias düzeltmeleri
-  const LANG_ALIASES = {
-    cn: "zh",
-    jp: "ja",
-    kr: "ko",
-    sa: "ar",
-    gr: "el",
-    cz: "cs",
-    rs: "sr",
-    se: "sv",
-    ua: "uk",
-    ir: "fa",
-  };
-
-  function normLang(l){
+  // alias düzeltmeleri (hub’da kullandıkların)
+  const LANG_ALIASES = { cn:"zh", jp:"ja", kr:"ko", sa:"ar", gr:"el", cz:"cs", rs:"sr", se:"sv", ua:"uk", ir:"fa" };
+  const normLang = (l)=>{
     const x = String(l || "en").trim().toLowerCase();
     return LANG_ALIASES[x] || x;
-  }
+  };
 
   async function loadTestRow(){
     const { data, error } = await supabase
@@ -239,29 +227,24 @@
     return data;
   }
 
-  // ✅ Storage’dan sabit test dosyasını çek
+  // ✅ Storage’dan sabit test dosyası
   async function loadStaticTest(lang){
     const L = normLang(lang);
     const url = `https://auth.italky.ai/storage/v1/object/public/tests/level_tests/${encodeURIComponent(L)}_v1.json`;
-
-    const r = await fetch(url, { cache: "no-store" });
+    const r = await fetch(url, { cache:"no-store" });
     if(!r.ok){
       const t = await r.text().catch(()=> "");
-      throw new Error(`Static test file not found: ${L}_v1.json\nHTTP ${r.status}\n${t}`);
+      throw new Error(`Static test file not found: ${L}_v1.json (HTTP ${r.status})\n${t}`);
     }
-    const j = await r.json().catch(()=>null);
-    if(!j) return [];
-
-    // kabul: {questions:[...]} veya direkt [...]
+    const j = await r.json();
     if(Array.isArray(j)) return j;
-    if(Array.isArray(j.)) return j.;
+    if(j && Array.isArray(j.questions)) return j.questions;
     return [];
   }
 
-  // --- start ---
   showInfo("Test yükleniyor…");
 
-  let testRow = null;
+  let testRow;
   try{
     testRow = await loadTestRow();
   }catch(e){
@@ -272,13 +255,10 @@
   const langCode = normLang(testRow?.language_code || langParamRaw || "en");
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı`;
 
-  let  = [];
+  // ✅ 1) Soruları storage’dan al
+  let QUESTIONS = [];
   try{
-    await supabase.rpc("attach_level_test_questions", {
-  p_test_id: testId,
-  p_questions: QUESTIONS,
-  p_language_code: langCode
-});
+    QUESTIONS = await loadStaticTest(langCode);
   }catch(e){
     showError("Test dosyası yüklenemedi.", e?.message || String(e));
     throw e;
@@ -287,6 +267,19 @@
   if(!Array.isArray(QUESTIONS) || QUESTIONS.length === 0){
     showError("Test soruları boş.", "JSON dosyasında questions array yok.");
     throw new Error("empty static questions");
+  }
+
+  // ✅ 2) DB’ye güvenli şekilde yaz (RLS takılmasın)
+  try{
+    const { error: attErr } = await supabase.rpc("attach_level_test_questions", {
+      p_test_id: testId,
+      p_questions: QUESTIONS,
+      p_language_code: langCode
+    });
+    if(attErr) throw attErr;
+  }catch(e){
+    showError("Sorular DB’ye yazılamadı.", e?.message || String(e));
+    throw e;
   }
 
   // --- TIMER (40 dk) ---
@@ -302,7 +295,7 @@
     }
   }catch{}
 
-  // ✅ debug
+  // debug
   console.log("STATIC QUESTIONS:", QUESTIONS);
   console.log("Is Array?", Array.isArray(QUESTIONS), "Length:", QUESTIONS.length);
 
@@ -418,6 +411,7 @@ Sonuç profilinize işlendi.`;
     }
   }, 1000);
 
+  // hazır
   render();
 </script>
 </body>
