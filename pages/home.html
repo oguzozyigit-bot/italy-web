@@ -352,9 +352,10 @@
             <div class="academy-text"><h2>Seviye <span>Tespit Sınavı</span></h2><p>TÜM DİLLER • GERÇEK SINAV</p></div>
           </div>
 
-          <div class="academy-pro" data-href="/pages/game.html">
+          <!-- ✅ DEĞİŞTİ: oyunlar menüsüne değil, önce oyun dili seçimine -->
+          <div class="academy-pro" data-href="/pages/game_lang_select.html">
             <div class="iconBox learn-logo"><span>🎯</span></div>
-            <div class="academy-text"><h2>Eğlenerek <span>Öğren</span></h2><p>OYUNLARLA PRATİK YAP</p></div>
+            <div class="academy-text"><h2>Eğlenerek <span>Öğren</span></h2><p>OYUN DİLİNİ SEÇ • SONRA OYNA</p></div>
           </div>
 
           <div class="academy-pro" data-href="/pages/f2f_connect.html">
@@ -451,25 +452,20 @@
         lockAppHeight();
         loadUser();
 
-        // ölç
         const headerH = Math.round(hdr.getBoundingClientRect().height || 0);
         const footerH = Math.round(ftr.getBoundingClientRect().height || 0);
 
-        // footer kadar alt boşluk ayır
         page.style.paddingBottom = (footerH + 10) + "px";
 
-        // kullanılabilir yükseklik
         const appH = Math.round(app.getBoundingClientRect().height || 0);
         const available = Math.max(120, appH - headerH - footerH - 20);
 
-        // önce scaleY=1 ölç
         setVar("--contentScaleY", "1");
         requestAnimationFrame(()=>{
           const natural = Math.round(scaled.getBoundingClientRect().height || 0);
-
           let s = 1;
           if(natural > available){
-            s = Math.max(0.78, Math.min(1, available / natural)); // ✅ çok ezme
+            s = Math.max(0.78, Math.min(1, available / natural));
           }
           setVar("--contentScaleY", String(s));
         });
