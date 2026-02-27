@@ -1,4 +1,4 @@
-<!-- FILE: /pages/academy_level_required.html -->
+<!-- FILE: /pages/level_required.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -11,50 +11,100 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{ --bd: rgba(255,255,255,0.12); }
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    #pageContent{ min-height: 100%; padding: 14px; }
-    .wrap{ max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
-    .card{
-      border-radius: 26px;
-      border: 1px solid var(--bd);
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      padding: 16px 14px;
+    :root{
+      --border: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.05);
+      --muted: rgba(255,255,255,0.72);
     }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+
+    #pageContent{
+      height: 100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 12px;
+    }
+
+    .box{
+      width:100%;
+      max-width:520px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 16px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
     .title{
       font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight: 1000;
+      font-weight:1000;
       font-size: 18px;
-      margin:0 0 8px;
+      margin:0;
+      color:#fff;
+      letter-spacing:-0.3px;
     }
-    .muted{ color: rgba(255,255,255,0.72); font-weight:800; line-height:1.55; font-size:12px; }
-    .pill{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding: 8px 12px;
-      border-radius: 999px;
+
+    .desc{
+      margin:0;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.76);
+    }
+    .desc b{ color:#fff; }
+
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
-      font-weight: 1000;
+    }
+    .lang{
+      font-weight:1000;
+      font-size: 14px;
+      color:#fff;
+    }
+    .mini{
+      font-weight:900;
       font-size: 12px;
-      color: rgba(255,255,255,0.90);
-      white-space:nowrap;
+      color: rgba(255,255,255,0.75);
+      white-space: nowrap;
     }
-    .btnRow{ display:flex; gap:10px; }
+
     .btn{
-      flex:1; height:56px; border-radius:18px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.08);
-      color:#fff; font-weight:1000; cursor:pointer;
+      height: 54px;
+      border-radius: 18px;
+      border: none;
+      font-weight: 1000;
+      font-size: 14px;
+      cursor:pointer;
     }
-    .btnPrimary{ background:#fff; color:#000; border:none; }
-    .btn:disabled{ opacity:.35; cursor:not-allowed; }
+    .btn-primary{
+      background:#fff;
+      color:#000;
+    }
+    .btn-primary:disabled{
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.35);
+      cursor:not-allowed;
+    }
+
     .toast{
-      position: fixed; left:50%; top:18px;
+      position: fixed;
+      left:50%;
+      top:18px;
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,0.95);
       border: 1px solid rgba(165,180,252,0.35);
@@ -76,24 +126,18 @@
 
 <body>
   <main id="pageContent">
-    <div class="wrap">
-      <div class="card">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <h1 class="title" id="tTitle">Seviye Tespit Gerekli</h1>
-          <div class="pill">Ücret: 1 Jeton</div>
-        </div>
+    <div class="box">
+      <h1 class="title">Seviye tespit gerekli</h1>
+      <p class="desc" id="desc">
+        Bu derse/pratiğe başlamadan önce <b>Seviye Tespit Sınavı</b>na katılmalısınız.
+      </p>
 
-        <div class="muted" id="tText">
-          Bu dile ders planı açmadan önce seviyeni tespit etmemiz gerekiyor.
-        </div>
+      <div class="row">
+        <div class="lang" id="langName">Dil: —</div>
+        <div class="mini">Süre: 40 dk</div>
       </div>
 
-      <div class="card">
-        <div class="btnRow">
-          <button class="btn" id="btnBack">Geri</button>
-          <button class="btn btnPrimary" id="btnGo">Seviye Tespit Sınavına Katıl</button>
-        </div>
-      </div>
+      <button class="btn btn-primary" id="btnGo" disabled>Seviye Tespit Sınavına Katıl</button>
     </div>
   </main>
 
@@ -103,7 +147,7 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
-    mountShell({ scroll:"auto" });
+    mountShell({ scroll:"none" });
 
     const $ = (id)=>document.getElementById(id);
 
@@ -115,60 +159,60 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    const params = new URLSearchParams(location.search);
-    const lang = String(params.get("lang") || localStorage.getItem("italky_language_code") || "en").toLowerCase();
+    const qs = (k)=> new URLSearchParams(location.search).get(k);
+    const lang = String(qs("lang")||"en").toLowerCase();
+    const teacher = String(qs("t")||"").trim();
+    const next = String(qs("next")||"").trim();
 
     const NAME = {
-      en:"English", fr:"French", de:"German", es:"Spanish", it:"Italian", ru:"Russian",
-      tr:"Turkish", az:"Azerbaijani", kk:"Kazakh", ky:"Kyrgyz", uz:"Uzbek", tk:"Turkmen",
-      ar:"Arabic", fa:"Persian", he:"Hebrew",
-      nl:"Dutch", sv:"Swedish", no:"Norwegian", da:"Danish", fi:"Finnish",
-      pl:"Polish", cs:"Czech", sk:"Slovak", hu:"Hungarian", ro:"Romanian",
-      bg:"Bulgarian", el:"Greek", uk:"Ukrainian", sr:"Serbian", hr:"Croatian",
-      pt:"Portuguese", zh:"Chinese", ja:"Japanese", ko:"Korean", th:"Thai"
+      en:"English", de:"German", fr:"French", it:"Italian", ru:"Russian", es:"Spanish"
     };
 
-    $("tTitle").textContent = `Henüz ${NAME[lang] || lang.toUpperCase()} seviyenizi tespit etmedik`;
-    $("tText").textContent =
-`Bu derse katılabilmek için önce Seviye Tespit Sınavına katılmalısınız.
-Sınav sonucunuz otomatik kaydedilir ve ders planı açılır.`;
+    $("langName").textContent = `Dil: ${NAME[lang] || lang.toUpperCase()}`;
+    $("desc").innerHTML =
+      `Henüz <b>${NAME[lang] || lang.toUpperCase()}</b> dil seviyenizi tespit etmedik.<br/>Bu derse devam etmek için önce sınava katılın.`;
 
-    $("btnBack").onclick = ()=>history.back();
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(!session?.user){
+      location.replace("/pages/login.html");
+    }
 
-    $("btnGo").onclick = async ()=>{
-      $("btnGo").disabled = true;
-      toast("Sınav başlatılıyor…");
+    const btn = $("btnGo");
+    btn.disabled = false;
 
-      const { data:{ session } } = await supabase.auth.getSession();
-      if(!session?.user){
-        location.href="/pages/login.html";
-        return;
-      }
-
-      const { data, error } = await supabase.rpc("start_level_test", { p_language_code: lang });
-
-      if(error){
-        if(String(error.message||"").toLowerCase().includes("not enough tokens")){
-          toast("Jeton yetersiz. Lütfen jeton yükleyin.");
-          setTimeout(()=>location.href="/pages/profile.html", 600);
+    let busy=false;
+    btn.addEventListener("click", async ()=>{
+      if(busy) return;
+      busy=true;
+      btn.disabled=true;
+      try{
+        toast("Sınav başlatılıyor…");
+        const { data, error } = await supabase.rpc("start_level_test", { p_language_code: lang });
+        if(error){
+          toast(error.message || "Başlatılamadı");
+          btn.disabled=false;
+          busy=false;
           return;
         }
-        toast(error.message || "Başlatılamadı");
-        $("btnGo").disabled = false;
-        return;
+        const row = Array.isArray(data) ? (data[0]||null) : data;
+        const testId = row?.test_id || row?.id || null;
+        if(!testId){
+          toast("test_id gelmedi");
+          btn.disabled=false;
+          busy=false;
+          return;
+        }
+
+        // teacher_select akışı için teacher paramını koru
+        const extra = teacher ? `&t=${encodeURIComponent(teacher)}&next=${encodeURIComponent(next)}` : "";
+        location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(lang)}${extra}`;
+      }catch(e){
+        toast("Başlatılamadı");
+        btn.disabled=false;
+      }finally{
+        busy=false;
       }
-
-      const row = Array.isArray(data) ? (data[0] || null) : data;
-      const testId = row?.test_id || row?.id || null;
-
-      if(!testId){
-        toast("test_id gelmedi");
-        $("btnGo").disabled = false;
-        return;
-      }
-
-      location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(lang)}`;
-    };
+    }, { passive:false });
   </script>
 </body>
 </html>
