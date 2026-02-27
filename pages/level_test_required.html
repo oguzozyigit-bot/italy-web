@@ -1,65 +1,99 @@
-<!-- FILE: /pages/level_test_required.html -->
+<!-- FILE: /pages/academy_level_required.html -->
 <!doctype html>
 <html lang="tr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>italkyAI • Seviye Gerekli</title>
+
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+
   <style>
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none;}
-    #pageContent{ min-height:100%; padding: 14px 14px calc(var(--footerH,92px) + env(safe-area-inset-bottom) + 14px); }
+    :root{ --bd: rgba(255,255,255,0.12); }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    #pageContent{ min-height: 100%; padding: 14px; }
     .wrap{ max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
     .card{
-      border-radius:26px;
-      border:1px solid rgba(255,255,255,0.12);
+      border-radius: 26px;
+      border: 1px solid var(--bd);
       background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       padding: 16px 14px;
     }
-    .title{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:18px; font-weight:1000; margin:0 0 8px; }
-    .txt{ font-size:12px; font-weight:900; color: rgba(255,255,255,0.72); line-height:1.55; margin:0; }
+    .title{
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-weight: 1000;
+      font-size: 18px;
+      margin:0 0 8px;
+    }
+    .muted{ color: rgba(255,255,255,0.72); font-weight:800; line-height:1.55; font-size:12px; }
+    .pill{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(255,255,255,0.90);
+      white-space:nowrap;
+    }
+    .btnRow{ display:flex; gap:10px; }
     .btn{
-      height:56px; border-radius:18px; border:none;
-      background:#fff; color:#000; font-weight:1000; font-size:15px;
-      cursor:pointer;
-    }
-    .btn:disabled{ opacity:.35; cursor:not-allowed; }
-    .ghost{
-      height:52px; border-radius:18px;
+      flex:1; height:56px; border-radius:18px;
       border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff; font-weight:1000;
+      background: rgba(255,255,255,0.08);
+      color:#fff; font-weight:1000; cursor:pointer;
     }
+    .btnPrimary{ background:#fff; color:#000; border:none; }
+    .btn:disabled{ opacity:.35; cursor:not-allowed; }
     .toast{
       position: fixed; left:50%; top:18px;
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,0.95);
       border: 1px solid rgba(165,180,252,0.35);
-      padding: 10px 14px; border-radius: 999px; color:#fff;
-      z-index: 999999; font-weight: 1000; font-size: 12px;
-      transition: .25s; backdrop-filter: blur(12px);
-      pointer-events:none; max-width: min(92vw, 520px); text-align:center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color:#fff;
+      z-index: 999999;
+      font-weight: 1000;
+      font-size: 12px;
+      transition: .25s;
+      backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width: min(92vw, 520px);
+      text-align:center;
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
   </style>
 </head>
+
 <body>
   <main id="pageContent">
     <div class="wrap">
       <div class="card">
-        <h1 class="title" id="tTitle">Seviyenizi tespit etmedik</h1>
-        <p class="txt" id="tDesc">
-          Bu derse katılabilmeniz için öncelikle seviye tespit sınavına katılmanız gerekir.
-        </p>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <h1 class="title" id="tTitle">Seviye Tespit Gerekli</h1>
+          <div class="pill">Ücret: 1 Jeton</div>
+        </div>
+
+        <div class="muted" id="tText">
+          Bu dile ders planı açmadan önce seviyeni tespit etmemiz gerekiyor.
+        </div>
       </div>
 
-      <button class="btn" id="btnGo">Seviye Tespit Sınavına Katıl</button>
-      <button class="ghost" id="btnBack">Geri</button>
+      <div class="card">
+        <div class="btnRow">
+          <button class="btn" id="btnBack">Geri</button>
+          <button class="btn btnPrimary" id="btnGo">Seviye Tespit Sınavına Katıl</button>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -72,27 +106,32 @@
     mountShell({ scroll:"auto" });
 
     const $ = (id)=>document.getElementById(id);
-    const p = new URLSearchParams(location.search);
-    const lang = String(p.get("lang") || "en").trim().toLowerCase();
-
-    const NAME = {
-      en:"İngilizce", de:"Almanca", fr:"Fransızca", es:"İspanyolca",
-      it:"İtalyanca", ru:"Rusça", ja:"Japonca", zh:"Çince", tr:"Türkçe"
-    };
-
-    $("tTitle").textContent = `Henüz ${NAME[lang] || lang.toUpperCase()} dil seviyenizi tespit etmedik`;
-    $("tDesc").textContent =
-`Bu derse katılabilmek için seviye tespit sınavına katılınız.
- Lütfen sessiz ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.
- Sorular dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.`;
 
     function toast(msg){
-      const t=$("toast"); if(!t) return;
-      t.textContent=String(msg||"");
+      const t = $("toast");
+      t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
-      window.__to=setTimeout(()=>t.classList.remove("show"),1600);
+      window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
+
+    const params = new URLSearchParams(location.search);
+    const lang = String(params.get("lang") || localStorage.getItem("italky_language_code") || "en").toLowerCase();
+
+    const NAME = {
+      en:"English", fr:"French", de:"German", es:"Spanish", it:"Italian", ru:"Russian",
+      tr:"Turkish", az:"Azerbaijani", kk:"Kazakh", ky:"Kyrgyz", uz:"Uzbek", tk:"Turkmen",
+      ar:"Arabic", fa:"Persian", he:"Hebrew",
+      nl:"Dutch", sv:"Swedish", no:"Norwegian", da:"Danish", fi:"Finnish",
+      pl:"Polish", cs:"Czech", sk:"Slovak", hu:"Hungarian", ro:"Romanian",
+      bg:"Bulgarian", el:"Greek", uk:"Ukrainian", sr:"Serbian", hr:"Croatian",
+      pt:"Portuguese", zh:"Chinese", ja:"Japanese", ko:"Korean", th:"Thai"
+    };
+
+    $("tTitle").textContent = `Henüz ${NAME[lang] || lang.toUpperCase()} seviyenizi tespit etmedik`;
+    $("tText").textContent =
+`Bu derse katılabilmek için önce Seviye Tespit Sınavına katılmalısınız.
+Sınav sonucunuz otomatik kaydedilir ve ders planı açılır.`;
 
     $("btnBack").onclick = ()=>history.back();
 
@@ -100,24 +139,31 @@
       $("btnGo").disabled = true;
       toast("Sınav başlatılıyor…");
 
+      const { data:{ session } } = await supabase.auth.getSession();
+      if(!session?.user){
+        location.href="/pages/login.html";
+        return;
+      }
+
       const { data, error } = await supabase.rpc("start_level_test", { p_language_code: lang });
 
       if(error){
-        $("btnGo").disabled = false;
         if(String(error.message||"").toLowerCase().includes("not enough tokens")){
-          toast("Jeton yetersiz. Jeton yüklemeniz gerekir.");
+          toast("Jeton yetersiz. Lütfen jeton yükleyin.");
           setTimeout(()=>location.href="/pages/profile.html", 600);
           return;
         }
         toast(error.message || "Başlatılamadı");
+        $("btnGo").disabled = false;
         return;
       }
 
       const row = Array.isArray(data) ? (data[0] || null) : data;
-      const testId = row?.id || row?.test_id || null;
+      const testId = row?.test_id || row?.id || null;
+
       if(!testId){
-        $("btnGo").disabled = false;
         toast("test_id gelmedi");
+        $("btnGo").disabled = false;
         return;
       }
 
