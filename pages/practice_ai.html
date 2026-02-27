@@ -18,25 +18,25 @@
       --border: rgba(255,255,255,0.12);
       --card: rgba(255,255,255,0.05);
       --muted: rgba(255,255,255,0.70);
+      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
 
     #pageContent{
       height: 100%;
+      padding: 10px 12px;
       display:flex;
       align-items:stretch;
       justify-content:center;
-      padding: 10px 12px;
     }
 
     .wrap{
-      width: 100%;
+      width:100%;
       max-width: 520px;
       height: 100%;
       display:flex;
       flex-direction:column;
       gap: 10px;
-      justify-content: space-between;
     }
 
     .hero{
@@ -47,24 +47,27 @@
       -webkit-backdrop-filter: blur(16px);
       padding: 12px 14px;
     }
-
     .heroTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
       margin-bottom: 6px;
     }
-
     .hTitle{
       font-family:"Space Grotesk",system-ui,sans-serif;
       font-weight: 1000;
       font-size: 16px;
-      letter-spacing: -0.2px;
       margin:0;
       color:#fff;
+      letter-spacing:-.2px;
+      display:flex;
+      gap:8px;
+      align-items:baseline;
     }
-
+    .hTitle .ai{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      font-weight:1000;
+    }
     .pill{
       padding: 7px 10px;
       border-radius: 999px;
@@ -75,7 +78,6 @@
       color: rgba(255,255,255,0.90);
       white-space: nowrap;
     }
-
     .heroText{
       margin:0;
       font-size: 12px;
@@ -91,22 +93,22 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
-      justify-content: center;
+      justify-content:center; /* ✅ 6 kartı dikey ortala */
     }
 
     button.langCard{
-      width: 100%;
+      width:100%;
       border-radius: 22px;
       border: 1px solid var(--border);
       background: var(--card);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-
       padding: 14px 14px;
+
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
+      gap:12px;
 
       color:#fff;
       cursor:pointer;
@@ -124,23 +126,18 @@
     }
 
     .left{
-      display:flex;
-      align-items:center;
-      gap: 12px;
-      min-width: 0;
+      display:flex; align-items:center; gap:12px; min-width:0;
     }
 
     .flagBox{
-      width: 42px;
-      height: 42px;
+      width: 42px; height: 42px;
       border-radius: 16px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      display:flex; align-items:center; justify-content:center;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
-      flex: 0 0 auto;
+      flex:0 0 auto;
       overflow:hidden;
+      position:relative;
     }
 
     .flag{
@@ -150,7 +147,6 @@
       filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
     }
     @keyframes floatFlag{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-2px);} }
-
     button.langCard:nth-child(2) .flag{ animation-duration: 2.5s; }
     button.langCard:nth-child(3) .flag{ animation-duration: 2.1s; }
     button.langCard:nth-child(4) .flag{ animation-duration: 2.7s; }
@@ -158,17 +154,17 @@
     button.langCard:nth-child(6) .flag{ animation-duration: 2.6s; }
 
     .txt{
-      min-width: 0;
+      min-width:0;
       display:flex;
       flex-direction:column;
-      gap: 2px;
+      gap:2px;
     }
     .name{
       font-size: 15px;
       font-weight: 1000;
-      letter-spacing: -0.2px;
+      letter-spacing:-.2px;
       white-space: nowrap;
-      overflow: hidden;
+      overflow:hidden;
       text-overflow: ellipsis;
     }
     .sub{
@@ -178,14 +174,11 @@
       line-height: 1.2;
     }
     .sub.ok{ color: rgba(165,180,252,0.95); }
+    .sub.warn{ color: rgba(255,190,120,0.95); }
 
     .right{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      flex: 0 0 auto;
+      display:flex; align-items:center; gap:10px; flex:0 0 auto;
     }
-
     .badge{
       padding: 7px 10px;
       border-radius: 999px;
@@ -196,7 +189,6 @@
       color: rgba(255,255,255,0.88);
       white-space: nowrap;
     }
-
     .chev{
       width: 34px; height: 34px;
       border-radius: 14px;
@@ -240,14 +232,15 @@
 <body>
   <main id="pageContent">
     <div class="wrap">
+
       <section class="hero">
         <div class="heroTop">
-          <h1 class="hTitle">AI ile Pratik Yap</h1>
-          <div class="pill">Tek Kişi</div>
+          <h1 class="hTitle">AI ile <span class="ai">Pratik Yap</span></h1>
+          <div class="pill">6 Dil</div>
         </div>
         <p class="heroText">
-          Pratik modunda seviye zorunludur.<br/>
-          Seviye yoksa önce <b>Seviye Tespit Sınavı</b>na yönlendirir.
+          Bu modül <b>seviye odaklı</b> çalışır: önce dil seviyeni kontrol eder.<br/>
+          Seviyen yoksa seni <b>Seviye Tespit Sınavına</b> yönlendirir.
         </p>
       </section>
 
@@ -261,6 +254,7 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
+    // ✅ üst-alt bar
     mountShell({ scroll:"none" });
 
     const $ = (id)=>document.getElementById(id);
@@ -274,13 +268,15 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
+    // ✅ 6 dil (italky kurgusu bunlara kilitlendi)
+    // teacher map: öğretmen sayfalarıyla uyum için
     const LANGS = [
-      { code:"en", name:"English",  flag:"🇬🇧" },
-      { code:"de", name:"German",   flag:"🇩🇪" },
-      { code:"fr", name:"French",   flag:"🇫🇷" },
-      { code:"it", name:"Italian",  flag:"🇮🇹" },
-      { code:"ru", name:"Russian",  flag:"🇷🇺" },
-      { code:"es", name:"Spanish",  flag:"🇪🇸" },
+      { code:"en", name:"English",  flag:"🇬🇧", teacher:"dora"   },
+      { code:"de", name:"German",   flag:"🇩🇪", teacher:"ayda"   },
+      { code:"fr", name:"French",   flag:"🇫🇷", teacher:"jale"   },
+      { code:"it", name:"Italian",  flag:"🇮🇹", teacher:"sencer" },
+      { code:"ru", name:"Russian",  flag:"🇷🇺", teacher:"sungur" },
+      { code:"es", name:"Spanish",  flag:"🇪🇸", teacher:"ozan"   },
     ];
 
     const { data:{ session } } = await supabase.auth.getSession();
@@ -289,27 +285,44 @@
       location.replace("/pages/login.html");
     }
 
+    // profil: levels + tokens
     let levels = {};
+    let tokens = 0;
     try{
       const { data: prof } = await supabase
         .from("profiles")
-        .select("levels")
+        .select("levels, tokens")
         .eq("id", userId)
         .maybeSingle();
       levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
+      tokens = Number(prof?.tokens ?? 0);
     }catch{}
+
+    // 🔑 bu modülde "jeton" tüketimini sonra netleyeceğiz.
+    // şimdilik bilgi amaçlı gösteriyoruz.
+    const PRACTICE_ENTRY_FEE = 0; // 0 = ücretsiz giriş (şimdilik). İstersen sonra 1 yaparız.
 
     function cardHtml(l){
       const lv = (levels && typeof levels === "object") ? (levels[l.code] || "") : "";
-      const sub = lv ? `Seviyeniz: ${lv} • Pratiğe başla` : "Seviye yok • Sınava yönlendir";
-      const subCls = lv ? "sub ok" : "sub";
+      const hasLevel = !!lv;
+
+      let sub = "";
+      let cls = "sub";
+      if(hasLevel){
+        sub = `Seviyeniz: ${lv} • Pratiğe başla`;
+        cls = "sub ok";
+      }else{
+        sub = "Seviye yok • Sınava yönlendir";
+        cls = "sub warn";
+      }
+
       return `
-        <button class="langCard" type="button" data-code="${l.code}">
+        <button class="langCard" type="button" data-code="${l.code}" data-teacher="${l.teacher}">
           <div class="left">
             <div class="flagBox"><div class="flag">${l.flag}</div></div>
             <div class="txt">
               <div class="name">${l.name}</div>
-              <div class="${subCls}">${sub}</div>
+              <div class="${cls}">${sub}</div>
             </div>
           </div>
           <div class="right">
@@ -325,16 +338,30 @@
     let busy = false;
     let lastTap = 0;
 
-    async function goNext(code){
+    async function goNext(code, teacher){
+      // tercih cache
+      try{ localStorage.setItem("italky_teacher_pref", teacher); }catch{}
+
       const lv = (levels && typeof levels === "object") ? (levels[code] || "") : "";
-      if(lv){
-        // ✅ burada senin pratik akış sayfan neyse ona yönlendir
-        // (şimdilik practice_ai_session.html varsayımı)
-        location.href = `/pages/practice_ai_session.html?lang=${encodeURIComponent(code)}&level=${encodeURIComponent(lv)}`;
+
+      if(!lv){
+        // ✅ seviye yok -> ara sayfa
+        location.href = `/pages/level_required.html?lang=${encodeURIComponent(code)}&t=${encodeURIComponent(teacher)}&next=${encodeURIComponent("practice_ai")}`;
         return;
       }
-      // seviye yok -> ara sayfa
-      location.href = `/pages/level_required.html?lang=${encodeURIComponent(code)}&next=${encodeURIComponent("practice")}`;
+
+      // ✅ seviye var -> pratik oturumu (şimdilik bu sayfa)
+      // İstersen sonra /pages/practice_ai_session.html yaparız.
+      // Bu sayfada sadece “start” mantığını bağlayacağız.
+      if(PRACTICE_ENTRY_FEE > 0 && tokens < PRACTICE_ENTRY_FEE){
+        toast("Yetersiz bakiye. Jeton yükleyin.");
+        location.href = "/pages/profile.html";
+        return;
+      }
+
+      // şimdilik: doğrudan kendi oturum sayfanıza yönlendireceğiz (sonra yazacağız)
+      // placeholder:
+      location.href = `/pages/practice_ai_session.html?lang=${encodeURIComponent(code)}&t=${encodeURIComponent(teacher)}&level=${encodeURIComponent(lv)}`;
     }
 
     list.querySelectorAll(".langCard").forEach(btn=>{
@@ -347,10 +374,12 @@
         busy = true;
 
         const code = String(btn.getAttribute("data-code")||"").trim();
+        const teacher = String(btn.getAttribute("data-teacher")||"").trim();
+
         try{
           toast("Kontrol ediliyor…");
-          await goNext(code);
-        }finally{
+          await goNext(code, teacher);
+        } finally {
           busy = false;
         }
       };
