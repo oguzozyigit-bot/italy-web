@@ -1,239 +1,115 @@
-<!-- FILE: /pages/teacher_select.html -->
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Dil Seçimi</title>
+// ✅ teacher_select.html içindeki module script'in TAMAMI (ESKİSİNİ SİL, BUNU KOY)
+import { mountShell } from "/js/ui_shell.js";
+import { supabase } from "/js/supabase_client.js";
 
-  <meta name="theme-color" content="#02000f">
-  <style>html,body{background:#02000f !important;}</style>
+mountShell({ scroll:"auto" });
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+const $ = (id)=>document.getElementById(id);
+function toast(msg){
+  const t = $("toast");
+  if(!t) return;
+  t.textContent = String(msg||"");
+  t.classList.add("show");
+  clearTimeout(window.__to);
+  window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
+}
 
-  <style>
-    #pageContent{ height:100%; }
-    .wrap{ height:100%; padding: 10px 16px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 18px); display:flex; flex-direction:column; gap: 12px; }
-    .title-area{ text-align:center; margin: 10px 0 6px; }
-    .title-area h2{ margin:0; font-family:"Space Grotesk",system-ui,sans-serif; font-size: 22px; font-weight: 1000; letter-spacing: -0.4px; color: rgba(255,255,255,0.95); }
+const { data:{ session } } = await supabase.auth.getSession();
+if(!session?.user){
+  location.replace("/pages/login.html");
+}
 
-    .grid{
-      flex:1;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-content: start;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 8px;
+let levels = {};
+try{
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("levels")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
+}catch{}
+
+// ✅ 34 dil
+const TOP = ["en","fr","de","es","it","ru"];
+const LANGS = [
+  { code:"en", name:"English",      flag:"🇬🇧" },
+  { code:"fr", name:"French",       flag:"🇫🇷" },
+  { code:"de", name:"German",       flag:"🇩🇪" },
+  { code:"es", name:"Spanish",      flag:"🇪🇸" },
+  { code:"it", name:"Italian",      flag:"🇮🇹" },
+  { code:"ru", name:"Russian",      flag:"🇷🇺" },
+
+  { code:"tr", name:"Turkish",      flag:"🇹🇷" },
+  { code:"az", name:"Azerbaijani",  flag:"🇦🇿" },
+  { code:"kk", name:"Kazakh",       flag:"🇰🇿" },
+  { code:"ky", name:"Kyrgyz",       flag:"🇰🇬" },
+  { code:"uz", name:"Uzbek",        flag:"🇺🇿" },
+  { code:"tk", name:"Turkmen",      flag:"🇹🇲" },
+
+  { code:"ar", name:"Arabic",       flag:"🇸🇦" },
+  { code:"fa", name:"Persian",      flag:"🇮🇷" },
+  { code:"he", name:"Hebrew",       flag:"🇮🇱" },
+
+  { code:"nl", name:"Dutch",        flag:"🇳🇱" },
+  { code:"sv", name:"Swedish",      flag:"🇸🇪" },
+  { code:"no", name:"Norwegian",    flag:"🇳🇴" },
+  { code:"da", name:"Danish",       flag:"🇩🇰" },
+  { code:"fi", name:"Finnish",      flag:"🇫🇮" },
+  { code:"pl", name:"Polish",       flag:"🇵🇱" },
+  { code:"cs", name:"Czech",        flag:"🇨🇿" },
+  { code:"sk", name:"Slovak",       flag:"🇸🇰" },
+  { code:"hu", name:"Hungarian",    flag:"🇭🇺" },
+  { code:"ro", name:"Romanian",     flag:"🇷🇴" },
+  { code:"bg", name:"Bulgarian",    flag:"🇧🇬" },
+  { code:"el", name:"Greek",        flag:"🇬🇷" },
+  { code:"uk", name:"Ukrainian",    flag:"🇺🇦" },
+  { code:"sr", name:"Serbian",      flag:"🇷🇸" },
+  { code:"hr", name:"Croatian",     flag:"🇭🇷" },
+
+  { code:"pt", name:"Portuguese",   flag:"🇵🇹" },
+  { code:"zh", name:"Chinese",      flag:"🇨🇳" },
+  { code:"ja", name:"Japanese",     flag:"🇯🇵" },
+  { code:"ko", name:"Korean",       flag:"🇰🇷" },
+  { code:"th", name:"Thai",         flag:"🇹🇭" },
+];
+
+function orderLangs(){
+  const map = new Map(LANGS.map(x=>[x.code,x]));
+  const top = TOP.map(c=>map.get(c)).filter(Boolean);
+  const rest = LANGS.filter(x=>!TOP.includes(x.code))
+    .sort((a,b)=>a.name.localeCompare(b.name, "en", { sensitivity:"base" }));
+  return [...top, ...rest];
+}
+
+const grid = document.getElementById("langGrid");
+grid.innerHTML = orderLangs().map(l=>{
+  const lv = levels?.[l.code] || "";
+  const mini = lv ? `Seviyeniz: ${lv}` : `Henüz sınava katılmadınız`;
+  return `
+    <button class="card" type="button" data-code="${l.code}">
+      <div class="mini" style="display:inline-flex">${mini}</div>
+      <div class="flagBox"><div class="flag">${l.flag}</div></div>
+      <div class="lang">${l.code.toUpperCase()}</div>
+      <div class="local">${l.name}</div>
+    </button>
+  `;
+}).join("");
+
+grid.querySelectorAll(".card").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const code = String(btn.getAttribute("data-code")||"").trim();
+    if(!code) return;
+
+    localStorage.setItem("italky_language_code", code);
+
+    const lv = levels?.[code] || "";
+    if(lv){
+      toast("Ders planına geçiliyor…");
+      setTimeout(()=>location.href=`/pages/plan_select.html?lang=${encodeURIComponent(code)}`, 120);
+    }else{
+      toast("Önce seviye tespit…");
+      setTimeout(()=>location.href=`/pages/academy_level_required.html?lang=${encodeURIComponent(code)}`, 120);
     }
-    .grid::-webkit-scrollbar{ display:none; }
-
-    .card{
-      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
-      text-decoration:none; color:#fff;
-      border-radius: 26px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.03);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 16px 12px;
-      min-height: 132px;
-      user-select:none; -webkit-tap-highlight-color: transparent;
-      transition: transform .18s ease, background .18s ease;
-      position:relative;
-    }
-    .card:active{ transform: scale(.985); background: rgba(255,255,255,0.06); }
-
-    .flagBox{
-      width:64px;height:64px;border-radius:22px;
-      display:flex;align-items:center;justify-content:center;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      box-shadow: 0 18px 44px rgba(0,0,0,0.24);
-    }
-    .flag{ font-size:30px; }
-
-    .codeTop{
-      position:absolute; top:10px; left:10px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      color: rgba(255,255,255,0.85);
-      font-weight: 1000;
-      font-size: 11px;
-      letter-spacing: 1px;
-    }
-    .levelTop{
-      position:absolute; top:10px; right:10px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(165,180,252,0.35);
-      background: rgba(99,102,241,0.16);
-      color: rgba(165,180,252,0.95);
-      font-weight: 1000;
-      font-size: 11px;
-      display:none;
-    }
-
-    .langName{ font-size:16px; font-weight:1000; color:#fff; letter-spacing:-0.2px; text-align:center; line-height:1.1; }
-    .sub{ font-size:11px; font-weight:900; opacity:.65; text-align:center; }
-
-    .toast{
-      position: fixed; left:50%; top:18px;
-      transform:translateX(-50%) translateY(-120px);
-      background:rgba(10,10,18,.92);
-      border:1px solid rgba(165,180,252,.35);
-      padding:10px 14px;
-      border-radius:999px;
-      color:#fff;
-      z-index:999999;
-      font-weight:900;
-      font-size:12px;
-      transition:.28s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width:min(92vw,520px);
-      text-align:center;
-    }
-    .toast.show{ transform:translateX(-50%) translateY(0); }
-  </style>
-</head>
-
-<body>
-<main id="pageContent">
-  <div class="wrap">
-    <div class="title-area"><h2>Dil Dersi Seçimi Yapın</h2></div>
-    <div class="grid" id="langGrid"></div>
-  </div>
-</main>
-
-<div class="toast" id="toast"></div>
-
-<script type="module">
-  import { mountShell } from "/js/ui_shell.js";
-  import { supabase } from "/js/supabase_client.js";
-
-  mountShell({ scroll:"auto" });
-
-  const $ = (id)=>document.getElementById(id);
-  const grid = $("langGrid");
-
-  function toast(msg){
-    const t = $("toast");
-    t.textContent = String(msg||"");
-    t.classList.add("show");
-    clearTimeout(window.__to);
-    window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
-  }
-
-  const LANGS = [
-    { code:"en", name:"English",      flag:"🇬🇧" },
-    { code:"fr", name:"French",       flag:"🇫🇷" },
-    { code:"de", name:"German",       flag:"🇩🇪" },
-    { code:"es", name:"Spanish",      flag:"🇪🇸" },
-    { code:"it", name:"Italian",      flag:"🇮🇹" },
-    { code:"ru", name:"Russian",      flag:"🇷🇺" },
-
-    { code:"tr", name:"Turkish",      flag:"🇹🇷" },
-    { code:"az", name:"Azerbaijani",  flag:"🇦🇿" },
-    { code:"kk", name:"Kazakh",       flag:"🇰🇿" },
-    { code:"ky", name:"Kyrgyz",       flag:"🇰🇬" },
-    { code:"uz", name:"Uzbek",        flag:"🇺🇿" },
-    { code:"tk", name:"Turkmen",      flag:"🇹🇲" },
-
-    { code:"ar", name:"Arabic",       flag:"🇸🇦" },
-    { code:"fa", name:"Persian",      flag:"🇮🇷" },
-    { code:"he", name:"Hebrew",       flag:"🇮🇱" },
-
-    { code:"nl", name:"Dutch",        flag:"🇳🇱" },
-    { code:"sv", name:"Swedish",      flag:"🇸🇪" },
-    { code:"no", name:"Norwegian",    flag:"🇳🇴" },
-    { code:"da", name:"Danish",       flag:"🇩🇰" },
-    { code:"fi", name:"Finnish",      flag:"🇫🇮" },
-    { code:"pl", name:"Polish",       flag:"🇵🇱" },
-    { code:"cs", name:"Czech",        flag:"🇨🇿" },
-    { code:"sk", name:"Slovak",       flag:"🇸🇰" },
-    { code:"hu", name:"Hungarian",    flag:"🇭🇺" },
-    { code:"ro", name:"Romanian",     flag:"🇷🇴" },
-    { code:"bg", name:"Bulgarian",    flag:"🇧🇬" },
-    { code:"el", name:"Greek",        flag:"🇬🇷" },
-    { code:"uk", name:"Ukrainian",    flag:"🇺🇦" },
-    { code:"sr", name:"Serbian",      flag:"🇷🇸" },
-    { code:"hr", name:"Croatian",     flag:"🇭🇷" },
-
-    { code:"pt", name:"Portuguese",   flag:"🇵🇹" },
-
-    { code:"zh", name:"Chinese",      flag:"🇨🇳" },
-    { code:"ja", name:"Japanese",     flag:"🇯🇵" },
-    { code:"ko", name:"Korean",       flag:"🇰🇷" },
-    { code:"th", name:"Thai",         flag:"🇹🇭" },
-  ];
-
-  const TOP = ["en","fr","de","es","it","ru"];
-
-  function orderedLangs(){
-    const map = new Map(LANGS.map(x=>[x.code,x]));
-    const top = TOP.map(c=>map.get(c)).filter(Boolean);
-    const rest = LANGS.filter(x=>!TOP.includes(x.code))
-      .sort((a,b)=>a.name.localeCompare(b.name,"en",{sensitivity:"base"}));
-    return [...top, ...rest];
-  }
-
-  const { data:{ session } } = await supabase.auth.getSession();
-  if(!session?.user){
-    location.replace("/pages/login.html");
-  }
-
-  let levels = {};
-  try{
-    const { data: prof } = await supabase
-      .from("profiles")
-      .select("levels")
-      .eq("id", session.user.id)
-      .maybeSingle();
-    levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
-  }catch{}
-
-  function card(l){
-    const lv = levels?.[l.code] || "";
-    const sub = lv ? `Seviyeniz: ${lv}` : "Seviyenizi ölçelim";
-    return `
-      <a class="card" href="#" data-code="${l.code}">
-        <div class="codeTop">${l.code.toUpperCase()}</div>
-        <div class="levelTop" style="display:${lv ? "inline-flex" : "none"}">${lv}</div>
-        <div class="flagBox"><div class="flag">${l.flag}</div></div>
-        <div class="langName">${l.name}</div>
-        <div class="sub">${sub}</div>
-      </a>
-    `;
-  }
-
-  const list = orderedLangs();
-  grid.innerHTML = list.map(card).join("");
-
-  grid.querySelectorAll(".card").forEach(a=>{
-    a.addEventListener("click", (ev)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-      const code = String(a.getAttribute("data-code")||"").trim();
-      if(!code) return;
-
-      localStorage.setItem("italky_teacher_pref", code);
-
-      const lv = levels?.[code] || "";
-      if(lv){
-        toast("Ders planına geçiliyor…");
-        setTimeout(()=>location.href="/pages/plan_select.html", 120);
-      }else{
-        toast("Seviye tespit gerekli…");
-        setTimeout(()=>location.href=`/pages/level_test_required.html?lang=${encodeURIComponent(code)}`, 120);
-      }
-    }, { passive:false });
-  });
-</script>
-</body>
-</html>
+  }, { passive:true });
+});
