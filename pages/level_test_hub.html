@@ -15,29 +15,13 @@
 
   <style>
     :root{
-      --bg:#02000f;
       --card: rgba(255,255,255,0.05);
       --border: rgba(255,255,255,0.12);
-      --muted: rgba(255,255,255,0.62);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    #pageContent{ padding: 14px 14px 12px; }
 
-    /* ✅ ui_shell main-content zaten padding+scroll veriyor.
-       Burada ekstra padding verme (çifte padding / boşluk yapar). */
-    #pageContent{
-      padding: 0 !important;
-      margin: 0 !important;
-      min-height: 100%;
-    }
-
-    .wrap{
-      max-width:560px;
-      margin:0 auto;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      padding: 4px 0 2px; /* mini üst boşluk */
-    }
+    .wrap{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
 
     .hero{
       border-radius: 24px;
@@ -45,44 +29,27 @@
       background: rgba(255,255,255,0.04);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      padding: 14px 14px;
+      padding: 14px;
     }
-    .heroTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom: 8px;
-    }
+    .heroTop{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 8px; }
     .hTitle{
       font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight: 1000;
-      font-size: 16px;
-      margin:0;
-      color:#fff;
+      font-weight: 1000; font-size: 16px; margin:0; color:#fff;
     }
     .pill{
-      padding: 8px 12px;
-      border-radius: 999px;
+      padding: 8px 12px; border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.18);
-      font-weight: 1000;
-      font-size: 12px;
-      color: rgba(255,255,255,0.88);
+      font-weight: 1000; font-size: 12px; color: rgba(255,255,255,0.88);
       white-space: nowrap;
     }
     .heroText{
-      margin:0;
-      font-size: 12px;
-      font-weight: 900;
-      line-height: 1.5;
+      margin:0; font-size: 12px; font-weight: 900; line-height: 1.5;
       color: rgba(255,255,255,0.70);
     }
     .heroText b{ color:#fff; }
 
-    /* ✅ 2 sütun sabit (tek kart kalmaz çünkü 34 dil) */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     button.card{
       border-radius: 22px;
@@ -93,48 +60,28 @@
       padding: 14px 12px;
       min-height: 98px;
 
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
       gap:6px;
 
+      width:100%;
       cursor:pointer;
       user-select:none;
-      transition: transform .18s ease, background .18s ease;
       text-align:center;
-
-      width:100%;
-      appearance:none;
-      -webkit-appearance:none;
-      outline:none;
       color:#fff;
+
+      appearance:none; -webkit-appearance:none;
+      transition: transform .18s ease, background .18s ease;
     }
     button.card:active{ transform: scale(.985); background: rgba(255,255,255,0.07); }
-    button.card:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
 
-    .flag{
-      font-size: 26px;
-      line-height: 1;
-      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.28));
-    }
-    .name{
-      font-size: 14px;
-      font-weight: 1000;
-      color:#fff;
-      letter-spacing: -0.2px;
-    }
-    .status{
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.60);
-    }
+    .flag{ font-size: 26px; line-height: 1; }
+    .name{ font-size: 14px; font-weight: 1000; }
+    .status{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.60); }
     .status.ok{ color: rgba(165,180,252,0.95); }
 
     .toast{
-      position: fixed;
-      left:50%;
-      top:18px;
+      position: fixed; left:50%; top:18px;
       transform: translateX(-50%) translateY(-120px);
       background: rgba(10,10,18,0.95);
       border: 1px solid rgba(165,180,252,0.35);
@@ -157,7 +104,6 @@
 <body>
   <main id="pageContent">
     <div class="wrap">
-
       <section class="hero">
         <div class="heroTop">
           <h1 class="hTitle">Seviye Tespit Sınavı</h1>
@@ -165,12 +111,11 @@
         </div>
         <p class="heroText">
           Lütfen <b>sessiz</b> ve dikkatinizin dağılmayacağı bir ortamda sınava başlayın.<br/>
-          Sınav soruları dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
+          Sorular dünya standartları seviye tespit sınavlarına göre hazırlanmıştır.
         </p>
       </section>
 
       <section class="grid" id="grid"></section>
-
     </div>
   </main>
 
@@ -180,7 +125,6 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
-    // ✅ ui_shell scroll'u aç (main-content scroll)
     mountShell({ scroll:"auto" });
 
     const $ = (id)=>document.getElementById(id);
@@ -188,75 +132,31 @@
 
     function toast(msg){
       const t = $("toast");
-      if(!t) return;
       t.textContent = String(msg||"");
       t.classList.add("show");
       clearTimeout(window.__to);
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // ✅ teacher_select ile BİREBİR aynı 34 dil
-    const TOP = ["en","fr","de","es","it","ru"];
+    // ✅ SADECE 6 DİL
     const LANGS = [
-      { code:"en", name:"English",      flag:"🇬🇧" },
-      { code:"fr", name:"French",       flag:"🇫🇷" },
-      { code:"de", name:"German",       flag:"🇩🇪" },
-      { code:"es", name:"Spanish",      flag:"🇪🇸" },
-      { code:"it", name:"Italian",      flag:"🇮🇹" },
-      { code:"ru", name:"Russian",      flag:"🇷🇺" },
-
-      { code:"tr", name:"Turkish",      flag:"🇹🇷" },
-      { code:"az", name:"Azerbaijani",  flag:"🇦🇿" },
-      { code:"kk", name:"Kazakh",       flag:"🇰🇿" },
-      { code:"ky", name:"Kyrgyz",       flag:"🇰🇬" },
-      { code:"uz", name:"Uzbek",        flag:"🇺🇿" },
-      { code:"tk", name:"Turkmen",      flag:"🇹🇲" },
-
-      { code:"ar", name:"Arabic",       flag:"🇸🇦" },
-      { code:"fa", name:"Persian",      flag:"🇮🇷" },
-      { code:"he", name:"Hebrew",       flag:"🇮🇱" },
-
-      { code:"nl", name:"Dutch",        flag:"🇳🇱" },
-      { code:"sv", name:"Swedish",      flag:"🇸🇪" },
-      { code:"no", name:"Norwegian",    flag:"🇳🇴" },
-      { code:"da", name:"Danish",       flag:"🇩🇰" },
-      { code:"fi", name:"Finnish",      flag:"🇫🇮" },
-      { code:"pl", name:"Polish",       flag:"🇵🇱" },
-      { code:"cs", name:"Czech",        flag:"🇨🇿" },
-      { code:"sk", name:"Slovak",       flag:"🇸🇰" },
-      { code:"hu", name:"Hungarian",    flag:"🇭🇺" },
-      { code:"ro", name:"Romanian",     flag:"🇷🇴" },
-      { code:"bg", name:"Bulgarian",    flag:"🇧🇬" },
-      { code:"el", name:"Greek",        flag:"🇬🇷" },
-      { code:"uk", name:"Ukrainian",    flag:"🇺🇦" },
-      { code:"sr", name:"Serbian",      flag:"🇷🇸" },
-      { code:"hr", name:"Croatian",     flag:"🇭🇷" },
-
-      { code:"pt", name:"Portuguese",   flag:"🇵🇹" },
-
-      { code:"zh", name:"Chinese",      flag:"🇨🇳" },
-      { code:"ja", name:"Japanese",     flag:"🇯🇵" },
-      { code:"ko", name:"Korean",       flag:"🇰🇷" },
-      { code:"th", name:"Thai",         flag:"🇹🇭" },
+      { code:"en", name:"English",   flag:"🇬🇧" },
+      { code:"de", name:"German",    flag:"🇩🇪" },
+      { code:"fr", name:"French",    flag:"🇫🇷" },
+      { code:"it", name:"Italian",   flag:"🇮🇹" },
+      { code:"ru", name:"Russian",   flag:"🇷🇺" },
+      { code:"es", name:"Spanish",   flag:"🇪🇸" },
     ];
 
-    function orderLangs(){
-      const map = new Map(LANGS.map(x=>[x.code,x]));
-      const top = TOP.map(c=>map.get(c)).filter(Boolean);
-      const rest = LANGS
-        .filter(x=>!TOP.includes(x.code))
-        .sort((a,b)=>a.name.localeCompare(b.name, "en", { sensitivity:"base" }));
-      return [...top, ...rest];
-    }
-
-    // auth
+    // session
+    let userId = null;
     const { data:{ session } } = await supabase.auth.getSession();
-    if(!session?.user){
+    userId = session?.user?.id || null;
+    if(!userId){
       location.replace("/pages/login.html");
     }
-    const userId = session.user.id;
 
-    // levels (profiles.levels JSONB)
+    // levels
     let levels = {};
     try{
       const { data: prof } = await supabase
@@ -268,7 +168,7 @@
     }catch{}
 
     function cardHtml(l){
-      const lv = levels?.[l.code] || "";
+      const lv = (levels && typeof levels === "object") ? (levels[l.code] || "") : "";
       const status = lv ? `Seviyeniz: ${lv}` : "Henüz sınava katılmadınız";
       const cls = lv ? "status ok" : "status";
       return `
@@ -280,10 +180,9 @@
       `;
     }
 
-    const ordered = orderLangs();
-    grid.innerHTML = ordered.map(cardHtml).join("");
+    grid.innerHTML = LANGS.map(cardHtml).join("");
 
-    // ✅ tık koruması
+    // dedupe
     let busy = false;
     let lastTap = 0;
 
@@ -301,18 +200,16 @@
         const { data, error } = await supabase.rpc("start_level_test", { p_language_code: code });
 
         if(error){
-          console.log("RPC ERROR:", error);
           toast(error.message || "Başlatılamadı");
           btn.disabled = false;
           busy = false;
           return;
         }
 
-        const row = Array.isArray(data) ? data[0] : data;
-        const testId = row?.test_id;
+        const row = Array.isArray(data) ? (data[0] || null) : data;
+        const testId = row?.test_id || row?.id || null;
 
         if(!testId){
-          console.log("RPC DATA:", data);
           toast("test_id gelmedi");
           btn.disabled = false;
           busy = false;
@@ -321,7 +218,6 @@
 
         location.href = `/pages/level_test.html?test_id=${encodeURIComponent(testId)}&lang=${encodeURIComponent(code)}`;
       }catch(e){
-        console.log("RPC EX:", e);
         toast("Başlatılamadı");
         btn.disabled = false;
       }finally{
@@ -329,15 +225,16 @@
       }
     }
 
-    // ✅ click tek başına yeter (touchend double-fire istemiyoruz)
     grid.querySelectorAll(".card").forEach(btn=>{
-      btn.addEventListener("click", (ev)=>{
+      const handler = (ev)=>{
         ev.preventDefault();
         ev.stopPropagation();
         const code = String(btn.getAttribute("data-code")||"").trim();
         if(!code) return;
         startTest(code, btn);
-      }, { passive:false });
+      };
+      btn.addEventListener("click", handler, { passive:false });
+      btn.addEventListener("touchend", handler, { passive:false });
     });
   </script>
 </body>
