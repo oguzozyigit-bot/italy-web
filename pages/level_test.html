@@ -210,19 +210,13 @@
     throw new Error("no session");
   }
 
-  // alias düzeltmeleri
   const LANG_ALIASES = { cn:"zh", jp:"ja", kr:"ko", sa:"ar", gr:"el", cz:"cs", rs:"sr", se:"sv", ua:"uk", ir:"fa" };
   const normLang = (l)=>{
     const x = String(l || "en").trim().toLowerCase();
     return LANG_ALIASES[x] || x;
   };
 
-  // Dil isimleri (sonuçta doğru dil yazacak)
-  const LANG_NAMES_TR = {
-    en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca",
-    zh:"Çince", ja:"Japonca", ko:"Korece", ar:"Arapça", el:"Yunanca", cs:"Çekçe", sr:"Sırpça", sv:"İsveççe",
-    uk:"Ukraynaca", fa:"Farsça", pt:"Portekizce", ro:"Romence", hr:"Hırvatça", th:"Tayca", bg:"Bulgarca"
-  };
+  const LANG_NAMES_TR = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
 
   async function loadTestRow(){
     const { data, error } = await supabase
@@ -234,7 +228,34 @@
     return data;
   }
 
-  // Storage’dan sabit test dosyası (version’lı)
+  // ✅ Şık metninden A/B/C/D etiketlerini temizler
+  function cleanOptionText(s){
+    let t = String(s ?? "").trim();
+    t = t.replace(/^\(?\s*[A-D]\s*\)?\s*[\.\:\-\)\]]\s*/i, "");
+    t = t.replace(/^\(?\s*[A-D]\s*\)?\s*\/\s*/i, "");
+    t = t.replace(/^(option|choice)\s*[A-D]\s*[\:\-\)\.]\s*/i, "");
+    return t.trim();
+  }
+
+  // ✅ options + correct_index birlikte karıştır (DB’ye de aynı gitsin)
+  function shuffleWithCorrectIndex(q){
+    const optionsRaw = Array.isArray(q?.options) ? q.options : [];
+    const correct = (q?.correct_index != null) ? Number(q.correct_index) : (q?.correct != null ? Number(q.correct) : 0);
+
+    const options = optionsRaw.map(cleanOptionText);
+    const idxs = options.map((_,i)=>i);
+
+    for(let i=idxs.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [idxs[i], idxs[j]] = [idxs[j], idxs[i]];
+    }
+
+    const newOptions = idxs.map(i=>options[i]);
+    const newCorrect = idxs.indexOf(correct);
+
+    return { options: newOptions, correct_index: (newCorrect >= 0 ? newCorrect : 0) };
+  }
+
   async function loadStaticTest(lang, version){
     const L = normLang(lang);
     const v = Number(version || 1) || 1;
@@ -270,7 +291,7 @@
 
   $("langChip").textContent = `${langCode.toUpperCase()} • Seviye Sınavı (v${testVer})`;
 
-  // 1) Soruları storage’dan al (vX)
+  // 1) Soruları storage’dan al
   let QUESTIONS = [];
   try{
     QUESTIONS = await loadStaticTest(langCode, testVer);
@@ -284,7 +305,17 @@
     throw new Error("empty static questions");
   }
 
-  // 2) DB’ye yaz (RLS takılmasın)
+  // 2) ✅ her soruda options + correct_index beraber karıştır + A/B/C/D etiketini temizle
+  QUESTIONS = QUESTIONS.map(q=>{
+    const packed = shuffleWithCorrectIndex(q);
+    return {
+      ...q,
+      options: packed.options,
+      correct_index: packed.correct_index
+    };
+  });
+
+  // 3) DB’ye yaz
   try{
     const { error: attErr } = await supabase.rpc("attach_level_test_questions", {
       p_test_id: testId,
@@ -297,7 +328,7 @@
     throw e;
   }
 
-  // --- TIMER (40 dk) ---
+  // --- TIMER ---
   const TOTAL_TIME = 40*60;
   const MAX_PASSES = 2;
 
