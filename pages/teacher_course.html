@@ -1,314 +1,336 @@
-<!doctype html>
+<!-- FILE: /pages/teacher_course.html -->
+<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Canlı Ders</title>
+  <title>italkyAI • Ders</title>
 
-  <meta name="theme-color" content="#000000">
-  <style>html,body{background:#000 !important; margin:0; padding:0; overflow:hidden; font-family:'Outfit', sans-serif;}</style>
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --accent: #6366f1;
-      --glass: rgba(255, 255, 255, 0.04);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+    :root{
+      --border: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.05);
+      --muted: rgba(255,255,255,0.65);
+      --ok: rgba(34,197,94,0.95);
+      --bad: rgba(255,90,140,0.95);
+      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    #pageContent{ height:100%; }
+
+    /* ui_shell shellMain içine taşınacak */
+    .wrap{
+      max-width: 520px;
+      margin: 0 auto;
+      height: 100%;
+      padding: 12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    
-    #pageContent { 
-      height: 100vh; 
-      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 80%);
-      display: flex; flex-direction: column; position: relative;
-      /* ui_shell bar boşlukları */
-      padding-top: calc(env(safe-area-inset-top) + 60px);
-      padding-bottom: calc(env(safe-area-inset-bottom) + 85px);
+    .topRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex:0 0 auto;
     }
 
-    /* Dinamik Arka Plan */
-    .nebula {
-      position: absolute; inset: -50%;
-      background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 40%);
-      filter: blur(80px); animation: drift 20s infinite alternate; pointer-events: none;
-    }
-    @keyframes drift { from { transform: rotate(0); } to { transform: rotate(15deg); } }
-
-    .wrap {
-      flex: 1; position: relative; z-index: 1;
-      max-width: 500px; margin: 0 auto; width: 100%;
-      padding: 12px; display: flex; flex-direction: column; gap: 12px;
+    .leftTop{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
     }
 
-    /* Üst Durum Çubuğu */
-    .status-bar {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      padding: 12px 18px; border-radius: 20px; backdrop-filter: blur(20px);
-      display: flex; justify-content: space-between; align-items: center;
+    .backBtn{
+      width:44px;height:44px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color:#fff;
+      font-size:20px;font-weight:1000;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer; user-select:none;
+      flex:0 0 auto;
     }
-    .t-info h2 { font-size: 14px; color: #fff; margin: 0; font-weight: 800; }
-    .t-info p { font-size: 10px; color: var(--accent); margin: 2px 0 0; font-weight: 700; text-transform: uppercase; }
-    
-    .timer { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: #fff; }
+    .backBtn:active{ transform: scale(.96); }
 
-    /* Ana Sahne (Öğretmen Bölümü) */
-    .stage {
-      flex: 1; display: flex; flex-direction: column; gap: 12px; overflow: hidden;
+    .mini-brand{
+      display:flex;
+      flex-direction:column;
+      user-select:none;
+      cursor:pointer;
+      line-height:1;
+      min-width:0;
     }
-
-    /* Öğretmen Balonu (Odak Noktası) */
-    .teacher-card {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 24px; padding: 20px; backdrop-filter: blur(20px);
-      display: flex; flex-direction: column; gap: 12px;
-      animation: slideIn 0.5s ease-out;
+    .logo-line{
+      font-family:'Space Grotesk', sans-serif;
+      font-size: 18px;
+      letter-spacing: -0.4px;
+      display:flex; align-items:flex-end; gap:2px;
+      white-space:nowrap;
     }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .teacher-card .label { font-size: 9px; font-weight: 900; color: var(--accent); letter-spacing: 1px; }
-    .teacher-card .speech { font-size: 19px; font-weight: 600; color: #fff; line-height: 1.4; }
-    .teacher-card .translation { font-size: 13px; color: rgba(255,255,255,0.4); font-style: italic; }
-
-    /* Öğrenci Etkileşim Alanı */
-    .student-zone {
-      background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
-      border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
-      min-height: 180px; justify-content: center; align-items: center; text-align: center;
+    .logo-main{ font-weight:700; color:#FFFFFF; }
+    .logo-ai{
+      font-weight:700;
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
-
-    .repeat-target { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; opacity: 0.5; transition: 0.3s; }
-    .repeat-target.active { opacity: 1; color: var(--accent); }
-
-    .live-stt { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.7); min-height: 22px; }
-
-    /* Alt Kontroller */
-    .dock {
-      background: var(--glass); border: 1px solid var(--glass-border);
-      border-radius: 24px; padding: 16px; backdrop-filter: blur(20px);
-      display: flex; justify-content: space-between; align-items: center;
+    .logo-slogan{
+      font-size:9px;
+      font-weight:900;
+      letter-spacing: 3.6px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 4px;
+      padding-left: 2px;
+      text-transform: uppercase;
+      white-space:nowrap;
     }
 
-    .deneme-hakki { display: flex; gap: 5px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); }
-    .dot.fill { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-
-    .btn-lesson {
-      background: #fff; color: #000; border: none; padding: 12px 24px;
-      border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.2s;
+    .pill{
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(255,255,255,0.9);
+      white-space: nowrap;
+      flex:0 0 auto;
     }
-    .btn-lesson:active { transform: scale(0.95); }
 
-    .status-badge { font-size: 9px; font-weight: 900; color: #fff; text-transform: uppercase; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 8px; }
+    .panel{
+      flex:1;
+      min-height:0;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+    }
 
-    /* Ses Dalgaları (Kayıt Sırasında) */
-    .waves { display: flex; align-items: center; gap: 3px; height: 20px; display: none; }
-    .waves.active { display: flex; }
-    .wave-bar { width: 3px; height: 100%; background: var(--accent); border-radius: 2px; animation: wave 0.5s infinite alternate; }
-    @keyframes wave { from { height: 4px; } to { height: 18px; } }
+    .panelHeader{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.18);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex:0 0 auto;
+    }
+    .panelTitle{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .teacherName{
+      font-weight: 1000;
+      font-size: 13px;
+      color:#fff;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .lessonInfo{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.62);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .panelBadges{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex:0 0 auto;
+    }
+    .miniPill{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      font-weight: 1000;
+      font-size: 11px;
+      color: rgba(255,255,255,0.88);
+      white-space:nowrap;
+    }
+
+    /* ✅ Chat kayar, butonlar SABİT kalır */
+    .chat{
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .chat::-webkit-scrollbar{ display:none; }
+
+    .bubble{
+      max-width: 92%;
+      border-radius: 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      position:relative;
+    }
+    .bubble.teacher{
+      align-self:flex-start;
+      border-left: 4px solid rgba(99,102,241,0.65);
+      background: rgba(99,102,241,0.10);
+    }
+    .bubble.student{
+      align-self:flex-end;
+      border-right: 4px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.06);
+      text-align:right;
+    }
+    .bubble.tr{
+      align-self:flex-start;
+      opacity:.85;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.72);
+    }
+    .bubble .txt{
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .spkBtn{
+      position:absolute;
+      right:8px;
+      bottom:8px;
+      width:34px;height:34px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+    }
+    .spkBtn:active{ transform: scale(.96); }
+    .spkBtn svg{ width:18px;height:18px; fill:none; stroke:#fff; stroke-width:2; opacity:.9; }
+
+    /* ✅ CRITICAL: dock sticky */
+    .dock{
+      position: sticky;
+      bottom: 0;
+      padding: 12px 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.20);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      z-index: 10;
+    }
+
+    .statusText{
+      font-size: 11px;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.75);
+      min-width: 110px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .btnLesson{
+      flex:1;
+      height:54px;
+      border-radius: 18px;
+      border:none;
+      background: var(--aiGrad);
+      color:#050510;
+      font-weight: 1000;
+      font-size: 14px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btnLesson:active{ transform: scale(.99); }
+
+    .btnTiny{
+      width:54px;
+      height:54px;
+      border-radius:18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btnTiny:active{ transform: scale(.99); }
   </style>
 </head>
 
 <body>
-<div class="nebula"></div>
-<main id="pageContent">
-  <div class="wrap">
-    
-    <header class="status-bar">
-      <div class="t-info">
-        <h2 id="teacherName">Yükleniyor...</h2>
-        <p id="lessonInfo">Ders Başlatılmadı</p>
-      </div>
-      <div class="timer" id="timerDisplay">00:00</div>
-    </header>
+  <main id="pageContent">
+    <div class="wrap">
 
-    <div class="stage">
-      <div class="teacher-card">
-        <div class="label" id="statusLabel">AI TEACHER</div>
-        <div class="speech" id="teachText">Hazır olduğunda dersi başlat.</div>
-        <div class="translation" id="teachTR">Click the button to start.</div>
-      </div>
-
-      <div class="student-zone">
-        <div class="label">TEKRAR ET / KONUŞ</div>
-        <div class="repeat-target" id="repeatTarget">---</div>
-        <div class="waves" id="micWaves">
-          <div class="wave-bar" style="animation-delay: 0.1s"></div>
-          <div class="wave-bar" style="animation-delay: 0.2s"></div>
-          <div class="wave-bar" style="animation-delay: 0.3s"></div>
-          <div class="wave-bar" style="animation-delay: 0.2s"></div>
-          <div class="wave-bar" style="animation-delay: 0.1s"></div>
+      <div class="topRow">
+        <div class="leftTop">
+          <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
+          <div class="mini-brand" id="logoHome" title="Ana sayfa">
+            <div class="logo-line">
+              <span class="logo-main">italky</span><span class="logo-ai">AI</span>
+            </div>
+            <div class="logo-slogan">BE FREE</div>
+          </div>
         </div>
-        <div class="live-stt" id="sttResult">Seni dinliyorum...</div>
+        <div class="pill" id="pillTry">●●●</div>
       </div>
+
+      <section class="panel">
+        <div class="panelHeader">
+          <div class="panelTitle">
+            <div class="teacherName" id="teacherName">—</div>
+            <div class="lessonInfo" id="lessonInfo">—</div>
+          </div>
+          <div class="panelBadges">
+            <div class="miniPill" id="pillScore">95%</div>
+          </div>
+        </div>
+
+        <div class="chat" id="chat"></div>
+
+        <div class="dock">
+          <div class="statusText" id="statusText">READY</div>
+          <button class="btnTiny" id="btnBell" type="button" title="Zil">🔔</button>
+          <button class="btnLesson" id="btnLesson" type="button">Dersi Başlat</button>
+        </div>
+      </section>
+
     </div>
+  </main>
 
-    <footer class="dock">
-      <div class="deneme-hakki" id="pillTry">
-        <div class="dot fill"></div>
-        <div class="dot fill"></div>
-        <div class="dot fill"></div>
-      </div>
+  <!-- ✅ shell’i gerçekten kur (üst/alt bar kesin gelsin) -->
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    mountShell({ scroll:"none" });
 
-      <button class="btn-lesson" id="btnLesson">Dersi Başlat</button>
-
-      <div class="status-badge" id="statusText">HAZIR</div>
-    </footer>
-
-  </div>
-</main>
-
-<script type="module">
-  import { mountShell } from "/js/ui_shell.js";
-  import { apiPOST } from "/js/api.js";
-
-  mountShell({ scroll:"none" });
-
-  const $ = (id)=>document.getElementById(id);
-  
-  // Durum Yönetimi
-  let running = false;
-  let paused = false;
-  let endAt = 0;
-  let teacher = { id: "dora", nameTR: "Dora", lang: "en", voice: "nova", stt: "en-US" };
-  let level = localStorage.getItem("italky_lesson_level") || "A1";
-  let mins = parseInt(localStorage.getItem("italky_lesson_mins")) || 15;
-  let triesLeft = 3;
-  let pendingRepeat = "";
-
-  // UI Güncelleme Fonksiyonları
-  function setStatus(s, label = "AI TEACHER") {
-    $("statusText").textContent = s;
-    $("statusLabel").textContent = label;
-    if(s === "LISTENING") $("micWaves").classList.add("active");
-    else $("micWaves").classList.remove("active");
-  }
-
-  function updateTries() {
-    const dots = $("pillTry").querySelectorAll(".dot");
-    dots.forEach((dot, i) => {
-      dot.classList.toggle("fill", i < triesLeft);
-    });
-  }
-
-  // OpenAI Brifing ve Ders Akışı (Senin JS dosyasındaki mantık)
-  async function teacherNext(userText) {
-    if(!running || paused) return;
-    setStatus("THINKING", "ÖĞRETMEN DÜŞÜNÜYOR...");
-    
-    try {
-      const data = await apiPOST("/api/chat_openai", {
-        text: userText,
-        persona_name: teacher.nameTR,
-        history: [{ role: "system", content: `Discipline teacher. Level ${level}. Target language only. Format: TEACH: [text] REPEAT: [one sentence]` }]
-      });
-      
-      const reply = data.text || "";
-      const teachMatch = reply.match(/TEACH:\s*([\s\S]*?)(?:\n|REPEAT:|$)/i);
-      const repeatMatch = reply.match(/REPEAT:\s*([^\n]+)/i);
-
-      const teach = teachMatch ? teachMatch[1].trim() : reply;
-      const repeat = repeatMatch ? repeatMatch[1].trim() : "";
-
-      // TEACH kısmını yazdır ve seslendir
-      $("teachText").textContent = teach;
-      if(teach) {
-          // Çeviri (UI Only)
-          const trData = await apiPOST("/api/translate", { text: teach, source: teacher.lang, target: "tr" });
-          $("teachTR").textContent = `(${trData.translated || '...'})`;
-          
-          setStatus("SPEAKING", "ÖĞRETMEN KONUŞUYOR");
-          await speakTTS(teach);
-      }
-
-      // REPEAT kısmını ayarla
-      if(repeat) {
-          pendingRepeat = repeat;
-          $("repeatTarget").textContent = repeat;
-          $("repeatTarget").classList.add("active");
-          triesLeft = 3;
-          updateTries();
-          listenStudent();
-      } else {
-          $("repeatTarget").textContent = "---";
-          $("repeatTarget").classList.remove("active");
-          listenStudent();
-      }
-
-    } catch(e) { setStatus("HATA"); }
-  }
-
-  async function speakTTS(text) {
-    const data = await apiPOST("/api/tts_openai", { text: text, voice: teacher.voice });
-    if(data.audio_base64) {
-      const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
-      await audio.play();
-      return new Promise(res => audio.onended = res);
-    }
-  }
-
-  function listenStudent() {
-    if(!running || paused) return;
-    setStatus("LISTENING", "SENİ DİNLİYORUM");
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new SR();
-    rec.lang = teacher.stt;
-    
-    rec.onresult = async (e) => {
-      const said = e.results[0][0].transcript;
-      $("sttResult").textContent = said;
-      
-      if(pendingRepeat) {
-          // Basit benzerlik kontrolü (JS dosyasındaki mantığın özeti)
-          if(said.toLowerCase().includes(pendingRepeat.toLowerCase().split(' ')[0])) {
-              $("sttResult").textContent = "Mükemmel! ✅";
-              teacherNext("Good job. Let's continue.");
-          } else {
-              triesLeft--;
-              updateTries();
-              if(triesLeft <= 0) teacherNext("Let's try something else.");
-              else rec.start();
-          }
-      } else {
-          teacherNext(said);
-      }
-    };
-    rec.start();
-  }
-
-  // Timer
-  function updateTimer() {
-    if(!running || paused) return;
-    const ms = Math.max(0, endAt - Date.now());
-    const s = Math.floor(ms/1000);
-    $("timerDisplay").textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
-    if(s <= 0) { running = false; setStatus("BİTTİ"); }
-    else requestAnimationFrame(updateTimer);
-  }
-
-  // Dersi Başlat / Durdur
-  $("btnLesson").onclick = () => {
-    if(!running) {
-      running = true;
-      endAt = Date.now() + mins * 60 * 1000;
-      $("btnLesson").textContent = "Mola Ver";
-      $("teacherName").textContent = `${teacher.nameTR} • ${teacher.lang.toUpperCase()}`;
-      $("lessonInfo").textContent = `Seviye: ${level}`;
-      updateTimer();
-      teacherNext("Start the lesson.");
-    } else {
-      paused = !paused;
-      $("btnLesson").textContent = paused ? "Devam Et" : "Mola Ver";
-      if(!paused) { updateTimer(); listenStudent(); }
-      else setStatus("DURDURULDU");
-    }
-  };
-
-</script>
+    // ✅ shell kurulduktan sonra JS’yi yükle (DOM artık doğru yerde)
+    import("/js/teacher_course.page.js?v=TC_V1_002");
+  </script>
 </body>
 </html>
