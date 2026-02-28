@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Ders Planı</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>italkyAI • Pro Pratik</title>
 
   <meta name="theme-color" content="#000000">
   <style>html,body{background:#000 !important; margin:0; padding:0; overflow:hidden; font-family:'Outfit', sans-serif;}</style>
@@ -15,345 +15,340 @@
   <style>
     :root {
       --accent: #6366f1;
-      --accent-glow: rgba(99, 102, 241, 0.4);
-      --glass: rgba(255, 255, 255, 0.05);
+      --glass: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.1);
-      --ai-gradient: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+      --ai-gradient: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline:none; }
-    
-    #pageContent { 
-      height: 100vh; 
-      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 70%);
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+
+    #pageContent {
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      position: relative;
+      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 80%);
+      padding: 10px 14px;
+      /* ui_shell boşlukları */
+      padding-top: calc(env(safe-area-inset-top) + 60px); 
+      padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
     }
 
     .nebula {
-      position: absolute;
-      inset: -50%;
-      background: 
-        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
-      filter: blur(80px);
-      animation: rotate 20s linear infinite;
-      z-index: 0;
+      position: absolute; inset: -50%;
+      background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 40%);
+      filter: blur(60px); animation: drift 15s infinite alternate; z-index: 0; pointer-events: none;
     }
-    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes drift { from { transform: rotate(0deg) scale(1); } to { transform: rotate(10deg) scale(1.1); } }
 
-    .wrap {
-      position: relative;
-      z-index: 1;
-      height: 100%;
-      padding: 16px;
-      padding-bottom: calc(var(--footerH, 80px) + env(safe-area-inset-bottom) + 10px);
-      display: flex;
-      flex-direction: column;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .panel {
+    .main-card {
+      position: relative; z-index: 1;
       flex: 1;
-      background: rgba(255, 255, 255, 0.03);
+      background: var(--glass);
       border: 1px solid var(--glass-border);
-      border-radius: 32px;
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border-radius: 30px;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      display: flex; flex-direction: column;
       overflow: hidden;
+      max-width: 480px; margin: 0 auto; width: 100%;
     }
 
-    .head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
+    /* Üst Bilgi */
+    .card-head {
+      padding: 16px 20px 10px;
+      display: flex; justify-content: space-between; align-items: center;
     }
+    .info-group h2 { font-size: 14px; color: #fff; margin: 0; font-weight: 800; opacity: 0.9; }
+    .level-tag { font-size: 10px; color: var(--accent); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
 
-    .title-area h2 {
+    /* Cümle Alanı - Orta Odak */
+    .content-area {
+      flex: 1;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 0 24px; text-align: center;
+    }
+    .sentence {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 24px;
-      font-weight: 800;
-      color: #fff;
-      margin: 0;
+      font-size: 24px; font-weight: 700; color: #fff;
+      line-height: 1.2; margin-bottom: 12px;
+    }
+    .meaning-box {
+      font-size: 14px; color: rgba(255,255,255,0.5);
+      font-weight: 500; min-height: 20px;
     }
 
-    .title-area p {
-      font-size: 11px;
-      color: var(--accent);
-      margin: 4px 0 0;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    /* Alt Kontrol Paneli */
+    .control-panel {
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-top: 1px solid var(--glass-border);
     }
 
-    .time-chip {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid var(--glass-border);
-      padding: 6px 12px;
-      border-radius: 12px;
-      color: #fff;
-      font-weight: 800;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    /* Mini Aksiyonlar */
+    .mini-actions {
+      display: flex; gap: 8px; margin-bottom: 15px;
     }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 16px;
+    .m-btn {
+      flex: 1; height: 38px; border-radius: 12px;
+      border: 1px solid var(--glass-border); background: var(--glass);
+      color: #fff; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
     }
+    .m-btn.prime { background: var(--ai-gradient); border: none; color: #000; }
 
-    .stat-box {
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--glass-border);
-      padding: 10px 14px;
-      border-radius: 16px;
+    /* Ana Mikrofon ve Akış */
+    .main-actions {
+      display: flex; justify-content: space-between; align-items: center; gap: 15px;
     }
-
-    .stat-label {
-      font-size: 9px;
-      color: rgba(255,255,255,0.4);
-      font-weight: 800;
-      text-transform: uppercase;
-      margin-bottom: 2px;
+    .side-btn {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      color: #fff; display: flex; align-items: center; justify-content: center;
     }
-
-    .stat-value { font-size: 14px; font-weight: 800; color: #fff; }
-
-    .script-container {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      margin-bottom: 20px;
+    .mic-btn {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: #fff; color: #000; border: none;
+      font-size: 28px; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(99,102,241,0.4);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    .mic-btn.rec { background: #ff4757; color: #fff; transform: scale(1.1); box-shadow: 0 0 30px rgba(255,71,87,0.5); }
 
-    .script-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      padding-bottom: 8px;
+    /* Analiz Paneli */
+    .status-row {
+      display: flex; gap: 10px; margin-top: 15px;
     }
-
-    .ai-label { font-size: 10px; font-weight: 900; color: var(--accent); display: flex; align-items: center; gap: 6px; }
-
-    .type-line {
-      font-family: 'SF Mono', monospace;
-      font-size: 13px;
-      line-height: 1.5;
-      color: rgba(255, 255, 255, 0.85);
-      overflow-y: auto;
-      flex: 1;
+    .stat-card {
+      flex: 1; background: rgba(255,255,255,0.03);
+      padding: 8px; border-radius: 12px; text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
     }
+    .stat-label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 2px; }
+    .stat-val { font-size: 11px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .stat-val.ok { color: #2ecc71; }
+    .stat-val.bad { color: #ff4757; }
 
-    .cursor { display: inline-block; width: 7px; height: 14px; background: var(--accent); margin-left: 2px; vertical-align: middle; animation: blink 1s infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-    /* BUTONLAR PANELİN İÇİNE ALINDI */
-    .footer-actions {
-      display: flex;
-      gap: 10px;
+    /* Toast */
+    .toast {
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-100px);
+      background: #fff; color: #000; padding: 10px 20px; border-radius: 50px;
+      font-weight: 800; font-size: 13px; z-index: 10000; transition: 0.4s;
     }
-
-    .btn {
-      height: 54px;
-      border-radius: 18px;
-      border: none;
-      font-weight: 800;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.2s;
-    }
-
-    .btn:active { transform: scale(0.96); }
-
-    .btn-main {
-      flex: 1;
-      background: #fff;
-      color: #000;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    }
-
-    .btn-ghost {
-      width: 70px;
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
-      border: 1px solid var(--glass-border);
-    }
-
-    .warn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 16px; color: #fca5a5; font-size: 12px; font-weight: 600; margin-bottom: 12px; display: none; }
-
-    .toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #fff; color: #000; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 13px; z-index: 10000; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
     .toast.show { transform: translateX(-50%) translateY(0); }
-    .replay-btn { background: none; border: none; color: var(--accent); font-weight: 800; font-size: 10px; cursor: pointer; }
   </style>
 </head>
 
 <body>
-<div class="nebula"></div>
-<main id="pageContent">
-  <div class="wrap">
-
-    <div class="panel">
-      <div class="head">
-        <div class="title-area">
-          <p id="topSub">Hazırlık Tamamlanıyor</p>
-          <h2>Ders Planı</h2>
+  <div class="nebula"></div>
+  
+  <main id="pageContent">
+    <div class="main-card">
+      <div class="card-head">
+        <div class="info-group">
+          <div class="level-tag" id="levelPill">Yükleniyor...</div>
+          <h2 id="langTitle">—</h2>
         </div>
-        <div class="time-chip">15 Dakika</div>
+        <div id="chipRight" style="font-size: 20px;">🌍</div>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-label">Kurs</div>
-          <div class="stat-value" id="kvCourse">...</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Mevcut</div>
-          <div class="stat-value" id="kvLevel">...</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Hedef Seviye</div>
-          <div class="stat-value" id="kvGoal">...</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Oturum</div>
-          <div class="stat-value">Birebir AI</div>
-        </div>
+      <div class="content-area">
+        <div class="sentence" id="sentence">Cümle hazırlanıyor...</div>
+        <div class="meaning-box" id="transBox">Anlam için butona bas.</div>
       </div>
 
-      <div class="script-container">
-        <div class="script-header">
-          <div class="ai-label">AI KOÇ BRİFİNG</div>
-          <button class="replay-btn" id="btnReplay">🔊 TEKRAR</button>
+      <div class="control-panel">
+        <div class="mini-actions">
+          <button class="m-btn" id="btnListenTop">🔊 Dinlet</button>
+          <button class="m-btn" id="btnMeaningTop">📝 Anlam</button>
+          <button class="m-btn prime" id="btnSkipTop">✨ Atla</button>
         </div>
-        <div class="type-line" id="typeBox">Başlatılıyor...</div>
-      </div>
 
-      <div class="warn" id="warnBox"></div>
+        <div class="main-actions">
+          <button class="side-btn" id="btnRepeat" title="Tekrar">↻</button>
+          <button class="mic-btn" id="btnRec">🎙️</button>
+          <button class="side-btn" id="btnNext" disabled title="Sonraki">➔</button>
+        </div>
 
-      <div class="footer-actions">
-        <button class="btn btn-ghost" id="btnBack">Geri</button>
-        <button class="btn btn-main" id="btnStart">Dersi Başlat</button>
+        <div class="status-row">
+          <div class="stat-card">
+            <div class="stat-label">Tanıma</div>
+            <div class="stat-val" id="sttStatus">Hazır</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Benzerlik</div>
+            <div class="stat-val" id="simStatus">—</div>
+          </div>
+        </div>
       </div>
     </div>
 
-  </div>
-</main>
+    <div style="display:none;">
+      <button id="btnPlay"></button>
+      <div id="hint"></div>
+      <button id="btnExit"></button>
+    </div>
+  </main>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-<script type="module">
-  import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
-  import { supabase } from "/js/supabase_client.js";
+  <script type="module">
+    import { mountShell } from "/js/ui_shell.js";
+    import { supabase } from "/js/supabase_client.js";
 
-  mountShell({ scroll:"none" });
+    mountShell({ scroll:"none" });
 
-  const API_BASE = "https://italky-api.onrender.com";
-  const $ = (id)=>document.getElementById(id);
+    const API_BASE = "https://italky-api.onrender.com";
+    const PRACTICE_POOL_BASE = "https://auth.italky.ai/storage/v1/object/public/practice/pool";
 
-  function toast(msg){
-    const t = $("toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    setTimeout(()=>t.classList.remove("show"), 2000);
-  }
+    const $ = (id)=>document.getElementById(id);
+    const toastEl = $("toast");
 
-  const params = new URLSearchParams(location.search);
-  const teacherId = params.get("t") || localStorage.getItem("italky_teacher_pref");
-  if(!teacherId) location.replace("/pages/teacher_select.html");
-
-  const lang = (params.get("lang") || "en").toLowerCase();
-  const levelUrl = (params.get("level") || "").toUpperCase();
-
-  const LANGS = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
-  $("kvCourse").textContent = LANGS[lang] || "Dil Dersi";
-
-  const { data:{ session } } = await supabase.auth.getSession();
-  if(!session?.user) location.replace("/pages/login.html");
-  const userId = session.user.id;
-
-  let prof = null;
-  const { data } = await supabase.from("profiles").select("tokens, full_name, levels").eq("id", userId).maybeSingle();
-  prof = data;
-
-  const tokens = Number(prof?.tokens ?? 0);
-  setHeaderTokens(tokens);
-
-  const name = prof?.full_name?.split(' ')[0] || "Öğrenci";
-  const level = ["A1","A2","B1","B2","C1"].includes(levelUrl) ? levelUrl : (prof?.levels?.[lang] || "A1");
-  const goal = level === "A1" ? "A2" : level === "A2" ? "B1" : level === "B1" ? "B2" : "C1";
-
-  $("kvLevel").textContent = level;
-  $("kvGoal").textContent = goal;
-
-  if(tokens <= 0){
-    $("warnBox").style.display = "block";
-    $("warnBox").innerHTML = "⚠️ Jetonunuz tükenmiş. Lütfen yükleme yapın.";
-    $("btnStart").textContent = "Jeton Yükle";
-    $("btnStart").onclick = ()=>location.href="/pages/profile.html";
-  }
-
-  $("btnBack").onclick = ()=>history.back();
-
-  const script = `Selam ${name}. Seninle 15 dk ${LANGS[lang]} çalışacağız. Seviyeni ${level}'den ${goal} seviyesine beraber çıkaracağız. Hazırsan başlayalım!`;
-
-  async function typeWrite(text){
-    let out = "";
-    for(let i=0; i<text.length; i++){
-      out += text[i];
-      $("typeBox").innerHTML = out + `<span class="cursor"></span>`;
-      await new Promise(r=>setTimeout(r, 20));
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(()=>toastEl.classList.remove("show"), 2000);
     }
-  }
 
-  async function speak(text){
-    try {
+    function qs(k){ return new URLSearchParams(location.search).get(k); }
+    const lang = String(qs("lang") || "en").toLowerCase();
+    const levelQ = String(qs("level") || "").toUpperCase();
+
+    const LANG_META = {
+      en:{ name:"English", flag:"🇬🇧" }, de:{ name:"German", flag:"🇩🇪" },
+      fr:{ name:"French", flag:"🇫🇷" }, it:{ name:"Italian", flag:"🇮🇹" },
+      ru:{ name:"Russian", flag:"🇷🇺" }, es:{ name:"Spanish", flag:"🇪🇸" }
+    };
+    const meta = LANG_META[lang] || { name: lang.toUpperCase(), flag:"🌍" };
+    $("chipRight").textContent = meta.flag;
+    $("langTitle").textContent = meta.name;
+
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(!session?.user) location.replace("/pages/login.html");
+    const userId = session.user.id;
+
+    let fullName = "";
+    let levels = {};
+    const { data: prof } = await supabase.from("profiles").select("full_name, levels").eq("id", userId).maybeSingle();
+    fullName = prof?.full_name || "Oğuz";
+    levels = prof?.levels || {};
+
+    const level = ["A1","A2","B1","B2","C1"].includes(levelQ) ? levelQ : (levels?.[lang] || "A1");
+    $("levelPill").textContent = `Seviye: ${level}`;
+
+    const THRESH = 0.95;
+    let sessionQueue = [], sessionIndex = 0, currentText = "", currentTR = "";
+
+    async function loadPool(){
+      const r = await fetch(`${PRACTICE_POOL_BASE}/${encodeURIComponent(lang)}.json`);
+      const j = await r.json();
+      return j.levels || j;
+    }
+
+    function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+    function nextSentence(){
+      if(sessionIndex >= sessionQueue.length){ sessionQueue = shuffle(sessionQueue); sessionIndex = 0; }
+      const it = sessionQueue[sessionIndex++];
+      currentText = typeof it === "string" ? it : it.text;
+      currentTR = typeof it === "object" ? (it.tr || it.meaning_tr || "") : "";
+      
+      $("sentence").textContent = currentText;
+      $("sttStatus").textContent = "Hazır";
+      $("simStatus").textContent = "—";
+      $("simStatus").className = "stat-val";
+      $("btnNext").disabled = true;
+      $("transBox").textContent = "Anlam için butona bas.";
+    }
+
+    async function ttsSpeak(text){
       const r = await fetch(`${API_BASE}/api/tts`, {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
+        method:"POST", headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ text, lang })
       });
       const j = await r.json();
       if(j.audio_base64) new Audio("data:audio/mpeg;base64," + j.audio_base64).play();
-    } catch(e){}
-  }
+    }
 
-  (async ()=>{
-    await typeWrite(script);
-    await speak(script);
-  })();
+    // STT Logic
+    let mediaStream = null, recorder = null, chunks = [], recording = false;
+    async function startRec(){
+      if(!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      chunks = [];
+      recorder = new MediaRecorder(mediaStream);
+      recorder.ondataavailable = (e)=> chunks.push(e.data);
+      recorder.onstop = async ()=>{
+        try {
+          $("sttStatus").textContent = "Analiz...";
+          const blob = new Blob(chunks, { type: "audio/webm" });
+          const fd = new FormData(); fd.append("file", blob); fd.append("lang", lang);
+          const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
+          const j = await r.json();
+          const text = (j.text || "").trim();
+          $("sttStatus").textContent = text || "?";
+          
+          const sim = calculateSimilarity(text, currentText);
+          const pct = Math.round(sim * 100);
+          $("simStatus").textContent = `%${pct}`;
+          
+          if(sim >= THRESH){
+            $("simStatus").className = "stat-val ok";
+            $("btnNext").disabled = false;
+            setTimeout(()=> $("btnNext").click(), 800);
+          } else {
+            $("simStatus").className = "stat-val bad";
+          }
+        } catch(e){ $("sttStatus").textContent = "Hata"; }
+        recording = false;
+        $("btnRec").classList.remove("rec");
+      };
+      recorder.start();
+      recording = true;
+      $("btnRec").classList.add("rec");
+      $("sttStatus").textContent = "Dinliyor...";
+    }
 
-  $("btnReplay").onclick = () => speak(script);
+    function calculateSimilarity(a, b) {
+      const s1 = a.toLowerCase().replace(/[^\w\s]/g,'');
+      const s2 = b.toLowerCase().replace(/[^\w\s]/g,'');
+      if(s1 === s2) return 1;
+      const len = Math.max(s1.length, s2.length);
+      if(len === 0) return 1;
+      let dist = 0;
+      for(let i=0; i<Math.min(s1.length, s2.length); i++) if(s1[i] !== s2[i]) dist++;
+      dist += Math.abs(s1.length - s2.length);
+      return Math.max(0, 1 - (dist / len));
+    }
 
-  $("btnStart").addEventListener("click", () => {
-    if(tokens <= 0) return;
-    localStorage.setItem("italky_lesson_mins", "15");
-    localStorage.setItem("italky_course_lang", lang);
-    localStorage.setItem("italky_course_level", level);
-    localStorage.setItem("italky_teacher_pref", teacherId);
-    toast("Ders Başlıyor...");
-    setTimeout(()=>location.href="/pages/teacher_course.html", 600);
-  });
-</script>
+    // Actions
+    $("btnRec").onclick = () => !recording ? startRec() : recorder.stop();
+    $("btnNext").onclick = () => { nextSentence(); setTimeout(()=>ttsSpeak(currentText), 300); };
+    $("btnRepeat").onclick = () => ttsSpeak(currentText);
+    $("btnListenTop").onclick = () => ttsSpeak(currentText);
+    $("btnSkipTop").onclick = () => $("btnNext").click();
+    
+    $("btnMeaningTop").onclick = async () => {
+      if(currentTR) { $("transBox").textContent = currentTR; return; }
+      $("transBox").textContent = "Çevriliyor...";
+      try {
+        const r = await fetch(`${API_BASE}/api/translate_ai`, {
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ text: currentText, source_lang: lang, target_lang: "tr" })
+        });
+        const j = await r.json();
+        $("transBox").textContent = j.text || "...";
+      } catch(e){ $("transBox").textContent = "Hata"; }
+    };
+
+    // Init
+    (async ()=>{
+      try {
+        const pool = await loadPool();
+        const raw = pool[level] || pool["A1"];
+        sessionQueue = shuffle(raw).slice(0, 100);
+        nextSentence();
+        setTimeout(()=>ttsSpeak(currentText), 500);
+      } catch(e){ $("sentence").textContent = "Hata oluştu."; }
+    })();
+  </script>
 </body>
 </html>
