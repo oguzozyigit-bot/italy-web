@@ -6,7 +6,9 @@
   <title>italkyAI • Pro Pratik</title>
 
   <meta name="theme-color" content="#000000">
-  <style>html,body{background:#000 !important; margin:0; padding:0; overflow:hidden; font-family:'Outfit', sans-serif;}</style>
+  <style>
+    html,body{background:#000 !important; margin:0; padding:0; overflow:hidden; font-family:'Outfit', sans-serif;}
+  </style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,17 +23,24 @@
       --glass-border: rgba(255, 255, 255, 0.1);
       --text-muted: rgba(255, 255, 255, 0.6);
       --ai-gradient: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+
+      /* Shell barlar üstüne binmesin diye güvenli boşluklar */
+      --shellTopPad: 70px;
+      --shellBottomPad: 110px;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    #pageContent {
+    #pageContent{
       height: 100vh;
       display: flex;
       flex-direction: column;
       position: relative;
       background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 70%);
-      padding-bottom: 80px; /* UI Shell alt barı için boşluk */
+
+      /* ✅ UI Shell üst/alt bar arası oturtma + notch safe area */
+      padding-top: calc(env(safe-area-inset-top) + var(--shellTopPad));
+      padding-bottom: calc(env(safe-area-inset-bottom) + var(--shellBottomPad));
     }
 
     /* Arka Plan Hareketli Işıklar */
@@ -45,7 +54,6 @@
       z-index: 0;
       animation: float 20s infinite alternate;
     }
-
     @keyframes float {
       0% { transform: translate(-10%, -10%) scale(1); }
       100% { transform: translate(20%, 30%) scale(1.2); }
@@ -62,7 +70,7 @@
       flex-direction: column;
       padding: 16px;
       gap: 20px;
-      padding-bottom: 20px; /* Alttan boşluk */
+      padding-bottom: 20px;
     }
 
     /* Üst Bar */
@@ -73,19 +81,35 @@
       padding: 10px 4px;
     }
 
-    .brand {
-      display: flex;
+    /* ✅ Logo kaldırıldı -> Anasayfa */
+    .home-link{
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-weight: 800;
-      font-size: 18px;
-      color: #fff;
+      font-weight: 900;
+      font-size: 15px;
+      color:#fff;
+      background: transparent;
+      border: 0;
+      padding: 8px 10px;
+      border-radius: 14px;
+      cursor: pointer;
     }
-
-    .brand span {
-      background: var(--ai-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .home-link:active{ transform: scale(0.98); opacity: 0.9; }
+    .home-link .ico{
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 0 18px rgba(99,102,241,0.15);
+      font-size: 16px;
+    }
+    .home-link .txt{
+      letter-spacing: .2px;
     }
 
     .lang-chip {
@@ -174,7 +198,7 @@
       align-items: center;
       gap: 4px;
       height: 30px;
-      margin-bottom: 0px; /* Kaymayı önlemek için 0 yapıldı */
+      margin-bottom: 0px;
     }
 
     .vis-bar {
@@ -219,15 +243,13 @@
     .btn-circle:active { transform: scale(0.9); background: var(--glass-border); }
 
     /* Yeni Mic Tasarımı */
-    .mic-wrap {
-      position: relative;
-    }
+    .mic-wrap { position: relative; }
 
     .btn-mic {
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background: var(--accent); /* Renk değiştirildi */
+      background: var(--accent);
       border: 2px solid rgba(255,255,255,0.2);
       color: #fff;
       font-size: 32px;
@@ -242,7 +264,7 @@
     }
 
     .btn-mic.recording {
-      background: #ff4757; /* Kayıt halindeki renk */
+      background: #ff4757;
       color: #fff;
       transform: scale(1.1);
       box-shadow: 0 0 50px rgba(255, 71, 87, 0.5);
@@ -250,16 +272,14 @@
 
     .mic-pulse {
       position: absolute;
-      inset: -10px; /* Daha geniş alan */
+      inset: -10px;
       border-radius: 50%;
       background: var(--accent);
       opacity: 0;
       z-index: 1;
     }
 
-    .recording .mic-pulse {
-      animation: pulse 1.5s infinite;
-    }
+    .recording .mic-pulse { animation: pulse 1.5s infinite; }
 
     @keyframes pulse {
       0% { transform: scale(1); opacity: 0.5; }
@@ -270,7 +290,7 @@
     .stats-footer {
       display: flex;
       gap: 10px;
-      padding-top: 0px; /* Kaymayı önlemek için 0 yapıldı */
+      padding-top: 0px;
     }
 
     .stat-card {
@@ -290,7 +310,7 @@
     /* Toast */
     .toast {
       position: fixed;
-      top: 30px;
+      top: calc(env(safe-area-inset-top) + 18px);
       left: 50%;
       transform: translateX(-50%) translateY(-100px);
       background: rgba(255,255,255,0.95);
@@ -305,35 +325,40 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* Yardımcı butonlar (üstte gizli) */
+    /* Yardımcı butonlar */
     .top-actions {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-top: -10px;
-        margin-bottom: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: -10px;
+      margin-bottom: 10px;
     }
     .btn-pill {
-        background: var(--glass);
-        border: 1px solid var(--glass-border);
-        color: #fff;
-        padding: 6px 16px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
   <div class="glow-blob"></div>
-  
+
   <main id="pageContent">
     <div class="wrap">
-      
+
       <header class="header">
-        <div class="brand"><span>italky</span>AI</div>
+        <!-- ✅ italky logosu kaldırıldı -->
+        <button class="home-link" id="btnHome" type="button" aria-label="Anasayfa">
+          <span class="ico">⌂</span>
+          <span class="txt">Anasayfa</span>
+        </button>
+
         <div class="lang-chip" id="chipRight">🇬🇧 EN</div>
       </header>
 
@@ -341,8 +366,8 @@
         <div class="card-top">
           <div class="level-badge" id="levelPill">SEVİYE: A1</div>
           <div class="top-actions">
-             <button class="btn-pill" id="btnMeaningTop">📝 Anlamı Gör</button>
-             <button class="btn-pill" id="btnSkipTop">✨ Atla</button>
+            <button class="btn-pill" id="btnMeaningTop">📝 Anlamı Gör</button>
+            <button class="btn-pill" id="btnSkipTop">✨ Atla</button>
           </div>
         </div>
 
@@ -366,7 +391,7 @@
 
           <div class="action-row">
             <button class="btn-circle" id="btnRepeat" title="Tekrarla">↺</button>
-            
+
             <div class="mic-wrap">
               <div class="mic-pulse"></div>
               <button class="btn-mic" id="btnRec">🎙️</button>
@@ -389,11 +414,11 @@
       </section>
 
       <div style="display:none">
-          <button id="btnPlay"></button>
-          <button id="btnListenTop"></button>
-          <div id="hint"></div>
-          <div id="langTitle"></div>
-          <button id="btnExit"></button>
+        <button id="btnPlay"></button>
+        <button id="btnListenTop"></button>
+        <div id="hint"></div>
+        <div id="langTitle"></div>
+        <button id="btnExit"></button>
       </div>
 
     </div>
@@ -406,6 +431,11 @@
     import { supabase } from "/js/supabase_client.js";
 
     mountShell({ scroll:"none" });
+
+    // ✅ Anasayfa dönüş
+    document.getElementById("btnHome").onclick = () => {
+      location.href = "/pages/home.html";
+    };
 
     // --- MANTIK (LOGIC) AYNI KALIYOR ---
     const API_BASE = "https://italky-api.onrender.com";
@@ -444,17 +474,13 @@
     // Profilden isim alma işlemi
     let fullName = "";
     let levels = {};
-    let userName = ""; // Kullanıcının adını tutacak değişken
+    let userName = "";
 
     try {
       const { data: prof } = await supabase.from("profiles").select("full_name, levels").eq("id", userId).maybeSingle();
       fullName = prof?.full_name || "";
       levels = prof?.levels || {};
-      
-      // Tam isimden sadece ilk ismi alma
-      if(fullName) {
-          userName = fullName.split(' ')[0];
-      }
+      if(fullName) userName = fullName.split(' ')[0];
     } catch(e){}
 
     const level = ["A1","A2","B1","B2","C1"].includes(levelQ) ? levelQ : (levels?.[lang] || "A1");
@@ -473,9 +499,7 @@
       return j.levels || j;
     }
 
-    function shuffle(arr){
-      return [...arr].sort(()=> Math.random() - 0.5);
-    }
+    function shuffle(arr){ return [...arr].sort(()=> Math.random() - 0.5); }
 
     function nextSentence(){
       if(sessionIndex >= sessionQueue.length){
@@ -526,12 +550,12 @@
           const j = await r.json();
           const text = (j.text || j.transcript || "").trim();
           $("sttStatus").textContent = text || "Anlaşılamadı";
-          
+
           // Benzerlik
           const sim = calculateSim(text, currentText);
           const pct = Math.round(sim * 100);
           $("simStatus").textContent = `%${pct}`;
-          
+
           if(sim >= THRESH){
             $("simStatus").className = "stat-value ok";
             toast("Harika! Başarılı telaffuz. ✨");
@@ -585,19 +609,19 @@
     $("btnNext").onclick = () => nextSentence();
     $("btnRepeat").onclick = () => ttsSpeak(currentText);
     $("btnSkipTop").onclick = () => nextSentence();
-    
+
     $("btnMeaningTop").onclick = async () => {
-        if(currentTR) { $("transBox").textContent = currentTR; return; }
-        $("transBox").textContent = "Çeviriliyor...";
-        try {
-            const r = await fetch(`${API_BASE}/api/translate_ai`, {
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body: JSON.stringify({ text: currentText, source_lang: lang, target_lang: "tr" })
-            });
-            const j = await r.json();
-            $("transBox").textContent = j.text || "Çeviri bulunamadı.";
-        } catch(e) { $("transBox").textContent = "Hata oluştu."; }
+      if(currentTR) { $("transBox").textContent = currentTR; return; }
+      $("transBox").textContent = "Çeviriliyor...";
+      try {
+        const r = await fetch(`${API_BASE}/api/translate_ai`, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ text: currentText, source_lang: lang, target_lang: "tr" })
+        });
+        const j = await r.json();
+        $("transBox").textContent = j.text || "Çeviri bulunamadı.";
+      } catch(e) { $("transBox").textContent = "Hata oluştu."; }
     };
 
     // Init
@@ -606,12 +630,10 @@
       const raw = pool[level] || pool["A1"];
       sessionQueue = shuffle(raw);
       nextSentence();
-      // Profilden alınan isim ile selamlama
       toast(`Hoş geldin ${userName}! İyi pratikler.`);
     } catch(e) {
       $("sentence").textContent = "Havuz yüklenemedi.";
     }
-
   </script>
 </body>
 </html>
