@@ -70,7 +70,27 @@
       flex-direction:column;
       gap:12px;
       overflow:hidden;
+      position: relative;
     }
+
+    /* küçük nebula anim */
+    .panel:before{
+      content:"";
+      position:absolute; inset:-30%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,.25) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
+        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
+      filter: blur(34px);
+      opacity:.85;
+      animation: drift 10s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-10px,-8px,0) scale(1); }
+      to{ transform: translate3d(10px,8px,0) scale(1.06); }
+    }
+    .panel > *{ position:relative; z-index:2; }
 
     .titleRow{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -82,6 +102,11 @@
       margin:0;
       color:#fff;
       letter-spacing:-.2px;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 72%;
     }
     .lvl{
       padding: 7px 10px;
@@ -137,7 +162,11 @@
       justify-content:center;
       gap:10px;
       user-select:none;
+      flex: 1;
+      min-width: 0;
+      white-space:nowrap;
     }
+    .btn.small{ flex: 0 0 auto; min-width: 110px; }
     .btn:disabled{ opacity:.35; cursor:not-allowed; }
 
     .btn-primary{
@@ -159,6 +188,7 @@
       align-items:center;
       justify-content:center;
       box-shadow: 0 10px 30px rgba(99,102,241,0.25);
+      flex: 0 0 auto;
     }
     .mic:active{ transform: scale(.99); }
     .mic.rec{
@@ -189,11 +219,17 @@
       color: rgba(255,255,255,0.55);
       letter-spacing:.5px;
       text-transform: uppercase;
+      flex:0 0 auto;
     }
     .v{
       font-size: 12px;
       font-weight: 1000;
       color:#fff;
+      text-align:right;
+      max-width: 65%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
     .v.ok{ color: var(--ok); }
     .v.bad{ color: var(--bad); }
@@ -236,7 +272,6 @@
     }
     .toast.show{ transform: translateX(-50%) translateY(0); }
 
-    /* küçük ekran sıkıştır */
     @media (max-height: 740px){
       .sentence{ font-size: 15px; }
       .sentenceBox{ min-height: 86px; }
@@ -262,7 +297,7 @@
 
         <div class="sentenceBox">
           <div class="sentence" id="sentence">Yükleniyor…</div>
-          <div class="hint" id="hint">Önce sesi dinle, sonra mikrofona basıp tekrar et.</div>
+          <div class="hint" id="hint">Önce dinle, sonra mikrofona basıp tekrar et.</div>
         </div>
 
         <div class="actions">
@@ -292,8 +327,8 @@
         </div>
 
         <div class="note" id="note">
-          • Seviye bazlı eşik uygulanır. Ses benzerliği yeterliyse “Sonraki” açılır.<br/>
-          • Bu ekranın maliyeti düşük: sadece STT/TTS istekleri var.
+          • Seviye bazlı eşik uygulanır. Benzerlik yeterliyse “Sonraki” açılır.<br/>
+          • Maliyet düşük: STT/TTS + isteğe bağlı anlam (translate).
         </div>
       </section>
     </div>
@@ -323,10 +358,10 @@
 
     // params
     const lang = String(qs("lang") || "en").trim().toLowerCase();
+    const level = String(qs("level") || "A1").trim().toUpperCase();
     const teacher = String(qs("t") || "").trim();
-    const level = String(qs("level") || "").trim().toUpperCase(); // A1..C1
 
-    // ui labels
+    // UI labels
     const LANG_META = {
       en:{ name:"English",  flag:"🇬🇧" },
       de:{ name:"German",   flag:"🇩🇪" },
@@ -339,55 +374,64 @@
 
     $("chipRight").textContent = `${meta.flag} ${lang.toUpperCase()}`;
     $("langTitle").textContent = `${meta.name} • Konuşma Pratiği`;
-    $("levelPill").textContent = level ? `Seviye: ${level}` : "Seviye: —";
+    $("levelPill").textContent = (["A1","A2","B1","B2","C1"].includes(level)) ? `Seviye: ${level}` : "Seviye: A1";
 
-    // auth check
+    // Auth check + isim al (kişiselleştirme)
     const { data:{ session } } = await supabase.auth.getSession();
-    if(!session?.user){
+    const userId = session?.user?.id || null;
+    if(!userId){
       location.replace("/pages/login.html");
       throw new Error("no session");
     }
 
-    // ---- Phrase pool (şimdilik gömülü; sonra storage’dan 1000’lik pool çekeriz) ----
-    // Her dil için minimum set; seviyeye göre seçilecek.
+    // Profil adı (hitap)
+    let displayName = "Kullanıcı";
+    try{
+      const { data: prof } = await supabase.from("profiles").select("full_name").eq("id", userId).maybeSingle();
+      const full = String(prof?.full_name || "").trim();
+      if(full) displayName = full.split(/\s+/)[0] || full;
+    }catch{}
+
+    // ---- Phrase pool (şimdilik gömülü demo) ----
+    // Not: Yakında storage’dan pool çekeceğiz. Şimdilik stabil çalışsın.
     const POOL = {
       en:{
-        A1:["I live in a small house.","I drink coffee every morning.","Where is the bus stop?","I like to read books.","My name is Oğuz."],
+        A1:["My name is {name}.","I drink coffee every morning.","Where is the bus stop?","I like to read books.","I live in a small house."],
         A2:["I went to the market yesterday.","Can you help me, please?","I am learning English these days.","We will meet at seven o’clock.","I usually cook at home."],
         B1:["I’ve been working here for two years.","If I had time, I would travel more.","Could you tell me how to get there?","I’m trying to improve my pronunciation.","I didn’t expect it to be so difficult."],
         B2:["I wish I had studied earlier.","The reason I’m late is the traffic.","I’d rather stay home than go out tonight.","I’m looking forward to hearing from you.","This topic is more complex than it seems."],
         C1:["Although it sounds simple, it requires careful planning.","I can’t recall exactly how it happened.","It’s essential to consider the long-term impact.","I’m not convinced that this approach will work.","Let’s clarify the assumptions before we proceed."]
       },
       fr:{
-        A1:["Je vais à l’école tous les jours.","Où est la station de métro ?","J’aime boire du thé.","Je m’appelle Oğuz.","C’est une bonne idée."],
+        A1:["Je m’appelle {name}.","Où est la station de métro ?","J’aime boire du thé.","C’est une bonne idée.","Je vais à l’école tous les jours."],
         A2:["Hier, je suis allé au marché.","Peux-tu m’aider, s’il te plaît ?","Je suis en train d’apprendre le français.","On se voit à sept heures.","Je cuisine souvent à la maison."],
         B1:["Je travaille ici depuis deux ans.","Si j’avais le temps, je voyagerais plus.","Peux-tu m’expliquer comment y aller ?","J’essaie d’améliorer ma prononciation.","Je ne m’attendais pas à ça."],
         B2:["J’aimerais mieux rester à la maison ce soir.","La raison, c’est qu’il y avait des embouteillages.","Je suis impatient d’avoir de tes nouvelles.","Ce sujet est plus complexe qu’il n’y paraît.","Il faut trouver une solution rapidement."],
         C1:["Même si cela paraît simple, il faut bien s’organiser.","Il est essentiel d’évaluer les conséquences à long terme.","Je ne suis pas convaincu que cette méthode soit efficace.","Clarifions les hypothèses avant de continuer.","Je n’arrive pas à me souvenir des détails."]
       },
       de:{
-        A1:["Ich wohne in einem kleinen Haus.","Wo ist die Bushaltestelle?","Ich trinke jeden Morgen Kaffee.","Mein Name ist Oğuz.","Das ist sehr gut."],
+        A1:["Mein Name ist {name}.","Wo ist die Bushaltestelle?","Ich trinke jeden Morgen Kaffee.","Das ist sehr gut.","Ich wohne in einem kleinen Haus."],
         A2:["Gestern bin ich zum Markt gegangen.","Kannst du mir bitte helfen?","Ich lerne gerade Deutsch.","Wir treffen uns um sieben Uhr.","Ich koche oft zu Hause."],
         B1:["Ich arbeite seit zwei Jahren hier.","Wenn ich Zeit hätte, würde ich mehr reisen.","Kannst du mir erklären, wie ich dahin komme?","Ich versuche, meine Aussprache zu verbessern.","Ich habe nicht damit gerechnet."],
         B2:["Ich wäre lieber zu Hause geblieben.","Der Grund ist der starke Verkehr.","Ich freue mich darauf, von dir zu hören.","Dieses Thema ist komplizierter, als es scheint.","Wir müssen schnell eine Lösung finden."],
         C1:["Auch wenn es einfach klingt, erfordert es gute Planung.","Es ist wichtig, die langfristigen Folgen zu berücksichtigen.","Ich bin nicht überzeugt, dass dieser Ansatz funktioniert.","Lass uns die Annahmen zuerst klären.","Ich kann mich nicht genau erinnern, wie es passiert ist."]
       },
       it:{
-        A1:["Vivo in una piccola casa.","Dov’è la fermata dell’autobus?","Bevo caffè ogni mattina.","Mi chiamo Oğuz.","È una buona idea."],
+        A1:["Mi chiamo {name}.","Dov’è la fermata dell’autobus?","Bevo caffè ogni mattina.","È una buona idea.","Vivo in una piccola casa."],
         A2:["Ieri sono andato al mercato.","Puoi aiutarmi, per favore?","Sto imparando l’italiano.","Ci vediamo alle sette.","Cucino spesso a casa."],
         B1:["Lavoro qui da due anni.","Se avessi tempo, viaggerei di più.","Puoi spiegarmi come arrivare lì?","Cerco di migliorare la pronuncia.","Non me lo aspettavo."],
         B2:["Preferirei restare a casa stasera.","Il motivo è il traffico.","Non vedo l’ora di avere tue notizie.","Questo argomento è più complesso di quanto sembri.","Dobbiamo trovare una soluzione in fretta."],
         C1:["Anche se sembra semplice, richiede una buona pianificazione.","È essenziale considerare l’impatto a lungo termine.","Non sono convinto che questo approccio funzioni.","Chiariamo le ipotesi prima di continuare.","Non ricordo esattamente come sia successo."]
       },
       es:{
-        A1:["Vivo en una casa pequeña.","¿Dónde está la parada de autobús?","Bebo café cada mañana.","Me llamo Oğuz.","Es una buena idea."],
+        A1:["Me llamo {name}.","¿Dónde está la parada de autobús?","Bebo café cada mañana.","Es una buena idea.","Vivo en una casa pequeña."],
         A2:["Ayer fui al mercado.","¿Puedes ayudarme, por favor?","Estoy aprendiendo español.","Nos vemos a las siete.","Cocino a menudo en casa."],
         B1:["He estado trabajando aquí durante dos años.","Si tuviera tiempo, viajaría más.","¿Podrías decirme cómo llegar allí?","Estoy intentando mejorar mi pronunciación.","No me lo esperaba."],
         B2:["Preferiría quedarme en casa esta noche.","La razón es el tráfico.","Tengo ganas de saber de ti.","Este tema es más complejo de lo que parece.","Necesitamos encontrar una solución pronto."],
         C1:["Aunque suene simple, requiere una planificación cuidadosa.","Es esencial considerar el impacto a largo plazo.","No estoy convencido de que este enfoque funcione.","Aclaremos las suposiciones antes de seguir.","No recuerdo exactamente cómo ocurrió."]
       },
       ru:{
-        A1:["Я живу в маленьком доме.","Где автобусная остановка?","Я пью кофе каждое утро.","Меня зовут Оğuz.","Это хорошая идея."],
+        A1:["Меня зовут {name}.","Где автобусная остановка?","Я пью кофе каждое утро.","Это хорошая идея.","Я живу в маленьком доме."],
         A2:["Вчера я ходил на рынок.","Ты можешь мне помочь, пожалуйста?","Я сейчас учу русский язык.","Увидимся в семь часов.","Я часто готовлю дома."],
         B1:["Я работаю здесь уже два года.","Если бы у меня было время, я бы больше путешествовал.","Ты можешь объяснить, как туда добраться?","Я пытаюсь улучшить произношение.","Я этого не ожидал."],
         B2:["Я бы предпочёл остаться дома сегодня вечером.","Причина — пробки.","Я с нетерпением жду твоего ответа.","Эта тема сложнее, чем кажется.","Нам нужно быстро найти решение."],
@@ -399,7 +443,7 @@
       if(["A1","A2","B1","B2","C1"].includes(lv)) return lv;
       return "A1";
     }
-    const lv = pickLevel(level || "A1");
+    const LV = pickLevel(level);
 
     // thresholds by level
     const THRESH = { A1:0.72, A2:0.75, B1:0.78, B2:0.82, C1:0.85 };
@@ -412,12 +456,27 @@
     function randItem(arr){
       return arr[Math.floor(Math.random() * arr.length)];
     }
+
+    // Avoid immediate repeats in a session
+    const seen = new Set();
     function nextSentence(){
       const pool = POOL[lang] || POOL.en;
-      const arr = pool[lv] || pool.A1;
-      current = randItem(arr);
+      const arr = (pool[LV] || pool.A1).map(s => s.replace("{name}", displayName));
+
+      if(seen.size >= Math.min(arr.length, 12)) seen.clear();
+
+      let pick = randItem(arr);
+      let guard=0;
+      while(seen.has(pick) && guard<20){
+        pick = randItem(arr);
+        guard++;
+      }
+      seen.add(pick);
+
+      current = pick;
       lastRecognized = "";
       lastSimilarity = 0;
+
       $("sentence").textContent = current;
       $("sttStatus").textContent = "Hazır";
       $("simStatus").textContent = "—";
@@ -426,11 +485,11 @@
       $("transBox").innerHTML = `<span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>`;
     }
 
-    // ---- Similarity (normalized) ----
+    // ---- Similarity ----
     function normText(s){
       return String(s||"")
         .toLowerCase()
-        .replace(/[\u0300-\u036f]/g, "") // combining marks
+        .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^\p{L}\p{N}\s']/gu, " ")
         .replace(/\s+/g, " ")
         .trim();
@@ -446,11 +505,7 @@
       for(let i=1;i<=m;i++){
         for(let j=1;j<=n;j++){
           const cost = a[i-1]===b[j-1] ? 0 : 1;
-          dp[i][j] = Math.min(
-            dp[i-1][j] + 1,
-            dp[i][j-1] + 1,
-            dp[i-1][j-1] + cost
-          );
+          dp[i][j] = Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+cost);
         }
       }
       return dp[m][n];
@@ -466,7 +521,7 @@
 
     function setSimilarityUI(sim){
       lastSimilarity = sim;
-      const t = THRESH[lv] ?? 0.75;
+      const t = THRESH[LV] ?? 0.75;
       const pct = Math.round(sim * 100);
       if(sim >= t){
         $("simStatus").textContent = `%${pct} • Başarılı`;
@@ -479,63 +534,58 @@
       }
     }
 
-    // ---- TTS (backend) ----
-    async function ttsSpeak(text){
-      // Bu endpoint projenizde farklı payload bekliyor olabilir.
-      // O yüzden 2 deneme yapıyoruz.
-      const payload1 = { text, lang };
-      const payload2 = { input: text, lang };
-
-      async function tryReq(payload){
-        const r = await fetch(`${API_BASE}/api/tts`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        // bazı implementasyonlar json döndürür, bazıları audio bytes döndürür:
-        const ct = (r.headers.get("content-type") || "").toLowerCase();
-
-        if(!r.ok){
-          const t = await r.text().catch(()=> "");
-          throw new Error(`TTS HTTP ${r.status} ${t}`);
-        }
-
-        if(ct.includes("application/json")){
-          const j = await r.json().catch(()=>null);
-          // j.url / j.audio_base64 gibi olabilir
-          if(j?.url){
-            const audio = new Audio(j.url);
-            await audio.play();
-            return true;
-          }
-          if(j?.audio_base64){
-            const src = "data:audio/mpeg;base64," + j.audio_base64;
-            const audio = new Audio(src);
-            await audio.play();
-            return true;
-          }
-          // json ama tanınmadı
-          throw new Error("TTS json format unknown");
-        } else {
-          // audio blob
-          const blob = await r.blob();
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          await audio.play();
-          audio.onended = ()=>URL.revokeObjectURL(url);
-          return true;
-        }
-      }
-
+    // ---- TTS (backend /api/tts) ----
+    let audioObj = null;
+    function stopAudio(){
       try{
-        await tryReq(payload1);
-      }catch(e1){
-        await tryReq(payload2);
-      }
+        if(audioObj){
+          audioObj.pause();
+          audioObj.currentTime = 0;
+        }
+      }catch{}
+      audioObj = null;
     }
 
-    // ---- STT (record -> backend) ----
+    async function ttsSpeak(text){
+      const t = String(text||"").trim();
+      if(!t) return;
+
+      stopAudio();
+
+      const res = await fetch(`${API_BASE}/api/tts`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        credentials:"include",
+        body: JSON.stringify({ text: t, lang })
+      });
+
+      if(!res.ok){
+        const msg = await res.text().catch(()=> "");
+        throw new Error(`TTS HTTP ${res.status} ${msg}`);
+      }
+
+      const data = await res.json().catch(()=>null);
+      // Senin backend: { ok, audio_base64, provider_used }
+      if(!data?.ok || !data.audio_base64){
+        throw new Error("TTS unavailable");
+      }
+
+      const bin = atob(data.audio_base64);
+      const bytes = new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+
+      const blob = new Blob([bytes], { type:"audio/mpeg" });
+      const url = URL.createObjectURL(blob);
+
+      audioObj = new Audio(url);
+      audioObj.playsInline = true;
+      audioObj.onended = ()=>{ try{ URL.revokeObjectURL(url); }catch{} };
+      audioObj.onerror = ()=>{ try{ URL.revokeObjectURL(url); }catch{} };
+
+      await audioObj.play();
+    }
+
+    // ---- STT (record -> /api/stt) ----
     let mediaStream = null;
     let recorder = null;
     let chunks = [];
@@ -548,31 +598,24 @@
     }
 
     function pickMime(){
-      const candidates = [
-        "audio/webm;codecs=opus",
-        "audio/webm",
-        "audio/ogg;codecs=opus",
-        "audio/ogg"
-      ];
+      const candidates = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
       for(const c of candidates){
-        if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) return c;
+        try{ if(MediaRecorder.isTypeSupported(c)) return c; }catch{}
       }
       return "";
     }
 
     async function sttSend(blob){
       const fd = new FormData();
-      // backend genelde file bekler: "file" veya "audio"
       fd.append("file", blob, "speech.webm");
       fd.append("lang", lang);
 
-      const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
+      const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd, credentials:"include" });
       if(!r.ok){
         const t = await r.text().catch(()=> "");
         throw new Error(`STT HTTP ${r.status} ${t}`);
       }
       const j = await r.json().catch(()=>null);
-      // beklenen: {text:"..."} veya {transcript:"..."}
       const text = (j?.text || j?.transcript || j?.result || "").toString().trim();
       if(!text) throw new Error("STT boş döndü");
       return text;
@@ -587,7 +630,7 @@
       recorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) chunks.push(e.data); };
       recorder.onstop = async ()=>{
         try{
-          const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" });
+          const blob = new Blob(chunks, { type: recorder?.mimeType || "audio/webm" });
           $("sttStatus").textContent = "Çözümleniyor…";
           const text = await sttSend(blob);
           lastRecognized = text;
@@ -600,7 +643,7 @@
           $("btnNext").disabled = true;
           $("simStatus").textContent = "—";
           $("simStatus").className = "v";
-        } finally {
+        }finally{
           recording = false;
           $("btnRec").classList.remove("rec");
           $("btnRec").textContent = "🎙️";
@@ -616,6 +659,8 @@
       $("btnNext").disabled = true;
 
       recorder.start();
+      // auto-stop 10s
+      setTimeout(()=>{ try{ if(recording) stopRec(); }catch{} }, 10000);
     }
 
     function stopRec(){
@@ -626,23 +671,28 @@
 
     // ---- Meaning (optional) ----
     async function translateMeaning(){
-      // Maliyeti artırmamak için “isteğe bağlı” yaptık.
-      // /api/translate_ai kullanıyoruz. Eğer hata olursa, sadece gizle.
-      const payload = { text: current, source_lang: lang, target_lang: "tr" };
-
       try{
         $("transBox").innerHTML = `<span class="muted">Çeviriliyor…</span>`;
         const r = await fetch(`${API_BASE}/api/translate_ai`, {
           method:"POST",
           headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
+          credentials:"include",
+          body: JSON.stringify({
+            text: current,
+            from_lang: lang,
+            to_lang: "tr",
+            style:"fast",
+            provider:"auto",
+            strict:true,
+            no_extra:true
+          })
         });
         if(!r.ok){
           const t = await r.text().catch(()=> "");
           throw new Error(`Translate HTTP ${r.status} ${t}`);
         }
         const j = await r.json().catch(()=>null);
-        const out = (j?.text || j?.translation || j?.result || "").toString().trim();
+        const out = (j?.translated || j?.text || j?.result || "").toString().trim();
         if(!out) throw new Error("Çeviri boş döndü");
         $("transBox").textContent = out;
       }catch(e){
@@ -655,7 +705,6 @@
     $("btnPlay").onclick = async ()=>{
       try{
         $("btnPlay").disabled = true;
-        toast("Ses hazırlanıyor…");
         await ttsSpeak(current);
       }catch(e){
         toast(e?.message || String(e));
@@ -665,7 +714,6 @@
     };
 
     $("btnRepeat").onclick = async ()=>{
-      // tekrar dinlet + reset
       try{
         $("btnNext").disabled = true;
         $("sttStatus").textContent = "Hazır";
@@ -681,11 +729,8 @@
 
     $("btnRec").onclick = async ()=>{
       try{
-        if(!recording){
-          await startRec();
-        }else{
-          stopRec();
-        }
+        if(!recording) await startRec();
+        else stopRec();
       }catch(e){
         recording = false;
         $("btnRec").classList.remove("rec");
@@ -696,16 +741,20 @@
 
     $("btnNext").onclick = ()=>{
       nextSentence();
+      // mini “AI hissi”
+      setTimeout(()=>{ try{ $("btnPlay").click(); }catch{} }, 220);
     };
 
     $("btnExit").onclick = ()=>{
+      stopAudio();
+      try{ mediaStream?.getTracks?.().forEach(t=>t.stop()); }catch{}
       location.href = "/pages/practice_ai.html";
     };
 
     // init
     nextSentence();
-    // otomatik ilk dinletme (istersen kapatırız)
-    setTimeout(()=>{ $("btnPlay").click(); }, 350);
+    // ilk dinletme
+    setTimeout(()=>{ try{ $("btnPlay").click(); }catch{} }, 350);
   </script>
 </body>
 </html>
