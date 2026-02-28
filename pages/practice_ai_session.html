@@ -626,49 +626,26 @@
 
     // TTS
     async function ttsSpeak(text){
-      const payload1 = { text, lang };
-      const payload2 = { input: text, lang };
+  const r = await fetch(`${API_BASE}/api/tts`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({
+      input: text,   // ❗️ sadece input gönder
+      lang: lang
+    })
+  });
 
-      async function tryReq(payload){
-        const r = await fetch(`${API_BASE}/api/tts`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
+  if(!r.ok){
+    const t = await r.text().catch(()=> "");
+    throw new Error(`TTS HTTP ${r.status} ${t}`);
+  }
 
-        const ct = (r.headers.get("content-type") || "").toLowerCase();
-        if(!r.ok){
-          const t = await r.text().catch(()=> "");
-          throw new Error(`TTS HTTP ${r.status} ${t}`);
-        }
-
-        if(ct.includes("application/json")){
-          const j = await r.json().catch(()=>null);
-          if(j?.url){
-            const audio = new Audio(j.url);
-            await audio.play();
-            return true;
-          }
-          if(j?.audio_base64){
-            const src = "data:audio/mpeg;base64," + j.audio_base64;
-            const audio = new Audio(src);
-            await audio.play();
-            return true;
-          }
-          throw new Error("TTS json format unknown");
-        } else {
-          const blob = await r.blob();
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          await audio.play();
-          audio.onended = ()=>URL.revokeObjectURL(url);
-          return true;
-        }
-      }
-
-      try{ await tryReq(payload1); }
-      catch{ await tryReq(payload2); }
-    }
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const audio = new Audio(url);
+  await audio.play();
+  audio.onended = ()=>URL.revokeObjectURL(url);
+}
 
     // STT
     let mediaStream = null;
