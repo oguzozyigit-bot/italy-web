@@ -14,6 +14,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
+    :root{
+      --border: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.05);
+      --muted: rgba(255,255,255,0.70);
+      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
     #pageContent{ height:100%; }
 
     .wrap{
@@ -23,6 +30,8 @@
       flex-direction:column;
       gap:12px;
       overflow:hidden;
+      max-width: 560px;
+      margin:0 auto;
     }
 
     .panel{
@@ -32,11 +41,32 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       padding: 16px 14px;
+      position:relative;
+      overflow:hidden;
     }
+
+    /* yumuşak nebula */
+    .panel:before{
+      content:"";
+      position:absolute; inset:-35%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,.22) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
+        radial-gradient(circle at 50% 80%, rgba(168,85,247,.14) 0%, transparent 45%);
+      filter: blur(34px);
+      opacity:.85;
+      animation: drift 10s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-10px,-8px,0) scale(1); }
+      to{ transform: translate3d(10px,8px,0) scale(1.06); }
+    }
+    .panel > *{ position:relative; z-index:2; }
 
     .head{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .title{
       font-family:"Space Grotesk",system-ui,sans-serif;
@@ -53,6 +83,12 @@
       font-size:12px;
       color: rgba(255,255,255,0.86);
       white-space:nowrap;
+      display:flex; gap:8px; align-items:center;
+    }
+    .chip b{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
 
     .sub{
@@ -66,7 +102,7 @@
       display:grid;
       grid-template-columns: 1fr auto;
       gap:10px 12px;
-      margin-top: 14px;
+      margin-top: 12px;
     }
     .k{
       font-size:12px;
@@ -83,34 +119,60 @@
       margin: 14px 0;
     }
 
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
-    .pill{
-      flex:1;
-      min-width: 120px;
-      padding: 12px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
+    /* daktilo kartı */
+    .scriptBox{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
-      color:#fff;
-      font-weight:1000;
-      cursor:pointer;
-      user-select:none;
-      text-align:center;
+      padding: 14px 12px;
+      min-height: 142px;
     }
-    .pill.sel{ background: rgba(99,102,241,0.35); border-color: rgba(99,102,241,0.55); }
-    .pill:active{ transform: scale(.99); }
-
-    .inp{
-      width:100%;
-      height:48px;
-      border-radius: 18px;
+    .scriptTitle{
+      font-size:11px;
+      font-weight:1000;
+      color: rgba(165,180,252,0.95);
+      letter-spacing:1px;
+      text-transform: uppercase;
+      margin-bottom:8px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+    .miniBtn{
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(255,255,255,0.06);
       color:#fff;
-      font-weight:1000;
-      padding: 0 12px;
-      outline:none;
+      font-weight: 1000;
+      font-size: 11px;
+      cursor:pointer;
+      user-select:none;
+      display:flex; align-items:center; gap:6px;
+      white-space:nowrap;
     }
+    .miniBtn:active{ transform: scale(.99); }
+
+    .typeLine{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.92);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 92px;
+    }
+    .cursor{
+      display:inline-block;
+      width: 9px;
+      height: 16px;
+      margin-left: 2px;
+      background: rgba(165,180,252,0.9);
+      vertical-align: -3px;
+      animation: blink 0.9s infinite;
+      border-radius: 2px;
+    }
+    @keyframes blink{ 0%,49%{opacity:1} 50%,100%{opacity:0} }
 
     .warn{
       border-radius: 18px;
@@ -123,6 +185,7 @@
       line-height: 1.45;
       display:none;
       white-space:pre-wrap;
+      margin-top: 10px;
     }
 
     .btnRow{
@@ -142,7 +205,7 @@
     }
     .btn:active{ transform: scale(.99); }
     .btn-main{
-      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 55%, #ec4899 100%);
+      background: var(--aiGrad);
       color:#050510;
       flex: 1;
     }
@@ -153,7 +216,6 @@
       width: 110px;
     }
 
-    /* ✅ toast pageContent içinde kalacak */
     .toast{
       position: fixed;
       left:50%;
@@ -170,7 +232,7 @@
       transition:.28s;
       backdrop-filter: blur(12px);
       pointer-events:none;
-      max-width:min(92vw,520px);
+      max-width:min(92vw,560px);
       text-align:center;
     }
     .toast.show{ transform:translateX(-50%) translateY(0); }
@@ -184,45 +246,31 @@
     <div class="panel">
       <div class="head">
         <h2 class="title">Ders Planı</h2>
-        <div class="chip">15 dk</div>
+        <div class="chip"><b>15 dk</b> • Oturum</div>
       </div>
 
       <div class="sub">
-        Dersler maksimum 15 dakika sürer.
+        Bu ders <b>15 dakika</b> sürer. Süre bitince devam edebilir ya da ara verebilirsin.
       </div>
 
       <div class="kv">
-        <div class="k">SÜRE</div><div class="v">15 Dakika</div>
-        <div class="k">AKIŞ</div><div class="v">Ders bitince “Devam?”</div>
+        <div class="k">DERS</div><div class="v" id="kvCourse">—</div>
+        <div class="k">SEVİYE</div><div class="v" id="kvLevel">—</div>
+        <div class="k">HEDEF</div><div class="v" id="kvGoal">A2</div>
       </div>
 
       <div class="divider"></div>
 
-      <div class="sub" style="margin-bottom:10px;">
-        Öğretmen ayarları (dersten önce):
+      <div class="scriptBox">
+        <div class="scriptTitle">
+          <span>AI KOÇ • BRİFİNG</span>
+          <button class="miniBtn" id="btnReplay" type="button">🔊 Tekrar Dinlet</button>
+        </div>
+
+        <div class="typeLine" id="typeBox">Hazırlanıyor<span class="cursor"></span></div>
+
+        <div class="warn" id="warnBox"></div>
       </div>
-
-      <div class="sub">Öğretmen Cinsiyeti</div>
-      <div class="row" id="genderRow" style="margin-top:8px;">
-        <div class="pill" data-v="female">Kadın</div>
-        <div class="pill" data-v="male">Erkek</div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="sub">Öğretmen Adı (istersen değiştirebilirsin)</div>
-      <input class="inp" id="teacherName" maxlength="16" placeholder="Örn: Hüma" />
-
-      <div style="height:10px;"></div>
-
-      <div class="sub">Öğretmenin sana nasıl hitap etsin?</div>
-      <input class="inp" id="studentHitap" maxlength="16" placeholder="Örn: Oğuz / Selin / Mert" />
-      <div class="sub" style="margin-top:6px;color:rgba(255,255,255,0.65)">
-        Bu alan sadece isim içindir. Unvan/etiket kullanmayın.
-      </div>
-
-      <div style="height:12px;"></div>
-      <div class="warn" id="warnBox"></div>
     </div>
 
     <div class="btnRow">
@@ -230,9 +278,7 @@
       <button class="btn btn-main" id="btnStart" type="button">Dersi Başlat</button>
     </div>
 
-    <!-- ✅ toast artık içeride -->
     <div class="toast" id="toast"></div>
-
   </div>
 </main>
 
@@ -241,6 +287,8 @@
   import { supabase } from "/js/supabase_client.js";
 
   mountShell({ scroll:"none" });
+
+  const API_BASE = "https://italky-api.onrender.com";
 
   const $ = (id)=>document.getElementById(id);
   const warn = $("warnBox");
@@ -255,44 +303,33 @@
     window.__to = setTimeout(()=>t.classList.remove("show"), 1400);
   }
 
-  // teacher id: ?t > localStorage
+  // --- teacher id: ?t > localStorage (akış bozulmasın diye duruyor)
   const params = new URLSearchParams(location.search);
   const teacherId = String(params.get("t") || localStorage.getItem("italky_teacher_pref") || "").trim();
   if(!teacherId) location.replace("/pages/teacher_select.html");
   localStorage.setItem("italky_teacher_pref", teacherId);
 
-  const COACH = {
-    dora:   { name:"Dora",   style:"disciplined" },
-    ayda:   { name:"Ayda",   style:"friendly" },
-    jale:   { name:"Jale",   style:"expert" },
-    huma:   { name:"Hüma",   style:"cheerful" },
-    sencer: { name:"Sencer", style:"friendly" },
-    ozan:   { name:"Ozan",   style:"cheerful" },
-    sungur: { name:"Sungur", style:"disciplined" },
-    umay:   { name:"Umay",   style:"expert" }
+  // --- dil / seviye
+  const lang = String(params.get("lang") || "en").trim().toLowerCase();
+  const levelFromUrl = String(params.get("level") || "").trim().toUpperCase();
+
+  const LANG_NAMES_TR = {
+    en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca"
   };
-  const def = COACH[teacherId] || { name:"Dora", style:"friendly" };
+  const courseName = LANG_NAMES_TR[lang] ? `${LANG_NAMES_TR[lang]} Dersi` : "Dil Dersi";
+  $("kvCourse").textContent = courseName;
 
-  let gender = "female";
-  function pickGender(v){
-    gender = v;
-    document.querySelectorAll("#genderRow .pill").forEach(p=>p.classList.remove("sel"));
-    document.querySelector(`#genderRow .pill[data-v="${v}"]`)?.classList.add("sel");
-  }
-  pickGender("female");
-  $("teacherName").value = def.name;
-
-  // session gate (bootPage yok)
+  // --- session gate
   const { data:{ session } } = await supabase.auth.getSession();
-  if(!session) location.replace("/pages/login.html");
+  if(!session?.user) location.replace("/pages/login.html");
   const userId = session.user.id;
 
-  // profiles read (maybeSingle)
+  // --- profile read
   let prof = null;
   try{
     const { data, error } = await supabase
       .from("profiles")
-      .select("tokens, teacher_prefs, full_name")
+      .select("tokens, full_name, levels")
       .eq("id", userId)
       .maybeSingle();
     if(!error) prof = data || null;
@@ -301,15 +338,26 @@
   const tokens = Number(prof?.tokens ?? 0);
   try{ setHeaderTokens(tokens); }catch{}
 
-  const fn = String(prof?.full_name || "").trim();
-  $("studentHitap").value = fn ? (fn.split(/\s+/)[0] || fn).slice(0,16) : "";
+  // adı soyadı kırp: tek kelimeyse o, birden fazlaysa son kelimeyi at
+  function firstNameNoSurname(full){
+    const s = String(full||"").trim();
+    if(!s) return "";
+    const parts = s.split(/\s+/).filter(Boolean);
+    if(parts.length === 1) return parts[0];
+    return parts.slice(0, -1).join(" ");
+  }
+  const firstName = firstNameNoSurname(prof?.full_name) || "Oğuz";
 
-  const prefs = (prof?.teacher_prefs && typeof prof.teacher_prefs === "object") ? prof.teacher_prefs : {};
-  const cur = prefs?.[teacherId] || {};
-  if(cur?.gender) pickGender(cur.gender);
-  if(cur?.teacher_name) $("teacherName").value = String(cur.teacher_name).slice(0,16);
-  if(cur?.student_hitap) $("studentHitap").value = String(cur.student_hitap).slice(0,16);
+  // level belirle: url > profiles.levels[lang] > A1
+  const levels = (prof?.levels && typeof prof.levels==="object") ? prof.levels : {};
+  const level = (["A1","A2","B1","B2","C1"].includes(levelFromUrl) ? levelFromUrl : (levels?.[lang] || "A1"));
+  $("kvLevel").textContent = level;
 
+  // hedef: basit kural
+  const goal = (level === "A1") ? "A2" : (level === "A2" ? "B1" : (level === "B1" ? "B2" : (level === "B2" ? "C1" : "C1")));
+  $("kvGoal").textContent = goal;
+
+  // --- token yoksa (ders giriş kuralın)
   function showNoTokens(){
     warn.style.display = "block";
     warn.textContent =
@@ -318,56 +366,111 @@ Lütfen jeton yükleyerek eğitiminize devam edin.`;
     btnStart.textContent = "Jeton Yükle";
     btnStart.onclick = ()=>location.href="/pages/profile.html";
   }
-
   if(tokens <= 0) showNoTokens();
 
   $("btnBack").onclick = ()=>history.back();
 
-  document.querySelectorAll("#genderRow .pill").forEach(p=>{
-    p.addEventListener("click", ()=>pickGender(p.getAttribute("data-v")));
-  });
+  // --- brifing metni (değişkenli)
+  const scriptText =
+`Selam ${firstName}. Seninle 15 dakika boyunca ${courseName.replace(" Dersi","")} dersinde birlikte çalışacağız.
+15 dakika sonunda devam edebilirsin ya da ara verebilirsin.
+Benim sana tavsiyem günde en az 60 dakikalık derslere katılmandır.
+Bu sayede seviyeni kısa sürede ${level} seviyesinden ${goal} seviyesine çıkartabiliriz.
+Ders harici mutlaka “AI ile Pratik Yap” ve “Eğlenerek Öğren” oyunları ile hem eğlen hem öğren.
+Hazırsan dersi başlatabilirsin.`;
 
-  btnStart.onclick = async ()=>{
-    // token kontrol (yeniden)
-    let nowTokens = tokens;
+  // --- daktilo efekti
+  async function typeWrite(text){
+    const box = $("typeBox");
+    const cursor = `<span class="cursor"></span>`;
+    let out = "";
+    box.innerHTML = cursor;
+
+    // hızlı ama “AI hissi” veren hız
+    const minDelay = 8, maxDelay = 22;
+
+    for(let i=0;i<text.length;i++){
+      out += text[i];
+      const safe = out
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
+
+      box.innerHTML = safe + cursor;
+
+      const ch = text[i];
+      let d = minDelay + Math.random()*(maxDelay-minDelay);
+      if(ch === "." || ch === "!" || ch === "?") d += 120;
+      if(ch === "\n") d += 90;
+
+      await new Promise(r=>setTimeout(r, d));
+    }
+  }
+
+  // --- TTS (backend: google yoksa openai fallback olacak)
+  let currentAudio = null;
+  async function speak(text){
     try{
-      const { data } = await supabase.from("profiles").select("tokens, teacher_prefs").eq("id", userId).maybeSingle();
-      nowTokens = Number(data?.tokens ?? 0);
+      // aynı anda üst üste basılınca karışmasın
+      if(currentAudio){
+        try{ currentAudio.pause(); }catch{}
+        currentAudio = null;
+      }
+
+      const r = await fetch(`${API_BASE}/api/tts`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ text, lang })
+      });
+
+      const j = await r.json().catch(()=>null);
+      if(!r.ok || !j){
+        throw new Error(`TTS HTTP ${r.status}`);
+      }
+      if(!j.ok || !j.audio_base64){
+        throw new Error(j.error || "TTS_UNAVAILABLE");
+      }
+
+      const audio = new Audio("data:audio/mpeg;base64," + j.audio_base64);
+      currentAudio = audio;
+      await audio.play();
+      audio.onended = ()=>{ if(currentAudio===audio) currentAudio=null; };
+
+    }catch(e){
+      toast("Ses şu an kullanılamıyor");
+    }
+  }
+
+  // otomatik yaz + oku
+  (async ()=>{
+    await typeWrite(scriptText);
+    await speak(scriptText);
+  })();
+
+  $("btnReplay").onclick = ()=>speak(scriptText);
+
+  // --- başlat
+  btnStart.onclick = async ()=>{
+    // token kontrolü (yeniden)
+    try{
+      const { data } = await supabase.from("profiles").select("tokens").eq("id", userId).maybeSingle();
+      const nowTokens = Number(data?.tokens ?? 0);
       if(nowTokens <= 0){
         showNoTokens();
         return;
       }
+    }catch{}
 
-      const teacher_name = ($("teacherName").value || "").trim().slice(0,16) || def.name;
-      const student_hitap = ($("studentHitap").value || "").trim().slice(0,16);
+    // ders context (teacher prefs artık yok)
+    try{
+      localStorage.setItem("italky_lesson_mins", "15");
+      localStorage.setItem("italky_course_lang", lang);
+      localStorage.setItem("italky_course_level", level);
+      localStorage.setItem("italky_teacher_pref", teacherId);
+    }catch{}
 
-      if(student_hitap && student_hitap.length < 3){
-        warn.style.display="block";
-        warn.textContent = "Hitap alanı en az 3 karakter olmalı (örn: Oğuz).";
-        return;
-      }
-      warn.style.display="none";
-
-      const currentPrefs = (data?.teacher_prefs && typeof data.teacher_prefs==="object") ? { ...data.teacher_prefs } : {};
-      currentPrefs[teacherId] = { teacher_name, gender, style: def.style, student_hitap };
-
-      const { error: upErr } = await supabase
-        .from("profiles")
-        .update({ teacher_prefs: currentPrefs })
-        .eq("id", userId);
-
-      if(upErr){
-        toast("Kaydedilemedi");
-        return;
-      }
-
-      localStorage.setItem("italky_lesson_mins","15");
-      toast("Hazır! Derse geçiyorsun…");
-      setTimeout(()=>location.href="/pages/teacher_course.html", 250);
-
-    }catch{
-      toast("Bir hata oldu");
-    }
+    toast("Ders başlıyor…");
+    setTimeout(()=>location.href="/pages/teacher_course.html", 260);
   };
 </script>
 </body>
