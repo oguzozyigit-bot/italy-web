@@ -16,17 +16,21 @@
   <style>
     :root{
       --border: rgba(255,255,255,0.12);
-      --card: rgba(255,255,255,0.05);
       --muted: rgba(255,255,255,0.65);
       --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    #pageContent{ height:100%; }
+
+    /* ✅ en kritik fix: footerH kadar alttan pay bırak */
+    #pageContent{
+      height: 100%;
+      padding-bottom: calc(var(--footerH, 0px) + env(safe-area-inset-bottom) + 12px);
+    }
 
     .wrap{
       max-width: 520px;
       margin: 0 auto;
-      min-height: 100%;
+      height: 100%;
       padding: 12px 14px 14px;
       display:flex;
       flex-direction:column;
@@ -41,7 +45,12 @@
       flex:0 0 auto;
     }
 
-    .leftTop{ display:flex; align-items:center; gap:10px; min-width:0; }
+    .leftTop{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
 
     .backBtn{
       width:44px;height:44px;border-radius:16px;
@@ -55,7 +64,14 @@
     }
     .backBtn:active{ transform: scale(.96); }
 
-    .mini-brand{ display:flex; flex-direction:column; user-select:none; cursor:pointer; line-height:1; min-width:0; }
+    .mini-brand{
+      display:flex;
+      flex-direction:column;
+      user-select:none;
+      cursor:pointer;
+      line-height:1;
+      min-width:0;
+    }
     .logo-line{
       font-family:'Space Grotesk', sans-serif;
       font-size: 18px;
@@ -116,11 +132,35 @@
       gap:10px;
       flex:0 0 auto;
     }
-    .panelTitle{ min-width:0; display:flex; flex-direction:column; gap:3px; }
-    .teacherName{ font-weight: 1000; font-size: 13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .lessonInfo{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.62); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .panelTitle{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .teacherName{
+      font-weight: 1000;
+      font-size: 13px;
+      color:#fff;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .lessonInfo{
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.62);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
 
-    .panelBadges{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+    .panelBadges{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex:0 0 auto;
+    }
     .miniPill{
       padding: 7px 10px;
       border-radius: 999px;
@@ -152,10 +192,31 @@
       background: rgba(0,0,0,0.18);
       position:relative;
     }
-    .bubble.teacher{ align-self:flex-start; border-left: 4px solid rgba(99,102,241,0.65); background: rgba(99,102,241,0.10); }
-    .bubble.student{ align-self:flex-end; border-right: 4px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.06); text-align:right; }
-    .bubble.tr{ align-self:flex-start; opacity:.85; font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.72); }
-    .bubble .txt{ font-size: 13px; font-weight: 900; line-height: 1.45; white-space: pre-wrap; }
+    .bubble.teacher{
+      align-self:flex-start;
+      border-left: 4px solid rgba(99,102,241,0.65);
+      background: rgba(99,102,241,0.10);
+    }
+    .bubble.student{
+      align-self:flex-end;
+      border-right: 4px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.06);
+      text-align:right;
+    }
+    .bubble.tr{
+      align-self:flex-start;
+      opacity:.85;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.72);
+      background: rgba(0,0,0,0.14);
+    }
+    .bubble .txt{
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
 
     .spkBtn{
       position:absolute;
@@ -171,9 +232,9 @@
     .spkBtn:active{ transform: scale(.96); }
     .spkBtn svg{ width:18px;height:18px; fill:none; stroke:#fff; stroke-width:2; opacity:.9; }
 
-    /* dock: panel içinde sabit kalsın */
+    /* ✅ dock artık her koşulda görünür, footer üstünde kalır */
     .dock{
-      flex:0 0 auto;
+      flex: 0 0 auto;
       padding: 12px 12px;
       border-top: 1px solid rgba(255,255,255,0.08);
       background: rgba(0,0,0,0.20);
@@ -181,6 +242,7 @@
       gap:10px;
       align-items:center;
       justify-content:space-between;
+      z-index: 10;
     }
 
     .statusText{
@@ -230,7 +292,9 @@
         <div class="leftTop">
           <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
           <div class="mini-brand" id="logoHome" title="Ana sayfa">
-            <div class="logo-line"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
+            <div class="logo-line">
+              <span class="logo-main">italky</span><span class="logo-ai">AI</span>
+            </div>
             <div class="logo-slogan">BE FREE</div>
           </div>
         </div>
@@ -243,7 +307,9 @@
             <div class="teacherName" id="teacherName">—</div>
             <div class="lessonInfo" id="lessonInfo">—</div>
           </div>
-          <div class="panelBadges"><div class="miniPill" id="pillScore">95%</div></div>
+          <div class="panelBadges">
+            <div class="miniPill" id="pillScore">95%</div>
+          </div>
         </div>
 
         <div class="chat" id="chat"></div>
@@ -260,11 +326,9 @@
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
-    // ✅ scroll AUTO olmalı ki footer boşluğu çalışsın, buton gömülmesin
-    mountShell({ scroll:"auto" });
+    mountShell({ scroll:"none" });
 
-    // ✅ shell kurulduktan sonra JS’yi yükle
-    import("/js/teacher_course.page.js?v=TC_V2_001");
+    import("/js/teacher_course.page.js?v=TC_REAL_003");
   </script>
 </body>
 </html>
