@@ -2,866 +2,232 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • AI Pratik Oturumu</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>italkyAI • AI Pratik Oturumu</title>
 
-  <meta name="theme-color" content="#02000f">
-  <style>html,body{background:#02000f !important;}</style>
+<meta name="theme-color" content="#02000f">
+<style>html,body{background:#02000f!important;margin:0}</style>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
-  <style>
-    :root{
-      --border: rgba(255,255,255,0.12);
-      --card: rgba(255,255,255,0.05);
-      --muted: rgba(255,255,255,0.70);
-      --ok: rgba(34,197,94,0.95);
-      --bad: rgba(255,90,140,0.95);
-      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
-    }
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    #pageContent{ height:100%; }
+<style>
+:root{
+  --border:rgba(255,255,255,.12);
+  --card:rgba(255,255,255,.05);
+  --ok:#22c55e;
+  --bad:#ff5a8c;
+  --ai:linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+}
+*{box-sizing:border-box;font-family:'Outfit',sans-serif;color:#fff}
+.wrap{
+  max-width:480px;margin:auto;height:100vh;padding:14px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.panel{
+  flex:1;border-radius:22px;
+  background:var(--card);border:1px solid var(--border);
+  padding:14px;display:flex;flex-direction:column;gap:14px;
+}
+.topbar{display:flex;justify-content:space-between}
+.chip{padding:8px 12px;border-radius:999px;background:#0003;border:1px solid var(--border);font-weight:900;font-size:12px}
+.ai{background:var(--ai);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-    .wrap{
-      position:relative;
-      max-width:480px;
-      height:100%;
-      margin:0 auto;
-      padding: 12px 14px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      background: rgba(10,10,30,0.18);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 26px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
+.sentenceBox{background:#0004;border-radius:18px;padding:14px;min-height:90px}
+.sentence{font-size:16px;font-weight:900}
 
-    .topbar{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
-    .chip{
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,0.22);
-      color: rgba(255,255,255,0.92);
-      font-weight:1000;
-      font-size:12px;
-      white-space:nowrap;
-      display:flex; gap:8px; align-items:center;
-      max-width: 48%;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .chip .ai{
-      background: var(--aiGrad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      font-weight:1000;
-    }
+.actions{display:flex;gap:10px}
+.btn,.mic{
+  height:52px;border-radius:18px;font-weight:900;cursor:pointer;
+  border:1px solid var(--border);background:#fff1;padding:0 14px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary{background:#fff;color:#000;border:none}
+.mic{background:var(--ai);color:#000;width:52px;min-width:52px}
+.mic.rec{background:linear-gradient(135deg,#ff5a8c,#ec4899)}
 
-    .panel{
-      flex:1;
-      border-radius: 22px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      padding: 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      overflow:hidden;
-      position: relative;
-    }
-
-    .panel:before{
-      content:"";
-      position:absolute; inset:-30%;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(99,102,241,.25) 0%, transparent 45%),
-        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
-        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
-      filter: blur(34px);
-      opacity:.85;
-      animation: drift 10s ease-in-out infinite alternate;
-      pointer-events:none;
-    }
-    @keyframes drift{
-      from{ transform: translate3d(-10px,-8px,0) scale(1); }
-      to{ transform: translate3d(10px,8px,0) scale(1.06); }
-    }
-    .panel > *{ position:relative; z-index:2; }
-
-    .titleRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    .h{
-      font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight:1000;
-      font-size:14px;
-      margin:0;
-      color:#fff;
-      letter-spacing:-.2px;
-      min-width:0;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space:nowrap;
-    }
-    .lvl{
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      font-weight: 1000;
-      font-size: 12px;
-      color: rgba(165,180,252,0.95);
-      white-space: nowrap;
-      flex:0 0 auto;
-    }
-
-    .sentenceBox{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 12px;
-      min-height: 104px;
-    }
-    .sentence{
-      font-size: 16px;
-      font-weight: 1000;
-      line-height: 1.35;
-      color:#fff;
-      white-space: pre-wrap;
-    }
-    .hint{
-      margin-top: 6px;
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.62);
-      line-height:1.35;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    .btn{
-      height: 52px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:1000;
-      cursor:pointer;
-      padding: 0 14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      user-select:none;
-      flex: 1;
-    }
-    .btn:disabled{ opacity:.35; cursor:not-allowed; }
-
-    .btn-primary{
-      background:#fff;
-      color:#000;
-      border:none;
-      flex: 1.1;
-    }
-
-    .mic{
-      width: 52px; min-width:52px;
-      height: 52px;
-      border-radius: 18px;
-      border: none;
-      background: var(--aiGrad);
-      color:#000;
-      font-weight:1000;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: 0 10px 30px rgba(99,102,241,0.25);
-      flex: 0 0 auto;
-    }
-    .mic:active{ transform: scale(.99); }
-    .mic.rec{
-      background: linear-gradient(135deg, rgba(255,90,140,1) 0%, rgba(236,72,153,1) 60%, rgba(165,180,252,1) 100%);
-    }
-
-    .statusBox{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.14);
-      padding: 12px;
-      min-height: 96px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .statusBox::-webkit-scrollbar{ display:none; }
-
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 8px;
-    }
-    .k{
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.55);
-      letter-spacing:.5px;
-      text-transform: uppercase;
-    }
-    .v{
-      font-size: 12px;
-      font-weight: 1000;
-      color:#fff;
-      text-align:right;
-      max-width: 65%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .v.ok{ color: var(--ok); }
-    .v.bad{ color: var(--bad); }
-
-    .trans{
-      margin-top: 8px;
-      font-size: 12px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.82);
-      white-space: pre-wrap;
-      line-height: 1.45;
-    }
-    .trans .muted{ color: rgba(255,255,255,0.60); }
-
-    .note{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-      line-height:1.45;
-    }
-
-    .toast{
-      position: fixed;
-      left:50%;
-      top:18px;
-      transform: translateX(-50%) translateY(-120px);
-      background: rgba(10,10,18,0.95);
-      border: 1px solid rgba(165,180,252,0.35);
-      padding: 10px 14px;
-      border-radius: 999px;
-      color:#fff;
-      z-index: 999999;
-      font-weight: 1000;
-      font-size: 12px;
-      transition: .25s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width: min(92vw, 520px);
-      text-align:center;
-    }
-    .toast.show{ transform: translateX(-50%) translateY(0); }
-
-    @media (max-height: 740px){
-      .sentence{ font-size: 15px; }
-      .sentenceBox{ min-height: 92px; }
-      .btn{ height: 50px; }
-      .mic{ width:50px; min-width:50px; height:50px; }
-    }
-  </style>
+.statusBox{background:#0003;border-radius:18px;padding:12px}
+.row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;font-weight:900}
+.v.ok{color:var(--ok)}
+.v.bad{color:var(--bad)}
+.toast{
+ position:fixed;top:20px;left:50%;transform:translateX(-50%);
+ background:#000c;padding:10px 16px;border-radius:999px;
+ border:1px solid var(--border);font-size:12px;font-weight:900;
+ display:none
+}
+.toast.show{display:block}
+</style>
 </head>
 
 <body>
-  <main id="pageContent">
-    <div class="wrap">
-      <div class="topbar">
-        <div class="chip" id="chipLeft"><span class="ai">AI</span> Pratik</div>
-        <div class="chip" id="chipRight">—</div>
-      </div>
+<div class="wrap">
+  <div class="topbar">
+    <div class="chip"><span class="ai">AI</span> Pratik</div>
+    <div class="chip" id="langChip">—</div>
+  </div>
 
-      <section class="panel">
-        <div class="titleRow">
-          <h2 class="h" id="langTitle">—</h2>
-          <div class="lvl" id="levelPill">—</div>
-        </div>
-
-        <div class="sentenceBox">
-          <div class="sentence" id="sentence">Yükleniyor…</div>
-          <div class="hint" id="hint">Dinlet → Mikrofona bas → Tekrar et. Benzerlik yeterliyse “Sonraki” açılır.</div>
-        </div>
-
-        <div class="actions">
-          <button class="btn" id="btnPlay" type="button">🔊 Dinlet</button>
-          <button class="mic" id="btnRec" type="button" title="Kayıt">🎙️</button>
-          <button class="btn btn-primary" id="btnNext" type="button" disabled>Sonraki</button>
-        </div>
-
-        <div class="statusBox">
-          <div class="row">
-            <div class="k">Tanıma</div>
-            <div class="v" id="sttStatus">Hazır</div>
-          </div>
-          <div class="row">
-            <div class="k">Benzerlik</div>
-            <div class="v" id="simStatus">—</div>
-          </div>
-          <div class="trans" id="transBox">
-            <span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn" id="btnMeaning" type="button">📝 Anlam</button>
-          <button class="btn" id="btnRepeat" type="button">↻ Tekrar</button>
-          <button class="btn" id="btnExit" type="button">Çık</button>
-        </div>
-
-        <div class="note" id="note">
-          • Havuzdan gelir: tekrar yok (kullanıcı + dil + seviye).<br/>
-          • “Anlam” butonu AI çağırmaz, dosyadaki meaning_tr’yi gösterir.
-        </div>
-      </section>
+  <div class="panel">
+    <div class="sentenceBox">
+      <div class="sentence" id="sentence">Yükleniyor…</div>
     </div>
-  </main>
 
-  <div class="toast" id="toast"></div>
-
-  <script type="module">
-    import { mountShell } from "/js/ui_shell.js";
-    import { supabase } from "/js/supabase_client.js";
-
-    mountShell({ scroll:"none" });
-
-    const API_BASE = "https://italky-api.onrender.com";
-
-    const $ = (id)=>document.getElementById(id);
-    const toastEl = $("toast");
-
-    function toast(msg){
-      toastEl.textContent = String(msg||"");
-      toastEl.classList.add("show");
-      clearTimeout(window.__to);
-      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 1600);
-    }
-
-    function qs(k){ return new URLSearchParams(location.search).get(k); }
-
-    // params
-    const lang = String(qs("lang") || "en").trim().toLowerCase();
-    const level = String(qs("level") || "A1").trim().toUpperCase(); // A1..C1
-
-    // labels
-    const LANG_META = {
-      en:{ name:"English",  flag:"🇬🇧" },
-      de:{ name:"German",   flag:"🇩🇪" },
-      fr:{ name:"French",   flag:"🇫🇷" },
-      it:{ name:"Italian",  flag:"🇮🇹" },
-      ru:{ name:"Russian",  flag:"🇷🇺" },
-      es:{ name:"Spanish",  flag:"🇪🇸" },
-    };
-    const meta = LANG_META[lang] || { name: lang.toUpperCase(), flag:"🌍" };
-
-    // auth + profile
-    const { data:{ session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || null;
-    if(!userId){
-      location.replace("/pages/login.html");
-      throw new Error("no session");
-    }
-
-    let firstName = "Başkanım";
-    try{
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", userId)
-        .maybeSingle();
-      const fn = String(prof?.full_name || "").trim();
-      if(fn){
-        firstName = fn.split(/\s+/)[0] || fn;
-      }
-    }catch{}
-
-    $("chipRight").textContent = `${meta.flag} ${lang.toUpperCase()}`;
-    $("langTitle").textContent = `${meta.name} • Konuşma Pratiği`;
-    $("levelPill").textContent = `Seviye: ${level}`;
-
-    // thresholds by level
-    const THRESH = { A1:0.72, A2:0.75, B1:0.78, B2:0.82, C1:0.85 };
-    const threshold = THRESH[level] ?? 0.75;
-
-    // =========================
-    // POOL LOAD (Storage)
-    // =========================
-    function poolUrl(l, lv){
-      // tests/practice_pool/en_A1.json
-      return `https://auth.italky.ai/storage/v1/object/public/tests/practice_pool/${encodeURIComponent(l)}_${encodeURIComponent(lv)}.json`;
-    }
-
-    async function fetchPool(){
-      const url = poolUrl(lang, level);
-      const r = await fetch(url, { cache:"no-store" });
-      if(!r.ok){
-        const t = await r.text().catch(()=> "");
-        throw new Error(`Havuz bulunamadı: ${lang}_${level}.json\nHTTP ${r.status}\n${t}`);
-      }
-      const j = await r.json().catch(()=>null);
-      const items = Array.isArray(j?.items) ? j.items : (Array.isArray(j?.questions) ? j.questions : []);
-      if(!Array.isArray(items) || items.length === 0) throw new Error("Havuz boş.");
-      // normalize fields
-      return items.map(it=>({
-        text: String(it?.text || it?.sentence || "").trim(),
-        meaning_tr: String(it?.meaning_tr || it?.meaning || it?.tr || "").trim()
-      })).filter(x=>x.text);
-    }
-
-    // =========================
-    // NO-REPEAT ENGINE (per user/lang/level)
-    // =========================
-    function keyBase(){ return `italky_practice_${userId}_${lang}_${level}`; }
-    function kCycle(){ return `${keyBase()}_cycle`; }
-    function kOrder(c){ return `${keyBase()}_order_${c}`; }
-    function kPtr(c){ return `${keyBase()}_ptr_${c}`; }
-    function kRecent(){ return `${keyBase()}_recent`; }
-
-    function getInt(k, def=0){
-      try{ const v = parseInt(localStorage.getItem(k) || "", 10); return Number.isFinite(v) ? v : def; }catch{ return def; }
-    }
-    function setInt(k, v){ try{ localStorage.setItem(k, String(v)); }catch{} }
-    function getJson(k, def=null){ try{ const r = localStorage.getItem(k); return r ? JSON.parse(r) : def; }catch{ return def; } }
-    function setJson(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
-
-    function shuffle(arr){
-      const a = arr.slice();
-      for(let i=a.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]] = [a[j],a[i]];
-      }
-      return a;
-    }
-
-    function hashText(s){
-      s = String(s||"").toLowerCase().trim();
-      let h=0;
-      for(let i=0;i<s.length;i++){ h = ((h<<5)-h) + s.charCodeAt(i); h |= 0; }
-      return String(h);
-    }
-
-    function getRecentSet(){
-      const arr = getJson(kRecent(), []) || [];
-      return new Set(arr.map(String));
-    }
-    function pushRecent(hash){
-      const arr = getJson(kRecent(), []) || [];
-      arr.push(String(hash));
-      // son 40
-      while(arr.length > 40) arr.shift();
-      setJson(kRecent(), arr);
-    }
-
-    let POOL = [];
-    let cycle = 1;
-    let order = [];
-    let ptr = 0;
-
-    async function initPool(){
-      $("sentence").textContent = "Havuz yükleniyor…";
-      POOL = await fetchPool();
-
-      cycle = getInt(kCycle(), 1);
-      order = getJson(kOrder(cycle), null);
-      ptr = getInt(kPtr(cycle), 0);
-
-      // order yoksa yarat
-      if(!Array.isArray(order) || order.length !== POOL.length){
-        order = shuffle([...Array(POOL.length).keys()]);
-        setJson(kOrder(cycle), order);
-        ptr = 0;
-        setInt(kPtr(cycle), ptr);
-      }
-
-      // ptr taşmışsa yeni cycle
-      if(ptr >= order.length){
-        cycle += 1;
-        setInt(kCycle(), cycle);
-        order = shuffle([...Array(POOL.length).keys()]);
-        setJson(kOrder(cycle), order);
-        ptr = 0;
-        setInt(kPtr(cycle), ptr);
-      }
-    }
-
-    // current item state
-    let current = null; // {text, meaning_tr}
-    let lastRecognized = "";
-    let lastSimilarity = 0;
-
-    function resetUIForNewItem(){
-      lastRecognized = "";
-      lastSimilarity = 0;
-      $("sttStatus").textContent = "Hazır";
-      $("simStatus").textContent = "—";
-      $("simStatus").className = "v";
-      $("btnNext").disabled = true;
-      $("transBox").innerHTML = `<span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>`;
-    }
-
-    function pickNextItem(){
-      const recent = getRecentSet();
-
-      // 1) normal sıradan dene (maks 25 adım), recent’e takılıyorsa bir kaç ileri bak
-      for(let step=0; step<25; step++){
-        if(ptr >= order.length){
-          // cycle bitmiş -> yeni cycle
-          cycle += 1;
-          setInt(kCycle(), cycle);
-          order = shuffle([...Array(POOL.length).keys()]);
-          setJson(kOrder(cycle), order);
-          ptr = 0;
-        }
-
-        const idx = order[ptr];
-        ptr += 1;
-        setInt(kPtr(cycle), ptr);
-
-        const item = POOL[idx];
-        const h = hashText(item.text);
-        if(recent.has(h)) continue;
-
-        pushRecent(h);
-        return item;
-      }
-
-      // 2) bulamazsa (çok küçük havuz vb) recent’i resetle
-      setJson(kRecent(), []);
-      // tekrar dene
-      const idx = order[Math.min(ptr, order.length-1)];
-      ptr += 1;
-      setInt(kPtr(cycle), ptr);
-      const item = POOL[idx] || POOL[0];
-      pushRecent(hashText(item.text));
-      return item;
-    }
-
-    function greetAndFirst(){
-      const hi = `Selam ${firstName}! Sen şu an ${meta.name} dilinde ${level} seviyesindesin.\nHazırsan başlıyoruz.`;
-      $("sentence").textContent = hi;
-      current = { text: hi, meaning_tr: "" };
-      resetUIForNewItem();
-      // İlk “sonraki” ile gerçek havuz cümlesine geçsin
-      $("btnNext").disabled = false;
-      $("simStatus").textContent = "Başlamak için Sonraki";
-      $("simStatus").className = "v ok";
-    }
-
-    function showItem(item){
-      current = item;
-      $("sentence").textContent = item.text;
-      resetUIForNewItem();
-    }
-
-    // =========================
-    // Similarity (Levenshtein)
-    // =========================
-    function normText(s){
-      return String(s||"")
-        .toLowerCase()
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\p{L}\p{N}\s']/gu, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function levenshtein(a, b){
-      a = normText(a); b = normText(b);
-      const m = a.length, n = b.length;
-      if(!m && !n) return 0;
-      const dp = Array.from({length:m+1}, ()=>Array(n+1).fill(0));
-      for(let i=0;i<=m;i++) dp[i][0]=i;
-      for(let j=0;j<=n;j++) dp[0][j]=j;
-      for(let i=1;i<=m;i++){
-        for(let j=1;j<=n;j++){
-          const cost = a[i-1]===b[j-1] ? 0 : 1;
-          dp[i][j] = Math.min(
-            dp[i-1][j] + 1,
-            dp[i][j-1] + 1,
-            dp[i-1][j-1] + cost
-          );
-        }
-      }
-      return dp[m][n];
-    }
-
-    function similarity(a, b){
-      a = normText(a); b = normText(b);
-      if(!a && !b) return 1;
-      const dist = levenshtein(a,b);
-      const maxLen = Math.max(a.length, b.length) || 1;
-      return Math.max(0, 1 - (dist / maxLen));
-    }
-
-    function setSimilarityUI(sim){
-      lastSimilarity = sim;
-      const pct = Math.round(sim * 100);
-      if(sim >= threshold){
-        $("simStatus").textContent = `%${pct} • Başarılı`;
-        $("simStatus").className = "v ok";
-        $("btnNext").disabled = false;
-      }else{
-        $("simStatus").textContent = `%${pct} • Tekrar`;
-        $("simStatus").className = "v bad";
-        $("btnNext").disabled = true;
-      }
-    }
-
-    // =========================
-    // TTS (backend -> base64) + fallback
-    // =========================
-    let audioObj = null;
-    function stopAudio(){
-      try{ if(audioObj){ audioObj.pause(); audioObj.currentTime=0; } }catch{}
-      audioObj = null;
-    }
-
-    async function ttsSpeak(text){
-      const t = String(text||"").trim();
-      if(!t) return;
-
-      // 1) backend /api/tts (senin yapıda json + audio_base64 dönüyor)
-      try{
-        const r = await fetch(`${API_BASE}/api/tts`,{
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ text: t, lang })
-        });
-        if(r.ok){
-          const j = await r.json().catch(()=>null);
-          if(j?.ok && j.audio_base64){
-            stopAudio();
-            const src = "data:audio/mpeg;base64," + j.audio_base64;
-            audioObj = new Audio(src);
-            audioObj.playsInline = true;
-            await audioObj.play();
-            return;
-          }
-        }
-      }catch{}
-
-      // 2) fallback: speechSynthesis
-      try{
-        if(!("speechSynthesis" in window)) return;
-        const map = {en:"en-US",de:"de-DE",fr:"fr-FR",it:"it-IT",es:"es-ES",ru:"ru-RU"};
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = map[lang] || "en-US";
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-      }catch{}
-    }
-
-    // =========================
-    // STT (record -> backend)
-    // =========================
-    let mediaStream = null;
-    let recorder = null;
-    let chunks = [];
-    let recording = false;
-
-    async function ensureMic(){
-      if(mediaStream) return mediaStream;
-      mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
-      return mediaStream;
-    }
-
-    function pickMime(){
-      const candidates = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
-      for(const c of candidates){
-        try{
-          if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) return c;
-        }catch{}
-      }
-      return "";
-    }
-
-    async function sttSend(blob){
-      const fd = new FormData();
-      fd.append("file", blob, "speech.webm");
-      fd.append("lang", lang);
-
-      const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
-      if(!r.ok){
-        const t = await r.text().catch(()=> "");
-        throw new Error(`STT HTTP ${r.status} ${t}`);
-      }
-      const j = await r.json().catch(()=>null);
-      const text = (j?.text || j?.transcript || j?.result || "").toString().trim();
-      if(!text) throw new Error("STT boş döndü");
-      return text;
-    }
-
-    async function startRec(){
-      await ensureMic();
-      chunks = [];
-      const mime = pickMime();
-      recorder = new MediaRecorder(mediaStream, mime ? { mimeType: mime } : undefined);
-
-      recorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) chunks.push(e.data); };
-      recorder.onstop = async ()=>{
-        try{
-          const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" });
-          $("sttStatus").textContent = "Çözümleniyor…";
-          const text = await sttSend(blob);
-          lastRecognized = text;
-          $("sttStatus").textContent = text;
-
-          // greeting satırında ölçüm yapmayalım
-          if(current && current.meaning_tr === "" && current.text.includes("Selam")){
-            $("simStatus").textContent = "—";
-            $("simStatus").className = "v";
-            $("btnNext").disabled = false;
-            return;
-          }
-
-          const sim = similarity(text, current?.text || "");
-          setSimilarityUI(sim);
-        }catch(err){
-          $("sttStatus").textContent = "STT hata";
-          toast(err?.message || String(err));
-          $("btnNext").disabled = true;
-          $("simStatus").textContent = "—";
-          $("simStatus").className = "v";
-        } finally {
-          recording = false;
-          $("btnRec").classList.remove("rec");
-          $("btnRec").textContent = "🎙️";
-        }
-      };
-
-      recording = true;
-      $("btnRec").classList.add("rec");
-      $("btnRec").textContent = "⏺";
-      $("sttStatus").textContent = "Dinliyorum…";
-      $("simStatus").textContent = "—";
-      $("simStatus").className = "v";
-      $("btnNext").disabled = true;
-
-      recorder.start();
-    }
-
-    function stopRec(){
-      try{ if(recorder && recorder.state !== "inactive") recorder.stop(); }catch{}
-    }
-
-    // =========================
-    // Meaning (NO AI)
-    // =========================
-    function showMeaning(){
-      const m = String(current?.meaning_tr || "").trim();
-      if(!m){
-        $("transBox").innerHTML = `<span class="muted">Bu cümlede anlam yok.</span>`;
-        return;
-      }
-      $("transBox").textContent = m;
-    }
-
-    // =========================
-    // UI actions
-    // =========================
-    $("btnPlay").onclick = async ()=>{
-      try{
-        $("btnPlay").disabled = true;
-        await ttsSpeak(current?.text || "");
-      }catch(e){
-        toast(e?.message || String(e));
-      }finally{
-        $("btnPlay").disabled = false;
-      }
-    };
-
-    $("btnRepeat").onclick = async ()=>{
-      try{
-        $("btnNext").disabled = true;
-        $("sttStatus").textContent = "Hazır";
-        $("simStatus").textContent = "—";
-        $("simStatus").className = "v";
-        await ttsSpeak(current?.text || "");
-      }catch(e){
-        toast(e?.message || String(e));
-      }
-    };
-
-    $("btnMeaning").onclick = ()=>showMeaning();
-
-    $("btnRec").onclick = async ()=>{
-      try{
-        if(!recording) await startRec();
-        else stopRec();
-      }catch(e){
-        recording = false;
-        $("btnRec").classList.remove("rec");
-        $("btnRec").textContent = "🎙️";
-        toast(e?.message || String(e));
-      }
-    };
-
-    $("btnNext").onclick = async ()=>{
-      // greeting ise: ilk havuz cümlesine geç
-      if(current && current.meaning_tr === "" && current.text.includes("Selam")){
-        const it = pickNextItem();
-        showItem(it);
-        await ttsSpeak(it.text);
-        return;
-      }
-
-      // normal geçiş
-      const it = pickNextItem();
-      showItem(it);
-      await ttsSpeak(it.text);
-    };
-
-    $("btnExit").onclick = ()=>{
-      location.href = "/pages/practice_ai.html";
-    };
-
-    // =========================
-    // BOOT
-    // =========================
-    try{
-      showInfo("Havuz hazırlanıyor…");
-      await initPool();
-      greetAndFirst();
-      // selamı da dinletelim (AI hissi)
-      setTimeout(()=>ttsSpeak($("sentence").textContent), 450);
-    }catch(e){
-      showError("Pratik havuzu açılamadı.", e?.message || String(e));
-      throw e;
-    }
-
-    function showError(title, detail){
-      $("sentence").textContent = "";
-      $("hint").textContent = "";
-      $("sttStatus").textContent = "—";
-      $("simStatus").textContent = "—";
-      $("transBox").textContent = "";
-      $("btnPlay").disabled = true;
-      $("btnRec").disabled = true;
-      $("btnNext").disabled = true;
-
-      $("sentence").textContent = title;
-      $("transBox").textContent = detail || "";
-    }
-
-    function showInfo(msg){
-      $("sentence").textContent = msg;
-    }
-  </script>
+    <div class="actions">
+      <button class="btn" id="btnPlay">🔊 Dinlet</button>
+      <button class="mic" id="btnRec">🎙️</button>
+      <button class="btn btn-primary" id="btnNext" disabled>Sonraki</button>
+    </div>
+
+    <div class="statusBox">
+      <div class="row">
+        <div>Tanıma</div>
+        <div id="sttStatus">Hazır</div>
+      </div>
+      <div class="row">
+        <div>Benzerlik</div>
+        <div id="simStatus">—</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btnRepeat">↻ Tekrar</button>
+      <button class="btn" id="btnExit">Çık</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { mountShell } from "/js/ui_shell.js";
+import { supabase } from "/js/supabase_client.js";
+mountShell({scroll:"none"});
+
+const API_BASE="https://italky-api.onrender.com";
+const $=id=>document.getElementById(id);
+const toast=(m)=>{const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500);};
+
+const params=new URLSearchParams(location.search);
+const lang=params.get("lang")||"en";
+const level=(params.get("level")||"A1").toUpperCase();
+
+$("langChip").textContent=`${lang.toUpperCase()} • ${level}`;
+
+const THRESH={A1:.70,A2:.75,B1:.78,B2:.82,C1:.85};
+const threshold=THRESH[level]||.75;
+
+let pool=[];
+let used=[];
+let current="";
+let autoNextTimer=null;
+const AUTO_NEXT_MS=2200;
+
+function cancelAutoNext(){ if(autoNextTimer) clearTimeout(autoNextTimer); autoNextTimer=null; }
+
+async function loadPool(){
+  const r=await fetch(`https://auth.italky.ai/storage/v1/object/public/practice/${lang}_${level}.json`);
+  const j=await r.json();
+  pool=j.sentences||[];
+}
+function nextSentence(){
+  cancelAutoNext();
+  if(used.length>=pool.length) used=[];
+  const remaining=pool.filter(x=>!used.includes(x));
+  current=remaining[Math.floor(Math.random()*remaining.length)];
+  used.push(current);
+  $("sentence").textContent=current;
+  $("btnNext").disabled=true;
+  $("simStatus").textContent="—";
+  $("sttStatus").textContent="Hazır";
+  setTimeout(()=>$("btnPlay").click(),300);
+}
+
+function norm(s){return s.toLowerCase().replace(/[^\p{L}\p{N}\s']/gu," ").replace(/\s+/g," ").trim();}
+function levenshtein(a,b){
+  a=norm(a);b=norm(b);
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+  for(let i=0;i<=m;i++)dp[i][0]=i;
+  for(let j=0;j<=n;j++)dp[0][j]=j;
+  for(let i=1;i<=m;i++)
+    for(let j=1;j<=n;j++)
+      dp[i][j]=Math.min(
+        dp[i-1][j]+1,
+        dp[i][j-1]+1,
+        dp[i-1][j-1]+(a[i-1]==b[j-1]?0:1)
+      );
+  return dp[m][n];
+}
+function similarity(a,b){
+  const dist=levenshtein(a,b);
+  const max=Math.max(norm(a).length,norm(b).length)||1;
+  return 1-(dist/max);
+}
+
+function setSimilarityUI(sim){
+  cancelAutoNext();
+  const pct=Math.round(sim*100);
+  if(sim>=threshold){
+    $("simStatus").textContent=`%${pct} • Başarılı`;
+    $("simStatus").className="v ok";
+    $("btnNext").disabled=false;
+    autoNextTimer=setTimeout(()=>{$("btnNext").click();},AUTO_NEXT_MS);
+  }else{
+    $("simStatus").textContent=`%${pct} • Tekrar`;
+    $("simStatus").className="v bad";
+    $("btnNext").disabled=true;
+  }
+}
+
+async function ttsSpeak(text){
+  const r=await fetch(`${API_BASE}/api/tts`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({text,lang})
+  });
+  const blob=await r.blob();
+  const url=URL.createObjectURL(blob);
+  const audio=new Audio(url);
+  audio.play();
+}
+
+let mediaStream=null,recorder=null,chunks=[],recording=false;
+
+async function startRec(){
+  cancelAutoNext();
+  mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  recorder=new MediaRecorder(mediaStream);
+  chunks=[];
+  recorder.ondataavailable=e=>chunks.push(e.data);
+  recorder.onstop=async()=>{
+    const blob=new Blob(chunks,{type:"audio/webm"});
+    const fd=new FormData();
+    fd.append("file",blob);
+    fd.append("lang",lang);
+    const r=await fetch(`${API_BASE}/api/stt`,{method:"POST",body:fd});
+    const j=await r.json();
+    const text=j.text||"";
+    $("sttStatus").textContent=text;
+    const sim=similarity(text,current);
+    setSimilarityUI(sim);
+    recording=false;
+    $("btnRec").classList.remove("rec");
+  };
+  recorder.start();
+  recording=true;
+  $("btnRec").classList.add("rec");
+}
+function stopRec(){if(recorder)recorder.stop();}
+
+$("btnPlay").onclick=()=>{cancelAutoNext();ttsSpeak(current);}
+$("btnRepeat").onclick=()=>{cancelAutoNext();ttsSpeak(current);}
+$("btnRec").onclick=()=>recording?stopRec():startRec();
+$("btnNext").onclick=()=>{cancelAutoNext();nextSentence();}
+$("btnExit").onclick=()=>{cancelAutoNext();location.href="/pages/practice_ai.html";}
+
+await loadPool();
+nextSentence();
+</script>
 </body>
 </html>
