@@ -1,27 +1,21 @@
 // FILE: /js/teacher_course.page.js
 // italkyAI Teacher Course — REAL LESSON (Voice + Repeat)
-// ✅ Supabase session gate (no localStorage email/terms)
-// ✅ No teacher names/personas (teacher selection removed)
-// ✅ Language + level from localStorage, fallback from profiles.levels[lang]
+// ✅ Supabase session gate
+// ✅ Teacher selection removed
+// ✅ Language + level from localStorage (fallback profiles.levels[lang])
 // ✅ TTS: /api/tts (Google -> OpenAI fallback backend)
-// ✅ STT: WebSpeechRecognition (browser) -> similarity
+// ✅ STT: WebSpeechRecognition (browser)
 // ✅ 95% similarity, 3 tries
-// ✅ Lesson flow: TEACH (teacher speaks) -> REPEAT (student repeats) -> evaluate -> next
-// ✅ UI shows TR translation in parentheses (translate_ai), teacher target-language only
+// ✅ Flow: TEACH -> REPEAT -> listen -> evaluate -> next
+// ✅ UI shows TR translation in parentheses (translate_ai)
 
 import { supabase } from "/js/supabase_client.js";
 
 const API_BASE = "https://italky-api.onrender.com";
-
 const $ = (id) => document.getElementById(id);
 
-// ---------- helpers ----------
 function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-
-function safeSet(id, text){
-  const el = $(id);
-  if(el) el.textContent = String(text ?? "");
-}
+function safeSet(id, text){ const el = $(id); if(el) el.textContent = String(text ?? ""); }
 
 function fmtTimeLeft(ms){
   const s = Math.max(0, Math.floor(ms/1000));
@@ -35,7 +29,6 @@ function firstNameOnly(full){
   if(!s) return "Kullanıcı";
   const parts = s.split(" ").filter(Boolean);
   if(parts.length === 1) return parts[0];
-  // son kelime soyad varsayımı -> çıkar
   return parts.slice(0, -1).join(" ");
 }
 
@@ -47,7 +40,6 @@ function normText(s){
     .trim();
 }
 
-// token/bag similarity (cheap)
 function tokenSimilarity(a,b){
   const A = normText(a).split(" ").filter(Boolean);
   const B = normText(b).split(" ").filter(Boolean);
@@ -58,7 +50,6 @@ function tokenSimilarity(a,b){
   let bagHit = 0;
   for(const w of A) if(setB.has(w)) bagHit++;
 
-  // order hit
   let orderHit = 0;
   for(let i=0;i<Math.min(A.length,B.length);i++){
     if(A[i] === B[i]) orderHit++;
@@ -74,6 +65,7 @@ function scrollBottom(){ try{ chatEl.scrollTop = chatEl.scrollHeight; }catch{} }
 function addBubble(kind, text, { speakable=false, onSpeak=null } = {}){
   const b = document.createElement("div");
   b.className = `bubble ${kind}`;
+
   const txt = document.createElement("div");
   txt.className = "txt";
   txt.textContent = String(text||"");
@@ -135,16 +127,15 @@ function stopAudio(){
   currentAudio = null;
 }
 
-async function speakTTS(text, lang){
+async function speakTTS(text, langCode){
   stopAudio();
   const t = String(text||"").trim();
   if(!t) return;
 
-  // backend: {ok, audio_base64} (google/openai)
   const r = await fetch(`${API_BASE}/api/tts`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({ text: t, lang })
+    body: JSON.stringify({ text: t, lang: langCode })
   });
   const j = await r.json().catch(()=>null);
   if(!j?.ok || !j.audio_base64) throw new Error(j?.error || "TTS_UNAVAILABLE");
@@ -154,7 +145,7 @@ async function speakTTS(text, lang){
   await audio.play();
 }
 
-// ---------- Translate to TR (display only) ----------
+// ---------- Translate to TR ----------
 async function translateToTR(text, sourceLang){
   const t = String(text||"").trim();
   if(!t) return "";
@@ -162,19 +153,11 @@ async function translateToTR(text, sourceLang){
     const r = await fetch(`${API_BASE}/api/translate_ai`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({
-        text: t,
-        from_lang: sourceLang,
-        to_lang: "tr",
-        strict: true,
-        no_extra: true,
-        style: "fast",
-        provider: "auto"
-      })
+      body: JSON.stringify({ text: t, from_lang: sourceLang, to_lang: "tr" })
     });
     if(!r.ok) return "";
     const j = await r.json().catch(()=>null);
-    return String(j?.translated || "").trim();
+    return String(j?.text || j?.translated || j?.translation || "").trim();
   }catch{
     return "";
   }
@@ -195,7 +178,7 @@ function buildRecognizer(bcp47){
   return r;
 }
 
-// ---------- Lesson brain (OpenAI text via your existing /api/chat_openai) ----------
+// ---------- Lesson brain (OpenAI text via /api/chat_openai) ----------
 function systemPrompt(lang, level, studentName){
   return `
 You are a real ${lang.toUpperCase()} teacher.
@@ -210,7 +193,6 @@ Student: ${studentName}.
 `.trim();
 }
 
-// Calls backend: /api/chat_openai (your API already has this router)
 async function teacherGenerate(userText, lang, level, studentName, history){
   const payload = {
     text: userText,
@@ -281,7 +263,7 @@ function setBadges(){
 }
 
 function setHeaderUI(){
-  safeSet("teacherName", `Ders • ${lang.toUpperCase()}`);
+  safeSet("teacherName", `italky Academy • ${lang.toUpperCase()}`);
   safeSet("lessonInfo", `Seviye: ${level} • Süre: ${mins} dk`);
 }
 
@@ -307,8 +289,10 @@ async function sayTeacher(text){
     speakable:true,
     onSpeak: async (t)=>{ try{ await speakTTS(t, sttLang); }catch{} }
   });
+
   const tr = await translateToTR(text, lang);
   if(tr) addBubble("tr", `(${tr})`);
+
   try{ await speakTTS(text, sttLang); }catch{}
 }
 
@@ -397,7 +381,6 @@ function listenStudent(){
 
       setStatus("TRY_AGAIN");
       await sayTeacher(`Not yet. Try again. (${pct}%)`);
-      // tekrar dinlet + dinle
       await sayTeacher(`Repeat: ${pendingRepeat}`);
       listenStudent();
       return;
@@ -463,14 +446,12 @@ function endLesson(){
   stopSTT();
   setStatus("DONE");
   playBell();
-  // geri dön
   setTimeout(()=>location.href="/pages/plan_select.html", 650);
 }
 
 // ---------- BOOT ----------
 document.addEventListener("DOMContentLoaded", async ()=>{
   try{
-    // buttons
     $("backBtn")?.addEventListener("click", ()=>location.href="/pages/home.html");
     $("logoHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
     $("btnBell")?.addEventListener("click", ()=>playBell());
@@ -488,23 +469,19 @@ document.addEventListener("DOMContentLoaded", async ()=>{
       });
     }
 
-    // session
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session?.user){
       location.replace("/pages/login.html");
       return;
     }
 
-    // localStorage config (plan_select sets these)
     lang = String(localStorage.getItem("italky_course_lang") || "en").trim().toLowerCase();
     mins = Number(localStorage.getItem("italky_lesson_mins") || "15") || 15;
     mins = clamp(mins, 5, 60);
 
-    // stt lang map
     const STT_MAP = { en:"en-US", de:"de-DE", fr:"fr-FR", it:"it-IT", es:"es-ES", ru:"ru-RU" };
     sttLang = STT_MAP[lang] || "en-US";
 
-    // profile (name + levels)
     const userId = session.user.id;
     const { data: prof } = await supabase
       .from("profiles")
