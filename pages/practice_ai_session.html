@@ -1,3 +1,4 @@
+<!-- FILE: /pages/practice_ai_session.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -24,8 +25,8 @@
       --text-muted: rgba(255, 255, 255, 0.6);
       --ai-gradient: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
 
-      /* Shell barlar üstüne binmesin diye güvenli boşluklar */
-      --shellTopPad: 70px;
+      /* ✅ üstteki boşluğu azalttım */
+      --shellTopPad: 48px;
       --shellBottomPad: 110px;
     }
 
@@ -37,8 +38,6 @@
       flex-direction: column;
       position: relative;
       background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 70%);
-
-      /* ✅ UI Shell üst/alt bar arası oturtma + notch safe area */
       padding-top: calc(env(safe-area-inset-top) + var(--shellTopPad));
       padding-bottom: calc(env(safe-area-inset-bottom) + var(--shellBottomPad));
     }
@@ -68,9 +67,10 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      padding: 16px;
-      gap: 20px;
-      padding-bottom: 20px;
+
+      /* ✅ üst boşluğu azalttım, altı da sıklaştırdım */
+      padding: 10px 16px 10px;
+      gap: 14px;
     }
 
     /* Üst Bar */
@@ -78,10 +78,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 4px;
+      padding: 6px 0;
     }
 
-    /* ✅ Logo kaldırıldı -> Anasayfa */
     .home-link{
       display: inline-flex;
       align-items: center;
@@ -108,9 +107,6 @@
       box-shadow: 0 0 18px rgba(99,102,241,0.15);
       font-size: 16px;
     }
-    .home-link .txt{
-      letter-spacing: .2px;
-    }
 
     .lang-chip {
       background: var(--glass);
@@ -121,6 +117,21 @@
       color: #fff;
       font-size: 13px;
       font-weight: 600;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    /* ✅ kontör bilgisi chip */
+    .token-chip{
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      color: rgba(255,255,255,0.85);
+      font-weight: 900;
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     /* Ana Panel */
@@ -137,7 +148,7 @@
     }
 
     .card-top {
-      padding: 24px;
+      padding: 18px 18px 10px;
       text-align: center;
     }
 
@@ -151,8 +162,27 @@
       background: rgba(99, 102, 241, 0.1);
       padding: 4px 12px;
       border-radius: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
+
+    .top-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
+      margin-bottom: 2px;
+    }
+    .btn-pill {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-pill:active{ transform: scale(.98); opacity:.9; }
 
     /* Cümle Alanı */
     .sentence-container {
@@ -161,35 +191,37 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 0 30px;
+      padding: 0 24px;
       text-align: center;
+      min-height: 0;
     }
 
     .sentence {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
       color: #fff;
-      line-height: 1.2;
-      margin-bottom: 16px;
+      line-height: 1.15;
+      margin-bottom: 12px;
       transition: all 0.3s ease;
+      word-break: break-word;
     }
 
     .translation {
-      font-size: 16px;
+      font-size: 15px;
       color: var(--text-muted);
-      font-weight: 400;
-      min-height: 24px;
+      font-weight: 600;
+      min-height: 22px;
     }
 
     /* Alt Kontroller */
     .controls {
       background: rgba(0, 0, 0, 0.2);
-      padding: 24px;
+      padding: 16px 18px 18px;
       border-top: 1px solid var(--glass-border);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 12px;
     }
 
     .visualizer {
@@ -197,8 +229,7 @@
       justify-content: center;
       align-items: center;
       gap: 4px;
-      height: 30px;
-      margin-bottom: 0px;
+      height: 26px;
     }
 
     .vis-bar {
@@ -215,14 +246,14 @@
 
     @keyframes barGrow {
       0%, 100% { height: 5px; }
-      50% { height: 25px; }
+      50% { height: 22px; }
     }
 
     .action-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 15px;
+      gap: 14px;
     }
 
     .btn-circle {
@@ -241,9 +272,6 @@
     }
 
     .btn-circle:active { transform: scale(0.9); background: var(--glass-border); }
-
-    /* Yeni Mic Tasarımı */
-    .mic-wrap { position: relative; }
 
     .btn-mic {
       width: 80px;
@@ -265,8 +293,7 @@
 
     .btn-mic.recording {
       background: #ff4757;
-      color: #fff;
-      transform: scale(1.1);
+      transform: scale(1.08);
       box-shadow: 0 0 50px rgba(255, 71, 87, 0.5);
     }
 
@@ -277,12 +304,13 @@
       background: var(--accent);
       opacity: 0;
       z-index: 1;
+      pointer-events:none;
     }
 
-    .recording .mic-pulse { animation: pulse 1.5s infinite; }
+    .recording + .mic-pulse { animation: pulse 1.5s infinite; }
 
     @keyframes pulse {
-      0% { transform: scale(1); opacity: 0.5; }
+      0% { transform: scale(1); opacity: 0.45; }
       100% { transform: scale(1.8); opacity: 0; }
     }
 
@@ -302,8 +330,8 @@
       text-align: center;
     }
 
-    .stat-label { font-size: 9px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
-    .stat-value { font-size: 13px; font-weight: 700; color: #fff; }
+    .stat-label { font-size: 9px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; font-weight:900; letter-spacing:.6px; }
+    .stat-value { font-size: 13px; font-weight: 800; color: #fff; }
     .stat-value.ok { color: #2ecc71; }
     .stat-value.bad { color: #ff4757; }
 
@@ -315,33 +343,24 @@
       transform: translateX(-50%) translateY(-100px);
       background: rgba(255,255,255,0.95);
       color: #000;
-      padding: 12px 24px;
+      padding: 12px 18px;
       border-radius: 50px;
-      font-weight: 700;
-      font-size: 14px;
+      font-weight: 900;
+      font-size: 13px;
       z-index: 10000;
-      transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      max-width: min(92vw, 520px);
+      text-align:center;
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* Yardımcı butonlar */
-    .top-actions {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: -10px;
-      margin-bottom: 10px;
-    }
-    .btn-pill {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      color: #fff;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
+    @media (max-height: 740px){
+      :root{ --shellTopPad: 40px; }
+      .sentence{ font-size: 23px; }
+      .btn-circle{ width:52px; height:52px; }
+      .btn-mic{ width:74px; height:74px; }
+      .controls{ padding: 14px 16px 16px; }
     }
   </style>
 </head>
@@ -353,27 +372,29 @@
     <div class="wrap">
 
       <header class="header">
-        <!-- ✅ italky logosu kaldırıldı -->
         <button class="home-link" id="btnHome" type="button" aria-label="Anasayfa">
           <span class="ico">⌂</span>
           <span class="txt">Anasayfa</span>
         </button>
 
-        <div class="lang-chip" id="chipRight">🇬🇧 EN</div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div class="token-chip" id="tokenChip">Kontör: —</div>
+          <div class="lang-chip" id="chipRight">🇬🇧 EN</div>
+        </div>
       </header>
 
       <section class="main-card">
         <div class="card-top">
           <div class="level-badge" id="levelPill">SEVİYE: A1</div>
           <div class="top-actions">
-            <button class="btn-pill" id="btnMeaningTop">📝 Anlamı Gör</button>
+            <button class="btn-pill" id="btnMeaningTop">📝 Anlam</button>
             <button class="btn-pill" id="btnSkipTop">✨ Atla</button>
           </div>
         </div>
 
         <div class="sentence-container">
           <div class="sentence" id="sentence">Hazırlanıyor...</div>
-          <div class="translation" id="transBox">Anlamak için butona dokun</div>
+          <div class="translation" id="transBox">Anlamı görmek için dokun</div>
         </div>
 
         <div class="controls">
@@ -390,11 +411,11 @@
           </div>
 
           <div class="action-row">
-            <button class="btn-circle" id="btnRepeat" title="Tekrarla">↺</button>
+            <button class="btn-circle" id="btnRepeat" title="Dinlet">🔊</button>
 
-            <div class="mic-wrap">
-              <div class="mic-pulse"></div>
-              <button class="btn-mic" id="btnRec">🎙️</button>
+            <div style="position:relative;">
+              <button class="btn-mic" id="btnRec" title="Konuş">🎙️</button>
+              <div class="mic-pulse" id="micPulse"></div>
             </div>
 
             <button class="btn-circle" id="btnNext" disabled title="Sonraki">➔</button>
@@ -402,24 +423,16 @@
 
           <div class="stats-footer">
             <div class="stat-card">
-              <div class="stat-label">Sizin Sesiniz</div>
+              <div class="stat-label">Sen söyledin</div>
               <div class="stat-value" id="sttStatus">Bekleniyor</div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Doğruluk</div>
+              <div class="stat-label">Benzerlik</div>
               <div class="stat-value" id="simStatus">—</div>
             </div>
           </div>
         </div>
       </section>
-
-      <div style="display:none">
-        <button id="btnPlay"></button>
-        <button id="btnListenTop"></button>
-        <div id="hint"></div>
-        <div id="langTitle"></div>
-        <button id="btnExit"></button>
-      </div>
 
     </div>
   </main>
@@ -429,15 +442,11 @@
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
-
     mountShell({ scroll:"none" });
 
-    // ✅ Anasayfa dönüş
-    document.getElementById("btnHome").onclick = () => {
-      location.href = "/pages/home.html";
-    };
+    // ✅ Anasayfa
+    document.getElementById("btnHome").onclick = () => location.href="/pages/home.html";
 
-    // --- MANTIK (LOGIC) AYNI KALIYOR ---
     const API_BASE = "https://italky-api.onrender.com";
     const PRACTICE_POOL_BASE = "https://auth.italky.ai/storage/v1/object/public/practice/pool";
 
@@ -448,7 +457,7 @@
       toastEl.textContent = String(msg||"");
       toastEl.classList.add("show");
       clearTimeout(window.__to);
-      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2500);
+      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2400);
     }
 
     function qs(k){ return new URLSearchParams(location.search).get(k); }
@@ -466,52 +475,123 @@
     const meta = LANG_META[lang] || { name: lang.toUpperCase(), flag:"🌍" };
     $("chipRight").textContent = `${meta.flag} ${lang.toUpperCase()}`;
 
-    // Auth & Profile
+    // ✅ auth
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session?.user){ location.replace("/pages/login.html"); throw new Error("no session"); }
     const userId = session.user.id;
 
-    // Profilden isim alma işlemi
+    // ✅ profil (isim + seviye + tokens)
     let fullName = "";
     let levels = {};
-    let userName = "";
+    let tokens = 0;
 
-    try {
-      const { data: prof } = await supabase.from("profiles").select("full_name, levels").eq("id", userId).maybeSingle();
-      fullName = prof?.full_name || "";
-      levels = prof?.levels || {};
-      if(fullName) userName = fullName.split(' ')[0];
-    } catch(e){}
+    try{
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("full_name, levels, tokens")
+        .eq("id", userId)
+        .maybeSingle();
 
-    const level = ["A1","A2","B1","B2","C1"].includes(levelQ) ? levelQ : (levels?.[lang] || "A1");
+      fullName = String(prof?.full_name || "").trim();
+      levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
+      tokens = Number(prof?.tokens ?? 0);
+    }catch{}
+
+    const userName = (fullName.split(/\s+/).filter(Boolean)[0]) || "Oğuz";
+
+    const level = (["A1","A2","B1","B2","C1"].includes(levelQ) ? levelQ : (levels?.[lang] || "A1"));
     $("levelPill").textContent = `SEVİYE: ${level}`;
 
+    // ✅ 60 dk = 1 kontör
+    const FEE = 1;
+    const PASS_MS = 60 * 60 * 1000; // 60 dakika
+    const passKey = `italky_practice_60m_${lang}_${userId}`;
+
+    function isPassActive(){
+      const ts = Number(localStorage.getItem(passKey) || 0);
+      return ts && (Date.now() - ts) < PASS_MS;
+    }
+    function setPassNow(){
+      localStorage.setItem(passKey, String(Date.now()));
+    }
+
+    async function spendTokenOnce(){
+      // Pass aktifse hiç dokunma
+      if(isPassActive()){
+        $("tokenChip").textContent = `Kontör: ${tokens} • 60dk açık`;
+        return;
+      }
+
+      // Token yoksa
+      if(tokens < FEE){
+        toast("Kontör yetersiz. Kontör yükleyin.");
+        setTimeout(()=>location.href="/pages/profile.html", 900);
+        throw new Error("no tokens");
+      }
+
+      // DB güncelle (atomic değil ama hızlı çözüm)
+      const newTokens = tokens - FEE;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ tokens: newTokens })
+        .eq("id", userId);
+
+      if(error){
+        toast("Kontör düşülemedi.");
+        throw error;
+      }
+
+      tokens = newTokens;
+      setPassNow();
+      $("tokenChip").textContent = `Kontör: ${tokens} • 60dk açık`;
+      toast("✅ 60 dk pratik hakkı aktif");
+    }
+
+    // UI token
+    $("tokenChip").textContent = `Kontör: ${tokens}`;
+
+    // ✅ girişte kontör kuralı çalışsın
+    await spendTokenOnce();
+
+    // Benzerlik eşiği (istediğin)
     const THRESH = 0.95;
+
     let sessionQueue = [];
     let sessionIndex = 0;
+
+    // item formatı: string veya {text, tr}
     let currentText = "";
     let currentTR = "";
 
     async function loadPool(){
       const url = `${PRACTICE_POOL_BASE}/${encodeURIComponent(lang)}.json`;
       const r = await fetch(url, { cache:"no-store" });
+      if(!r.ok) throw new Error(`Havuz yok: ${lang}.json`);
       const j = await r.json();
       return j.levels || j;
     }
 
-    function shuffle(arr){ return [...arr].sort(()=> Math.random() - 0.5); }
+    function shuffle(arr){
+      const a = [...arr];
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
 
     function nextSentence(){
       if(sessionIndex >= sessionQueue.length){
         sessionQueue = shuffle(sessionQueue);
         sessionIndex = 0;
       }
-      const item = sessionQueue[sessionIndex++];
-      currentText = typeof item === 'string' ? item : item.text;
-      currentTR = typeof item === 'object' ? (item.tr || "") : "";
 
-      $("sentence").textContent = currentText;
-      $("transBox").textContent = "Anlamı görmek için dokunun";
+      const item = sessionQueue[sessionIndex++];
+      currentText = (typeof item === "string") ? item : String(item?.text || "");
+      currentTR = (typeof item === "object") ? String(item?.tr || "") : "";
+
+      $("sentence").textContent = currentText || "—";
+      $("transBox").textContent = "Anlamı görmek için dokun";
       $("sttStatus").textContent = "Bekleniyor";
       $("simStatus").textContent = "—";
       $("simStatus").className = "stat-value";
@@ -519,67 +599,116 @@
       $("visualizer").classList.remove("vis-active");
     }
 
+    // ✅ TTS - backend /api/tts (Google yoksa OpenAI fallback senin backend’de)
     async function ttsSpeak(text){
       const r = await fetch(`${API_BASE}/api/tts`,{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({ text, lang })
       });
-      const j = await r.json();
-      if(j.audio_base64){
+
+      const j = await r.json().catch(()=>null);
+      if(!r.ok){
+        throw new Error(j?.detail || "TTS hata");
+      }
+
+      if(j?.audio_base64){
         const audio = new Audio("data:audio/mpeg;base64," + j.audio_base64);
         await audio.play();
+        return true;
       }
+      throw new Error(j?.error || "TTS yok");
     }
 
-    // STT Logic
+    // ---- STT ----
     let mediaStream = null, recorder = null, chunks = [], recording = false;
 
     async function startRec(){
       if(!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
       chunks = [];
-      recorder = new MediaRecorder(mediaStream);
-      recorder.ondataavailable = (e)=> chunks.push(e.data);
+
+      const mime = (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported("audio/webm;codecs=opus"))
+        ? "audio/webm;codecs=opus"
+        : "audio/webm";
+
+      recorder = new MediaRecorder(mediaStream, { mimeType: mime });
+
+      recorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) chunks.push(e.data); };
+
       recorder.onstop = async ()=>{
-        try {
-          $("sttStatus").textContent = "Analiz ediliyor...";
-          const blob = new Blob(chunks, { type: "audio/webm" });
+        try{
+          $("sttStatus").textContent = "Analiz…";
+          const blob = new Blob(chunks, { type: mime });
           const fd = new FormData();
-          fd.append("file", blob); fd.append("lang", lang);
+          fd.append("file", blob, "speech.webm");
+          fd.append("lang", lang);
+
           const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
-          const j = await r.json();
-          const text = (j.text || j.transcript || "").trim();
+          const j = await r.json().catch(()=>null);
+          const text = String(j?.text || j?.transcript || j?.result || "").trim();
           $("sttStatus").textContent = text || "Anlaşılamadı";
 
-          // Benzerlik
           const sim = calculateSim(text, currentText);
           const pct = Math.round(sim * 100);
           $("simStatus").textContent = `%${pct}`;
 
           if(sim >= THRESH){
             $("simStatus").className = "stat-value ok";
-            toast("Harika! Başarılı telaffuz. ✨");
+            toast("✨ Süper! Devam…");
             $("btnNext").disabled = false;
-            setTimeout(()=> $("btnNext").click(), 1200);
-          } else {
+            setTimeout(()=>{ try{ $("btnNext").click(); }catch{} }, 900);
+          }else{
             $("simStatus").className = "stat-value bad";
-            toast("Biraz daha gayret! Tekrar dene.");
+            toast("Tekrar dene 👂");
           }
-        } catch(e){ toast("Hata oluştu."); }
-        recording = false;
-        $("btnRec").classList.remove("recording");
-        $("visualizer").classList.remove("vis-active");
+        }catch(e){
+          toast(e?.message || "STT hata");
+          $("sttStatus").textContent = "Hata";
+          $("simStatus").textContent = "—";
+          $("simStatus").className = "stat-value";
+          $("btnNext").disabled = true;
+        }finally{
+          recording = false;
+          $("btnRec").classList.remove("recording");
+          $("visualizer").classList.remove("vis-active");
+        }
       };
+
       recorder.start();
       recording = true;
       $("btnRec").classList.add("recording");
       $("visualizer").classList.add("vis-active");
-      $("sttStatus").textContent = "Dinliyorum...";
+      $("sttStatus").textContent = "Dinliyorum…";
     }
 
+    function stopRec(){ try{ if(recorder && recorder.state !== "inactive") recorder.stop(); }catch{} }
+
+    // ✅ Meaning: pool’da TR varsa direkt göster, yoksa translate_ai
+    async function meaning(){
+      if(currentTR){
+        $("transBox").textContent = currentTR;
+        return;
+      }
+      $("transBox").textContent = "Çeviriliyor…";
+      try{
+        const r = await fetch(`${API_BASE}/api/translate_ai`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ text: currentText, source_lang: lang, target_lang: "tr" })
+        });
+        const j = await r.json().catch(()=>null);
+        const out = String(j?.text || j?.translation || j?.result || "").trim();
+        $("transBox").textContent = out || "Çeviri bulunamadı.";
+      }catch{
+        $("transBox").textContent = "Çeviri şu an yok.";
+      }
+    }
+
+    // Benzerlik (aynı)
     function calculateSim(a, b){
-      const s1 = a.toLowerCase().replace(/[^\w\s]/g,'');
-      const s2 = b.toLowerCase().replace(/[^\w\s]/g,'');
+      const s1 = String(a||"").toLowerCase().replace(/[^\p{L}\p{N}\s']/gu,'').replace(/\s+/g,' ').trim();
+      const s2 = String(b||"").toLowerCase().replace(/[^\p{L}\p{N}\s']/gu,'').replace(/\s+/g,' ').trim();
+      if(!s1 && !s2) return 1;
       if(s1 === s2) return 1;
       const longer = s1.length > s2.length ? s1 : s2;
       const shorter = s1.length > s2.length ? s2 : s1;
@@ -592,10 +721,10 @@
       for (let i = 0; i <= s1.length; i++) {
         let lastValue = i;
         for (let j = 0; j <= s2.length; j++) {
-          if (i == 0) costs[j] = j;
+          if (i === 0) costs[j] = j;
           else if (j > 0) {
             let newValue = costs[j - 1];
-            if (s1.charAt(i - 1) != s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            if (s1.charAt(i - 1) !== s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
             costs[j - 1] = lastValue; lastValue = newValue;
           }
         }
@@ -604,35 +733,36 @@
       return costs[s2.length];
     }
 
-    // Event Listeners
-    $("btnRec").onclick = () => !recording ? startRec() : recorder.stop();
+    // Events
+    $("btnRec").onclick = () => !recording ? startRec() : stopRec();
     $("btnNext").onclick = () => nextSentence();
-    $("btnRepeat").onclick = () => ttsSpeak(currentText);
-    $("btnSkipTop").onclick = () => nextSentence();
-
-    $("btnMeaningTop").onclick = async () => {
-      if(currentTR) { $("transBox").textContent = currentTR; return; }
-      $("transBox").textContent = "Çeviriliyor...";
-      try {
-        const r = await fetch(`${API_BASE}/api/translate_ai`, {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ text: currentText, source_lang: lang, target_lang: "tr" })
-        });
-        const j = await r.json();
-        $("transBox").textContent = j.text || "Çeviri bulunamadı.";
-      } catch(e) { $("transBox").textContent = "Hata oluştu."; }
+    $("btnRepeat").onclick = async () => {
+      try{
+        toast("🔊 Dinletiliyor…");
+        await ttsSpeak(currentText);
+      }catch(e){
+        toast(e?.message || "Ses yok");
+      }
     };
+    $("btnSkipTop").onclick = () => nextSentence();
+    $("btnMeaningTop").onclick = () => meaning();
 
     // Init
-    try {
+    try{
       const pool = await loadPool();
-      const raw = pool[level] || pool["A1"];
+      const raw = pool?.[level] || pool?.A1 || [];
       sessionQueue = shuffle(raw);
-      nextSentence();
-      toast(`Hoş geldin ${userName}! İyi pratikler.`);
-    } catch(e) {
+
+      if(!sessionQueue.length){
+        $("sentence").textContent = "Havuz boş.";
+        toast("Havuz boş görünüyor.");
+      }else{
+        nextSentence();
+        toast(`Selam ${userName} 👋 Hazırsan başlıyoruz!`);
+      }
+    }catch(e){
       $("sentence").textContent = "Havuz yüklenemedi.";
+      toast(e?.message || "Havuz hatası");
     }
   </script>
 </body>
