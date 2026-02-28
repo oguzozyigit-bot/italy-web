@@ -1,74 +1,56 @@
 // FILE: /js/teacher_course.page.js
-// italkyAI Teacher Course — Speech-only, Sweet but Disciplined
-// - Teacher speaks target language only
-// - UI shows Turkish translation in parentheses
-// - 95% similarity, 3 tries
-// - Start/Pause button controls the lesson
-// - Classic bell (WebAudio)
-// - Teacher bubbles have speaker button to replay
+import { STORAGE_KEY } from "/js/config.js";
 
-import { STORAGE_KEY, BASE_DOMAIN } from "/js/config.js";
-import { apiPOST } from "/js/api.js";
-
+const API_BASE = "https://italky-api.onrender.com";
 const $ = (id)=>document.getElementById(id);
-function safeJson(s, fb={}){ try{return JSON.parse(s||"");}catch{return fb;} }
-function base(){ return String(BASE_DOMAIN||"").replace(/\/+$/,""); }
+const safeJson=(s,fb={})=>{ try{return JSON.parse(s||"");}catch{return fb;} };
 
-// auth
-function termsKey(email=""){ return `italky_terms_accepted_at::${String(email||"").toLowerCase().trim()}`; }
-function getUser(){ return safeJson(localStorage.getItem(STORAGE_KEY), {}); }
-function ensureLogged(){
-  const u=getUser();
-  if(!u?.email){ location.replace("/index.html"); return null; }
-  if(!localStorage.getItem(termsKey(u.email))){ location.replace("/index.html"); return null; }
-  return u;
+function getUserCache(){
+  return safeJson(localStorage.getItem(STORAGE_KEY), {});
+}
+function firstNameNoSurname(full){
+  const s = String(full||"").trim().replace(/\s+/g," ");
+  if(!s) return "Öğrenci";
+  const parts = s.split(" ").filter(Boolean);
+  if(parts.length === 1) return parts[0];
+  // 2+ isimde son kelime soyad kabul
+  return parts.slice(0, -1).join(" ");
 }
 
-// teacher prefs
-const KEY_TEACHER = "italky_teacher_pref";
-const KEY_MINS = "italky_lesson_mins";
-const KEY_LEVEL = "italky_lesson_level";
-
+// ---- Teacher map (6 dil)
 const TEACHERS = {
-  dora:   { id:"dora",   nameTR:"Dora",   lang:"en", stt:"en-US", voice:"nova" },
-  ayda:   { id:"ayda",   nameTR:"Ayda",   lang:"de", stt:"de-DE", voice:"shimmer" },
-  jale:   { id:"jale",   nameTR:"Jale",   lang:"fr", stt:"fr-FR", voice:"alloy" },
-  sencer: { id:"sencer", nameTR:"Sencer", lang:"it", stt:"it-IT", voice:"echo" },
-  ozan:   { id:"ozan",   nameTR:"Ozan",   lang:"es", stt:"es-ES", voice:"fable" },
-  sungur: { id:"sungur", nameTR:"Sungur", lang:"ru", stt:"ru-RU", voice:"onyx" },
-  huma:   { id:"huma",   nameTR:"Hüma",   lang:"ja", stt:"ja-JP", voice:"nova" }
+  dora:   { id:"dora",   name:"Dora",   lang:"en", stt:"en-US" },
+  ayda:   { id:"ayda",   name:"Ayda",   lang:"de", stt:"de-DE" },
+  jale:   { id:"jale",   name:"Jale",   lang:"fr", stt:"fr-FR" },
+  sencer: { id:"sencer", name:"Sencer", lang:"it", stt:"it-IT" },
+  ozan:   { id:"ozan",   name:"Ozan",   lang:"es", stt:"es-ES" },
+  sungur: { id:"sungur", name:"Sungur", lang:"ru", stt:"ru-RU" },
 };
-
 function getTeacher(){
-  const id = (localStorage.getItem(KEY_TEACHER)||"dora").trim();
+  const id = String(localStorage.getItem("italky_teacher_pref")||"dora").trim();
   return TEACHERS[id] || TEACHERS.dora;
 }
-function getMins(){
-  const m = (localStorage.getItem(KEY_MINS)||"10").trim();
-  return (m==="20"||m==="30") ? Number(m) : 10;
-}
-function getLevel(){
-  const l = (localStorage.getItem(KEY_LEVEL)||"A0").trim().toUpperCase();
-  return ["A0","A1","A2","B1"].includes(l) ? l : "A0";
+function getPlanMins(){
+  const m = Number(localStorage.getItem("italky_lesson_mins")||"15");
+  return [10,15,20,30].includes(m) ? m : 15;
 }
 
-// UI helpers
+// ---- UI
 const chatEl = $("chat");
 function scrollBottom(){ try{ chatEl.scrollTop = chatEl.scrollHeight; }catch{} }
 
-function addBubble(cls, text, { speakable=false } = {}){
+function addBubble(cls, text, speakable=false){
   const d=document.createElement("div");
   d.className = `bubble ${cls}`;
-
   const txt = document.createElement("div");
-  txt.className = "txt";
+  txt.className="txt";
   txt.textContent = String(text||"");
   d.appendChild(txt);
 
   if(speakable){
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "spkBtn";
+    const b=document.createElement("button");
+    b.type="button";
+    b.className="spkBtn";
     b.innerHTML = `
       <svg viewBox="0 0 24 24">
         <path d="M11 5L6 9H2v6h4l5 4V5z"/>
@@ -77,7 +59,7 @@ function addBubble(cls, text, { speakable=false } = {}){
       </svg>`;
     b.addEventListener("click",(e)=>{
       e.preventDefault(); e.stopPropagation();
-      speakTTS(txt.textContent, teacher.voice, ()=>{});
+      speakTTS(String(text||""), teacher.lang);
     });
     d.appendChild(b);
   }
@@ -87,49 +69,76 @@ function addBubble(cls, text, { speakable=false } = {}){
   return d;
 }
 
-// Turkish translation (UI only)
-async function translateToTR(text, sourceLang){
+function setStatus(s){
+  const el=$("statusText");
+  if(el) el.textContent = s;
+}
+
+function setBadges(){
+  $("pillScore").textContent = "95%";
+  $("pillTry").textContent = "●".repeat(Math.max(0, triesLeft)) + "○".repeat(Math.max(0, 3-triesLeft));
+}
+
+// ---- Translate (UI only)
+async function translateTR(text, sourceLang){
   const t = String(text||"").trim();
   if(!t) return "";
   try{
-    const b = base();
-    if(!b) return "";
-    const r = await fetch(`${b}/api/translate`,{
+    const r = await fetch(`${API_BASE}/api/translate_ai`,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ text:t, source: sourceLang, target:"tr", from_lang: sourceLang, to_lang:"tr" })
+      body: JSON.stringify({
+        text: t,
+        from_lang: sourceLang,
+        to_lang: "tr",
+        style: "fast",
+        provider: "auto",
+        strict: true,
+        no_extra: true
+      })
     });
     if(!r.ok) return "";
-    const data = await r.json().catch(()=> ({}));
-    return String(data?.translated || data?.translation || data?.text || "").trim() || "";
+    const j = await r.json().catch(()=>null);
+    return String(j?.translated || "").trim();
   }catch{ return ""; }
 }
 
-// similarity
-const TARGET_SIM = 0.95;
-const MAX_TRIES = 3;
+// ---- Audio: /api/tts (google -> openai fallback backend)
+let audioObj=null;
+function stopAudio(){ try{ if(audioObj){ audioObj.pause(); audioObj.currentTime=0; } }catch{} audioObj=null; }
 
-function normText(s){
-  return String(s||"")
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu," ")
-    .replace(/\s+/g," ")
-    .trim();
-}
-function tokenSimilarity(a,b){
-  const A = normText(a).split(" ").filter(Boolean);
-  const B = normText(b).split(" ").filter(Boolean);
-  if(!A.length && !B.length) return 1;
-  if(!A.length || !B.length) return 0;
-  const len = Math.max(A.length, B.length);
-  let hit=0;
-  for(let i=0;i<Math.min(A.length,B.length);i++){ if(A[i]===B[i]) hit++; }
-  const setB=new Set(B); let bagHit=0;
-  for(const w of A){ if(setB.has(w)) bagHit++; }
-  return Math.max(hit/len, bagHit/len);
+async function speakTTS(text, lang){
+  const t = String(text||"").trim();
+  if(!t) return;
+
+  stopAudio();
+  setStatus("SPEAKING");
+
+  try{
+    const r = await fetch(`${API_BASE}/api/tts`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ text: t, lang })
+    });
+    if(!r.ok){
+      setStatus("TTS_FAIL");
+      return;
+    }
+    const j = await r.json().catch(()=>null);
+    if(!j?.ok || !j?.audio_base64){
+      setStatus("TTS_UNAVAILABLE");
+      return;
+    }
+    const src = "data:audio/mpeg;base64," + j.audio_base64;
+    audioObj = new Audio(src);
+    audioObj.onended = ()=>{ audioObj=null; setStatus("RUNNING"); };
+    await audioObj.play();
+  }catch{
+    setStatus("TTS_ERR");
+  }
 }
 
-// bell
+// ---- Bell
 function playBell(){
   try{
     const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -143,38 +152,42 @@ function playBell(){
     o2.frequency.value = 1320;
     g.gain.setValueAtTime(0.0001, ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+1.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+1.2);
     o1.connect(g); o2.connect(g); g.connect(ctx.destination);
     o1.start(); o2.start();
-    o1.stop(ctx.currentTime+1.45); o2.stop(ctx.currentTime+1.45);
-    setTimeout(()=>{ try{ctx.close();}catch{} }, 1600);
+    o1.stop(ctx.currentTime+1.25); o2.stop(ctx.currentTime+1.25);
+    setTimeout(()=>{ try{ctx.close();}catch{} }, 1400);
   }catch{}
 }
 
-// TTS via backend
-let currentAudio=null;
-function stopAudio(){ if(currentAudio){ try{currentAudio.pause();}catch{} currentAudio=null; } }
+// ---- Similarity (token + bag)
+const TARGET_SIM = 0.95;
+function normText(s){
+  return String(s||"")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s']/gu," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+function tokenSimilarity(a,b){
+  const A = normText(a).split(" ").filter(Boolean);
+  const B = normText(b).split(" ").filter(Boolean);
+  if(!A.length && !B.length) return 1;
+  if(!A.length || !B.length) return 0;
 
-async function speakTTS(text, voice, onEnd){
-  stopAudio();
-  const t=String(text||"").trim(); if(!t){ onEnd?.(); return; }
-  setStatus("SPEAKING");
-  try{
-    const data = await apiPOST("/api/tts_openai", { text:t, voice, speed:1.05 }, { timeoutMs:45000 });
-    const b64 = data?.audio_base64;
-    if(!b64){ onEnd?.(); return; }
-    const audio = new Audio("data:audio/mp3;base64,"+b64);
-    currentAudio=audio;
-    audio.onended=()=>{ currentAudio=null; onEnd?.(); };
-    await audio.play();
-  }catch{
-    onEnd?.();
-  }
+  const len = Math.max(A.length, B.length);
+  let posHit=0;
+  for(let i=0;i<Math.min(A.length,B.length);i++){ if(A[i]===B[i]) posHit++; }
+
+  const setB=new Set(B);
+  let bagHit=0;
+  for(const w of A){ if(setB.has(w)) bagHit++; }
+
+  return Math.max(posHit/len, bagHit/len);
 }
 
-// STT
+// ---- SpeechRecognition
 let recognition=null;
-function stopSTT(){ try{recognition?.stop?.();}catch{} recognition=null; }
 function buildRecognizer(lang){
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR) return null;
@@ -185,189 +198,160 @@ function buildRecognizer(lang){
   r.maxAlternatives = 1;
   return r;
 }
+function stopSTT(){ try{ recognition?.stop?.(); }catch{} recognition=null; }
 
-// OpenAI teacher prompt
-function teacherSystemPrompt({teacherName, lang, level, studentName}){
-  return `
-You are ${teacherName}, a sweet but disciplined ${lang.toUpperCase()} language teacher in italkyAI.
+// ---- Lesson content generator (OpenAI chat backend)
+async function teacherTurn(userText){
+  const sys =
+`You are a real ${teacher.lang.toUpperCase()} teacher.
 Rules:
-- You NEVER speak Turkish. Never translate to Turkish. Never mention OpenAI/GPT/AI/Gemini.
-- Teach like a real class: pronunciation + letters/sounds + examples.
+- Speak ONLY in ${teacher.lang.toUpperCase()} (never Turkish).
 - Output MUST be exactly:
 TEACH: (1-3 short lines)
-REPEAT: (ONE single sentence the student must say)
-- Level: ${level}. Keep it appropriate.
-Student name: ${studentName}.
-`.trim();
-}
+REPEAT: (ONE single sentence student must say)
+- Level is ${level}. Keep it appropriate.
+- Be sweet but disciplined.`;
 
-async function apiTeacherText(userText, teacher, level, studentName, history){
-  const sys = teacherSystemPrompt({ teacherName: teacher.nameTR, lang: teacher.lang, level, studentName });
-  const h = [
-    { role:"assistant", content: sys },
-    ...(history||[]).slice(-6)
-  ];
-  const data = await apiPOST("/api/chat_openai", {
+  const payload = {
+    // senin backend chat_openai router’ında beklediğin alanlara göre:
     text: userText,
-    persona_name: teacher.nameTR,
-    history: h,
+    system: sys,
     max_tokens: 220
-  }, { timeoutMs: 25000 });
-  return String(data?.text || "").trim();
+  };
+
+  const r = await fetch(`${API_BASE}/api/chat_openai`,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(payload)
+  });
+  if(!r.ok){
+    const t = await r.text().catch(()=> "");
+    throw new Error(t || `HTTP ${r.status}`);
+  }
+  const j = await r.json().catch(()=>null);
+  return String(j?.text || j?.reply || "").trim();
 }
 
-function parseTeachRepeat(reply){
-  const raw=String(reply||"").trim();
-  let teach=raw, repeat="";
-  const mR = raw.match(/REPEAT:\s*([^\n\r]+)/i);
-  if(mR) repeat=String(mR[1]||"").trim();
-  const mT = raw.match(/TEACH:\s*([\s\S]*?)(?:\n|\r|$)REPEAT:/i);
-  if(mT) teach=String(mT[1]||"").trim();
+function parseTeachRepeat(raw){
+  const s=String(raw||"").trim();
+  let teach=s, repeat="";
+  const mR = s.match(/REPEAT:\s*([^\n\r]+)/i);
+  if(mR) repeat = String(mR[1]||"").trim();
+  const mT = s.match(/TEACH:\s*([\s\S]*?)\s*REPEAT:/i);
+  if(mT) teach = String(mT[1]||"").trim();
   if(!repeat){
-    const lines = raw.split(/[\n\r]+/).map(x=>x.trim()).filter(Boolean);
-    repeat = lines[lines.length-1] || "";
+    const lines=s.split(/[\n\r]+/).map(x=>x.trim()).filter(Boolean);
+    repeat = lines.at(-1) || "";
   }
-  if(!teach) teach = raw;
   return { teach, repeat };
 }
 
-// Course state
-let u=null;
+// ---- State
 let teacher=null;
-let level="A0";
-let mins=10;
+let mins=15;
+let level="A1";
 let running=false;
 let paused=false;
 let endAt=0;
 
 let pendingRepeat="";
-let triesLeft=MAX_TRIES;
-let history=[];
+let triesLeft=3;
 
-function setBadges(){
-  $("pillTry").textContent = "●".repeat(Math.max(0, triesLeft)) + "○".repeat(Math.max(0, MAX_TRIES-triesLeft));
-  $("pillScore").textContent = "95%";
-}
-
-function setHeader(){
-  $("teacherName").textContent = `${teacher.nameTR} • ${teacher.lang.toUpperCase()}`;
-  $("lessonInfo").textContent = `Ders: ${level} • Süre: ${mins} dk`;
-}
-
-function setStatus(s){
-  const el = $("statusText");
-  if(el) el.textContent = s;
-}
-
-function resetRepeat(){
-  pendingRepeat="";
-  triesLeft=MAX_TRIES;
-  setBadges();
-}
-
-function pauseLesson(){
-  paused=true;
-  stopAudio(); stopSTT();
-  setStatus("PAUSED");
-  const b = $("btnLesson");
-  if(b) b.textContent = "Devam Et";
-}
-function resumeLesson(){
-  paused=false;
-  setStatus("RUNNING");
-  const b = $("btnLesson");
-  if(b) b.textContent = "Mola Ver";
-  if(pendingRepeat) listenStudent();
-  else teacherNext("Continue.");
-}
-function stopLesson(){
-  running=false;
-  paused=false;
-  stopAudio(); stopSTT();
-  setStatus("READY");
-  const b = $("btnLesson");
-  if(b) b.textContent = "Dersi Başlat";
-}
-
-function formatTimeLeft(){
+function formatLeft(){
   const ms = Math.max(0, endAt - Date.now());
   const s = Math.floor(ms/1000);
   const mm = Math.floor(s/60);
   const ss = String(s%60).padStart(2,"0");
   return `${mm}:${ss}`;
 }
-
-function tickTime(){
+function tick(){
   if(!running || paused) return;
-  if(Date.now() >= endAt) endAt = Date.now();
-  $("lessonInfo").textContent = `Ders: ${level} • Kalan: ${formatTimeLeft()}`;
-  requestAnimationFrame(tickTime);
+  $("lessonInfo").textContent = `Ders: ${level} • Kalan: ${formatLeft()}`;
+  if(Date.now() >= endAt){
+    endLesson();
+    return;
+  }
+  requestAnimationFrame(tick);
 }
 
 async function startLesson(){
-  if(running) return;
-
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){
-    alert("Bu cihaz konuşmayı yazıya çevirmiyor (SpeechRecognition yok).");
+    alert("Bu cihazda SpeechRecognition yok. Chrome/Android WebView sınırlaması olabilir.");
     return;
   }
-
   running=true;
   paused=false;
   endAt = Date.now() + mins*60*1000;
+  triesLeft=3;
+  setBadges();
+
+  $("btnLesson").textContent = "Mola Ver";
   setStatus("RUNNING");
-  const b = $("btnLesson");
-  if(b) b.textContent = "Mola Ver";
-  resetRepeat();
 
-  // teacher greets
-  const studentName = (u?.name || u?.fullname || "Student").split(" ")[0].trim() || "Student";
+  const u = getUserCache();
+  const studentName = firstNameNoSurname(u?.full_name || u?.display_name || u?.name || "Öğrenci");
 
-  addBubble("teacher", `Hello ${studentName}.`, { speakable:true });
-  const tr1 = await translateToTR(`Hello ${studentName}.`, teacher.lang);
-  if(tr1) addBubble("tr", `(${tr1})`);
+  // Açılış
+  const hi = `Hello ${studentName}.`;
+  addBubble("teacher", hi, true);
+  const tr = await translateTR(hi, teacher.lang);
+  if(tr) addBubble("tr", `(${tr})`, false);
+  await speakTTS(hi, teacher.lang);
 
-  await speakTTS(`Hello ${studentName}.`, teacher.voice, async ()=>{
-    await teacherNext("Start the lesson. Begin with a short warm-up and then a sound/letter topic.");
-    tickTime();
-  });
+  await nextTeacher("Start the lesson with a quick warm-up. Then give a short pronunciation focus.");
+  tick();
 }
 
-async function teacherNext(userText){
+function pauseLesson(){
+  paused=true;
+  stopAudio(); stopSTT();
+  setStatus("PAUSED");
+  $("btnLesson").textContent = "Devam Et";
+}
+function resumeLesson(){
+  paused=false;
+  setStatus("RUNNING");
+  $("btnLesson").textContent = "Mola Ver";
+  if(pendingRepeat) listenStudent();
+  else nextTeacher("Continue.");
+  tick();
+}
+
+async function nextTeacher(userText){
   if(!running || paused) return;
 
   setStatus("THINKING");
-  history.push({ role:"user", content: userText });
-  if(history.length>12) history = history.slice(-12);
-
   let reply="";
-  try{ reply = await apiTeacherText(userText, teacher, level, (u?.name||"Student").split(" ")[0], history); }catch{}
-
-  const { teach, repeat } = parseTeachRepeat(reply);
-  const teachText = (teach||"").trim();
-  const repeatText = (repeat||"").trim();
-
-  history.push({ role:"assistant", content: reply||"" });
-  if(history.length>12) history = history.slice(-12);
-
-  if(teachText){
-    addBubble("teacher", teachText, { speakable:true });
-    const tr = await translateToTR(teachText, teacher.lang);
-    if(tr) addBubble("tr", `(${tr})`);
-    await speakTTS(teachText, teacher.voice, ()=>{});
+  try{
+    reply = await teacherTurn(userText);
+  }catch(e){
+    addBubble("teacher", "Sorry. Connection issue. Let's try again.", true);
+    setStatus("ERR");
+    return;
   }
 
-  if(repeatText){
-    pendingRepeat = repeatText;
-    triesLeft = MAX_TRIES;
+  const { teach, repeat } = parseTeachRepeat(reply);
+
+  if(teach){
+    addBubble("teacher", teach, true);
+    const tr = await translateTR(teach, teacher.lang);
+    if(tr) addBubble("tr", `(${tr})`, false);
+    await speakTTS(teach, teacher.lang);
+  }
+
+  if(repeat){
+    pendingRepeat = repeat;
+    triesLeft = 3;
     setBadges();
 
-    addBubble("teacher", `Repeat: ${repeatText}`, { speakable:true });
-    const tr = await translateToTR(`Repeat: ${repeatText}`, teacher.lang);
-    if(tr) addBubble("tr", `(${tr})`);
+    const repLine = `Repeat: ${repeat}`;
+    addBubble("teacher", repLine, true);
+    const tr = await translateTR(repLine, teacher.lang);
+    if(tr) addBubble("tr", `(${tr})`, false);
 
-    await speakTTS(`Repeat: ${repeatText}`, teacher.voice, ()=>{ listenStudent(); });
+    await speakTTS(repLine, teacher.lang);
+    listenStudent();
     return;
   }
 
@@ -382,122 +366,123 @@ function listenStudent(){
   const rec = buildRecognizer(teacher.stt);
   if(!rec){
     alert("SpeechRecognition yok.");
-    stopLesson();
+    running=false;
     return;
   }
-  recognition = rec;
+  recognition=rec;
 
   rec.onresult = async (e)=>{
     const said = String(e.results?.[0]?.[0]?.transcript || "").trim();
     if(!said) return;
 
-    addBubble("student", said);
+    addBubble("student", said, false);
 
-    if(pendingRepeat){
-      const score = tokenSimilarity(said, pendingRepeat);
-      if(score >= TARGET_SIM){
-        addBubble("teacher", `Good. (${Math.round(score*100)}%)`, { speakable:true });
-        const tr = await translateToTR(`Good.`, teacher.lang);
-        if(tr) addBubble("tr", `(${tr})`);
-
-        await speakTTS("Good.", teacher.voice, async ()=>{
-          resetRepeat();
-          if(Date.now() >= endAt) await endLessonProperly();
-          else await teacherNext("Continue.");
-        });
-      } else {
-        triesLeft -= 1;
-        setBadges();
-
-        addBubble("teacher", `Not yet. Listen carefully. (tries left: ${triesLeft})`, { speakable:true });
-        const tr = await translateToTR(`Not yet. Listen carefully.`, teacher.lang);
-        if(tr) addBubble("tr", `(${tr})`);
-
-        await speakTTS(`Not yet. Listen carefully.`, teacher.voice, async ()=>{
-          if(triesLeft <= 0){
-            addBubble("teacher", `Okay. We move on.`, { speakable:true });
-            const trm = await translateToTR(`Okay. We move on.`, teacher.lang);
-            if(trm) addBubble("tr", `(${trm})`);
-
-            await speakTTS(`Okay. We move on.`, teacher.voice, async ()=>{
-              resetRepeat();
-              if(Date.now() >= endAt) await endLessonProperly();
-              else await teacherNext("Continue.");
-            });
-          } else {
-            addBubble("teacher", `Repeat: ${pendingRepeat}`, { speakable:true });
-            const tr2 = await translateToTR(`Repeat: ${pendingRepeat}`, teacher.lang);
-            if(tr2) addBubble("tr", `(${tr2})`);
-
-            await speakTTS(`Repeat: ${pendingRepeat}`, teacher.voice, ()=>{ listenStudent(); });
-          }
-        });
-      }
+    if(!pendingRepeat){
+      await nextTeacher(said);
       return;
     }
 
-    await teacherNext(said);
+    const sim = tokenSimilarity(said, pendingRepeat);
+    const pct = Math.round(sim*100);
+
+    if(sim >= TARGET_SIM){
+      const okLine = `Good. (${pct}%)`;
+      addBubble("teacher", okLine, true);
+      const tr = await translateTR("Good.", teacher.lang);
+      if(tr) addBubble("tr", `(${tr})`, false);
+
+      await speakTTS("Good.", teacher.lang);
+      pendingRepeat="";
+      triesLeft=3;
+      setBadges();
+      await nextTeacher("Continue.");
+      return;
+    }
+
+    triesLeft -= 1;
+    setBadges();
+
+    const noLine = `Not yet. (${pct}%) Try again.`;
+    addBubble("teacher", noLine, true);
+    const tr = await translateTR("Not yet. Try again.", teacher.lang);
+    if(tr) addBubble("tr", `(${tr})`, false);
+
+    await speakTTS("Not yet. Try again.", teacher.lang);
+
+    if(triesLeft <= 0){
+      addBubble("teacher", "Okay. We move on.", true);
+      const trm = await translateTR("Okay. We move on.", teacher.lang);
+      if(trm) addBubble("tr", `(${trm})`, false);
+
+      await speakTTS("Okay. We move on.", teacher.lang);
+      pendingRepeat="";
+      triesLeft=3;
+      setBadges();
+      await nextTeacher("Continue.");
+      return;
+    }
+
+    // tekrar aynı cümle
+    const repLine = `Repeat: ${pendingRepeat}`;
+    addBubble("teacher", repLine, true);
+    const tr2 = await translateTR(repLine, teacher.lang);
+    if(tr2) addBubble("tr", `(${tr2})`, false);
+    await speakTTS(repLine, teacher.lang);
+
+    listenStudent();
   };
 
   rec.onerror = ()=>{};
-  rec.onend = ()=>{};
   try{ rec.start(); }catch{}
 }
 
-async function endLessonProperly(){
+async function endLesson(){
   if(!running) return;
-  setStatus("ENDING");
+  running=false;
+  paused=false;
+  stopAudio(); stopSTT();
+  setStatus("DONE");
+  $("btnLesson").textContent = "Dersi Başlat";
 
-  const studentName = (u?.name || u?.fullname || "Student").split(" ")[0].trim() || "Student";
-  const bye = `Good job today, ${studentName}. See you tomorrow.`;
-  addBubble("teacher", bye, { speakable:true });
-  const tr = await translateToTR(bye, teacher.lang);
-  if(tr) addBubble("tr", `(${tr})`);
+  const u = getUserCache();
+  const studentName = firstNameNoSurname(u?.full_name || u?.display_name || u?.name || "Öğrenci");
 
-  await speakTTS(bye, teacher.voice, ()=>{
-    playBell();
-    stopLesson();
-    setStatus("DONE");
-  });
+  const bye = `Good job today, ${studentName}. See you next time.`;
+  addBubble("teacher", bye, true);
+  const tr = await translateTR(bye, teacher.lang);
+  if(tr) addBubble("tr", `(${tr})`, false);
+  await speakTTS(bye, teacher.lang);
+  playBell();
 }
 
-// boot
+// ---- Boot
 document.addEventListener("DOMContentLoaded", ()=>{
-  try{
-    u = ensureLogged();
-    if(!u) return;
+  teacher = getTeacher();
+  mins = getPlanMins();
 
-    teacher = getTeacher();
-    mins = getMins();
-    level = getLevel();
+  // level’ı profiles.levels’dan daha sonra okuyup set edeceğiz; şimdilik local
+  // (istersen buraya supabase read ekleriz)
+  level = String(localStorage.getItem("italky_course_level") || "A1").toUpperCase();
+  if(!["A1","A2","B1","B2","C1"].includes(level)) level="A1";
 
-    setHeader();
-    setBadges();
-    setStatus("READY");
+  $("teacherName").textContent = `${teacher.name} • ${teacher.lang.toUpperCase()}`;
+  $("lessonInfo").textContent = `Ders: ${level} • Süre: ${mins} dk`;
+  setBadges();
+  setStatus("READY");
 
-    $("backBtn")?.addEventListener("click", ()=>location.href="/pages/home.html");
-    $("logoHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
+  $("backBtn")?.addEventListener("click", ()=>location.href="/pages/plan_select.html");
+  $("logoHome")?.addEventListener("click", ()=>location.href="/pages/home.html");
 
-    const btn = $("btnLesson");
-    if(!btn){
-      console.error("btnLesson bulunamadı!");
+  $("btnBell")?.addEventListener("click", playBell);
+
+  $("btnLesson")?.addEventListener("click", async ()=>{
+    if(!running){
+      await startLesson();
       return;
     }
+    if(paused) resumeLesson();
+    else pauseLesson();
+  });
 
-    // ✅ asıl kritik: tıklama kesin çalışsın
-    btn.addEventListener("click", async ()=>{
-      if(!running){
-        await startLesson();
-        return;
-      }
-      if(paused) resumeLesson();
-      else pauseLesson();
-    });
-
-    // initial info
-    addBubble("teacher", `Lesson ready. Press “Dersi Başlat”.`, { speakable:true });
-
-  }catch(e){
-    console.error("teacher_course.page.js boot error:", e);
-  }
+  addBubble("teacher", `Lesson ready. Press “Dersi Başlat”.`, true);
 });
