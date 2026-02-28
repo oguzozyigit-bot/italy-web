@@ -1,626 +1,314 @@
-<!-- FILE: /pages/teacher_course.html -->
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • Ders</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>italkyAI • Canlı Ders</title>
 
-  <meta name="theme-color" content="#02000f">
-  <style>html,body{background:#02000f !important;}</style>
+  <meta name="theme-color" content="#000000">
+  <style>html,body{background:#000 !important; margin:0; padding:0; overflow:hidden; font-family:'Outfit', sans-serif;}</style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);
-      --border: rgba(255,255,255,0.12);
-      --card: rgba(255,255,255,0.06);
-      --muted: rgba(255,255,255,0.70);
-      --muted2: rgba(255,255,255,0.55);
-      --ok: rgba(34,197,94,0.95);
-      --bad: rgba(255,90,140,0.95);
-    }
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    #pageContent{ height:100%; }
-
-    /* ui_shell içeride scroll'u shellMain yönetiyor. Biz içeride kendi layout’umuzu kuruyoruz */
-    .wrap{
-      min-height: 100%;
-      padding: 12px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
+    :root {
+      --accent: #6366f1;
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
     }
 
-    .topRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .chip{
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,0.18);
-      font-weight: 1000;
-      font-size: 12px;
-      color: rgba(255,255,255,0.92);
-      white-space: nowrap;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .chip .dot{
-      width:7px; height:7px; border-radius:99px;
-      background:#a5b4fc;
-      box-shadow:0 0 10px rgba(165,180,252,0.55);
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+    
+    #pageContent { 
+      height: 100vh; 
+      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 80%);
+      display: flex; flex-direction: column; position: relative;
+      /* ui_shell bar boşlukları */
+      padding-top: calc(env(safe-area-inset-top) + 60px);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 85px);
     }
 
-    .panel{
-      flex:1;
-      min-height: 0;
-      border-radius: 28px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      padding: 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      overflow:hidden;
-      position:relative;
+    /* Dinamik Arka Plan */
+    .nebula {
+      position: absolute; inset: -50%;
+      background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 40%);
+      filter: blur(80px); animation: drift 20s infinite alternate; pointer-events: none;
     }
-    .panel::before{
-      content:"";
-      position:absolute; inset:-30%;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(99,102,241,.25) 0%, transparent 45%),
-        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
-        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
-      filter: blur(34px);
-      opacity:.85;
-      animation: drift 10s ease-in-out infinite alternate;
-      pointer-events:none;
-    }
-    @keyframes drift{
-      from{ transform: translate3d(-10px,-8px,0) scale(1); }
-      to{ transform: translate3d(10px,8px,0) scale(1.06); }
-    }
-    .panel > *{ position:relative; z-index:2; }
+    @keyframes drift { from { transform: rotate(0); } to { transform: rotate(15deg); } }
 
-    .head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .title{
-      font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight:1000;
-      font-size:16px;
-      margin:0;
-      letter-spacing:-.2px;
-    }
-    .subtitle{
-      margin-top:4px;
-      font-size:12px;
-      font-weight:900;
-      color: var(--muted);
-      line-height:1.45;
-    }
-    .badge{
-      padding:8px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      font-weight:1000;
-      font-size:12px;
-      color: rgba(165,180,252,0.95);
-      white-space:nowrap;
+    .wrap {
+      flex: 1; position: relative; z-index: 1;
+      max-width: 500px; margin: 0 auto; width: 100%;
+      padding: 12px; display: flex; flex-direction: column; gap: 12px;
     }
 
-    /* Daktilo brifing */
-    .brief{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 12px;
-      overflow:hidden;
+    /* Üst Durum Çubuğu */
+    .status-bar {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      padding: 12px 18px; border-radius: 20px; backdrop-filter: blur(20px);
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .briefTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 8px;
-    }
-    .tag{
-      font-size: 11px;
-      font-weight: 1000;
-      color: rgba(255,255,255,0.90);
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    .tag .ai{
-      background: var(--aiGrad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      font-weight:1000;
-    }
-    .typeLine{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 13px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.86);
-      line-height: 1.55;
-      white-space: pre-wrap;
-      min-height: 64px;
-    }
-    .cursor{
-      display:inline-block;
-      width: 7px;
-      height: 14px;
-      background: rgba(165,180,252,0.95);
-      margin-left: 2px;
-      vertical-align: middle;
-      animation: blink 1s infinite;
-      border-radius: 2px;
-    }
-    @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:0} }
+    .t-info h2 { font-size: 14px; color: #fff; margin: 0; font-weight: 800; }
+    .t-info p { font-size: 10px; color: var(--accent); margin: 2px 0 0; font-weight: 700; text-transform: uppercase; }
+    
+    .timer { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: #fff; }
 
-    /* Ders içerik kartı */
-    .lesson{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.16);
-      padding: 12px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    .lesson::-webkit-scrollbar{ display:none; }
-
-    .secTitle{
-      font-size: 12px;
-      font-weight: 1000;
-      letter-spacing:.6px;
-      color: rgba(165,180,252,0.95);
-      text-transform: uppercase;
-    }
-    .txt{
-      font-size: 13px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.86);
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-    .ex{
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.05);
-      padding: 10px;
-    }
-    .ex .a{
-      font-weight:1000;
-      font-size: 13px;
-    }
-    .ex .tr{
-      margin-top:6px;
-      font-weight:900;
-      font-size: 12px;
-      color: rgba(255,255,255,0.70);
+    /* Ana Sahne (Öğretmen Bölümü) */
+    .stage {
+      flex: 1; display: flex; flex-direction: column; gap: 12px; overflow: hidden;
     }
 
-    /* Görev */
-    .task{
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 12px;
+    /* Öğretmen Balonu (Odak Noktası) */
+    .teacher-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; padding: 20px; backdrop-filter: blur(20px);
+      display: flex; flex-direction: column; gap: 12px;
+      animation: slideIn 0.5s ease-out;
     }
-    .q{ font-weight:1000; font-size:13px; line-height:1.25; }
-    .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: var(--muted); line-height:1.35; }
-    .inp{
-      margin-top:10px;
-      width:100%;
-      height:48px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:900;
-      font-size:14px;
-      padding: 0 12px;
-    }
-    .inp::placeholder{ color: rgba(255,255,255,0.45); }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .rowBtns{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .btn{
-      flex:1;
-      min-width: 140px;
-      height:54px;
-      border-radius:22px;
-      border:none;
-      cursor:pointer;
-      font-weight:1000;
-      font-size:14px;
-      color:#070714;
-      background: var(--aiGrad);
-      box-shadow: 0 16px 44px rgba(79,70,229,.22);
-    }
-    .btn:active{ transform: scale(.99); }
-    .ghost{
-      flex:1;
-      min-width: 140px;
-      height:54px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:1000;
-      font-size:13px;
-      cursor:pointer;
-    }
-    .ghost:active{ transform: scale(.99); }
+    .teacher-card .label { font-size: 9px; font-weight: 900; color: var(--accent); letter-spacing: 1px; }
+    .teacher-card .speech { font-size: 19px; font-weight: 600; color: #fff; line-height: 1.4; }
+    .teacher-card .translation { font-size: 13px; color: rgba(255,255,255,0.4); font-style: italic; }
 
-    .hintRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 2px;
+    /* Öğrenci Etkileşim Alanı */
+    .student-zone {
+      background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border);
+      border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+      min-height: 180px; justify-content: center; align-items: center; text-align: center;
     }
-    .linkPill{
-      flex:1;
-      min-width: 140px;
-      padding: 12px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.14);
-      color:#fff;
-      font-weight:1000;
-      font-size: 12px;
-      cursor:pointer;
-      text-align:center;
-      user-select:none;
-    }
-    .linkPill:active{ transform: scale(.99); }
 
-    .toast{
-      position: fixed;
-      left:50%;
-      top:18px;
-      transform:translateX(-50%) translateY(-120px);
-      background:rgba(10,10,18,.92);
-      border:1px solid rgba(165,180,252,.35);
-      padding:10px 14px;
-      border-radius:999px;
-      color:#fff;
-      z-index:99999;
-      font-weight:900;
-      font-size:12px;
-      transition:.28s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width:min(92vw,520px);
-      text-align:center;
-    }
-    .toast.show{ transform:translateX(-50%) translateY(0); }
+    .repeat-target { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; opacity: 0.5; transition: 0.3s; }
+    .repeat-target.active { opacity: 1; color: var(--accent); }
 
-    /* Continue modal */
-    .overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); display:none; align-items:center; justify-content:center; padding:16px; z-index:999999; }
-    .overlay.show{ display:flex; }
-    .modal{ width:min(520px,100%); border-radius:28px; border:1px solid rgba(255,255,255,0.12); background: rgba(10,10,18,0.92); padding:14px; }
-    .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; }
-    .mText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; margin: 0 6px; white-space:pre-wrap; }
-    .mBtns{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+    .live-stt { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.7); min-height: 22px; }
+
+    /* Alt Kontroller */
+    .dock {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 24px; padding: 16px; backdrop-filter: blur(20px);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .deneme-hakki { display: flex; gap: 5px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); }
+    .dot.fill { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+    .btn-lesson {
+      background: #fff; color: #000; border: none; padding: 12px 24px;
+      border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3); transition: 0.2s;
+    }
+    .btn-lesson:active { transform: scale(0.95); }
+
+    .status-badge { font-size: 9px; font-weight: 900; color: #fff; text-transform: uppercase; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 8px; }
+
+    /* Ses Dalgaları (Kayıt Sırasında) */
+    .waves { display: flex; align-items: center; gap: 3px; height: 20px; display: none; }
+    .waves.active { display: flex; }
+    .wave-bar { width: 3px; height: 100%; background: var(--accent); border-radius: 2px; animation: wave 0.5s infinite alternate; }
+    @keyframes wave { from { height: 4px; } to { height: 18px; } }
   </style>
 </head>
 
 <body>
+<div class="nebula"></div>
 <main id="pageContent">
   <div class="wrap">
+    
+    <header class="status-bar">
+      <div class="t-info">
+        <h2 id="teacherName">Yükleniyor...</h2>
+        <p id="lessonInfo">Ders Başlatılmadı</p>
+      </div>
+      <div class="timer" id="timerDisplay">00:00</div>
+    </header>
 
-    <div class="topRow">
-      <div class="chip" id="whoChip"><span class="dot"></span> Ders • —</div>
-      <div class="chip" id="timerChip">15:00</div>
+    <div class="stage">
+      <div class="teacher-card">
+        <div class="label" id="statusLabel">AI TEACHER</div>
+        <div class="speech" id="teachText">Hazır olduğunda dersi başlat başkanım.</div>
+        <div class="translation" id="teachTR">Click the button to start.</div>
+      </div>
+
+      <div class="student-zone">
+        <div class="label">TEKRAR ET / KONUŞ</div>
+        <div class="repeat-target" id="repeatTarget">---</div>
+        <div class="waves" id="micWaves">
+          <div class="wave-bar" style="animation-delay: 0.1s"></div>
+          <div class="wave-bar" style="animation-delay: 0.2s"></div>
+          <div class="wave-bar" style="animation-delay: 0.3s"></div>
+          <div class="wave-bar" style="animation-delay: 0.2s"></div>
+          <div class="wave-bar" style="animation-delay: 0.1s"></div>
+        </div>
+        <div class="live-stt" id="sttResult">Seni dinliyorum...</div>
+      </div>
     </div>
 
-    <section class="panel">
-      <div class="head">
-        <div>
-          <h2 class="title" id="title">Ders Başlıyor</h2>
-          <div class="subtitle" id="subtitle">—</div>
-        </div>
-        <div class="badge" id="badge">Seviye: —</div>
+    <footer class="dock">
+      <div class="deneme-hakki" id="pillTry">
+        <div class="dot fill"></div>
+        <div class="dot fill"></div>
+        <div class="dot fill"></div>
       </div>
 
-      <div class="brief">
-        <div class="briefTop">
-          <div class="tag"><span class="ai">AI</span> KOÇ BRİFİNG</div>
-          <div class="tag" id="miniTag">15 dk</div>
-        </div>
-        <div class="typeLine" id="typeBox">Hazırlanıyor<span class="cursor"></span></div>
-      </div>
+      <button class="btn-lesson" id="btnLesson">Dersi Başlat</button>
 
-      <div class="lesson" id="lessonBox">
-        <div class="secTitle" id="secTopic">KONU</div>
-        <div class="txt" id="topicText">—</div>
-
-        <div class="secTitle">ÖRNEKLER</div>
-        <div id="examples"></div>
-
-        <div class="secTitle">HIZLI İPUCU</div>
-        <div class="txt" id="tipText">—</div>
-      </div>
-
-      <div class="task">
-        <div class="q" id="qText">…</div>
-        <div class="qSub" id="qTr">…</div>
-        <input class="inp" id="answer" placeholder="Cevabını yaz..." />
-      </div>
-
-      <div class="rowBtns">
-        <button class="btn" id="btnSend" type="button">Gönder</button>
-        <button class="ghost" id="btnFinish" type="button">Dersi Bitir</button>
-        <button class="ghost" id="btnExit" type="button">Çık</button>
-      </div>
-
-      <div class="hintRow">
-        <div class="linkPill" id="goPractice">AI ile Pratik Yap</div>
-        <div class="linkPill" id="goGames">Eğlenerek Öğren</div>
-      </div>
-    </section>
+      <div class="status-badge" id="statusText">HAZIR</div>
+    </footer>
 
   </div>
 </main>
 
-<div class="toast" id="toast"></div>
-
-<div class="overlay" id="continueOverlay">
-  <div class="modal">
-    <div class="mTitle">Devam Edelim mi?</div>
-    <div class="mText" id="continueText">—</div>
-    <div class="mBtns">
-      <button class="btn" id="btnContinueYes" type="button">Evet, Devam</button>
-      <button class="ghost" id="btnContinueNo" type="button">Bugünlük Bu Kadar</button>
-    </div>
-  </div>
-</div>
-
 <script type="module">
-  import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
-  import { bootPage } from "/js/ui_guard.js";
-  import { supabase } from "/js/supabase_client.js";
+  import { mountShell } from "/js/ui_shell.js";
+  import { apiPOST } from "/js/api.js";
 
-  // ✅ ui_shell ile oturt
-  mountShell({ scroll:"auto" });
-  bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+  mountShell({ scroll:"none" });
 
   const $ = (id)=>document.getElementById(id);
+  
+  // Durum Yönetimi
+  let running = false;
+  let paused = false;
+  let endAt = 0;
+  let teacher = { id: "dora", nameTR: "Dora", lang: "en", voice: "nova", stt: "en-US" };
+  let level = localStorage.getItem("italky_lesson_level") || "A1";
+  let mins = parseInt(localStorage.getItem("italky_lesson_mins")) || 15;
+  let triesLeft = 3;
+  let pendingRepeat = "";
 
-  function toast(msg){
-    const t = $("toast");
-    t.textContent = String(msg||"");
-    t.classList.add("show");
-    clearTimeout(window.__to);
-    window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
+  // UI Güncelleme Fonksiyonları
+  function setStatus(s, label = "AI TEACHER") {
+    $("statusText").textContent = s;
+    $("statusLabel").textContent = label;
+    if(s === "LISTENING") $("micWaves").classList.add("active");
+    else $("micWaves").classList.remove("active");
   }
 
-  function qs(k){ return new URLSearchParams(location.search).get(k); }
-
-  function firstNameNoLast(full){
-    const s = String(full||"").trim().replace(/\s+/g," ");
-    if(!s) return "";
-    const parts = s.split(" ").filter(Boolean);
-    if(parts.length === 1) return parts[0];
-    // 2+ kelime varsa son kelimeyi soyad say
-    return parts.slice(0, -1).join(" ");
+  function updateTries() {
+    const dots = $("pillTry").querySelectorAll(".dot");
+    dots.forEach((dot, i) => {
+      dot.classList.toggle("fill", i < triesLeft);
+    });
   }
 
-  // Dil adları
-  const LANG_TR = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
+  // OpenAI Brifing ve Ders Akışı (Senin JS dosyasındaki mantık)
+  async function teacherNext(userText) {
+    if(!running || paused) return;
+    setStatus("THINKING", "ÖĞRETMEN DÜŞÜNÜYOR...");
+    
+    try {
+      const data = await apiPOST("/api/chat_openai", {
+        text: userText,
+        persona_name: teacher.nameTR,
+        history: [{ role: "system", content: `Discipline teacher. Level ${level}. Target language only. Format: TEACH: [text] REPEAT: [one sentence]` }]
+      });
+      
+      const reply = data.text || "";
+      const teachMatch = reply.match(/TEACH:\s*([\s\S]*?)(?:\n|REPEAT:|$)/i);
+      const repeatMatch = reply.match(/REPEAT:\s*([^\n]+)/i);
 
-  // Basit ders planı (AI yoksa da gerçek ders)
-  const PLAN = {
-    en: {
-      A1: { topic:"Present Simple (I/You/We/They)", tip:"I/You/We/They + verb (go, work, live). He/She/It için -s gelir.",
-        examples:[ ["I work every day.","Her gün çalışırım."], ["We live in Düzce.","Düzce'de yaşarız."] ],
-        task:"Write 1 Present Simple sentence about your day.",
-        task_tr:"Günün hakkında Present Simple ile 1 cümle yaz."
-      },
-      A2: { topic:"Past Simple (regular/irregular)", tip:"Geçmişte bitmiş olay: yesterday/last week. Regular: -ed, irregular: go→went.",
-        examples:[ ["I visited my friend yesterday.","Dün arkadaşımı ziyaret ettim."], ["I went to the market.","Markete gittim."] ],
-        task:"Write 2 past sentences: 1 regular, 1 irregular.",
-        task_tr:"2 geçmiş zaman cümlesi yaz: 1 düzenli (-ed), 1 düzensiz."
-      },
-      B1: { topic:"Present Perfect vs Past Simple", tip:"Present Perfect: deneyim/sonuç (have/has + V3). Past Simple: zaman belli (last year).",
-        examples:[ ["I have been to Ankara.","Ankara'ya gittim (deneyim)."], ["I went to Ankara last year.","Geçen yıl Ankara'ya gittim."] ],
-        task:"Write 2 sentences: 1 Present Perfect, 1 Past Simple.",
-        task_tr:"2 cümle yaz: 1 Present Perfect, 1 Past Simple."
-      },
-      B2: { topic:"Conditionals (If)", tip:"If + past → would (2nd conditional). If + present → will (1st conditional).",
-        examples:[ ["If I had time, I would travel more.","Zamanım olsa daha çok gezerdim."], ["If it rains, I will stay home.","Yağmur yağarsa evde kalacağım."] ],
-        task:"Write 1 conditional sentence about your life.",
-        task_tr:"Hayatınla ilgili 1 şart cümlesi (if) yaz."
-      },
-      C1: { topic:"Cohesive writing (linkers)", tip:"Although/However/Therefore gibi bağlaçlarla akıcı cümle kur.",
-        examples:[ ["Although it seems easy, it requires planning.","Kolay görünse de planlama ister."], ["However, we can improve quickly.","Yine de hızlı gelişebiliriz."] ],
-        task:"Write 1 sentence using 'Although' or 'However'.",
-        task_tr:"'Although' veya 'However' ile 1 cümle yaz."
+      const teach = teachMatch ? teachMatch[1].trim() : reply;
+      const repeat = repeatMatch ? repeatMatch[1].trim() : "";
+
+      // TEACH kısmını yazdır ve seslendir
+      $("teachText").textContent = teach;
+      if(teach) {
+          // Çeviri (UI Only)
+          const trData = await apiPOST("/api/translate", { text: teach, source: teacher.lang, target: "tr" });
+          $("teachTR").textContent = `(${trData.translated || '...'})`;
+          
+          setStatus("SPEAKING", "ÖĞRETMEN KONUŞUYOR");
+          await speakTTS(teach);
       }
-    },
-    de: { A1:{topic:"Präsens (ich/du/wir)", tip:"ich/wir + Verb. du + -st.", examples:[["Ich arbeite jeden Tag.","Her gün çalışırım."],["Wir wohnen in Düzce.","Düzce'de yaşarız."]], task:"Schreibe 1 Satz im Präsens über deinen Tag.", task_tr:"Günün hakkında Almanca geniş zamanda 1 cümle yaz."} },
-    fr: { A1:{topic:"Présent (je/tu/nous)", tip:"je/nous + verbe. tu + -s (souvent).", examples:[["Je travaille tous les jours.","Her gün çalışırım."],["Nous habitons à Düzce.","Düzce'de yaşarız."]], task:"Écris 1 phrase au présent sur ta journée.", task_tr:"Günün hakkında Fransızca şimdiki zamanda 1 cümle yaz."} },
-    it: { A1:{topic:"Presente (io/tu/noi)", tip:"io/noi + verbo. tu genelde -i.", examples:[["Io lavoro ogni giorno.","Her gün çalışırım."],["Noi viviamo a Düzce.","Düzce'de yaşarız."]], task:"Scrivi 1 frase al presente sulla tua giornata.", task_tr:"Günün hakkında İtalyanca şimdiki zamanda 1 cümle yaz."} },
-    ru: { A1:{topic:"Настоящее время", tip:"Короткие простые фразы. Сначала правильный порядок слов.", examples:[["Я учу русский язык.","Rusça öğreniyorum."],["Я живу в Дюздже.","Düzce'de yaşıyorum."]], task:"Напиши 1 простое предложение о себе.", task_tr:"Kendin hakkında Rusça 1 basit cümle yaz."} },
-    es: { A1:{topic:"Presente", tip:"Frases cortas: Yo + verbo.", examples:[["Yo estudio español.","İspanyolca çalışıyorum."],["Yo vivo en Düzce.","Düzce'de yaşıyorum."]], task:"Escribe 1 frase en presente sobre tu día.", task_tr:"Günün hakkında İspanyolca geniş zamanda 1 cümle yaz."} }
-  };
 
-  function pickPlan(lang, lvl){
-    const byLang = PLAN[lang] || PLAN.en;
-    return byLang[lvl] || byLang.A1 || PLAN.en.A1;
+      // REPEAT kısmını ayarla
+      if(repeat) {
+          pendingRepeat = repeat;
+          $("repeatTarget").textContent = repeat;
+          $("repeatTarget").classList.add("active");
+          triesLeft = 3;
+          updateTries();
+          listenStudent();
+      } else {
+          $("repeatTarget").textContent = "---";
+          $("repeatTarget").classList.remove("active");
+          listenStudent();
+      }
+
+    } catch(e) { setStatus("HATA"); }
   }
 
-  // Daktilo
-  async function typeWrite(text){
-    const box = $("typeBox");
-    box.textContent = "";
-    for(let i=0;i<text.length;i++){
-      const ch = text[i];
-      box.textContent += ch;
-      const delay = (".!?".includes(ch) ? 160 : 18);
-      await new Promise(r=>setTimeout(r, delay));
+  async function speakTTS(text) {
+    const data = await apiPOST("/api/tts_openai", { text: text, voice: teacher.voice });
+    if(data.audio_base64) {
+      const audio = new Audio("data:audio/mp3;base64," + data.audio_base64);
+      await audio.play();
+      return new Promise(res => audio.onended = res);
     }
-    box.innerHTML = box.textContent + `<span class="cursor"></span>`;
   }
 
-  // --------- SESSION ----------
-  const { data:{ session } } = await supabase.auth.getSession();
-  if(!session?.user){ location.replace("/pages/login.html"); throw new Error("no session"); }
-  const userId = session.user.id;
-
-  const { data: prof } = await supabase
-    .from("profiles")
-    .select("tokens, full_name, levels")
-    .eq("id", userId)
-    .maybeSingle();
-
-  const tokens = Number(prof?.tokens ?? 0);
-  try{ setHeaderTokens(tokens); }catch{}
-
-  const student = firstNameNoLast(prof?.full_name) || "Oğuz";
-
-  const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
-  // teacherId yoksa en azından dili URL’den al
-  const lang = String(qs("lang") || (teacherId==="ayda"?"de":teacherId==="jale"?"fr":teacherId==="sencer"?"it":teacherId==="sungur"?"ru":teacherId==="ozan"?"es":"en")).toLowerCase();
-  const lvl = String(qs("level") || (prof?.levels?.[lang] || "A1")).toUpperCase();
-  const langNameTR = LANG_TR[lang] || lang.toUpperCase();
-
-  $("whoChip").textContent = `${langNameTR} • 15 dk`;
-  $("badge").textContent = `Seviye: ${lvl}`;
-  $("title").textContent = `${langNameTR} Dersi`;
-  $("subtitle").textContent = `Odak: gerçek ders akışı • kısa görevlerle ilerleme`;
-
-  // yönlendirme
-  $("goPractice").onclick = ()=>location.href=`/pages/practice_ai_session.html?lang=${encodeURIComponent(lang)}&level=${encodeURIComponent(lvl)}`;
-  $("goGames").onclick = ()=>location.href=`/pages/game_lang_select.html?lang=${encodeURIComponent(lang)}`;
-
-  // içerik doldur
-  const plan = pickPlan(lang, lvl);
-  $("secTopic").textContent = "KONU";
-  $("topicText").textContent = `${plan.topic}`;
-  $("tipText").textContent = plan.tip;
-
-  const exWrap = $("examples");
-  exWrap.innerHTML = "";
-  (plan.examples || []).forEach(([a,tr])=>{
-    const d = document.createElement("div");
-    d.className = "ex";
-    d.innerHTML = `<div class="a"></div><div class="tr"></div>`;
-    d.querySelector(".a").textContent = a;
-    d.querySelector(".tr").textContent = tr;
-    exWrap.appendChild(d);
-  });
-
-  function setTask(t, tr){
-    $("qText").textContent = t || "Bir cümle yaz.";
-    $("qTr").textContent = tr || "Bir cümle yaz.";
-    $("answer").value = "";
+  function listenStudent() {
+    if(!running || paused) return;
+    setStatus("LISTENING", "SENİ DİNLİYORUM");
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.lang = teacher.stt;
+    
+    rec.onresult = async (e) => {
+      const said = e.results[0][0].transcript;
+      $("sttResult").textContent = said;
+      
+      if(pendingRepeat) {
+          // Basit benzerlik kontrolü (JS dosyasındaki mantığın özeti)
+          if(said.toLowerCase().includes(pendingRepeat.toLowerCase().split(' ')[0])) {
+              $("sttResult").textContent = "Mükemmel! ✅";
+              teacherNext("Good job. Let's continue.");
+          } else {
+              triesLeft--;
+              updateTries();
+              if(triesLeft <= 0) teacherNext("Let's try something else.");
+              else rec.start();
+          }
+      } else {
+          teacherNext(said);
+      }
+    };
+    rec.start();
   }
-  setTask(plan.task, plan.task_tr);
-
-  // Brifing metni (anlatıcı + yönlendirmeli) — SES YOK (sadece daktilo)
-  const briefing =
-`Selam ${student}.
-Seninle 15 dakika boyunca ${langNameTR} dersinde birlikte çalışacağız.
-
-Bu 15 dakikanın sonunda:
-• Devam edebilir veya ara verebilirsin.
-• Tavsiyem: Günde en az 60 dakika çalışma.
-
-Ders dışı destek:
-• "AI ile Pratik Yap" ile konuşma hızın artar.
-• "Eğlenerek Öğren" oyunlarıyla pekiştirirsin.
-
-Hazırsan aşağıdaki görevi çözerek başlayalım.`;
-
-  await typeWrite(briefing);
 
   // Timer
-  let remaining = 15*60;
-  const tick = setInterval(()=>{
-    remaining = Math.max(0, remaining-1);
-    $("timerChip").textContent = `${String(Math.floor(remaining/60)).padStart(2,"0")}:${String(remaining%60).padStart(2,"0")}`;
-    if(remaining===0){
-      clearInterval(tick);
-      $("continueText").textContent = `15 dakika tamamlandı.\n\nDevam etmek ister misin?`;
-      $("continueOverlay").classList.add("show");
-    }
-  }, 1000);
-
-  // Gönder -> basit feedback (AI yoksa da ders akıyor)
-  function basicFeedback(txt){
-    const t = (txt||"").trim();
-    if(!t) return { ok:false, teacher:"Cümle göremedim 🙂 Bir tane yazıp gönder.", tr:"Boş mesaj." };
-
-    const ok = t.length >= 10;
-    if(ok){
-      return {
-        ok:true,
-        teacher:"Güzel! Şimdi aynı anlamı farklı kelimelerle yeniden yaz.",
-        tr:"İyi gidiyor. Aynı anlamı farklı kelimelerle tekrar yaz."
-      };
-    }
-    return {
-      ok:false,
-      teacher:"Biraz kısa kaldı. 10+ karakter olacak şekilde tekrar yaz.",
-      tr:"Cümleni biraz uzatıp tekrar dene."
-    };
+  function updateTimer() {
+    if(!running || paused) return;
+    const ms = Math.max(0, endAt - Date.now());
+    const s = Math.floor(ms/1000);
+    $("timerDisplay").textContent = `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+    if(s <= 0) { running = false; setStatus("BİTTİ"); }
+    else requestAnimationFrame(updateTimer);
   }
 
-  $("btnSend").onclick = ()=>{
-    const txt = ($("answer").value || "").trim();
-    if(!txt){ toast("Cevabını yaz 🙂"); return; }
-    $("answer").value = "";
-
-    // kullanıcı cümlesini üstte mini “ders içeriği” gibi tutmak yerine toast + görevle ilerliyoruz
-    const fb = basicFeedback(txt);
-    toast(fb.ok ? "✅ Güzel!" : "↻ Tekrar dene");
-    setTask(
-      fb.ok ? "Rewrite your sentence using different words." : plan.task,
-      fb.ok ? "Cümleni farklı kelimelerle yeniden yaz." : plan.task_tr
-    );
+  // Dersi Başlat / Durdur
+  $("btnLesson").onclick = () => {
+    if(!running) {
+      running = true;
+      endAt = Date.now() + mins * 60 * 1000;
+      $("btnLesson").textContent = "Mola Ver";
+      $("teacherName").textContent = `${teacher.nameTR} • ${teacher.lang.toUpperCase()}`;
+      $("lessonInfo").textContent = `Seviye: ${level}`;
+      updateTimer();
+      teacherNext("Start the lesson.");
+    } else {
+      paused = !paused;
+      $("btnLesson").textContent = paused ? "Devam Et" : "Mola Ver";
+      if(!paused) { updateTimer(); listenStudent(); }
+      else setStatus("DURDURULDU");
+    }
   };
 
-  $("btnFinish").onclick = ()=>{
-    $("continueText").textContent = `Dersi bitirdin.\n\nDevam etmek ister misin?`;
-    $("continueOverlay").classList.add("show");
-  };
-
-  $("btnExit").onclick = ()=>location.href="/pages/home.html";
-
-  $("btnContinueYes").onclick = ()=>{
-    $("continueOverlay").classList.remove("show");
-    remaining = 15*60;
-    toast("Devam ediyoruz…");
-    setTask(plan.task, plan.task_tr);
-  };
-  $("btnContinueNo").onclick = ()=>{
-    $("continueOverlay").classList.remove("show");
-    location.href="/pages/plan_select.html";
-  };
 </script>
 </body>
 </html>
