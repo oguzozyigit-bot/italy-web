@@ -787,7 +787,7 @@ async function ttsSpeak(text){
         $("transBox").textContent = out;
       }catch(e){
         $("transBox").innerHTML = `<span class="muted">Çeviri şu an kullanılamıyor.</span>`;
-        toast(e?.message || String(e));
+        toast("Ses şu an kullanılamıyor.");
       }
     }
 
@@ -799,7 +799,7 @@ async function ttsSpeak(text){
         await ttsSpeak(current);
         setStep("ok","on","");
       }catch(e){
-        toast(e?.message || String(e));
+        toast("Ses şu an kullanılamıyor.");
       }finally{
         $("btnPlay").disabled = false;
       }
@@ -815,7 +815,7 @@ async function ttsSpeak(text){
         await ttsSpeak(current);
         setStep("ok","on","");
       }catch(e){
-        toast(e?.message || String(e));
+        toast("Ses şu an kullanılamıyor.");
       }
     };
 
@@ -829,7 +829,7 @@ async function ttsSpeak(text){
         recording = false;
         $("btnRec").classList.remove("rec");
         $("btnRec").textContent = "🎙️";
-        toast(e?.message || String(e));
+        toast("Ses şu an kullanılamıyor.");
       }
     };
 
@@ -861,7 +861,7 @@ async function ttsSpeak(text){
 
     }catch(e){
       $("sentence").textContent = "Havuz yüklenemedi.";
-      toast(e?.message || String(e));
+      toast("Ses şu an kullanılamıyor.");
       $("btnPlay").disabled = true;
       $("btnRec").disabled = true;
       $("btnNext").disabled = true;
