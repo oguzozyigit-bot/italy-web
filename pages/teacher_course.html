@@ -1,190 +1,224 @@
+<!-- FILE: /pages/teacher_course.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>italkyAI • Canlı Ders</title>
+  <title>italkyAI • Ders</title>
 
-  <meta name="theme-color" content="#000000">
-  <style>html,body{background:#000 !important; margin:0; padding:0; overflow:hidden; font-family:'Outfit', sans-serif;}</style>
+  <meta name="theme-color" content="#02000f">
+  <style>html,body{background:#02000f !important;}</style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --accent: #6366f1;
-      --glass: rgba(255, 255, 255, 0.04);
-      --glass-border: rgba(255, 255, 255, 0.1);
+    :root{
+      --border: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.05);
+      --muted: rgba(255,255,255,0.65);
       --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
     }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    #pageContent{ height:100%; }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
-    #pageContent {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 80%);
-      /* UI Shell barları arasına sığdırıyoruz */
-      padding-top: calc(env(safe-area-inset-top) + 60px);
-      padding-bottom: calc(env(safe-area-inset-bottom) + 85px);
-    }
-
-    .wrap {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      max-width: 500px;
+    .wrap{
+      max-width: 520px;
       margin: 0 auto;
-      width: 100%;
-      padding: 10px;
+      min-height: 100%;
+      padding: 12px 14px 14px;
+      display:flex;
+      flex-direction:column;
       gap: 12px;
-      overflow: hidden;
     }
 
-    /* Panel Tasarımı */
-    .panel {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      border-radius: 30px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      overflow: hidden;
+    .topRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex:0 0 auto;
     }
 
-    /* Üst Bilgi Alanı */
-    .panelHeader {
-      padding: 15px 20px;
-      background: rgba(0,0,0,0.2);
-      border-bottom: 1px solid var(--glass-border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    .leftTop{ display:flex; align-items:center; gap:10px; min-width:0; }
 
-    .teacherName { font-weight: 800; font-size: 14px; color: #fff; }
-    .lessonInfo { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; margin-top: 2px; }
-    
-    .pill-status {
-      padding: 6px 12px;
-      background: rgba(99,102,241,0.1);
-      border: 1px solid rgba(99,102,241,0.2);
-      border-radius: 12px;
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 1px;
+    .backBtn{
+      width:44px;height:44px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color:#fff;
+      font-size:20px;font-weight:1000;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer; user-select:none;
+      flex:0 0 auto;
     }
+    .backBtn:active{ transform: scale(.96); }
 
-    /* Chat Alanı */
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      scrollbar-width: none;
+    .mini-brand{ display:flex; flex-direction:column; user-select:none; cursor:pointer; line-height:1; min-width:0; }
+    .logo-line{
+      font-family:'Space Grotesk', sans-serif;
+      font-size: 18px;
+      letter-spacing: -0.4px;
+      display:flex; align-items:flex-end; gap:2px;
+      white-space:nowrap;
     }
-    #chat::-webkit-scrollbar { display: none; }
-
-    /* Bubble Tasarımları */
-    .bubble {
-      max-width: 85%;
-      padding: 12px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      line-height: 1.45;
-      position: relative;
-      font-weight: 500;
-    }
-    .bubble.teacher {
-      align-self: flex-start;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--glass-border);
-      color: #fff;
-      border-bottom-left-radius: 4px;
-    }
-    .bubble.student {
-      align-self: flex-end;
+    .logo-main{ font-weight:700; color:#FFFFFF; }
+    .logo-ai{
+      font-weight:700;
       background: var(--aiGrad);
-      color: #000;
-      font-weight: 700;
-      border-bottom-right-radius: 4px;
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
-    .bubble.tr {
-      align-self: flex-start;
-      background: transparent;
-      color: rgba(255,255,255,0.4);
-      font-size: 12px;
-      font-style: italic;
-      padding: 0;
-      margin-top: -8px;
-    }
-
-    /* Dock / Sabit Alt Kontrol */
-    .dock {
-      padding: 16px;
-      background: rgba(0,0,0,0.3);
-      border-top: 1px solid var(--glass-border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btnLesson {
-      flex: 1;
-      height: 54px;
-      border-radius: 18px;
-      border: none;
-      background: #fff;
-      color: #000;
-      font-weight: 900;
-      font-size: 15px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .btnLesson:active { transform: scale(0.96); }
-
-    .btnTiny {
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
-      border: 1px solid var(--glass-border);
-      background: var(--glass);
-      font-size: 20px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .statusText {
-      position: absolute;
-      top: -25px;
-      left: 20px;
-      font-size: 9px;
-      font-weight: 900;
-      color: var(--accent);
+    .logo-slogan{
+      font-size:9px;
+      font-weight:900;
+      letter-spacing: 3.6px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 4px;
+      padding-left: 2px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      white-space:nowrap;
     }
 
-    .tries-indicator {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 5px;
+    .pill{
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(255,255,255,0.9);
+      white-space: nowrap;
+      flex:0 0 auto;
     }
 
-    /* Speaker Butonu */
-    .spkBtn {
-      background: none; border: none; cursor: pointer; color: var(--accent);
-      padding: 5px; margin-left: 5px; vertical-align: middle;
+    .panel{
+      flex:1;
+      min-height:0;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
     }
-    .spkBtn svg { width: 16px; height: 16px; fill: currentColor; }
+
+    .panelHeader{
+      padding: 12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.18);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex:0 0 auto;
+    }
+    .panelTitle{ min-width:0; display:flex; flex-direction:column; gap:3px; }
+    .teacherName{ font-weight: 1000; font-size: 13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .lessonInfo{ font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.62); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .panelBadges{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+    .miniPill{
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      font-weight: 1000;
+      font-size: 11px;
+      color: rgba(255,255,255,0.88);
+      white-space:nowrap;
+    }
+
+    .chat{
+      flex:1;
+      min-height:0;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .chat::-webkit-scrollbar{ display:none; }
+
+    .bubble{
+      max-width: 92%;
+      border-radius: 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      position:relative;
+    }
+    .bubble.teacher{ align-self:flex-start; border-left: 4px solid rgba(99,102,241,0.65); background: rgba(99,102,241,0.10); }
+    .bubble.student{ align-self:flex-end; border-right: 4px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.06); text-align:right; }
+    .bubble.tr{ align-self:flex-start; opacity:.85; font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.72); }
+    .bubble .txt{ font-size: 13px; font-weight: 900; line-height: 1.45; white-space: pre-wrap; }
+
+    .spkBtn{
+      position:absolute;
+      right:8px;
+      bottom:8px;
+      width:34px;height:34px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;
+    }
+    .spkBtn:active{ transform: scale(.96); }
+    .spkBtn svg{ width:18px;height:18px; fill:none; stroke:#fff; stroke-width:2; opacity:.9; }
+
+    /* dock: panel içinde sabit kalsın */
+    .dock{
+      flex:0 0 auto;
+      padding: 12px 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.20);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .statusText{
+      font-size: 11px;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.75);
+      min-width: 110px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .btnLesson{
+      flex:1;
+      height:54px;
+      border-radius: 18px;
+      border:none;
+      background: var(--aiGrad);
+      color:#050510;
+      font-weight: 1000;
+      font-size: 14px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btnLesson:active{ transform: scale(.99); }
+
+    .btnTiny{
+      width:54px;
+      height:54px;
+      border-radius:18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      font-weight:1000;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btnTiny:active{ transform: scale(.99); }
   </style>
 </head>
 
@@ -192,23 +226,32 @@
   <main id="pageContent">
     <div class="wrap">
 
+      <div class="topRow">
+        <div class="leftTop">
+          <button class="backBtn" id="backBtn" aria-label="Geri">←</button>
+          <div class="mini-brand" id="logoHome" title="Ana sayfa">
+            <div class="logo-line"><span class="logo-main">italky</span><span class="logo-ai">AI</span></div>
+            <div class="logo-slogan">BE FREE</div>
+          </div>
+        </div>
+        <div class="pill" id="pillTry">●●●</div>
+      </div>
+
       <section class="panel">
         <div class="panelHeader">
           <div class="panelTitle">
-            <div class="teacherName" id="teacherName">Ders Hazırlanıyor...</div>
-            <div class="lessonInfo" id="lessonInfo">italkyAI Online Class</div>
+            <div class="teacherName" id="teacherName">—</div>
+            <div class="lessonInfo" id="lessonInfo">—</div>
           </div>
-          <div class="pill-status" id="pillScore">95% ACC</div>
+          <div class="panelBadges"><div class="miniPill" id="pillScore">95%</div></div>
         </div>
 
-        <div id="chat"></div>
+        <div class="chat" id="chat"></div>
 
         <div class="dock">
-          <div class="statusText" id="statusText">SİSTEM HAZIR</div>
-          <div id="pillTry" style="position: absolute; top: -25px; right: 20px; color: #fff; font-size: 10px; letter-spacing: 2px;"></div>
-          
-          <button class="btnTiny" id="btnBell" title="Zil">🔔</button>
-          <button class="btnLesson" id="btnLesson">Dersi Başlat</button>
+          <div class="statusText" id="statusText">READY</div>
+          <button class="btnTiny" id="btnBell" type="button" title="Zil">🔔</button>
+          <button class="btnLesson" id="btnLesson" type="button">Dersi Başlat</button>
         </div>
       </section>
 
@@ -217,14 +260,11 @@
 
   <script type="module">
     import { mountShell } from "/js/ui_shell.js";
-    
-    // UI Shell kurulumu (Logoyu shell kendi koyuyor zaten)
-    mountShell({ scroll: "none" });
+    // ✅ scroll AUTO olmalı ki footer boşluğu çalışsın, buton gömülmesin
+    mountShell({ scroll:"auto" });
 
-    // DOM hazır olduğunda JS sayfasını bağla
-    document.addEventListener("DOMContentLoaded", () => {
-      import("/js/teacher_course.page.js?v=" + Date.now());
-    });
+    // ✅ shell kurulduktan sonra JS’yi yükle
+    import("/js/teacher_course.page.js?v=TC_V2_001");
   </script>
 </body>
 </html>
