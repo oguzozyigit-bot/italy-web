@@ -1,3 +1,4 @@
+<!-- FILE: /pages/plan_select.html -->
 <!doctype html>
 <html lang="tr">
 <head>
@@ -18,25 +19,34 @@
       --glass: rgba(255, 255, 255, 0.04);
       --glass-border: rgba(255, 255, 255, 0.1);
       --ai-grad: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
+
+      /* Shell barlar üstüne binmesin diye güvenli boşluklar */
+      --shellTopPad: 48px;     /* ✅ daha yukarı */
+      --shellBottomPad: 92px;  /* ✅ alt bar üstünde */
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-    
-    #pageContent { 
-      height: 100vh; 
+
+    #pageContent {
+      height: 100vh;
       background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 80%);
       display: flex;
       flex-direction: column;
       position: relative;
-      /* ui_shell bar boşlukları */
-      padding-top: calc(env(safe-area-inset-top) + 60px);
-      padding-bottom: calc(env(safe-area-inset-bottom) + 85px);
+      padding-top: calc(env(safe-area-inset-top) + var(--shellTopPad));
+      padding-bottom: calc(env(safe-area-inset-bottom) + var(--shellBottomPad));
+      overflow: hidden;
     }
 
     .nebula {
       position: absolute; inset: -50%;
-      background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
-      filter: blur(80px); animation: rotate 20s linear infinite; pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(236,72,153,0.10) 0%, transparent 45%);
+      filter: blur(90px);
+      animation: rotate 22s linear infinite;
+      pointer-events: none;
+      opacity: .9;
     }
     @keyframes rotate { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
@@ -46,6 +56,7 @@
       max-width: 480px; margin: 0 auto; width: 100%;
       padding: 10px;
       display: flex; flex-direction: column;
+      min-height: 0;
     }
 
     .cockpit {
@@ -56,115 +67,300 @@
       backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
       display: flex; flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.45);
+      min-height: 0;
     }
 
     /* Üst Başlık Area */
     .c-head {
-      padding: 20px 20px 15px;
+      padding: 18px 20px 12px;
       display: flex; justify-content: space-between; align-items: flex-start;
     }
-    .c-title h2 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800; color: #fff; margin: 0; }
-    .c-title p { font-size: 11px; color: var(--accent); font-weight: 800; text-transform: uppercase; margin: 4px 0 0; letter-spacing: 1px; }
-    
+    .c-title h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      margin: 0;
+      letter-spacing: -.3px;
+    }
+    .c-title p {
+      font-size: 10px;
+      color: rgba(165,180,252,0.95);
+      font-weight: 900;
+      text-transform: uppercase;
+      margin: 4px 0 0;
+      letter-spacing: 1.2px;
+    }
+
     .t-badge {
-      background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border);
-      padding: 6px 12px; border-radius: 12px; color: #fff; font-size: 11px; font-weight: 800;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--glass-border);
+      padding: 6px 12px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
     }
 
     /* Bilgi Grid */
     .grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 20px; margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 0 20px;
+      margin-bottom: 12px;
     }
-    .g-item { background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: 16px; border: 1px solid var(--glass-border); }
-    .g-label { font-size: 9px; color: rgba(255,255,255,0.4); font-weight: 800; text-transform: uppercase; margin-bottom: 2px; }
-    .g-val { font-size: 14px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .g-item {
+      background: rgba(0,0,0,0.20);
+      padding: 10px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      min-width: 0;
+    }
+    .g-label {
+      font-size: 9px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      letter-spacing: 1px;
+    }
+    .g-val {
+      font-size: 14px;
+      font-weight: 900;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* AI Brifing Bölümü */
     .briefing {
       flex: 1;
-      margin: 0 20px 20px;
-      background: rgba(0,0,0,0.3);
+      min-height: 0;
+      margin: 0 20px 14px;
+      background: rgba(0,0,0,0.30);
       border: 1px solid var(--glass-border);
       border-radius: 20px;
-      padding: 16px;
-      display: flex; flex-direction: column;
+      padding: 14px 14px 12px;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+      position: relative;
     }
-    .b-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-    .ai-tag { font-size: 10px; font-weight: 900; color: var(--accent); display: flex; align-items: center; gap: 6px; }
-    .ai-tag::before { content: ""; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
-    
-    .type-line { font-family: 'SF Mono', monospace; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,0.85); overflow-y: auto; flex: 1; }
-    .cursor { display: inline-block; width: 7px; height: 14px; background: var(--accent); margin-left: 2px; vertical-align: middle; animation: blink 1s infinite; }
+    .briefing:before{
+      content:"";
+      position:absolute; inset:-40%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,.16) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,.10) 0%, transparent 45%);
+      filter: blur(50px);
+      animation: drift 10s ease-in-out infinite alternate;
+      pointer-events:none;
+      opacity: .9;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-10px,-6px,0) scale(1); }
+      to{ transform: translate3d(10px,8px,0) scale(1.06); }
+    }
+    .briefing > *{ position: relative; z-index: 2; }
+
+    .b-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 8px;
+      gap: 10px;
+    }
+    .ai-tag {
+      font-size: 10px;
+      font-weight: 1000;
+      color: rgba(165,180,252,0.95);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .ai-tag::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      background: #a5b4fc;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(165,180,252,0.55);
+    }
+
+    /* mini quick links */
+    .quick {
+      display:flex;
+      gap:8px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .qbtn{
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color:#fff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 900;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .qbtn:active{ transform: scale(.98); opacity:.9; }
+    .qbtn.primary{
+      background:#fff;
+      color:#000;
+      border:none;
+    }
+
+    .type-line {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.86);
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 4px;
+    }
+    .type-line::-webkit-scrollbar{ display:none; }
+    .cursor {
+      display: inline-block;
+      width: 7px;
+      height: 14px;
+      background: #a5b4fc;
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 1s infinite;
+    }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-    /* Butonlar - Panelin Altına Sabit */
-    .actions { padding: 0 20px 20px; display: flex; gap: 10px; }
-    .btn { height: 54px; border-radius: 18px; border: none; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+    .warn {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.30);
+      padding: 12px;
+      border-radius: 16px;
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 800;
+      margin: 0 20px 10px;
+      display: none;
+    }
+
+    .actions {
+      padding: 0 20px 18px;
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      height: 54px;
+      border-radius: 18px;
+      border: none;
+      font-weight: 1000;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
     .btn:active { transform: scale(0.96); }
     .btn-main { flex: 1; background: #fff; color: #000; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
     .btn-ghost { width: 70px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid var(--glass-border); }
 
-    .warn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 16px; color: #fca5a5; font-size: 12px; font-weight: 600; margin: 0 20px 15px; display: none; }
-    
-    .toast { position: fixed; top: 85px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #fff; color: #000; padding: 10px 22px; border-radius: 50px; font-weight: 800; font-size: 13px; z-index: 10000; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .toast {
+      position: fixed;
+      top: calc(env(safe-area-inset-top) + 18px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #fff;
+      color: #000;
+      padding: 10px 22px;
+      border-radius: 50px;
+      font-weight: 1000;
+      font-size: 13px;
+      z-index: 10000;
+      transition: 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
     .toast.show { transform: translateX(-50%) translateY(0); }
-    .replay-btn { background: none; border: none; color: var(--accent); font-weight: 800; font-size: 10px; cursor: pointer; padding: 4px; }
+
+    /* küçük ekran */
+    @media(max-height: 740px){
+      .c-title h2{ font-size: 18px; }
+      .briefing{ margin: 0 18px 12px; }
+      .grid{ padding: 0 18px; }
+      .actions{ padding: 0 18px 14px; }
+    }
   </style>
 </head>
 
 <body>
-<div class="nebula"></div>
-<main id="pageContent">
-  <div class="wrap">
-    <div class="cockpit">
-      <div class="c-head">
-        <div class="c-title">
-          <p>Oturum Hazırlığı</p>
-          <h2>italkyAI Pro</h2>
-        </div>
-        <div class="t-badge">15 Dakika</div>
-      </div>
+  <div class="nebula"></div>
 
-      <div class="grid">
-        <div class="g-item">
-          <div class="g-label">Kurs</div>
-          <div class="g-val" id="kvCourse">...</div>
-        </div>
-        <div class="g-item">
-          <div class="g-label">Seviye</div>
-          <div class="g-val" id="kvLevel">...</div>
-        </div>
-        <div class="g-item">
-          <div class="g-label">Hedef</div>
-          <div class="g-val" id="kvGoal">...</div>
-        </div>
-        <div class="g-item">
-          <div class="g-label">Oturum</div>
-          <div class="g-val">Birebir AI</div>
-        </div>
-      </div>
+  <main id="pageContent">
+    <div class="wrap">
+      <div class="cockpit">
 
-      <div class="briefing">
-        <div class="b-head">
-          <div class="ai-tag">AI KOÇ BRİFİNG</div>
-          <button class="replay-btn" id="btnReplay">🔊 TEKRAR</button>
+        <div class="c-head">
+          <div class="c-title">
+            <p>Oturum Hazırlığı</p>
+            <h2>italkyAI Pro</h2>
+          </div>
+          <div class="t-badge">15 Dakika</div>
         </div>
-        <div class="type-line" id="typeBox">Sistem yükleniyor...</div>
-      </div>
 
-      <div class="warn" id="warnBox"></div>
+        <div class="grid">
+          <div class="g-item">
+            <div class="g-label">Kurs</div>
+            <div class="g-val" id="kvCourse">...</div>
+          </div>
+          <div class="g-item">
+            <div class="g-label">Seviye</div>
+            <div class="g-val" id="kvLevel">...</div>
+          </div>
+          <div class="g-item">
+            <div class="g-label">Hedef</div>
+            <div class="g-val" id="kvGoal">...</div>
+          </div>
+          <div class="g-item">
+            <div class="g-label">Oturum</div>
+            <div class="g-val">Birebir AI</div>
+          </div>
+        </div>
 
-      <div class="actions">
-        <button class="btn btn-ghost" id="btnBack">Geri</button>
-        <button class="btn btn-main" id="btnStart">Dersi Başlat</button>
+        <div class="briefing">
+          <div class="b-head">
+            <div class="ai-tag">AI KOÇ BRİFİNG</div>
+            <div class="quick">
+              <button class="qbtn" id="btnGoPractice" type="button">AI ile Pratik</button>
+              <button class="qbtn" id="btnGoGames" type="button">Eğlenerek Öğren</button>
+            </div>
+          </div>
+          <div class="type-line" id="typeBox">Sistem yükleniyor...</div>
+        </div>
+
+        <div class="warn" id="warnBox"></div>
+
+        <div class="actions">
+          <button class="btn btn-ghost" id="btnBack">Geri</button>
+          <button class="btn btn-main" id="btnStart">Dersi Başlat</button>
+        </div>
+
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
 <script type="module">
   import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
@@ -172,14 +368,14 @@
 
   mountShell({ scroll:"none" });
 
-  const API_BASE = "https://italky-api.onrender.com";
   const $ = (id)=>document.getElementById(id);
 
   function toast(msg){
     const t = $("toast");
-    t.textContent = msg;
+    t.textContent = String(msg||"");
     t.classList.add("show");
-    setTimeout(()=>t.classList.remove("show"), 2000);
+    clearTimeout(window.__to2);
+    window.__to2 = setTimeout(()=>t.classList.remove("show"), 1600);
   }
 
   const params = new URLSearchParams(location.search);
@@ -196,74 +392,101 @@
   if(!session?.user) location.replace("/pages/login.html");
   const userId = session.user.id;
 
-  let prof = null;
-  const { data } = await supabase.from("profiles").select("tokens, full_name, levels").eq("id", userId).maybeSingle();
-  prof = data;
+  // profile read
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("tokens, full_name, levels")
+    .eq("id", userId)
+    .maybeSingle();
 
   const tokens = Number(prof?.tokens ?? 0);
   setHeaderTokens(tokens);
 
-  const name = prof?.full_name?.split(' ')[0] || "Öğrenci";
+  // ✅ isim: ilk isim + (ikinci isim varsa o da kalsın), soyadı at.
+  function firstNameOnly(full){
+    const s = String(full||"").trim().replace(/\s+/g," ");
+    if(!s) return "Öğrenci";
+    const parts = s.split(" ").filter(Boolean);
+    if(parts.length === 1) return parts[0];
+    if(parts.length === 2) return parts[0];           // Ad Soyad -> Ad
+    return parts.slice(0,2).join(" ");                // Ad İkinciAd Soyad -> Ad İkinciAd
+  }
+
+  const name = firstNameOnly(prof?.full_name);
   const level = ["A1","A2","B1","B2","C1"].includes(levelUrl) ? levelUrl : (prof?.levels?.[lang] || "A1");
   const goal = level === "A1" ? "A2" : level === "A2" ? "B1" : level === "B1" ? "B2" : "C1";
 
   $("kvLevel").textContent = level;
   $("kvGoal").textContent = goal;
 
+  // token uyarı (ders için)
   if(tokens <= 0){
     $("warnBox").style.display = "block";
-    $("warnBox").innerHTML = "⚠️ Jeton yetersiz. Lütfen yükleme yapın.";
+    $("warnBox").textContent = "⚠️ Jeton yetersiz. Lütfen yükleme yapın.";
     $("btnStart").textContent = "Jeton Yükle";
     $("btnStart").onclick = ()=>location.href="/pages/profile.html";
   }
 
   $("btnBack").onclick = ()=>history.back();
 
-  // Brifing metni Fold olmaması için biraz daha öz (compact) hale getirildi
-  const scriptText = `Selam ${name}. Seninle 15 dk ${LANGS[lang]} çalışacağız. Seviyeni ${level}'den ${goal} seviyesine beraber çıkaracağız. Hazırsan başlayalım!`;
+  // ✅ yönlendirme butonları
+  $("btnGoPractice").onclick = ()=>{
+    location.href = `/pages/practice_ai_session.html?lang=${encodeURIComponent(lang)}&t=${encodeURIComponent(teacherId)}&level=${encodeURIComponent(level)}`;
+  };
+  $("btnGoGames").onclick = ()=>{
+    location.href = `/pages/game_lang_select.html?lang=${encodeURIComponent(lang)}&t=${encodeURIComponent(teacherId)}&level=${encodeURIComponent(level)}`;
+  };
+
+  // ✅ Daha anlatıcı brifing (daktilo)
+  const courseName = LANGS[lang] || "bu derste";
+  const scriptText =
+`Selam ${name}.
+
+Şimdi seninle 15 dakika boyunca ${courseName} dersinde birlikte çalışacağız.
+
+Dersin sonunda:
+• Devam edebilirsin,
+• ya da ara verip sonra kaldığın yerden sürdürebilirsin.
+
+Benim sana net tavsiyem şu:
+Günde en az 60 dakikalık derslere katılırsan, seviyeni kısa sürede ${level} seviyesinden ${goal} seviyesine taşıyabiliriz.
+
+Ders dışında da iki destek var:
+• “AI ile Pratik Yap” → Hızlı konuşma & telaffuz,
+• “Eğlenerek Öğren” → Oyunlarla tekrar.
+
+Hazırsan başlıyoruz.`;
 
   async function typeWrite(text){
+    const box = $("typeBox");
     let out = "";
     for(let i=0; i<text.length; i++){
       out += text[i];
-      $("typeBox").innerHTML = out.replace(/\n/g, '<br>') + `<span class="cursor"></span>`;
-      let d = 20;
-      if(".!?".includes(text[i])) d += 150;
+      box.innerHTML = out.replace(/\n/g,'<br>') + `<span class="cursor"></span>`;
+      let d = 18;
+      const ch = text[i];
+      if(ch === "\n") d = 120;
+      if(".!?".includes(ch)) d = 140;
       await new Promise(r=>setTimeout(r, d));
+      box.scrollTop = box.scrollHeight;
     }
+    // cursor'u kaldır
+    box.innerHTML = out.replace(/\n/g,'<br>');
   }
 
-  let currentAudio = null;
-  async function speak(text){
-    try {
-      if(currentAudio) currentAudio.pause();
-      const r = await fetch(`${API_BASE}/api/tts`, {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ text, lang })
-      });
-      const j = await r.json();
-      if(j.audio_base64) {
-        currentAudio = new Audio("data:audio/mpeg;base64," + j.audio_base64);
-        currentAudio.play();
-      }
-    } catch(e){}
-  }
+  // start typing
+  $("typeBox").textContent = "";
+  await typeWrite(scriptText);
 
-  (async ()=>{
-    await typeWrite(scriptText);
-    await speak(scriptText);
-  })();
-
-  $("btnReplay").onclick = () => speak(scriptText);
-
+  // ders başlat
   $("btnStart").addEventListener("click", () => {
     if(tokens <= 0) return;
     localStorage.setItem("italky_lesson_mins", "15");
     localStorage.setItem("italky_course_lang", lang);
     localStorage.setItem("italky_course_level", level);
     localStorage.setItem("italky_teacher_pref", teacherId);
-    toast("Ders Başlıyor...");
-    setTimeout(()=>location.href="/pages/teacher_course.html", 600);
+    toast("Ders başlıyor…");
+    setTimeout(()=>location.href="/pages/teacher_course.html", 450);
   });
 </script>
 </body>
