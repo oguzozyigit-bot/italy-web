@@ -6,45 +6,255 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Ders</title>
   <link rel="icon" href="data:," />
+
+  <!-- ✅ white flash + dark lock -->
+  <meta name="theme-color" content="#02000f">
+  <style>
+    html,body{ background:#02000f !important; }
+  </style>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    #pageContent{ height:100%; }
-    .wrap{ height:100%; padding: 12px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
-    .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .chip{ padding:10px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.18); font-weight:1000; font-size:12px; color: rgba(255,255,255,0.86); white-space:nowrap; }
-    .card{ flex:1; border-radius: 28px; border: 1px solid rgba(255,255,255,0.10); background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%); padding: 14px 12px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
-    .sub{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.45; margin-top:-4px; }
-    .chat{ flex:1; overflow:auto; padding-right: 6px; display:flex; flex-direction:column; gap:10px; }
-    .bubble{ max-width: 92%; border-radius: 18px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.18); }
-    .me{ align-self:flex-end; background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.30); }
+    :root{
+      --bg:#02000f;
+      --border: rgba(255,255,255,0.12);
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(0,0,0,0.22);
+      --muted: rgba(255,255,255,0.72);
+      --muted2: rgba(255,255,255,0.55);
+      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);
+      --footerSafe: calc(var(--footerH, 92px) + env(safe-area-inset-bottom));
+    }
+
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+
+    html,body{
+      margin:0; padding:0;
+      width:100%; height:100%;
+      overflow:hidden;
+      background: var(--bg);
+      color:#fff;
+      font-family:'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    /* ✅ page background */
+    #pageContent{
+      height:100%;
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 50% -20%, rgba(99,102,241,0.35) 0%, rgba(2,0,15,0) 60%),
+        radial-gradient(circle at 15% 85%, rgba(236,72,153,0.18) 0%, rgba(2,0,15,0) 55%),
+        radial-gradient(circle at 85% 65%, rgba(168,85,247,0.16) 0%, rgba(2,0,15,0) 55%),
+        #02000f;
+    }
+
+    /* nebula drift layer */
+    #pageContent::before{
+      content:"";
+      position:absolute; inset:-35%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,.30) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
+        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
+      filter: blur(44px);
+      opacity:.9;
+      animation: drift 10s ease-in-out infinite alternate;
+      pointer-events:none;
+      z-index:0;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-10px,-8px,0) scale(1); }
+      to{ transform: translate3d(10px,10px,0) scale(1.06); }
+    }
+
+    .wrap{
+      position:relative;
+      z-index:1;
+      height:100%;
+      padding: 12px 12px calc(var(--footerSafe) + 14px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .chip{
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.28);
+      font-weight:1000;
+      font-size:12px;
+      color: rgba(255,255,255,0.92);
+      white-space:nowrap;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .card{
+      flex:1;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.24);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 14px 12px;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+    }
+
+    .sub{
+      font-size:13px;
+      font-weight:900;
+      color: var(--muted);
+      line-height:1.45;
+      margin-top:-4px;
+    }
+
+    .chat{
+      flex:1;
+      overflow:auto;
+      padding-right: 6px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .chat::-webkit-scrollbar{ display:none; }
+
+    .bubble{
+      max-width: 92%;
+      border-radius: 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.24);
+    }
+    .me{ align-self:flex-end; background: rgba(99,102,241,0.18); border-color: rgba(99,102,241,0.34); }
     .teacher{ align-self:flex-start; }
-    .bTop{ font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px; }
-    .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; }
-    .bTr{ margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.10); font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); white-space:pre-wrap; }
 
-    .task{ border-radius: 22px; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.18); padding: 12px 12px; }
-    .q{ font-weight:1000; font-size:13px; line-height:1.25; }
-    .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: rgba(255,255,255,0.70); line-height:1.35; }
-    .inp{ margin-top:10px; width:100%; height:48px; border-radius:18px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; font-weight:900; font-size:14px; padding: 0 12px; }
+    .bTop{ font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px; color: rgba(255,255,255,0.92); }
+    .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; color:#fff; }
+    .bTr{
+      margin-top:8px;
+      padding-top:8px;
+      border-top:1px solid rgba(255,255,255,0.10);
+      font-size:12px;
+      font-weight:900;
+      color: rgba(255,255,255,0.72);
+      white-space:pre-wrap;
+    }
 
-    .btnRow{ display:flex; gap:10px; }
-    .btn{ flex:1; height:54px; border-radius:22px; border:none; cursor:pointer; font-weight:1000; font-size:14px; color:#fff; background: linear-gradient(135deg, #A5B4FC, #4F46E5); box-shadow: 0 16px 44px rgba(79,70,229,.22); }
+    .task{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.22);
+      padding: 12px 12px;
+    }
+    .q{ font-weight:1000; font-size:13px; line-height:1.25; color:#fff; }
+    .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: var(--muted); line-height:1.35; }
+    .inp{
+      margin-top:10px;
+      width:100%;
+      height:48px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.07);
+      color:#fff;
+      font-weight:900;
+      font-size:14px;
+      padding: 0 12px;
+    }
+    .inp::placeholder{ color: rgba(255,255,255,0.45); }
+
+    .btnRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      flex:1;
+      min-width: 130px;
+      height:54px;
+      border-radius:22px;
+      border:none;
+      cursor:pointer;
+      font-weight:1000;
+      font-size:14px;
+      color:#070714;
+      background: var(--aiGrad);
+      box-shadow: 0 16px 44px rgba(79,70,229,.22);
+    }
     .btn:active{ transform: scale(.99); }
-    .ghost{ flex:1; height:54px; border-radius:22px; border:1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color:#fff; font-weight:1000; font-size:13px; cursor:pointer; }
+
+    .ghost{
+      flex:1;
+      min-width: 130px;
+      height:54px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.07);
+      color:#fff;
+      font-weight:1000;
+      font-size:13px;
+      cursor:pointer;
+    }
     .ghost:active{ transform: scale(.99); }
 
-    .toast{ position: fixed; left:50%; top:18px; transform:translateX(-50%) translateY(-120px); background:rgba(10,10,18,.92); border:1px solid rgba(165,180,252,.35); padding:10px 14px; border-radius:999px; color:#fff; z-index:99999; font-weight:900; font-size:12px; transition:.28s; backdrop-filter: blur(12px); pointer-events:none; max-width:min(92vw,520px); text-align:center; }
+    .toast{
+      position: fixed;
+      left:50%;
+      top:18px;
+      transform:translateX(-50%) translateY(-120px);
+      background:rgba(10,10,18,.92);
+      border:1px solid rgba(165,180,252,.35);
+      padding:10px 14px;
+      border-radius:999px;
+      color:#fff;
+      z-index:99999;
+      font-weight:900;
+      font-size:12px;
+      transition:.28s;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      pointer-events:none;
+      max-width:min(92vw,520px);
+      text-align:center;
+    }
     .toast.show{ transform:translateX(-50%) translateY(0); }
 
-    .overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); display:none; align-items:center; justify-content:center; padding:16px; z-index:999999; }
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:999999;
+    }
     .overlay.show{ display:flex; }
-    .modal{ width:min(520px,100%); border-radius:28px; border:1px solid rgba(255,255,255,0.12); background: rgba(10,10,18,0.92); padding:14px; }
-    .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; }
+
+    .modal{
+      width:min(520px,100%);
+      border-radius:28px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(10,10,18,0.92);
+      padding:14px;
+    }
+    .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; color:#fff; }
     .mText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; margin: 0 6px; white-space:pre-wrap; }
-    .mBtns{ display:flex; gap:10px; margin-top:12px; }
+    .mBtns{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
   </style>
 </head>
 
@@ -132,31 +342,12 @@
     const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
     if(!teacherId) location.href="/pages/teacher_select.html";
 
-    const LANGMAP = {
-      dora:"English", ayda:"Deutsch", jale:"Français", ozan:"Español",
-      sencer:"Italiano", sungur:"Русский", huma:"日本語", umay:"中文"
-    };
+    const urlParams = new URLSearchParams(location.search);
+    const TEACHER_TO_LANG = { dora:"en", ayda:"de", jale:"fr", sencer:"it", sungur:"ru", ozan:"es" };
+    const LANG_NAME_TR = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
+    const langCode = (urlParams.get("lang") || TEACHER_TO_LANG[teacherId] || "en").trim().toLowerCase();
+    $("whoChip").textContent = `${LANG_NAME_TR[langCode] || langCode.toUpperCase()} • 15 dk`;
 
-    const LANGTR = {
-      dora:"İngilizce", ayda:"Almanca", jale:"Fransızca", ozan:"İspanyolca",
-      sencer:"İtalyanca", sungur:"Rusça", huma:"Japonca", umay:"Çince"
-    };
-
-    // Default kadro (plan_select’te style yazılıyor; ama burada fallback)
-    const DEFAULT_COACH = {
-      dora:{ name:"Dora", style:"disciplined" },
-      ayda:{ name:"Ayda", style:"friendly" },
-      jale:{ name:"Jale", style:"expert" },
-      huma:{ name:"Hüma", style:"cheerful" },
-      sencer:{ name:"Sencer", style:"friendly" },
-      ozan:{ name:"Ozan", style:"cheerful" },
-      sungur:{ name:"Sungur", style:"disciplined" },
-      umay:{ name:"Umay", style:"expert" }
-    }[teacherId] || { name:"Dora", style:"friendly" };
-
-    $("whoChip").textContent = `${LANGMAP[teacherId] || "Language"} • 15 dk`;
-
-    // --- PROFILE & PREFS ---
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session) location.href="/pages/login.html";
 
@@ -177,80 +368,38 @@
     const prefs = (prof?.teacher_prefs && typeof prof.teacher_prefs === "object") ? prof.teacher_prefs : {};
     const cur = prefs?.[teacherId] || {};
 
+    const DEFAULT_COACH = {
+      dora:{ name:"Dora", style:"disciplined" },
+      ayda:{ name:"Ayda", style:"friendly" },
+      jale:{ name:"Jale", style:"expert" },
+      sencer:{ name:"Sencer", style:"friendly" },
+      ozan:{ name:"Ozan", style:"cheerful" },
+      sungur:{ name:"Sungur", style:"disciplined" }
+    }[teacherId] || { name:"Coach", style:"friendly" };
+
     const teacherName = String(cur?.teacher_name || DEFAULT_COACH.name).trim();
     const gender = String(cur?.gender || "female").trim();
     const style = String(cur?.style || DEFAULT_COACH.style).trim();
-    const studentHitap = String(cur?.student_hitap || "").trim();
 
     const fullName = String(prof?.full_name || "").trim();
     const fallbackStudent = fullName ? (fullName.split(/\s+/)[0] || fullName) : "Student";
-    const studentName = (studentHitap.length >= 3) ? studentHitap : fallbackStudent;
+    const studentName = fallbackStudent;
 
-    const level = String(prof?.levels?.[teacherId] || "A0");
+    const level = String((prof?.levels && typeof prof.levels==="object" ? (prof.levels[langCode] || "A1") : "A1")).toUpperCase();
+    $("coachSub").textContent = `Öğretmenin: ${teacherName} • Seviye: ${level}`;
 
-    $("coachSub").textContent = `Öğretmenin: ${teacherName} • (${gender === "male" ? "Erkek" : "Kadın"})`;
-
-    // --- İlk mesaj (hedef dil + TR) ---
-    const firstMsg = {
-      dora: {
-        t: `Hi ${studentName}! This is our first lesson, and I'm excited to meet you. How are you today?`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz ve seninle tanışmak için heyecanlıyım. Bugün nasılsın?`
-      },
-      ayda: {
-        t: `Hallo ${studentName}! Das ist unsere erste Stunde, und ich freue mich, dich kennenzulernen. Wie geht's dir heute?`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz ve seninle tanıştığım için mutluyum. Bugün nasılsın?`
-      },
-      jale: {
-        t: `Salut ${studentName} ! C’est notre premier cours et je suis ravie de faire ta connaissance. Comment ça va aujourd’hui ?`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz ve seninle tanıştığım için çok memnunum. Bugün nasılsın?`
-      },
-      ozan: {
-        t: `¡Hola ${studentName}! Es nuestra primera clase y me alegra conocerte. ¿Cómo estás hoy?`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz ve tanıştığımıza sevindim. Bugün nasılsın?`
-      },
-      sencer: {
-        t: `Ciao ${studentName}! È la nostra prima lezione e sono felice di conoscerti. Come stai oggi?`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz ve tanıştığımıza sevindim. Bugün nasılsın?`
-      },
-      sungur: {
-        t: `Привет, ${studentName}! Это наш первый урок, и я рад познакомиться. Как ты сегодня?`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz ve tanıştığımıza memnun oldum. Bugün nasılsın?`
-      },
-      huma: {
-        t: `はじめまして、${studentName}さん！はじめてのレッスンで、会えてうれしいです。今日は元気ですか？`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz, tanıştığımıza çok sevindim. Bugün nasılsın?`
-      },
-      umay: {
-        t: `你好，${studentName}！这是我们的第一节课，很高兴认识你。你今天怎么样？`,
-        tr:`Merhaba ${studentName}! Bu ilk dersimiz, tanıştığımıza sevindim. Bugün nasılsın?`
-      }
-    }[teacherId] || {
-      t: `Hi ${studentName}! I'm happy to meet you. How are you today?`,
-      tr:`Merhaba ${studentName}! Tanıştığımıza memnun oldum. Bugün nasılsın?`
-    };
-
-    addBubble({ who: teacherName, text: firstMsg.t, tr: firstMsg.tr });
+    addBubble({
+      who: teacherName,
+      text: `Hi ${studentName}! We will study together for 15 minutes. Are you ready?`,
+      tr:  `Selam ${studentName}! 15 dakika boyunca birlikte çalışacağız. Hazır mısın?`
+    });
 
     function setTask(task, taskTr){
       $("qText").textContent = task || "Write one sentence about your day.";
       $("qTr").textContent = taskTr || "Günün hakkında bir cümle yaz.";
     }
+    setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
 
-    // ilk görev dil bazlı
-    const firstTask = {
-      dora:   { t:"Write one sentence about your day.", tr:"Günün hakkında bir cümle yaz." },
-      ayda:   { t:"Schreibe einen Satz über deinen Tag.", tr:"Günün hakkında bir cümle yaz." },
-      jale:   { t:"Écris une phrase sur ta journée.", tr:"Günün hakkında bir cümle yaz." },
-      ozan:   { t:"Escribe una frase sobre tu día.", tr:"Günün hakkında bir cümle yaz." },
-      sencer: { t:"Scrivi una frase sulla tua giornata.", tr:"Günün hakkında bir cümle yaz." },
-      sungur: { t:"Напиши одно предложение о своём дне.", tr:"Günün hakkında bir cümle yaz." },
-      huma:   { t:"今日のことを一文で書いてください。", tr:"Günün hakkında bir cümle yaz." },
-      umay:   { t:"请写一句关于你今天的句子。", tr:"Günün hakkında bir cümle yaz." }
-    }[teacherId] || { t:"Write one sentence about your day.", tr:"Günün hakkında bir cümle yaz." };
-
-    setTask(firstTask.t, firstTask.tr);
-
-    // --- Timer ---
     let remainingSec = PLAN_MIN * 60;
     let tick = null;
     let sessionId = null;
@@ -295,16 +444,13 @@
     async function startNewSession(){
       const { data, error } = await supabase.rpc("start_course_15min", { p_teacher_id: teacherId });
       if(error){
-        // Jeton yoksa sadece uyarı + profile
         toast("Derse katılabilmek için jeton yüklemeniz gereklidir.");
         setTimeout(()=>location.href="/pages/profile.html", 600);
         return;
       }
-
       sessionId = data?.[0]?.session_id || null;
       localStorage.setItem(ACTIVE_KEY, sessionId || "");
       remainingSec = PLAN_MIN * 60;
-
       await refreshTokens();
     }
 
@@ -328,14 +474,13 @@
       const { data, error } = await supabase.functions.invoke("italky_teacher_chat", {
         body: {
           teacher_id: teacherId,
+          lang: langCode,
           teacher_name: teacherName,
-          role: LANGMAP[teacherId] || "English",
           level,
           student_name: studentName,
           user_text: userText,
           coach_gender: gender,
-          coach_style: style,
-          coach_voice: cur?.voice || "voice_1"
+          coach_style: style
         }
       });
       if(error) throw error;
@@ -353,39 +498,35 @@
       try{
         const res = await teacherReply(txt);
         addBubble({ who: teacherName, text: res?.teacher || "", tr: res?.tr || "" });
-        setTask(res?.task || firstTask.t, res?.task_tr || firstTask.tr);
+        setTask(res?.task || "Write one sentence about your day.", res?.task_tr || "Günün hakkında bir cümle yaz.");
       }catch(e){
         console.error(e);
         toast("Öğretmen yanıt veremedi");
       }
     }
 
-    async function endSessionWithRefund(){
-      if(!sessionId) return { refund_tokens:0, tokens_left:null, used_minutes:15 };
+    async function endSession(){
+      if(!sessionId) return { used_minutes:15 };
       try{
         const { data, error } = await supabase.rpc("end_course_with_refund", { p_session_id: sessionId });
         if(error) throw error;
-        return data?.[0] || { refund_tokens:0, tokens_left:null, used_minutes:15 };
+        return data?.[0] || { used_minutes:15 };
       }catch(e){
         console.warn(e);
-        return { refund_tokens:0, tokens_left:null, used_minutes:15 };
+        return { used_minutes:15 };
       } finally {
         try{ localStorage.removeItem(ACTIVE_KEY); }catch{}
       }
     }
 
     async function endAndAskContinue(autoTimeUp=false){
-      const r = await endSessionWithRefund();
+      const r = await endSession();
       await refreshTokens();
-
       const used = Number(r?.used_minutes ?? 15);
-      const refund = Number(r?.refund_tokens ?? 0);
 
-      // ✅ ÜCRET/Jeton lafı yok
       const txt =
         (autoTimeUp ? "15 dakika tamamlandı.\n" : "Ders kapatıldı.\n") +
-        `Kullanılan süre: ${used} dk\n` +
-        `İade: ${refund} Jeton\n\n` +
+        `Kullanılan süre: ${used} dk\n\n` +
         `Devam etmek ister misin?`;
 
       $("continueText").textContent = txt;
@@ -402,7 +543,7 @@
 
     $("btnExit").addEventListener("click", async ()=>{
       clearInterval(tick);
-      await endSessionWithRefund();
+      await endSession();
       await refreshTokens();
       location.href="/pages/home.html";
     });
@@ -412,10 +553,10 @@
       await startNewSession();
       addBubble({
         who: teacherName,
-        text: firstMsg.t,
-        tr: firstMsg.tr
+        text: `Hi ${studentName}! Ready to continue?`,
+        tr:  `Selam ${studentName}! Devam etmeye hazır mısın?`
       });
-      setTask(firstTask.t, firstTask.tr);
+      setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
       startTimer();
     });
 
@@ -424,13 +565,9 @@
       location.href="/pages/plan_select.html";
     });
 
-    // ---- BOOT ----
     const resumed = await tryResumeActive();
-    if(!resumed){
-      await startNewSession();
-    }
+    if(!resumed) await startNewSession();
     startTimer();
-
   </script>
 </body>
 </html>
