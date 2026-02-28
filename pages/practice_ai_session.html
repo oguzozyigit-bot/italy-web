@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • AI Pratik Oturumu</title>
+  <title>italkyAI • AI Pratik</title>
 
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
@@ -20,7 +20,9 @@
       --muted: rgba(255,255,255,0.70);
       --ok: rgba(34,197,94,0.95);
       --bad: rgba(255,90,140,0.95);
+      --warn: rgba(255,190,120,0.95);
       --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
+      --glass: rgba(10,10,30,0.18);
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
     #pageContent{ height:100%; }
@@ -34,12 +36,32 @@
       display:flex;
       flex-direction:column;
       gap:12px;
-      background: rgba(10,10,30,0.18);
+      background: var(--glass);
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 26px;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
+      overflow:hidden;
     }
+
+    /* hareketli arkaplan */
+    .wrap:before{
+      content:"";
+      position:absolute; inset:-35%;
+      background:
+        radial-gradient(circle at 18% 25%, rgba(99,102,241,.28) 0%, transparent 44%),
+        radial-gradient(circle at 82% 32%, rgba(236,72,153,.20) 0%, transparent 46%),
+        radial-gradient(circle at 55% 82%, rgba(168,85,247,.18) 0%, transparent 46%);
+      filter: blur(38px);
+      opacity:.9;
+      animation: drift 10s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-10px,-8px,0) scale(1); }
+      to{ transform: translate3d(10px,8px,0) scale(1.06); }
+    }
+    .wrap > *{ position:relative; z-index:2; }
 
     .topbar{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
     .chip{
@@ -70,26 +92,7 @@
       flex-direction:column;
       gap:12px;
       overflow:hidden;
-      position: relative;
     }
-
-    .panel:before{
-      content:"";
-      position:absolute; inset:-30%;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(99,102,241,.25) 0%, transparent 45%),
-        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
-        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
-      filter: blur(34px);
-      opacity:.85;
-      animation: drift 10s ease-in-out infinite alternate;
-      pointer-events:none;
-    }
-    @keyframes drift{
-      from{ transform: translate3d(-10px,-8px,0) scale(1); }
-      to{ transform: translate3d(10px,8px,0) scale(1.06); }
-    }
-    .panel > *{ position:relative; z-index:2; }
 
     .titleRow{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -113,14 +116,77 @@
       white-space: nowrap;
     }
 
+    /* 3 adım barı */
+    .steps{
+      display:flex; gap:8px; align-items:center;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.14);
+      padding: 10px;
+    }
+    .step{
+      flex:1;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.06);
+      padding: 10px;
+      text-align:center;
+      font-weight:1000;
+      font-size: 11px;
+      color: rgba(255,255,255,0.78);
+      display:flex; gap:8px; align-items:center; justify-content:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .step .dot{
+      width:8px; height:8px; border-radius:99px;
+      background: rgba(255,255,255,0.25);
+      box-shadow: 0 0 10px rgba(255,255,255,0.18);
+    }
+    .step.on{
+      background: rgba(99,102,241,0.14);
+      border-color: rgba(99,102,241,0.30);
+      color:#fff;
+    }
+    .step.on .dot{
+      background:#00f3ff;
+      box-shadow: 0 0 12px rgba(0,243,255,.55);
+      animation:pulseDot 1.05s ease-in-out infinite;
+    }
+    .step.ok{
+      background: rgba(34,197,94,0.14);
+      border-color: rgba(34,197,94,0.35);
+      color:#fff;
+    }
+    .step.ok .dot{
+      background: rgba(34,197,94,0.95);
+      box-shadow: 0 0 12px rgba(34,197,94,.45);
+    }
+    @keyframes pulseDot{ 0%,100%{transform:scale(1);opacity:.8} 50%{transform:scale(1.35);opacity:1} }
+
     .sentenceBox{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.18);
       padding: 12px;
-      min-height: 110px;
+      min-height: 118px;
+      position:relative;
+      overflow:hidden;
     }
+    .sentenceBox:after{
+      content:"";
+      position:absolute; inset:-2px;
+      background: linear-gradient(90deg, rgba(99,102,241,0), rgba(99,102,241,.45), rgba(236,72,153,0));
+      transform: translateX(-120%);
+      animation: scan 1.25s ease-in-out infinite;
+      opacity:.55;
+      pointer-events:none;
+    }
+    @keyframes scan{ 0%{transform:translateX(-130%)} 60%{transform:translateX(130%)} 100%{transform:translateX(130%)} }
+
     .sentence{
+      position:relative;
+      z-index:2;
       font-size: 16px;
       font-weight: 1000;
       line-height: 1.35;
@@ -128,10 +194,12 @@
       white-space: pre-wrap;
     }
     .hint{
+      position:relative;
+      z-index:2;
       margin-top: 6px;
       font-size: 11px;
       font-weight: 900;
-      color: rgba(255,255,255,0.62);
+      color: rgba(255,255,255,0.70);
       line-height:1.35;
     }
 
@@ -157,6 +225,7 @@
       gap:10px;
       user-select:none;
     }
+    .btn:active{ transform: scale(.99); }
     .btn:disabled{ opacity:.35; cursor:not-allowed; }
 
     .btn-primary{
@@ -178,8 +247,28 @@
       align-items:center;
       justify-content:center;
       box-shadow: 0 10px 30px rgba(99,102,241,0.25);
+      position:relative;
+      overflow:hidden;
     }
-    .mic:active{ transform: scale(.99); }
+    .mic:before{
+      content:"";
+      position:absolute; inset:-25px;
+      border:2px solid rgba(165,180,252,.35);
+      border-radius:50%;
+      animation:ripple 1.35s linear infinite;
+      opacity:.8;
+    }
+    .mic:after{
+      content:"";
+      position:absolute; inset:-12px;
+      border:2px solid rgba(236,72,153,.28);
+      border-radius:50%;
+      animation:ripple 1.35s linear infinite;
+      animation-delay:.55s;
+      opacity:.8;
+    }
+    @keyframes ripple{ 0%{transform:scale(.35);opacity:.9} 100%{transform:scale(1.25);opacity:0} }
+
     .mic.rec{
       background: linear-gradient(135deg, rgba(255,90,140,1) 0%, rgba(236,72,153,1) 60%, rgba(165,180,252,1) 100%);
     }
@@ -189,7 +278,7 @@
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.14);
       padding: 12px;
-      min-height: 92px;
+      min-height: 96px;
       overflow:auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -214,13 +303,14 @@
       font-weight: 1000;
       color:#fff;
       text-align:right;
-      max-width: 65%;
+      max-width: 70%;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
     }
     .v.ok{ color: var(--ok); }
     .v.bad{ color: var(--bad); }
+    .v.warn{ color: var(--warn); }
 
     .trans{
       margin-top: 8px;
@@ -231,13 +321,6 @@
       line-height: 1.45;
     }
     .trans .muted{ color: rgba(255,255,255,0.60); }
-
-    .note{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-      line-height:1.45;
-    }
 
     .toast{
       position: fixed;
@@ -262,7 +345,7 @@
 
     @media (max-height: 740px){
       .sentence{ font-size: 15px; }
-      .sentenceBox{ min-height: 96px; }
+      .sentenceBox{ min-height: 102px; }
       .btn{ height: 50px; }
       .mic{ width:50px; min-width:50px; height:50px; }
     }
@@ -283,9 +366,15 @@
           <div class="lvl" id="levelPill">—</div>
         </div>
 
+        <div class="steps" aria-label="steps">
+          <div class="step on" id="st1"><span class="dot"></span>Dinlet</div>
+          <div class="step" id="st2"><span class="dot"></span>Tekrar Et</div>
+          <div class="step" id="st3"><span class="dot"></span>Geç</div>
+        </div>
+
         <div class="sentenceBox">
           <div class="sentence" id="sentence">Yükleniyor…</div>
-          <div class="hint" id="hint">Önce sesi dinle, sonra mikrofona basıp tekrar et.</div>
+          <div class="hint" id="hint">Dinlet ➜ Mikrofon ➜ Başarılı olunca otomatik geçer.</div>
         </div>
 
         <div class="actions">
@@ -304,7 +393,7 @@
             <div class="v" id="simStatus">—</div>
           </div>
           <div class="trans" id="transBox">
-            <span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>
+            <span class="muted">İstersen anlamını görmek için</span> “Anlam” <span class="muted">bas.</span>
           </div>
         </div>
 
@@ -312,11 +401,6 @@
           <button class="btn" id="btnMeaning" type="button">📝 Anlam</button>
           <button class="btn" id="btnRepeat" type="button">↻ Tekrar</button>
           <button class="btn" id="btnExit" type="button">Çık</button>
-        </div>
-
-        <div class="note" id="note">
-          • Seviye bazlı eşik uygulanır. Ses benzerliği yeterliyse “Sonraki” açılır.<br/>
-          • Havuz tekrar etmeyecek şekilde karıştırılır. (Oturum içinde tekrar yok)
         </div>
       </section>
     </div>
@@ -345,12 +429,9 @@
 
     function qs(k){ return new URLSearchParams(location.search).get(k); }
 
-    // params
     const lang = String(qs("lang") || "en").trim().toLowerCase();
-    const teacher = String(qs("t") || "").trim();
-    const levelQ = String(qs("level") || "").trim().toUpperCase(); // A1..C1
+    const levelQ = String(qs("level") || "").trim().toUpperCase();
 
-    // ui labels
     const LANG_META = {
       en:{ name:"English",  flag:"🇬🇧" },
       de:{ name:"German",   flag:"🇩🇪" },
@@ -364,7 +445,6 @@
     $("chipRight").textContent = `${meta.flag} ${lang.toUpperCase()}`;
     $("langTitle").textContent = `${meta.name} • Konuşma Pratiği`;
 
-    // auth check + user name
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session?.user){
       location.replace("/pages/login.html");
@@ -372,7 +452,6 @@
     }
     const userId = session.user.id;
 
-    // get profile info (name + levels)
     let fullName = "";
     let levels = {};
     try{
@@ -401,10 +480,16 @@
     const level = pickLevel(levelQ || (levels?.[lang] || "A1"));
     $("levelPill").textContent = `Seviye: ${level}`;
 
-    // thresholds by level
     const THRESH = { A1:0.72, A2:0.75, B1:0.78, B2:0.82, C1:0.85 };
 
-    // ------------- Practice Pool from Storage -------------
+    // Steps UI helper
+    function setStep(a,b,c){
+      const s1=$("st1"), s2=$("st2"), s3=$("st3");
+      s1.className = "step" + (a==="on"?" on":a==="ok"?" ok":"");
+      s2.className = "step" + (b==="on"?" on":b==="ok"?" ok":"");
+      s3.className = "step" + (c==="on"?" on":c==="ok"?" ok":"");
+    }
+
     async function loadPool(){
       const url = `${PRACTICE_POOL_BASE}/${encodeURIComponent(lang)}.json`;
       const r = await fetch(url, { cache:"no-store" });
@@ -414,8 +499,6 @@
       }
       const j = await r.json().catch(()=>null);
       if(!j) throw new Error("practice pool json okunamadı");
-
-      // kabul: {A1:[..],A2:[..]} veya {levels:{A1:[..]}}
       if(j.levels && typeof j.levels === "object") return j.levels;
       return j;
     }
@@ -429,30 +512,56 @@
       return a;
     }
 
-    // oturum listesi: tekrar yok
-    let sessionQueue = [];
-    let sessionIndex = 0;
-
     function pickFromPool(pool, lv){
       const byLevel = pool?.[lv];
       if(Array.isArray(byLevel) && byLevel.length) return byLevel;
-
-      // fallback: A1
       const a1 = pool?.A1;
       if(Array.isArray(a1) && a1.length) return a1;
-
-      // fallback: ilk array bul
       for(const k of ["A2","B1","B2","C1"]){
         if(Array.isArray(pool?.[k]) && pool[k].length) return pool[k];
       }
       return [];
     }
 
-    // state
-    let current = "";
-    let lastRecognized = "";
-    let lastSimilarity = 0;
+    let sessionQueue = [];
+    let sessionIndex = 0;
 
+    let current = "";
+    let recording = false;
+
+    function setGreeting(){
+      const greet = {
+        en: `Hello ${who}! You are ${level}. Let's practice.`,
+        de: `Hallo ${who}! Du bist ${level}. Los geht's.`,
+        fr: `Salut ${who} ! Niveau ${level}. On commence.`,
+        it: `Ciao ${who}! Livello ${level}. Iniziamo.`,
+        es: `Hola ${who}! Nivel ${level}. Empezamos.`,
+        ru: `Привет, ${who}! Уровень ${level}. Начнём.`
+      };
+      $("hint").textContent = greet[lang] || `Selam ${who}! Şu an ${level} seviyesindesin. Başlıyoruz.`;
+    }
+
+    function setSentenceUI(){
+      $("sentence").textContent = current;
+      $("sttStatus").textContent = "Hazır";
+      $("simStatus").textContent = "—";
+      $("simStatus").className = "v";
+      $("btnNext").disabled = true;
+      $("transBox").innerHTML = `<span class="muted">İstersen anlamını görmek için</span> “Anlam” <span class="muted">bas.</span>`;
+      setStep("on","","");
+    }
+
+    function nextSentence(){
+      if(sessionIndex >= sessionQueue.length){
+        sessionQueue = shuffle(sessionQueue);
+        sessionIndex = 0;
+      }
+      current = sessionQueue[sessionIndex] || "";
+      sessionIndex++;
+      setSentenceUI();
+    }
+
+    // text similarity (basit)
     function normText(s){
       return String(s||"")
         .toLowerCase()
@@ -461,7 +570,6 @@
         .replace(/\s+/g, " ")
         .trim();
     }
-
     function levenshtein(a, b){
       a = normText(a); b = normText(b);
       const m = a.length, n = b.length;
@@ -481,7 +589,6 @@
       }
       return dp[m][n];
     }
-
     function similarity(a, b){
       a = normText(a); b = normText(b);
       if(!a && !b) return 1;
@@ -491,17 +598,20 @@
     }
 
     function setSimilarityUI(sim){
-      lastSimilarity = sim;
       const t = THRESH[level] ?? 0.75;
       const pct = Math.round(sim * 100);
+
       if(sim >= t){
         $("simStatus").textContent = `%${pct} • Başarılı`;
         $("simStatus").className = "v ok";
         $("btnNext").disabled = false;
 
-        // ✅ otomatik sonraki (çok hızlı olmasın)
+        setStep("ok","ok","on");
+
+        // ✅ auto-next (kayıt sürerken geçme)
         setTimeout(()=>{
           try{
+            if(recording) return;
             if(!$("btnNext").disabled) $("btnNext").click();
           }catch{}
         }, 650);
@@ -510,43 +620,11 @@
         $("simStatus").textContent = `%${pct} • Tekrar`;
         $("simStatus").className = "v bad";
         $("btnNext").disabled = true;
+        setStep("ok","on","");
       }
     }
 
-    function setGreeting(){
-      // seçilen dilde selam hissi (çok basit ama etkili)
-      const greet = {
-        en: `Hello ${who}! You are currently at ${level} level. Let's practice together.`,
-        de: `Hallo ${who}! Du bist gerade auf Niveau ${level}. Lass uns zusammen üben.`,
-        fr: `Salut ${who} ! Tu es au niveau ${level}. On va pratiquer ensemble.`,
-        it: `Ciao ${who}! Sei al livello ${level}. Facciamo pratica insieme.`,
-        es: `Hola ${who}! Estás en nivel ${level}. Vamos a practicar juntos.`,
-        ru: `Привет, ${who}! У тебя уровень ${level}. Давай потренируемся вместе.`
-      };
-      $("hint").textContent = greet[lang] || `Selam ${who}! Şu an ${level} seviyesindesin. Başlıyoruz.`;
-    }
-
-    function setSentenceUI(){
-      $("sentence").textContent = current;
-      $("sttStatus").textContent = "Hazır";
-      $("simStatus").textContent = "—";
-      $("simStatus").className = "v";
-      $("btnNext").disabled = true;
-      $("transBox").innerHTML = `<span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>`;
-    }
-
-    function nextSentence(){
-      if(sessionIndex >= sessionQueue.length){
-        // bitti -> yeniden karıştır (tekrar olacak ama oturum turu bittiğinde)
-        sessionQueue = shuffle(sessionQueue);
-        sessionIndex = 0;
-      }
-      current = sessionQueue[sessionIndex] || "";
-      sessionIndex++;
-      setSentenceUI();
-    }
-
-    // ---- TTS (backend) ----
+    // TTS
     async function ttsSpeak(text){
       const payload1 = { text, lang };
       const payload2 = { input: text, lang };
@@ -559,7 +637,6 @@
         });
 
         const ct = (r.headers.get("content-type") || "").toLowerCase();
-
         if(!r.ok){
           const t = await r.text().catch(()=> "");
           throw new Error(`TTS HTTP ${r.status} ${t}`);
@@ -593,11 +670,10 @@
       catch{ await tryReq(payload2); }
     }
 
-    // ---- STT (record -> backend) ----
+    // STT
     let mediaStream = null;
     let recorder = null;
     let chunks = [];
-    let recording = false;
 
     async function ensureMic(){
       if(mediaStream) return mediaStream;
@@ -606,12 +682,7 @@
     }
 
     function pickMime(){
-      const candidates = [
-        "audio/webm;codecs=opus",
-        "audio/webm",
-        "audio/ogg;codecs=opus",
-        "audio/ogg"
-      ];
+      const candidates = ["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
       for(const c of candidates){
         if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) return c;
       }
@@ -646,7 +717,6 @@
           const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" });
           $("sttStatus").textContent = "Çözümleniyor…";
           const text = await sttSend(blob);
-          lastRecognized = text;
           $("sttStatus").textContent = text;
 
           const sim = similarity(text, current);
@@ -658,6 +728,7 @@
           $("btnNext").disabled = true;
           $("simStatus").textContent = "—";
           $("simStatus").className = "v";
+          setStep("ok","on","");
         } finally {
           recording = false;
           $("btnRec").classList.remove("rec");
@@ -672,7 +743,7 @@
       $("simStatus").textContent = "—";
       $("simStatus").className = "v";
       $("btnNext").disabled = true;
-
+      setStep("ok","on","");
       recorder.start();
     }
 
@@ -680,7 +751,7 @@
       try{ if(recorder && recorder.state !== "inactive") recorder.stop(); }catch{}
     }
 
-    // ---- Meaning (optional) ----
+    // Meaning
     async function translateMeaning(){
       const payload = { text: current, source_lang: lang, target_lang: "tr" };
       try{
@@ -704,12 +775,13 @@
       }
     }
 
-    // ---- UI hooks ----
+    // UI
     $("btnPlay").onclick = async ()=>{
       try{
         $("btnPlay").disabled = true;
-        toast("Ses hazırlanıyor…");
+        setStep("on","","");
         await ttsSpeak(current);
+        setStep("ok","on","");
       }catch(e){
         toast(e?.message || String(e));
       }finally{
@@ -723,7 +795,9 @@
         $("sttStatus").textContent = "Hazır";
         $("simStatus").textContent = "—";
         $("simStatus").className = "v";
+        setStep("on","","");
         await ttsSpeak(current);
+        setStep("ok","on","");
       }catch(e){
         toast(e?.message || String(e));
       }
@@ -744,33 +818,29 @@
     };
 
     $("btnNext").onclick = ()=>{
+      setStep("ok","ok","ok");
       nextSentence();
       setTimeout(()=>{ try{ $("btnPlay").click(); }catch{} }, 250);
     };
 
-    $("btnExit").onclick = ()=>{
-      location.href = "/pages/practice_ai.html";
-    };
+    $("btnExit").onclick = ()=>location.href = "/pages/practice_ai.html";
 
-    // ---- init ----
+    // init
     try{
       $("sentence").textContent = "Havuz yükleniyor…";
       setGreeting();
 
-      const pool = await loadPool();          // {A1:[...],...}
-      const raw = pickFromPool(pool, level);  // level array
+      const pool = await loadPool();
+      const raw = pickFromPool(pool, level);
 
-      // oturum kuyruğu: karıştır + ilk 60 öğe (çok uzamasın)
-      sessionQueue = shuffle(raw).slice(0, Math.max(60, Math.min(200, raw.length)));
+      const TAKE = Math.min(200, raw.length);   // ✅ net limit
+      sessionQueue = shuffle(raw).slice(0, TAKE);
       sessionIndex = 0;
 
-      if(!sessionQueue.length){
-        throw new Error("Havuz boş görünüyor.");
-      }
+      if(!sessionQueue.length) throw new Error("Havuz boş görünüyor.");
 
       nextSentence();
 
-      // otomatik ilk dinletme
       setTimeout(()=>{ try{ $("btnPlay").click(); }catch{} }, 350);
 
     }catch(e){
@@ -780,7 +850,6 @@
       $("btnRec").disabled = true;
       $("btnNext").disabled = true;
     }
-
   </script>
 </body>
 </html>
