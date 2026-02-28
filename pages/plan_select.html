@@ -29,10 +29,8 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      overflow: hidden;
     }
 
-    /* Arka Plan Hareketli Nebula Efekti */
     .nebula {
       position: absolute;
       inset: -50%;
@@ -49,15 +47,14 @@
       position: relative;
       z-index: 1;
       height: 100%;
-      padding: 16px 16px calc(var(--footerH, 80px) + env(safe-area-inset-bottom) + 20px);
+      padding: 16px;
+      padding-bottom: calc(var(--footerH, 80px) + env(safe-area-inset-bottom) + 10px);
       display: flex;
       flex-direction: column;
       max-width: 500px;
       margin: 0 auto;
-      gap: 20px;
     }
 
-    /* Ana Panel - Glassmorphism Pro */
     .panel {
       flex: 1;
       background: rgba(255, 255, 255, 0.03);
@@ -69,13 +66,14 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
     }
 
     .head {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .title-area h2 {
@@ -84,14 +82,13 @@
       font-weight: 800;
       color: #fff;
       margin: 0;
-      letter-spacing: -0.5px;
     }
 
     .title-area p {
-      font-size: 13px;
+      font-size: 11px;
       color: var(--accent);
       margin: 4px 0 0;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -99,187 +96,115 @@
     .time-chip {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid var(--glass-border);
-      padding: 8px 14px;
-      border-radius: 16px;
+      padding: 6px 12px;
+      border-radius: 12px;
       color: #fff;
       font-weight: 800;
-      font-size: 12px;
+      font-size: 11px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
 
-    /* Bilgi Kartları Grid */
     .stats-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
     .stat-box {
       background: rgba(0, 0, 0, 0.2);
       border: 1px solid var(--glass-border);
-      padding: 12px 16px;
-      border-radius: 18px;
+      padding: 10px 14px;
+      border-radius: 16px;
     }
 
     .stat-label {
-      font-size: 10px;
-      color: rgba(255,255,255,0.5);
+      font-size: 9px;
+      color: rgba(255,255,255,0.4);
       font-weight: 800;
       text-transform: uppercase;
-      margin-bottom: 4px;
-      letter-spacing: 0.5px;
+      margin-bottom: 2px;
     }
 
-    .stat-value {
-      font-size: 16px;
-      font-weight: 800;
-      color: #fff;
-    }
+    .stat-value { font-size: 14px; font-weight: 800; color: #fff; }
 
-    /* Brifing Alanı (Cyber Style) */
     .script-container {
       flex: 1;
       background: rgba(0, 0, 0, 0.3);
       border: 1px solid var(--glass-border);
-      border-radius: 22px;
-      padding: 18px;
-      position: relative;
+      border-radius: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      margin-bottom: 20px;
     }
 
     .script-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 10px;
+      margin-bottom: 10px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 8px;
     }
 
-    .ai-label {
-      font-size: 11px;
-      font-weight: 900;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .ai-label::before {
-      content: "";
-      width: 6px;
-      height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-      box-shadow: 0 0 10px var(--accent);
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    .ai-label { font-size: 10px; font-weight: 900; color: var(--accent); display: flex; align-items: center; gap: 6px; }
 
     .type-line {
-      font-family: 'SF Mono', 'Consolas', monospace;
-      font-size: 14px;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.9);
+      font-family: 'SF Mono', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.85);
       overflow-y: auto;
       flex: 1;
-      padding-right: 4px;
     }
 
-    .type-line::-webkit-scrollbar { width: 4px; }
-    .type-line::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
-
-    .cursor {
-      display: inline-block;
-      width: 8px;
-      height: 15px;
-      background: var(--accent);
-      margin-left: 2px;
-      vertical-align: middle;
-      animation: blink 1s infinite;
-    }
+    .cursor { display: inline-block; width: 7px; height: 14px; background: var(--accent); margin-left: 2px; vertical-align: middle; animation: blink 1s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-    /* Butonlar */
-    .btn-row {
+    /* BUTONLAR PANELİN İÇİNE ALINDI */
+    .footer-actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
     }
 
     .btn {
-      height: 60px;
-      border-radius: 20px;
+      height: 54px;
+      border-radius: 18px;
       border: none;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: 0.2s;
     }
 
-    .btn:active { transform: scale(0.95); }
+    .btn:active { transform: scale(0.96); }
 
     .btn-main {
       flex: 1;
       background: #fff;
       color: #000;
-      box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
 
     .btn-ghost {
-      width: 80px;
-      background: rgba(255, 255, 255, 0.1);
+      width: 70px;
+      background: rgba(255, 255, 255, 0.08);
       color: #fff;
       border: 1px solid var(--glass-border);
     }
 
-    .warn {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      padding: 12px;
-      border-radius: 16px;
-      color: #fca5a5;
-      font-size: 12px;
-      font-weight: 600;
-      margin-top: 12px;
-      display: none;
-    }
+    .warn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 16px; color: #fca5a5; font-size: 12px; font-weight: 600; margin-bottom: 12px; display: none; }
 
-    .toast {
-      position: fixed;
-      top: 30px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: rgba(255, 255, 255, 0.95);
-      color: #000;
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-weight: 700;
-      font-size: 14px;
-      z-index: 10000;
-      transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
+    .toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #fff; color: #000; padding: 12px 24px; border-radius: 50px; font-weight: 800; font-size: 13px; z-index: 10000; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
     .toast.show { transform: translateX(-50%) translateY(0); }
-
-    .replay-btn {
-      background: none;
-      border: none;
-      color: var(--accent);
-      font-weight: 800;
-      font-size: 11px;
-      text-transform: uppercase;
-      cursor: pointer;
-      padding: 4px 8px;
-    }
+    .replay-btn { background: none; border: none; color: var(--accent); font-weight: 800; font-size: 10px; cursor: pointer; }
   </style>
 </head>
 
@@ -291,30 +216,27 @@
     <div class="panel">
       <div class="head">
         <div class="title-area">
-          <p>Mevcut Oturum</p>
-          <h2>Ders Hazırlığı</h2>
+          <p id="topSub">Hazırlık Tamamlanıyor</p>
+          <h2>Ders Planı</h2>
         </div>
-        <div class="time-chip">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          15 dk
-        </div>
+        <div class="time-chip">15 Dakika</div>
       </div>
 
       <div class="stats-grid">
         <div class="stat-box">
-          <div class="stat-label">Ders</div>
-          <div class="stat-value" id="kvCourse">—</div>
+          <div class="stat-label">Kurs</div>
+          <div class="stat-value" id="kvCourse">...</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">Seviye</div>
-          <div class="stat-value" id="kvLevel">—</div>
+          <div class="stat-label">Mevcut</div>
+          <div class="stat-value" id="kvLevel">...</div>
         </div>
         <div class="stat-box">
-          <div class="stat-label">Jeton Hedefi</div>
-          <div class="stat-value" id="kvGoal">A2</div>
+          <div class="stat-label">Hedef Seviye</div>
+          <div class="stat-value" id="kvGoal">...</div>
         </div>
-        <div class="stat-box" style="border-color: var(--accent);">
-          <div class="stat-label">Mod</div>
+        <div class="stat-box">
+          <div class="stat-label">Oturum</div>
           <div class="stat-value">Birebir AI</div>
         </div>
       </div>
@@ -322,23 +244,23 @@
       <div class="script-container">
         <div class="script-header">
           <div class="ai-label">AI KOÇ BRİFİNG</div>
-          <button class="replay-btn" id="btnReplay">🔊 Tekrar Oynat</button>
+          <button class="replay-btn" id="btnReplay">🔊 TEKRAR</button>
         </div>
-        <div class="type-line" id="typeBox">
-          Sistem başlatılıyor...
-        </div>
-        <div class="warn" id="warnBox"></div>
+        <div class="type-line" id="typeBox">Başlatılıyor...</div>
+      </div>
+
+      <div class="warn" id="warnBox"></div>
+
+      <div class="footer-actions">
+        <button class="btn btn-ghost" id="btnBack">Geri</button>
+        <button class="btn btn-main" id="btnStart">Dersi Başlat</button>
       </div>
     </div>
 
-    <div class="btn-row">
-      <button class="btn btn-ghost" id="btnBack">Geri</button>
-      <button class="btn btn-main" id="btnStart">Dersi Başlat</button>
-    </div>
-
-    <div class="toast" id="toast"></div>
   </div>
 </main>
+
+<div class="toast" id="toast"></div>
 
 <script type="module">
   import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
@@ -348,130 +270,90 @@
 
   const API_BASE = "https://italky-api.onrender.com";
   const $ = (id)=>document.getElementById(id);
-  const warn = $("warnBox");
-  const btnStart = $("btnStart");
 
   function toast(msg){
     const t = $("toast");
-    if(!t) return;
-    t.textContent = String(msg||"");
+    t.textContent = msg;
     t.classList.add("show");
-    clearTimeout(window.__to);
-    window.__to = setTimeout(()=>t.classList.remove("show"), 2000);
+    setTimeout(()=>t.classList.remove("show"), 2000);
   }
 
   const params = new URLSearchParams(location.search);
-  const teacherId = String(params.get("t") || localStorage.getItem("italky_teacher_pref") || "").trim();
+  const teacherId = params.get("t") || localStorage.getItem("italky_teacher_pref");
   if(!teacherId) location.replace("/pages/teacher_select.html");
-  localStorage.setItem("italky_teacher_pref", teacherId);
 
-  const lang = String(params.get("lang") || "en").trim().toLowerCase();
-  const levelFromUrl = String(params.get("level") || "").trim().toUpperCase();
+  const lang = (params.get("lang") || "en").toLowerCase();
+  const levelUrl = (params.get("level") || "").toUpperCase();
 
-  const LANG_NAMES_TR = {
-    en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca"
-  };
-  const courseName = LANG_NAMES_TR[lang] ? `${LANG_NAMES_TR[lang]} Dersi` : "Dil Dersi";
-  $("kvCourse").textContent = courseName;
+  const LANGS = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
+  $("kvCourse").textContent = LANGS[lang] || "Dil Dersi";
 
   const { data:{ session } } = await supabase.auth.getSession();
   if(!session?.user) location.replace("/pages/login.html");
   const userId = session.user.id;
 
   let prof = null;
-  try{
-    const { data, error } = await supabase.from("profiles").select("tokens, full_name, levels").eq("id", userId).maybeSingle();
-    if(!error) prof = data || null;
-  }catch{}
+  const { data } = await supabase.from("profiles").select("tokens, full_name, levels").eq("id", userId).maybeSingle();
+  prof = data;
 
   const tokens = Number(prof?.tokens ?? 0);
-  try{ setHeaderTokens(tokens); }catch{}
+  setHeaderTokens(tokens);
 
-  function firstNameNoSurname(full){
-    const s = String(full||"").trim();
-    if(!s) return "";
-    const parts = s.split(/\s+/).filter(Boolean);
-    return parts.length === 1 ? parts[0] : parts.slice(0, -1).join(" ");
-  }
-  const firstName = firstNameNoSurname(prof?.full_name) || "Öğrenci";
+  const name = prof?.full_name?.split(' ')[0] || "Öğrenci";
+  const level = ["A1","A2","B1","B2","C1"].includes(levelUrl) ? levelUrl : (prof?.levels?.[lang] || "A1");
+  const goal = level === "A1" ? "A2" : level === "A2" ? "B1" : level === "B1" ? "B2" : "C1";
 
-  const levels = (prof?.levels && typeof prof.levels==="object") ? prof.levels : {};
-  const level = (["A1","A2","B1","B2","C1"].includes(levelFromUrl) ? levelFromUrl : (levels?.[lang] || "A1"));
   $("kvLevel").textContent = level;
-
-  const goal = (level === "A1") ? "A2" : (level === "A2" ? "B1" : (level === "B1" ? "B2" : (level === "B2" ? "C1" : "C1")));
   $("kvGoal").textContent = goal;
 
-  function showNoTokens(){
-    warn.style.display = "block";
-    warn.innerHTML = `⚠️ <b>Jeton Yetersiz:</b> Derse katılabilmek için yeterli jetonunuz bulunmuyor.`;
-    btnStart.textContent = "Jeton Satın Al";
-    btnStart.style.background = "#ef4444";
-    btnStart.style.color = "#fff";
-    btnStart.onclick = ()=>location.href="/pages/profile.html";
+  if(tokens <= 0){
+    $("warnBox").style.display = "block";
+    $("warnBox").innerHTML = "⚠️ Jetonunuz tükenmiş. Lütfen yükleme yapın.";
+    $("btnStart").textContent = "Jeton Yükle";
+    $("btnStart").onclick = ()=>location.href="/pages/profile.html";
   }
-  if(tokens <= 0) showNoTokens();
 
   $("btnBack").onclick = ()=>history.back();
 
-  const scriptText = `Selam ${firstName}. Seninle 15 dakika boyunca ${courseName.replace(" Dersi","")} dersinde birlikte çalışacağız. 
-Günde en az 60 dakika çalışarak seviyeni kısa sürede ${level}'den ${goal} seviyesine çıkartabiliriz. 
-Hazırsan sistemi başlatalım mı?`;
+  const script = `Selam ${name}. Seninle 15 dk ${LANGS[lang]} çalışacağız. Seviyeni ${level}'den ${goal} seviyesine beraber çıkaracağız. Hazırsan başlayalım!`;
 
   async function typeWrite(text){
-    const box = $("typeBox");
-    const cursor = `<span class="cursor"></span>`;
     let out = "";
-    box.innerHTML = cursor;
-
-    for(let i=0;i<text.length;i++){
+    for(let i=0; i<text.length; i++){
       out += text[i];
-      box.innerHTML = out.replace(/\n/g, '<br>') + cursor;
-      let d = 15 + Math.random() * 20;
-      if(".!?".includes(text[i])) d += 200;
-      await new Promise(r=>setTimeout(r, d));
+      $("typeBox").innerHTML = out + `<span class="cursor"></span>`;
+      await new Promise(r=>setTimeout(r, 20));
     }
   }
 
-  let currentAudio = null;
   async function speak(text){
-    try{
-      if(currentAudio) { currentAudio.pause(); currentAudio = null; }
-      const r = await fetch(`${API_BASE}/api/tts`,{
+    try {
+      const r = await fetch(`${API_BASE}/api/tts`, {
         method:"POST",
-        headers:{ "Content-Type":"application/json" },
+        headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ text, lang })
       });
       const j = await r.json();
-      if(j.audio_base64){
-        const audio = new Audio("data:audio/mpeg;base64," + j.audio_base64);
-        currentAudio = audio;
-        await audio.play();
-      }
-    }catch(e){ toast("Ses bağlantısı kurulamadı"); }
+      if(j.audio_base64) new Audio("data:audio/mpeg;base64," + j.audio_base64).play();
+    } catch(e){}
   }
 
   (async ()=>{
-    await typeWrite(scriptText);
-    await speak(scriptText);
+    await typeWrite(script);
+    await speak(script);
   })();
 
-  $("btnReplay").onclick = ()=>speak(scriptText);
+  $("btnReplay").onclick = () => speak(script);
 
-  btnStart.onclick = async ()=>{
-    try{
-      const { data } = await supabase.from("profiles").select("tokens").eq("id", userId).maybeSingle();
-      if(Number(data?.tokens ?? 0) <= 0){ showNoTokens(); return; }
-    }catch{}
-
+  $("btnStart").addEventListener("click", () => {
+    if(tokens <= 0) return;
     localStorage.setItem("italky_lesson_mins", "15");
     localStorage.setItem("italky_course_lang", lang);
     localStorage.setItem("italky_course_level", level);
     localStorage.setItem("italky_teacher_pref", teacherId);
-
-    toast("Sistem Hazır! Ders Başlıyor...");
-    setTimeout(()=>location.href="/pages/teacher_course.html", 500);
-  };
+    toast("Ders Başlıyor...");
+    setTimeout(()=>location.href="/pages/teacher_course.html", 600);
+  });
 </script>
 </body>
 </html>
