@@ -31,7 +31,7 @@
       flex-direction: column;
       position: relative;
       background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 70%);
-      padding-bottom: 80px; /* ui_shell alt bar için */
+      padding-bottom: 80px; /* UI Shell alt barı için boşluk */
     }
 
     /* Arka Plan Hareketli Işıklar */
@@ -62,6 +62,7 @@
       flex-direction: column;
       padding: 16px;
       gap: 20px;
+      padding-bottom: 20px; /* Alttan boşluk */
     }
 
     /* Üst Bar */
@@ -162,6 +163,9 @@
       background: rgba(0, 0, 0, 0.2);
       padding: 24px;
       border-top: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .visualizer {
@@ -170,7 +174,7 @@
       align-items: center;
       gap: 4px;
       height: 30px;
-      margin-bottom: 20px;
+      margin-bottom: 0px; /* Kaymayı önlemek için 0 yapıldı */
     }
 
     .vis-bar {
@@ -214,6 +218,7 @@
 
     .btn-circle:active { transform: scale(0.9); background: var(--glass-border); }
 
+    /* Yeni Mic Tasarımı */
     .mic-wrap {
       position: relative;
     }
@@ -222,9 +227,9 @@
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background: #fff;
-      border: none;
-      color: #000;
+      background: var(--accent); /* Renk değiştirildi */
+      border: 2px solid rgba(255,255,255,0.2);
+      color: #fff;
       font-size: 32px;
       display: flex;
       align-items: center;
@@ -237,7 +242,7 @@
     }
 
     .btn-mic.recording {
-      background: #ff4757;
+      background: #ff4757; /* Kayıt halindeki renk */
       color: #fff;
       transform: scale(1.1);
       box-shadow: 0 0 50px rgba(255, 71, 87, 0.5);
@@ -245,7 +250,7 @@
 
     .mic-pulse {
       position: absolute;
-      inset: -5px;
+      inset: -10px; /* Daha geniş alan */
       border-radius: 50%;
       background: var(--accent);
       opacity: 0;
@@ -265,7 +270,7 @@
     .stats-footer {
       display: flex;
       gap: 10px;
-      padding-top: 20px;
+      padding-top: 0px; /* Kaymayı önlemek için 0 yapıldı */
     }
 
     .stat-card {
@@ -436,12 +441,20 @@
     if(!session?.user){ location.replace("/pages/login.html"); throw new Error("no session"); }
     const userId = session.user.id;
 
+    // Profilden isim alma işlemi
     let fullName = "";
     let levels = {};
+    let userName = ""; // Kullanıcının adını tutacak değişken
+
     try {
       const { data: prof } = await supabase.from("profiles").select("full_name, levels").eq("id", userId).maybeSingle();
       fullName = prof?.full_name || "";
       levels = prof?.levels || {};
+      
+      // Tam isimden sadece ilk ismi alma
+      if(fullName) {
+          userName = fullName.split(' ')[0];
+      }
     } catch(e){}
 
     const level = ["A1","A2","B1","B2","C1"].includes(levelQ) ? levelQ : (levels?.[lang] || "A1");
@@ -544,7 +557,6 @@
       const s1 = a.toLowerCase().replace(/[^\w\s]/g,'');
       const s2 = b.toLowerCase().replace(/[^\w\s]/g,'');
       if(s1 === s2) return 1;
-      // Basit lev-dist benzeri mantık
       const longer = s1.length > s2.length ? s1 : s2;
       const shorter = s1.length > s2.length ? s2 : s1;
       if (longer.length === 0) return 1.0;
@@ -594,7 +606,8 @@
       const raw = pool[level] || pool["A1"];
       sessionQueue = shuffle(raw);
       nextSentence();
-      toast(`Hoş geldin Başkanım! İyi pratikler.`);
+      // Profilden alınan isim ile selamlama
+      toast(`Hoş geldin ${userName}! İyi pratikler.`);
     } catch(e) {
       $("sentence").textContent = "Havuz yüklenemedi.";
     }
