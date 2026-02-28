@@ -15,192 +15,226 @@
 
   <style>
     :root{
-      --bg:#02000f;
+      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);
       --border: rgba(255,255,255,0.12);
       --card: rgba(255,255,255,0.06);
-      --glass: rgba(0,0,0,0.24);
-      --muted: rgba(255,255,255,0.72);
+      --muted: rgba(255,255,255,0.70);
       --muted2: rgba(255,255,255,0.55);
-      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);
       --ok: rgba(34,197,94,0.95);
       --bad: rgba(255,90,140,0.95);
-
-      /* ui_shell footer yüksekliği buraya yazar */
-      --footerH: 92px;
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    html,body{ margin:0; padding:0; width:100%; height:100%; overflow:hidden; background: var(--bg); color:#fff; font-family:'Outfit',system-ui,sans-serif; }
+    #pageContent{ height:100%; }
 
-    /* Shell gelmezse bile sayfa düzgün dursun */
-    #pageContent{
-      height:100%;
-      position:relative;
-      overflow:hidden;
-      padding: 12px 14px calc(var(--footerH) + env(safe-area-inset-bottom) + 14px);
-    }
-    #pageContent::before{
-      content:"";
-      position:absolute; inset:-35%;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(99,102,241,.28) 0%, transparent 45%),
-        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
-        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
-      filter: blur(44px);
-      opacity:.9;
-      animation: drift 10s ease-in-out infinite alternate;
-      pointer-events:none;
-      z-index:0;
-    }
-    @keyframes drift{ from{transform:translate3d(-10px,-8px,0) scale(1)} to{transform:translate3d(10px,10px,0) scale(1.06)} }
-
+    /* ui_shell içeride scroll'u shellMain yönetiyor. Biz içeride kendi layout’umuzu kuruyoruz */
     .wrap{
-      position:relative; z-index:1;
-      height:100%;
-      max-width: 520px;
-      margin:0 auto;
+      min-height: 100%;
+      padding: 12px 14px;
       display:flex;
       flex-direction:column;
-      gap:10px;
-      min-height:0;
+      gap:12px;
     }
 
-    /* Fallback header/footer (ui_shell gelmezse) */
-    .fallbackTop{
-      display:none;
+    .topRow{
+      display:flex;
       align-items:center;
       justify-content:space-between;
-      padding: 10px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(14px);
+      gap:10px;
     }
-    .fallbackTop .brand{
+    .chip{
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.18);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(255,255,255,0.92);
+      white-space: nowrap;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .chip .dot{
+      width:7px; height:7px; border-radius:99px;
+      background:#a5b4fc;
+      box-shadow:0 0 10px rgba(165,180,252,0.55);
+    }
+
+    .panel{
+      flex:1;
+      min-height: 0;
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      overflow:hidden;
+      position:relative;
+    }
+    .panel::before{
+      content:"";
+      position:absolute; inset:-30%;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,.25) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
+        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
+      filter: blur(34px);
+      opacity:.85;
+      animation: drift 10s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-10px,-8px,0) scale(1); }
+      to{ transform: translate3d(10px,8px,0) scale(1.06); }
+    }
+    .panel > *{ position:relative; z-index:2; }
+
+    .head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .title{
       font-family:"Space Grotesk",system-ui,sans-serif;
       font-weight:1000;
-      font-size:14px;
-      display:flex; gap:6px; align-items:center;
+      font-size:16px;
+      margin:0;
+      letter-spacing:-.2px;
     }
-    .fallbackTop .brand .ai{
+    .subtitle{
+      margin-top:4px;
+      font-size:12px;
+      font-weight:900;
+      color: var(--muted);
+      line-height:1.45;
+    }
+    .badge{
+      padding:8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.18);
+      font-weight:1000;
+      font-size:12px;
+      color: rgba(165,180,252,0.95);
+      white-space:nowrap;
+    }
+
+    /* Daktilo brifing */
+    .brief{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
+      padding: 12px;
+      overflow:hidden;
+    }
+    .briefTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 8px;
+    }
+    .tag{
+      font-size: 11px;
+      font-weight: 1000;
+      color: rgba(255,255,255,0.90);
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .tag .ai{
       background: var(--aiGrad);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
-    }
-    .fallbackTop .right{
-      display:flex; gap:10px; align-items:center;
-      font-weight:900; font-size:12px; color: rgba(255,255,255,0.85);
-    }
-    .fallbackBottom{
-      display:none;
-      position:absolute;
-      left:14px; right:14px;
-      bottom: calc(env(safe-area-inset-bottom) + 10px);
-      padding: 10px 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.22);
-      backdrop-filter: blur(14px);
-      font-size: 11px;
-      font-weight:900;
-      color: rgba(255,255,255,0.70);
-      text-align:center;
-    }
-
-    .topRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-    .chip{
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.28);
       font-weight:1000;
-      font-size:12px;
-      color: rgba(255,255,255,0.92);
-      white-space:nowrap;
-      backdrop-filter: blur(12px);
-      display:flex; align-items:center; gap:8px;
     }
-    .chip .dot{ width:7px; height:7px; border-radius:99px; background:#a5b4fc; box-shadow:0 0 10px rgba(165,180,252,0.55); }
+    .typeLine{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.86);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      min-height: 64px;
+    }
+    .cursor{
+      display:inline-block;
+      width: 7px;
+      height: 14px;
+      background: rgba(165,180,252,0.95);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 1s infinite;
+      border-radius: 2px;
+    }
+    @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:0} }
 
-    .card{
-      flex:1; min-height:0;
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.24);
-      backdrop-filter: blur(18px);
+    /* Ders içerik kartı */
+    .lesson{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.16);
       padding: 12px;
       display:flex;
       flex-direction:column;
       gap:10px;
-      overflow:hidden;
-      box-shadow: 0 18px 60px rgba(0,0,0,0.35);
-    }
-
-    .sub{ font-size:12px; font-weight:900; color: var(--muted); line-height:1.45; margin-top:-4px; }
-
-    .chat{
-      flex:1; min-height:0;
       overflow:auto;
-      padding-right:6px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+      -webkit-overflow-scrolling: touch;
     }
-    .chat::-webkit-scrollbar{ display:none; }
+    .lesson::-webkit-scrollbar{ display:none; }
 
-    .bubble{
-      max-width: 94%;
-      border-radius: 18px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.24);
+    .secTitle{
+      font-size: 12px;
+      font-weight: 1000;
+      letter-spacing:.6px;
+      color: rgba(165,180,252,0.95);
+      text-transform: uppercase;
     }
-    .me{ align-self:flex-end; background: rgba(99,102,241,0.18); border-color: rgba(99,102,241,0.34); }
-    .teacher{ align-self:flex-start; }
-
-    .bTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px;
+    .txt{
+      font-size: 13px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.86);
+      line-height: 1.5;
+      white-space: pre-wrap;
     }
-    .speakBtn{
-      border:none; cursor:pointer;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      color:#fff;
-      border-radius: 12px;
-      padding: 6px 10px;
+    .ex{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.05);
+      padding: 10px;
+    }
+    .ex .a{
       font-weight:1000;
-      font-size: 11px;
+      font-size: 13px;
     }
-    .speakBtn:active{ transform: scale(.99); opacity:.95; }
-    .speakBtn[disabled]{ opacity:.4; cursor:not-allowed; }
-
-    .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; }
-    .bTr{
-      margin-top:8px;
-      padding-top:8px;
-      border-top:1px solid rgba(255,255,255,0.10);
-      font-size:12px;
+    .ex .tr{
+      margin-top:6px;
       font-weight:900;
-      color: rgba(255,255,255,0.72);
-      white-space:pre-wrap;
+      font-size: 12px;
+      color: rgba(255,255,255,0.70);
     }
 
+    /* Görev */
     .task{
       border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.18);
       padding: 12px;
     }
     .q{ font-weight:1000; font-size:13px; line-height:1.25; }
     .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: var(--muted); line-height:1.35; }
-
     .inp{
       margin-top:10px;
       width:100%;
       height:48px;
       border-radius:18px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
       color:#fff;
       font-weight:900;
       font-size:14px;
@@ -208,9 +242,14 @@
     }
     .inp::placeholder{ color: rgba(255,255,255,0.45); }
 
-    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; }
+    .rowBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
     .btn{
-      flex:1; min-width: 130px;
+      flex:1;
+      min-width: 140px;
       height:54px;
       border-radius:22px;
       border:none;
@@ -222,19 +261,41 @@
       box-shadow: 0 16px 44px rgba(79,70,229,.22);
     }
     .btn:active{ transform: scale(.99); }
-
     .ghost{
-      flex:1; min-width: 130px;
+      flex:1;
+      min-width: 140px;
       height:54px;
       border-radius:22px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
       color:#fff;
       font-weight:1000;
       font-size:13px;
       cursor:pointer;
     }
     .ghost:active{ transform: scale(.99); }
+
+    .hintRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 2px;
+    }
+    .linkPill{
+      flex:1;
+      min-width: 140px;
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.14);
+      color:#fff;
+      font-weight:1000;
+      font-size: 12px;
+      cursor:pointer;
+      text-align:center;
+      user-select:none;
+    }
+    .linkPill:active{ transform: scale(.99); }
 
     .toast{
       position: fixed;
@@ -257,25 +318,10 @@
     }
     .toast.show{ transform:translateX(-50%) translateY(0); }
 
-    .overlay{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,0.55);
-      backdrop-filter: blur(10px);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      z-index:999999;
-    }
+    /* Continue modal */
+    .overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); display:none; align-items:center; justify-content:center; padding:16px; z-index:999999; }
     .overlay.show{ display:flex; }
-
-    .modal{
-      width:min(520px,100%);
-      border-radius:28px;
-      border:1px solid rgba(255,255,255,0.12);
-      background: rgba(10,10,18,0.92);
-      padding:14px;
-    }
+    .modal{ width:min(520px,100%); border-radius:28px; border:1px solid rgba(255,255,255,0.12); background: rgba(10,10,18,0.92); padding:14px; }
     .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; }
     .mText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; margin: 0 6px; white-space:pre-wrap; }
     .mBtns{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
@@ -283,394 +329,298 @@
 </head>
 
 <body>
-  <main id="pageContent">
-    <div class="wrap">
+<main id="pageContent">
+  <div class="wrap">
 
-      <!-- ui_shell gelmezse gözüksün -->
-      <div class="fallbackTop" id="fbTop">
-        <div class="brand">italky<span class="ai">AI</span> • Academy</div>
-        <div class="right"><span id="fbLang">EN</span> • <span id="fbTime">15:00</span></div>
-      </div>
-
-      <div class="topRow">
-        <div class="chip" id="whoChip"><span class="dot"></span> —</div>
-        <div class="chip" id="timerChip">15:00</div>
-      </div>
-
-      <section class="card">
-        <div class="chip" id="engineChip">italky Academy • Ders</div>
-        <div class="sub" id="coachSub">Ders başlıyor…</div>
-
-        <div class="chat" id="chat"></div>
-
-        <div class="task">
-          <div class="q" id="qText">…</div>
-          <div class="qSub" id="qTr">…</div>
-          <input class="inp" id="answer" placeholder="Cevabını yaz..." />
-        </div>
-
-        <div class="btnRow">
-          <button class="btn" id="btnSend" type="button">Gönder</button>
-          <button class="ghost" id="btnFinish" type="button">Dersi Bitir</button>
-          <button class="ghost" id="btnExit" type="button">Çık</button>
-        </div>
-      </section>
-
-      <!-- ui_shell gelmezse gözüksün -->
-      <div class="fallbackBottom" id="fbBottom">
-        Hakkımızda • SSS • Gizlilik • İletişim
-      </div>
+    <div class="topRow">
+      <div class="chip" id="whoChip"><span class="dot"></span> Ders • —</div>
+      <div class="chip" id="timerChip">15:00</div>
     </div>
-  </main>
 
-  <div class="toast" id="toast"></div>
-
-  <div class="overlay" id="continueOverlay">
-    <div class="modal">
-      <div class="mTitle">Devam Edelim mi?</div>
-      <div class="mText" id="continueText">—</div>
-      <div class="mBtns">
-        <button class="btn" id="btnContinueYes" type="button">Evet, Devam</button>
-        <button class="ghost" id="btnContinueNo" type="button">Bugünlük Bu Kadar</button>
+    <section class="panel">
+      <div class="head">
+        <div>
+          <h2 class="title" id="title">Ders Başlıyor</h2>
+          <div class="subtitle" id="subtitle">—</div>
+        </div>
+        <div class="badge" id="badge">Seviye: —</div>
       </div>
+
+      <div class="brief">
+        <div class="briefTop">
+          <div class="tag"><span class="ai">AI</span> KOÇ BRİFİNG</div>
+          <div class="tag" id="miniTag">15 dk</div>
+        </div>
+        <div class="typeLine" id="typeBox">Hazırlanıyor<span class="cursor"></span></div>
+      </div>
+
+      <div class="lesson" id="lessonBox">
+        <div class="secTitle" id="secTopic">KONU</div>
+        <div class="txt" id="topicText">—</div>
+
+        <div class="secTitle">ÖRNEKLER</div>
+        <div id="examples"></div>
+
+        <div class="secTitle">HIZLI İPUCU</div>
+        <div class="txt" id="tipText">—</div>
+      </div>
+
+      <div class="task">
+        <div class="q" id="qText">…</div>
+        <div class="qSub" id="qTr">…</div>
+        <input class="inp" id="answer" placeholder="Cevabını yaz..." />
+      </div>
+
+      <div class="rowBtns">
+        <button class="btn" id="btnSend" type="button">Gönder</button>
+        <button class="ghost" id="btnFinish" type="button">Dersi Bitir</button>
+        <button class="ghost" id="btnExit" type="button">Çık</button>
+      </div>
+
+      <div class="hintRow">
+        <div class="linkPill" id="goPractice">AI ile Pratik Yap</div>
+        <div class="linkPill" id="goGames">Eğlenerek Öğren</div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="continueOverlay">
+  <div class="modal">
+    <div class="mTitle">Devam Edelim mi?</div>
+    <div class="mText" id="continueText">—</div>
+    <div class="mBtns">
+      <button class="btn" id="btnContinueYes" type="button">Evet, Devam</button>
+      <button class="ghost" id="btnContinueNo" type="button">Bugünlük Bu Kadar</button>
     </div>
   </div>
+</div>
 
-  <script type="module">
-    import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
-    import { bootPage } from "/js/ui_guard.js";
-    import { supabase } from "/js/supabase_client.js";
+<script type="module">
+  import { mountShell, setHeaderTokens } from "/js/ui_shell.js";
+  import { bootPage } from "/js/ui_guard.js";
+  import { supabase } from "/js/supabase_client.js";
 
-    // 1) Shell’i başlat
-    mountShell({ scroll:"none" });
-    bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
+  // ✅ ui_shell ile oturt
+  mountShell({ scroll:"auto" });
+  bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
-    const API_BASE = "https://italky-api.onrender.com";
+  const $ = (id)=>document.getElementById(id);
 
-    const $ = (id)=>document.getElementById(id);
-    const chat = $("chat");
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = String(msg||"");
+    t.classList.add("show");
+    clearTimeout(window.__to);
+    window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
+  }
 
-    // 2) Shell gelmezse fallback aç
-    setTimeout(()=>{
-      const hasShellFooter = getComputedStyle(document.documentElement).getPropertyValue("--footerH").trim();
-      if(!hasShellFooter){ // shell CSS var’ı gelmediyse
-        $("fbTop").style.display = "flex";
-        $("fbBottom").style.display = "block";
+  function qs(k){ return new URLSearchParams(location.search).get(k); }
+
+  function firstNameNoLast(full){
+    const s = String(full||"").trim().replace(/\s+/g," ");
+    if(!s) return "";
+    const parts = s.split(" ").filter(Boolean);
+    if(parts.length === 1) return parts[0];
+    // 2+ kelime varsa son kelimeyi soyad say
+    return parts.slice(0, -1).join(" ");
+  }
+
+  // Dil adları
+  const LANG_TR = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
+
+  // Basit ders planı (AI yoksa da gerçek ders)
+  const PLAN = {
+    en: {
+      A1: { topic:"Present Simple (I/You/We/They)", tip:"I/You/We/They + verb (go, work, live). He/She/It için -s gelir.",
+        examples:[ ["I work every day.","Her gün çalışırım."], ["We live in Düzce.","Düzce'de yaşarız."] ],
+        task:"Write 1 Present Simple sentence about your day.",
+        task_tr:"Günün hakkında Present Simple ile 1 cümle yaz."
+      },
+      A2: { topic:"Past Simple (regular/irregular)", tip:"Geçmişte bitmiş olay: yesterday/last week. Regular: -ed, irregular: go→went.",
+        examples:[ ["I visited my friend yesterday.","Dün arkadaşımı ziyaret ettim."], ["I went to the market.","Markete gittim."] ],
+        task:"Write 2 past sentences: 1 regular, 1 irregular.",
+        task_tr:"2 geçmiş zaman cümlesi yaz: 1 düzenli (-ed), 1 düzensiz."
+      },
+      B1: { topic:"Present Perfect vs Past Simple", tip:"Present Perfect: deneyim/sonuç (have/has + V3). Past Simple: zaman belli (last year).",
+        examples:[ ["I have been to Ankara.","Ankara'ya gittim (deneyim)."], ["I went to Ankara last year.","Geçen yıl Ankara'ya gittim."] ],
+        task:"Write 2 sentences: 1 Present Perfect, 1 Past Simple.",
+        task_tr:"2 cümle yaz: 1 Present Perfect, 1 Past Simple."
+      },
+      B2: { topic:"Conditionals (If)", tip:"If + past → would (2nd conditional). If + present → will (1st conditional).",
+        examples:[ ["If I had time, I would travel more.","Zamanım olsa daha çok gezerdim."], ["If it rains, I will stay home.","Yağmur yağarsa evde kalacağım."] ],
+        task:"Write 1 conditional sentence about your life.",
+        task_tr:"Hayatınla ilgili 1 şart cümlesi (if) yaz."
+      },
+      C1: { topic:"Cohesive writing (linkers)", tip:"Although/However/Therefore gibi bağlaçlarla akıcı cümle kur.",
+        examples:[ ["Although it seems easy, it requires planning.","Kolay görünse de planlama ister."], ["However, we can improve quickly.","Yine de hızlı gelişebiliriz."] ],
+        task:"Write 1 sentence using 'Although' or 'However'.",
+        task_tr:"'Although' veya 'However' ile 1 cümle yaz."
       }
-    }, 650);
+    },
+    de: { A1:{topic:"Präsens (ich/du/wir)", tip:"ich/wir + Verb. du + -st.", examples:[["Ich arbeite jeden Tag.","Her gün çalışırım."],["Wir wohnen in Düzce.","Düzce'de yaşarız."]], task:"Schreibe 1 Satz im Präsens über deinen Tag.", task_tr:"Günün hakkında Almanca geniş zamanda 1 cümle yaz."} },
+    fr: { A1:{topic:"Présent (je/tu/nous)", tip:"je/nous + verbe. tu + -s (souvent).", examples:[["Je travaille tous les jours.","Her gün çalışırım."],["Nous habitons à Düzce.","Düzce'de yaşarız."]], task:"Écris 1 phrase au présent sur ta journée.", task_tr:"Günün hakkında Fransızca şimdiki zamanda 1 cümle yaz."} },
+    it: { A1:{topic:"Presente (io/tu/noi)", tip:"io/noi + verbo. tu genelde -i.", examples:[["Io lavoro ogni giorno.","Her gün çalışırım."],["Noi viviamo a Düzce.","Düzce'de yaşarız."]], task:"Scrivi 1 frase al presente sulla tua giornata.", task_tr:"Günün hakkında İtalyanca şimdiki zamanda 1 cümle yaz."} },
+    ru: { A1:{topic:"Настоящее время", tip:"Короткие простые фразы. Сначала правильный порядок слов.", examples:[["Я учу русский язык.","Rusça öğreniyorum."],["Я живу в Дюздже.","Düzce'de yaşıyorum."]], task:"Напиши 1 простое предложение о себе.", task_tr:"Kendin hakkında Rusça 1 basit cümle yaz."} },
+    es: { A1:{topic:"Presente", tip:"Frases cortas: Yo + verbo.", examples:[["Yo estudio español.","İspanyolca çalışıyorum."],["Yo vivo en Düzce.","Düzce'de yaşıyorum."]], task:"Escribe 1 frase en presente sobre tu día.", task_tr:"Günün hakkında İspanyolca geniş zamanda 1 cümle yaz."} }
+  };
 
-    function toast(msg){
-      const t = $("toast");
-      t.textContent = String(msg||"");
-      t.classList.add("show");
-      clearTimeout(window.__to);
-      window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
+  function pickPlan(lang, lvl){
+    const byLang = PLAN[lang] || PLAN.en;
+    return byLang[lvl] || byLang.A1 || PLAN.en.A1;
+  }
+
+  // Daktilo
+  async function typeWrite(text){
+    const box = $("typeBox");
+    box.textContent = "";
+    for(let i=0;i<text.length;i++){
+      const ch = text[i];
+      box.textContent += ch;
+      const delay = (".!?".includes(ch) ? 160 : 18);
+      await new Promise(r=>setTimeout(r, delay));
     }
+    box.innerHTML = box.textContent + `<span class="cursor"></span>`;
+  }
 
-    // 🔊 tek audio: üst üste binmesin
-    let currentAudio = null;
-    function stopAudio(){
-      try{ if(currentAudio){ currentAudio.pause(); currentAudio.currentTime = 0; } }catch{}
-      currentAudio = null;
-    }
-    async function speak(text, lang){
-      try{
-        stopAudio();
-        const r = await fetch(`${API_BASE}/api/tts`,{
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ text, lang })
-        });
-        const j = await r.json().catch(()=>null);
-        if(!j?.ok || !j?.audio_base64){
-          toast("Ses şu an kullanılamıyor");
-          return;
-        }
-        currentAudio = new Audio("data:audio/mpeg;base64," + j.audio_base64);
-        await currentAudio.play();
-      }catch{
-        toast("Ses oynatılamadı");
-      }
-    }
+  // --------- SESSION ----------
+  const { data:{ session } } = await supabase.auth.getSession();
+  if(!session?.user){ location.replace("/pages/login.html"); throw new Error("no session"); }
+  const userId = session.user.id;
 
-    function addBubble({ who, text, tr, isMe=false, langForVoice="en", allowSpeak=false }){
-      const b = document.createElement("div");
-      b.className = "bubble " + (isMe ? "me" : "teacher");
-      b.innerHTML = `
-        <div class="bTop">
-          <span class="who"></span>
-          ${allowSpeak ? `<button class="speakBtn" type="button">🔊 Dinlet</button>` : `<span></span>`}
-        </div>
-        <div class="bTxt"></div>
-        ${tr ? `<div class="bTr"></div>` : ""}
-      `;
-      b.querySelector(".who").textContent = who || "";
-      b.querySelector(".bTxt").textContent = text || "";
-      if(tr) b.querySelector(".bTr").textContent = tr || "";
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("tokens, full_name, levels")
+    .eq("id", userId)
+    .maybeSingle();
 
-      const sBtn = b.querySelector(".speakBtn");
-      if(sBtn){
-        sBtn.addEventListener("click", async ()=>{
-          sBtn.disabled = true;
-          await speak(text || "", langForVoice);
-          setTimeout(()=>{ try{ sBtn.disabled = false; }catch{} }, 800);
-        });
-      }
+  const tokens = Number(prof?.tokens ?? 0);
+  try{ setHeaderTokens(tokens); }catch{}
 
-      chat.appendChild(b);
-      chat.scrollTop = chat.scrollHeight;
-    }
+  const student = firstNameNoLast(prof?.full_name) || "Oğuz";
 
-    function fmtTime(sec){
-      const m = String(Math.floor(sec/60)).padStart(2,"0");
-      const s = String(sec%60).padStart(2,"0");
-      return `${m}:${s}`;
-    }
+  const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
+  // teacherId yoksa en azından dili URL’den al
+  const lang = String(qs("lang") || (teacherId==="ayda"?"de":teacherId==="jale"?"fr":teacherId==="sencer"?"it":teacherId==="sungur"?"ru":teacherId==="ozan"?"es":"en")).toLowerCase();
+  const lvl = String(qs("level") || (prof?.levels?.[lang] || "A1")).toUpperCase();
+  const langNameTR = LANG_TR[lang] || lang.toUpperCase();
 
-    // ---------- PROFİL / DİL / SEVİYE ----------
-    const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
-    if(!teacherId) location.href="/pages/teacher_select.html";
+  $("whoChip").textContent = `${langNameTR} • 15 dk`;
+  $("badge").textContent = `Seviye: ${lvl}`;
+  $("title").textContent = `${langNameTR} Dersi`;
+  $("subtitle").textContent = `Odak: gerçek ders akışı • kısa görevlerle ilerleme`;
 
-    const urlParams = new URLSearchParams(location.search);
-    const TEACHER_TO_LANG = { dora:"en", ayda:"de", jale:"fr", sencer:"it", sungur:"ru", ozan:"es" };
-    const LANG_NAME_TR = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
+  // yönlendirme
+  $("goPractice").onclick = ()=>location.href=`/pages/practice_ai_session.html?lang=${encodeURIComponent(lang)}&level=${encodeURIComponent(lvl)}`;
+  $("goGames").onclick = ()=>location.href=`/pages/game_lang_select.html?lang=${encodeURIComponent(lang)}`;
 
-    const langCode = (urlParams.get("lang") || TEACHER_TO_LANG[teacherId] || "en").trim().toLowerCase();
-    $("whoChip").textContent = `${LANG_NAME_TR[langCode] || langCode.toUpperCase()} • 15 dk`;
-    $("fbLang").textContent = langCode.toUpperCase();
+  // içerik doldur
+  const plan = pickPlan(lang, lvl);
+  $("secTopic").textContent = "KONU";
+  $("topicText").textContent = `${plan.topic}`;
+  $("tipText").textContent = plan.tip;
 
-    const { data:{ session } } = await supabase.auth.getSession();
-    if(!session) location.href="/pages/login.html";
+  const exWrap = $("examples");
+  exWrap.innerHTML = "";
+  (plan.examples || []).forEach(([a,tr])=>{
+    const d = document.createElement("div");
+    d.className = "ex";
+    d.innerHTML = `<div class="a"></div><div class="tr"></div>`;
+    d.querySelector(".a").textContent = a;
+    d.querySelector(".tr").textContent = tr;
+    exWrap.appendChild(d);
+  });
 
-    const { data: prof } = await supabase
-      .from("profiles")
-      .select("tokens, full_name, levels, teacher_prefs")
-      .eq("id", session.user.id)
-      .maybeSingle();
+  function setTask(t, tr){
+    $("qText").textContent = t || "Bir cümle yaz.";
+    $("qTr").textContent = tr || "Bir cümle yaz.";
+    $("answer").value = "";
+  }
+  setTask(plan.task, plan.task_tr);
 
-    const tokens = Number(prof?.tokens ?? 0);
-    try{ setHeaderTokens(tokens); }catch{}
+  // Brifing metni (anlatıcı + yönlendirmeli) — SES YOK (sadece daktilo)
+  const briefing =
+`Selam ${student}.
+Seninle 15 dakika boyunca ${langNameTR} dersinde birlikte çalışacağız.
 
-    function firstName(full){
-      const s = String(full||"").trim();
-      if(!s) return "";
-      const parts = s.split(/\s+/).filter(Boolean);
-      if(parts.length <= 2) return parts[0] || s;
-      return parts.slice(0, -1).join(" ");
-    }
+Bu 15 dakikanın sonunda:
+• Devam edebilir veya ara verebilirsin.
+• Tavsiyem: Günde en az 60 dakika çalışma.
 
-    const studentName = firstName(prof?.full_name) || "Oğuz";
-    const level = String((prof?.levels && typeof prof.levels==="object" ? (prof.levels[langCode] || "A1") : "A1")).toUpperCase();
+Ders dışı destek:
+• "AI ile Pratik Yap" ile konuşma hızın artar.
+• "Eğlenerek Öğren" oyunlarıyla pekiştirirsin.
 
-    const prefs = (prof?.teacher_prefs && typeof prof.teacher_prefs === "object") ? prof.teacher_prefs : {};
-    const cur = prefs?.[teacherId] || {};
+Hazırsan aşağıdaki görevi çözerek başlayalım.`;
 
-    const DEFAULT_COACH = {
-      dora:{ name:"Dora", style:"disciplined" },
-      ayda:{ name:"Ayda", style:"friendly" },
-      jale:{ name:"Jale", style:"expert" },
-      sencer:{ name:"Sencer", style:"friendly" },
-      ozan:{ name:"Ozan", style:"cheerful" },
-      sungur:{ name:"Sungur", style:"disciplined" }
-    }[teacherId] || { name:"Coach", style:"friendly" };
+  await typeWrite(briefing);
 
-    const teacherName = String(cur?.teacher_name || DEFAULT_COACH.name).trim();
-    $("coachSub").textContent = `Koç: ${teacherName} • Seviye: ${level}`;
-
-    // ---------- GERÇEK DERS: AI yoksa bile AKAN OFFLINE PLAN ----------
-    // (Bu sayede “ortada ders yok” asla olmaz.)
-    const LESSON_PLAN = {
-      en:{
-        A1:{
-          topic:"Present Simple (I/You/We/They)",
-          intro:`Selam ${studentName}. Bugün ${level} seviyesinde kısa ama gerçek bir ders yapacağız.\nKonu: Present Simple.\nHazırsan başlayalım.`,
-          tr:`Bugün “Geniş Zaman” (Present Simple) çalışacağız. Kuracağın cümle: I/You/We/They + verb.`,
-          examples:[
-            ["I work every day.","Her gün çalışırım."],
-            ["We live in Düzce.","Düzce'de yaşarız."]
-          ],
-          task:"Write 1 sentence about your day using Present Simple.",
-          task_tr:"Present Simple kullanarak günün hakkında 1 cümle yaz."
-        },
-        B1:{
-          topic:"Present Perfect vs Past Simple",
-          intro:`Selam ${studentName}. Bugün ${level} için gerçek ders: Present Perfect vs Past Simple.\nHazırsan başlıyoruz.`,
-          tr:`Present Perfect: sonuç/deneyim (“I have…”) • Past Simple: net geçmiş (“I did…”).`,
-          examples:[
-            ["I have been to Ankara.","Ankara'ya gittim (deneyim)."],
-            ["I went to Ankara last year.","Geçen yıl Ankara'ya gittim (zaman belli)."]
-          ],
-          task:"Write 2 sentences: 1 with Present Perfect, 1 with Past Simple.",
-          task_tr:"2 cümle yaz: 1 tanesi Present Perfect, 1 tanesi Past Simple."
-        }
-      }
-    };
-
-    function getPlan(){
-      const byLang = LESSON_PLAN[langCode] || LESSON_PLAN.en;
-      return byLang[level] || byLang.A1 || LESSON_PLAN.en.A1;
-    }
-
-    // ---------- AI VARSA: Edge Function’dan zengin ders ----------
-    async function aiLessonStep(userText, phase){
-      // sende varsa kullanır; yoksa hata verirse offline plan devam eder
-      const payload = {
-        teacher_id: teacherId,
-        teacher_name: teacherName,
-        coach_style: String(cur?.style || DEFAULT_COACH.style || "friendly"),
-        coach_gender: String(cur?.gender || "female"),
-        lang: langCode,
-        level,
-        student_name: studentName,
-        phase,
-        user_text: userText || ""
-      };
-      const { data, error } = await supabase.functions.invoke("italky_teacher_lesson", { body: payload });
-      if(error) throw error;
-      return data;
-    }
-
-    // phase: 1 intro, 2 examples, 3 task, 4 feedback, 5 recap
-    let phase = 1;
-    let currentTask = null;
-
-    function setTask(task, taskTr){
-      $("qText").textContent = task || "Bir cümle yaz.";
-      $("qTr").textContent = taskTr || "Bir cümle yaz.";
-      $("answer").value = "";
-    }
-
-    async function startLesson(){
-      const plan = getPlan();
-
-      // önce offline intro bas
-      addBubble({ who: teacherName, text: plan.intro, tr: plan.tr, allowSpeak:true, langForVoice: langCode });
-
-      // örnekler
-      for(const ex of plan.examples || []){
-        addBubble({ who: teacherName, text: `Örnek: ${ex[0]}`, tr: ex[1], allowSpeak:true, langForVoice: langCode });
-      }
-
-      // görev
-      setTask(plan.task, plan.task_tr);
-      currentTask = plan.task;
-
-      // AI varsa: bir tane “özelleştirme” mesajı çek (ders hissi artsın)
-      try{
-        const ai = await aiLessonStep("", 1);
-        if(ai?.teacher){
-          addBubble({ who: teacherName, text: ai.teacher, tr: ai.tr || "", allowSpeak:true, langForVoice: langCode });
-          if(ai.task){
-            setTask(ai.task, ai.task_tr || "");
-            currentTask = ai.task;
-          }
-        }
-      }catch{
-        // AI yoksa sorun değil
-      }
-    }
-
-    // basit feedback (AI yoksa)
-    function basicFeedback(userText){
-      const t = (userText||"").trim();
-      if(!t) return { teacher:"Cümle göremedim. Bir tane yazalım 🙂", tr:"Boş mesaj geldi.", ok:false };
-      const ok = t.length >= 8; // basit kural
-      return ok
-        ? { teacher:`Güzel! Şimdi aynı fikri farklı kelimelerle bir kez daha yaz.`, tr:`İyi gidiyor. Aynı anlamı farklı kelimelerle tekrar yaz.`, ok:true }
-        : { teacher:`Biraz kısa kaldı. En az 8-10 kelime olsun. Tekrar yaz.`, tr:`Cümleyi uzatıp tekrar yaz.`, ok:false };
-    }
-
-    async function send(){
-      const input = $("answer");
-      const txt = (input.value || "").trim();
-      if(!txt){ toast("Cevabını yaz 🙂"); return; }
-
-      addBubble({ who: studentName, text: txt, isMe:true });
-      input.value = "";
-
-      // Önce AI feedback dene
-      try{
-        const ai = await aiLessonStep(txt, 4);
-        if(ai?.teacher){
-          addBubble({ who: teacherName, text: ai.teacher, tr: ai.tr || "", allowSpeak:true, langForVoice: langCode });
-          if(ai?.task){
-            setTask(ai.task, ai.task_tr || "");
-            currentTask = ai.task;
-          }
-          return;
-        }
-      }catch{
-        // AI yoksa offline feedback
-      }
-
-      const fb = basicFeedback(txt);
-      addBubble({ who: teacherName, text: fb.teacher, tr: fb.tr, allowSpeak:true, langForVoice: langCode });
-
-      // tekrar görevi
-      if(fb.ok){
-        setTask("Rewrite your sentence using different words.", "Cümleni farklı kelimelerle yeniden yaz.");
-      }else{
-        setTask(currentTask || "Write one sentence.", "Bir cümle yaz.");
-      }
-    }
-
-    // ---------- TIMER / DEVAM ----------
-    const PLAN_MIN = 15;
-    let remainingSec = PLAN_MIN * 60;
-    let tick = null;
-
-    function startTimer(){
-      $("timerChip").textContent = fmtTime(remainingSec);
-      $("fbTime").textContent = fmtTime(remainingSec);
-      if(tick) clearInterval(tick);
-
-      tick = setInterval(()=>{
-        remainingSec--;
-        if(remainingSec < 0) remainingSec = 0;
-        $("timerChip").textContent = fmtTime(remainingSec);
-        $("fbTime").textContent = fmtTime(remainingSec);
-        if(remainingSec === 0){
-          clearInterval(tick);
-          $("continueText").textContent =
-            `15 dakika tamamlandı.\n\nDevam etmek ister misin?\n(Devam edersen yeni 15 dk oturum başlar.)`;
-          $("continueOverlay").classList.add("show");
-        }
-      }, 1000);
-    }
-
-    $("btnSend").addEventListener("click", send);
-    $("answer").addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") send(); });
-
-    $("btnFinish").addEventListener("click", ()=>{
+  // Timer
+  let remaining = 15*60;
+  const tick = setInterval(()=>{
+    remaining = Math.max(0, remaining-1);
+    $("timerChip").textContent = `${String(Math.floor(remaining/60)).padStart(2,"0")}:${String(remaining%60).padStart(2,"0")}`;
+    if(remaining===0){
       clearInterval(tick);
-      $("continueText").textContent =
-        `Dersi bitirdin.\n\nDevam etmek ister misin?`;
+      $("continueText").textContent = `15 dakika tamamlandı.\n\nDevam etmek ister misin?`;
       $("continueOverlay").classList.add("show");
-    });
+    }
+  }, 1000);
 
-    $("btnExit").addEventListener("click", ()=>{
-      clearInterval(tick);
-      location.href="/pages/home.html";
-    });
+  // Gönder -> basit feedback (AI yoksa da ders akıyor)
+  function basicFeedback(txt){
+    const t = (txt||"").trim();
+    if(!t) return { ok:false, teacher:"Cümle göremedim 🙂 Bir tane yazıp gönder.", tr:"Boş mesaj." };
 
-    $("btnContinueYes").addEventListener("click", async ()=>{
-      $("continueOverlay").classList.remove("show");
-      remainingSec = PLAN_MIN * 60;
-      startTimer();
-      toast("Devam ediyoruz…");
-      // yeni kısa görev
-      addBubble({ who: teacherName, text:`Devam! Yeni bir örnekle ilerliyoruz.`, tr:`Devam ediyoruz.`, allowSpeak:true, langForVoice: langCode });
-      setTask("Write one more sentence (a different topic).", "Farklı bir konuda 1 cümle daha yaz.");
-    });
+    const ok = t.length >= 10;
+    if(ok){
+      return {
+        ok:true,
+        teacher:"Güzel! Şimdi aynı anlamı farklı kelimelerle yeniden yaz.",
+        tr:"İyi gidiyor. Aynı anlamı farklı kelimelerle tekrar yaz."
+      };
+    }
+    return {
+      ok:false,
+      teacher:"Biraz kısa kaldı. 10+ karakter olacak şekilde tekrar yaz.",
+      tr:"Cümleni biraz uzatıp tekrar dene."
+    };
+  }
 
-    $("btnContinueNo").addEventListener("click", ()=>{
-      $("continueOverlay").classList.remove("show");
-      location.href="/pages/plan_select.html";
-    });
+  $("btnSend").onclick = ()=>{
+    const txt = ($("answer").value || "").trim();
+    if(!txt){ toast("Cevabını yaz 🙂"); return; }
+    $("answer").value = "";
 
-    // ---- BOOT ----
-    startTimer();
-    await startLesson();
-  </script>
+    // kullanıcı cümlesini üstte mini “ders içeriği” gibi tutmak yerine toast + görevle ilerliyoruz
+    const fb = basicFeedback(txt);
+    toast(fb.ok ? "✅ Güzel!" : "↻ Tekrar dene");
+    setTask(
+      fb.ok ? "Rewrite your sentence using different words." : plan.task,
+      fb.ok ? "Cümleni farklı kelimelerle yeniden yaz." : plan.task_tr
+    );
+  };
+
+  $("btnFinish").onclick = ()=>{
+    $("continueText").textContent = `Dersi bitirdin.\n\nDevam etmek ister misin?`;
+    $("continueOverlay").classList.add("show");
+  };
+
+  $("btnExit").onclick = ()=>location.href="/pages/home.html";
+
+  $("btnContinueYes").onclick = ()=>{
+    $("continueOverlay").classList.remove("show");
+    remaining = 15*60;
+    toast("Devam ediyoruz…");
+    setTask(plan.task, plan.task_tr);
+  };
+  $("btnContinueNo").onclick = ()=>{
+    $("continueOverlay").classList.remove("show");
+    location.href="/pages/plan_select.html";
+  };
+</script>
 </body>
 </html>
