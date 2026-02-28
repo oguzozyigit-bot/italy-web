@@ -93,7 +93,7 @@
       display:flex;
       flex-direction:column;
       gap: 10px;
-      justify-content:center; /* ✅ 6 kartı dikey ortala */
+      justify-content:center;
     }
 
     button.langCard{
@@ -240,7 +240,7 @@
         </div>
         <p class="heroText">
           Bu modül <b>seviye odaklı</b> çalışır: önce dil seviyeni kontrol eder.<br/>
-          Seviyen yoksa seni <b>Seviye Tespit Sınavına</b> yönlendirir.
+          Seviyen yoksa seni <b>Seviye Tespit</b> sayfasına yönlendirir.
         </p>
       </section>
 
@@ -254,7 +254,6 @@
     import { mountShell } from "/js/ui_shell.js";
     import { supabase } from "/js/supabase_client.js";
 
-    // ✅ üst-alt bar
     mountShell({ scroll:"none" });
 
     const $ = (id)=>document.getElementById(id);
@@ -268,8 +267,6 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // ✅ 6 dil (italky kurgusu bunlara kilitlendi)
-    // teacher map: öğretmen sayfalarıyla uyum için
     const LANGS = [
       { code:"en", name:"English",  flag:"🇬🇧", teacher:"dora"   },
       { code:"de", name:"German",   flag:"🇩🇪", teacher:"ayda"   },
@@ -285,7 +282,6 @@
       location.replace("/pages/login.html");
     }
 
-    // profil: levels + tokens
     let levels = {};
     let tokens = 0;
     try{
@@ -298,23 +294,12 @@
       tokens = Number(prof?.tokens ?? 0);
     }catch{}
 
-    // 🔑 bu modülde "jeton" tüketimini sonra netleyeceğiz.
-    // şimdilik bilgi amaçlı gösteriyoruz.
-    const PRACTICE_ENTRY_FEE = 0; // 0 = ücretsiz giriş (şimdilik). İstersen sonra 1 yaparız.
-
     function cardHtml(l){
       const lv = (levels && typeof levels === "object") ? (levels[l.code] || "") : "";
       const hasLevel = !!lv;
 
-      let sub = "";
-      let cls = "sub";
-      if(hasLevel){
-        sub = `Seviyeniz: ${lv} • Pratiğe başla`;
-        cls = "sub ok";
-      }else{
-        sub = "Seviye yok • Sınava yönlendir";
-        cls = "sub warn";
-      }
+      const sub = hasLevel ? `Seviyeniz: ${lv} • Pratiğe başla` : "Seviye yok • Sınava yönlendir";
+      const cls = hasLevel ? "sub ok" : "sub warn";
 
       return `
         <button class="langCard" type="button" data-code="${l.code}" data-teacher="${l.teacher}">
@@ -339,28 +324,16 @@
     let lastTap = 0;
 
     async function goNext(code, teacher){
-      // tercih cache
       try{ localStorage.setItem("italky_teacher_pref", teacher); }catch{}
 
       const lv = (levels && typeof levels === "object") ? (levels[code] || "") : "";
 
       if(!lv){
-        // ✅ seviye yok -> ara sayfa
         location.href = `/pages/level_required.html?lang=${encodeURIComponent(code)}&t=${encodeURIComponent(teacher)}&next=${encodeURIComponent("practice_ai")}`;
         return;
       }
 
-      // ✅ seviye var -> pratik oturumu (şimdilik bu sayfa)
-      // İstersen sonra /pages/practice_ai_session.html yaparız.
-      // Bu sayfada sadece “start” mantığını bağlayacağız.
-      if(PRACTICE_ENTRY_FEE > 0 && tokens < PRACTICE_ENTRY_FEE){
-        toast("Yetersiz bakiye. Jeton yükleyin.");
-        location.href = "/pages/profile.html";
-        return;
-      }
-
-      // şimdilik: doğrudan kendi oturum sayfanıza yönlendireceğiz (sonra yazacağız)
-      // placeholder:
+      // burada ücret yok (şimdilik). İstersen sonra 1 jeton yaparız.
       location.href = `/pages/practice_ai_session.html?lang=${encodeURIComponent(code)}&t=${encodeURIComponent(teacher)}&level=${encodeURIComponent(lv)}`;
     }
 
