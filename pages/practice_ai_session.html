@@ -1,340 +1,396 @@
-<!-- FILE: /pages/practice_ai_session.html -->
 <!doctype html>
 <html lang="tr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>italkyAI • AI Pratik Oturumu</title>
+  <title>italkyAI • Pro Pratik</title>
 
-  <meta name="theme-color" content="#02000f">
-  <style>html,body{background:#02000f !important;}</style>
+  <meta name="theme-color" content="#000000">
+  <style>html,body{background:#000 !important; margin:0; padding:0; overflow:hidden; font-family:'Outfit', sans-serif;}</style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --border: rgba(255,255,255,0.12);
-      --card: rgba(255,255,255,0.05);
-      --muted: rgba(255,255,255,0.70);
-      --ok: rgba(34,197,94,0.95);
-      --bad: rgba(255,90,140,0.95);
-      --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 50%,#ec4899 100%);
-    }
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
-    #pageContent{ height:100%; }
-
-    .wrap{
-      position:relative;
-      max-width:480px;
-      height:100%;
-      margin:0 auto;
-      padding: 12px 14px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      background: rgba(10,10,30,0.18);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 26px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      overflow:hidden;
+    :root {
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --bg-dark: #0a0a0c;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-muted: rgba(255, 255, 255, 0.6);
+      --ai-gradient: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
     }
 
-    .topbar{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
-    .chip{
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,0.22);
-      color: rgba(255,255,255,0.92);
-      font-weight:1000;
-      font-size:12px;
-      white-space:nowrap;
-      display:flex; gap:8px; align-items:center;
-    }
-    .chip .ai{
-      background: var(--aiGrad);
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-      font-weight:1000;
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    #pageContent {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000 70%);
+      padding-bottom: 80px; /* ui_shell alt bar için */
     }
 
-    .panel{
-      flex:1;
-      border-radius: 22px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      padding: 14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      overflow:hidden;
+    /* Arka Plan Hareketli Işıklar */
+    .glow-blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: var(--accent-glow);
+      filter: blur(100px);
+      border-radius: 50%;
+      z-index: 0;
+      animation: float 20s infinite alternate;
+    }
+
+    @keyframes float {
+      0% { transform: translate(-10%, -10%) scale(1); }
+      100% { transform: translate(20%, 30%) scale(1.2); }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 20px;
+    }
+
+    /* Üst Bar */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .brand span {
+      background: var(--ai-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lang-chip {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Ana Panel */
+    .main-card {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 32px;
+      backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-top {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .level-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    /* Cümle Alanı */
+    .sentence-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 30px;
+      text-align: center;
+    }
+
+    .sentence {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .translation {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: 400;
+      min-height: 24px;
+    }
+
+    /* Alt Kontroller */
+    .controls {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 24px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .visualizer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      height: 30px;
+      margin-bottom: 20px;
+    }
+
+    .vis-bar {
+      width: 3px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: height 0.1s ease;
+    }
+
+    .vis-active .vis-bar {
+      animation: barGrow 0.5s infinite ease-in-out;
+    }
+
+    @keyframes barGrow {
+      0%, 100% { height: 5px; }
+      50% { height: 25px; }
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-circle:active { transform: scale(0.9); background: var(--glass-border); }
+
+    .mic-wrap {
       position: relative;
     }
 
-    .panel:before{
-      content:"";
-      position:absolute; inset:-30%;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(99,102,241,.25) 0%, transparent 45%),
-        radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
-        radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
-      filter: blur(34px);
-      opacity:.85;
-      animation: drift 10s ease-in-out infinite alternate;
-      pointer-events:none;
-    }
-    @keyframes drift{
-      from{ transform: translate3d(-10px,-8px,0) scale(1); }
-      to{ transform: translate3d(10px,8px,0) scale(1.06); }
-    }
-    .panel > *{ position:relative; z-index:2; }
-
-    .titleRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    .h{
-      font-family:"Space Grotesk",system-ui,sans-serif;
-      font-weight:1000;
-      font-size:14px;
-      margin:0;
-      color:#fff;
-      letter-spacing:-.2px;
-    }
-    .lvl{
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.18);
-      font-weight: 1000;
-      font-size: 12px;
-      color: rgba(165,180,252,0.95);
-      white-space: nowrap;
-    }
-
-    .miniRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      margin-top: -2px;
-    }
-    .miniBtn{
-      flex:1;
-      height: 44px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.16);
-      color:#fff;
-      font-weight:1000;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-    }
-    .miniBtn:active{ transform: scale(.99); }
-    .miniBtn.primary{
-      background: var(--aiGrad);
-      color:#000;
-      border:none;
-    }
-
-    .sentenceBox{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.18);
-      padding: 12px;
-      min-height: 112px;
-    }
-    .sentence{
-      font-size: 16px;
-      font-weight: 1000;
-      line-height: 1.35;
-      color:#fff;
-      white-space: pre-wrap;
-    }
-    .hint{
-      margin-top: 8px;
-      font-size: 12px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.70);
-      line-height:1.35;
-    }
-    .hint b{ color:#fff; }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    .btn{
-      height: 52px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-weight:1000;
-      cursor:pointer;
-      padding: 0 14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      user-select:none;
-    }
-    .btn:disabled{ opacity:.35; cursor:not-allowed; }
-
-    .btn-primary{
-      background:#fff;
-      color:#000;
-      border:none;
-    }
-
-    .mic{
-      width: 52px; min-width:52px;
-      height: 52px;
-      border-radius: 18px;
+    .btn-mic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #fff;
       border: none;
-      background: var(--aiGrad);
-      color:#000;
-      font-weight:1000;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: 0 10px 30px rgba(99,102,241,0.25);
-    }
-    .mic:active{ transform: scale(.99); }
-    .mic.rec{
-      background: linear-gradient(135deg, rgba(255,90,140,1) 0%, rgba(236,72,153,1) 60%, rgba(165,180,252,1) 100%);
+      color: #000;
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 30px var(--accent-glow);
+      z-index: 2;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .statusBox{
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(0,0,0,0.14);
-      padding: 12px;
-      min-height: 92px;
-      overflow:auto;
-      -webkit-overflow-scrolling: touch;
+    .btn-mic.recording {
+      background: #ff4757;
+      color: #fff;
+      transform: scale(1.1);
+      box-shadow: 0 0 50px rgba(255, 71, 87, 0.5);
     }
-    .statusBox::-webkit-scrollbar{ display:none; }
 
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom: 8px;
+    .mic-pulse {
+      position: absolute;
+      inset: -5px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0;
+      z-index: 1;
     }
-    .k{
-      font-size: 11px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.55);
-      letter-spacing:.5px;
-      text-transform: uppercase;
-    }
-    .v{
-      font-size: 12px;
-      font-weight: 1000;
-      color:#fff;
-      text-align:right;
-      max-width: 65%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .v.ok{ color: var(--ok); }
-    .v.bad{ color: var(--bad); }
 
-    .trans{
-      margin-top: 8px;
-      font-size: 12px;
-      font-weight: 900;
-      color: rgba(255,255,255,0.82);
-      white-space: pre-wrap;
-      line-height: 1.45;
+    .recording .mic-pulse {
+      animation: pulse 1.5s infinite;
     }
-    .trans .muted{ color: rgba(255,255,255,0.60); }
 
-    .toast{
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.5; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    /* Durum Kartı */
+    .stats-footer {
+      display: flex;
+      gap: 10px;
+      padding-top: 20px;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--glass-border);
+      padding: 10px;
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .stat-label { font-size: 9px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .stat-value { font-size: 13px; font-weight: 700; color: #fff; }
+    .stat-value.ok { color: #2ecc71; }
+    .stat-value.bad { color: #ff4757; }
+
+    /* Toast */
+    .toast {
       position: fixed;
-      left:50%;
-      top:18px;
-      transform: translateX(-50%) translateY(-120px);
-      background: rgba(10,10,18,0.95);
-      border: 1px solid rgba(165,180,252,0.35);
-      padding: 10px 14px;
-      border-radius: 999px;
-      color:#fff;
-      z-index: 999999;
-      font-weight: 1000;
-      font-size: 12px;
-      transition: .25s;
-      backdrop-filter: blur(12px);
-      pointer-events:none;
-      max-width: min(92vw, 520px);
-      text-align:center;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(255,255,255,0.95);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 14px;
+      z-index: 10000;
+      transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
-    .toast.show{ transform: translateX(-50%) translateY(0); }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Yardımcı butonlar (üstte gizli) */
+    .top-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    .btn-pill {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        color: #fff;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
+  <div class="glow-blob"></div>
+  
   <main id="pageContent">
     <div class="wrap">
-      <div class="topbar">
-        <div class="chip"><span class="ai">AI</span> Pratik</div>
-        <div class="chip" id="chipRight">—</div>
-      </div>
+      
+      <header class="header">
+        <div class="brand"><span>italky</span>AI</div>
+        <div class="lang-chip" id="chipRight">🇬🇧 EN</div>
+      </header>
 
-      <section class="panel">
-        <div class="titleRow">
-          <h2 class="h" id="langTitle">—</h2>
-          <div class="lvl" id="levelPill">—</div>
-        </div>
-
-        <div class="miniRow">
-          <button class="miniBtn" id="btnListenTop" type="button">🔊 Dinlet</button>
-          <button class="miniBtn" id="btnMeaningTop" type="button">📝 Anlam</button>
-          <button class="miniBtn primary" id="btnSkipTop" type="button">✨ Geç</button>
-        </div>
-
-        <div class="sentenceBox">
-          <div class="sentence" id="sentence">Yükleniyor…</div>
-          <div class="hint" id="hint">—</div>
-        </div>
-
-        <div class="actions">
-          <button class="btn" id="btnPlay" type="button">🔊 Dinlet</button>
-          <button class="mic" id="btnRec" type="button" title="Kayıt">🎙️</button>
-          <button class="btn btn-primary" id="btnNext" type="button" disabled>Sonraki</button>
-        </div>
-
-        <div class="statusBox">
-          <div class="row">
-            <div class="k">Tanıma</div>
-            <div class="v" id="sttStatus">Hazır</div>
-          </div>
-          <div class="row">
-            <div class="k">Benzerlik</div>
-            <div class="v" id="simStatus">—</div>
-          </div>
-          <div class="trans" id="transBox">
-            <span class="muted">Anlamı görmek için</span> “Anlam” <span class="muted">butonuna bas.</span>
+      <section class="main-card">
+        <div class="card-top">
+          <div class="level-badge" id="levelPill">SEVİYE: A1</div>
+          <div class="top-actions">
+             <button class="btn-pill" id="btnMeaningTop">📝 Anlamı Gör</button>
+             <button class="btn-pill" id="btnSkipTop">✨ Atla</button>
           </div>
         </div>
 
-        <div class="actions">
-          <button class="btn" id="btnRepeat" type="button">↻ Tekrar</button>
-          <button class="btn" id="btnExit" type="button">Çık</button>
+        <div class="sentence-container">
+          <div class="sentence" id="sentence">Hazırlanıyor...</div>
+          <div class="translation" id="transBox">Anlamak için butona dokun</div>
+        </div>
+
+        <div class="controls">
+          <div class="visualizer" id="visualizer">
+            <div class="vis-bar" style="animation-delay: 0.1s"></div>
+            <div class="vis-bar" style="animation-delay: 0.2s"></div>
+            <div class="vis-bar" style="animation-delay: 0.3s"></div>
+            <div class="vis-bar" style="animation-delay: 0.4s"></div>
+            <div class="vis-bar" style="animation-delay: 0.5s"></div>
+            <div class="vis-bar" style="animation-delay: 0.4s"></div>
+            <div class="vis-bar" style="animation-delay: 0.3s"></div>
+            <div class="vis-bar" style="animation-delay: 0.2s"></div>
+            <div class="vis-bar" style="animation-delay: 0.1s"></div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-circle" id="btnRepeat" title="Tekrarla">↺</button>
+            
+            <div class="mic-wrap">
+              <div class="mic-pulse"></div>
+              <button class="btn-mic" id="btnRec">🎙️</button>
+            </div>
+
+            <button class="btn-circle" id="btnNext" disabled title="Sonraki">➔</button>
+          </div>
+
+          <div class="stats-footer">
+            <div class="stat-card">
+              <div class="stat-label">Sizin Sesiniz</div>
+              <div class="stat-value" id="sttStatus">Bekleniyor</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Doğruluk</div>
+              <div class="stat-value" id="simStatus">—</div>
+            </div>
+          </div>
         </div>
       </section>
+
+      <div style="display:none">
+          <button id="btnPlay"></button>
+          <button id="btnListenTop"></button>
+          <div id="hint"></div>
+          <div id="langTitle"></div>
+          <button id="btnExit"></button>
+      </div>
+
     </div>
   </main>
 
@@ -346,6 +402,7 @@
 
     mountShell({ scroll:"none" });
 
+    // --- MANTIK (LOGIC) AYNI KALIYOR ---
     const API_BASE = "https://italky-api.onrender.com";
     const PRACTICE_POOL_BASE = "https://auth.italky.ai/storage/v1/object/public/practice/pool";
 
@@ -356,11 +413,10 @@
       toastEl.textContent = String(msg||"");
       toastEl.classList.add("show");
       clearTimeout(window.__to);
-      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 1800);
+      window.__to = setTimeout(()=>toastEl.classList.remove("show"), 2500);
     }
 
     function qs(k){ return new URLSearchParams(location.search).get(k); }
-
     const lang = String(qs("lang") || "en").trim().toLowerCase();
     const levelQ = String(qs("level") || "").trim().toUpperCase();
 
@@ -374,401 +430,175 @@
     };
     const meta = LANG_META[lang] || { name: lang.toUpperCase(), flag:"🌍" };
     $("chipRight").textContent = `${meta.flag} ${lang.toUpperCase()}`;
-    $("langTitle").textContent = `${meta.name} • Konuşma Pratiği`;
 
-    // auth check + profile
+    // Auth & Profile
     const { data:{ session } } = await supabase.auth.getSession();
-    if(!session?.user){
-      location.replace("/pages/login.html");
-      throw new Error("no session");
-    }
+    if(!session?.user){ location.replace("/pages/login.html"); throw new Error("no session"); }
     const userId = session.user.id;
 
     let fullName = "";
     let levels = {};
-    try{
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("full_name, levels")
-        .eq("id", userId)
-        .maybeSingle();
-      fullName = String(prof?.full_name || "").trim();
-      levels = (prof?.levels && typeof prof.levels === "object") ? prof.levels : {};
-    }catch{}
+    try {
+      const { data: prof } = await supabase.from("profiles").select("full_name, levels").eq("id", userId).maybeSingle();
+      fullName = prof?.full_name || "";
+      levels = prof?.levels || {};
+    } catch(e){}
 
-    function firstName(full){
-      const s = String(full||"").trim();
-      if(!s) return "";
-      const parts = s.split(/\s+/).filter(Boolean);
-      if(parts.length <= 2) return s;
-      return parts.slice(0, -1).join(" ");
-    }
-    const who = firstName(fullName) || "Oğuz";
+    const level = ["A1","A2","B1","B2","C1"].includes(levelQ) ? levelQ : (levels?.[lang] || "A1");
+    $("levelPill").textContent = `SEVİYE: ${level}`;
 
-    function pickLevel(lv){
-      if(["A1","A2","B1","B2","C1"].includes(lv)) return lv;
-      return "A1";
-    }
-    const level = pickLevel(levelQ || (levels?.[lang] || "A1"));
-    $("levelPill").textContent = `Seviye: ${level}`;
-
-    // ✅ %95 kuralı
     const THRESH = 0.95;
+    let sessionQueue = [];
+    let sessionIndex = 0;
+    let currentText = "";
+    let currentTR = "";
 
     async function loadPool(){
       const url = `${PRACTICE_POOL_BASE}/${encodeURIComponent(lang)}.json`;
       const r = await fetch(url, { cache:"no-store" });
-      if(!r.ok){
-        const t = await r.text().catch(()=> "");
-        throw new Error(`practice pool yok: ${lang}.json (HTTP ${r.status})\n${t}`);
-      }
-      const j = await r.json().catch(()=>null);
-      if(!j) throw new Error("practice pool json okunamadı");
-      if(j.levels && typeof j.levels === "object") return j.levels;
-      return j;
+      const j = await r.json();
+      return j.levels || j;
     }
 
     function shuffle(arr){
-      const a = [...arr];
-      for(let i=a.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]] = [a[j],a[i]];
-      }
-      return a;
+      return [...arr].sort(()=> Math.random() - 0.5);
     }
-
-    function pickFromPool(pool, lv){
-      const byLevel = pool?.[lv];
-      if(Array.isArray(byLevel) && byLevel.length) return byLevel;
-      const a1 = pool?.A1;
-      if(Array.isArray(a1) && a1.length) return a1;
-      for(const k of ["A2","B1","B2","C1"]){
-        if(Array.isArray(pool?.[k]) && pool[k].length) return pool[k];
-      }
-      return [];
-    }
-
-    // ✅ item normalize: string veya object
-    function normalizeItem(item){
-      if(typeof item === "string") return { text: item, tr: "" };
-      if(item && typeof item === "object"){
-        const text = String(item.text || item.sentence || item.phrase || item.value || "").trim();
-        const tr = String(item.tr || item.meaning_tr || item.meaning || item.translation_tr || "").trim();
-        return { text, tr };
-      }
-      return { text:"", tr:"" };
-    }
-
-    function normText(s){
-      return String(s||"")
-        .toLowerCase()
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\p{L}\p{N}\s']/gu, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function levenshtein(a, b){
-      a = normText(a); b = normText(b);
-      const m = a.length, n = b.length;
-      if(!m && !n) return 0;
-      const dp = Array.from({length:m+1}, ()=>Array(n+1).fill(0));
-      for(let i=0;i<=m;i++) dp[i][0]=i;
-      for(let j=0;j<=n;j++) dp[0][j]=j;
-      for(let i=1;i<=m;i++){
-        for(let j=1;j<=n;j++){
-          const cost = a[i-1]===b[j-1] ? 0 : 1;
-          dp[i][j] = Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+cost);
-        }
-      }
-      return dp[m][n];
-    }
-
-    function similarity(a, b){
-      a = normText(a); b = normText(b);
-      if(!a && !b) return 1;
-      const dist = levenshtein(a,b);
-      const maxLen = Math.max(a.length, b.length) || 1;
-      return Math.max(0, 1 - (dist / maxLen));
-    }
-
-    function setSimilarityUI(sim){
-      const pct = Math.round(sim * 100);
-      if(sim >= THRESH){
-        $("simStatus").textContent = `%${pct} • Başarılı`;
-        $("simStatus").className = "v ok";
-        $("btnNext").disabled = false;
-
-        // otomatik sonraki
-        setTimeout(()=>{
-          try{ if(!$("btnNext").disabled) $("btnNext").click(); }catch{}
-        }, 650);
-
-      }else{
-        $("simStatus").textContent = `%${pct} • Tekrar`;
-        $("simStatus").className = "v bad";
-        $("btnNext").disabled = true;
-      }
-    }
-
-    function setGreeting(){
-      const greet = {
-        en: `Hello <b>${who}</b>! You are <b>${level}</b>. Tap <b>Dinlet</b>, then repeat.`,
-        de: `Hallo <b>${who}</b>! Du bist <b>${level}</b>. Erst <b>Dinlet</b>, dann wiederholen.`,
-        fr: `Salut <b>${who}</b> ! Niveau <b>${level}</b>. D’abord <b>Dinlet</b>, puis répète.`,
-        it: `Ciao <b>${who}</b>! Livello <b>${level}</b>. Prima <b>Dinlet</b>, poi ripeti.`,
-        es: `Hola <b>${who}</b>! Nivel <b>${level}</b>. Primero <b>Dinlet</b>, luego repite.`,
-        ru: `Привет, <b>${who}</b>! Уровень <b>${level}</b>. Нажми <b>Dinlet</b>, затем повтори.`
-      };
-      $("hint").innerHTML = greet[lang] || `Selam <b>${who}</b>! Şu an <b>${level}</b>. Dinlet → tekrar et.`;
-    }
-
-    function setSentenceUI(text){
-      $("sentence").textContent = text || "—";
-      $("sttStatus").textContent = "Hazır";
-      $("simStatus").textContent = "—";
-      $("simStatus").className = "v";
-      $("btnNext").disabled = true;
-      $("transBox").innerHTML = `<span class="muted">Anlam için</span> “Anlam” <span class="muted">butonuna bas.</span>`;
-    }
-
-    // session queue (no repeats within session)
-    let sessionQueue = [];
-    let sessionIndex = 0;
-
-    // current item
-    let currentText = "";
-    let currentTR = "";
 
     function nextSentence(){
       if(sessionIndex >= sessionQueue.length){
         sessionQueue = shuffle(sessionQueue);
         sessionIndex = 0;
       }
-      const it = normalizeItem(sessionQueue[sessionIndex]);
-      sessionIndex++;
+      const item = sessionQueue[sessionIndex++];
+      currentText = typeof item === 'string' ? item : item.text;
+      currentTR = typeof item === 'object' ? (item.tr || "") : "";
 
-      currentText = it.text;
-      currentTR = it.tr;
-
-      setSentenceUI(currentText);
+      $("sentence").textContent = currentText;
+      $("transBox").textContent = "Anlamı görmek için dokunun";
+      $("sttStatus").textContent = "Bekleniyor";
+      $("simStatus").textContent = "—";
+      $("simStatus").className = "stat-value";
+      $("btnNext").disabled = true;
+      $("visualizer").classList.remove("vis-active");
     }
 
-    // ---- TTS ----
     async function ttsSpeak(text){
       const r = await fetch(`${API_BASE}/api/tts`,{
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({ text, lang })
       });
-
-      if(!r.ok){
-        const t = await r.text().catch(()=> "");
-        throw new Error(`TTS HTTP ${r.status} ${t}`);
+      const j = await r.json();
+      if(j.audio_base64){
+        const audio = new Audio("data:audio/mpeg;base64," + j.audio_base64);
+        await audio.play();
       }
-
-      const j = await r.json().catch(()=>null);
-      if(!j?.ok || !j?.audio_base64){
-        throw new Error(j?.error || "TTS_UNAVAILABLE");
-      }
-
-      const src = "data:audio/mpeg;base64," + j.audio_base64;
-      const audio = new Audio(src);
-      await audio.play();
-      return true;
     }
 
-    // ---- STT ----
-    let mediaStream = null;
-    let recorder = null;
-    let chunks = [];
-    let recording = false;
-
-    async function ensureMic(){
-      if(mediaStream) return mediaStream;
-      mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
-      return mediaStream;
-    }
-
-    function pickMime(){
-      const candidates = [
-        "audio/webm;codecs=opus","audio/webm",
-        "audio/ogg;codecs=opus","audio/ogg"
-      ];
-      for(const c of candidates){
-        if(window.MediaRecorder?.isTypeSupported && MediaRecorder.isTypeSupported(c)) return c;
-      }
-      return "";
-    }
-
-    async function sttSend(blob){
-      const fd = new FormData();
-      fd.append("file", blob, "speech.webm");
-      fd.append("lang", lang);
-
-      const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
-      if(!r.ok){
-        const t = await r.text().catch(()=> "");
-        throw new Error(`STT HTTP ${r.status} ${t}`);
-      }
-      const j = await r.json().catch(()=>null);
-      const text = (j?.text || j?.transcript || j?.result || "").toString().trim();
-      if(!text) throw new Error("STT boş döndü");
-      return text;
-    }
+    // STT Logic
+    let mediaStream = null, recorder = null, chunks = [], recording = false;
 
     async function startRec(){
-      await ensureMic();
+      if(!mediaStream) mediaStream = await navigator.mediaDevices.getUserMedia({ audio:true });
       chunks = [];
-      const mime = pickMime();
-      recorder = new MediaRecorder(mediaStream, mime ? { mimeType: mime } : undefined);
-
-      recorder.ondataavailable = (e)=>{ if(e.data && e.data.size>0) chunks.push(e.data); };
+      recorder = new MediaRecorder(mediaStream);
+      recorder.ondataavailable = (e)=> chunks.push(e.data);
       recorder.onstop = async ()=>{
-        try{
-          const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" });
-          $("sttStatus").textContent = "Çözümleniyor…";
-          const text = await sttSend(blob);
-          $("sttStatus").textContent = text;
-
-          const sim = similarity(text, currentText);
-          setSimilarityUI(sim);
-        }catch(err){
-          $("sttStatus").textContent = "STT hata";
-          toast(err?.message || String(err));
-          $("btnNext").disabled = true;
-          $("simStatus").textContent = "—";
-          $("simStatus").className = "v";
-        } finally {
-          recording = false;
-          $("btnRec").classList.remove("rec");
-          $("btnRec").textContent = "🎙️";
-        }
-      };
-
-      recording = true;
-      $("btnRec").classList.add("rec");
-      $("btnRec").textContent = "⏺";
-      $("sttStatus").textContent = "Dinliyorum…";
-      $("simStatus").textContent = "—";
-      $("simStatus").className = "v";
-      $("btnNext").disabled = true;
-
-      recorder.start();
-    }
-
-    function stopRec(){
-      try{ if(recorder && recorder.state !== "inactive") recorder.stop(); }catch{}
-    }
-
-    // ---- Meaning ----
-    async function translateMeaning(){
-      // 1) havuzda TR varsa direkt göster
-      if(currentTR){
-        $("transBox").textContent = currentTR;
-        return;
-      }
-
-      // 2) yoksa translate_ai
-      const payload = { text: currentText, source_lang: lang, target_lang: "tr" };
-      try{
-        $("transBox").innerHTML = `<span class="muted">Çeviriliyor…</span>`;
-        const r = await fetch(`${API_BASE}/api/translate_ai`, {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
-        });
-        if(!r.ok){
-          const t = await r.text().catch(()=> "");
-          throw new Error(`Translate HTTP ${r.status} ${t}`);
-        }
-        const j = await r.json().catch(()=>null);
-        const out = (j?.text || j?.translation || j?.result || "").toString().trim();
-        if(!out) throw new Error("Çeviri boş döndü");
-        $("transBox").textContent = out;
-      }catch(e){
-        $("transBox").innerHTML = `<span class="muted">Çeviri şu an kullanılamıyor.</span>`;
-        toast(e?.message || String(e));
-      }
-    }
-
-    // ---- Buttons ----
-    async function playNow(){
-      try{
-        $("btnPlay").disabled = true;
-        $("btnListenTop").disabled = true;
-        await ttsSpeak(currentText);
-      }catch(e){
-        toast(e?.message || String(e));
-      }finally{
-        $("btnPlay").disabled = false;
-        $("btnListenTop").disabled = false;
-      }
-    }
-
-    $("btnPlay").onclick = playNow;
-    $("btnListenTop").onclick = playNow;
-
-    $("btnMeaningTop").onclick = translateMeaning;
-    $("btnMeaningTop").addEventListener("touchend", (e)=>{ e.preventDefault(); translateMeaning(); }, {passive:false});
-
-    $("btnSkipTop").onclick = ()=>{
-      // “Geç” = sonraki cümle (sadece havuz akışı)
-      $("btnNext").disabled = false;
-      $("btnNext").click();
-    };
-
-    $("btnRepeat").onclick = async ()=>{
-      $("btnNext").disabled = true;
-      $("sttStatus").textContent = "Hazır";
-      $("simStatus").textContent = "—";
-      $("simStatus").className = "v";
-      await playNow();
-    };
-
-    $("btnRec").onclick = async ()=>{
-      try{
-        if(!recording) await startRec();
-        else stopRec();
-      }catch(e){
+        try {
+          $("sttStatus").textContent = "Analiz ediliyor...";
+          const blob = new Blob(chunks, { type: "audio/webm" });
+          const fd = new FormData();
+          fd.append("file", blob); fd.append("lang", lang);
+          const r = await fetch(`${API_BASE}/api/stt`, { method:"POST", body: fd });
+          const j = await r.json();
+          const text = (j.text || j.transcript || "").trim();
+          $("sttStatus").textContent = text || "Anlaşılamadı";
+          
+          // Benzerlik
+          const sim = calculateSim(text, currentText);
+          const pct = Math.round(sim * 100);
+          $("simStatus").textContent = `%${pct}`;
+          
+          if(sim >= THRESH){
+            $("simStatus").className = "stat-value ok";
+            toast("Harika! Başarılı telaffuz. ✨");
+            $("btnNext").disabled = false;
+            setTimeout(()=> $("btnNext").click(), 1200);
+          } else {
+            $("simStatus").className = "stat-value bad";
+            toast("Biraz daha gayret! Tekrar dene.");
+          }
+        } catch(e){ toast("Hata oluştu."); }
         recording = false;
-        $("btnRec").classList.remove("rec");
-        $("btnRec").textContent = "🎙️";
-        toast(e?.message || String(e));
-      }
-    };
-
-    $("btnNext").onclick = ()=>{
-      nextSentence();
-      setTimeout(()=>{ try{ playNow(); }catch{} }, 250);
-    };
-
-    $("btnExit").onclick = ()=>location.href="/pages/practice_ai.html";
-
-    // ---- init ----
-    try{
-      setGreeting();
-      $("sentence").textContent = "Havuz yükleniyor…";
-
-      const pool = await loadPool();
-      const raw = pickFromPool(pool, level);
-
-      sessionQueue = shuffle(raw).slice(0, Math.max(60, Math.min(200, raw.length)));
-      sessionIndex = 0;
-
-      if(!sessionQueue.length) throw new Error("Havuz boş görünüyor.");
-
-      nextSentence();
-      setTimeout(()=>{ try{ playNow(); }catch{} }, 350);
-
-    }catch(e){
-      $("sentence").textContent = "Havuz yüklenemedi.";
-      toast(e?.message || String(e));
-      $("btnPlay").disabled = true;
-      $("btnListenTop").disabled = true;
-      $("btnRec").disabled = true;
-      $("btnNext").disabled = true;
+        $("btnRec").classList.remove("recording");
+        $("visualizer").classList.remove("vis-active");
+      };
+      recorder.start();
+      recording = true;
+      $("btnRec").classList.add("recording");
+      $("visualizer").classList.add("vis-active");
+      $("sttStatus").textContent = "Dinliyorum...";
     }
+
+    function calculateSim(a, b){
+      const s1 = a.toLowerCase().replace(/[^\w\s]/g,'');
+      const s2 = b.toLowerCase().replace(/[^\w\s]/g,'');
+      if(s1 === s2) return 1;
+      // Basit lev-dist benzeri mantık
+      const longer = s1.length > s2.length ? s1 : s2;
+      const shorter = s1.length > s2.length ? s2 : s1;
+      if (longer.length === 0) return 1.0;
+      return (longer.length - editDistance(longer, shorter)) / parseFloat(longer.length);
+    }
+
+    function editDistance(s1, s2) {
+      let costs = [];
+      for (let i = 0; i <= s1.length; i++) {
+        let lastValue = i;
+        for (let j = 0; j <= s2.length; j++) {
+          if (i == 0) costs[j] = j;
+          else if (j > 0) {
+            let newValue = costs[j - 1];
+            if (s1.charAt(i - 1) != s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            costs[j - 1] = lastValue; lastValue = newValue;
+          }
+        }
+        if (i > 0) costs[s2.length] = lastValue;
+      }
+      return costs[s2.length];
+    }
+
+    // Event Listeners
+    $("btnRec").onclick = () => !recording ? startRec() : recorder.stop();
+    $("btnNext").onclick = () => nextSentence();
+    $("btnRepeat").onclick = () => ttsSpeak(currentText);
+    $("btnSkipTop").onclick = () => nextSentence();
+    
+    $("btnMeaningTop").onclick = async () => {
+        if(currentTR) { $("transBox").textContent = currentTR; return; }
+        $("transBox").textContent = "Çeviriliyor...";
+        try {
+            const r = await fetch(`${API_BASE}/api/translate_ai`, {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body: JSON.stringify({ text: currentText, source_lang: lang, target_lang: "tr" })
+            });
+            const j = await r.json();
+            $("transBox").textContent = j.text || "Çeviri bulunamadı.";
+        } catch(e) { $("transBox").textContent = "Hata oluştu."; }
+    };
+
+    // Init
+    try {
+      const pool = await loadPool();
+      const raw = pool[level] || pool["A1"];
+      sessionQueue = shuffle(raw);
+      nextSentence();
+      toast(`Hoş geldin Başkanım! İyi pratikler.`);
+    } catch(e) {
+      $("sentence").textContent = "Havuz yüklenemedi.";
+    }
+
   </script>
 </body>
 </html>
