@@ -5,13 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>italkyAI • Ders</title>
-  <link rel="icon" href="data:," />
-
-  <!-- ✅ white flash + dark lock -->
   <meta name="theme-color" content="#02000f">
-  <style>
-    html,body{ background:#02000f !important; }
-  </style>
+  <style>html,body{background:#02000f !important;}</style>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,11 +17,12 @@
       --bg:#02000f;
       --border: rgba(255,255,255,0.12);
       --card: rgba(255,255,255,0.06);
-      --card2: rgba(0,0,0,0.22);
+      --glass: rgba(0,0,0,0.24);
       --muted: rgba(255,255,255,0.72);
       --muted2: rgba(255,255,255,0.55);
       --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);
-      --footerSafe: calc(var(--footerH, 92px) + env(safe-area-inset-bottom));
+      --ok: rgba(34,197,94,0.95);
+      --bad: rgba(255,90,140,0.95);
     }
 
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
@@ -40,24 +36,20 @@
       font-family:'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
 
-    /* ✅ page background */
+    /* ui_shell bar’lar dışarıda; bizim içerik barların arasında kalsın */
     #pageContent{
       height:100%;
       position:relative;
       overflow:hidden;
-      background:
-        radial-gradient(circle at 50% -20%, rgba(99,102,241,0.35) 0%, rgba(2,0,15,0) 60%),
-        radial-gradient(circle at 15% 85%, rgba(236,72,153,0.18) 0%, rgba(2,0,15,0) 55%),
-        radial-gradient(circle at 85% 65%, rgba(168,85,247,0.16) 0%, rgba(2,0,15,0) 55%),
-        #02000f;
+      padding: 12px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 14px);
     }
 
-    /* nebula drift layer */
+    /* arka plan */
     #pageContent::before{
       content:"";
       position:absolute; inset:-35%;
       background:
-        radial-gradient(circle at 20% 20%, rgba(99,102,241,.30) 0%, transparent 45%),
+        radial-gradient(circle at 20% 20%, rgba(99,102,241,.28) 0%, transparent 45%),
         radial-gradient(circle at 80% 30%, rgba(236,72,153,.18) 0%, transparent 42%),
         radial-gradient(circle at 50% 80%, rgba(168,85,247,.16) 0%, transparent 45%);
       filter: blur(44px);
@@ -72,21 +64,20 @@
     }
 
     .wrap{
-      position:relative;
-      z-index:1;
+      position:relative; z-index:1;
       height:100%;
-      padding: 12px 12px calc(var(--footerSafe) + 14px);
-      overflow:hidden;
+      max-width: 520px;
+      margin:0 auto;
       display:flex;
       flex-direction:column;
-      gap:12px;
-      max-width: 520px;
-      margin: 0 auto;
+      gap:10px;
+      min-height:0;
     }
 
-    .top{
+    .topRow{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
     }
+
     .chip{
       padding:10px 12px;
       border-radius:999px;
@@ -98,25 +89,32 @@
       white-space:nowrap;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      display:flex; align-items:center; gap:8px;
+    }
+    .chip .dot{
+      width:7px; height:7px; border-radius:99px;
+      background:#a5b4fc;
+      box-shadow: 0 0 10px rgba(165,180,252,0.55);
     }
 
     .card{
       flex:1;
+      min-height:0;
       border-radius: 28px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.24);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      padding: 14px 12px;
-      overflow:hidden;
+      padding: 12px;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:10px;
+      overflow:hidden;
       box-shadow: 0 18px 60px rgba(0,0,0,0.35);
     }
 
     .sub{
-      font-size:13px;
+      font-size:12px;
       font-weight:900;
       color: var(--muted);
       line-height:1.45;
@@ -125,6 +123,7 @@
 
     .chat{
       flex:1;
+      min-height:0;
       overflow:auto;
       padding-right: 6px;
       display:flex;
@@ -134,7 +133,7 @@
     .chat::-webkit-scrollbar{ display:none; }
 
     .bubble{
-      max-width: 92%;
+      max-width: 94%;
       border-radius: 18px;
       padding: 10px 12px;
       border: 1px solid rgba(255,255,255,0.12);
@@ -143,7 +142,24 @@
     .me{ align-self:flex-end; background: rgba(99,102,241,0.18); border-color: rgba(99,102,241,0.34); }
     .teacher{ align-self:flex-start; }
 
-    .bTop{ font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px; color: rgba(255,255,255,0.92); }
+    .bTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px;
+      color: rgba(255,255,255,0.92);
+    }
+    .speakBtn{
+      border:none; cursor:pointer;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color:#fff;
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-weight:1000;
+      font-size: 11px;
+    }
+    .speakBtn:active{ transform: scale(.99); opacity:.95; }
+    .speakBtn[disabled]{ opacity:.4; cursor:not-allowed; }
+
     .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; color:#fff; }
     .bTr{
       margin-top:8px;
@@ -159,10 +175,11 @@
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.22);
-      padding: 12px 12px;
+      padding: 12px;
     }
     .q{ font-weight:1000; font-size:13px; line-height:1.25; color:#fff; }
     .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: var(--muted); line-height:1.35; }
+
     .inp{
       margin-top:10px;
       width:100%;
@@ -261,13 +278,13 @@
 <body>
   <main id="pageContent">
     <div class="wrap">
-      <div class="top">
-        <div class="chip" id="whoChip">—</div>
+      <div class="topRow">
+        <div class="chip" id="whoChip"><span class="dot"></span> —</div>
         <div class="chip" id="timerChip">15:00</div>
       </div>
 
       <section class="card">
-        <div class="chip" id="engineChip">italky Academy</div>
+        <div class="chip" id="engineChip">italky Academy • Gerçek Ders</div>
         <div class="sub" id="coachSub">—</div>
 
         <div class="chat" id="chat"></div>
@@ -308,6 +325,8 @@
     mountShell({ scroll:"none" });
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
+    const API_BASE = "https://italky-api.onrender.com";
+
     const $ = (id)=>document.getElementById(id);
     const chat = $("chat");
 
@@ -322,13 +341,59 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    function addBubble({ who, text, tr, isMe=false }){
+    // 🔊 tek audio (üst üste binmesin)
+    let currentAudio = null;
+    function stopAudio(){
+      try{ if(currentAudio){ currentAudio.pause(); currentAudio.currentTime = 0; } }catch{}
+      currentAudio = null;
+    }
+
+    async function speak(text, lang){
+      try{
+        stopAudio();
+        const r = await fetch(`${API_BASE}/api/tts`,{
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ text, lang })
+        });
+        const j = await r.json().catch(()=>null);
+        if(!j?.ok || !j?.audio_base64){
+          toast("Ses şu an kullanılamıyor");
+          return;
+        }
+        currentAudio = new Audio("data:audio/mpeg;base64," + j.audio_base64);
+        await currentAudio.play();
+      }catch{
+        toast("Ses oynatılamadı");
+      }
+    }
+
+    function addBubble({ who, text, tr, isMe=false, langForVoice="en", allowSpeak=false }){
       const b = document.createElement("div");
       b.className = "bubble " + (isMe ? "me" : "teacher");
-      b.innerHTML = `<div class="bTop"></div><div class="bTxt"></div>${tr ? `<div class="bTr"></div>` : ""}`;
-      b.querySelector(".bTop").textContent = who || "";
+
+      b.innerHTML = `
+        <div class="bTop">
+          <span class="who"></span>
+          ${allowSpeak ? `<button class="speakBtn" type="button">🔊 Dinlet</button>` : `<span></span>`}
+        </div>
+        <div class="bTxt"></div>
+        ${tr ? `<div class="bTr"></div>` : ""}
+      `;
+
+      b.querySelector(".who").textContent = who || "";
       b.querySelector(".bTxt").textContent = text || "";
       if(tr) b.querySelector(".bTr").textContent = tr || "";
+
+      const sBtn = b.querySelector(".speakBtn");
+      if(sBtn){
+        sBtn.addEventListener("click", async ()=>{
+          sBtn.disabled = true;
+          await speak(text || "", langForVoice);
+          setTimeout(()=>{ try{ sBtn.disabled = false; }catch{} }, 800);
+        });
+      }
+
       chat.appendChild(b);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -339,6 +404,7 @@
       return `${m}:${s}`;
     }
 
+    // teacher/lang seçimleri
     const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
     if(!teacherId) location.href="/pages/teacher_select.html";
 
@@ -348,22 +414,30 @@
     const langCode = (urlParams.get("lang") || TEACHER_TO_LANG[teacherId] || "en").trim().toLowerCase();
     $("whoChip").textContent = `${LANG_NAME_TR[langCode] || langCode.toUpperCase()} • 15 dk`;
 
+    // profile
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session) location.href="/pages/login.html";
 
-    const { data: prof, error } = await supabase
+    const { data: prof } = await supabase
       .from("profiles")
       .select("tokens, full_name, teacher_prefs, levels")
       .eq("id", session.user.id)
-      .single();
-
-    if(error){
-      toast("Profil okunamadı");
-      console.warn(error);
-    }
+      .maybeSingle();
 
     const tokens = Number(prof?.tokens ?? 0);
     setHeaderTokens(tokens);
+
+    // sadece ad ile hitap (soyadı at)
+    function firstName(full){
+      const s = String(full||"").trim();
+      if(!s) return "";
+      const parts = s.split(/\s+/).filter(Boolean);
+      if(parts.length <= 2) return parts[0] || s;
+      return parts.slice(0, -1).join(" "); // son kelimeyi soyad say
+    }
+    const studentName = firstName(prof?.full_name) || "Oğuz";
+
+    const level = String((prof?.levels && typeof prof.levels==="object" ? (prof.levels[langCode] || "A1") : "A1")).toUpperCase();
 
     const prefs = (prof?.teacher_prefs && typeof prof.teacher_prefs === "object") ? prof.teacher_prefs : {};
     const cur = prefs?.[teacherId] || {};
@@ -378,28 +452,132 @@
     }[teacherId] || { name:"Coach", style:"friendly" };
 
     const teacherName = String(cur?.teacher_name || DEFAULT_COACH.name).trim();
-    const gender = String(cur?.gender || "female").trim();
     const style = String(cur?.style || DEFAULT_COACH.style).trim();
+    const gender = String(cur?.gender || "female").trim();
 
-    const fullName = String(prof?.full_name || "").trim();
-    const fallbackStudent = fullName ? (fullName.split(/\s+/)[0] || fullName) : "Student";
-    const studentName = fallbackStudent;
+    $("coachSub").textContent = `Koç: ${teacherName} • Seviye: ${level}`;
 
-    const level = String((prof?.levels && typeof prof.levels==="object" ? (prof.levels[langCode] || "A1") : "A1")).toUpperCase();
-    $("coachSub").textContent = `Öğretmenin: ${teacherName} • Seviye: ${level}`;
-
-    addBubble({
-      who: teacherName,
-      text: `Hi ${studentName}! We will study together for 15 minutes. Are you ready?`,
-      tr:  `Selam ${studentName}! 15 dakika boyunca birlikte çalışacağız. Hazır mısın?`
-    });
+    // ------- GERÇEK DERS AKIŞI (phase machine) -------
+    // phase: 1 Warmup → 2 Micro lesson → 3 Example → 4 Task → 5 Feedback → 6 Recap
+    let phase = 1;
+    let lastTask = null; // { prompt, prompt_tr, expected_hint? }
+    let lastCorrect = null;
 
     function setTask(task, taskTr){
-      $("qText").textContent = task || "Write one sentence about your day.";
-      $("qTr").textContent = taskTr || "Günün hakkında bir cümle yaz.";
+      $("qText").textContent = task || "Bir cümle yaz.";
+      $("qTr").textContent = taskTr || "Bir cümle yaz.";
+      $("answer").value = "";
+      $("answer").placeholder = "Cevabını yaz...";
     }
-    setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
 
+    // ✅ Edge Function beklenen dönüş formatı:
+    // {
+    //   teacher: "target language lesson text",
+    //   tr: "turkish explanation",
+    //   task: "student task prompt (target language)",
+    //   task_tr: "task Turkish",
+    //   correct_hint: "optional hint",
+    //   next_phase: 2..6 (optional),
+    //   should_speak: true/false (optional)
+    // }
+
+    async function lessonStep(userText){
+      const payload = {
+        teacher_id: teacherId,
+        teacher_name: teacherName,
+        coach_gender: gender,
+        coach_style: style,
+        lang: langCode,
+        level,
+        student_name: studentName,
+        phase,
+        user_text: userText || ""
+      };
+
+      const { data, error } = await supabase.functions.invoke("italky_teacher_lesson", { body: payload });
+      if(error) throw error;
+      return data;
+    }
+
+    async function bootstrapLesson(){
+      // ilk adım: hiç user_text yok
+      try{
+        const res = await lessonStep("");
+        // öğretmen mesajı
+        addBubble({
+          who: teacherName,
+          text: res?.teacher || "",
+          tr: res?.tr || "",
+          isMe:false,
+          langForVoice: langCode,
+          allowSpeak: true
+        });
+
+        // task
+        if(res?.task){
+          setTask(res.task, res.task_tr || "");
+          lastTask = { task: res.task, task_tr: res.task_tr || "" };
+        } else {
+          // fallback task
+          setTask("Write one simple sentence about your day.", "Günün hakkında basit bir cümle yaz.");
+        }
+
+        // phase update
+        if(res?.next_phase) phase = Number(res.next_phase) || phase + 1;
+        else phase = Math.min(6, phase + 1);
+
+      }catch(e){
+        console.error(e);
+        toast("Ders motoru çalışmadı");
+        // fallback minimal
+        addBubble({
+          who: teacherName,
+          text: `Hi ${studentName}! Today we’ll practice at ${level}.`,
+          tr: `Selam ${studentName}! Bugün ${level} seviyesinde pratik yapacağız.`,
+          isMe:false,
+          langForVoice: langCode,
+          allowSpeak: true
+        });
+        setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
+      }
+    }
+
+    async function send(){
+      const input = $("answer");
+      const txt = (input.value || "").trim();
+      if(!txt){ toast("Cevabını yaz 🙂"); return; }
+
+      addBubble({ who: studentName, text: txt, isMe:true });
+
+      input.value = "";
+
+      try{
+        const res = await lessonStep(txt);
+
+        addBubble({
+          who: teacherName,
+          text: res?.teacher || "",
+          tr: res?.tr || "",
+          isMe:false,
+          langForVoice: langCode,
+          allowSpeak: true
+        });
+
+        if(res?.task){
+          setTask(res.task, res.task_tr || "");
+          lastTask = { task: res.task, task_tr: res.task_tr || "" };
+        }
+
+        if(res?.next_phase) phase = Number(res.next_phase) || phase;
+        else phase = Math.min(6, phase + 1);
+
+      }catch(e){
+        console.error(e);
+        toast("Öğretmen yanıt veremedi");
+      }
+    }
+
+    // ------- SESSION TIMER / CONTINUE -------
     let remainingSec = PLAN_MIN * 60;
     let tick = null;
     let sessionId = null;
@@ -462,7 +640,6 @@
         remainingSec--;
         if(remainingSec < 0) remainingSec = 0;
         $("timerChip").textContent = fmtTime(remainingSec);
-
         if(remainingSec === 0){
           clearInterval(tick);
           await endAndAskContinue(true);
@@ -470,50 +647,15 @@
       }, 1000);
     }
 
-    async function teacherReply(userText){
-      const { data, error } = await supabase.functions.invoke("italky_teacher_chat", {
-        body: {
-          teacher_id: teacherId,
-          lang: langCode,
-          teacher_name: teacherName,
-          level,
-          student_name: studentName,
-          user_text: userText,
-          coach_gender: gender,
-          coach_style: style
-        }
-      });
-      if(error) throw error;
-      return data;
-    }
-
-    async function send(){
-      const input = $("answer");
-      const txt = (input.value || "").trim();
-      if(!txt) return;
-
-      addBubble({ who: studentName, text: txt, isMe:true });
-      input.value = "";
-
-      try{
-        const res = await teacherReply(txt);
-        addBubble({ who: teacherName, text: res?.teacher || "", tr: res?.tr || "" });
-        setTask(res?.task || "Write one sentence about your day.", res?.task_tr || "Günün hakkında bir cümle yaz.");
-      }catch(e){
-        console.error(e);
-        toast("Öğretmen yanıt veremedi");
-      }
-    }
-
     async function endSession(){
       if(!sessionId) return { used_minutes:15 };
       try{
         const { data, error } = await supabase.rpc("end_course_with_refund", { p_session_id: sessionId });
         if(error) throw error;
-        return data?.[0] || { used_minutes:15 };
+        return data?.[0] || { used_minutes:15, refund_tokens:0 };
       }catch(e){
         console.warn(e);
-        return { used_minutes:15 };
+        return { used_minutes:15, refund_tokens:0 };
       } finally {
         try{ localStorage.removeItem(ACTIVE_KEY); }catch{}
       }
@@ -523,10 +665,12 @@
       const r = await endSession();
       await refreshTokens();
       const used = Number(r?.used_minutes ?? 15);
+      const refund = Number(r?.refund_tokens ?? 0);
 
       const txt =
         (autoTimeUp ? "15 dakika tamamlandı.\n" : "Ders kapatıldı.\n") +
-        `Kullanılan süre: ${used} dk\n\n` +
+        `Kullanılan süre: ${used} dk\n` +
+        `İade: ${refund} Jeton\n\n` +
         `Devam etmek ister misin?`;
 
       $("continueText").textContent = txt;
@@ -551,12 +695,16 @@
     $("btnContinueYes").addEventListener("click", async ()=>{
       $("continueOverlay").classList.remove("show");
       await startNewSession();
+      phase = 1;
       addBubble({
         who: teacherName,
         text: `Hi ${studentName}! Ready to continue?`,
-        tr:  `Selam ${studentName}! Devam etmeye hazır mısın?`
+        tr:  `Selam ${studentName}! Devam etmeye hazır mısın?`,
+        isMe:false,
+        langForVoice: langCode,
+        allowSpeak: true
       });
-      setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
+      await bootstrapLesson();
       startTimer();
     });
 
@@ -565,9 +713,11 @@
       location.href="/pages/plan_select.html";
     });
 
+    // ---- BOOT ----
     const resumed = await tryResumeActive();
     if(!resumed) await startNewSession();
     startTimer();
+    await bootstrapLesson();
   </script>
 </body>
 </html>
