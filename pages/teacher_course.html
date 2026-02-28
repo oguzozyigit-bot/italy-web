@@ -1,10 +1,11 @@
 <!-- FILE: /pages/teacher_course.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>italkyAI • Ders</title>
+
   <meta name="theme-color" content="#02000f">
   <style>html,body{background:#02000f !important;}</style>
 
@@ -23,28 +24,20 @@
       --aiGrad: linear-gradient(135deg,#a5b4fc 0%,#6366f1 55%,#ec4899 100%);
       --ok: rgba(34,197,94,0.95);
       --bad: rgba(255,90,140,0.95);
-    }
 
+      /* ui_shell footer yüksekliği buraya yazar */
+      --footerH: 92px;
+    }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; outline:none; }
+    html,body{ margin:0; padding:0; width:100%; height:100%; overflow:hidden; background: var(--bg); color:#fff; font-family:'Outfit',system-ui,sans-serif; }
 
-    html,body{
-      margin:0; padding:0;
-      width:100%; height:100%;
-      overflow:hidden;
-      background: var(--bg);
-      color:#fff;
-      font-family:'Outfit', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-
-    /* ui_shell bar’lar dışarıda; bizim içerik barların arasında kalsın */
+    /* Shell gelmezse bile sayfa düzgün dursun */
     #pageContent{
       height:100%;
       position:relative;
       overflow:hidden;
-      padding: 12px 14px calc(var(--footerH, 92px) + env(safe-area-inset-bottom) + 14px);
+      padding: 12px 14px calc(var(--footerH) + env(safe-area-inset-bottom) + 14px);
     }
-
-    /* arka plan */
     #pageContent::before{
       content:"";
       position:absolute; inset:-35%;
@@ -58,10 +51,7 @@
       pointer-events:none;
       z-index:0;
     }
-    @keyframes drift{
-      from{ transform: translate3d(-10px,-8px,0) scale(1); }
-      to{ transform: translate3d(10px,10px,0) scale(1.06); }
-    }
+    @keyframes drift{ from{transform:translate3d(-10px,-8px,0) scale(1)} to{transform:translate3d(10px,10px,0) scale(1.06)} }
 
     .wrap{
       position:relative; z-index:1;
@@ -74,10 +64,49 @@
       min-height:0;
     }
 
-    .topRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    /* Fallback header/footer (ui_shell gelmezse) */
+    .fallbackTop{
+      display:none;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(14px);
+    }
+    .fallbackTop .brand{
+      font-family:"Space Grotesk",system-ui,sans-serif;
+      font-weight:1000;
+      font-size:14px;
+      display:flex; gap:6px; align-items:center;
+    }
+    .fallbackTop .brand .ai{
+      background: var(--aiGrad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .fallbackTop .right{
+      display:flex; gap:10px; align-items:center;
+      font-weight:900; font-size:12px; color: rgba(255,255,255,0.85);
+    }
+    .fallbackBottom{
+      display:none;
+      position:absolute;
+      left:14px; right:14px;
+      bottom: calc(env(safe-area-inset-bottom) + 10px);
+      padding: 10px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.22);
+      backdrop-filter: blur(14px);
+      font-size: 11px;
+      font-weight:900;
+      color: rgba(255,255,255,0.70);
+      text-align:center;
     }
 
+    .topRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
     .chip{
       padding:10px 12px;
       border-radius:999px;
@@ -88,23 +117,16 @@
       color: rgba(255,255,255,0.92);
       white-space:nowrap;
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       display:flex; align-items:center; gap:8px;
     }
-    .chip .dot{
-      width:7px; height:7px; border-radius:99px;
-      background:#a5b4fc;
-      box-shadow: 0 0 10px rgba(165,180,252,0.55);
-    }
+    .chip .dot{ width:7px; height:7px; border-radius:99px; background:#a5b4fc; box-shadow:0 0 10px rgba(165,180,252,0.55); }
 
     .card{
-      flex:1;
-      min-height:0;
+      flex:1; min-height:0;
       border-radius: 28px;
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(0,0,0,0.24);
       backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
       padding: 12px;
       display:flex;
       flex-direction:column;
@@ -113,19 +135,12 @@
       box-shadow: 0 18px 60px rgba(0,0,0,0.35);
     }
 
-    .sub{
-      font-size:12px;
-      font-weight:900;
-      color: var(--muted);
-      line-height:1.45;
-      margin-top:-4px;
-    }
+    .sub{ font-size:12px; font-weight:900; color: var(--muted); line-height:1.45; margin-top:-4px; }
 
     .chat{
-      flex:1;
-      min-height:0;
+      flex:1; min-height:0;
       overflow:auto;
-      padding-right: 6px;
+      padding-right:6px;
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -145,7 +160,6 @@
     .bTop{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
       font-size: 12px; font-weight:1000; opacity:.92; margin-bottom:6px;
-      color: rgba(255,255,255,0.92);
     }
     .speakBtn{
       border:none; cursor:pointer;
@@ -160,7 +174,7 @@
     .speakBtn:active{ transform: scale(.99); opacity:.95; }
     .speakBtn[disabled]{ opacity:.4; cursor:not-allowed; }
 
-    .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; color:#fff; }
+    .bTxt{ font-size: 13px; font-weight:900; line-height:1.45; white-space:pre-wrap; }
     .bTr{
       margin-top:8px;
       padding-top:8px;
@@ -177,7 +191,7 @@
       background: rgba(0,0,0,0.22);
       padding: 12px;
     }
-    .q{ font-weight:1000; font-size:13px; line-height:1.25; color:#fff; }
+    .q{ font-weight:1000; font-size:13px; line-height:1.25; }
     .qSub{ margin-top:6px; font-size:12px; font-weight:900; color: var(--muted); line-height:1.35; }
 
     .inp{
@@ -194,14 +208,9 @@
     }
     .inp::placeholder{ color: rgba(255,255,255,0.45); }
 
-    .btnRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; }
     .btn{
-      flex:1;
-      min-width: 130px;
+      flex:1; min-width: 130px;
       height:54px;
       border-radius:22px;
       border:none;
@@ -215,8 +224,7 @@
     .btn:active{ transform: scale(.99); }
 
     .ghost{
-      flex:1;
-      min-width: 130px;
+      flex:1; min-width: 130px;
       height:54px;
       border-radius:22px;
       border:1px solid rgba(255,255,255,0.14);
@@ -243,7 +251,6 @@
       font-size:12px;
       transition:.28s;
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       pointer-events:none;
       max-width:min(92vw,520px);
       text-align:center;
@@ -269,7 +276,7 @@
       background: rgba(10,10,18,0.92);
       padding:14px;
     }
-    .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; color:#fff; }
+    .mTitle{ font-family:"Space Grotesk",system-ui,sans-serif; font-size:16px; font-weight:1000; margin:6px 6px 10px; }
     .mText{ font-size:13px; font-weight:900; color: rgba(255,255,255,0.78); line-height:1.5; margin: 0 6px; white-space:pre-wrap; }
     .mBtns{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
   </style>
@@ -278,14 +285,21 @@
 <body>
   <main id="pageContent">
     <div class="wrap">
+
+      <!-- ui_shell gelmezse gözüksün -->
+      <div class="fallbackTop" id="fbTop">
+        <div class="brand">italky<span class="ai">AI</span> • Academy</div>
+        <div class="right"><span id="fbLang">EN</span> • <span id="fbTime">15:00</span></div>
+      </div>
+
       <div class="topRow">
         <div class="chip" id="whoChip"><span class="dot"></span> —</div>
         <div class="chip" id="timerChip">15:00</div>
       </div>
 
       <section class="card">
-        <div class="chip" id="engineChip">italky Academy • Gerçek Ders</div>
-        <div class="sub" id="coachSub">—</div>
+        <div class="chip" id="engineChip">italky Academy • Ders</div>
+        <div class="sub" id="coachSub">Ders başlıyor…</div>
 
         <div class="chat" id="chat"></div>
 
@@ -301,6 +315,11 @@
           <button class="ghost" id="btnExit" type="button">Çık</button>
         </div>
       </section>
+
+      <!-- ui_shell gelmezse gözüksün -->
+      <div class="fallbackBottom" id="fbBottom">
+        Hakkımızda • SSS • Gizlilik • İletişim
+      </div>
     </div>
   </main>
 
@@ -322,6 +341,7 @@
     import { bootPage } from "/js/ui_guard.js";
     import { supabase } from "/js/supabase_client.js";
 
+    // 1) Shell’i başlat
     mountShell({ scroll:"none" });
     bootPage({ protectedPage:true, header:{ nameId:"userName", picId:"userPic" } });
 
@@ -330,8 +350,14 @@
     const $ = (id)=>document.getElementById(id);
     const chat = $("chat");
 
-    const PLAN_MIN = 15;
-    const ACTIVE_KEY = "italky_active_course_session";
+    // 2) Shell gelmezse fallback aç
+    setTimeout(()=>{
+      const hasShellFooter = getComputedStyle(document.documentElement).getPropertyValue("--footerH").trim();
+      if(!hasShellFooter){ // shell CSS var’ı gelmediyse
+        $("fbTop").style.display = "flex";
+        $("fbBottom").style.display = "block";
+      }
+    }, 650);
 
     function toast(msg){
       const t = $("toast");
@@ -341,13 +367,12 @@
       window.__to = setTimeout(()=>t.classList.remove("show"), 1600);
     }
 
-    // 🔊 tek audio (üst üste binmesin)
+    // 🔊 tek audio: üst üste binmesin
     let currentAudio = null;
     function stopAudio(){
       try{ if(currentAudio){ currentAudio.pause(); currentAudio.currentTime = 0; } }catch{}
       currentAudio = null;
     }
-
     async function speak(text, lang){
       try{
         stopAudio();
@@ -371,7 +396,6 @@
     function addBubble({ who, text, tr, isMe=false, langForVoice="en", allowSpeak=false }){
       const b = document.createElement("div");
       b.className = "bubble " + (isMe ? "me" : "teacher");
-
       b.innerHTML = `
         <div class="bTop">
           <span class="who"></span>
@@ -380,7 +404,6 @@
         <div class="bTxt"></div>
         ${tr ? `<div class="bTr"></div>` : ""}
       `;
-
       b.querySelector(".who").textContent = who || "";
       b.querySelector(".bTxt").textContent = text || "";
       if(tr) b.querySelector(".bTr").textContent = tr || "";
@@ -404,39 +427,39 @@
       return `${m}:${s}`;
     }
 
-    // teacher/lang seçimleri
+    // ---------- PROFİL / DİL / SEVİYE ----------
     const teacherId = (localStorage.getItem("italky_teacher_pref") || "").trim();
     if(!teacherId) location.href="/pages/teacher_select.html";
 
     const urlParams = new URLSearchParams(location.search);
     const TEACHER_TO_LANG = { dora:"en", ayda:"de", jale:"fr", sencer:"it", sungur:"ru", ozan:"es" };
     const LANG_NAME_TR = { en:"İngilizce", de:"Almanca", fr:"Fransızca", it:"İtalyanca", ru:"Rusça", es:"İspanyolca" };
+
     const langCode = (urlParams.get("lang") || TEACHER_TO_LANG[teacherId] || "en").trim().toLowerCase();
     $("whoChip").textContent = `${LANG_NAME_TR[langCode] || langCode.toUpperCase()} • 15 dk`;
+    $("fbLang").textContent = langCode.toUpperCase();
 
-    // profile
     const { data:{ session } } = await supabase.auth.getSession();
     if(!session) location.href="/pages/login.html";
 
     const { data: prof } = await supabase
       .from("profiles")
-      .select("tokens, full_name, teacher_prefs, levels")
+      .select("tokens, full_name, levels, teacher_prefs")
       .eq("id", session.user.id)
       .maybeSingle();
 
     const tokens = Number(prof?.tokens ?? 0);
-    setHeaderTokens(tokens);
+    try{ setHeaderTokens(tokens); }catch{}
 
-    // sadece ad ile hitap (soyadı at)
     function firstName(full){
       const s = String(full||"").trim();
       if(!s) return "";
       const parts = s.split(/\s+/).filter(Boolean);
       if(parts.length <= 2) return parts[0] || s;
-      return parts.slice(0, -1).join(" "); // son kelimeyi soyad say
+      return parts.slice(0, -1).join(" ");
     }
-    const studentName = firstName(prof?.full_name) || "Oğuz";
 
+    const studentName = firstName(prof?.full_name) || "Oğuz";
     const level = String((prof?.levels && typeof prof.levels==="object" ? (prof.levels[langCode] || "A1") : "A1")).toUpperCase();
 
     const prefs = (prof?.teacher_prefs && typeof prof.teacher_prefs === "object") ? prof.teacher_prefs : {};
@@ -452,94 +475,109 @@
     }[teacherId] || { name:"Coach", style:"friendly" };
 
     const teacherName = String(cur?.teacher_name || DEFAULT_COACH.name).trim();
-    const style = String(cur?.style || DEFAULT_COACH.style).trim();
-    const gender = String(cur?.gender || "female").trim();
-
     $("coachSub").textContent = `Koç: ${teacherName} • Seviye: ${level}`;
 
-    // ------- GERÇEK DERS AKIŞI (phase machine) -------
-    // phase: 1 Warmup → 2 Micro lesson → 3 Example → 4 Task → 5 Feedback → 6 Recap
-    let phase = 1;
-    let lastTask = null; // { prompt, prompt_tr, expected_hint? }
-    let lastCorrect = null;
+    // ---------- GERÇEK DERS: AI yoksa bile AKAN OFFLINE PLAN ----------
+    // (Bu sayede “ortada ders yok” asla olmaz.)
+    const LESSON_PLAN = {
+      en:{
+        A1:{
+          topic:"Present Simple (I/You/We/They)",
+          intro:`Selam ${studentName}. Bugün ${level} seviyesinde kısa ama gerçek bir ders yapacağız.\nKonu: Present Simple.\nHazırsan başlayalım.`,
+          tr:`Bugün “Geniş Zaman” (Present Simple) çalışacağız. Kuracağın cümle: I/You/We/They + verb.`,
+          examples:[
+            ["I work every day.","Her gün çalışırım."],
+            ["We live in Düzce.","Düzce'de yaşarız."]
+          ],
+          task:"Write 1 sentence about your day using Present Simple.",
+          task_tr:"Present Simple kullanarak günün hakkında 1 cümle yaz."
+        },
+        B1:{
+          topic:"Present Perfect vs Past Simple",
+          intro:`Selam ${studentName}. Bugün ${level} için gerçek ders: Present Perfect vs Past Simple.\nHazırsan başlıyoruz.`,
+          tr:`Present Perfect: sonuç/deneyim (“I have…”) • Past Simple: net geçmiş (“I did…”).`,
+          examples:[
+            ["I have been to Ankara.","Ankara'ya gittim (deneyim)."],
+            ["I went to Ankara last year.","Geçen yıl Ankara'ya gittim (zaman belli)."]
+          ],
+          task:"Write 2 sentences: 1 with Present Perfect, 1 with Past Simple.",
+          task_tr:"2 cümle yaz: 1 tanesi Present Perfect, 1 tanesi Past Simple."
+        }
+      }
+    };
 
-    function setTask(task, taskTr){
-      $("qText").textContent = task || "Bir cümle yaz.";
-      $("qTr").textContent = taskTr || "Bir cümle yaz.";
-      $("answer").value = "";
-      $("answer").placeholder = "Cevabını yaz...";
+    function getPlan(){
+      const byLang = LESSON_PLAN[langCode] || LESSON_PLAN.en;
+      return byLang[level] || byLang.A1 || LESSON_PLAN.en.A1;
     }
 
-    // ✅ Edge Function beklenen dönüş formatı:
-    // {
-    //   teacher: "target language lesson text",
-    //   tr: "turkish explanation",
-    //   task: "student task prompt (target language)",
-    //   task_tr: "task Turkish",
-    //   correct_hint: "optional hint",
-    //   next_phase: 2..6 (optional),
-    //   should_speak: true/false (optional)
-    // }
-
-    async function lessonStep(userText){
+    // ---------- AI VARSA: Edge Function’dan zengin ders ----------
+    async function aiLessonStep(userText, phase){
+      // sende varsa kullanır; yoksa hata verirse offline plan devam eder
       const payload = {
         teacher_id: teacherId,
         teacher_name: teacherName,
-        coach_gender: gender,
-        coach_style: style,
+        coach_style: String(cur?.style || DEFAULT_COACH.style || "friendly"),
+        coach_gender: String(cur?.gender || "female"),
         lang: langCode,
         level,
         student_name: studentName,
         phase,
         user_text: userText || ""
       };
-
       const { data, error } = await supabase.functions.invoke("italky_teacher_lesson", { body: payload });
       if(error) throw error;
       return data;
     }
 
-    async function bootstrapLesson(){
-      // ilk adım: hiç user_text yok
-      try{
-        const res = await lessonStep("");
-        // öğretmen mesajı
-        addBubble({
-          who: teacherName,
-          text: res?.teacher || "",
-          tr: res?.tr || "",
-          isMe:false,
-          langForVoice: langCode,
-          allowSpeak: true
-        });
+    // phase: 1 intro, 2 examples, 3 task, 4 feedback, 5 recap
+    let phase = 1;
+    let currentTask = null;
 
-        // task
-        if(res?.task){
-          setTask(res.task, res.task_tr || "");
-          lastTask = { task: res.task, task_tr: res.task_tr || "" };
-        } else {
-          // fallback task
-          setTask("Write one simple sentence about your day.", "Günün hakkında basit bir cümle yaz.");
-        }
+    function setTask(task, taskTr){
+      $("qText").textContent = task || "Bir cümle yaz.";
+      $("qTr").textContent = taskTr || "Bir cümle yaz.";
+      $("answer").value = "";
+    }
 
-        // phase update
-        if(res?.next_phase) phase = Number(res.next_phase) || phase + 1;
-        else phase = Math.min(6, phase + 1);
+    async function startLesson(){
+      const plan = getPlan();
 
-      }catch(e){
-        console.error(e);
-        toast("Ders motoru çalışmadı");
-        // fallback minimal
-        addBubble({
-          who: teacherName,
-          text: `Hi ${studentName}! Today we’ll practice at ${level}.`,
-          tr: `Selam ${studentName}! Bugün ${level} seviyesinde pratik yapacağız.`,
-          isMe:false,
-          langForVoice: langCode,
-          allowSpeak: true
-        });
-        setTask("Write one sentence about your day.", "Günün hakkında bir cümle yaz.");
+      // önce offline intro bas
+      addBubble({ who: teacherName, text: plan.intro, tr: plan.tr, allowSpeak:true, langForVoice: langCode });
+
+      // örnekler
+      for(const ex of plan.examples || []){
+        addBubble({ who: teacherName, text: `Örnek: ${ex[0]}`, tr: ex[1], allowSpeak:true, langForVoice: langCode });
       }
+
+      // görev
+      setTask(plan.task, plan.task_tr);
+      currentTask = plan.task;
+
+      // AI varsa: bir tane “özelleştirme” mesajı çek (ders hissi artsın)
+      try{
+        const ai = await aiLessonStep("", 1);
+        if(ai?.teacher){
+          addBubble({ who: teacherName, text: ai.teacher, tr: ai.tr || "", allowSpeak:true, langForVoice: langCode });
+          if(ai.task){
+            setTask(ai.task, ai.task_tr || "");
+            currentTask = ai.task;
+          }
+        }
+      }catch{
+        // AI yoksa sorun değil
+      }
+    }
+
+    // basit feedback (AI yoksa)
+    function basicFeedback(userText){
+      const t = (userText||"").trim();
+      if(!t) return { teacher:"Cümle göremedim. Bir tane yazalım 🙂", tr:"Boş mesaj geldi.", ok:false };
+      const ok = t.length >= 8; // basit kural
+      return ok
+        ? { teacher:`Güzel! Şimdi aynı fikri farklı kelimelerle bir kez daha yaz.`, tr:`İyi gidiyor. Aynı anlamı farklı kelimelerle tekrar yaz.`, ok:true }
+        : { teacher:`Biraz kısa kaldı. En az 8-10 kelime olsun. Tekrar yaz.`, tr:`Cümleyi uzatıp tekrar yaz.`, ok:false };
     }
 
     async function send(){
@@ -548,164 +586,81 @@
       if(!txt){ toast("Cevabını yaz 🙂"); return; }
 
       addBubble({ who: studentName, text: txt, isMe:true });
-
       input.value = "";
 
+      // Önce AI feedback dene
       try{
-        const res = await lessonStep(txt);
-
-        addBubble({
-          who: teacherName,
-          text: res?.teacher || "",
-          tr: res?.tr || "",
-          isMe:false,
-          langForVoice: langCode,
-          allowSpeak: true
-        });
-
-        if(res?.task){
-          setTask(res.task, res.task_tr || "");
-          lastTask = { task: res.task, task_tr: res.task_tr || "" };
+        const ai = await aiLessonStep(txt, 4);
+        if(ai?.teacher){
+          addBubble({ who: teacherName, text: ai.teacher, tr: ai.tr || "", allowSpeak:true, langForVoice: langCode });
+          if(ai?.task){
+            setTask(ai.task, ai.task_tr || "");
+            currentTask = ai.task;
+          }
+          return;
         }
+      }catch{
+        // AI yoksa offline feedback
+      }
 
-        if(res?.next_phase) phase = Number(res.next_phase) || phase;
-        else phase = Math.min(6, phase + 1);
+      const fb = basicFeedback(txt);
+      addBubble({ who: teacherName, text: fb.teacher, tr: fb.tr, allowSpeak:true, langForVoice: langCode });
 
-      }catch(e){
-        console.error(e);
-        toast("Öğretmen yanıt veremedi");
+      // tekrar görevi
+      if(fb.ok){
+        setTask("Rewrite your sentence using different words.", "Cümleni farklı kelimelerle yeniden yaz.");
+      }else{
+        setTask(currentTask || "Write one sentence.", "Bir cümle yaz.");
       }
     }
 
-    // ------- SESSION TIMER / CONTINUE -------
+    // ---------- TIMER / DEVAM ----------
+    const PLAN_MIN = 15;
     let remainingSec = PLAN_MIN * 60;
     let tick = null;
-    let sessionId = null;
-
-    async function refreshTokens(){
-      try{
-        const { data:{ session } } = await supabase.auth.getSession();
-        if(!session) return;
-        const { data } = await supabase.from("profiles").select("tokens").eq("id", session.user.id).single();
-        if(data?.tokens != null) setHeaderTokens(data.tokens);
-      }catch{}
-    }
-
-    async function tryResumeActive(){
-      const cached = (localStorage.getItem(ACTIVE_KEY) || "").trim();
-      if(!cached) return false;
-
-      try{
-        const { data, error } = await supabase
-          .from("course_sessions")
-          .select("id,status,started_at,plan_minutes")
-          .eq("id", cached)
-          .maybeSingle();
-
-        if(error || !data?.id){ localStorage.removeItem(ACTIVE_KEY); return false; }
-        if(data.status !== "active"){ localStorage.removeItem(ACTIVE_KEY); return false; }
-
-        const startedAt = new Date(data.started_at).getTime();
-        const elapsed = Math.max(0, (Date.now() - startedAt) / 1000);
-        const planSec = (Number(data.plan_minutes)||15) * 60;
-        remainingSec = Math.max(0, Math.floor(planSec - elapsed));
-
-        sessionId = data.id;
-        toast("Ders devam ediyor");
-        return true;
-      }catch{
-        localStorage.removeItem(ACTIVE_KEY);
-        return false;
-      }
-    }
-
-    async function startNewSession(){
-      const { data, error } = await supabase.rpc("start_course_15min", { p_teacher_id: teacherId });
-      if(error){
-        toast("Derse katılabilmek için jeton yüklemeniz gereklidir.");
-        setTimeout(()=>location.href="/pages/profile.html", 600);
-        return;
-      }
-      sessionId = data?.[0]?.session_id || null;
-      localStorage.setItem(ACTIVE_KEY, sessionId || "");
-      remainingSec = PLAN_MIN * 60;
-      await refreshTokens();
-    }
 
     function startTimer(){
       $("timerChip").textContent = fmtTime(remainingSec);
+      $("fbTime").textContent = fmtTime(remainingSec);
       if(tick) clearInterval(tick);
 
-      tick = setInterval(async ()=>{
+      tick = setInterval(()=>{
         remainingSec--;
         if(remainingSec < 0) remainingSec = 0;
         $("timerChip").textContent = fmtTime(remainingSec);
+        $("fbTime").textContent = fmtTime(remainingSec);
         if(remainingSec === 0){
           clearInterval(tick);
-          await endAndAskContinue(true);
+          $("continueText").textContent =
+            `15 dakika tamamlandı.\n\nDevam etmek ister misin?\n(Devam edersen yeni 15 dk oturum başlar.)`;
+          $("continueOverlay").classList.add("show");
         }
       }, 1000);
-    }
-
-    async function endSession(){
-      if(!sessionId) return { used_minutes:15 };
-      try{
-        const { data, error } = await supabase.rpc("end_course_with_refund", { p_session_id: sessionId });
-        if(error) throw error;
-        return data?.[0] || { used_minutes:15, refund_tokens:0 };
-      }catch(e){
-        console.warn(e);
-        return { used_minutes:15, refund_tokens:0 };
-      } finally {
-        try{ localStorage.removeItem(ACTIVE_KEY); }catch{}
-      }
-    }
-
-    async function endAndAskContinue(autoTimeUp=false){
-      const r = await endSession();
-      await refreshTokens();
-      const used = Number(r?.used_minutes ?? 15);
-      const refund = Number(r?.refund_tokens ?? 0);
-
-      const txt =
-        (autoTimeUp ? "15 dakika tamamlandı.\n" : "Ders kapatıldı.\n") +
-        `Kullanılan süre: ${used} dk\n` +
-        `İade: ${refund} Jeton\n\n` +
-        `Devam etmek ister misin?`;
-
-      $("continueText").textContent = txt;
-      $("continueOverlay").classList.add("show");
     }
 
     $("btnSend").addEventListener("click", send);
     $("answer").addEventListener("keydown", (ev)=>{ if(ev.key === "Enter") send(); });
 
-    $("btnFinish").addEventListener("click", async ()=>{
+    $("btnFinish").addEventListener("click", ()=>{
       clearInterval(tick);
-      await endAndAskContinue(false);
+      $("continueText").textContent =
+        `Dersi bitirdin.\n\nDevam etmek ister misin?`;
+      $("continueOverlay").classList.add("show");
     });
 
-    $("btnExit").addEventListener("click", async ()=>{
+    $("btnExit").addEventListener("click", ()=>{
       clearInterval(tick);
-      await endSession();
-      await refreshTokens();
       location.href="/pages/home.html";
     });
 
     $("btnContinueYes").addEventListener("click", async ()=>{
       $("continueOverlay").classList.remove("show");
-      await startNewSession();
-      phase = 1;
-      addBubble({
-        who: teacherName,
-        text: `Hi ${studentName}! Ready to continue?`,
-        tr:  `Selam ${studentName}! Devam etmeye hazır mısın?`,
-        isMe:false,
-        langForVoice: langCode,
-        allowSpeak: true
-      });
-      await bootstrapLesson();
+      remainingSec = PLAN_MIN * 60;
       startTimer();
+      toast("Devam ediyoruz…");
+      // yeni kısa görev
+      addBubble({ who: teacherName, text:`Devam! Yeni bir örnekle ilerliyoruz.`, tr:`Devam ediyoruz.`, allowSpeak:true, langForVoice: langCode });
+      setTask("Write one more sentence (a different topic).", "Farklı bir konuda 1 cümle daha yaz.");
     });
 
     $("btnContinueNo").addEventListener("click", ()=>{
@@ -714,10 +669,8 @@
     });
 
     // ---- BOOT ----
-    const resumed = await tryResumeActive();
-    if(!resumed) await startNewSession();
     startTimer();
-    await bootstrapLesson();
+    await startLesson();
   </script>
 </body>
 </html>
